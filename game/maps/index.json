@@ -1,0 +1,176 @@
+{
+ "tiles": {
+  " ": {
+   "key": "void",
+   "name": "Outside / not part of the level",
+   "walk": false,
+   "noise": 0
+  },
+  "#": {
+   "key": "wall",
+   "name": "Wall",
+   "walk": false,
+   "noise": 0
+  },
+  "W": {
+   "key": "window",
+   "name": "Window in wall",
+   "walk": false,
+   "noise": 0
+  },
+  "G": {
+   "key": "glass",
+   "name": "Glass partition",
+   "walk": false,
+   "noise": 0
+  },
+  "D": {
+   "key": "door",
+   "name": "Door (closed, opens with a click)",
+   "walk": true,
+   "noise": 3
+  },
+  "d": {
+   "key": "doorway",
+   "name": "Open doorway",
+   "walk": true,
+   "noise": 0
+  },
+  "L": {
+   "key": "locked",
+   "name": "Locked door (needs a key)",
+   "walk": false,
+   "noise": 0
+  },
+  "V": {
+   "key": "vent",
+   "name": "Vent / crawl space",
+   "walk": true,
+   "noise": 1
+  },
+  "S": {
+   "key": "stairs",
+   "name": "Stairs",
+   "walk": true,
+   "noise": 2
+  },
+  "E": {
+   "key": "elevator",
+   "name": "Elevator",
+   "walk": true,
+   "noise": 4
+  },
+  "X": {
+   "key": "exit",
+   "name": "Level exit",
+   "walk": true,
+   "noise": 0
+  },
+  ".": {
+   "key": "concrete",
+   "name": "Concrete / linoleum floor",
+   "walk": true,
+   "noise": 2
+  },
+  ",": {
+   "key": "carpet",
+   "name": "Carpet",
+   "walk": true,
+   "noise": 0
+  },
+  "~": {
+   "key": "wood",
+   "name": "Old parquet (creaks!)",
+   "walk": true,
+   "noise": 4
+  },
+  ":": {
+   "key": "tile",
+   "name": "Ceramic tile",
+   "walk": true,
+   "noise": 3
+  },
+  "=": {
+   "key": "marble",
+   "name": "Polished marble",
+   "walk": true,
+   "noise": 2
+  },
+  "\"": {
+   "key": "grass",
+   "name": "Grass",
+   "walk": true,
+   "noise": 0
+  },
+  "%": {
+   "key": "gravel",
+   "name": "Gravel (very loud)",
+   "walk": true,
+   "noise": 5
+  },
+  "o": {
+   "key": "deck",
+   "name": "Balcony decking",
+   "walk": true,
+   "noise": 2
+  }
+ },
+ "maps": [
+  {
+   "id": "museum",
+   "name": "The Museum",
+   "subtitle": "Night shift, closed wing",
+   "file": "museum.json",
+   "width": 43,
+   "height": 40
+  },
+  {
+   "id": "office",
+   "name": "Fourth Floor, After Hours",
+   "subtitle": "Open plan, one corner office, one sleeping boss",
+   "file": "office.json",
+   "width": 44,
+   "height": 33
+  },
+  {
+   "id": "apartment",
+   "name": "The Flat, 02:14",
+   "subtitle": "Two floors up, one sleeping father",
+   "file": "apartment.json",
+   "width": 36,
+   "height": 57
+  },
+  {
+   "id": "hospital",
+   "name": "St. Vitus, Third Floor",
+   "subtitle": "Night ward, lights down",
+   "file": "hospital.json",
+   "width": 45,
+   "height": 32
+  },
+  {
+   "id": "hotel",
+   "name": "Grand Hotel Bohemia, Floor 4",
+   "subtitle": "Corridor carpet, forty metres of it",
+   "file": "hotel.json",
+   "width": 49,
+   "height": 34
+  },
+  {
+   "id": "school",
+   "name": "Komenský Primary, 21:40",
+   "subtitle": "Everyone went home. Almost everyone.",
+   "file": "school.json",
+   "width": 49,
+   "height": 36
+  },
+  {
+   "id": "cottage",
+   "name": "Grandpa's Cottage",
+   "subtitle": "Every single board creaks",
+   "file": "cottage.json",
+   "width": 43,
+   "height": 36
+  }
+ ]
+}

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Don't Wake Him — Map Book</title>
+<style>
+  :root{
+    --bg:#131720; --panel:#1b202b; --panel2:#232a38; --line:#2f3849;
+    --ink:#e8edf5; --muted:#96a1b5; --accent:#ffd23f; --ok:#4fd08a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 ui-sans-serif,system-ui,"Segoe UI",sans-serif}
+  header{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;gap:16px;align-items:baseline;flex-wrap:wrap}
+  header h1{margin:0;font-size:18px;letter-spacing:.02em}
+  header .sub{color:var(--muted);font-size:13px}
+  .layout{display:flex;min-height:calc(100vh - 55px)}
+  aside{width:270px;flex:none;border-right:1px solid var(--line);background:var(--panel);padding:14px;overflow:auto}
+  main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .toolbar{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+  .stage{flex:1;overflow:auto;padding:18px;background:
+    repeating-linear-gradient(45deg,#10141c 0 10px,#121721 10px 20px)}
+  canvas{display:block;border-radius:10px;box-shadow:0 18px 46px rgba(0,0,0,.55)}
+  button.map{display:block;width:100%;text-align:left;margin:0 0 6px;padding:9px 11px;border-radius:9px;
+    border:1px solid var(--line);background:var(--panel2);color:var(--ink);cursor:pointer;font:inherit}
+  button.map:hover{border-color:#4b596f}
+  button.map[aria-current="true"]{border-color:var(--accent);background:#2a2b22}
+  button.map small{display:block;color:var(--muted);font-size:11.5px}
+  label.chk{display:inline-flex;gap:6px;align-items:center;cursor:pointer;user-select:none}
+  input[type=range]{width:130px}
+  h2{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px}
+  .legend{display:grid;grid-template-columns:auto 1fr;gap:5px 9px;align-items:center;font-size:12.5px}
+  .sw{width:18px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.45)}
+  .info{padding:12px 16px;border-top:1px solid var(--line);background:var(--panel);font-size:13px}
+  .info b{color:var(--accent)}
+  .pill{display:inline-block;padding:2px 8px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);margin:0 5px 5px 0;font-size:12px}
+  code{background:#111620;padding:1px 5px;border-radius:4px;color:#cfe0ff}
+</style>
+</head>
+<body>
+<header>
+  <h1>Don't Wake Him <span style="color:var(--muted);font-weight:400">— map book</span></h1>
+  <span class="sub">7 hand-authored levels · walls, floors, furniture, lamps and curtains</span>
+</header>
+
+<div class="layout">
+  <aside>
+    <h2>Levels</h2>
+    <div id="maplist"></div>
+
+    <h2>Floor materials</h2>
+    <div class="legend" id="legend-floor"></div>
+
+    <h2>Structure</h2>
+    <div class="legend" id="legend-struct"></div>
+  </aside>
+
+  <main>
+    <div class="toolbar">
+      <label class="chk"><input type="checkbox" id="t-walls" checked> Highlight walls</label>
+      <label class="chk"><input type="checkbox" id="t-labels" checked> Room names</label>
+      <label class="chk"><input type="checkbox" id="t-props" checked> Furniture</label>
+      <label class="chk"><input type="checkbox" id="t-noise"> Noise heat-map</label>
+      <label class="chk"><input type="checkbox" id="t-grid"> Tile grid</label>
+      <label class="chk">Zoom <input type="range" id="zoom" min="10" max="42" value="22"> <span id="zoomv">22px</span></label>
+    </div>
+    <div class="stage"><canvas id="c"></canvas></div>
+    <div class="info" id="info"></div>
+  </main>
+</div>
+
+<script src="maps-data.js"></script>
+<script src="map-renderer.js"></script>
+<script>
+const maps = window.DWH_MAPS, TILES = window.DWH_TILES;
+let current = 0;
+const $ = (s) => document.querySelector(s);
+
+/* sidebar */
+$('#maplist').innerHTML = maps.map((m,i)=>
+  `<button class="map" data-i="${i}"><strong>${i+1}. ${m.name}</strong><small>${m.subtitle}</small></button>`).join('');
+$('#maplist').addEventListener('click', e => {
+  const b = e.target.closest('button.map'); if(!b) return;
+  current = +b.dataset.i; render();
+});
+
+/* legends built from the real tile table */
+const FLOORS = ['.',',','~',':','=','"','%','o'];
+const STRUCT = ['#','W','G','D','d','L','V','S','E','X'];
+function swatch(ch){
+  const key = TILES[ch].key;
+  const c = DWHRenderer.TILE_COLORS.floors[key];
+  if (c) return c[0];
+  return {wall:'#525a6b',window:'#8fc7e6',glass:'#a0d7f0',door:'#a9793f',locked:'#6b5334',
+          vent:'#7c848f',stairs:'#b3b8c1',elevator:'#8b939f',exit:'#4fd08a',doorway:'#dfe4ea'}[key] || '#888';
+}
+const rowsF = FLOORS.map(ch=>`<div class="sw" style="background:${swatch(ch)}"></div><div>${TILES[ch].name}${TILES[ch].noise?` <span style="color:var(--muted)">· noise ${TILES[ch].noise}/5</span>`:' <span style="color:var(--ok)">· silent</span>'}</div>`);
+$('#legend-floor').innerHTML = rowsF.join('');
+$('#legend-struct').innerHTML = STRUCT.map(ch=>`<div class="sw" style="background:${swatch(ch)}"></div><div><code>${ch}</code> ${TILES[ch].name}</div>`).join('');
+
+/* toolbar */
+['t-walls','t-labels','t-props','t-noise','t-grid'].forEach(id=>$('#'+id).addEventListener('change',render));
+$('#zoom').addEventListener('input', ()=>{ $('#zoomv').textContent = $('#zoom').value+'px'; render(); });
+
+function render(){
+  const m = maps[current];
+  document.querySelectorAll('button.map').forEach((b,i)=>b.setAttribute('aria-current', i===current));
+  DWHRenderer.draw($('#c'), m, {
+    tile:+$('#zoom').value,
+    walls:$('#t-walls').checked,
+    labels:$('#t-labels').checked,
+    props:$('#t-props').checked,
+    noise:$('#t-noise').checked,
+    grid:$('#t-grid').checked,
+  });
+  const counts = {};
+  m.props.forEach(p=>counts[p.t]=(counts[p.t]||0)+1);
+  const top = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  $('#info').innerHTML =
+    `<div><b>${m.name}</b> — ${m.subtitle} · ${m.width}×${m.height} tiles · ${m.rooms.length} rooms · ${m.props.length} objects · difficulty ${'★'.repeat(m.difficulty)}${'☆'.repeat(5-m.difficulty)}</div>`+
+    `<div style="margin:6px 0;color:var(--muted)">${m.objective}</div>`+
+    `<div><b>Him:</b> ${m.sleeper.name} — ${m.sleeper.note} (hearing radius ${m.sleeper.sense} tiles)</div>`+
+    `<div style="margin-top:6px">${top.map(([k,v])=>`<span class="pill">${k} ×${v}</span>`).join('')}</div>`;
+}
+render();
+</script>
+</body>
+</html>
