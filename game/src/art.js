@@ -7,7 +7,9 @@
 // top of real colliders (plants on a chest, a lamp on a nightstand), never loose
 // on the floor where they would fake a wall the player collides with.
 import { TUNING } from './tuning.js';
-import { SLEEP_ASLEEP, SLEEP_STIRRING, SLEEP_ALMOST, SLEEP_AWAKE } from './rules.js';
+import {
+  SLEEP_DEEP, SLEEP_LIGHT, SLEEP_DISTURBED, SLEEP_ALMOST, SLEEP_CRITICAL, SLEEP_AWAKE
+} from './rules.js';
 
 const { width: W, height: H, wallThickness: WT } = TUNING.world;
 const TAU = Math.PI * 2;
@@ -63,7 +65,48 @@ export const PALETTE = {
   thiefBelt: '#1d2138'
 };
 
+// Each room theme repaints the shell only — walls, floor, light. Furniture and
+// props stay the same code, so a new theme costs six colours, not a new module.
+const THEMES = {
+  bedroom:   { wall: '#7c3346', lip: '#9a4257', shade: '#5f2637', skirt: '#c96b6a',
+               floor: '#bd7a3e', alt: '#b17138', seam: 'rgba(143,85,38,0.6)',
+               grain: 'rgba(207,143,82,0.30)', light: '255,216,138', vignette: '60,20,40' },
+  apartment: { wall: '#4c5570', lip: '#616c8c', shade: '#3a4257', skirt: '#93a0c0',
+               floor: '#b08a5e', alt: '#a58156', seam: 'rgba(126,95,60,0.6)',
+               grain: 'rgba(198,162,120,0.28)', light: '255,226,170', vignette: '28,32,54' },
+  hotel:     { wall: '#3f6560', lip: '#527d77', shade: '#2f4c48', skirt: '#96c3bb',
+               floor: '#a97f4d', alt: '#9e7645', seam: 'rgba(126,90,48,0.6)',
+               grain: 'rgba(198,155,96,0.28)', light: '255,232,186', vignette: '18,44,44' },
+  office:    { wall: '#3d4652', lip: '#515c6b', shade: '#2c343d', skirt: '#8d9aab',
+               floor: '#8e8b84', alt: '#85827b', seam: 'rgba(96,94,88,0.6)',
+               grain: 'rgba(170,167,158,0.26)', light: '208,232,255', vignette: '20,26,34' },
+  luxury:    { wall: '#4a2f63', lip: '#603d80', shade: '#38234a', skirt: '#c9a86a',
+               floor: '#9d6b3f', alt: '#926239', seam: 'rgba(116,74,38,0.6)',
+               grain: 'rgba(190,140,88,0.28)', light: '255,214,150', vignette: '38,20,54' },
+  penthouse: { wall: '#2c2f3d', lip: '#3d4152', shade: '#1f222d', skirt: '#d3b166',
+               floor: '#7d6242', alt: '#74593b', seam: 'rgba(92,70,44,0.6)',
+               grain: 'rgba(170,140,100,0.26)', light: '255,236,190', vignette: '14,16,24' }
+};
+
+let T = THEMES.bedroom;   // set once per room paint; drawing is synchronous
+
 const SHADOW = 'rgba(92,40,28,0.30)';
+
+// How each item type looks and reads. The simulation never sees any of this.
+export const ITEM_ART = {
+  phone: '📱', watch: '⌚', cash: '💵', jewel: '💎', laptop: '💻', tv: '📺',
+  coin: '🪙', wallet: '👛', headphones: '🎧', ring: '💍', camera: '📷',
+  tablet: '🖥️', console: '🎮', speaker: '🔊', necklace: '📿', vase: '🏺',
+  painting: '🖼️', mirror: '🪞', diamond: '💠', goldbar: '💰'
+};
+
+export const ITEM_NAMES = {
+  phone: 'Phone', watch: 'Watch', cash: 'Cash', jewel: 'Jewels', laptop: 'Laptop',
+  tv: 'TV', coin: 'Coins', wallet: 'Wallet', headphones: 'Headphones', ring: 'Ring',
+  camera: 'Camera', tablet: 'Monitor', console: 'Console', speaker: 'Speaker',
+  necklace: 'Necklace', vase: 'Vase', painting: 'Painting', mirror: 'Mirror',
+  diamond: 'Diamond', goldbar: 'Gold'
+};
 
 export function roundRect(ctx, x, y, w, h, r) {
   const radius = Math.max(0, Math.min(r, w / 2, h / 2));
@@ -371,17 +414,17 @@ export function drawFurniture(ctx, c) {
 const WINDOWS = { A: 'left', B: 'right', C: 'left' };
 
 function drawFloor(ctx) {
-  ctx.fillStyle = PALETTE.floor;
+  ctx.fillStyle = T.floor;
   ctx.fillRect(WT, WT, W - WT * 2, H - WT * 2);
 
   const plank = 32;
   for (let y = WT, row = 0; y < H - WT; y += plank, row++) {
     const height = Math.min(plank, H - WT - y);
     if (row % 2 === 1) {
-      ctx.fillStyle = PALETTE.floorAlt;
+      ctx.fillStyle = T.alt;
       ctx.fillRect(WT, y, W - WT * 2, height);
     }
-    ctx.strokeStyle = 'rgba(143,85,38,0.6)';
+    ctx.strokeStyle = T.seam;
     ctx.lineWidth = 1.4;
     ctx.beginPath();
     ctx.moveTo(WT, y + 0.5);
@@ -397,7 +440,7 @@ function drawFloor(ctx) {
     }
     ctx.stroke();
 
-    ctx.strokeStyle = 'rgba(207,143,82,0.30)';     // grain
+    ctx.strokeStyle = T.grain;                     // grain
     ctx.beginPath();
     ctx.moveTo(WT, y + plank * 0.45);
     ctx.lineTo(W - WT, y + plank * 0.45);
@@ -408,19 +451,19 @@ function drawFloor(ctx) {
 }
 
 function drawWalls(ctx) {
-  ctx.fillStyle = PALETTE.wall;
+  ctx.fillStyle = T.wall;
   ctx.fillRect(0, 0, W, WT);
   ctx.fillRect(0, 0, WT, H);
   ctx.fillRect(W - WT, 0, WT, H);
   ctx.fillRect(0, H - WT, W, WT);
 
-  ctx.fillStyle = PALETTE.wallLip;
+  ctx.fillStyle = T.lip;
   ctx.fillRect(0, 0, W, 4);
-  ctx.fillStyle = PALETTE.wallShade;                // shaded inner edge
+  ctx.fillStyle = T.shade;                          // shaded inner edge
   ctx.fillRect(WT - 3, WT, 3, H - WT * 2);
   ctx.fillRect(W - WT, WT, 3, H - WT * 2);
 
-  ctx.fillStyle = PALETTE.skirting;                 // warm skirting board
+  ctx.fillStyle = T.skirt;                          // skirting board
   ctx.fillRect(WT, WT, W - WT * 2, 3);
   ctx.fillRect(WT, H - WT - 3, W - WT * 2, 3);
   ctx.fillRect(WT, WT, 3, H - WT * 2);
@@ -452,9 +495,9 @@ function drawSunbeam(ctx, side) {
   const originX = side === 'left' ? WT : W - WT;
   const reach = 235;
   const beam = ctx.createLinearGradient(originX, 0, originX + dir * reach, 0);
-  beam.addColorStop(0, 'rgba(255,216,138,0.34)');
-  beam.addColorStop(0.55, 'rgba(255,216,138,0.15)');
-  beam.addColorStop(1, 'rgba(255,216,138,0)');
+  beam.addColorStop(0, `rgba(${T.light},0.34)`);
+  beam.addColorStop(0.55, `rgba(${T.light},0.15)`);
+  beam.addColorStop(1, `rgba(${T.light},0)`);
   ctx.fillStyle = beam;
   ctx.beginPath();
   ctx.moveTo(originX, top + 4);
@@ -466,8 +509,8 @@ function drawSunbeam(ctx, side) {
 
   const pool = ctx.createRadialGradient(originX + dir * 34, top + height / 2, 6,
                                         originX + dir * 34, top + height / 2, 118);
-  pool.addColorStop(0, 'rgba(255,228,160,0.30)');
-  pool.addColorStop(1, 'rgba(255,228,160,0)');
+  pool.addColorStop(0, `rgba(${T.light},0.28)`);
+  pool.addColorStop(1, `rgba(${T.light},0)`);
   ctx.fillStyle = pool;
   ctx.fillRect(WT, WT, W - WT * 2, H - WT * 2);
 
@@ -530,9 +573,40 @@ function drawBedBase(ctx, level) {
   fillRound(ctx, bed.x + 5, bed.y + 9, bed.w - 10, bed.h - 20, 6, PALETTE.mattress);
 }
 
+// Old boards that announce you. Drawn as a worn patch with nail heads — the
+// player should be able to see the hazard before stepping on it.
+function drawCreakZone(ctx, zone) {
+  ctx.save();
+  ctx.globalAlpha = 0.5;
+  fillRound(ctx, zone.x, zone.y, zone.w, zone.h, 3, 'rgba(60,34,16,0.42)');
+  ctx.globalAlpha = 0.75;
+  ctx.strokeStyle = 'rgba(40,22,10,0.6)';
+  ctx.lineWidth = 1.4;
+  const boards = Math.max(2, Math.round(zone.h / 14));
+  for (let i = 1; i < boards; i++) {
+    const y = zone.y + (zone.h / boards) * i;
+    ctx.beginPath();
+    ctx.moveTo(zone.x + 2, y);
+    ctx.lineTo(zone.x + zone.w - 2, y);
+    ctx.stroke();
+  }
+  ctx.fillStyle = 'rgba(228,206,168,0.55)';                  // nail heads
+  for (let i = 0; i < boards; i++) {
+    const y = zone.y + (zone.h / boards) * (i + 0.5);
+    for (const x of [zone.x + 5, zone.x + zone.w - 5]) {
+      ctx.beginPath();
+      ctx.arc(x, y, 1.3, 0, TAU);
+      ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+
 // Everything that never moves, drawn once per level into an offscreen canvas.
 export function paintStaticRoom(ctx, level) {
+  T = THEMES[level.theme] || THEMES.bedroom;
   drawFloor(ctx);
+  for (const zone of level.creaks) drawCreakZone(ctx, zone);
   drawRug(ctx, level.layout);
   drawWalls(ctx);
   // After the walls: the window is cut into one, and its light falls on top
@@ -545,28 +619,36 @@ export function paintStaticRoom(ctx, level) {
 
   const vignette = ctx.createRadialGradient(W / 2, H / 2, H * 0.30, W / 2, H / 2, H * 0.74);
   vignette.addColorStop(0, 'rgba(0,0,0,0)');
-  vignette.addColorStop(1, 'rgba(60,20,40,0.30)');
+  vignette.addColorStop(1, `rgba(${T.vignette},0.32)`);
   ctx.fillStyle = vignette;
   ctx.fillRect(0, 0, W, H);
 }
 
 // ---------------------------------------------------------------- sleeper
-export function drawSleeper(ctx, level, stage, clock) {
+export function drawSleeper(ctx, level, stage, clock, wake = 0) {
   const bed = level.bed;
   const hx = level.sleeper.x;
   const hy = level.sleeper.y;
 
-  // Breathing: slow while asleep, shallower and faster as he stirs.
-  const rate = [0.62, 0.9, 1.35, 2.0][stage];
-  const depth = [1, 0.8, 0.55, 0.35][stage];
+  // Breathing: slow and deep at first, shallower and faster as he surfaces.
+  const rate = [0.55, 0.8, 1.15, 1.6, 2.3, 2.6][stage];
+  const depth = [1.15, 0.95, 0.7, 0.5, 0.35, 0.3][stage];
   const breath = Math.sin(clock * rate * TAU) * depth;
-  // A small shift every few seconds, so he is never perfectly still.
+
+  // Never perfectly still: a slow settle drift, plus the occasional turn that
+  // gets more frequent the closer he is to waking.
+  const fidgetRate = [0.09, 0.16, 0.3, 0.55, 0.9, 0][stage];
+  const fidget = Math.max(0, Math.sin(clock * fidgetRate * TAU) - 0.86) * 7;
   const settle = Math.sin(clock * 0.21) * 0.7 + Math.sin(clock * 0.13 + 1.7) * 0.5;
 
-  const duvetY = bed.y + bed.h * 0.40 - breath * 1.4;
-  const duvetH = bed.y + bed.h - 6 - duvetY;
+  // Waking is a sit-up: the duvet slips down and the head lifts off the pillow.
+  const rise = stage === SLEEP_AWAKE ? Math.min(1, wake / 0.45) : 0;
+  const ease = rise * rise * (3 - 2 * rise);
+
+  const duvetY = bed.y + bed.h * 0.40 - breath * 1.4 + ease * 16;
+  const duvetH = Math.max(6, bed.y + bed.h - 6 - duvetY);
   fillRound(ctx, bed.x + 5, duvetY, bed.w - 10, duvetH, 7, PALETTE.duvet);
-  fillRound(ctx, bed.x + 5, duvetY, bed.w - 10, 9 + breath * 1.2, 5, PALETTE.duvetTop);
+  fillRound(ctx, bed.x + 5, duvetY, bed.w - 10, Math.min(duvetH, 9 + breath * 1.2), 5, PALETTE.duvetTop);
 
   ctx.strokeStyle = PALETTE.duvetFold;                      // duvet folds
   ctx.lineWidth = 1.5;
@@ -583,8 +665,13 @@ export function drawSleeper(ctx, level, stage, clock) {
   roundRect(ctx, hx - 22, hy + 6, 44, 6, 3);
   ctx.fill();
 
-  const headX = hx + settle * 0.9;
-  const headY = hy + breath * 0.5;
+  // Torso appears as he sits up.
+  if (ease > 0.05) {
+    fillRound(ctx, hx - 15, hy + 2, 30, 26 * ease, 8, '#e7ebf2');
+  }
+
+  const headX = hx + settle * 0.9 + fidget * (stage >= SLEEP_DISTURBED ? 1 : 0.4);
+  const headY = hy + breath * 0.5 - ease * 9;
   ctx.fillStyle = PALETTE.skinShade;
   ctx.beginPath();
   ctx.arc(headX, headY + 1.5, 15, 0, TAU);
@@ -603,55 +690,79 @@ export function drawSleeper(ctx, level, stage, clock) {
   ctx.lineWidth = 1.7;
   ctx.lineCap = 'round';
   ctx.fillStyle = PALETTE.hair;
-  if (stage === SLEEP_ASLEEP) {
+
+  const closedEyes = () => {
     ctx.beginPath();
     ctx.moveTo(headX - 9, ey - 1);
     ctx.quadraticCurveTo(headX - 6, ey + 3, headX - 3, ey - 1);
     ctx.moveTo(headX + 3, ey - 1);
     ctx.quadraticCurveTo(headX + 6, ey + 3, headX + 9, ey - 1);
     ctx.stroke();
-  } else if (stage === SLEEP_STIRRING) {
+  };
+  const openEyes = (r) => {
+    ctx.beginPath();
+    ctx.arc(headX - 6, ey, r, 0, TAU);
+    ctx.arc(headX + 6, ey, r, 0, TAU);
+    ctx.fill();
+  };
+
+  if (stage === SLEEP_DEEP || stage === SLEEP_LIGHT) closedEyes();
+  else if (stage === SLEEP_DISTURBED) {                     // squinting
     ctx.beginPath();
     ctx.moveTo(headX - 9, ey);
     ctx.lineTo(headX - 4, ey);
     ctx.moveTo(headX + 4, ey);
     ctx.lineTo(headX + 9, ey);
     ctx.stroke();
-  } else {
-    const r = stage === SLEEP_ALMOST ? 2.2 : 3.2;
+  } else if (stage === SLEEP_ALMOST) openEyes(2);
+  else if (stage === SLEEP_CRITICAL) openEyes(3);
+  else {                                                    // wide awake
+    ctx.fillStyle = '#fff';
     ctx.beginPath();
-    ctx.arc(headX - 6, ey, r, 0, TAU);
-    ctx.arc(headX + 6, ey, r, 0, TAU);
+    ctx.arc(headX - 6, ey, 4.4, 0, TAU);
+    ctx.arc(headX + 6, ey, 4.4, 0, TAU);
     ctx.fill();
+    ctx.fillStyle = PALETTE.hair;
+    openEyes(2.2);
   }
-  ctx.beginPath();
+
+  ctx.beginPath();                                          // mouth
   if (stage === SLEEP_AWAKE) {
-    ctx.arc(headX, ey + 9, 3.5, 0, TAU);
+    ctx.ellipse(headX, ey + 9, 3.4, 4.4 * Math.max(0.4, ease), 0, 0, TAU);
     ctx.fill();
+  } else if (stage === SLEEP_CRITICAL) {
+    ctx.arc(headX, ey + 8, 3.4, 0.15, Math.PI - 0.15);
+    ctx.stroke();
   } else {
     ctx.moveTo(headX - 3.5, ey + 9);
     ctx.lineTo(headX + 3.5, ey + 9);
     ctx.stroke();
   }
 
-  if (stage === SLEEP_ASLEEP) {
-    // The beds sit close to the top wall, so the drifting Z's are clamped to
-    // stay inside the room instead of sliding up under the HUD.
-    const f = (clock * 0.42) % 1;
-    const floor = (value) => Math.max(WT + 6, value);   // stay off the wall band
+  // The state read-out above the bed: sleepy Z's, then escalating alarm.
+  const floor = (value) => Math.max(WT + 6, value);         // stay off the wall band
+  if (stage === SLEEP_DEEP || stage === SLEEP_LIGHT) {
+    const f = (clock * (stage === SLEEP_DEEP ? 0.42 : 0.6)) % 1;
     ctx.textAlign = 'left';
     ctx.globalAlpha = Math.max(0, 1 - f);
     ctx.fillStyle = '#ffffffdd';
     ctx.font = 'bold 13px system-ui';
     ctx.fillText('z', hx + 22, floor(hy - 14 - f * 14));
-    ctx.font = 'bold 18px system-ui';
-    ctx.fillText('Z', hx + 31, floor(hy - 26 - f * 20));
+    if (stage === SLEEP_DEEP) {
+      ctx.font = 'bold 18px system-ui';
+      ctx.fillText('Z', hx + 31, floor(hy - 26 - f * 20));
+    }
     ctx.globalAlpha = 1;
   } else {
+    const marks = ['', '', '?', '!', '!!', '!!!'][stage];
+    const colors = ['', '', '#ffe08a', '#ffc24d', '#ff8c42', '#ff5252'];
+    const pulse = stage >= SLEEP_CRITICAL ? 0.6 + 0.4 * Math.sin(clock * 9) : 1;
     ctx.textAlign = 'center';
-    ctx.font = 'bold 20px system-ui';
-    ctx.fillStyle = stage === SLEEP_AWAKE ? '#ff5252' : stage === SLEEP_ALMOST ? '#ffb020' : '#ffe08a';
-    ctx.fillText(stage === SLEEP_AWAKE ? '!!' : stage === SLEEP_ALMOST ? '!' : '?', hx, bed.y - 10);
+    ctx.globalAlpha = pulse;
+    ctx.font = `bold ${16 + stage * 2}px system-ui`;
+    ctx.fillStyle = colors[stage];
+    ctx.fillText(marks, hx, floor(bed.y - 10));
+    ctx.globalAlpha = 1;
   }
 }
 

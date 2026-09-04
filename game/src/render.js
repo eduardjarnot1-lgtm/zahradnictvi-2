@@ -4,21 +4,18 @@
 import { TUNING } from './tuning.js';
 import { sleepStage } from './rules.js';
 import { playerOf } from './sim.js';
-import { paintStaticRoom, drawSleeper, drawThief, drawGrabbedItem, roundRect } from './art.js';
+import {
+  paintStaticRoom, drawSleeper, drawThief, drawGrabbedItem, roundRect, ITEM_ART
+} from './art.js';
 
 const { width: W, height: H, wallThickness: WT, hudStrip: HUD_H } = TUNING.world;
 const TAU = Math.PI * 2;
-
-// Art lives here, not in the item table: the simulation never knows what an
-// item looks like.
-const ITEM_ART = {
-  phone: '📱', watch: '⌚', cash: '💵', jewel: '💎', laptop: '💻', tv: '📺'
-};
 
 export function createRenderer(canvas, options = {}) {
   const ctx = canvas.getContext('2d');
   const debug = !!options.debug;
   let scale = 1;
+  let quality = TUNING.quality.high;
 
   // The room never moves, so it is painted once per level into an offscreen
   // canvas at device resolution and blitted 1:1 — detailed *and* cheap.
@@ -35,7 +32,7 @@ export function createRenderer(canvas, options = {}) {
 
     // Sharper than the old flat cap of 2, but never more pixels than a
     // mid-range phone GPU is happy to push every frame.
-    let dpr = Math.min(devicePixelRatio || 1, TUNING.render.maxPixelRatio);
+    let dpr = Math.min(devicePixelRatio || 1, TUNING.render.maxPixelRatio, quality.pixelRatio);
     const budget = TUNING.render.maxCanvasPixels;
     if (cssWidth * cssHeight * dpr * dpr > budget) {
       dpr = Math.max(1, Math.sqrt(budget / (cssWidth * cssHeight)));
@@ -135,6 +132,18 @@ export function createRenderer(canvas, options = {}) {
     }
   }
 
+  // Tiny burst when something is taken; a fragile item throws more, colder ones.
+  function drawSparks(sparks) {
+    for (const spark of sparks) {
+      ctx.globalAlpha = Math.max(0, spark.life);
+      ctx.fillStyle = spark.color;
+      ctx.beginPath();
+      ctx.arc(spark.x, spark.y, 1.6 + spark.life * 1.4, 0, TAU);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
   function drawPops(pops) {
     ctx.textAlign = 'center';
     for (const pop of pops) {
@@ -144,9 +153,10 @@ export function createRenderer(canvas, options = {}) {
       ctx.lineWidth = 3;
       ctx.lineJoin = 'round';
       ctx.strokeStyle = 'rgba(20,10,26,0.8)';
-      ctx.strokeText(`+$${pop.value}`, pop.x, pop.y - 18 - rise);
-      ctx.fillStyle = '#ffd34d';
-      ctx.fillText(`+$${pop.value}`, pop.x, pop.y - 18 - rise);
+      const label = pop.text || `+$${pop.value}`;
+      ctx.strokeText(label, pop.x, pop.y - 18 - rise);
+      ctx.fillStyle = pop.text ? '#ff9c6e' : '#ffd34d';
+      ctx.fillText(label, pop.x, pop.y - 18 - rise);
       ctx.globalAlpha = 1;
     }
   }
@@ -201,8 +211,9 @@ export function createRenderer(canvas, options = {}) {
     resize,
     get scale() { return scale; },
     invalidateRoom() { roomKey = ''; },
+    setQuality(next) { if (next) { quality = next; roomKey = ''; } },
 
-    draw(sim, alpha, time, pops, stats) {
+    draw(sim, alpha, time, pops, stats, sparks = []) {
       ensureRoom(sim.level);
 
       ctx.save();
@@ -210,7 +221,7 @@ export function createRenderer(canvas, options = {}) {
 
       ctx.drawImage(roomCache, 0, 0, W, H);
       drawExit(sim, time);
-      drawSleeper(ctx, sim.level, sleepStage(sim.noise), time);
+      drawSleeper(ctx, sim.level, sleepStage(sim.noise), time, sim.wakeSeconds || 0);
       drawItems(sim, time);
 
       // The thief is drawn between the last two simulation steps.
@@ -232,6 +243,7 @@ export function createRenderer(canvas, options = {}) {
         drawGrabbedItem(ctx, ITEM_ART[sim.reach.type] || '?', sim.reach, hand, reachProgress);
       }
 
+      drawSparks(sparks);
       drawPops(pops);
       drawDanger(sim, time);
       if (debug) drawDebug(sim, stats, { x: px, y: py });

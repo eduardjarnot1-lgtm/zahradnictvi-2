@@ -21,9 +21,17 @@ const ORDER = [
 const IMPORT_RE = /^import\s*\{([^}]*)\}\s*from\s*'\.\/([\w-]+)\.js';?\s*$/;
 const EXPORT_DECL_RE = /^export\s+(const|let|var|function|class)\s+([A-Za-z_$][\w$]*)/;
 
+// Import statements may wrap across lines; fold them back onto one line before
+// parsing, so source formatting is free to be readable.
+function foldImports(source) {
+  return source.replace(/^import\s*\{[^}]*\}\s*from\s*'[^']+';?$/gms, (match) =>
+    match.replace(/\s*\n\s*/g, ' ').replace(/\{\s+/, '{ ').replace(/\s+\}/, ' }')
+  );
+}
+
 function transform(name, source) {
   const exported = [];
-  const lines = source.split('\n');
+  const lines = foldImports(source).split('\n');
   const out = [];
 
   for (const line of lines) {

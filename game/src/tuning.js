@@ -28,8 +28,11 @@ export const TUNING = {
 
   noise: {
     max: 100,            // he wakes at this exact value
-    stirringAt: 51,      // sleeper visual stages
-    almostAt: 81
+    // Where each visual sleep band begins: light, disturbed, almost awake,
+    // and about-to-wake. Below the first he is in deep sleep.
+    bands: [41, 61, 81, 96],
+    stirringAt: 41,      // the HUD meter turns amber here
+    almostAt: 81         // ...and red here
   },
 
   pickup: {
@@ -55,14 +58,80 @@ export const TUNING = {
     maxCanvasPixels: 3.2e6   // ...but never more pixels than a mid-range GPU likes
   },
 
-  // Item value / noise table. Art for each type lives in render.js, not here:
-  // the simulation must never know what an item looks like.
+  // Item value / noise table. Art for each type lives in art.js, not here: the
+  // simulation must never know what an item looks like.
+  //
+  // The six original types keep their exact numbers — the first ten levels are
+  // balanced around them and must not shift. Everything below `coin` is new.
   items: {
     phone:  { value: 30,  noise: 8  },
     watch:  { value: 45,  noise: 10 },
     cash:   { value: 60,  noise: 12 },
     jewel:  { value: 90,  noise: 16 },
     laptop: { value: 120, noise: 22 },
-    tv:     { value: 180, noise: 30 }
+    tv:     { value: 180, noise: 30 },
+
+    coin:       { value: 10,  noise: 3  },
+    wallet:     { value: 25,  noise: 6  },
+    headphones: { value: 50,  noise: 11 },
+    ring:       { value: 65,  noise: 13 },
+    camera:     { value: 75,  noise: 14 },
+    tablet:     { value: 85,  noise: 15 },
+    console:    { value: 100, noise: 18 },
+    speaker:    { value: 110, noise: 20 },
+    necklace:   { value: 130, noise: 21 },
+    // Fragile things are worth more than their noise suggests, because the
+    // noise is front-loaded: they clink the moment you lift them.
+    vase:       { value: 80,  noise: 17, fragile: true },
+    painting:   { value: 160, noise: 25, fragile: true },
+    mirror:     { value: 95,  noise: 19, fragile: true },
+    diamond:    { value: 220, noise: 32 },
+    goldbar:    { value: 300, noise: 38 }
+  },
+
+  // Simple environmental hazards. Trigger zones, nothing more.
+  hazards: {
+    creakNoise: 5,        // stepping onto a creaky board
+    creakCooldown: 1.4    // seconds before the same board can creak again
+  },
+
+  // Escape with a big enough share of the room's total value.
+  stars: {
+    two: 0.5,
+    three: 0.8
+  },
+
+  // Three upgrades, deliberately few. None of them touches the risk/reward
+  // decision: nothing here makes a stolen item quieter.
+  upgrades: {
+    shoes: {
+      name: 'Soft Shoes',
+      blurb: 'Creaky boards bother you less.',
+      icon: '👟',
+      costs: [400, 1200, 3000],
+      // multiplier applied to hazard noise
+      effect: [1, 0.65, 0.35, 0]
+    },
+    feet: {
+      name: 'Quick Feet',
+      blurb: 'Move a little faster.',
+      icon: '⚡',
+      costs: [500, 1500, 3500],
+      effect: [1, 1.07, 1.14, 1.22]
+    },
+    bag: {
+      name: 'Velvet Bag',
+      blurb: 'Fences pay you more for the same haul.',
+      icon: '🎒',
+      costs: [600, 1800, 4200],
+      effect: [1, 1.12, 1.25, 1.4]
+    }
+  },
+
+  // Graphics quality caps the render resolution and the particle budget.
+  quality: {
+    low:    { pixelRatio: 1,   particles: 0 },
+    medium: { pixelRatio: 2,   particles: 8 },
+    high:   { pixelRatio: 3,   particles: 16 }
   }
 };

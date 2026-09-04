@@ -39,13 +39,13 @@ new state, so the whole game runs in node with no browser.
 | module | responsibility |
 | --- | --- |
 | `tuning.js` | every balance number, in one object |
-| `rules.js` | pure rules: item stats, noise, sleep stage, win/lose |
+| `rules.js` | pure rules: item stats, noise, sleep bands, stars, upgrades, win/lose |
 | `levels.js` | level data as tagged objects (`{type:'furniture', …}`) |
 | `validate.js` | level schema + reachability checks |
 | `physics.js` | `solveMove` — sub-stepped AABB, used by every mover |
 | `sim.js` | fixed-step simulation, entity list, event output |
 | `replay.js` | input quantisation, run-length recording, replay |
-| `save.js` | versioned save with a migration chain |
+| `save.js` | versioned save with a migration chain (progress, stars, shop, settings) |
 | `fsm.js` | screen state machine with enter/exit hooks |
 | `input.js` | keyboard + multi-touch into one `read()` |
 | `audio.js` | master gain, persisted mute, context revival |
@@ -75,6 +75,28 @@ resolution and blitted 1:1, so detail costs nothing per frame. Furniture style
 and tone are derived from each collider's shape and position — level files say
 `furniture` and get a bookshelf, chest, sofa, wardrobe, TV bench, table or
 nightstand — so a room can be redecorated without touching level data.
+
+### Progression
+
+Money is banked on escape; stars are judged on the **raw** haul (before the
+Velvet Bag multiplier), so an upgrade can never buy a star. The shop holds three
+upgrades and none of them makes a stolen item quieter — a test asserts this,
+because the moment the shop can soften the risk, the core decision stops
+mattering.
+
+### Chapters
+
+Levels are grouped into themed chapters (Bedroom, Apartment, Hotel, Office,
+Luxury, Penthouse). Each chapter opens easier than the last one ended and then
+climbs; tests assert both. Levels 1-10 are the original beta set and are
+deliberately unchanged.
+
+### Hazards
+
+Creaky boards are plain trigger rectangles in `level.creaks`. Stepping onto one
+costs noise once, then it goes quiet for a cooldown, so a board can neither be
+milked nor drain you while you stand on it. Soft Shoes reduce and eventually
+silence them.
 
 ### Adding a level
 

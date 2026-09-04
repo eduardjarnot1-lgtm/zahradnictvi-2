@@ -40,10 +40,32 @@ const LAYOUTS = {
       [30, 44, 92, 54], [154, 152, 110, 42], [36, 262, 60, 124],
       [248, 306, 124, 42], [120, 436, 142, 42]
     ]
+  },
+  D: {
+    bed: [24, 20, 110, 80],
+    furniture: [
+      [170, 34, 100, 52], [300, 140, 70, 120], [40, 180, 110, 44],
+      [150, 300, 120, 44], [40, 420, 90, 50], [250, 430, 120, 46]
+    ]
+  },
+  E: {
+    bed: [140, 18, 120, 90],
+    furniture: [
+      [30, 150, 90, 46], [290, 150, 80, 46], [36, 270, 70, 110],
+      [160, 300, 110, 42], [250, 420, 120, 44], [40, 430, 90, 44]
+    ]
+  },
+  F: {
+    bed: [230, 20, 140, 96],
+    furniture: [
+      [30, 40, 120, 60], [170, 160, 90, 44], [300, 200, 70, 120],
+      [40, 200, 90, 50], [120, 320, 150, 44], [40, 420, 100, 50],
+      [250, 440, 120, 46]
+    ]
   }
 };
 
-function makeLevel(id, layoutKey, spawn, exitX, items) {
+function makeLevel(id, layoutKey, spawn, exitX, items, options = {}) {
   const layout = LAYOUTS[layoutKey];
   const bed = collider('bed', ...layout.bed);
   const colliders = [
@@ -55,6 +77,11 @@ function makeLevel(id, layoutKey, spawn, exitX, items) {
   return {
     id,
     layout: layoutKey,
+    // Theme drives palette and furniture flavour only — never the rules.
+    theme: options.theme || 'bedroom',
+    name: options.name || 'Bedroom',
+    // Creaky boards: plain trigger rectangles on the floor.
+    creaks: (options.creaks || []).map(([x, y, w, h], i) => ({ id: `L${id}-c${i}`, x, y, w, h })),
     spawn: { x: spawn[0], y: spawn[1] },
     exit: { x: exitX, y: H - WT - 10, w: EXIT_W, h: WT + 18 },
     bed,
@@ -112,7 +139,86 @@ export const LEVELS = [
     [196, 70, 'tv'], [70, 150, 'jewel'], [330, 150, 'laptop'],
     [160, 238, 'tv'], [186, 352, 'laptop'], [330, 400, 'jewel'],
     [60, 470, 'tv'], [330, 520, 'cash']
-  ])
+  ]),
+
+  // ---- Apartment: smaller pickings, tighter room ------------------------
+  makeLevel(11, 'D', [200, 548], 160, [
+    [150, 130, 'coin'], [250, 130, 'wallet'], [60, 260, 'phone'],
+    [200, 240, 'headphones'], [330, 300, 'watch'], [100, 360, 'wallet'],
+    [230, 370, 'coin']
+  ], { theme: 'apartment', name: 'Apartment' }),
+  makeLevel(12, 'D', [200, 548], 160, [
+    [150, 130, 'wallet'], [250, 130, 'headphones'], [60, 260, 'ring'],
+    [200, 240, 'camera'], [330, 300, 'phone'], [100, 360, 'necklace'],
+    [230, 370, 'tablet'], [170, 470, 'console']
+  ], { theme: 'apartment', name: 'Apartment' }),
+
+  // ---- Hotel room: creaky old floorboards -------------------------------
+  makeLevel(13, 'E', [200, 548], 160, [
+    [70, 120, 'wallet'], [200, 140, 'camera'], [330, 110, 'ring'],
+    [140, 220, 'headphones'], [250, 240, 'watch'], [330, 260, 'phone'],
+    [120, 370, 'tablet'], [280, 350, 'wallet']
+  ], { theme: 'hotel', name: 'Hotel Room', creaks: [[150, 190, 90, 40]] }),
+  makeLevel(14, 'E', [200, 548], 160, [
+    [70, 120, 'ring'], [200, 140, 'tablet'], [330, 110, 'camera'],
+    [140, 220, 'necklace'], [250, 240, 'headphones'], [330, 260, 'watch'],
+    [120, 370, 'console'], [280, 350, 'ring'], [170, 470, 'wallet']
+  ], { theme: 'hotel', name: 'Hotel Room', creaks: [[150, 190, 90, 40], [60, 350, 60, 50]] }),
+  makeLevel(15, 'E', [200, 548], 160, [
+    [70, 120, 'vase'], [200, 140, 'console'], [330, 110, 'necklace'],
+    [140, 220, 'tablet'], [250, 240, 'camera'], [330, 260, 'ring'],
+    [120, 370, 'speaker'], [280, 350, 'headphones'], [330, 515, 'coin']
+  ], { theme: 'hotel', name: 'Hotel Room', creaks: [[150, 190, 90, 40], [230, 470, 80, 44]] }),
+
+  // ---- Office: electronics, hard floors ---------------------------------
+  makeLevel(16, 'D', [200, 548], 160, [
+    [150, 130, 'tablet'], [250, 130, 'laptop'], [60, 260, 'console'],
+    [200, 240, 'speaker'], [330, 300, 'camera'], [100, 360, 'tablet'],
+    [230, 370, 'headphones'], [330, 515, 'phone']
+  ], { theme: 'office', name: 'Office', creaks: [[170, 210, 90, 44]] }),
+  makeLevel(17, 'D', [200, 548], 160, [
+    [150, 130, 'laptop'], [250, 130, 'console'], [60, 260, 'speaker'],
+    [200, 240, 'tv'], [330, 300, 'tablet'], [100, 360, 'laptop'],
+    [230, 370, 'camera'], [330, 515, 'wallet'], [60, 520, 'coin']
+  ], { theme: 'office', name: 'Office', creaks: [[170, 210, 90, 44], [60, 440, 70, 44]] }),
+  makeLevel(18, 'D', [200, 548], 160, [
+    [150, 130, 'tv'], [250, 130, 'speaker'], [60, 260, 'laptop'],
+    [200, 240, 'console'], [330, 300, 'mirror'], [100, 360, 'tv'],
+    [230, 370, 'tablet'], [330, 515, 'camera']
+  ], { theme: 'office', name: 'Office', creaks: [[170, 210, 90, 44], [230, 300, 90, 44]] }),
+
+  // ---- Luxury bedroom: fragile, expensive things ------------------------
+  makeLevel(19, 'F', [200, 548], 160, [
+    [180, 90, 'vase'], [120, 130, 'necklace'], [60, 300, 'painting'],
+    [250, 290, 'ring'], [330, 350, 'jewel'], [60, 370, 'mirror'],
+    [180, 400, 'necklace'], [150, 500, 'watch']
+  ], { theme: 'luxury', name: 'Luxury Bedroom', creaks: [[140, 240, 100, 44]] }),
+  makeLevel(20, 'F', [200, 548], 160, [
+    [180, 90, 'painting'], [120, 130, 'jewel'], [60, 300, 'vase'],
+    [250, 290, 'necklace'], [330, 350, 'mirror'], [60, 370, 'diamond'],
+    [180, 400, 'ring'], [150, 500, 'necklace'], [330, 520, 'coin']
+  ], { theme: 'luxury', name: 'Luxury Bedroom', creaks: [[140, 240, 100, 44]] }),
+  makeLevel(21, 'F', [200, 548], 160, [
+    [180, 90, 'diamond'], [120, 130, 'painting'], [60, 300, 'necklace'],
+    [250, 290, 'vase'], [330, 350, 'jewel'], [60, 370, 'mirror'],
+    [180, 400, 'painting'], [150, 500, 'ring']
+  ], { theme: 'luxury', name: 'Luxury Bedroom', creaks: [[140, 240, 100, 44], [230, 380, 90, 44]] }),
+
+  // ---- Penthouse: the biggest hauls, the worst decisions ----------------
+  makeLevel(22, 'F', [200, 548], 160, [
+    [180, 90, 'goldbar'], [120, 130, 'diamond'], [250, 290, 'necklace'],
+    [60, 370, 'jewel'], [180, 400, 'ring'], [150, 500, 'vase']
+  ], { theme: 'penthouse', name: "Penthouse", creaks: [[140, 240, 100, 44]] }),
+  makeLevel(23, 'C', [200, 548], 160, [
+    [196, 70, 'goldbar'], [70, 150, 'diamond'], [330, 150, 'painting'],
+    [160, 238, 'necklace'], [186, 352, 'diamond'], [330, 400, 'goldbar'],
+    [60, 470, 'painting'], [330, 520, 'jewel']
+  ], { theme: 'penthouse', name: 'Penthouse', creaks: [[100, 210, 110, 44]] }),
+  makeLevel(24, 'F', [200, 548], 160, [
+    [180, 90, 'goldbar'], [120, 130, 'goldbar'], [60, 300, 'diamond'],
+    [250, 290, 'painting'], [330, 350, 'goldbar'], [60, 370, 'diamond'],
+    [180, 400, 'necklace'], [150, 500, 'painting'], [330, 520, 'vase']
+  ], { theme: 'penthouse', name: 'Penthouse', creaks: [[140, 240, 100, 44], [230, 460, 90, 44]] })
 ];
 
 export const collidersOfType = (level, type) =>

@@ -23,6 +23,9 @@
   #noisewrap{flex:1;height:14px;border-radius:7px;background:#0006;
     border:1px solid #ffffff26;overflow:hidden;position:relative}
   #noisebar{height:100%;width:0%;background:#4cc172;transition:width .1s linear}
+  /* Near the cap the meter starts insisting. */
+  #noisewrap.danger{border-color:#ff6b6b;animation:alarm .7s ease-in-out infinite}
+  @keyframes alarm{0%,100%{box-shadow:0 0 0 0 #ff4d4d00}50%{box-shadow:0 0 0 3px #ff4d4d55}}
   #noisetxt{position:absolute;inset:0;text-align:center;font-size:10px;line-height:12px;
     text-shadow:0 1px 2px #000;font-variant-numeric:tabular-nums}
   .hudbtn{pointer-events:auto;background:#ffffff1a;border:1px solid #ffffff2e;color:#fff;
@@ -46,9 +49,12 @@
   body[data-screen="menu"] #hud, body[data-screen="levels"] #hud{display:none}
   body:not([data-screen="playing"]) #btnpause{opacity:.45}
 
+  /* justify-content:center clips both ends once a screen scrolls; auto block
+     margins on the sheet centre short screens and scroll tall ones instead. */
   .screen{position:absolute;inset:0;display:none;flex-direction:column;
-    align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center;
-    background:#120e17f2;backdrop-filter:blur(3px)}
+    align-items:center;justify-content:flex-start;gap:12px;padding:20px 24px;
+    text-align:center;background:#120e17f2;backdrop-filter:blur(3px);
+    overflow-y:auto;overscroll-behavior:contain}
   .screen.on{display:flex}
   h1{font-size:30px;line-height:1.1;letter-spacing:-.5px}
   h1 small{display:block;font-size:12px;letter-spacing:3px;color:#a08fb0;
@@ -63,19 +69,71 @@
   .btn.alt:active{box-shadow:0 2px 0 #ffffff14}
   .btn:focus-visible{outline:2px solid #ffd34d;outline-offset:3px}
   .btn.small{padding:9px 18px;font-size:13px;min-width:0}
-  #grid{display:grid;grid-template-columns:repeat(4,58px);gap:10px;justify-content:center}
-  .lv{height:58px;border-radius:12px;border:0;background:#7c4dff;color:#fff;font-size:18px;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+  .sheet{display:flex;flex-direction:column;align-items:center;gap:12px;
+    width:100%;max-width:330px;margin-block:auto;padding:4px 0}
+  .money{display:inline-flex;align-items:center;gap:6px;background:#ffd34d1a;
+    border:1px solid #ffd34d4d;color:#ffd34d;font-weight:800;font-size:15px;
+    padding:6px 14px;border-radius:999px;font-variant-numeric:tabular-nums}
+  .menugrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;width:100%}
+  .menugrid .btn{min-width:0;width:100%;padding:11px 8px;font-size:14px}
+  #grid{display:grid;grid-template-columns:repeat(4,66px);gap:9px;justify-content:center}
+  .lv{height:62px;border-radius:12px;border:0;background:#7c4dff;color:#fff;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
   .lv.locked{background:#ffffff12;color:#ffffff40}
   .lv b{font-size:18px;line-height:1}
-  .lv i{font-size:9px;font-style:normal;color:#ffd34d;font-weight:700}
+  .lv i{font-size:10px;font-style:normal;letter-spacing:1px;line-height:1;color:#ffd34d}
+  .lv i s{text-decoration:none;color:#ffffff33}
+  .chapter{width:100%;text-align:left;font-size:11px;letter-spacing:2px;
+    color:#a08fb0;font-weight:700;margin:6px 0 -4px;text-transform:uppercase}
+
+  .card{display:flex;align-items:center;gap:11px;width:100%;background:#ffffff0f;
+    border:1px solid #ffffff1a;border-radius:14px;padding:11px 13px;text-align:left}
+  .card .ico{font-size:26px;width:34px;text-align:center}
+  .card .body{flex:1;min-width:0}
+  .card h3{font-size:14px;font-weight:800}
+  .card p{font-size:11px;color:#a89bb5;margin-top:2px}
+  .pips{display:flex;gap:3px;margin-top:5px}
+  .pip{width:22px;height:5px;border-radius:3px;background:#ffffff1f}
+  .pip.on{background:#4cc172}
+  .buy{background:#ffd34d;color:#2a1c05;border:0;border-radius:10px;padding:8px 11px;
+    font-size:12px;font-weight:800;white-space:nowrap;min-width:66px}
+  .buy:disabled{background:#ffffff14;color:#ffffff40}
+  .buy.max{background:#4cc17233;color:#8be0a6}
+
+  #collgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%}
+  .coll{background:#ffffff0d;border:1px solid #ffffff14;border-radius:11px;
+    padding:8px 3px;text-align:center}
+  .coll .em{font-size:21px;line-height:1.1;filter:grayscale(1);opacity:.28}
+  .coll.got .em{filter:none;opacity:1}
+  .coll span{display:block;font-size:8.5px;color:#8d7f9b;margin-top:3px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .coll.got span{color:#cbbcd8}
+
+  .row{display:flex;align-items:center;justify-content:space-between;width:100%;
+    background:#ffffff0d;border:1px solid #ffffff14;border-radius:12px;padding:11px 13px}
+  .row span{font-size:13px;font-weight:700}
+  .toggle{background:#ffffff14;border:1px solid #ffffff26;color:#fff;border-radius:999px;
+    padding:6px 14px;font-size:12px;font-weight:800;min-width:64px}
+  .toggle.on{background:#4cc17233;border-color:#4cc172;color:#9fe8b8}
+  .seg{display:flex;gap:4px}
+  .seg button{background:#ffffff12;border:1px solid #ffffff1f;color:#bcaec8;
+    border-radius:8px;padding:6px 9px;font-size:11px;font-weight:800}
+  .seg button.on{background:#7c4dff;border-color:#7c4dff;color:#fff}
+
+  #stars{font-size:30px;letter-spacing:6px;color:#ffd34d;min-height:38px}
+  #stars s{text-decoration:none;color:#ffffff1f}
+  .tally{display:flex;gap:14px;justify-content:center;font-size:12px;color:#bcaec8}
+  .tally b{display:block;font-size:16px;color:#fff;margin-top:2px}
   .stat{font-size:15px;color:#ffd34d;font-weight:700}
   .hint{font-size:12px;color:#8d7f9b}
   #crash{position:absolute;inset:0;display:none;flex-direction:column;gap:10px;padding:20px;
     background:#1a0f12f5;color:#ffb4b4;font:12px ui-monospace,monospace;overflow:auto;z-index:9}
   #crash.on{display:flex}
   #crash pre{white-space:pre-wrap;color:#ffd9d9}
-  @media (prefers-reduced-motion: reduce){ #noisebar{transition:none} }
+  @media (prefers-reduced-motion: reduce){
+    #noisebar{transition:none}
+    #noisewrap.danger{animation:none;box-shadow:0 0 0 2px #ff4d4d88}
+  }
 </style>
 </head>
 <body>
@@ -94,28 +152,74 @@
   <button id="take" aria-label="Take item">TAKE</button>
 
   <div class="screen on" id="scMenu">
-    <h1><small>SUPER SIMPLE BETA</small>DON'T WAKE HIM!</h1>
-    <p>Steal what you can. Every item makes noise. Get out before he wakes up.</p>
-    <button class="btn" id="bPlay">PLAY</button>
-    <button class="btn alt" id="bLevels">LEVELS</button>
-    <button class="btn alt small" id="bMuteMenu">SOUND ON</button>
-    <p class="stat" id="bank">Total stolen: $0</p>
-    <p class="hint">Move: drag anywhere / arrows. Take: TAKE button / space.</p>
+    <div class="sheet">
+      <h1><small>ONE MORE THING?</small>DON'T WAKE HIM!</h1>
+      <span class="money" id="bank">$0</span>
+      <button class="btn" id="bPlay">PLAY</button>
+      <div class="menugrid">
+        <button class="btn alt" id="bLevels">LEVELS</button>
+        <button class="btn alt" id="bShop">SHOP</button>
+        <button class="btn alt" id="bCollection">COLLECTION</button>
+        <button class="btn alt" id="bSettings">SETTINGS</button>
+      </div>
+      <p class="hint" id="menuStars">0 / 72 stars</p>
+      <p class="hint">Move: drag anywhere / arrows. Take: TAKE button / space.</p>
+    </div>
   </div>
 
   <div class="screen" id="scLevels">
-    <h2>LEVELS</h2>
-    <div id="grid"></div>
-    <button class="btn alt" id="bBack">BACK</button>
-    <button class="btn alt small" id="bReset">RESET PROGRESS</button>
+    <div class="sheet">
+      <h2>LEVELS</h2>
+      <div id="grid"></div>
+      <button class="btn alt" id="bBack">BACK</button>
+    </div>
+  </div>
+
+  <div class="screen" id="scShop">
+    <div class="sheet">
+      <h2>SHOP</h2>
+      <span class="money" id="shopBank">$0</span>
+      <div id="shopList" style="display:flex;flex-direction:column;gap:9px;width:100%"></div>
+      <p class="hint">Nothing here makes a stolen item quieter.<br>The decision stays yours.</p>
+      <button class="btn alt" id="bShopBack">BACK</button>
+    </div>
+  </div>
+
+  <div class="screen" id="scCollection">
+    <div class="sheet">
+      <h2>COLLECTION</h2>
+      <p class="hint" id="collCount">0 of 20 found</p>
+      <div id="collgrid"></div>
+      <button class="btn alt" id="bCollBack">BACK</button>
+    </div>
+  </div>
+
+  <div class="screen" id="scSettings">
+    <div class="sheet">
+      <h2>SETTINGS</h2>
+      <div class="row"><span>Sound</span><button class="toggle" id="tSound">ON</button></div>
+      <div class="row"><span>Music</span><button class="toggle" id="tMusic">ON</button></div>
+      <div class="row"><span>Vibration</span><button class="toggle" id="tVibe">ON</button></div>
+      <div class="row"><span>Graphics</span>
+        <div class="seg" id="segQuality">
+          <button data-q="low">LOW</button><button data-q="medium">MED</button><button data-q="high">HIGH</button>
+        </div>
+      </div>
+      <button class="btn alt" id="bSetBack">BACK</button>
+      <button class="btn alt small" id="bReset">RESET PROGRESS</button>
+    </div>
   </div>
 
   <div class="screen" id="scEnd">
-    <h2 id="endTitle">LEVEL COMPLETE</h2>
-    <p id="endText"></p>
-    <button class="btn" id="bNext">NEXT LEVEL</button>
-    <button class="btn alt" id="bRetry">RETRY</button>
-    <button class="btn alt" id="bMenu">MENU</button>
+    <div class="sheet">
+      <h2 id="endTitle">LEVEL COMPLETE</h2>
+      <div id="stars"></div>
+      <div class="tally" id="endTally"></div>
+      <p id="endText"></p>
+      <button class="btn" id="bNext">NEXT LEVEL</button>
+      <button class="btn alt" id="bRetry">RETRY</button>
+      <button class="btn alt" id="bMenu">MENU</button>
+    </div>
   </div>
 
   <div class="screen" id="scPause">
@@ -167,8 +271,11 @@ __mod.tuning = (function () {
 
     noise: {
       max: 100,            // he wakes at this exact value
-      stirringAt: 51,      // sleeper visual stages
-      almostAt: 81
+      // Where each visual sleep band begins: light, disturbed, almost awake,
+      // and about-to-wake. Below the first he is in deep sleep.
+      bands: [41, 61, 81, 96],
+      stirringAt: 41,      // the HUD meter turns amber here
+      almostAt: 81         // ...and red here
     },
 
     pickup: {
@@ -194,15 +301,81 @@ __mod.tuning = (function () {
       maxCanvasPixels: 3.2e6   // ...but never more pixels than a mid-range GPU likes
     },
 
-    // Item value / noise table. Art for each type lives in render.js, not here:
-    // the simulation must never know what an item looks like.
+    // Item value / noise table. Art for each type lives in art.js, not here: the
+    // simulation must never know what an item looks like.
+    //
+    // The six original types keep their exact numbers — the first ten levels are
+    // balanced around them and must not shift. Everything below `coin` is new.
     items: {
       phone:  { value: 30,  noise: 8  },
       watch:  { value: 45,  noise: 10 },
       cash:   { value: 60,  noise: 12 },
       jewel:  { value: 90,  noise: 16 },
       laptop: { value: 120, noise: 22 },
-      tv:     { value: 180, noise: 30 }
+      tv:     { value: 180, noise: 30 },
+
+      coin:       { value: 10,  noise: 3  },
+      wallet:     { value: 25,  noise: 6  },
+      headphones: { value: 50,  noise: 11 },
+      ring:       { value: 65,  noise: 13 },
+      camera:     { value: 75,  noise: 14 },
+      tablet:     { value: 85,  noise: 15 },
+      console:    { value: 100, noise: 18 },
+      speaker:    { value: 110, noise: 20 },
+      necklace:   { value: 130, noise: 21 },
+      // Fragile things are worth more than their noise suggests, because the
+      // noise is front-loaded: they clink the moment you lift them.
+      vase:       { value: 80,  noise: 17, fragile: true },
+      painting:   { value: 160, noise: 25, fragile: true },
+      mirror:     { value: 95,  noise: 19, fragile: true },
+      diamond:    { value: 220, noise: 32 },
+      goldbar:    { value: 300, noise: 38 }
+    },
+
+    // Simple environmental hazards. Trigger zones, nothing more.
+    hazards: {
+      creakNoise: 5,        // stepping onto a creaky board
+      creakCooldown: 1.4    // seconds before the same board can creak again
+    },
+
+    // Escape with a big enough share of the room's total value.
+    stars: {
+      two: 0.5,
+      three: 0.8
+    },
+
+    // Three upgrades, deliberately few. None of them touches the risk/reward
+    // decision: nothing here makes a stolen item quieter.
+    upgrades: {
+      shoes: {
+        name: 'Soft Shoes',
+        blurb: 'Creaky boards bother you less.',
+        icon: '👟',
+        costs: [400, 1200, 3000],
+        // multiplier applied to hazard noise
+        effect: [1, 0.65, 0.35, 0]
+      },
+      feet: {
+        name: 'Quick Feet',
+        blurb: 'Move a little faster.',
+        icon: '⚡',
+        costs: [500, 1500, 3500],
+        effect: [1, 1.07, 1.14, 1.22]
+      },
+      bag: {
+        name: 'Velvet Bag',
+        blurb: 'Fences pay you more for the same haul.',
+        icon: '🎒',
+        costs: [600, 1800, 4200],
+        effect: [1, 1.12, 1.25, 1.4]
+      }
+    },
+
+    // Graphics quality caps the render resolution and the particle budget.
+    quality: {
+      low:    { pixelRatio: 1,   particles: 0 },
+      medium: { pixelRatio: 2,   particles: 8 },
+      high:   { pixelRatio: 3,   particles: 16 }
     }
   };
   return { TUNING };
@@ -232,10 +405,19 @@ __mod.rules = (function () {
   // Pure game rules. No DOM, no canvas, no timers, no randomness.
   const { TUNING } = __mod.tuning;
 
-  const SLEEP_ASLEEP = 0;
-  const SLEEP_STIRRING = 1;
-  const SLEEP_ALMOST = 2;
-  const SLEEP_AWAKE = 3;
+  // Six visual states, from dead to the world to sitting bolt upright.
+  const SLEEP_DEEP = 0;
+  const SLEEP_LIGHT = 1;
+  const SLEEP_DISTURBED = 2;
+  const SLEEP_ALMOST = 3;
+  const SLEEP_CRITICAL = 4;
+  const SLEEP_AWAKE = 5;
+  const SLEEP_ASLEEP = SLEEP_DEEP;   // kept: reads better at call sites
+  const SLEEP_STIRRING = SLEEP_LIGHT;
+
+  const SLEEP_LABELS = [
+    'Deep sleep', 'Light sleep', 'Stirring', 'Almost awake', 'About to wake', 'Awake'
+  ];
 
   function itemStats(type) {
     const stats = TUNING.items[type];
@@ -253,9 +435,9 @@ __mod.rules = (function () {
 
   function sleepStage(noise) {
     if (isAwake(noise)) return SLEEP_AWAKE;
-    if (noise >= TUNING.noise.almostAt) return SLEEP_ALMOST;
-    if (noise >= TUNING.noise.stirringAt) return SLEEP_STIRRING;
-    return SLEEP_ASLEEP;
+    let stage = 0;
+    for (const threshold of TUNING.noise.bands) if (noise >= threshold) stage++;
+    return stage;
   }
 
   // Escaping is only worth anything while he is still asleep.
@@ -281,7 +463,40 @@ __mod.rules = (function () {
   function forcesChoice(level) {
     return levelTotals(level).noise > TUNING.noise.max;
   }
-  return { SLEEP_ASLEEP, SLEEP_STIRRING, SLEEP_ALMOST, SLEEP_AWAKE, itemStats, addNoise, isAwake, sleepStage, canBank, levelTotals, forcesChoice };
+
+  // Stars are earned on the raw haul, never on the upgraded payout — otherwise
+  // buying the Velvet Bag would quietly hand you three stars everywhere.
+  function starsFor(level, haul) {
+    if (haul <= 0) return 1;
+    const share = haul / levelTotals(level).value;
+    if (share >= TUNING.stars.three) return 3;
+    if (share >= TUNING.stars.two) return 2;
+    return 1;
+  }
+
+  function starThresholds(level) {
+    const total = levelTotals(level).value;
+    return {
+      two: Math.ceil(total * TUNING.stars.two),
+      three: Math.ceil(total * TUNING.stars.three)
+    };
+  }
+
+  // Turn owned upgrade levels into the multipliers the simulation applies.
+  function resolveUpgrades(owned = {}) {
+    const pick = (key) => {
+      const table = TUNING.upgrades[key].effect;
+      const level = Math.max(0, Math.min(table.length - 1, Math.floor(owned[key] || 0)));
+      return table[level];
+    };
+    return { speed: pick('feet'), hazardNoise: pick('shoes'), payout: pick('bag') };
+  }
+
+  function upgradeCost(key, ownedLevel) {
+    const costs = TUNING.upgrades[key].costs;
+    return ownedLevel >= costs.length ? null : costs[ownedLevel];
+  }
+  return { SLEEP_DEEP, SLEEP_LIGHT, SLEEP_DISTURBED, SLEEP_ALMOST, SLEEP_CRITICAL, SLEEP_AWAKE, SLEEP_ASLEEP, SLEEP_STIRRING, SLEEP_LABELS, itemStats, addNoise, isAwake, sleepStage, canBank, levelTotals, forcesChoice, starsFor, starThresholds, resolveUpgrades, upgradeCost };
 })();
 __mod.physics = (function () {
   // One mover for every moving thing. Sub-stepped so nothing can tunnel through a
@@ -385,10 +600,32 @@ __mod.levels = (function () {
         [30, 44, 92, 54], [154, 152, 110, 42], [36, 262, 60, 124],
         [248, 306, 124, 42], [120, 436, 142, 42]
       ]
+    },
+    D: {
+      bed: [24, 20, 110, 80],
+      furniture: [
+        [170, 34, 100, 52], [300, 140, 70, 120], [40, 180, 110, 44],
+        [150, 300, 120, 44], [40, 420, 90, 50], [250, 430, 120, 46]
+      ]
+    },
+    E: {
+      bed: [140, 18, 120, 90],
+      furniture: [
+        [30, 150, 90, 46], [290, 150, 80, 46], [36, 270, 70, 110],
+        [160, 300, 110, 42], [250, 420, 120, 44], [40, 430, 90, 44]
+      ]
+    },
+    F: {
+      bed: [230, 20, 140, 96],
+      furniture: [
+        [30, 40, 120, 60], [170, 160, 90, 44], [300, 200, 70, 120],
+        [40, 200, 90, 50], [120, 320, 150, 44], [40, 420, 100, 50],
+        [250, 440, 120, 46]
+      ]
     }
   };
 
-  function makeLevel(id, layoutKey, spawn, exitX, items) {
+  function makeLevel(id, layoutKey, spawn, exitX, items, options = {}) {
     const layout = LAYOUTS[layoutKey];
     const bed = collider('bed', ...layout.bed);
     const colliders = [
@@ -400,6 +637,11 @@ __mod.levels = (function () {
     return {
       id,
       layout: layoutKey,
+      // Theme drives palette and furniture flavour only — never the rules.
+      theme: options.theme || 'bedroom',
+      name: options.name || 'Bedroom',
+      // Creaky boards: plain trigger rectangles on the floor.
+      creaks: (options.creaks || []).map(([x, y, w, h], i) => ({ id: `L${id}-c${i}`, x, y, w, h })),
       spawn: { x: spawn[0], y: spawn[1] },
       exit: { x: exitX, y: H - WT - 10, w: EXIT_W, h: WT + 18 },
       bed,
@@ -457,7 +699,86 @@ __mod.levels = (function () {
       [196, 70, 'tv'], [70, 150, 'jewel'], [330, 150, 'laptop'],
       [160, 238, 'tv'], [186, 352, 'laptop'], [330, 400, 'jewel'],
       [60, 470, 'tv'], [330, 520, 'cash']
-    ])
+    ]),
+
+    // ---- Apartment: smaller pickings, tighter room ------------------------
+    makeLevel(11, 'D', [200, 548], 160, [
+      [150, 130, 'coin'], [250, 130, 'wallet'], [60, 260, 'phone'],
+      [200, 240, 'headphones'], [330, 300, 'watch'], [100, 360, 'wallet'],
+      [230, 370, 'coin']
+    ], { theme: 'apartment', name: 'Apartment' }),
+    makeLevel(12, 'D', [200, 548], 160, [
+      [150, 130, 'wallet'], [250, 130, 'headphones'], [60, 260, 'ring'],
+      [200, 240, 'camera'], [330, 300, 'phone'], [100, 360, 'necklace'],
+      [230, 370, 'tablet'], [170, 470, 'console']
+    ], { theme: 'apartment', name: 'Apartment' }),
+
+    // ---- Hotel room: creaky old floorboards -------------------------------
+    makeLevel(13, 'E', [200, 548], 160, [
+      [70, 120, 'wallet'], [200, 140, 'camera'], [330, 110, 'ring'],
+      [140, 220, 'headphones'], [250, 240, 'watch'], [330, 260, 'phone'],
+      [120, 370, 'tablet'], [280, 350, 'wallet']
+    ], { theme: 'hotel', name: 'Hotel Room', creaks: [[150, 190, 90, 40]] }),
+    makeLevel(14, 'E', [200, 548], 160, [
+      [70, 120, 'ring'], [200, 140, 'tablet'], [330, 110, 'camera'],
+      [140, 220, 'necklace'], [250, 240, 'headphones'], [330, 260, 'watch'],
+      [120, 370, 'console'], [280, 350, 'ring'], [170, 470, 'wallet']
+    ], { theme: 'hotel', name: 'Hotel Room', creaks: [[150, 190, 90, 40], [60, 350, 60, 50]] }),
+    makeLevel(15, 'E', [200, 548], 160, [
+      [70, 120, 'vase'], [200, 140, 'console'], [330, 110, 'necklace'],
+      [140, 220, 'tablet'], [250, 240, 'camera'], [330, 260, 'ring'],
+      [120, 370, 'speaker'], [280, 350, 'headphones'], [330, 515, 'coin']
+    ], { theme: 'hotel', name: 'Hotel Room', creaks: [[150, 190, 90, 40], [230, 470, 80, 44]] }),
+
+    // ---- Office: electronics, hard floors ---------------------------------
+    makeLevel(16, 'D', [200, 548], 160, [
+      [150, 130, 'tablet'], [250, 130, 'laptop'], [60, 260, 'console'],
+      [200, 240, 'speaker'], [330, 300, 'camera'], [100, 360, 'tablet'],
+      [230, 370, 'headphones'], [330, 515, 'phone']
+    ], { theme: 'office', name: 'Office', creaks: [[170, 210, 90, 44]] }),
+    makeLevel(17, 'D', [200, 548], 160, [
+      [150, 130, 'laptop'], [250, 130, 'console'], [60, 260, 'speaker'],
+      [200, 240, 'tv'], [330, 300, 'tablet'], [100, 360, 'laptop'],
+      [230, 370, 'camera'], [330, 515, 'wallet'], [60, 520, 'coin']
+    ], { theme: 'office', name: 'Office', creaks: [[170, 210, 90, 44], [60, 440, 70, 44]] }),
+    makeLevel(18, 'D', [200, 548], 160, [
+      [150, 130, 'tv'], [250, 130, 'speaker'], [60, 260, 'laptop'],
+      [200, 240, 'console'], [330, 300, 'mirror'], [100, 360, 'tv'],
+      [230, 370, 'tablet'], [330, 515, 'camera']
+    ], { theme: 'office', name: 'Office', creaks: [[170, 210, 90, 44], [230, 300, 90, 44]] }),
+
+    // ---- Luxury bedroom: fragile, expensive things ------------------------
+    makeLevel(19, 'F', [200, 548], 160, [
+      [180, 90, 'vase'], [120, 130, 'necklace'], [60, 300, 'painting'],
+      [250, 290, 'ring'], [330, 350, 'jewel'], [60, 370, 'mirror'],
+      [180, 400, 'necklace'], [150, 500, 'watch']
+    ], { theme: 'luxury', name: 'Luxury Bedroom', creaks: [[140, 240, 100, 44]] }),
+    makeLevel(20, 'F', [200, 548], 160, [
+      [180, 90, 'painting'], [120, 130, 'jewel'], [60, 300, 'vase'],
+      [250, 290, 'necklace'], [330, 350, 'mirror'], [60, 370, 'diamond'],
+      [180, 400, 'ring'], [150, 500, 'necklace'], [330, 520, 'coin']
+    ], { theme: 'luxury', name: 'Luxury Bedroom', creaks: [[140, 240, 100, 44]] }),
+    makeLevel(21, 'F', [200, 548], 160, [
+      [180, 90, 'diamond'], [120, 130, 'painting'], [60, 300, 'necklace'],
+      [250, 290, 'vase'], [330, 350, 'jewel'], [60, 370, 'mirror'],
+      [180, 400, 'painting'], [150, 500, 'ring']
+    ], { theme: 'luxury', name: 'Luxury Bedroom', creaks: [[140, 240, 100, 44], [230, 380, 90, 44]] }),
+
+    // ---- Penthouse: the biggest hauls, the worst decisions ----------------
+    makeLevel(22, 'F', [200, 548], 160, [
+      [180, 90, 'goldbar'], [120, 130, 'diamond'], [250, 290, 'necklace'],
+      [60, 370, 'jewel'], [180, 400, 'ring'], [150, 500, 'vase']
+    ], { theme: 'penthouse', name: "Penthouse", creaks: [[140, 240, 100, 44]] }),
+    makeLevel(23, 'C', [200, 548], 160, [
+      [196, 70, 'goldbar'], [70, 150, 'diamond'], [330, 150, 'painting'],
+      [160, 238, 'necklace'], [186, 352, 'diamond'], [330, 400, 'goldbar'],
+      [60, 470, 'painting'], [330, 520, 'jewel']
+    ], { theme: 'penthouse', name: 'Penthouse', creaks: [[100, 210, 110, 44]] }),
+    makeLevel(24, 'F', [200, 548], 160, [
+      [180, 90, 'goldbar'], [120, 130, 'goldbar'], [60, 300, 'diamond'],
+      [250, 290, 'painting'], [330, 350, 'goldbar'], [60, 370, 'diamond'],
+      [180, 400, 'necklace'], [150, 500, 'painting'], [330, 520, 'vase']
+    ], { theme: 'penthouse', name: 'Penthouse', creaks: [[140, 240, 100, 44], [230, 460, 90, 44]] })
   ];
 
   const collidersOfType = (level, type) =>
@@ -627,7 +948,7 @@ __mod.sim = (function () {
   const { TUNING } = __mod.tuning;
   const { createRng } = __mod.rng;
   const { solveMove, clampToWorld } = __mod.physics;
-  const { addNoise, isAwake, itemStats, canBank, sleepStage } = __mod.rules;
+  const { addNoise, isAwake, itemStats, canBank, sleepStage, resolveUpgrades } = __mod.rules;
 
   const STEP_SECONDS = 1 / TUNING.sim.hz;
 
@@ -643,8 +964,9 @@ __mod.sim = (function () {
 
       // Reaching for an item is a hesitation, not a stop: you keep steering.
       const slowed = sim.reach ? TUNING.pickup.reachSlow : 1;
-      const targetVx = ix * TUNING.player.speed * slowed;
-      const targetVy = iy * TUNING.player.speed * slowed;
+      const top = TUNING.player.speed * sim.mods.speed;
+      const targetVx = ix * top * slowed;
+      const targetVy = iy * top * slowed;
 
       // Approach the target velocity as a vector, so turning is a curve rather
       // than a snap and there is no direction the character accelerates faster in.
@@ -692,7 +1014,7 @@ __mod.sim = (function () {
     }
   };
 
-  function createSim({ level, seed = 1 }) {
+  function createSim({ level, seed = 1, upgrades = {} }) {
     const player = {
       kind: 'player',
       x: level.spawn.x,
@@ -710,13 +1032,17 @@ __mod.sim = (function () {
       idleSeconds: 0
     };
 
+    const mods = resolveUpgrades(upgrades);
+
     return {
       level,
       seed,
+      mods,
       rng: createRng(seed),
       frame: 0,
       status: 'running', // running | won | lost
-      money: 0,
+      money: 0,          // what you get paid (haul plus any bag bonus)
+      haul: 0,           // raw value of what you took — stars are judged on this
       noise: 0,
       entities: [player],
       items: level.items.map((item) => {
@@ -726,8 +1052,10 @@ __mod.sim = (function () {
           type: item.type,
           x: item.x,
           y: item.y,
-          value: stats.value,
+          value: Math.round(stats.value * mods.payout),
+          rawValue: stats.value,
           noise: stats.noise,
+          fragile: !!stats.fragile,
           taken: false,
           inRange: false,
           takenAtFrame: -1
@@ -735,6 +1063,10 @@ __mod.sim = (function () {
       }),
       targetId: null,   // the in-range item a TAKE would consume
       reach: null,      // the in-progress grab animation, if any
+      // Creaky boards: plain trigger zones, each with its own cooldown so
+      // standing on one does not drain the meter.
+      creaks: level.creaks.map((zone) => ({ ...zone, cooldown: 0, active: false })),
+      wakeSeconds: 0,   // drives the wake-up animation only
       shake: 0,
       shakePhase: 0,
       shakeX: 0,
@@ -749,7 +1081,14 @@ __mod.sim = (function () {
   function finish(sim, status) {
     if (sim.status !== 'running') return; // a level can only end once
     sim.status = status;
-    sim.events.push({ type: status, money: sim.money, noise: sim.noise, frame: sim.frame });
+    sim.events.push({
+      type: status,
+      money: sim.money,
+      haul: sim.haul,
+      noise: sim.noise,
+      frame: sim.frame,
+      taken: sim.items.filter((i) => i.taken).map((i) => i.type)
+    });
   }
 
   function takeItem(sim, item) {
@@ -757,6 +1096,7 @@ __mod.sim = (function () {
     item.inRange = false;
     item.takenAtFrame = sim.frame;
     sim.money += item.value;
+    sim.haul += item.rawValue;
     sim.noise = addNoise(sim.noise, item.noise);
     // Drives the reach-and-grab animation. Money and noise are already credited,
     // so the animation is presentation only and can never affect the outcome.
@@ -769,6 +1109,7 @@ __mod.sim = (function () {
       itemType: item.type,
       value: item.value,
       noise: item.noise,
+      fragile: item.fragile,
       x: item.x,
       y: item.y,
       stage: sleepStage(sim.noise)
@@ -779,7 +1120,11 @@ __mod.sim = (function () {
   // Exactly one fixed simulation tick.
   function stepSim(sim, input = EMPTY_INPUT) {
     sim.events.length = 0;
-    if (sim.status !== 'running') return sim;
+    if (sim.status !== 'running') {
+      // The level is over, but he is still sitting up: let the animation finish.
+      if (isAwake(sim.noise)) sim.wakeSeconds += STEP_SECONDS;
+      return sim;
+    }
 
     for (const entity of sim.entities) {
       entity.prevX = entity.x;
@@ -806,6 +1151,25 @@ __mod.sim = (function () {
       }
     }
     sim.targetId = nearest ? nearest.id : null;
+
+    // Creaky boards. Entering one costs noise; it then goes quiet for a while,
+    // so a board cannot be milked and cannot drain you while you stand on it.
+    for (const zone of sim.creaks) {
+      if (zone.cooldown > 0) zone.cooldown = Math.max(0, zone.cooldown - STEP_SECONDS);
+      const inside =
+        player.x > zone.x && player.x < zone.x + zone.w &&
+        player.y > zone.y && player.y < zone.y + zone.h;
+      if (inside && !zone.active && zone.cooldown === 0 && sim.status === 'running') {
+        const amount = Math.round(TUNING.hazards.creakNoise * sim.mods.hazardNoise);
+        if (amount > 0) {
+          sim.noise = addNoise(sim.noise, amount);
+          sim.events.push({ type: 'creak', x: player.x, y: player.y, noise: amount });
+          if (isAwake(sim.noise)) finish(sim, 'lost');
+        }
+        zone.cooldown = TUNING.hazards.creakCooldown;
+      }
+      zone.active = inside;
+    }
 
     const pressedTake = input.take && !sim.prevTake;
     sim.prevTake = input.take;
@@ -849,6 +1213,7 @@ __mod.sim = (function () {
       frame: sim.frame,
       status: sim.status,
       money: sim.money,
+      haul: sim.haul,
       noise: sim.noise,
       taken: sim.items.filter((i) => i.taken).map((i) => i.id),
       x: Math.round(player.x * 100) / 100,
@@ -914,21 +1279,46 @@ __mod.save = (function () {
   // Versioned save with an explicit migration chain. Adding a field later means
   // appending one migration, not breaking every existing player's progress.
   const SAVE_KEY = 'dwh_save';
-  const SAVE_VERSION = 2;
+  const SAVE_VERSION = 3;
+
+  function defaultSettings() {
+    return { sound: true, music: true, vibration: true, quality: 'high' };
+  }
 
   function defaultSave() {
-    return { v: SAVE_VERSION, unlocked: 1, bank: 0, muted: false, best: {} };
+    return {
+      v: SAVE_VERSION,
+      unlocked: 1,
+      bank: 0,
+      best: {},
+      stars: {},
+      collection: [],
+      upgrades: { shoes: 0, feet: 0, bag: 0 },
+      settings: defaultSettings()
+    };
   }
 
   // Each migration takes the previous shape and returns the next one.
   const MIGRATIONS = {
     // v0 is the original unversioned {unlocked, bank}.
     0: (save) => ({ v: 1, unlocked: save.unlocked, bank: save.bank, muted: false }),
-    1: (save) => ({ ...save, v: 2, best: {} })
+    1: (save) => ({ ...save, v: 2, best: {} }),
+    // v3 adds progression. A v2 player's mute preference becomes their sound setting.
+    2: (save) => ({
+      ...save,
+      v: 3,
+      stars: {},
+      collection: [],
+      upgrades: { shoes: 0, feet: 0, bag: 0 },
+      // Only a real `true` means muted; a corrupt value must not silence the game.
+      settings: { ...defaultSettings(), sound: save.muted !== true }
+    })
   };
 
+  const QUALITIES = ['low', 'medium', 'high'];
+
   function migrate(raw) {
-    if (!raw || typeof raw !== 'object') return defaultSave();
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return defaultSave();
 
     let save = { ...raw };
     let version = typeof save.v === 'number' ? save.v : 0;
@@ -944,13 +1334,32 @@ __mod.save = (function () {
     }
 
     const base = defaultSave();
+    const settings = save.settings && typeof save.settings === 'object' ? save.settings : {};
     return {
       v: SAVE_VERSION,
       unlocked: clampInt(save.unlocked, 1, 999, base.unlocked),
       bank: clampInt(save.bank, 0, Number.MAX_SAFE_INTEGER, base.bank),
-      muted: typeof save.muted === 'boolean' ? save.muted : base.muted,
-      best: save.best && typeof save.best === 'object' ? save.best : {}
+      best: plainObject(save.best),
+      stars: plainObject(save.stars),
+      collection: Array.isArray(save.collection)
+        ? [...new Set(save.collection.filter((t) => typeof t === 'string'))]
+        : [],
+      upgrades: {
+        shoes: clampInt(save.upgrades && save.upgrades.shoes, 0, 3, 0),
+        feet: clampInt(save.upgrades && save.upgrades.feet, 0, 3, 0),
+        bag: clampInt(save.upgrades && save.upgrades.bag, 0, 3, 0)
+      },
+      settings: {
+        sound: typeof settings.sound === 'boolean' ? settings.sound : true,
+        music: typeof settings.music === 'boolean' ? settings.music : true,
+        vibration: typeof settings.vibration === 'boolean' ? settings.vibration : true,
+        quality: QUALITIES.includes(settings.quality) ? settings.quality : 'high'
+      }
     };
+  }
+
+  function plainObject(value) {
+    return value && typeof value === 'object' && !Array.isArray(value) ? { ...value } : {};
   }
 
   function clampInt(value, min, max, fallback) {
@@ -987,19 +1396,47 @@ __mod.save = (function () {
         cache = { ...cache, ...patch };
         return write();
       },
-      recordWin(levelId, money) {
+      setSetting(key, value) {
+        cache = { ...cache, settings: { ...cache.settings, [key]: value } };
+        return write();
+      },
+
+      // One place where a finished level is written down.
+      recordWin(levelId, money, extra = {}) {
         // Guard the store against a caller bug: a bad id must not poison progress.
         if (!Number.isInteger(levelId) || levelId < 1) return cache;
         const earned = Number.isFinite(money) && money > 0 ? Math.floor(money) : 0;
-        const best = { ...cache.best, [levelId]: Math.max(cache.best[levelId] || 0, earned) };
+        const stars = clampInt(extra.stars, 0, 3, 0);
+        const types = Array.isArray(extra.types) ? extra.types.filter((t) => typeof t === 'string') : [];
         cache = {
           ...cache,
           bank: cache.bank + earned,
           unlocked: Math.max(cache.unlocked, levelId + 1),
-          best
+          best: { ...cache.best, [levelId]: Math.max(cache.best[levelId] || 0, earned) },
+          stars: { ...cache.stars, [levelId]: Math.max(cache.stars[levelId] || 0, stars) },
+          collection: [...new Set([...cache.collection, ...types])]
         };
         return write();
       },
+
+      // Returns false when the player cannot afford it, so the caller never has
+      // to trust its own arithmetic about the bank.
+      buyUpgrade(key, cost) {
+        const owned = cache.upgrades[key];
+        if (owned === undefined || !Number.isFinite(cost) || cost > cache.bank) return false;
+        cache = {
+          ...cache,
+          bank: cache.bank - cost,
+          upgrades: { ...cache.upgrades, [key]: owned + 1 }
+        };
+        write();
+        return true;
+      },
+
+      totalStars() {
+        return Object.values(cache.stars).reduce((sum, n) => sum + n, 0);
+      },
+
       reset() {
         cache = defaultSave();
         return write();
@@ -1007,7 +1444,7 @@ __mod.save = (function () {
       reload: read
     };
   }
-  return { SAVE_KEY, SAVE_VERSION, defaultSave, migrate, createSaveStore };
+  return { SAVE_KEY, SAVE_VERSION, defaultSettings, defaultSave, migrate, createSaveStore };
 })();
 __mod.fsm = (function () {
   // The only way the game changes screen. Transitions are declared, illegal ones
@@ -1053,10 +1490,12 @@ __mod.fsm = (function () {
 __mod.audio = (function () {
   // Everything routes through one master gain, so mute and volume are real, and a
   // context suspended by an iOS interruption gets resumed instead of going silent.
+  // Muting is a *setting*, owned by the save's settings block. This module is
+  // told what to do and never writes progress itself.
   function createAudio(saveStore) {
     let ctx = null;
     let master = null;
-    let muted = !!(saveStore && saveStore.data.muted);
+    let muted = !(saveStore && saveStore.data.settings.sound);
 
     function ensure() {
       if (!ctx) {
@@ -1097,23 +1536,89 @@ __mod.audio = (function () {
     document.addEventListener('visibilitychange', () => { if (!document.hidden) revive(); });
     window.addEventListener('focus', revive);
 
+    // A quiet two-note night drone. It is the "music" the settings toggle turns
+    // off, so the toggle controls something real.
+    let musicNodes = null;
+    function startMusic() {
+      const audio = ensure();
+      if (!audio || musicNodes) return;
+      const gain = audio.createGain();
+      gain.gain.value = 0.014;
+      gain.connect(master);
+      const voices = [55, 82.5].map((freq, i) => {
+        const osc = audio.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        const lfo = audio.createOscillator();
+        const lfoGain = audio.createGain();
+        lfo.frequency.value = 0.05 + i * 0.03;
+        lfoGain.gain.value = 1.5;
+        lfo.connect(lfoGain);
+        lfoGain.connect(osc.frequency);
+        osc.connect(gain);
+        osc.start();
+        lfo.start();
+        return [osc, lfo];
+      });
+      musicNodes = { gain, voices };
+    }
+    function stopMusic() {
+      if (!musicNodes) return;
+      for (const [osc, lfo] of musicNodes.voices) {
+        try { osc.stop(); lfo.stop(); } catch (e) { /* already stopped */ }
+      }
+      try { musicNodes.gain.disconnect(); } catch (e) { /* already gone */ }
+      musicNodes = null;
+    }
+
     return {
       unlock: ensure,
+      startMusic,
+      stopMusic,
       get muted() { return muted; },
       setMuted(next) {
         muted = !!next;
         if (master) master.gain.value = muted ? 0 : 0.9;
-        if (saveStore) saveStore.update({ muted });
         return muted;
       },
       toggleMute() { return this.setMuted(!muted); },
 
-      take(noiseAmount) {
-        // Louder items get a lower, uglier thump.
-        const pitch = 760 - Math.min(24, noiseAmount) * 14;
+      // Louder items get a lower, uglier thump; fragile ones clink instead.
+      take(noiseAmount, fragile) {
+        if (fragile) {
+          tone(1650, 0.05, 'triangle', 0.045);
+          tone(2200, 0.06, 'triangle', 0.035, 0.04);
+          tone(1400, 0.10, 'triangle', 0.025, 0.09);
+          tone(150 + noiseAmount, 0.16, 'sawtooth', 0.04, 0.02);
+          return;
+        }
+        const pitch = 760 - Math.min(28, noiseAmount) * 14;
         tone(pitch, 0.07, 'square', 0.05);
         tone(pitch * 1.35, 0.07, 'square', 0.04, 0.06);
         tone(130 + noiseAmount, 0.18, 'sawtooth', 0.035, 0.02);
+      },
+
+      // A dry knock under the foot.
+      creak() {
+        tone(220, 0.11, 'sawtooth', 0.05);
+        tone(140, 0.20, 'sawtooth', 0.04, 0.05);
+      },
+
+      // Barely-there footfall, alternating so a walk cycle has two feet.
+      step(left) {
+        tone(left ? 96 : 108, 0.045, 'triangle', 0.022);
+      },
+
+      wake() {
+        tone(180, 0.14, 'square', 0.07);
+        tone(300, 0.12, 'square', 0.06, 0.1);
+        tone(420, 0.4, 'sawtooth', 0.06, 0.2);
+      },
+
+      purchase() {
+        tone(660, 0.08, 'triangle', 0.06);
+        tone(880, 0.09, 'triangle', 0.06, 0.07);
+        tone(1180, 0.16, 'triangle', 0.05, 0.15);
       },
       warn() { tone(110, 0.32, 'sawtooth', 0.07); },
       win() {
@@ -1278,7 +1783,7 @@ __mod.art = (function () {
   // top of real colliders (plants on a chest, a lamp on a nightstand), never loose
   // on the floor where they would fake a wall the player collides with.
   const { TUNING } = __mod.tuning;
-  const { SLEEP_ASLEEP, SLEEP_STIRRING, SLEEP_ALMOST, SLEEP_AWAKE } = __mod.rules;
+  const { SLEEP_DEEP, SLEEP_LIGHT, SLEEP_DISTURBED, SLEEP_ALMOST, SLEEP_CRITICAL, SLEEP_AWAKE } = __mod.rules;
 
   const { width: W, height: H, wallThickness: WT } = TUNING.world;
   const TAU = Math.PI * 2;
@@ -1334,7 +1839,48 @@ __mod.art = (function () {
     thiefBelt: '#1d2138'
   };
 
+  // Each room theme repaints the shell only — walls, floor, light. Furniture and
+  // props stay the same code, so a new theme costs six colours, not a new module.
+  const THEMES = {
+    bedroom:   { wall: '#7c3346', lip: '#9a4257', shade: '#5f2637', skirt: '#c96b6a',
+                 floor: '#bd7a3e', alt: '#b17138', seam: 'rgba(143,85,38,0.6)',
+                 grain: 'rgba(207,143,82,0.30)', light: '255,216,138', vignette: '60,20,40' },
+    apartment: { wall: '#4c5570', lip: '#616c8c', shade: '#3a4257', skirt: '#93a0c0',
+                 floor: '#b08a5e', alt: '#a58156', seam: 'rgba(126,95,60,0.6)',
+                 grain: 'rgba(198,162,120,0.28)', light: '255,226,170', vignette: '28,32,54' },
+    hotel:     { wall: '#3f6560', lip: '#527d77', shade: '#2f4c48', skirt: '#96c3bb',
+                 floor: '#a97f4d', alt: '#9e7645', seam: 'rgba(126,90,48,0.6)',
+                 grain: 'rgba(198,155,96,0.28)', light: '255,232,186', vignette: '18,44,44' },
+    office:    { wall: '#3d4652', lip: '#515c6b', shade: '#2c343d', skirt: '#8d9aab',
+                 floor: '#8e8b84', alt: '#85827b', seam: 'rgba(96,94,88,0.6)',
+                 grain: 'rgba(170,167,158,0.26)', light: '208,232,255', vignette: '20,26,34' },
+    luxury:    { wall: '#4a2f63', lip: '#603d80', shade: '#38234a', skirt: '#c9a86a',
+                 floor: '#9d6b3f', alt: '#926239', seam: 'rgba(116,74,38,0.6)',
+                 grain: 'rgba(190,140,88,0.28)', light: '255,214,150', vignette: '38,20,54' },
+    penthouse: { wall: '#2c2f3d', lip: '#3d4152', shade: '#1f222d', skirt: '#d3b166',
+                 floor: '#7d6242', alt: '#74593b', seam: 'rgba(92,70,44,0.6)',
+                 grain: 'rgba(170,140,100,0.26)', light: '255,236,190', vignette: '14,16,24' }
+  };
+
+  let T = THEMES.bedroom;   // set once per room paint; drawing is synchronous
+
   const SHADOW = 'rgba(92,40,28,0.30)';
+
+  // How each item type looks and reads. The simulation never sees any of this.
+  const ITEM_ART = {
+    phone: '📱', watch: '⌚', cash: '💵', jewel: '💎', laptop: '💻', tv: '📺',
+    coin: '🪙', wallet: '👛', headphones: '🎧', ring: '💍', camera: '📷',
+    tablet: '🖥️', console: '🎮', speaker: '🔊', necklace: '📿', vase: '🏺',
+    painting: '🖼️', mirror: '🪞', diamond: '💠', goldbar: '💰'
+  };
+
+  const ITEM_NAMES = {
+    phone: 'Phone', watch: 'Watch', cash: 'Cash', jewel: 'Jewels', laptop: 'Laptop',
+    tv: 'TV', coin: 'Coins', wallet: 'Wallet', headphones: 'Headphones', ring: 'Ring',
+    camera: 'Camera', tablet: 'Monitor', console: 'Console', speaker: 'Speaker',
+    necklace: 'Necklace', vase: 'Vase', painting: 'Painting', mirror: 'Mirror',
+    diamond: 'Diamond', goldbar: 'Gold'
+  };
 
   function roundRect(ctx, x, y, w, h, r) {
     const radius = Math.max(0, Math.min(r, w / 2, h / 2));
@@ -1642,17 +2188,17 @@ __mod.art = (function () {
   const WINDOWS = { A: 'left', B: 'right', C: 'left' };
 
   function drawFloor(ctx) {
-    ctx.fillStyle = PALETTE.floor;
+    ctx.fillStyle = T.floor;
     ctx.fillRect(WT, WT, W - WT * 2, H - WT * 2);
 
     const plank = 32;
     for (let y = WT, row = 0; y < H - WT; y += plank, row++) {
       const height = Math.min(plank, H - WT - y);
       if (row % 2 === 1) {
-        ctx.fillStyle = PALETTE.floorAlt;
+        ctx.fillStyle = T.alt;
         ctx.fillRect(WT, y, W - WT * 2, height);
       }
-      ctx.strokeStyle = 'rgba(143,85,38,0.6)';
+      ctx.strokeStyle = T.seam;
       ctx.lineWidth = 1.4;
       ctx.beginPath();
       ctx.moveTo(WT, y + 0.5);
@@ -1668,7 +2214,7 @@ __mod.art = (function () {
       }
       ctx.stroke();
 
-      ctx.strokeStyle = 'rgba(207,143,82,0.30)';     // grain
+      ctx.strokeStyle = T.grain;                     // grain
       ctx.beginPath();
       ctx.moveTo(WT, y + plank * 0.45);
       ctx.lineTo(W - WT, y + plank * 0.45);
@@ -1679,19 +2225,19 @@ __mod.art = (function () {
   }
 
   function drawWalls(ctx) {
-    ctx.fillStyle = PALETTE.wall;
+    ctx.fillStyle = T.wall;
     ctx.fillRect(0, 0, W, WT);
     ctx.fillRect(0, 0, WT, H);
     ctx.fillRect(W - WT, 0, WT, H);
     ctx.fillRect(0, H - WT, W, WT);
 
-    ctx.fillStyle = PALETTE.wallLip;
+    ctx.fillStyle = T.lip;
     ctx.fillRect(0, 0, W, 4);
-    ctx.fillStyle = PALETTE.wallShade;                // shaded inner edge
+    ctx.fillStyle = T.shade;                          // shaded inner edge
     ctx.fillRect(WT - 3, WT, 3, H - WT * 2);
     ctx.fillRect(W - WT, WT, 3, H - WT * 2);
 
-    ctx.fillStyle = PALETTE.skirting;                 // warm skirting board
+    ctx.fillStyle = T.skirt;                          // skirting board
     ctx.fillRect(WT, WT, W - WT * 2, 3);
     ctx.fillRect(WT, H - WT - 3, W - WT * 2, 3);
     ctx.fillRect(WT, WT, 3, H - WT * 2);
@@ -1723,9 +2269,9 @@ __mod.art = (function () {
     const originX = side === 'left' ? WT : W - WT;
     const reach = 235;
     const beam = ctx.createLinearGradient(originX, 0, originX + dir * reach, 0);
-    beam.addColorStop(0, 'rgba(255,216,138,0.34)');
-    beam.addColorStop(0.55, 'rgba(255,216,138,0.15)');
-    beam.addColorStop(1, 'rgba(255,216,138,0)');
+    beam.addColorStop(0, `rgba(${T.light},0.34)`);
+    beam.addColorStop(0.55, `rgba(${T.light},0.15)`);
+    beam.addColorStop(1, `rgba(${T.light},0)`);
     ctx.fillStyle = beam;
     ctx.beginPath();
     ctx.moveTo(originX, top + 4);
@@ -1737,8 +2283,8 @@ __mod.art = (function () {
 
     const pool = ctx.createRadialGradient(originX + dir * 34, top + height / 2, 6,
                                           originX + dir * 34, top + height / 2, 118);
-    pool.addColorStop(0, 'rgba(255,228,160,0.30)');
-    pool.addColorStop(1, 'rgba(255,228,160,0)');
+    pool.addColorStop(0, `rgba(${T.light},0.28)`);
+    pool.addColorStop(1, `rgba(${T.light},0)`);
     ctx.fillStyle = pool;
     ctx.fillRect(WT, WT, W - WT * 2, H - WT * 2);
 
@@ -1801,9 +2347,40 @@ __mod.art = (function () {
     fillRound(ctx, bed.x + 5, bed.y + 9, bed.w - 10, bed.h - 20, 6, PALETTE.mattress);
   }
 
+  // Old boards that announce you. Drawn as a worn patch with nail heads — the
+  // player should be able to see the hazard before stepping on it.
+  function drawCreakZone(ctx, zone) {
+    ctx.save();
+    ctx.globalAlpha = 0.5;
+    fillRound(ctx, zone.x, zone.y, zone.w, zone.h, 3, 'rgba(60,34,16,0.42)');
+    ctx.globalAlpha = 0.75;
+    ctx.strokeStyle = 'rgba(40,22,10,0.6)';
+    ctx.lineWidth = 1.4;
+    const boards = Math.max(2, Math.round(zone.h / 14));
+    for (let i = 1; i < boards; i++) {
+      const y = zone.y + (zone.h / boards) * i;
+      ctx.beginPath();
+      ctx.moveTo(zone.x + 2, y);
+      ctx.lineTo(zone.x + zone.w - 2, y);
+      ctx.stroke();
+    }
+    ctx.fillStyle = 'rgba(228,206,168,0.55)';                  // nail heads
+    for (let i = 0; i < boards; i++) {
+      const y = zone.y + (zone.h / boards) * (i + 0.5);
+      for (const x of [zone.x + 5, zone.x + zone.w - 5]) {
+        ctx.beginPath();
+        ctx.arc(x, y, 1.3, 0, TAU);
+        ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
   // Everything that never moves, drawn once per level into an offscreen canvas.
   function paintStaticRoom(ctx, level) {
+    T = THEMES[level.theme] || THEMES.bedroom;
     drawFloor(ctx);
+    for (const zone of level.creaks) drawCreakZone(ctx, zone);
     drawRug(ctx, level.layout);
     drawWalls(ctx);
     // After the walls: the window is cut into one, and its light falls on top
@@ -1816,28 +2393,36 @@ __mod.art = (function () {
 
     const vignette = ctx.createRadialGradient(W / 2, H / 2, H * 0.30, W / 2, H / 2, H * 0.74);
     vignette.addColorStop(0, 'rgba(0,0,0,0)');
-    vignette.addColorStop(1, 'rgba(60,20,40,0.30)');
+    vignette.addColorStop(1, `rgba(${T.vignette},0.32)`);
     ctx.fillStyle = vignette;
     ctx.fillRect(0, 0, W, H);
   }
 
   // ---------------------------------------------------------------- sleeper
-  function drawSleeper(ctx, level, stage, clock) {
+  function drawSleeper(ctx, level, stage, clock, wake = 0) {
     const bed = level.bed;
     const hx = level.sleeper.x;
     const hy = level.sleeper.y;
 
-    // Breathing: slow while asleep, shallower and faster as he stirs.
-    const rate = [0.62, 0.9, 1.35, 2.0][stage];
-    const depth = [1, 0.8, 0.55, 0.35][stage];
+    // Breathing: slow and deep at first, shallower and faster as he surfaces.
+    const rate = [0.55, 0.8, 1.15, 1.6, 2.3, 2.6][stage];
+    const depth = [1.15, 0.95, 0.7, 0.5, 0.35, 0.3][stage];
     const breath = Math.sin(clock * rate * TAU) * depth;
-    // A small shift every few seconds, so he is never perfectly still.
+
+    // Never perfectly still: a slow settle drift, plus the occasional turn that
+    // gets more frequent the closer he is to waking.
+    const fidgetRate = [0.09, 0.16, 0.3, 0.55, 0.9, 0][stage];
+    const fidget = Math.max(0, Math.sin(clock * fidgetRate * TAU) - 0.86) * 7;
     const settle = Math.sin(clock * 0.21) * 0.7 + Math.sin(clock * 0.13 + 1.7) * 0.5;
 
-    const duvetY = bed.y + bed.h * 0.40 - breath * 1.4;
-    const duvetH = bed.y + bed.h - 6 - duvetY;
+    // Waking is a sit-up: the duvet slips down and the head lifts off the pillow.
+    const rise = stage === SLEEP_AWAKE ? Math.min(1, wake / 0.45) : 0;
+    const ease = rise * rise * (3 - 2 * rise);
+
+    const duvetY = bed.y + bed.h * 0.40 - breath * 1.4 + ease * 16;
+    const duvetH = Math.max(6, bed.y + bed.h - 6 - duvetY);
     fillRound(ctx, bed.x + 5, duvetY, bed.w - 10, duvetH, 7, PALETTE.duvet);
-    fillRound(ctx, bed.x + 5, duvetY, bed.w - 10, 9 + breath * 1.2, 5, PALETTE.duvetTop);
+    fillRound(ctx, bed.x + 5, duvetY, bed.w - 10, Math.min(duvetH, 9 + breath * 1.2), 5, PALETTE.duvetTop);
 
     ctx.strokeStyle = PALETTE.duvetFold;                      // duvet folds
     ctx.lineWidth = 1.5;
@@ -1854,8 +2439,13 @@ __mod.art = (function () {
     roundRect(ctx, hx - 22, hy + 6, 44, 6, 3);
     ctx.fill();
 
-    const headX = hx + settle * 0.9;
-    const headY = hy + breath * 0.5;
+    // Torso appears as he sits up.
+    if (ease > 0.05) {
+      fillRound(ctx, hx - 15, hy + 2, 30, 26 * ease, 8, '#e7ebf2');
+    }
+
+    const headX = hx + settle * 0.9 + fidget * (stage >= SLEEP_DISTURBED ? 1 : 0.4);
+    const headY = hy + breath * 0.5 - ease * 9;
     ctx.fillStyle = PALETTE.skinShade;
     ctx.beginPath();
     ctx.arc(headX, headY + 1.5, 15, 0, TAU);
@@ -1874,55 +2464,79 @@ __mod.art = (function () {
     ctx.lineWidth = 1.7;
     ctx.lineCap = 'round';
     ctx.fillStyle = PALETTE.hair;
-    if (stage === SLEEP_ASLEEP) {
+
+    const closedEyes = () => {
       ctx.beginPath();
       ctx.moveTo(headX - 9, ey - 1);
       ctx.quadraticCurveTo(headX - 6, ey + 3, headX - 3, ey - 1);
       ctx.moveTo(headX + 3, ey - 1);
       ctx.quadraticCurveTo(headX + 6, ey + 3, headX + 9, ey - 1);
       ctx.stroke();
-    } else if (stage === SLEEP_STIRRING) {
+    };
+    const openEyes = (r) => {
+      ctx.beginPath();
+      ctx.arc(headX - 6, ey, r, 0, TAU);
+      ctx.arc(headX + 6, ey, r, 0, TAU);
+      ctx.fill();
+    };
+
+    if (stage === SLEEP_DEEP || stage === SLEEP_LIGHT) closedEyes();
+    else if (stage === SLEEP_DISTURBED) {                     // squinting
       ctx.beginPath();
       ctx.moveTo(headX - 9, ey);
       ctx.lineTo(headX - 4, ey);
       ctx.moveTo(headX + 4, ey);
       ctx.lineTo(headX + 9, ey);
       ctx.stroke();
-    } else {
-      const r = stage === SLEEP_ALMOST ? 2.2 : 3.2;
+    } else if (stage === SLEEP_ALMOST) openEyes(2);
+    else if (stage === SLEEP_CRITICAL) openEyes(3);
+    else {                                                    // wide awake
+      ctx.fillStyle = '#fff';
       ctx.beginPath();
-      ctx.arc(headX - 6, ey, r, 0, TAU);
-      ctx.arc(headX + 6, ey, r, 0, TAU);
+      ctx.arc(headX - 6, ey, 4.4, 0, TAU);
+      ctx.arc(headX + 6, ey, 4.4, 0, TAU);
       ctx.fill();
+      ctx.fillStyle = PALETTE.hair;
+      openEyes(2.2);
     }
-    ctx.beginPath();
+
+    ctx.beginPath();                                          // mouth
     if (stage === SLEEP_AWAKE) {
-      ctx.arc(headX, ey + 9, 3.5, 0, TAU);
+      ctx.ellipse(headX, ey + 9, 3.4, 4.4 * Math.max(0.4, ease), 0, 0, TAU);
       ctx.fill();
+    } else if (stage === SLEEP_CRITICAL) {
+      ctx.arc(headX, ey + 8, 3.4, 0.15, Math.PI - 0.15);
+      ctx.stroke();
     } else {
       ctx.moveTo(headX - 3.5, ey + 9);
       ctx.lineTo(headX + 3.5, ey + 9);
       ctx.stroke();
     }
 
-    if (stage === SLEEP_ASLEEP) {
-      // The beds sit close to the top wall, so the drifting Z's are clamped to
-      // stay inside the room instead of sliding up under the HUD.
-      const f = (clock * 0.42) % 1;
-      const floor = (value) => Math.max(WT + 6, value);   // stay off the wall band
+    // The state read-out above the bed: sleepy Z's, then escalating alarm.
+    const floor = (value) => Math.max(WT + 6, value);         // stay off the wall band
+    if (stage === SLEEP_DEEP || stage === SLEEP_LIGHT) {
+      const f = (clock * (stage === SLEEP_DEEP ? 0.42 : 0.6)) % 1;
       ctx.textAlign = 'left';
       ctx.globalAlpha = Math.max(0, 1 - f);
       ctx.fillStyle = '#ffffffdd';
       ctx.font = 'bold 13px system-ui';
       ctx.fillText('z', hx + 22, floor(hy - 14 - f * 14));
-      ctx.font = 'bold 18px system-ui';
-      ctx.fillText('Z', hx + 31, floor(hy - 26 - f * 20));
+      if (stage === SLEEP_DEEP) {
+        ctx.font = 'bold 18px system-ui';
+        ctx.fillText('Z', hx + 31, floor(hy - 26 - f * 20));
+      }
       ctx.globalAlpha = 1;
     } else {
+      const marks = ['', '', '?', '!', '!!', '!!!'][stage];
+      const colors = ['', '', '#ffe08a', '#ffc24d', '#ff8c42', '#ff5252'];
+      const pulse = stage >= SLEEP_CRITICAL ? 0.6 + 0.4 * Math.sin(clock * 9) : 1;
       ctx.textAlign = 'center';
-      ctx.font = 'bold 20px system-ui';
-      ctx.fillStyle = stage === SLEEP_AWAKE ? '#ff5252' : stage === SLEEP_ALMOST ? '#ffb020' : '#ffe08a';
-      ctx.fillText(stage === SLEEP_AWAKE ? '!!' : stage === SLEEP_ALMOST ? '!' : '?', hx, bed.y - 10);
+      ctx.globalAlpha = pulse;
+      ctx.font = `bold ${16 + stage * 2}px system-ui`;
+      ctx.fillStyle = colors[stage];
+      ctx.fillText(marks, hx, floor(bed.y - 10));
+      ctx.globalAlpha = 1;
     }
   }
 
@@ -2030,7 +2644,7 @@ __mod.art = (function () {
     ctx.fillText(art, 0, 8);
     ctx.restore();
   }
-  return { PALETTE, roundRect, furnitureStyle, drawFurniture, paintStaticRoom, drawSleeper, drawThief, drawGrabbedItem };
+  return { PALETTE, ITEM_ART, ITEM_NAMES, roundRect, furnitureStyle, drawFurniture, paintStaticRoom, drawSleeper, drawThief, drawGrabbedItem };
 })();
 __mod.render = (function () {
   // Draws a simulation snapshot. Knows nothing about rules — it reads state and
@@ -2039,21 +2653,16 @@ __mod.render = (function () {
   const { TUNING } = __mod.tuning;
   const { sleepStage } = __mod.rules;
   const { playerOf } = __mod.sim;
-  const { paintStaticRoom, drawSleeper, drawThief, drawGrabbedItem, roundRect } = __mod.art;
+  const { paintStaticRoom, drawSleeper, drawThief, drawGrabbedItem, roundRect, ITEM_ART } = __mod.art;
 
   const { width: W, height: H, wallThickness: WT, hudStrip: HUD_H } = TUNING.world;
   const TAU = Math.PI * 2;
-
-  // Art lives here, not in the item table: the simulation never knows what an
-  // item looks like.
-  const ITEM_ART = {
-    phone: '📱', watch: '⌚', cash: '💵', jewel: '💎', laptop: '💻', tv: '📺'
-  };
 
   function createRenderer(canvas, options = {}) {
     const ctx = canvas.getContext('2d');
     const debug = !!options.debug;
     let scale = 1;
+    let quality = TUNING.quality.high;
 
     // The room never moves, so it is painted once per level into an offscreen
     // canvas at device resolution and blitted 1:1 — detailed *and* cheap.
@@ -2070,7 +2679,7 @@ __mod.render = (function () {
 
       // Sharper than the old flat cap of 2, but never more pixels than a
       // mid-range phone GPU is happy to push every frame.
-      let dpr = Math.min(devicePixelRatio || 1, TUNING.render.maxPixelRatio);
+      let dpr = Math.min(devicePixelRatio || 1, TUNING.render.maxPixelRatio, quality.pixelRatio);
       const budget = TUNING.render.maxCanvasPixels;
       if (cssWidth * cssHeight * dpr * dpr > budget) {
         dpr = Math.max(1, Math.sqrt(budget / (cssWidth * cssHeight)));
@@ -2170,6 +2779,18 @@ __mod.render = (function () {
       }
     }
 
+    // Tiny burst when something is taken; a fragile item throws more, colder ones.
+    function drawSparks(sparks) {
+      for (const spark of sparks) {
+        ctx.globalAlpha = Math.max(0, spark.life);
+        ctx.fillStyle = spark.color;
+        ctx.beginPath();
+        ctx.arc(spark.x, spark.y, 1.6 + spark.life * 1.4, 0, TAU);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+
     function drawPops(pops) {
       ctx.textAlign = 'center';
       for (const pop of pops) {
@@ -2179,9 +2800,10 @@ __mod.render = (function () {
         ctx.lineWidth = 3;
         ctx.lineJoin = 'round';
         ctx.strokeStyle = 'rgba(20,10,26,0.8)';
-        ctx.strokeText(`+$${pop.value}`, pop.x, pop.y - 18 - rise);
-        ctx.fillStyle = '#ffd34d';
-        ctx.fillText(`+$${pop.value}`, pop.x, pop.y - 18 - rise);
+        const label = pop.text || `+$${pop.value}`;
+        ctx.strokeText(label, pop.x, pop.y - 18 - rise);
+        ctx.fillStyle = pop.text ? '#ff9c6e' : '#ffd34d';
+        ctx.fillText(label, pop.x, pop.y - 18 - rise);
         ctx.globalAlpha = 1;
       }
     }
@@ -2236,8 +2858,9 @@ __mod.render = (function () {
       resize,
       get scale() { return scale; },
       invalidateRoom() { roomKey = ''; },
+      setQuality(next) { if (next) { quality = next; roomKey = ''; } },
 
-      draw(sim, alpha, time, pops, stats) {
+      draw(sim, alpha, time, pops, stats, sparks = []) {
         ensureRoom(sim.level);
 
         ctx.save();
@@ -2245,7 +2868,7 @@ __mod.render = (function () {
 
         ctx.drawImage(roomCache, 0, 0, W, H);
         drawExit(sim, time);
-        drawSleeper(ctx, sim.level, sleepStage(sim.noise), time);
+        drawSleeper(ctx, sim.level, sleepStage(sim.noise), time, sim.wakeSeconds || 0);
         drawItems(sim, time);
 
         // The thief is drawn between the last two simulation steps.
@@ -2267,6 +2890,7 @@ __mod.render = (function () {
           drawGrabbedItem(ctx, ITEM_ART[sim.reach.type] || '?', sim.reach, hand, reachProgress);
         }
 
+        drawSparks(sparks);
         drawPops(pops);
         drawDanger(sim, time);
         if (debug) drawDebug(sim, stats, { x: px, y: py });
@@ -2289,9 +2913,11 @@ __mod.main = (function () {
   const { createAudio } = __mod.audio;
   const { createInput } = __mod.input;
   const { createRenderer } = __mod.render;
-  const { sleepStage } = __mod.rules;
+  const { sleepStage, starsFor, starThresholds, levelTotals, upgradeCost, SLEEP_LABELS } = __mod.rules;
+  const { ITEM_ART, ITEM_NAMES } = __mod.art;
 
   const $ = (id) => document.getElementById(id);
+  const WAKE_BEAT = 0.9;         // seconds of wake-up animation before the fail screen
 
   function boot() {
     const params = new URLSearchParams(location.search);
@@ -2305,29 +2931,38 @@ __mod.main = (function () {
     const audio = createAudio(saveStore);
     const renderer = createRenderer(canvas, { debug });
 
-    // Levels are checked at boot in debug builds; CI checks them on every commit.
+    audio.setMuted(!saveStore.data.settings.sound);
+
     if (debug) {
       const report = validateAll(LEVELS);
       if (!report.ok) {
-        const detail = report.results
-          .filter((r) => !r.ok)
-          .map((r) => `L${r.id}: ${r.errors.join('; ')}`)
-          .join('\n');
+        const detail = report.results.filter((r) => !r.ok)
+          .map((r) => `L${r.id}: ${r.errors.join('; ')}`).join('\n');
         showCrash(new Error(`Level validation failed:\n${detail}`));
       }
       console.info('[dwh] level report', report.results.map((r) => ({ id: r.id, ...r.stats })));
     }
 
     let sim = null;
-    let currentLevelId = null;   // owned by the game, not by a screen payload:
-                                 // pausing must not lose track of the level
+    let currentLevelId = null;   // owned by the game, not by a screen payload
     let recording = null;
     let pops = [];
+    let sparks = [];
     let accumulator = 0;
     let lastTime = 0;
     let clock = 0;
     let warnedAt = 0;
+    let endHold = 0;            // wake-up beat before the fail screen
+    let pendingEnd = null;
+    let lastStepPhase = 0;
     const stats = { fps: 0, steps: 0 };
+
+    const setting = (key) => saveStore.data.settings[key];
+    const buzz = (pattern) => {
+      if (setting('vibration') && navigator.vibrate) {
+        try { navigator.vibrate(pattern); } catch (e) { /* unsupported */ }
+      }
+    };
 
     const input = createInput({
       stage,
@@ -2338,49 +2973,63 @@ __mod.main = (function () {
     });
 
     // ---------------------------------------------------------------- screens
-    const screens = { menu: $('scMenu'), levels: $('scLevels'), end: $('scEnd'), pause: $('scPause') };
+    const screens = {
+      menu: $('scMenu'), levels: $('scLevels'), end: $('scEnd'), pause: $('scPause'),
+      shop: $('scShop'), collection: $('scCollection'), settings: $('scSettings')
+    };
     const showOnly = (el) => {
       for (const key of Object.keys(screens)) screens[key].classList.toggle('on', screens[key] === el);
     };
+    const fromMenu = ['menu', 'playing'];
 
     const machine = createMachine({
       initial: 'menu',
       onChange(name) { document.body.dataset.screen = name; },
       states: {
         menu: {
-          to: ['levels', 'playing'],
-          enter() {
-            showOnly(screens.menu);
-            $('bank').textContent = `Total stolen: $${saveStore.data.bank}`;
-          }
+          to: ['levels', 'playing', 'shop', 'collection', 'settings'],
+          enter() { showOnly(screens.menu); paintMenu(); }
         },
-        levels: { to: ['menu', 'playing'], enter() { buildGrid(); showOnly(screens.levels); } },
+        levels: { to: fromMenu, enter() { buildGrid(); showOnly(screens.levels); } },
+        shop: { to: fromMenu, enter() { buildShop(); showOnly(screens.shop); } },
+        collection: { to: fromMenu, enter() { buildCollection(); showOnly(screens.collection); } },
+        settings: { to: fromMenu, enter() { paintSettings(); showOnly(screens.settings); } },
         playing: {
           to: ['paused', 'won', 'lost', 'menu'],
           enter() { showOnly(null); },
           exit() { input.clearAll(); }
         },
-        paused: {
-          to: ['playing', 'menu'],
-          enter() { showOnly(screens.pause); }
-        },
+        paused: { to: ['playing', 'menu'], enter() { showOnly(screens.pause); } },
         won: { to: ['playing', 'menu', 'levels'], enter: (ctx) => showEnd(true, ctx) },
         lost: { to: ['playing', 'menu'], enter: (ctx) => showEnd(false, ctx) }
       }
     });
 
+    function paintMenu() {
+      $('bank').textContent = `$${saveStore.data.bank.toLocaleString()}`;
+      $('menuStars').textContent = `${saveStore.totalStars()} / ${LEVELS.length * 3} stars`;
+    }
+
+    const starRow = (n) => '★★★'.slice(0, n) + (n < 3 ? `<s>${'★'.repeat(3 - n)}</s>` : '');
+
     function showEnd(won, ctx) {
       showOnly(screens.end);
       $('endTitle').textContent = won ? 'LEVEL COMPLETE' : 'HE WOKE UP!';
+      $('stars').innerHTML = won ? starRow(ctx.stars) : '';
+      $('endTally').innerHTML = won
+        ? `<div>HAUL<b>$${ctx.money.toLocaleString()}</b></div>` +
+          `<div>ITEMS<b>${ctx.taken.length}</b></div>` +
+          `<div>NOISE<b>${ctx.noise}/${TUNING.noise.max}</b></div>`
+        : '';
       if (won) {
-        const best = saveStore.data.best[currentLevelId] || 0;
-        $('endText').innerHTML =
-          `You escaped with <b style="color:#ffd34d">$${ctx.money}</b><br>` +
-          `Noise left behind: ${ctx.noise} / ${TUNING.noise.max}<br>` +
-          `Best on this level: $${best}<br><br>Total stolen: $${saveStore.data.bank}`;
+        const level = LEVELS.find((l) => l.id === currentLevelId);
+        const marks = starThresholds(level);
+        $('endText').innerHTML = ctx.stars < 3
+          ? `Steal $${(ctx.stars < 2 ? marks.two : marks.three).toLocaleString()} in one run for ${ctx.stars < 2 ? 2 : 3} stars.`
+          : 'A clean sweep. Nothing left worth taking.';
       } else {
         $('endText').innerHTML =
-          `One item too many.<br>You lost <b style="color:#ffd34d">$${ctx.money}</b>.`;
+          `One item too many.<br>You lost <b style="color:#ffd34d">$${ctx.money.toLocaleString()}</b>.`;
       }
       $('bNext').style.display = won && currentLevelId < LEVELS.length ? '' : 'none';
     }
@@ -2388,13 +3037,22 @@ __mod.main = (function () {
     function buildGrid() {
       const grid = $('grid');
       grid.innerHTML = '';
+      let theme = null;
       for (const level of LEVELS) {
+        if (level.theme !== theme) {
+          theme = level.theme;
+          const heading = document.createElement('div');
+          heading.className = 'chapter';
+          heading.style.gridColumn = '1 / -1';
+          heading.textContent = level.name;
+          grid.appendChild(heading);
+        }
         const unlocked = level.id <= saveStore.data.unlocked;
-        const best = saveStore.data.best[level.id];
+        const stars = saveStore.data.stars[level.id] || 0;
         const button = document.createElement('button');
         button.className = `lv${unlocked ? '' : ' locked'}`;
         button.innerHTML = unlocked
-          ? `<b>${level.id}</b>${best ? `<i>$${best}</i>` : ''}`
+          ? `<b>${level.id}</b><i>${stars ? starRow(stars) : '<s>★★★</s>'}</i>`
           : '<b>🔒</b>';
         button.disabled = !unlocked;
         if (unlocked) button.addEventListener('click', () => startLevel(level.id));
@@ -2402,41 +3060,138 @@ __mod.main = (function () {
       }
     }
 
+    function buildShop() {
+      $('shopBank').textContent = `$${saveStore.data.bank.toLocaleString()}`;
+      const list = $('shopList');
+      list.innerHTML = '';
+      for (const [key, upgrade] of Object.entries(TUNING.upgrades)) {
+        const owned = saveStore.data.upgrades[key];
+        const cost = upgradeCost(key, owned);
+        const card = document.createElement('div');
+        card.className = 'card';
+        const pips = upgrade.costs
+          .map((_, i) => `<div class="pip${i < owned ? ' on' : ''}"></div>`).join('');
+        card.innerHTML =
+          `<div class="ico">${upgrade.icon}</div>` +
+          `<div class="body"><h3>${upgrade.name}</h3><p>${upgrade.blurb}</p><div class="pips">${pips}</div></div>`;
+        const buy = document.createElement('button');
+        if (cost === null) {
+          buy.className = 'buy max';
+          buy.textContent = 'MAX';
+          buy.disabled = true;
+        } else {
+          buy.className = 'buy';
+          buy.textContent = `$${cost.toLocaleString()}`;
+          buy.disabled = cost > saveStore.data.bank;
+          buy.addEventListener('click', () => {
+            if (saveStore.buyUpgrade(key, cost)) {
+              audio.purchase();
+              buzz(20);
+              buildShop();
+            }
+          });
+        }
+        card.appendChild(buy);
+        list.appendChild(card);
+      }
+    }
+
+    function buildCollection() {
+      const types = Object.keys(TUNING.items);
+      const owned = new Set(saveStore.data.collection);
+      $('collCount').textContent = `${owned.size} of ${types.length} found`;
+      const grid = $('collgrid');
+      grid.innerHTML = '';
+      for (const type of types) {
+        const cell = document.createElement('div');
+        const got = owned.has(type);
+        cell.className = `coll${got ? ' got' : ''}`;
+        cell.innerHTML =
+          `<div class="em">${ITEM_ART[type]}</div><span>${got ? ITEM_NAMES[type] : '???'}</span>`;
+        grid.appendChild(cell);
+      }
+    }
+
+    function paintSettings() {
+      const paint = (id, on) => {
+        const el = $(id);
+        el.classList.toggle('on', on);
+        el.textContent = on ? 'ON' : 'OFF';
+      };
+      paint('tSound', setting('sound'));
+      paint('tMusic', setting('music'));
+      paint('tVibe', setting('vibration'));
+      for (const button of $('segQuality').children) {
+        button.classList.toggle('on', button.dataset.q === setting('quality'));
+      }
+    }
+
     // ---------------------------------------------------------------- level
     function startLevel(id) {
       const level = LEVELS.find((l) => l.id === id);
       if (!level) throw new Error(`no level ${id}`);
-      const seed = (Date.now() ^ (id * 2654435761)) >>> 0; // seeds the run, not the rules
+      const seed = (Date.now() ^ (id * 2654435761)) >>> 0;
       currentLevelId = id;
-      sim = createSim({ level, seed });
+      sim = createSim({ level, seed, upgrades: saveStore.data.upgrades });
       recording = createRecorder(id, seed);
       pops = [];
+      sparks = [];
       accumulator = 0;
       warnedAt = 0;
+      endHold = 0;
+      pendingEnd = null;
+      lastStepPhase = 0;
       audio.unlock();
+      if (setting('music')) audio.startMusic();
       hideCrash();
+      renderer.invalidateRoom();
       machine.set('playing');
-      if (debug) window.__dwh = { sim, recording, TUNING };
+      if (debug) window.__dwh = { sim, recording, TUNING, saveStore };
+    }
+
+    function spawnSparks(x, y, count, color) {
+      const budget = TUNING.quality[setting('quality')].particles;
+      for (let i = 0; i < Math.min(count, budget); i++) {
+        const angle = (i / Math.max(1, Math.min(count, budget))) * Math.PI * 2;
+        sparks.push({
+          x, y, life: 1, color,
+          vx: Math.cos(angle) * (24 + (i % 3) * 12),
+          vy: Math.sin(angle) * (24 + (i % 3) * 12) - 20
+        });
+      }
     }
 
     function handleEvents() {
       for (const event of sim.events) {
         if (event.type === 'took') {
           pops.push({ x: event.x, y: event.y, value: event.value, life: 1 });
-          audio.take(event.noise);
+          spawnSparks(event.x, event.y, event.fragile ? 10 : 6,
+            event.fragile ? '#bfe6ff' : '#ffd34d');
+          audio.take(event.noise, event.fragile);
+          buzz(event.fragile ? [12, 30, 12] : 14);
           const stageNow = sleepStage(sim.noise);
           if (stageNow > warnedAt && stageNow > 0 && sim.status === 'running') {
             warnedAt = stageNow;
             audio.warn();
           }
+        } else if (event.type === 'creak') {
+          pops.push({ x: event.x, y: event.y - 6, value: null, text: 'CREAK', life: 1 });
+          audio.creak();
+          buzz(18);
         } else if (event.type === 'won') {
-          saveStore.recordWin(currentLevelId, event.money);
+          const level = LEVELS.find((l) => l.id === currentLevelId);
+          const stars = starsFor(level, event.haul);
+          saveStore.recordWin(currentLevelId, event.money, { stars, types: event.taken });
           audio.win();
-          machine.set('won', { money: event.money, noise: event.noise });
+          buzz([16, 40, 16]);
+          machine.set('won', { money: event.money, noise: event.noise, stars, taken: event.taken });
           if (debug) console.info('[dwh] replay', frameCount(recording), 'frames', JSON.stringify(recording));
         } else if (event.type === 'lost') {
-          audio.lose();
-          machine.set('lost', { money: event.money, noise: event.noise });
+          // Let him sit up before the fail screen lands.
+          audio.wake();
+          buzz([30, 60, 90]);
+          endHold = WAKE_BEAT;
+          pendingEnd = { money: event.money, noise: event.noise };
         }
       }
     }
@@ -2445,19 +3200,19 @@ __mod.main = (function () {
     function paintHud() {
       if (!sim) return;
       const percent = (sim.noise / TUNING.noise.max) * 100;
-      $('money').textContent = `$${sim.money}`;
-      $('noisebar').style.width = `${percent}%`;
-      $('noisebar').style.background =
+      $('money').textContent = `$${sim.money.toLocaleString()}`;
+      const bar = $('noisebar');
+      bar.style.width = `${percent}%`;
+      bar.style.background =
         sim.noise >= TUNING.noise.almostAt ? '#ff4d4d'
           : sim.noise >= TUNING.noise.stirringAt ? '#ffb020' : '#4cc172';
       $('noisetxt').textContent = `${sim.noise} / ${TUNING.noise.max}`;
       $('lvl').textContent = `LV ${sim.level.id}`;
+      $('noisewrap').classList.toggle('danger', sim.noise >= TUNING.noise.almostAt);
       takeButton.classList.toggle('on', !!sim.targetId);
     }
 
     // ---------------------------------------------------------------- loop
-    // Fixed timestep with an accumulator; rendering interpolates between steps so
-    // a long frame costs no simulated distance.
     let consecutiveErrors = 0;
 
     function frame(now) {
@@ -2468,32 +3223,47 @@ __mod.main = (function () {
         stats.fps = stats.fps * 0.9 + (1 / Math.max(elapsed, 0.0001)) * 0.1;
 
         let steps = 0;
-        if (machine.is('playing') && sim) {
+        const stepping = sim && (machine.is('playing') || endHold > 0);
+        if (stepping) {
           accumulator += elapsed;
           while (accumulator >= STEP_SECONDS && steps < TUNING.sim.maxStepsPerFrame) {
-            const currentInput = input.read();
-            recordFrame(recording, currentInput);
+            const currentInput = endHold > 0 ? { x: 0, y: 0, take: false } : input.read();
+            if (endHold <= 0) recordFrame(recording, currentInput);
             stepSim(sim, currentInput);
             handleEvents();
+            footstepAudio();
             accumulator -= STEP_SECONDS;
             steps++;
-            if (!machine.is('playing')) { accumulator = 0; break; }
+            if (!machine.is('playing') && endHold <= 0) { accumulator = 0; break; }
           }
-          // Too far behind to catch up (tab was backgrounded): drop the debt.
           if (accumulator > STEP_SECONDS * TUNING.sim.maxStepsPerFrame) accumulator = 0;
         }
         stats.steps = steps;
 
+        if (endHold > 0) {
+          endHold -= elapsed;
+          if (endHold <= 0 && pendingEnd) {
+            machine.set('lost', pendingEnd);
+            pendingEnd = null;
+          }
+        }
+
         for (const pop of pops) pop.life -= elapsed * 1.2;
         pops = pops.filter((p) => p.life > 0);
+        for (const spark of sparks) {
+          spark.life -= elapsed * 1.9;
+          spark.x += spark.vx * elapsed;
+          spark.y += spark.vy * elapsed;
+          spark.vy += 150 * elapsed;
+        }
+        sparks = sparks.filter((s) => s.life > 0);
 
         if (sim) {
-          renderer.draw(sim, Math.min(1, accumulator / STEP_SECONDS), clock, pops, stats);
+          renderer.draw(sim, Math.min(1, accumulator / STEP_SECONDS), clock, pops, stats, sparks);
           paintHud();
         }
         consecutiveErrors = 0;
       } catch (error) {
-        // A throw in update or draw must not kill the loop silently.
         consecutiveErrors++;
         console.error('[dwh] frame error', error);
         if (consecutiveErrors === 1) showCrash(error);
@@ -2506,6 +3276,17 @@ __mod.main = (function () {
       }
     }
 
+    // A soft footfall each time the walk cycle passes a half stride.
+    function footstepAudio() {
+      const player = playerOf(sim);
+      if (!player.moving) { lastStepPhase = player.walkPhase; return; }
+      const half = Math.PI;
+      if (Math.floor(player.walkPhase / half) !== Math.floor(lastStepPhase / half)) {
+        audio.step(Math.floor(player.walkPhase / half) % 2 === 0);
+      }
+      lastStepPhase = player.walkPhase;
+    }
+
     function showCrash(error) {
       $('crashText').textContent = `${error && error.message}\n\n${(error && error.stack) || ''}`;
       $('crash').classList.add('on');
@@ -2514,10 +3295,18 @@ __mod.main = (function () {
 
     // ---------------------------------------------------------------- buttons
     const on = (id, handler) => $(id).addEventListener('click', handler);
+    const openFromMenu = (state) => () => { audio.unlock(); audio.ui(); machine.set(state); };
+
     on('bPlay', () => { audio.unlock(); startLevel(Math.min(saveStore.data.unlocked, LEVELS.length)); });
-    on('bLevels', () => { audio.unlock(); audio.ui(); machine.set('levels'); });
+    on('bLevels', openFromMenu('levels'));
+    on('bShop', openFromMenu('shop'));
+    on('bCollection', openFromMenu('collection'));
+    on('bSettings', openFromMenu('settings'));
     on('bBack', () => machine.set('menu'));
-    on('bReset', () => { saveStore.reset(); buildGrid(); audio.setMuted(false); paintMute(); });
+    on('bShopBack', () => machine.set('menu'));
+    on('bCollBack', () => machine.set('menu'));
+    on('bSetBack', () => machine.set('menu'));
+    on('bReset', () => { saveStore.reset(); applySettings(); paintSettings(); });
     on('bNext', () => startLevel(Math.min(currentLevelId + 1, LEVELS.length)));
     on('bRetry', () => startLevel(currentLevelId));
     on('bMenu', () => machine.set('menu'));
@@ -2530,17 +3319,37 @@ __mod.main = (function () {
       else if (machine.is('paused')) machine.set('playing');
     });
 
-    function paintMute() {
-      const icon = audio.muted ? '🔇' : '🔊';
-      $('btnmute').textContent = icon;
-      $('bMuteMenu').textContent = `SOUND ${audio.muted ? 'OFF' : 'ON'}`;
+    function applySettings() {
+      audio.setMuted(!setting('sound'));
+      if (setting('music') && setting('sound')) audio.startMusic(); else audio.stopMusic();
+      renderer.setQuality(TUNING.quality[setting('quality')]);
+      paintMute();
     }
-    const toggleMute = () => { audio.unlock(); audio.toggleMute(); paintMute(); };
-    on('btnmute', toggleMute);
-    on('bMuteMenu', toggleMute);
-    paintMute();
+    function paintMute() { $('btnmute').textContent = setting('sound') ? '🔊' : '🔇'; }
 
-    // The TAKE button drives the same input the keyboard does.
+    const toggleSetting = (key) => () => {
+      audio.unlock();
+      saveStore.setSetting(key, !setting(key));
+      applySettings();
+      paintSettings();
+    };
+    on('tSound', toggleSetting('sound'));
+    on('tMusic', toggleSetting('music'));
+    on('tVibe', () => { saveStore.setSetting('vibration', !setting('vibration')); buzz(20); paintSettings(); });
+    for (const button of $('segQuality').children) {
+      button.addEventListener('click', () => {
+        saveStore.setSetting('quality', button.dataset.q);
+        applySettings();
+        paintSettings();
+        resize();
+      });
+    }
+    on('btnmute', () => {
+      audio.unlock();
+      saveStore.setSetting('sound', !setting('sound'));
+      applySettings();
+    });
+
     takeButton.addEventListener('pointerdown', (e) => { e.preventDefault(); input.pressTake(true); });
     const releaseTake = () => input.pressTake(false);
     takeButton.addEventListener('pointerup', releaseTake);
@@ -2549,23 +3358,26 @@ __mod.main = (function () {
 
     addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && machine.is('playing')) machine.set('paused');
-      if (e.key.toLowerCase() === 'm') { audio.toggleMute(); paintMute(); }
-      if (debug) {
-        // Level jump keys: 1-9 and 0 for ten.
-        if (/^[0-9]$/.test(e.key)) startLevel(e.key === '0' ? 10 : Number(e.key));
+      if (e.key.toLowerCase() === 'm') {
+        saveStore.setSetting('sound', !setting('sound'));
+        applySettings();
       }
+      if (debug && /^[0-9]$/.test(e.key)) startLevel(e.key === '0' ? 10 : Number(e.key));
     });
 
     const resize = () => renderer.resize(stage);
     addEventListener('resize', resize);
     addEventListener('orientationchange', () => setTimeout(resize, 200));
+
+    renderer.setQuality(TUNING.quality[setting('quality')]);
     resize();
+    paintMute();
 
     // Something must be on screen behind the menu.
     sim = createSim({ level: LEVELS[0], seed: 1 });
     requestAnimationFrame((t) => { lastTime = t; frame(t); });
 
-    if (debug) window.__dwhBoot = { machine, saveStore, startLevel, LEVELS, TUNING };
+    if (debug) window.__dwhBoot = { machine, saveStore, startLevel, LEVELS, TUNING, SLEEP_LABELS, levelTotals };
   }
   return { boot };
 })();

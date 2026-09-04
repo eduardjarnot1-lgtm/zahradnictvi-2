@@ -23,6 +23,9 @@
   #noisewrap{flex:1;height:14px;border-radius:7px;background:#0006;
     border:1px solid #ffffff26;overflow:hidden;position:relative}
   #noisebar{height:100%;width:0%;background:#4cc172;transition:width .1s linear}
+  /* Near the cap the meter starts insisting. */
+  #noisewrap.danger{border-color:#ff6b6b;animation:alarm .7s ease-in-out infinite}
+  @keyframes alarm{0%,100%{box-shadow:0 0 0 0 #ff4d4d00}50%{box-shadow:0 0 0 3px #ff4d4d55}}
   #noisetxt{position:absolute;inset:0;text-align:center;font-size:10px;line-height:12px;
     text-shadow:0 1px 2px #000;font-variant-numeric:tabular-nums}
   .hudbtn{pointer-events:auto;background:#ffffff1a;border:1px solid #ffffff2e;color:#fff;
@@ -46,9 +49,12 @@
   body[data-screen="menu"] #hud, body[data-screen="levels"] #hud{display:none}
   body:not([data-screen="playing"]) #btnpause{opacity:.45}
 
+  /* justify-content:center clips both ends once a screen scrolls; auto block
+     margins on the sheet centre short screens and scroll tall ones instead. */
   .screen{position:absolute;inset:0;display:none;flex-direction:column;
-    align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center;
-    background:#120e17f2;backdrop-filter:blur(3px)}
+    align-items:center;justify-content:flex-start;gap:12px;padding:20px 24px;
+    text-align:center;background:#120e17f2;backdrop-filter:blur(3px);
+    overflow-y:auto;overscroll-behavior:contain}
   .screen.on{display:flex}
   h1{font-size:30px;line-height:1.1;letter-spacing:-.5px}
   h1 small{display:block;font-size:12px;letter-spacing:3px;color:#a08fb0;
@@ -63,19 +69,71 @@
   .btn.alt:active{box-shadow:0 2px 0 #ffffff14}
   .btn:focus-visible{outline:2px solid #ffd34d;outline-offset:3px}
   .btn.small{padding:9px 18px;font-size:13px;min-width:0}
-  #grid{display:grid;grid-template-columns:repeat(4,58px);gap:10px;justify-content:center}
-  .lv{height:58px;border-radius:12px;border:0;background:#7c4dff;color:#fff;font-size:18px;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+  .sheet{display:flex;flex-direction:column;align-items:center;gap:12px;
+    width:100%;max-width:330px;margin-block:auto;padding:4px 0}
+  .money{display:inline-flex;align-items:center;gap:6px;background:#ffd34d1a;
+    border:1px solid #ffd34d4d;color:#ffd34d;font-weight:800;font-size:15px;
+    padding:6px 14px;border-radius:999px;font-variant-numeric:tabular-nums}
+  .menugrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;width:100%}
+  .menugrid .btn{min-width:0;width:100%;padding:11px 8px;font-size:14px}
+  #grid{display:grid;grid-template-columns:repeat(4,66px);gap:9px;justify-content:center}
+  .lv{height:62px;border-radius:12px;border:0;background:#7c4dff;color:#fff;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
   .lv.locked{background:#ffffff12;color:#ffffff40}
   .lv b{font-size:18px;line-height:1}
-  .lv i{font-size:9px;font-style:normal;color:#ffd34d;font-weight:700}
+  .lv i{font-size:10px;font-style:normal;letter-spacing:1px;line-height:1;color:#ffd34d}
+  .lv i s{text-decoration:none;color:#ffffff33}
+  .chapter{width:100%;text-align:left;font-size:11px;letter-spacing:2px;
+    color:#a08fb0;font-weight:700;margin:6px 0 -4px;text-transform:uppercase}
+
+  .card{display:flex;align-items:center;gap:11px;width:100%;background:#ffffff0f;
+    border:1px solid #ffffff1a;border-radius:14px;padding:11px 13px;text-align:left}
+  .card .ico{font-size:26px;width:34px;text-align:center}
+  .card .body{flex:1;min-width:0}
+  .card h3{font-size:14px;font-weight:800}
+  .card p{font-size:11px;color:#a89bb5;margin-top:2px}
+  .pips{display:flex;gap:3px;margin-top:5px}
+  .pip{width:22px;height:5px;border-radius:3px;background:#ffffff1f}
+  .pip.on{background:#4cc172}
+  .buy{background:#ffd34d;color:#2a1c05;border:0;border-radius:10px;padding:8px 11px;
+    font-size:12px;font-weight:800;white-space:nowrap;min-width:66px}
+  .buy:disabled{background:#ffffff14;color:#ffffff40}
+  .buy.max{background:#4cc17233;color:#8be0a6}
+
+  #collgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%}
+  .coll{background:#ffffff0d;border:1px solid #ffffff14;border-radius:11px;
+    padding:8px 3px;text-align:center}
+  .coll .em{font-size:21px;line-height:1.1;filter:grayscale(1);opacity:.28}
+  .coll.got .em{filter:none;opacity:1}
+  .coll span{display:block;font-size:8.5px;color:#8d7f9b;margin-top:3px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .coll.got span{color:#cbbcd8}
+
+  .row{display:flex;align-items:center;justify-content:space-between;width:100%;
+    background:#ffffff0d;border:1px solid #ffffff14;border-radius:12px;padding:11px 13px}
+  .row span{font-size:13px;font-weight:700}
+  .toggle{background:#ffffff14;border:1px solid #ffffff26;color:#fff;border-radius:999px;
+    padding:6px 14px;font-size:12px;font-weight:800;min-width:64px}
+  .toggle.on{background:#4cc17233;border-color:#4cc172;color:#9fe8b8}
+  .seg{display:flex;gap:4px}
+  .seg button{background:#ffffff12;border:1px solid #ffffff1f;color:#bcaec8;
+    border-radius:8px;padding:6px 9px;font-size:11px;font-weight:800}
+  .seg button.on{background:#7c4dff;border-color:#7c4dff;color:#fff}
+
+  #stars{font-size:30px;letter-spacing:6px;color:#ffd34d;min-height:38px}
+  #stars s{text-decoration:none;color:#ffffff1f}
+  .tally{display:flex;gap:14px;justify-content:center;font-size:12px;color:#bcaec8}
+  .tally b{display:block;font-size:16px;color:#fff;margin-top:2px}
   .stat{font-size:15px;color:#ffd34d;font-weight:700}
   .hint{font-size:12px;color:#8d7f9b}
   #crash{position:absolute;inset:0;display:none;flex-direction:column;gap:10px;padding:20px;
     background:#1a0f12f5;color:#ffb4b4;font:12px ui-monospace,monospace;overflow:auto;z-index:9}
   #crash.on{display:flex}
   #crash pre{white-space:pre-wrap;color:#ffd9d9}
-  @media (prefers-reduced-motion: reduce){ #noisebar{transition:none} }
+  @media (prefers-reduced-motion: reduce){
+    #noisebar{transition:none}
+    #noisewrap.danger{animation:none;box-shadow:0 0 0 2px #ff4d4d88}
+  }
 </style>
 </head>
 <body>
@@ -94,28 +152,74 @@
   <button id="take" aria-label="Take item">TAKE</button>
 
   <div class="screen on" id="scMenu">
-    <h1><small>SUPER SIMPLE BETA</small>DON'T WAKE HIM!</h1>
-    <p>Steal what you can. Every item makes noise. Get out before he wakes up.</p>
-    <button class="btn" id="bPlay">PLAY</button>
-    <button class="btn alt" id="bLevels">LEVELS</button>
-    <button class="btn alt small" id="bMuteMenu">SOUND ON</button>
-    <p class="stat" id="bank">Total stolen: $0</p>
-    <p class="hint">Move: drag anywhere / arrows. Take: TAKE button / space.</p>
+    <div class="sheet">
+      <h1><small>ONE MORE THING?</small>DON'T WAKE HIM!</h1>
+      <span class="money" id="bank">$0</span>
+      <button class="btn" id="bPlay">PLAY</button>
+      <div class="menugrid">
+        <button class="btn alt" id="bLevels">LEVELS</button>
+        <button class="btn alt" id="bShop">SHOP</button>
+        <button class="btn alt" id="bCollection">COLLECTION</button>
+        <button class="btn alt" id="bSettings">SETTINGS</button>
+      </div>
+      <p class="hint" id="menuStars">0 / 72 stars</p>
+      <p class="hint">Move: drag anywhere / arrows. Take: TAKE button / space.</p>
+    </div>
   </div>
 
   <div class="screen" id="scLevels">
-    <h2>LEVELS</h2>
-    <div id="grid"></div>
-    <button class="btn alt" id="bBack">BACK</button>
-    <button class="btn alt small" id="bReset">RESET PROGRESS</button>
+    <div class="sheet">
+      <h2>LEVELS</h2>
+      <div id="grid"></div>
+      <button class="btn alt" id="bBack">BACK</button>
+    </div>
+  </div>
+
+  <div class="screen" id="scShop">
+    <div class="sheet">
+      <h2>SHOP</h2>
+      <span class="money" id="shopBank">$0</span>
+      <div id="shopList" style="display:flex;flex-direction:column;gap:9px;width:100%"></div>
+      <p class="hint">Nothing here makes a stolen item quieter.<br>The decision stays yours.</p>
+      <button class="btn alt" id="bShopBack">BACK</button>
+    </div>
+  </div>
+
+  <div class="screen" id="scCollection">
+    <div class="sheet">
+      <h2>COLLECTION</h2>
+      <p class="hint" id="collCount">0 of 20 found</p>
+      <div id="collgrid"></div>
+      <button class="btn alt" id="bCollBack">BACK</button>
+    </div>
+  </div>
+
+  <div class="screen" id="scSettings">
+    <div class="sheet">
+      <h2>SETTINGS</h2>
+      <div class="row"><span>Sound</span><button class="toggle" id="tSound">ON</button></div>
+      <div class="row"><span>Music</span><button class="toggle" id="tMusic">ON</button></div>
+      <div class="row"><span>Vibration</span><button class="toggle" id="tVibe">ON</button></div>
+      <div class="row"><span>Graphics</span>
+        <div class="seg" id="segQuality">
+          <button data-q="low">LOW</button><button data-q="medium">MED</button><button data-q="high">HIGH</button>
+        </div>
+      </div>
+      <button class="btn alt" id="bSetBack">BACK</button>
+      <button class="btn alt small" id="bReset">RESET PROGRESS</button>
+    </div>
   </div>
 
   <div class="screen" id="scEnd">
-    <h2 id="endTitle">LEVEL COMPLETE</h2>
-    <p id="endText"></p>
-    <button class="btn" id="bNext">NEXT LEVEL</button>
-    <button class="btn alt" id="bRetry">RETRY</button>
-    <button class="btn alt" id="bMenu">MENU</button>
+    <div class="sheet">
+      <h2 id="endTitle">LEVEL COMPLETE</h2>
+      <div id="stars"></div>
+      <div class="tally" id="endTally"></div>
+      <p id="endText"></p>
+      <button class="btn" id="bNext">NEXT LEVEL</button>
+      <button class="btn alt" id="bRetry">RETRY</button>
+      <button class="btn alt" id="bMenu">MENU</button>
+    </div>
   </div>
 
   <div class="screen" id="scPause">

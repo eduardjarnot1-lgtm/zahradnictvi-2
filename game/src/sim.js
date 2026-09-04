@@ -4,7 +4,7 @@
 import { TUNING } from './tuning.js';
 import { createRng } from './rng.js';
 import { solveMove, clampToWorld } from './physics.js';
-import { addNoise, isAwake, itemStats, canBank, sleepStage } from './rules.js';
+import { addNoise, isAwake, itemStats, canBank, sleepStage, resolveUpgrades } from './rules.js';
 
 export const STEP_SECONDS = 1 / TUNING.sim.hz;
 
@@ -20,8 +20,9 @@ const UPDATERS = {
 
     // Reaching for an item is a hesitation, not a stop: you keep steering.
     const slowed = sim.reach ? TUNING.pickup.reachSlow : 1;
-    const targetVx = ix * TUNING.player.speed * slowed;
-    const targetVy = iy * TUNING.player.speed * slowed;
+    const top = TUNING.player.speed * sim.mods.speed;
+    const targetVx = ix * top * slowed;
+    const targetVy = iy * top * slowed;
 
     // Approach the target velocity as a vector, so turning is a curve rather
     // than a snap and there is no direction the character accelerates faster in.
@@ -69,7 +70,7 @@ const UPDATERS = {
   }
 };
 
-export function createSim({ level, seed = 1 }) {
+export function createSim({ level, seed = 1, upgrades = {} }) {
   const player = {
     kind: 'player',
     x: level.spawn.x,
@@ -87,13 +88,17 @@ export function createSim({ level, seed = 1 }) {
     idleSeconds: 0
   };
 
+  const mods = resolveUpgrades(upgrades);
+
   return {
     level,
     seed,
+    mods,
     rng: createRng(seed),
     frame: 0,
     status: 'running', // running | won | lost
-    money: 0,
+    money: 0,          // what you get paid (haul plus any bag bonus)
+    haul: 0,           // raw value of what you took — stars are judged on this
     noise: 0,
     entities: [player],
     items: level.items.map((item) => {
@@ -103,8 +108,10 @@ export function createSim({ level, seed = 1 }) {
         type: item.type,
         x: item.x,
         y: item.y,
-        value: stats.value,
+        value: Math.round(stats.value * mods.payout),
+        rawValue: stats.value,
         noise: stats.noise,
+        fragile: !!stats.fragile,
         taken: false,
         inRange: false,
         takenAtFrame: -1
@@ -112,6 +119,10 @@ export function createSim({ level, seed = 1 }) {
     }),
     targetId: null,   // the in-range item a TAKE would consume
     reach: null,      // the in-progress grab animation, if any
+    // Creaky boards: plain trigger zones, each with its own cooldown so
+    // standing on one does not drain the meter.
+    creaks: level.creaks.map((zone) => ({ ...zone, cooldown: 0, active: false })),
+    wakeSeconds: 0,   // drives the wake-up animation only
     shake: 0,
     shakePhase: 0,
     shakeX: 0,
@@ -126,7 +137,14 @@ export const playerOf = (sim) => sim.entities.find((e) => e.kind === 'player');
 function finish(sim, status) {
   if (sim.status !== 'running') return; // a level can only end once
   sim.status = status;
-  sim.events.push({ type: status, money: sim.money, noise: sim.noise, frame: sim.frame });
+  sim.events.push({
+    type: status,
+    money: sim.money,
+    haul: sim.haul,
+    noise: sim.noise,
+    frame: sim.frame,
+    taken: sim.items.filter((i) => i.taken).map((i) => i.type)
+  });
 }
 
 function takeItem(sim, item) {
@@ -134,6 +152,7 @@ function takeItem(sim, item) {
   item.inRange = false;
   item.takenAtFrame = sim.frame;
   sim.money += item.value;
+  sim.haul += item.rawValue;
   sim.noise = addNoise(sim.noise, item.noise);
   // Drives the reach-and-grab animation. Money and noise are already credited,
   // so the animation is presentation only and can never affect the outcome.
@@ -146,6 +165,7 @@ function takeItem(sim, item) {
     itemType: item.type,
     value: item.value,
     noise: item.noise,
+    fragile: item.fragile,
     x: item.x,
     y: item.y,
     stage: sleepStage(sim.noise)
@@ -156,7 +176,11 @@ function takeItem(sim, item) {
 // Exactly one fixed simulation tick.
 export function stepSim(sim, input = EMPTY_INPUT) {
   sim.events.length = 0;
-  if (sim.status !== 'running') return sim;
+  if (sim.status !== 'running') {
+    // The level is over, but he is still sitting up: let the animation finish.
+    if (isAwake(sim.noise)) sim.wakeSeconds += STEP_SECONDS;
+    return sim;
+  }
 
   for (const entity of sim.entities) {
     entity.prevX = entity.x;
@@ -183,6 +207,25 @@ export function stepSim(sim, input = EMPTY_INPUT) {
     }
   }
   sim.targetId = nearest ? nearest.id : null;
+
+  // Creaky boards. Entering one costs noise; it then goes quiet for a while,
+  // so a board cannot be milked and cannot drain you while you stand on it.
+  for (const zone of sim.creaks) {
+    if (zone.cooldown > 0) zone.cooldown = Math.max(0, zone.cooldown - STEP_SECONDS);
+    const inside =
+      player.x > zone.x && player.x < zone.x + zone.w &&
+      player.y > zone.y && player.y < zone.y + zone.h;
+    if (inside && !zone.active && zone.cooldown === 0 && sim.status === 'running') {
+      const amount = Math.round(TUNING.hazards.creakNoise * sim.mods.hazardNoise);
+      if (amount > 0) {
+        sim.noise = addNoise(sim.noise, amount);
+        sim.events.push({ type: 'creak', x: player.x, y: player.y, noise: amount });
+        if (isAwake(sim.noise)) finish(sim, 'lost');
+      }
+      zone.cooldown = TUNING.hazards.creakCooldown;
+    }
+    zone.active = inside;
+  }
 
   const pressedTake = input.take && !sim.prevTake;
   sim.prevTake = input.take;
@@ -226,6 +269,7 @@ export function snapshot(sim) {
     frame: sim.frame,
     status: sim.status,
     money: sim.money,
+    haul: sim.haul,
     noise: sim.noise,
     taken: sim.items.filter((i) => i.taken).map((i) => i.id),
     x: Math.round(player.x * 100) / 100,

@@ -4,6 +4,13 @@ import { LEVELS } from '../src/levels.js';
 import { validateAll, validateLevel } from '../src/validate.js';
 import { levelTotals, forcesChoice, itemStats } from '../src/rules.js';
 import { play } from './harness.mjs';
+
+// Levels are grouped into themed chapters; each opens easier and then climbs.
+function byTheme() {
+  const groups = {};
+  for (const level of LEVELS) (groups[level.theme] ||= []).push(level);
+  return groups;
+}
 import { TUNING } from '../src/tuning.js';
 
 test('every shipped level passes the validator', () => {
@@ -44,26 +51,48 @@ test('validator catches a spawn inside a wall', () => {
   assert.match(validateLevel(broken).errors.join(' '), /spawn/);
 });
 
-test('difficulty curve: 1-2 are takeable whole, 3+ force a choice', () => {
+test('the first two levels are takeable whole, as a tutorial', () => {
   assert.equal(forcesChoice(LEVELS[0]), false);
   assert.equal(forcesChoice(LEVELS[1]), false);
-  for (const level of LEVELS.slice(2)) {
-    assert.equal(forcesChoice(level), true, `L${level.id} should force a choice`);
+});
+
+test('every chapter ends on levels that force the core decision', () => {
+  for (const [theme, levels] of Object.entries(byTheme())) {
+    const last = levels[levels.length - 1];
+    assert.equal(forcesChoice(last), true, `${theme} should end on a real decision`);
   }
 });
 
-test('level noise totals never decrease across the campaign after level 2', () => {
-  const totals = LEVELS.slice(2).map((l) => levelTotals(l).noise);
-  const sorted = [...totals].sort((a, b) => a - b);
-  // allow one deliberate dip (L5 is a layout change, not a difficulty drop)
-  const inversions = totals.filter((n, i) => i > 0 && n < totals[i - 1]).length;
-  assert.ok(inversions <= 1, `too many difficulty inversions: ${totals}`);
-  assert.ok(sorted[sorted.length - 1] > TUNING.noise.max);
+test('difficulty rises within each chapter', () => {
+  for (const [theme, levels] of Object.entries(byTheme())) {
+    if (levels.length < 2) continue;
+    const totals = levels.map((l) => levelTotals(l).noise);
+    const inversions = totals.filter((n, i) => i > 0 && n < totals[i - 1]).length;
+    assert.ok(inversions <= 1, `${theme} difficulty wanders: ${totals}`);
+    assert.ok(
+      totals[totals.length - 1] > totals[0],
+      `${theme} does not get harder: ${totals}`
+    );
+  }
 });
 
-// Every level is still completable after the polish pass. This is the check
-// that answers "did the visual work break any of the ten levels".
-test('all ten levels can still be played and escaped', () => {
+test('each new chapter opens easier than the previous one ended', () => {
+  const chapters = Object.values(byTheme());
+  for (let i = 1; i < chapters.length; i++) {
+    const previousEnd = levelTotals(chapters[i - 1][chapters[i - 1].length - 1]).noise;
+    const opening = levelTotals(chapters[i][0]).noise;
+    assert.ok(opening < previousEnd, 'a new room should ease the player back in');
+  }
+});
+
+test('the campaign ends harder than it starts', () => {
+  const first = levelTotals(LEVELS[0]);
+  const last = levelTotals(LEVELS[LEVELS.length - 1]);
+  assert.ok(last.noise > first.noise * 3);
+  assert.ok(last.value > first.value * 5);
+});
+
+test('every level can be played and escaped', () => {
   for (const level of LEVELS) {
     const ids = level.items.slice(0, 2).map((i) => i.id);
     const { result } = play(level.id, { take: ids, seed: 5 });

@@ -17,7 +17,16 @@ test('a v0 save from the first beta migrates without losing progress', () => {
   assert.equal(migrated.unlocked, 6);
   assert.equal(migrated.bank, 1240);
   assert.deepEqual(migrated.best, {});
-  assert.equal(migrated.muted, false);
+  assert.deepEqual(migrated.stars, {});
+  assert.deepEqual(migrated.collection, []);
+  assert.deepEqual(migrated.upgrades, { shoes: 0, feet: 0, bag: 0 });
+  assert.equal(migrated.settings.sound, true);
+});
+
+test('a v2 save carries its mute preference into the new settings', () => {
+  assert.equal(migrate({ v: 2, unlocked: 3, bank: 10, muted: true, best: { 1: 50 } }).settings.sound, false);
+  assert.equal(migrate({ v: 2, unlocked: 3, bank: 10, muted: false, best: {} }).settings.sound, true);
+  assert.deepEqual(migrate({ v: 2, unlocked: 3, bank: 10, muted: false, best: { 2: 90 } }).best, { 2: 90 });
 });
 
 test('garbage and hostile saves fall back to defaults instead of throwing', () => {
@@ -27,11 +36,19 @@ test('garbage and hostile saves fall back to defaults instead of throwing', () =
 });
 
 test('out-of-range fields are clamped, not trusted', () => {
-  const migrated = migrate({ v: 2, unlocked: -5, bank: -100, muted: 'yes', best: null });
+  const migrated = migrate({
+    v: 3, unlocked: -5, bank: -100, best: null, stars: 'lots',
+    collection: 'phone', upgrades: { shoes: 99, feet: -1, bag: 'x' },
+    settings: { sound: 'yes', quality: 'ultra' }
+  });
   assert.equal(migrated.unlocked, 1);
   assert.equal(migrated.bank, 0);
-  assert.equal(migrated.muted, false);
   assert.deepEqual(migrated.best, {});
+  assert.deepEqual(migrated.stars, {});
+  assert.deepEqual(migrated.collection, []);
+  assert.deepEqual(migrated.upgrades, { shoes: 3, feet: 0, bag: 0 });
+  assert.equal(migrated.settings.sound, true);
+  assert.equal(migrated.settings.quality, 'high');
 });
 
 test('a corrupt JSON blob does not wipe the player out with an exception', () => {
@@ -69,4 +86,41 @@ test('storage that throws (private mode) never breaks the game', () => {
   const store = createSaveStore(hostile);
   assert.deepEqual(store.data, defaultSave());
   assert.doesNotThrow(() => store.recordWin(1, 50));
+});
+
+
+test('a win records stars, the haul and the collection', () => {
+  const store = createSaveStore(fakeStorage());
+  store.recordWin(4, 300, { stars: 2, types: ['phone', 'laptop', 'phone'] });
+  assert.equal(store.data.stars[4], 2);
+  assert.deepEqual(store.data.collection.sort(), ['laptop', 'phone']);
+  assert.equal(store.totalStars(), 2);
+
+  store.recordWin(4, 100, { stars: 1, types: ['diamond'] });   // a worse replay
+  assert.equal(store.data.stars[4], 2, 'stars must never go down');
+  assert.equal(store.data.best[4], 300);
+  assert.deepEqual(store.data.collection.sort(), ['diamond', 'laptop', 'phone']);
+  assert.equal(store.data.bank, 400, 'money still accrues on a worse run');
+});
+
+test('an upgrade cannot be bought without the money', () => {
+  const store = createSaveStore(fakeStorage());
+  assert.equal(store.buyUpgrade('shoes', 400), false);
+  assert.equal(store.data.upgrades.shoes, 0);
+
+  store.recordWin(1, 1000);
+  assert.equal(store.buyUpgrade('shoes', 400), true);
+  assert.equal(store.data.upgrades.shoes, 1);
+  assert.equal(store.data.bank, 600);
+  assert.equal(store.buyUpgrade('nonsense', 1), false, 'unknown upgrades are refused');
+});
+
+test('settings persist individually', () => {
+  const storage = fakeStorage();
+  const store = createSaveStore(storage);
+  store.setSetting('music', false);
+  store.setSetting('quality', 'low');
+  assert.equal(JSON.parse(storage.raw).settings.music, false);
+  assert.equal(JSON.parse(storage.raw).settings.quality, 'low');
+  assert.equal(JSON.parse(storage.raw).settings.sound, true, 'other settings untouched');
 });

@@ -5,7 +5,9 @@ import { solveMove } from '../src/physics.js';
 import { LEVELS } from '../src/levels.js';
 import { TUNING } from '../src/tuning.js';
 import { play, createRun, tick, walkTo, steal, escape } from './harness.mjs';
-import { addNoise, sleepStage, SLEEP_AWAKE, SLEEP_ASLEEP } from '../src/rules.js';
+import {
+  addNoise, sleepStage, SLEEP_AWAKE, SLEEP_ASLEEP, starsFor, levelTotals
+} from '../src/rules.js';
 
 test('a scripted run wins with exactly the money it stole', () => {
   const { result } = play(1, { take: ['L1-0', 'L1-2'] });
@@ -213,4 +215,82 @@ test('screen shake settles instead of jittering forever', () => {
   assert.equal(run.sim.shake, 0);
   assert.equal(run.sim.shakeX, 0);
   assert.equal(run.sim.shakeY, 0);
+});
+
+// --- expansion: hazards, upgrades, stars ------------------------------------
+
+test('a creaky board costs noise once, then goes quiet', () => {
+  const level = LEVELS.find((l) => l.creaks.length > 0);
+  assert.ok(level, 'some level should have a creaky board');
+  const sim = createSim({ level, seed: 3 });
+  const zone = level.creaks[0];
+  const player = playerOf(sim);
+
+  player.x = zone.x - 30;
+  player.y = zone.y + zone.h / 2;
+  stepSim(sim, { x: 0, y: 0 });
+  assert.equal(sim.noise, 0, 'standing outside costs nothing');
+
+  player.x = zone.x + zone.w / 2;                    // step on
+  stepSim(sim, { x: 0, y: 0 });
+  assert.equal(sim.noise, TUNING.hazards.creakNoise);
+
+  for (let i = 0; i < 120; i++) stepSim(sim, { x: 0, y: 0 });  // stand on it
+  assert.equal(sim.noise, TUNING.hazards.creakNoise, 'a board must not drain you');
+});
+
+test('Soft Shoes silence the creaky boards', () => {
+  const level = LEVELS.find((l) => l.creaks.length > 0);
+  const zone = level.creaks[0];
+  const quiet = createSim({ level, seed: 3, upgrades: { shoes: 3 } });
+  const player = playerOf(quiet);
+  player.x = zone.x + zone.w / 2;
+  player.y = zone.y + zone.h / 2;
+  stepSim(quiet, { x: 0, y: 0 });
+  assert.equal(quiet.noise, 0);
+});
+
+test('no upgrade makes a stolen item quieter', () => {
+  const level = LEVELS[0];
+  const maxed = createSim({ level, seed: 1, upgrades: { shoes: 3, feet: 3, bag: 3 } });
+  const plain = createSim({ level, seed: 1 });
+  assert.deepEqual(
+    maxed.items.map((i) => i.noise),
+    plain.items.map((i) => i.noise),
+    'the core risk/reward decision must be untouched by the shop'
+  );
+});
+
+test('Quick Feet raise top speed, Velvet Bag raises the payout', () => {
+  const level = LEVELS[0];
+  const fast = createSim({ level, seed: 1, upgrades: { feet: 3 } });
+  const player = playerOf(fast);
+  player.x = 120;
+  player.y = 420;
+  for (let i = 0; i < 40; i++) stepSim(fast, { x: 1, y: 0 });
+  assert.ok(player.speed > TUNING.player.speed * 1.15, `only reached ${player.speed}`);
+
+  const rich = createSim({ level, seed: 1, upgrades: { bag: 3 } });
+  assert.ok(rich.items[0].value > rich.items[0].rawValue);
+  assert.equal(rich.items[0].rawValue, TUNING.items[level.items[0].type].value);
+});
+
+test('stars are judged on the raw haul, not the upgraded payout', () => {
+  const level = LEVELS[0];
+  const total = levelTotals(level).value;
+  assert.equal(starsFor(level, total), 3);
+  assert.equal(starsFor(level, Math.ceil(total * TUNING.stars.two)), 2);
+  assert.equal(starsFor(level, 1), 1);
+
+  // A maxed bag must not buy a star.
+  const rich = play(1, { take: ['L1-0'], seed: 4 });
+  const plain = play(1, { take: ['L1-0'], seed: 4 });
+  assert.equal(starsFor(level, rich.result.haul), starsFor(level, plain.result.haul));
+});
+
+test('the win event reports what was taken, for the collection', () => {
+  const { run } = play(2, { take: ['L2-0', 'L2-2'], seed: 8 });
+  const win = run.sim.events.find((e) => e.type === 'won')
+    || { taken: run.sim.items.filter((i) => i.taken).map((i) => i.type) };
+  assert.deepEqual([...win.taken].sort(), ['cash', 'watch']);
 });
