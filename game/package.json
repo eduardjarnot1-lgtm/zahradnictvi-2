@@ -1,0 +1,13 @@
+{
+  "name": "dont-wake-him",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Don't Wake Him! - a small stealth game. Pure simulation, headless tests, single-file build.",
+  "scripts": {
+    "build": "node build.mjs",
+    "validate": "node build.mjs --validate-only",
+    "test": "node --test test/*.test.mjs",
+    "check": "npm run test && npm run build"
+  }
+}

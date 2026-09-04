@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#191320">
+<meta name="description" content="Don't Wake Him! - a tiny stealth game about stealing one more thing before you run.">
+<title>Don't Wake Him!</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden;background:#0d0a10;color:#fff;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    user-select:none;-webkit-user-select:none;touch-action:none}
+  #stage{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    overflow:hidden;border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+  canvas{display:block;width:100%;height:100%}
+
+  #hud{position:absolute;left:0;top:0;right:0;padding:8px 10px;display:flex;
+    align-items:center;gap:8px;font-size:13px;font-weight:700;
+    background:#191320;height:40px;pointer-events:none}
+  #money{color:#ffd34d;min-width:58px;font-variant-numeric:tabular-nums}
+  #lvl{color:#cbbcd8;font-variant-numeric:tabular-nums}
+  #noisewrap{flex:1;height:14px;border-radius:7px;background:#0006;
+    border:1px solid #ffffff26;overflow:hidden;position:relative}
+  #noisebar{height:100%;width:0%;background:#4cc172;transition:width .1s linear}
+  #noisetxt{position:absolute;inset:0;text-align:center;font-size:10px;line-height:12px;
+    text-shadow:0 1px 2px #000;font-variant-numeric:tabular-nums}
+  .hudbtn{pointer-events:auto;background:#ffffff1a;border:1px solid #ffffff2e;color:#fff;
+    border-radius:8px;padding:4px 8px;font-size:13px;font-weight:700;line-height:1.1}
+  .hudbtn:focus-visible{outline:2px solid #ffd34d;outline-offset:2px}
+
+  #joy{position:absolute;width:110px;height:110px;border-radius:50%;
+    background:#ffffff14;border:2px solid #ffffff33;display:none;pointer-events:none}
+  #knob{position:absolute;width:48px;height:48px;border-radius:50%;
+    background:#ffffff4d;border:2px solid #ffffff80;left:31px;top:31px}
+
+  #take{position:absolute;right:18px;bottom:22px;width:86px;height:86px;border-radius:50%;
+    background:#ffd34d1f;border:2px solid #ffd34d80;color:#ffe07a;font-size:13px;
+    font-weight:800;letter-spacing:1px;display:none;align-items:center;justify-content:center;
+    pointer-events:auto}
+  #take.on{background:#ffd34d33;border-color:#ffd34d;color:#fff5d1}
+  #take.down{transform:scale(.94);background:#ffd34d55}
+  #take:focus-visible{outline:2px solid #ffd34d;outline-offset:3px}
+  body[data-screen="playing"] #take{display:flex}
+  /* the HUD belongs to the room, not to the menus */
+  body[data-screen="menu"] #hud, body[data-screen="levels"] #hud{display:none}
+  body:not([data-screen="playing"]) #btnpause{opacity:.45}
+
+  .screen{position:absolute;inset:0;display:none;flex-direction:column;
+    align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center;
+    background:#120e17f2;backdrop-filter:blur(3px)}
+  .screen.on{display:flex}
+  h1{font-size:30px;line-height:1.1;letter-spacing:-.5px}
+  h1 small{display:block;font-size:12px;letter-spacing:3px;color:#a08fb0;
+    font-weight:600;margin-bottom:6px}
+  h2{font-size:24px}
+  p{font-size:14px;color:#bcaec8;line-height:1.5;max-width:34ch}
+  button{font:inherit;font-weight:700;cursor:pointer}
+  .btn{background:#7c4dff;color:#fff;border:0;border-radius:12px;padding:13px 30px;
+    font-size:16px;min-width:180px;box-shadow:0 4px 0 #4d2bb0}
+  .btn:active{transform:translateY(2px);box-shadow:0 2px 0 #4d2bb0}
+  .btn.alt{background:#ffffff1a;box-shadow:0 4px 0 #ffffff14}
+  .btn.alt:active{box-shadow:0 2px 0 #ffffff14}
+  .btn:focus-visible{outline:2px solid #ffd34d;outline-offset:3px}
+  .btn.small{padding:9px 18px;font-size:13px;min-width:0}
+  #grid{display:grid;grid-template-columns:repeat(4,58px);gap:10px;justify-content:center}
+  .lv{height:58px;border-radius:12px;border:0;background:#7c4dff;color:#fff;font-size:18px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+  .lv.locked{background:#ffffff12;color:#ffffff40}
+  .lv b{font-size:18px;line-height:1}
+  .lv i{font-size:9px;font-style:normal;color:#ffd34d;font-weight:700}
+  .stat{font-size:15px;color:#ffd34d;font-weight:700}
+  .hint{font-size:12px;color:#8d7f9b}
+  #crash{position:absolute;inset:0;display:none;flex-direction:column;gap:10px;padding:20px;
+    background:#1a0f12f5;color:#ffb4b4;font:12px ui-monospace,monospace;overflow:auto;z-index:9}
+  #crash.on{display:flex}
+  #crash pre{white-space:pre-wrap;color:#ffd9d9}
+  @media (prefers-reduced-motion: reduce){ #noisebar{transition:none} }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="cv"></canvas>
+
+  <div id="hud">
+    <span id="money">$0</span>
+    <div id="noisewrap"><div id="noisebar"></div><div id="noisetxt">0 / 100</div></div>
+    <span id="lvl">LV 1</span>
+    <button id="btnmute" class="hudbtn" aria-label="Mute">🔊</button>
+    <button id="btnpause" class="hudbtn" aria-label="Pause">II</button>
+  </div>
+
+  <div id="joy"><div id="knob"></div></div>
+  <button id="take" aria-label="Take item">TAKE</button>
+
+  <div class="screen on" id="scMenu">
+    <h1><small>SUPER SIMPLE BETA</small>DON'T WAKE HIM!</h1>
+    <p>Steal what you can. Every item makes noise. Get out before he wakes up.</p>
+    <button class="btn" id="bPlay">PLAY</button>
+    <button class="btn alt" id="bLevels">LEVELS</button>
+    <button class="btn alt small" id="bMuteMenu">SOUND ON</button>
+    <p class="stat" id="bank">Total stolen: $0</p>
+    <p class="hint">Move: drag anywhere / arrows. Take: TAKE button / space.</p>
+  </div>
+
+  <div class="screen" id="scLevels">
+    <h2>LEVELS</h2>
+    <div id="grid"></div>
+    <button class="btn alt" id="bBack">BACK</button>
+    <button class="btn alt small" id="bReset">RESET PROGRESS</button>
+  </div>
+
+  <div class="screen" id="scEnd">
+    <h2 id="endTitle">LEVEL COMPLETE</h2>
+    <p id="endText"></p>
+    <button class="btn" id="bNext">NEXT LEVEL</button>
+    <button class="btn alt" id="bRetry">RETRY</button>
+    <button class="btn alt" id="bMenu">MENU</button>
+  </div>
+
+  <div class="screen" id="scPause">
+    <h2>PAUSED</h2>
+    <button class="btn" id="bResume">RESUME</button>
+    <button class="btn alt" id="bPRetry">RESTART LEVEL</button>
+    <button class="btn alt" id="bPMenu">MENU</button>
+  </div>
+
+  <div id="crash">
+    <b>The game hit an error and paused.</b>
+    <pre id="crashText"></pre>
+    <button class="btn alt small" id="bCrashReload">RESTART LEVEL</button>
+  </div>
+</div>
+
+<script>
+/*BUNDLE*/
+</script>
+</body>
+</html>

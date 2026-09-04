@@ -1,0 +1,38 @@
+name: game
+
+on:
+  push:
+    paths: ['game/**', '.github/workflows/game.yml']
+  pull_request:
+    paths: ['game/**', '.github/workflows/game.yml']
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: game
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Levels are validated as part of the build, so a level that cannot be
+      # finished fails here instead of shipping.
+      - name: Validate levels
+        run: npm run validate
+
+      # Headless: the pure simulation is driven through scripted inputs.
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Fail if the committed build is stale
+        run: |
+          if ! git diff --exit-code -- index.html dist/artifact.html; then
+            echo "::error::index.html is out of date — run 'npm run build' in game/ and commit the result."
+            exit 1
+          fi
