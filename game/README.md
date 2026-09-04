@@ -87,6 +87,18 @@ mattering.
 
 ### Map structure
 
+Doorways are declared data, not gaps inferred from where walls stop. The
+renderer frames each one with a threshold board and jambs — the single clearest
+readability cue in the reference floorplans — and the validator checks it is
+wide enough to walk through and actually open.
+
+Two placement rules the validator now enforces, both learned the hard way: an
+item on the spawn is free money for no travel, and an item on the exit hides
+the way out and gets taken on the way past. Neither is a decision, so neither
+is allowed.
+
+
+
 Levels 1-24 are single rooms. From 25 on they are **multi-area maps**: interior
 walls (`partition` colliders) divide the space into connected rooms joined by
 doorways. Partitions are part of the building, so like the outer walls they
@@ -105,6 +117,17 @@ Bigger maps take longer to cross, so a partitioned level declares its own
 `extraTime` on top of the campaign's shrinking clock. Without it the
 sophisticated levels land on the 15s floor and are simply unwinnable; a test
 asserts the allowance and the partitions go together in both directions.
+
+### Late-campaign layouts
+
+- `G` two rooms, two doorways: a short noisy route and a long clear one.
+- `H` the study, holding the best things, furthest from the door.
+- `I` a corridor with a room off each side and the bed at its head.
+- `J` a private gallery: a 3x2 grid of display plinths in an open hall, so the
+  value is out in the middle rather than around the edges.
+- `K` rooms hanging off a shared hall, each with its own door.
+- `L` a long apartment: a closed storage spine down one side, an open living
+  run down the other, bedroom behind a return wall at the far end.
 
 ### Chapters
 

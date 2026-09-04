@@ -39,6 +39,8 @@ const STYLE_GROUPS = {
 export function furnitureStyle(c) {
   if (c.type === 'bed') return 'bed';
   const ratio = c.w / c.h;
+  // A gallery's small squares are plinths, not nightstands.
+  if (c.theme === 'gallery' && c.w <= 52 && ratio > 0.75 && ratio < 1.35) return 'plinth';
   const group = c.h >= 100 ? 'tall' : ratio >= 2.3 ? 'wide' : ratio >= 1.35 ? 'mid' : 'small';
   const options = STYLE_GROUPS[group];
   return options[Math.floor(hash(c.x + 7, c.y + 13) * options.length) % options.length];

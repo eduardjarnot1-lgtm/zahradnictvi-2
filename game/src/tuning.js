@@ -153,7 +153,8 @@ export const TUNING = {
     // being about whether to steal one more thing.
     bump: {
       bed: 2, sofa: 2, nightstand: 3, table: 4,
-      chest: 4, tvBench: 4, wardrobe: 5, bookshelf: 6
+      chest: 4, tvBench: 4, wardrobe: 5, bookshelf: 6,
+      plinth: 6            // stone, and it rings
     },
     bumpCooldown: 1.0,    // one bump per collision, not one per frame
     bumpThreshold: 0.34,  // how squarely you must hit it to count at all

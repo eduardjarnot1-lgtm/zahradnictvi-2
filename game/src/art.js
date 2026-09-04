@@ -92,7 +92,15 @@ const THEMES = {
                grain: 'rgba(200,156,110,0.28)', light: '255,228,172', vignette: '30,24,30' },
   mansion:   { wall: '#3a2e46', lip: '#4d3d5c', shade: '#2a2033', skirt: '#cfae74',
                floor: '#8a6a4c', alt: '#806244', seam: 'rgba(104,78,54,0.6)',
-               grain: 'rgba(186,152,112,0.26)', light: '255,232,180', vignette: '24,16,32' }
+               grain: 'rgba(186,152,112,0.26)', light: '255,232,180', vignette: '24,16,32' },
+  // Pale stone and cool grey, after the museum reference.
+  gallery:   { wall: '#5a5f6b', lip: '#767c8a', shade: '#454a55', skirt: '#d7d2c8',
+               floor: '#9a988f', alt: '#918f86', seam: 'rgba(110,108,100,0.55)',
+               grain: 'rgba(190,187,176,0.24)', light: '232,240,255', vignette: '26,28,36' },
+  // Warm cream floors and white walls, after the apartment reference.
+  suite:     { wall: '#6e6455', lip: '#8a7e6c', shade: '#544c40', skirt: '#f0e7d6',
+               floor: '#c3a985', alt: '#b99f7c', seam: 'rgba(150,124,90,0.5)',
+               grain: 'rgba(216,194,160,0.26)', light: '255,238,204', vignette: '38,32,26' }
 };
 
 let T = THEMES.bedroom;   // set once per room paint; drawing is synchronous
@@ -382,6 +390,53 @@ function drawNightstand(ctx, c) {
   else drawBooks(ctx, c.x + c.w / 2, c.y + topH * 0.34);
 }
 
+// A museum plinth: a pale stone block with an artefact standing on it.
+function drawPlinth(ctx, c) {
+  ctx.fillStyle = SHADOW;
+  roundRect(ctx, c.x + 3, c.y + 7, c.w, c.h, 4);
+  ctx.fill();
+  fillRound(ctx, c.x, c.y, c.w, c.h, 4, '#8e8a86');
+  fillRound(ctx, c.x, c.y, c.w, c.h - 7, 4, '#c8c3bb');
+  fillRound(ctx, c.x + 4, c.y + 3, c.w - 8, c.h - 15, 3, '#ddd8cf');
+  // The piece on show, chosen by position so it never flickers.
+  const cx = c.x + c.w / 2;
+  const cy = c.y + c.h * 0.42;
+  const roll = hash(c.x + 2, c.y + 9);
+  if (roll > 0.66) {                                   // an urn
+    ctx.fillStyle = '#b8763f';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, 6, 8, 0, 0, TAU);
+    ctx.fill();
+    ctx.fillRect(cx - 2, cy - 11, 4, 5);
+    ctx.fillStyle = '#d69457';
+    ctx.beginPath();
+    ctx.ellipse(cx - 1.5, cy - 1, 2.6, 4, 0, 0, TAU);
+    ctx.fill();
+  } else if (roll > 0.33) {                            // a bust
+    ctx.fillStyle = '#cfd4d8';
+    ctx.beginPath();
+    ctx.arc(cx, cy - 3, 5, 0, TAU);
+    ctx.fill();
+    fillRound(ctx, cx - 6, cy + 1, 12, 7, 2.5, '#b9bfc4');
+  } else {                                             // a jade piece
+    ctx.fillStyle = '#4f8f6b';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, 7, 6.5, 0, 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = '#6fb389';
+    ctx.beginPath();
+    ctx.ellipse(cx - 2, cy - 2, 3, 2.4, -0.4, 0, TAU);
+    ctx.fill();
+  }
+  // A brass rail on the front edge, as in a real gallery.
+  ctx.strokeStyle = '#a68a4d';
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(c.x + 5, c.y + c.h - 3);
+  ctx.lineTo(c.x + c.w - 5, c.y + c.h - 3);
+  ctx.stroke();
+}
+
 const FURNITURE_PAINTERS = {
   table: drawTable,
   sofa: drawSofa,
@@ -389,7 +444,8 @@ const FURNITURE_PAINTERS = {
   nightstand: drawNightstand,
   tvBench: drawTvBench,
   chest: drawChest,
-  bookshelf: drawBookshelf
+  bookshelf: drawBookshelf,
+  plinth: drawPlinth
 };
 
 export function drawFurniture(ctx, c) {
@@ -650,6 +706,40 @@ function drawPartition(ctx, c) {
   }
 }
 
+// A doorway: a threshold board across the opening and a jamb at each side. In
+// the reference floorplans this is what makes a gap read as a way through
+// rather than as a hole where a wall should be.
+function drawDoorway(ctx, door) {
+  const horizontal = door.w > door.h;
+  ctx.save();
+  ctx.globalAlpha = 0.85;
+  fillRound(ctx, door.x, door.y, door.w, door.h, 2, T.shade);
+  ctx.globalAlpha = 1;
+  // Threshold board.
+  fillRound(ctx, door.x + 1, door.y + 1, door.w - 2, door.h - 2, 1.5, '#8a6a44');
+  ctx.strokeStyle = 'rgba(255,232,190,0.22)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  if (horizontal) {
+    ctx.moveTo(door.x + 3, door.y + door.h / 2);
+    ctx.lineTo(door.x + door.w - 3, door.y + door.h / 2);
+  } else {
+    ctx.moveTo(door.x + door.w / 2, door.y + 3);
+    ctx.lineTo(door.x + door.w / 2, door.y + door.h - 3);
+  }
+  ctx.stroke();
+  // Jambs at the open ends, so the wall reads as stopping rather than fading.
+  ctx.fillStyle = T.lip;
+  if (horizontal) {
+    ctx.fillRect(door.x - 2, door.y, 3, door.h);
+    ctx.fillRect(door.x + door.w - 1, door.y, 3, door.h);
+  } else {
+    ctx.fillRect(door.x, door.y - 2, door.w, 3);
+    ctx.fillRect(door.x, door.y + door.h - 1, door.w, 3);
+  }
+  ctx.restore();
+}
+
 // Everything that never moves, drawn once per level into an offscreen canvas.
 export function paintStaticRoom(ctx, level) {
   T = THEMES[level.theme] || THEMES.bedroom;
@@ -665,6 +755,7 @@ export function paintStaticRoom(ctx, level) {
   for (const c of level.colliders) {
     if (c.type === 'partition') drawPartition(ctx, c);
   }
+  for (const door of level.doors) drawDoorway(ctx, door);
   for (const c of level.colliders) {
     if (c.type === 'furniture') drawFurniture(ctx, c);
   }

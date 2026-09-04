@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { LEVELS } from '../src/levels.js';
 import { validateAll, validateLevel } from '../src/validate.js';
-import { levelTotals, forcesChoice, itemStats, timeLimit } from '../src/rules.js';
+import { levelTotals, forcesChoice, itemStats, timeLimit, furnitureStyle } from '../src/rules.js';
 import { play, playEfficiently } from './harness.mjs';
 
 // Levels are grouped into themed chapters; each opens easier and then climbs.
@@ -173,21 +173,28 @@ test('the two-doorway house really does offer independent routes', () => {
   const level = LEVELS.find((l) => l.layout === 'G');
   assert.ok(level, 'expected a two-doorway layout');
 
-  const doorways = [{ x: 66, y: 258, w: 50, h: 14 }, { x: 262, y: 258, w: 50, h: 14 }];
-  for (const [index, door] of doorways.entries()) {
+  const doorways = level.doors;
+  assert.equal(doorways.length, 2, 'expected exactly two doorways');
+
+  // Bricking a doorway up means it stops being a doorway, so it comes out of
+  // the door list too — otherwise the validator flags it as a blocked door,
+  // which is beside the point being tested here.
+  const brickUp = (indices) => {
     const sealed = structuredClone(level);
-    sealed.colliders.push({ type: 'partition', ...door });
-    const result = validateLevel(sealed);
+    for (const index of indices) sealed.colliders.push({ type: 'partition', ...doorways[index] });
+    sealed.doors = sealed.doors.filter((_, index) => !indices.includes(index));
+    return validateLevel(sealed);
+  };
+
+  for (const index of [0, 1]) {
+    const result = brickUp([index]);
     assert.equal(result.ok, true,
       `sealing doorway ${index} breaks the level: ${result.errors.join('; ')}`);
   }
 
   // And sealing both must break it — otherwise the partition is not dividing
   // anything and the test above proves nothing.
-  const bothSealed = structuredClone(level);
-  for (const door of doorways) bothSealed.colliders.push({ type: 'partition', ...door });
-  assert.equal(validateLevel(bothSealed).ok, false,
-    'sealing both doorways should cut the room in two');
+  assert.equal(brickUp([0, 1]).ok, false, 'sealing both doorways should cut the room in two');
 });
 
 test('taking everything wakes him on every level that should', () => {
@@ -195,5 +202,47 @@ test('taking everything wakes him on every level that should', () => {
     const { result } = play(level.id, { seed: 5 });
     assert.equal(result.status, 'lost', `level ${level.id} should be unsurvivable if greedy`);
     assert.equal(result.noise, 100);
+  }
+});
+
+test('every declared doorway is wide enough to walk through', () => {
+  for (const level of LEVELS) {
+    for (const door of level.doors) {
+      const span = door.w > door.h ? door.w : door.h;
+      const needed = (door.w > door.h ? TUNING.player.boxWidth : TUNING.player.boxHeight) + 12;
+      assert.ok(span >= needed,
+        `level ${level.id} has a ${span}px doorway, needs ${needed}`);
+    }
+  }
+});
+
+test('the validator rejects a doorway too narrow to pass', () => {
+  const level = LEVELS.find((l) => l.doors.length > 0);
+  const pinched = structuredClone(level);
+  pinched.doors[0] = { ...pinched.doors[0], w: 18, h: 14 };
+  assert.match(validateLevel(pinched).errors.join(' '), /too narrow/);
+});
+
+test('a partitioned level declares the doors its walls leave open', () => {
+  for (const level of LEVELS) {
+    const partitions = level.colliders.filter((c) => c.type === 'partition').length;
+    if (partitions > 0) {
+      assert.ok(level.doors.length > 0,
+        `level ${level.id} has interior walls but declares no way through them`);
+    }
+  }
+});
+
+test('gallery rooms put their value on plinths, out in the open', () => {
+  const gallery = LEVELS.filter((l) => l.theme === 'gallery');
+  assert.ok(gallery.length > 0);
+  for (const level of gallery) {
+    const plinths = level.colliders.filter(
+      (c) => c.type === 'furniture' && furnitureStyle(c) === 'plinth');
+    assert.ok(plinths.length >= 6, `level ${level.id} has only ${plinths.length} plinths`);
+    // Each plinth should have something worth taking beside it.
+    const guarded = plinths.filter((p) => level.items.some((item) =>
+      Math.abs(item.x - (p.x + p.w / 2)) < 40 && Math.abs(item.y - (p.y + p.h / 2)) < 40));
+    assert.ok(guarded.length >= 5, `only ${guarded.length} plinths are worth visiting`);
   }
 });

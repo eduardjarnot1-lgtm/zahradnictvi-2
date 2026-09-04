@@ -91,6 +91,18 @@ export function validateLevel(level) {
     if (!canReach) errors.push(`${item.id} (${item.x},${item.y}) is unreachable from spawn`);
   }
 
+  // An item on the spawn is free money for no travel, and an item on the exit
+  // hides the way out and is taken on the way past. Neither is a decision.
+  for (const item of level.items) {
+    if (Math.hypot(item.x - level.spawn.x, item.y - level.spawn.y) < TUNING.pickup.radius * 1.6) {
+      errors.push(`${item.id} sits on the spawn — it costs nothing to take`);
+    }
+    const exit = level.exit;
+    if (item.x > exit.x - 16 && item.x < exit.x + exit.w + 16 && item.y > exit.y - 26) {
+      errors.push(`${item.id} sits on the exit`);
+    }
+  }
+
   // Items must not stack on top of each other.
   for (let i = 0; i < level.items.length; i++) {
     for (let j = i + 1; j < level.items.length; j++) {
@@ -112,6 +124,19 @@ export function validateLevel(level) {
         errors.push(`${a.type} at (${a.x},${a.y}) overlaps ${b.type} at (${b.x},${b.y})`);
       }
     }
+  }
+
+  // Every declared doorway must be wide enough to walk through, and must
+  // actually be open. A sealed room is the failure mode complex layouts invite.
+  for (const [index, door] of (level.doors || []).entries()) {
+    const span = Math.min(door.w, door.h) === door.h ? door.w : door.h;
+    const need = (door.w > door.h ? PW : PH) + 12;
+    if (span < need) {
+      errors.push(`doorway ${index} is ${span}px, too narrow to walk through (need ${need})`);
+    }
+    const middle = { x: door.x + door.w / 2, y: door.y + door.h / 2 };
+    const openCell = points.some((p) => Math.hypot(p.x - middle.x, p.y - middle.y) < GRID * 3);
+    if (!openCell) errors.push(`doorway ${index} at (${door.x},${door.y}) is blocked`);
   }
 
   // The exit has to be walkable-into.

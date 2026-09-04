@@ -63,6 +63,7 @@ const LAYOUTS = {
     partitions: [
       [14, 258, 52, 14], [116, 258, 146, 14], [312, 258, 74, 14]
     ],
+    doors: [[66, 258, 50, 14], [262, 258, 50, 14]],
     furniture: [
       [30, 130, 84, 46], [292, 132, 80, 48],
       [36, 300, 120, 42], [246, 300, 120, 44],
@@ -77,6 +78,7 @@ const LAYOUTS = {
       [190, 14, 14, 168],
       [14, 316, 116, 14], [196, 316, 190, 14]
     ],
+    doors: [[130, 316, 66, 14]],
     furniture: [
       [30, 150, 96, 44],
       [216, 40, 90, 50], [306, 56, 70, 88], [212, 186, 84, 44],
@@ -92,12 +94,68 @@ const LAYOUTS = {
       [122, 14, 14, 70], [122, 140, 14, 128],
       [264, 14, 14, 110], [264, 180, 14, 88]
     ],
+    doors: [[122, 84, 14, 56], [264, 124, 14, 56]],
     furniture: [
       [140, 150, 70, 42],
       [30, 40, 78, 46], [28, 170, 80, 44],
       [286, 40, 88, 48], [290, 200, 80, 50],
       [40, 320, 120, 44], [246, 316, 124, 44],
       [36, 430, 64, 120], [140, 450, 160, 42], [320, 440, 58, 58]
+    ]
+  },
+  // A private gallery: a symmetric grid of display plinths in the hall, a
+  // bedroom nook off to one side, and a lobby below the dividing wall. Taken
+  // from the museum reference — the value is out in the open on the plinths,
+  // which means crossing the hall rather than hugging the edges.
+  J: {
+    bed: [28, 26, 100, 76],
+    partitions: [
+      [132, 14, 14, 150],
+      [14, 270, 156, 14], [230, 270, 156, 14]
+    ],
+    doors: [[170, 270, 60, 14], [132, 164, 14, 106]],
+    furniture: [
+      [30, 140, 92, 44],
+      [176, 60, 40, 40], [252, 60, 40, 40], [328, 60, 40, 40],
+      [176, 150, 40, 40], [252, 150, 40, 40], [328, 150, 40, 40],
+      [30, 320, 44, 120], [110, 330, 150, 40], [300, 330, 72, 44],
+      [40, 470, 120, 42], [250, 470, 130, 42]
+    ]
+  },
+  // Two rooms off a shared hall, each with its own door — the floorplan
+  // reference's arrangement of rooms hanging off a circulation spine.
+  K: {
+    bed: [30, 30, 110, 80],
+    partitions: [
+      [186, 14, 14, 240],
+      [14, 254, 60, 14], [128, 254, 58, 14],
+      [200, 254, 60, 14], [314, 254, 72, 14]
+    ],
+    doors: [[74, 254, 54, 14], [260, 254, 54, 14]],
+    furniture: [
+      [30, 150, 90, 44],
+      [216, 40, 90, 48], [306, 150, 70, 88], [204, 170, 64, 44],
+      [36, 320, 120, 42], [250, 316, 120, 44],
+      [36, 430, 64, 120], [150, 450, 150, 42], [316, 440, 60, 60]
+    ]
+  },
+  // A long apartment: a closed service spine of storage down one side, an open
+  // living run down the other, and the bedroom tucked behind a return wall at
+  // the far end — the apartment reference's shape.
+  L: {
+    bed: [268, 26, 104, 78],
+    partitions: [
+      [120, 14, 14, 66], [120, 134, 14, 90], [14, 224, 120, 14],
+      [240, 14, 14, 140]
+    ],
+    doors: [[120, 80, 14, 54], [240, 154, 14, 100]],
+    furniture: [
+      [30, 40, 56, 46], [30, 140, 56, 50],
+      [268, 120, 90, 44],
+      [150, 180, 80, 44],
+      [40, 260, 120, 42], [250, 260, 120, 44],
+      [36, 380, 64, 120], [150, 400, 150, 42], [300, 400, 76, 60],
+      [40, 520, 90, 44]
     ]
   },
   F: {
@@ -121,7 +179,10 @@ const RUGS = {
   F: { x: 120, y: 200, w: 150, h: 100 },
   G: { x: 150, y: 300, w: 160, h: 100 },
   H: { x: 210, y: 100, w: 150, h: 90 },
-  I: { x: 140, y: 300, w: 150, h: 110 }
+  I: { x: 140, y: 300, w: 150, h: 110 },
+  J: { x: 150, y: 360, w: 160, h: 90 },
+  K: { x: 150, y: 340, w: 160, h: 90 },
+  L: { x: 150, y: 260, w: 130, h: 110 }
 };
 
 function makeLevel(id, layoutKey, spawn, exitX, items, options = {}) {
@@ -134,7 +195,9 @@ function makeLevel(id, layoutKey, spawn, exitX, items, options = {}) {
     // are part of the building, so brushing one costs no noise.
     ...(layout.partitions || []).map((w) => collider('partition', ...w)),
     bed,
-    ...layout.furniture.map((f) => collider('furniture', ...f))
+    // Furniture carries the theme, so the same shape can be a nightstand in a
+    // bedroom and a display plinth in a gallery.
+    ...layout.furniture.map((f) => ({ ...collider('furniture', ...f), theme: options.theme || 'bedroom' }))
   ];
 
   return {
@@ -147,6 +210,10 @@ function makeLevel(id, layoutKey, spawn, exitX, items, options = {}) {
     // allowance on top of the campaign's shrinking clock. Without it the
     // sophisticated levels would land on the time floor and be unwinnable.
     extraTime: options.extraTime || 0,
+    // The openings in those interior walls, declared rather than inferred:
+    // the renderer frames them and the validator checks they are wide enough
+    // to actually walk through.
+    doors: (layout.doors || []).map(([x, y, w, h]) => ({ x, y, w, h })),
     // Creaky boards: plain trigger rectangles on the floor.
     creaks: (options.creaks || []).map(([x, y, w, h], i) => ({ id: `L${id}-c${i}`, x, y, w, h })),
     // Rugs. These are gameplay, not decoration: footsteps are silent on them,
@@ -314,12 +381,12 @@ export const LEVELS = [
   makeLevel(27, 'H', [200, 548], 160, [
     [160, 60, 'jewel'], [70, 250, 'cash'], [160, 240, 'laptop'],
     [350, 250, 'painting'], [250, 130, 'console'], [200, 400, 'watch'],
-    [200, 540, 'coin'], [350, 430, 'camera']
+    [140, 545, 'coin'], [350, 430, 'camera']
   ], { theme: 'house', name: 'Large House', extraTime: 9, creaks: [[130, 320, 66, 44]] }),
   makeLevel(28, 'H', [200, 548], 160, [
     [160, 60, 'diamond'], [70, 250, 'necklace'], [160, 240, 'vase'],
     [350, 250, 'painting'], [250, 130, 'mirror'], [200, 400, 'console'],
-    [200, 540, 'wallet'], [350, 430, 'speaker']
+    [140, 545, 'wallet'], [350, 430, 'speaker']
   ], { theme: 'house', name: 'Large House', extraTime: 9, creaks: [[130, 320, 66, 44], [40, 400, 60, 44]] }),
 
   // ---- Mansion: side rooms cost a walk past the bed ----------------------
@@ -342,7 +409,59 @@ export const LEVELS = [
     [200, 110, 'goldbar', 'bonus'], [66, 110, 'goldbar'], [66, 250, 'diamond'],
     [330, 130, 'goldbar'], [330, 280, 'diamond'], [200, 250, 'painting'],
     [200, 390, 'necklace'], [60, 560, 'vase'], [286, 520, 'ring']
-  ], { theme: 'mansion', name: 'Mansion', extraTime: 11, creaks: [[136, 200, 60, 50], [190, 290, 80, 40]] })
+  ], { theme: 'mansion', name: 'Mansion', extraTime: 11, creaks: [[136, 200, 60, 50], [190, 290, 80, 40]] }),
+
+  // ---- Private gallery: the value is out on the plinths, in the open ------
+  makeLevel(33, 'J', [200, 548], 160, [
+    [196, 45, 'vase'], [272, 45, 'painting'], [348, 45, 'mirror'],
+    [196, 205, 'ring'], [272, 205, 'necklace'], [348, 205, 'camera'],
+    [70, 200, 'wallet'], [200, 420, 'coin']
+  ], { theme: 'gallery', name: 'Private Gallery', extraTime: 14,
+       creaks: [[170, 284, 60, 44]] }),
+  makeLevel(34, 'J', [200, 548], 160, [
+    [196, 45, 'painting'], [272, 45, 'vase'], [348, 45, 'painting'],
+    [196, 205, 'necklace'], [272, 205, 'mirror'], [348, 205, 'jewel'],
+    [70, 200, 'watch'], [200, 420, 'wallet'], [286, 520, 'coin']
+  ], { theme: 'gallery', name: 'Private Gallery', extraTime: 13,
+       creaks: [[170, 284, 60, 44]] }),
+  makeLevel(35, 'J', [200, 548], 160, [
+    [196, 45, 'diamond'], [272, 45, 'painting', 'bonus'], [348, 45, 'vase'],
+    [196, 205, 'painting'], [272, 205, 'necklace'], [348, 205, 'mirror'],
+    [70, 200, 'ring'], [200, 420, 'camera']
+  ], { theme: 'gallery', name: 'Private Gallery', extraTime: 12,
+       creaks: [[170, 284, 60, 44], [90, 400, 70, 44]] }),
+  makeLevel(36, 'J', [200, 548], 160, [
+    [196, 45, 'goldbar'], [272, 45, 'diamond', 'bonus'], [348, 45, 'painting'],
+    [196, 205, 'diamond'], [272, 205, 'painting'], [348, 205, 'necklace'],
+    [70, 200, 'jewel'], [200, 420, 'mirror'], [286, 520, 'ring']
+  ], { theme: 'gallery', name: 'Private Gallery', extraTime: 12,
+       creaks: [[170, 284, 60, 44], [90, 400, 70, 44]] }),
+
+  // ---- Grand suite: rooms off a hall, then the long apartment -------------
+  makeLevel(37, 'K', [200, 548], 160, [
+    [160, 60, 'necklace'], [90, 210, 'camera'], [290, 110, 'laptop'],
+    [340, 60, 'ring'], [250, 235, 'console'], [200, 380, 'tablet'],
+    [110, 560, 'coin'], [110, 400, 'speaker']
+  ], { theme: 'suite', name: 'Grand Suite', extraTime: 10,
+       creaks: [[74, 268, 54, 44]] }),
+  makeLevel(38, 'K', [200, 548], 160, [
+    [160, 60, 'diamond'], [90, 210, 'necklace'], [290, 110, 'painting'],
+    [340, 60, 'jewel'], [250, 235, 'mirror'], [200, 380, 'console'],
+    [110, 560, 'wallet'], [110, 400, 'vase'], [340, 380, 'camera']
+  ], { theme: 'suite', name: 'Grand Suite', extraTime: 10,
+       creaks: [[74, 268, 54, 44], [260, 268, 54, 44]] }),
+  makeLevel(39, 'L', [200, 548], 160, [
+    [66, 100, 'necklace'], [66, 200, 'jewel'], [320, 200, 'painting'],
+    [190, 120, 'camera'], [200, 330, 'console'], [330, 330, 'mirror'],
+    [110, 470, 'tablet'], [286, 560, 'coin']
+  ], { theme: 'suite', name: 'Grand Suite', extraTime: 11,
+       creaks: [[150, 240, 70, 44]] }),
+  makeLevel(40, 'L', [200, 548], 160, [
+    [66, 100, 'goldbar'], [66, 200, 'diamond'], [320, 200, 'painting', 'bonus'],
+    [190, 120, 'necklace'], [200, 330, 'diamond'], [330, 330, 'goldbar'],
+    [110, 470, 'mirror'], [286, 560, 'vase'], [330, 470, 'ring']
+  ], { theme: 'suite', name: 'Grand Suite', extraTime: 12,
+       creaks: [[150, 240, 70, 44], [90, 470, 60, 44]] })
 ];
 
 export const collidersOfType = (level, type) =>
