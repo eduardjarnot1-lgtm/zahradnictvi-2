@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#141018">
+<meta name="description" content="Don't Wake Him! - a tiny stealth game about stealing one more thing before you run.">
+<title>Don't Wake Him!</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden;background:#0d0a10;color:#fff;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    user-select:none;-webkit-user-select:none;touch-action:none}
+  #stage{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    overflow:hidden;border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+  canvas{display:block;width:100%;height:100%}
+
+  /* ---------- HUD ---------- */
+  #hud{position:absolute;left:0;top:0;right:0;padding:8px 10px;display:flex;
+    align-items:center;gap:10px;font-size:13px;font-weight:700;
+    background:#191320;height:40px;pointer-events:none}
+  #money{color:#ffd34d;min-width:64px}
+  #lvl{color:#cbbcd8}
+  #noisewrap{flex:1;height:14px;border-radius:7px;background:#0006;
+    border:1px solid #ffffff26;overflow:hidden;position:relative}
+  #noisebar{height:100%;width:0%;background:#4cc172;transition:width .12s linear}
+  #noisetxt{position:absolute;inset:0;text-align:center;font-size:10px;line-height:12px;
+    text-shadow:0 1px 2px #000}
+  #btnpause{pointer-events:auto;background:#ffffff1a;border:1px solid #ffffff2e;color:#fff;
+    border-radius:8px;padding:4px 9px;font-size:13px;font-weight:700}
+
+  /* ---------- joystick ---------- */
+  #joy{position:absolute;width:110px;height:110px;border-radius:50%;
+    background:#ffffff14;border:2px solid #ffffff33;display:none;pointer-events:none}
+  #knob{position:absolute;width:48px;height:48px;border-radius:50%;
+    background:#ffffff4d;border:2px solid #ffffff80;left:31px;top:31px}
+
+  /* ---------- screens ---------- */
+  .screen{position:absolute;inset:0;display:none;flex-direction:column;
+    align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;
+    background:#120e17f2;backdrop-filter:blur(3px)}
+  .screen.on{display:flex}
+  h1{font-size:30px;line-height:1.1;letter-spacing:-.5px}
+  h1 small{display:block;font-size:12px;letter-spacing:3px;color:#a08fb0;
+    font-weight:600;margin-bottom:6px}
+  h2{font-size:24px}
+  p{font-size:14px;color:#bcaec8;line-height:1.5}
+  button{font:inherit;font-weight:700;cursor:pointer}
+  .btn{background:#7c4dff;color:#fff;border:0;border-radius:12px;padding:13px 30px;
+    font-size:16px;min-width:180px;box-shadow:0 4px 0 #4d2bb0}
+  .btn:active{transform:translateY(2px);box-shadow:0 2px 0 #4d2bb0}
+  .btn.alt{background:#ffffff1a;box-shadow:0 4px 0 #ffffff14}
+  .btn.alt:active{box-shadow:0 2px 0 #ffffff14}
+  #grid{display:grid;grid-template-columns:repeat(4,58px);gap:10px;justify-content:center}
+  .lv{height:58px;border-radius:12px;border:0;background:#7c4dff;color:#fff;font-size:18px}
+  .lv.locked{background:#ffffff12;color:#ffffff40}
+  .stat{font-size:15px;color:#ffd34d;font-weight:700}
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="cv"></canvas>
+
+  <div id="hud">
+    <span id="money">$0</span>
+    <div id="noisewrap"><div id="noisebar"></div><div id="noisetxt">0 / 100</div></div>
+    <span id="lvl">1</span>
+    <button id="btnpause">II</button>
+  </div>
+
+  <div id="joy"><div id="knob"></div></div>
+
+  <div class="screen on" id="scMenu">
+    <h1><small>SUPER SIMPLE BETA</small>DON'T WAKE HIM!</h1>
+    <p>Steal what you can.<br>Every item makes noise.<br>Escape before he wakes up.</p>
+    <button class="btn" id="bPlay">PLAY</button>
+    <button class="btn alt" id="bLevels">LEVELS</button>
+    <p class="stat" id="bank">Total stolen: $0</p>
+  </div>
+
+  <div class="screen" id="scLevels">
+    <h2>LEVELS</h2>
+    <div id="grid"></div>
+    <button class="btn alt" id="bBack">BACK</button>
+  </div>
+
+  <div class="screen" id="scEnd">
+    <h2 id="endTitle">LEVEL COMPLETE</h2>
+    <p id="endText"></p>
+    <button class="btn" id="bNext">NEXT LEVEL</button>
+    <button class="btn alt" id="bRetry">RETRY</button>
+    <button class="btn alt" id="bMenu">MENU</button>
+  </div>
+
+  <div class="screen" id="scPause">
+    <h2>PAUSED</h2>
+    <button class="btn" id="bResume">RESUME</button>
+    <button class="btn alt" id="bPRetry">RESTART LEVEL</button>
+    <button class="btn alt" id="bPMenu">MENU</button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= world constants ================= */
+var W = 400, H = 620, WT = 14;         // room size, wall thickness
+var HUD_H = 40;                        // strip above the room reserved for the HUD
+var SPEED = 132;                       // player units / second
+var PW = 22, PH = 24;                  // player collision box
+
+/* ================= item types ================= */
+var TYPES = {
+  phone : {icon:"📱", value:30,  noise:8 },
+  watch : {icon:"⌚",       value:45,  noise:10},
+  cash  : {icon:"💵", value:60,  noise:12},
+  jewel : {icon:"💎", value:90,  noise:16},
+  laptop: {icon:"💻", value:120, noise:22},
+  tv    : {icon:"📺", value:180, noise:30}
+};
+
+/* ================= levels (hand made, 10) ================= */
+/* bed = where he sleeps (solid). furn = solid furniture. exit = doorway x-range. */
+function L(bed, furn, start, exitX, items){
+  return {bed:bed, furn:furn, start:start, exitX:exitX, items:items};
+}
+var A_BED = [145,20,110,86];
+var A_FURN = [[30,180,80,46],[298,190,74,50],[152,306,96,44],[34,424,64,62],[286,404,86,46]];
+var B_BED = [24,20,104,84];
+var B_FURN = [[210,54,64,52],[300,158,72,46],[36,224,116,42],[186,300,44,116],[276,430,96,44],[36,452,80,42]];
+var C_BED = [262,20,110,86];
+var C_FURN = [[30,44,92,54],[154,152,110,42],[36,262,60,124],[248,306,124,42],[120,436,142,42]];
+
+var LEVELS = [
+  /* 1 */ L(A_BED, A_FURN, [200,540], 160, [
+    {x:80 ,y:130,t:"phone"},{x:320,y:130,t:"phone"},{x:200,y:250,t:"watch"},
+    {x:70 ,y:330,t:"phone"},{x:300,y:330,t:"watch"}
+  ]),
+  /* 2 */ L(A_BED, A_FURN, [200,540], 160, [
+    {x:70 ,y:140,t:"watch"},{x:330,y:140,t:"phone"},{x:200,y:250,t:"cash"},
+    {x:70 ,y:352,t:"phone"},{x:330,y:340,t:"watch"},{x:200,y:470,t:"cash"}
+  ]),
+  /* 3 */ L(B_BED, B_FURN, [200,548], 160, [
+    {x:170,y:140,t:"cash"},{x:330,y:96 ,t:"jewel"},{x:60 ,y:160,t:"jewel"},
+    {x:250,y:238,t:"laptop"},{x:120,y:352,t:"laptop"},{x:330,y:352,t:"jewel"}
+  ]),
+  /* 4 */ L(B_BED, B_FURN, [200,548], 160, [
+    {x:172,y:140,t:"laptop"},{x:330,y:96 ,t:"cash"},{x:60 ,y:162,t:"watch"},
+    {x:252,y:236,t:"jewel"},{x:112,y:352,t:"jewel"},{x:330,y:352,t:"laptop"},
+    {x:66 ,y:388,t:"jewel"}
+  ]),
+  /* 5 */ L(C_BED, C_FURN, [200,548], 160, [
+    {x:196,y:70 ,t:"cash"},{x:70 ,y:150,t:"laptop"},{x:330,y:150,t:"watch"},
+    {x:160,y:238,t:"jewel"},{x:180,y:352,t:"cash"},{x:330,y:400,t:"jewel"},
+    {x:60 ,y:470,t:"laptop"}
+  ]),
+  /* 6 */ L(A_BED, A_FURN, [200,540], 160, [
+    {x:70 ,y:120,t:"jewel"},{x:330,y:120,t:"cash"},{x:200,y:150,t:"watch"},
+    {x:200,y:250,t:"laptop"},{x:70 ,y:352,t:"cash"},{x:330,y:340,t:"jewel"},
+    {x:200,y:470,t:"tv"},{x:340,y:490,t:"phone"}
+  ]),
+  /* 7 */ L(B_BED, B_FURN, [200,548], 160, [
+    {x:172,y:140,t:"tv"},{x:330,y:96 ,t:"jewel"},{x:60 ,y:162,t:"cash"},
+    {x:252,y:236,t:"laptop"},{x:112,y:352,t:"watch"},{x:330,y:352,t:"jewel"},
+    {x:66 ,y:392,t:"cash"},{x:196,y:496,t:"laptop"}
+  ]),
+  /* 8 */ L(C_BED, C_FURN, [200,548], 160, [
+    {x:196,y:70 ,t:"jewel"},{x:70 ,y:150,t:"tv"},{x:330,y:150,t:"cash"},
+    {x:160,y:238,t:"laptop"},{x:186,y:352,t:"jewel"},{x:330,y:400,t:"laptop"},
+    {x:60 ,y:470,t:"jewel"},{x:330,y:520,t:"jewel"}
+  ]),
+  /* 9 */ L(A_BED, A_FURN, [200,540], 160, [
+    {x:70 ,y:120,t:"tv"},{x:330,y:120,t:"jewel"},{x:200,y:150,t:"cash"},
+    {x:200,y:250,t:"laptop"},{x:70 ,y:352,t:"jewel"},{x:330,y:340,t:"laptop"},
+    {x:200,y:470,t:"tv"},{x:340,y:496,t:"cash"}
+  ]),
+  /* 10 */ L(C_BED, C_FURN, [200,548], 160, [
+    {x:196,y:70 ,t:"tv"},{x:70 ,y:150,t:"jewel"},{x:330,y:150,t:"laptop"},
+    {x:160,y:238,t:"tv"},{x:186,y:352,t:"laptop"},{x:330,y:400,t:"jewel"},
+    {x:60 ,y:470,t:"tv"},{x:330,y:520,t:"cash"}
+  ])
+];
+var EXIT_W = 80;
+
+/* ================= tiny save file ================= */
+var save = {unlocked:1, bank:0};
+try{
+  var raw = localStorage.getItem("dwh_save");
+  if(raw){ var s = JSON.parse(raw);
+    if(s && typeof s.unlocked === "number"){ save.unlocked = s.unlocked; save.bank = s.bank||0; } }
+}catch(e){}
+function persist(){ try{ localStorage.setItem("dwh_save", JSON.stringify(save)); }catch(e){} }
+
+/* ================= sound (no files) ================= */
+var actx = null;
+function audio(){
+  if(!actx){ var C = window.AudioContext || window.webkitAudioContext;
+    if(C) actx = new C(); }
+  if(actx && actx.state === "suspended") actx.resume();
+  return actx;
+}
+function beep(freq, dur, type, vol, delay){
+  var a = audio(); if(!a) return;
+  var t = a.currentTime + (delay||0);
+  var o = a.createOscillator(), g = a.createGain();
+  o.type = type || "square"; o.frequency.setValueAtTime(freq, t);
+  g.gain.setValueAtTime(vol||0.06, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + dur + 0.02);
+}
+var SFX = {
+  grab : function(){ beep(680,0.07,"square",0.05); beep(940,0.07,"square",0.04,0.06); },
+  creak: function(){ beep(150,0.18,"sawtooth",0.04); },
+  warn : function(){ beep(110,0.32,"sawtooth",0.07); },
+  win  : function(){ beep(523,0.1,"triangle",0.07); beep(659,0.1,"triangle",0.07,0.1);
+                     beep(784,0.22,"triangle",0.07,0.2); },
+  lose : function(){ beep(300,0.2,"sawtooth",0.08); beep(200,0.3,"sawtooth",0.08,0.18);
+                     beep(120,0.5,"sawtooth",0.08,0.4); }
+};
+
+/* ================= game state ================= */
+var G = {
+  mode:"menu",          // menu | play | pause | end
+  level:0,
+  walls:[], items:[], exit:null, bed:null,
+  px:0, py:0, money:0, noise:0,
+  shake:0, t:0, lastWarn:0
+};
+
+function buildLevel(i){
+  var d = LEVELS[i];
+  G.level = i;
+  G.money = 0; G.noise = 0; G.shake = 0; G.lastWarn = 0;
+  G.px = d.start[0]; G.py = d.start[1];
+  G.bed = d.bed;
+
+  var ex = d.exitX;
+  G.exit = {x:ex, y:H-WT-10, w:EXIT_W, h:WT+18};
+
+  G.walls = [
+    [0,0,W,WT],                       // top
+    [0,0,WT,H],                       // left
+    [W-WT,0,WT,H],                    // right
+    [0,H-WT,ex,WT],                   // bottom left of door
+    [ex+EXIT_W,H-WT,W-ex-EXIT_W,WT]   // bottom right of door
+  ];
+  G.walls.push(d.bed.slice());
+  for(var k=0;k<d.furn.length;k++) G.walls.push(d.furn[k].slice());
+
+  G.items = d.items.map(function(o){
+    var ty = TYPES[o.t];
+    return {x:o.x, y:o.y, value:ty.value, noise:ty.noise, icon:ty.icon, gone:false, pop:0};
+  });
+}
+
+/* ================= input ================= */
+var keys = {}, stick = {active:false, id:null, dx:0, dy:0, cx:0, cy:0};
+var joyEl = document.getElementById("joy"), knobEl = document.getElementById("knob");
+var stageEl = document.getElementById("stage");
+var JOY_R = 46;
+
+addEventListener("keydown", function(e){
+  keys[e.key.toLowerCase()] = true;
+  if(["arrowup","arrowdown","arrowleft","arrowright"," "].indexOf(e.key.toLowerCase()) >= 0) e.preventDefault();
+});
+addEventListener("keyup", function(e){ keys[e.key.toLowerCase()] = false; });
+
+function stickStart(e){
+  if(G.mode !== "play" || stick.active) return;
+  if(e.target && e.target.closest && e.target.closest("#hud")) return;   // don't grab HUD taps
+  var r = stageEl.getBoundingClientRect();
+  stick.active = true; stick.id = e.pointerId;
+  stick.cx = e.clientX; stick.cy = e.clientY; stick.dx = 0; stick.dy = 0;
+  joyEl.style.display = "block";
+  joyEl.style.left = (e.clientX - r.left - 55) + "px";
+  joyEl.style.top  = (e.clientY - r.top  - 55) + "px";
+  knobEl.style.left = "31px"; knobEl.style.top = "31px";
+}
+function stickMove(e){
+  if(!stick.active || e.pointerId !== stick.id) return;
+  var dx = e.clientX - stick.cx, dy = e.clientY - stick.cy;
+  var len = Math.sqrt(dx*dx + dy*dy);
+  if(len > JOY_R){ dx = dx/len*JOY_R; dy = dy/len*JOY_R; len = JOY_R; }
+  stick.dx = dx / JOY_R; stick.dy = dy / JOY_R;
+  knobEl.style.left = (31 + dx) + "px"; knobEl.style.top = (31 + dy) + "px";
+}
+function stickEnd(e){
+  if(!stick.active || (e.pointerId !== stick.id && e.type !== "pointercancel")) return;
+  stick.active = false; stick.id = null; stick.dx = 0; stick.dy = 0;
+  joyEl.style.display = "none";
+}
+stageEl.addEventListener("pointerdown", stickStart);
+addEventListener("pointermove", stickMove);
+addEventListener("pointerup", stickEnd);
+addEventListener("pointercancel", stickEnd);
+
+function inputVector(){
+  var x = stick.dx, y = stick.dy;
+  if(keys["arrowleft"] || keys.a) x -= 1;
+  if(keys["arrowright"]|| keys.d) x += 1;
+  if(keys["arrowup"]   || keys.w) y -= 1;
+  if(keys["arrowdown"] || keys.s) y += 1;
+  var len = Math.sqrt(x*x + y*y);
+  if(len > 1){ x /= len; y /= len; }
+  return {x:x, y:y};
+}
+
+/* ================= physics: box vs boxes ================= */
+function hits(x, y){
+  var l = x - PW/2, r = x + PW/2, t = y - PH/2, b = y + PH/2;
+  for(var i=0;i<G.walls.length;i++){
+    var w = G.walls[i];
+    if(l < w[0]+w[2] && r > w[0] && t < w[1]+w[3] && b > w[1]) return true;
+  }
+  return false;
+}
+function movePlayer(dt){
+  var v = inputVector();
+  var nx = G.px + v.x * SPEED * dt;
+  if(!hits(nx, G.py)) G.px = nx;
+  var ny = G.py + v.y * SPEED * dt;
+  if(!hits(G.px, ny)) G.py = ny;
+  G.px = Math.max(PW/2, Math.min(W-PW/2, G.px));
+  G.py = Math.max(PH/2, Math.min(H-PH/2 + 10, G.py));
+}
+
+/* ================= game logic ================= */
+function collect(){
+  for(var i=0;i<G.items.length;i++){
+    var it = G.items[i];
+    if(it.gone) continue;
+    if(Math.abs(it.x - G.px) < PW/2 + 14 && Math.abs(it.y - G.py) < PH/2 + 14){
+      it.gone = true; it.pop = 1;
+      G.money += it.value;
+      G.noise = Math.min(100, G.noise + it.noise);
+      G.shake = Math.min(10, it.noise * 0.35);
+      SFX.grab(); SFX.creak();
+      if(G.noise >= 100){ endLevel(false); return; }
+      if(G.noise >= 80 && G.lastWarn < 80){ G.lastWarn = 80; SFX.warn(); }
+      else if(G.noise >= 50 && G.lastWarn < 50){ G.lastWarn = 50; SFX.warn(); }
+    }
+  }
+}
+function checkExit(){
+  var e = G.exit;
+  if(G.px + PW/2 > e.x && G.px - PW/2 < e.x + e.w && G.py + PH/2 > e.y) endLevel(true);
+}
+
+/* ================= screens ================= */
+var scMenu = document.getElementById("scMenu"), scLevels = document.getElementById("scLevels"),
+    scEnd = document.getElementById("scEnd"), scPause = document.getElementById("scPause");
+function show(el){
+  [scMenu, scLevels, scEnd, scPause].forEach(function(s){ s.classList.toggle("on", s === el); });
+}
+function startLevel(i){
+  buildLevel(i); G.mode = "play"; show(null); stickEnd({type:"pointercancel"});
+}
+function endLevel(won){
+  G.mode = "end";
+  document.getElementById("endTitle").textContent = won ? "LEVEL COMPLETE" : "HE WOKE UP!";
+  if(won){
+    save.bank += G.money;
+    if(G.level + 1 >= save.unlocked) save.unlocked = Math.min(LEVELS.length, G.level + 2);
+    persist(); SFX.win();
+    document.getElementById("endText").innerHTML =
+      "You escaped with <b style='color:#ffd34d'>$" + G.money + "</b><br>" +
+      "Noise left behind: " + G.noise + " / 100<br><br>Total stolen: $" + save.bank;
+  }else{
+    SFX.lose();
+    document.getElementById("endText").innerHTML =
+      "One item too many.<br>You lost <b style='color:#ffd34d'>$" + G.money + "</b>.";
+  }
+  document.getElementById("bNext").style.display =
+    (won && G.level + 1 < LEVELS.length) ? "" : "none";
+  show(scEnd);
+}
+function buildGrid(){
+  var g = document.getElementById("grid"); g.innerHTML = "";
+  for(var i=0;i<LEVELS.length;i++){
+    (function(i){
+      var b = document.createElement("button");
+      b.className = "lv" + (i < save.unlocked ? "" : " locked");
+      b.textContent = i < save.unlocked ? (i+1) : "🔒";
+      if(i < save.unlocked) b.onclick = function(){ startLevel(i); };
+      g.appendChild(b);
+    })(i);
+  }
+}
+function toMenu(){
+  G.mode = "menu"; show(scMenu);
+  document.getElementById("bank").textContent = "Total stolen: $" + save.bank;
+}
+document.getElementById("bPlay").onclick   = function(){ audio(); startLevel(Math.min(save.unlocked - 1, LEVELS.length - 1)); };
+document.getElementById("bLevels").onclick = function(){ audio(); buildGrid(); show(scLevels); };
+document.getElementById("bBack").onclick   = toMenu;
+document.getElementById("bNext").onclick   = function(){ startLevel(Math.min(G.level + 1, LEVELS.length - 1)); };
+document.getElementById("bRetry").onclick  = function(){ startLevel(G.level); };
+document.getElementById("bMenu").onclick   = toMenu;
+document.getElementById("bResume").onclick = function(){ G.mode = "play"; show(null); };
+document.getElementById("bPRetry").onclick = function(){ startLevel(G.level); };
+document.getElementById("bPMenu").onclick  = toMenu;
+document.getElementById("btnpause").onclick = function(){
+  if(G.mode === "play"){ G.mode = "pause"; show(scPause); }
+  else if(G.mode === "pause"){ G.mode = "play"; show(null); }
+};
+
+/* ================= canvas & scaling ================= */
+var cv = document.getElementById("cv"), ctx = cv.getContext("2d");
+function resize(){
+  var vw = innerWidth, vh = innerHeight, VH = H + HUD_H;
+  var s = Math.min(vw / W, vh / VH);
+  var cw = Math.round(W * s), ch = Math.round(VH * s);
+  stageEl.style.width = cw + "px"; stageEl.style.height = ch + "px";
+  var dpr = Math.min(devicePixelRatio || 1, 2);
+  cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr);
+  var k = cw * dpr / W;
+  ctx.setTransform(k, 0, 0, k, 0, HUD_H * k);   // room drawn below the HUD strip
+}
+addEventListener("resize", resize);
+addEventListener("orientationchange", function(){ setTimeout(resize, 200); });
+resize();
+
+/* ================= drawing ================= */
+function rrect(x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.arcTo(x+w, y, x+w, y+h, r);
+  ctx.arcTo(x+w, y+h, x, y+h, r);
+  ctx.arcTo(x, y+h, x, y, r);
+  ctx.arcTo(x, y, x+w, y, r);
+  ctx.closePath();
+}
+function sleepState(){
+  if(G.noise <= 50) return 0;      // asleep
+  if(G.noise <= 80) return 1;      // stirring
+  if(G.noise < 100) return 2;      // almost awake
+  return 3;                        // awake
+}
+function drawRoom(){
+  ctx.fillStyle = "#3b2f2a"; ctx.fillRect(0, 0, W, H);            // wall colour
+  ctx.fillStyle = "#6b5340"; ctx.fillRect(WT, WT, W-WT*2, H-WT*2); // floor
+  ctx.strokeStyle = "#00000018"; ctx.lineWidth = 2;
+  for(var y = WT + 40; y < H - WT; y += 40){
+    ctx.beginPath(); ctx.moveTo(WT, y); ctx.lineTo(W-WT, y); ctx.stroke();
+  }
+  // furniture (skip the 5 boundary walls and the bed at index 5)
+  for(var i = 6; i < G.walls.length; i++){
+    var w = G.walls[i];
+    ctx.fillStyle = "#00000033"; rrect(w[0]+3, w[1]+5, w[2], w[3], 6); ctx.fill();
+    ctx.fillStyle = "#8d6a4b"; rrect(w[0], w[1], w[2], w[3], 6); ctx.fill();
+    ctx.fillStyle = "#a37e5c"; rrect(w[0]+4, w[1]+4, w[2]-8, w[3]-8, 4); ctx.fill();
+  }
+}
+function drawBed(){
+  var b = G.bed, st = sleepState();
+  ctx.fillStyle = "#00000038"; rrect(b[0]+3, b[1]+6, b[2], b[3], 8); ctx.fill();
+  ctx.fillStyle = "#efe6da"; rrect(b[0], b[1], b[2], b[3], 8); ctx.fill();      // mattress
+  ctx.fillStyle = "#5a7fd6"; rrect(b[0], b[1]+b[3]*0.42, b[2], b[3]*0.58, 8); ctx.fill(); // blanket
+
+  var hx = b[0] + b[2]/2, hy = b[1] + b[3]*0.26;
+  ctx.fillStyle = "#fff"; rrect(hx-26, hy-15, 52, 30, 8); ctx.fill();           // pillow
+  ctx.fillStyle = "#f0c49b"; ctx.beginPath(); ctx.arc(hx, hy, 15, 0, 6.2832); ctx.fill(); // head
+  ctx.fillStyle = "#3b2b22";                                                     // hair (top of head)
+  ctx.beginPath(); ctx.arc(hx, hy - 7, 14, 3.1416, 6.2832); ctx.fill();
+
+  var ey = hy + 1;
+  ctx.strokeStyle = "#3b2b22"; ctx.lineWidth = 1.7; ctx.lineCap = "round";
+  ctx.fillStyle = "#3b2b22";
+  if(st === 0){                                   // closed eyes:  ‿   ‿
+    ctx.beginPath();
+    ctx.moveTo(hx-9, ey-1); ctx.quadraticCurveTo(hx-6, ey+3, hx-3, ey-1);
+    ctx.moveTo(hx+3, ey-1); ctx.quadraticCurveTo(hx+6, ey+3, hx+9, ey-1);
+    ctx.stroke();
+  }else if(st === 1){                             // squinting:  —   —
+    ctx.beginPath(); ctx.moveTo(hx-9,ey); ctx.lineTo(hx-4,ey);
+    ctx.moveTo(hx+4,ey); ctx.lineTo(hx+9,ey); ctx.stroke();
+  }else{                                          // eyes open
+    var r = st === 2 ? 2.2 : 3.2;
+    ctx.beginPath(); ctx.arc(hx-6, ey, r, 0, 6.2832); ctx.arc(hx+6, ey, r, 0, 6.2832); ctx.fill();
+  }
+  ctx.beginPath();                                // mouth
+  if(st === 3){ ctx.arc(hx, ey+9, 3.5, 0, 6.2832); ctx.fill(); }
+  else { ctx.moveTo(hx-3.5, ey+9); ctx.lineTo(hx+3.5, ey+9); ctx.stroke(); }
+
+  if(st === 0){                                   // sleepy Z's
+    ctx.fillStyle = "#ffffffcc"; ctx.textAlign = "left";
+    var f = (G.t * 0.9) % 1;
+    ctx.font = "bold 13px system-ui"; ctx.globalAlpha = 1 - f;
+    ctx.fillText("z", hx + 20, hy - 12 - f * 16);
+    ctx.font = "bold 17px system-ui";
+    ctx.fillText("Z", hx + 28, hy - 24 - f * 20);
+    ctx.globalAlpha = 1;
+  }else if(st > 0){
+    ctx.textAlign = "center";
+    ctx.font = "bold 20px system-ui";
+    ctx.fillStyle = st === 3 ? "#ff5252" : (st === 2 ? "#ffb020" : "#ffe08a");
+    ctx.fillText(st === 3 ? "!!" : (st === 2 ? "!" : "?"), hx, b[1] - 4);
+  }
+}
+function drawExit(){
+  var e = G.exit, pulse = 0.5 + 0.5 * Math.sin(G.t * 4);
+  ctx.fillStyle = "rgba(76,193,114," + (0.25 + 0.2 * pulse) + ")";
+  ctx.fillRect(e.x, e.y - 26, e.w, e.h + 26);
+  ctx.fillStyle = "#2f8f4e"; ctx.fillRect(e.x, H - WT, e.w, WT);
+  ctx.fillStyle = "#dcffe6"; ctx.textAlign = "center";
+  ctx.font = "bold 12px system-ui";
+  ctx.fillText("EXIT", e.x + e.w/2, H - 20);
+  ctx.beginPath();                                 // down arrow
+  ctx.moveTo(e.x + e.w/2 - 7, H - 44); ctx.lineTo(e.x + e.w/2 + 7, H - 44);
+  ctx.lineTo(e.x + e.w/2, H - 34); ctx.closePath(); ctx.fill();
+}
+function drawItems(){
+  ctx.textAlign = "center";
+  for(var i=0;i<G.items.length;i++){
+    var it = G.items[i];
+    if(it.gone){
+      if(it.pop > 0){                              // little "+$" pop
+        it.pop -= 0.02;
+        ctx.globalAlpha = Math.max(0, it.pop);
+        ctx.fillStyle = "#ffd34d"; ctx.font = "bold 14px system-ui";
+        ctx.fillText("+$" + it.value, it.x, it.y - 20 * (1 - it.pop));
+        ctx.globalAlpha = 1;
+      }
+      continue;
+    }
+    var bob = Math.sin(G.t * 2.6 + it.x) * 1.5;
+    ctx.fillStyle = "#00000030";
+    ctx.beginPath(); ctx.ellipse(it.x, it.y + 15, 12, 4, 0, 0, 6.2832); ctx.fill();
+    ctx.font = "23px system-ui";
+    ctx.fillText(it.icon, it.x, it.y + 8 + bob);
+    ctx.font = "bold 10px system-ui";
+    ctx.fillStyle = "#ffe07a"; ctx.fillText("$" + it.value, it.x, it.y - 15 + bob);
+    ctx.fillStyle = "#ff9c6e"; ctx.fillText("+" + it.noise, it.x, it.y + 24 + bob);
+  }
+}
+function drawPlayer(){
+  var x = G.px, y = G.py;
+  ctx.fillStyle = "#00000038";
+  ctx.beginPath(); ctx.ellipse(x, y + 13, 11, 4, 0, 0, 6.2832); ctx.fill();
+  ctx.fillStyle = "#2b2f45"; rrect(x-10, y-6, 20, 20, 6); ctx.fill();   // body
+  ctx.fillStyle = "#f0c49b"; ctx.beginPath(); ctx.arc(x, y-11, 8, 0, 6.2832); ctx.fill(); // head
+  ctx.fillStyle = "#1a1d2b"; ctx.beginPath(); ctx.arc(x, y-13, 8, 3.14, 6.2832); ctx.fill(); // mask
+  ctx.fillStyle = "#fff";
+  ctx.beginPath(); ctx.arc(x-3, y-12, 1.6, 0, 6.2832); ctx.arc(x+3, y-12, 1.6, 0, 6.2832); ctx.fill();
+}
+function draw(){
+  ctx.save();
+  if(G.shake > 0.2){
+    ctx.translate((Math.random()-0.5) * G.shake, (Math.random()-0.5) * G.shake);
+  }
+  drawRoom(); drawExit(); drawBed(); drawItems(); drawPlayer();
+  if(G.noise > 80){                                 // danger vignette
+    var a = (G.noise - 80) / 20 * (0.25 + 0.15 * Math.sin(G.t * 8));
+    ctx.fillStyle = "rgba(255,40,40," + a.toFixed(3) + ")";
+    ctx.fillRect(0, 0, W, WT + 6); ctx.fillRect(0, H-WT-6, W, WT + 6);
+    ctx.fillRect(0, 0, WT + 6, H); ctx.fillRect(W-WT-6, 0, WT + 6, H);
+  }
+  ctx.restore();
+}
+
+/* ================= HUD ================= */
+var elMoney = document.getElementById("money"), elBar = document.getElementById("noisebar"),
+    elNoise = document.getElementById("noisetxt"), elLvl = document.getElementById("lvl");
+function hud(){
+  elMoney.textContent = "$" + G.money;
+  elBar.style.width = G.noise + "%";
+  elBar.style.background = G.noise > 80 ? "#ff4d4d" : (G.noise > 50 ? "#ffb020" : "#4cc172");
+  elNoise.textContent = G.noise + " / 100";
+  elLvl.textContent = "LV " + (G.level + 1);
+}
+
+/* ================= loop ================= */
+var last = 0;
+function frame(now){
+  var dt = Math.min((now - last) / 1000, 0.05); last = now;
+  G.t += dt;
+  if(G.mode === "play"){
+    movePlayer(dt); collect();
+    if(G.mode === "play") checkExit();
+  }
+  if(G.shake > 0) G.shake = Math.max(0, G.shake - dt * 22);
+  draw(); hud();
+  requestAnimationFrame(frame);
+}
+buildLevel(0);
+toMenu();
+requestAnimationFrame(function(t){ last = t; frame(t); });
+})();
+</script>
+</body>
+</html>
