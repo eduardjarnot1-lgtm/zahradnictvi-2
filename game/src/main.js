@@ -316,32 +316,64 @@ export function boot() {
   }
 
   // ---------------------------------------------------------------- HUD
+  // The HUD is repainted every frame, so element lookups are cached and writes
+  // are skipped when the value has not changed: a redundant textContent or
+  // style write still costs a style recalculation.
+  const hudEls = {
+    money: $('money'), time: $('time'), level: $('lvl'),
+    bar: $('noisebar'), noise: $('noisetxt'), wrap: $('noisewrap')
+  };
+  const hudLast = {};
+  const setText = (key, el, value) => {
+    if (hudLast[key] === value) return;
+    hudLast[key] = value;
+    el.textContent = value;
+  };
+  const setStyle = (key, el, prop, value) => {
+    if (hudLast[key] === value) return;
+    hudLast[key] = value;
+    el.style[prop] = value;
+  };
+
   function paintHud() {
     if (!sim) return;
-    const percent = (sim.noise / TUNING.noise.max) * 100;
-    $('money').textContent = `$${sim.money.toLocaleString()}`;
+    setText('money', hudEls.money, `$${sim.money.toLocaleString()}`);
+    setText('level', hudEls.level, `LV ${sim.level.id}`);
 
     const seconds = Math.max(0, sim.timeLeft);
-    const timeEl = $('time');
-    timeEl.textContent = seconds.toFixed(1);
+    setText('time', hudEls.time, seconds.toFixed(1));
     const urgent = seconds <= TUNING.time.warnAt && sim.status === 'running';
-    timeEl.classList.toggle('warn', urgent);
+    if (hudLast.urgent !== urgent) {
+      hudLast.urgent = urgent;
+      hudEls.time.classList.toggle('warn', urgent);
+    }
     // One tick per second in the last few seconds.
     const whole = Math.ceil(seconds);
     if (urgent && whole !== lastTick) { lastTick = whole; audio.tick(); }
     if (!urgent) lastTick = -1;
 
-    $('noisewrap').classList.toggle('calming',
-      sim.stillFor > TUNING.recovery.delay && sim.noise > 0 && sim.status === 'running');
-    const bar = $('noisebar');
-    bar.style.width = `${percent}%`;
-    bar.style.background =
+    const rounded = Math.round(sim.noise);
+    setText('noiseText', hudEls.noise, `${rounded} / ${TUNING.noise.max}`);
+    setStyle('barWidth', hudEls.bar, 'width', `${(sim.noise / TUNING.noise.max) * 100}%`);
+    setStyle('barColor', hudEls.bar, 'background',
       sim.noise >= TUNING.noise.almostAt ? '#ff4d4d'
-        : sim.noise >= TUNING.noise.stirringAt ? '#ffb020' : '#4cc172';
-    $('noisetxt').textContent = `${Math.round(sim.noise)} / ${TUNING.noise.max}`;
-    $('lvl').textContent = `LV ${sim.level.id}`;
-    $('noisewrap').classList.toggle('danger', sim.noise >= TUNING.noise.almostAt);
-    takeButton.classList.toggle('on', !!sim.targetId);
+        : sim.noise >= TUNING.noise.stirringAt ? '#ffb020' : '#4cc172');
+
+    const danger = sim.noise >= TUNING.noise.almostAt;
+    if (hudLast.danger !== danger) {
+      hudLast.danger = danger;
+      hudEls.wrap.classList.toggle('danger', danger);
+    }
+    const calming = sim.stillFor > TUNING.recovery.delay && sim.noise > 0 && sim.status === 'running';
+    if (hudLast.calming !== calming) {
+      hudLast.calming = calming;
+      hudEls.wrap.classList.toggle('calming', calming);
+    }
+    const targeted = !!sim.targetId;
+    if (hudLast.targeted !== targeted) {
+      hudLast.targeted = targeted;
+      takeButton.classList.toggle('on', targeted);
+    }
   }
 
   // ---------------------------------------------------------------- loop
@@ -380,15 +412,20 @@ export function boot() {
         }
       }
 
-      for (const pop of pops) pop.life -= elapsed * 1.2;
-      pops = pops.filter((p) => p.life > 0);
-      for (const spark of sparks) {
-        spark.life -= elapsed * 1.9;
-        spark.x += spark.vx * elapsed;
-        spark.y += spark.vy * elapsed;
-        spark.vy += 150 * elapsed;
+      // Nothing to update most frames; skip the array churn entirely then.
+      if (pops.length) {
+        for (const pop of pops) pop.life -= elapsed * 1.2;
+        if (pops.some((p) => p.life <= 0)) pops = pops.filter((p) => p.life > 0);
       }
-      sparks = sparks.filter((s) => s.life > 0);
+      if (sparks.length) {
+        for (const spark of sparks) {
+          spark.life -= elapsed * 1.9;
+          spark.x += spark.vx * elapsed;
+          spark.y += spark.vy * elapsed;
+          spark.vy += 150 * elapsed;
+        }
+        if (sparks.some((s) => s.life <= 0)) sparks = sparks.filter((s) => s.life > 0);
+      }
 
       if (sim) {
         renderer.draw(sim, Math.min(1, accumulator / STEP_SECONDS), clock, pops, stats, sparks);

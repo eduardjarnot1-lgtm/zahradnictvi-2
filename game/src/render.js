@@ -60,13 +60,22 @@ export function createRenderer(canvas, options = {}) {
     roomKey = key;
   }
 
+  // The exit glow's geometry never changes, only its opacity, so the gradient
+  // is built once instead of sixty times a second.
+  let exitGlow = null;
+  let exitGlowKey = '';
   function drawExit(sim, time) {
     const exit = sim.level.exit;
     const pulse = 0.5 + 0.5 * Math.sin(time * 3);
-    const glow = ctx.createLinearGradient(0, exit.y - 34, 0, H);
-    glow.addColorStop(0, 'rgba(76,193,114,0)');
-    glow.addColorStop(1, `rgba(108,232,150,${0.30 + 0.16 * pulse})`);
-    ctx.fillStyle = glow;
+    const alpha = (0.30 + 0.16 * pulse).toFixed(2);
+    const key = `${exit.y}:${alpha}`;
+    if (exitGlowKey !== key) {
+      exitGlow = ctx.createLinearGradient(0, exit.y - 34, 0, H);
+      exitGlow.addColorStop(0, 'rgba(76,193,114,0)');
+      exitGlow.addColorStop(1, `rgba(108,232,150,${alpha})`);
+      exitGlowKey = key;
+    }
+    ctx.fillStyle = exitGlow;
     ctx.fillRect(exit.x, exit.y - 34, exit.w, exit.h + 34);
 
     ctx.fillStyle = '#2f8f4e';
