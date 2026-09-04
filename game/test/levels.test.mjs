@@ -124,12 +124,70 @@ test('taking two named items pays exactly what they are worth', () => {
 
 test('the clock shrinks with the campaign but never below the floor', () => {
   assert.equal(timeLimit(LEVELS[0]), TUNING.time.base);
-  const limits = LEVELS.map(timeLimit);
-  for (let i = 1; i < limits.length; i++) {
-    assert.ok(limits[i] <= limits[i - 1], 'the clock must never get more generous');
+  // The base clock shrinks monotonically; a level may then add an allowance
+  // for being physically bigger to cross.
+  const base = LEVELS.map((l) => timeLimit(l) - (l.extraTime || 0));
+  for (let i = 1; i < base.length; i++) {
+    assert.ok(base[i] <= base[i - 1], 'the base clock must never get more generous');
   }
-  assert.ok(limits[limits.length - 1] >= TUNING.time.floor);
-  assert.ok(limits[limits.length - 1] < TUNING.time.base, 'later levels must be tighter');
+  for (const level of LEVELS) {
+    assert.ok(timeLimit(level) >= TUNING.time.floor);
+    assert.ok(timeLimit(level) <= TUNING.time.base + 12, 'no level should be leisurely');
+  }
+  assert.ok(base[base.length - 1] < TUNING.time.base, 'later levels must be tighter');
+});
+
+test('only the big partitioned maps carry a time allowance', () => {
+  for (const level of LEVELS) {
+    const partitions = level.colliders.filter((c) => c.type === 'partition').length;
+    if (level.extraTime > 0) {
+      assert.ok(partitions > 0, `level ${level.id} takes extra time without being bigger`);
+    }
+    if (partitions > 0) {
+      assert.ok(level.extraTime > 0,
+        `level ${level.id} is partitioned but gets no extra clock to cross it`);
+    }
+  }
+});
+
+test('the campaign grows from one room into connected areas', () => {
+  const early = LEVELS.slice(0, 10);
+  const late = LEVELS.slice(-8);
+  for (const level of early) {
+    assert.equal(level.colliders.filter((c) => c.type === 'partition').length, 0,
+      `level ${level.id} should stay a simple single room`);
+  }
+  for (const level of late) {
+    assert.ok(level.colliders.filter((c) => c.type === 'partition').length >= 3,
+      `level ${level.id} should be a multi-area map`);
+  }
+  // ...and the late rooms are worth more and busier than the early ones.
+  const earlyItems = early.reduce((n, l) => n + l.items.length, 0) / early.length;
+  const lateItems = late.reduce((n, l) => n + l.items.length, 0) / late.length;
+  assert.ok(lateItems > earlyItems);
+});
+
+test('the two-doorway house really does offer independent routes', () => {
+  // Seal either doorway and the level is still completable through the other.
+  // That is the whole point of the layout, and it is easy to lose by accident.
+  const level = LEVELS.find((l) => l.layout === 'G');
+  assert.ok(level, 'expected a two-doorway layout');
+
+  const doorways = [{ x: 66, y: 258, w: 50, h: 14 }, { x: 262, y: 258, w: 50, h: 14 }];
+  for (const [index, door] of doorways.entries()) {
+    const sealed = structuredClone(level);
+    sealed.colliders.push({ type: 'partition', ...door });
+    const result = validateLevel(sealed);
+    assert.equal(result.ok, true,
+      `sealing doorway ${index} breaks the level: ${result.errors.join('; ')}`);
+  }
+
+  // And sealing both must break it — otherwise the partition is not dividing
+  // anything and the test above proves nothing.
+  const bothSealed = structuredClone(level);
+  for (const door of doorways) bothSealed.colliders.push({ type: 'partition', ...door });
+  assert.equal(validateLevel(bothSealed).ok, false,
+    'sealing both doorways should cut the room in two');
 });
 
 test('taking everything wakes him on every level that should', () => {

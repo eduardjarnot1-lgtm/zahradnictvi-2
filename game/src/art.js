@@ -86,7 +86,13 @@ const THEMES = {
                grain: 'rgba(190,140,88,0.28)', light: '255,214,150', vignette: '38,20,54' },
   penthouse: { wall: '#2c2f3d', lip: '#3d4152', shade: '#1f222d', skirt: '#d3b166',
                floor: '#7d6242', alt: '#74593b', seam: 'rgba(92,70,44,0.6)',
-               grain: 'rgba(170,140,100,0.26)', light: '255,236,190', vignette: '14,16,24' }
+               grain: 'rgba(170,140,100,0.26)', light: '255,236,190', vignette: '14,16,24' },
+  house:     { wall: '#54484f', lip: '#6b5c65', shade: '#3f363c', skirt: '#c4a68f',
+               floor: '#a97c50', alt: '#9e7348', seam: 'rgba(126,88,52,0.6)',
+               grain: 'rgba(200,156,110,0.28)', light: '255,228,172', vignette: '30,24,30' },
+  mansion:   { wall: '#3a2e46', lip: '#4d3d5c', shade: '#2a2033', skirt: '#cfae74',
+               floor: '#8a6a4c', alt: '#806244', seam: 'rgba(104,78,54,0.6)',
+               grain: 'rgba(186,152,112,0.26)', light: '255,232,180', vignette: '24,16,32' }
 };
 
 let T = THEMES.bedroom;   // set once per room paint; drawing is synchronous
@@ -617,6 +623,33 @@ function drawCreakZone(ctx, zone) {
   ctx.restore();
 }
 
+// An interior wall: same material as the room's shell, with a lit top edge and
+// a soft shadow so it reads as standing up out of the floor.
+function drawPartition(ctx, c) {
+  ctx.fillStyle = 'rgba(30,16,26,0.34)';
+  roundRect(ctx, c.x + 3, c.y + 6, c.w, c.h, 3);
+  ctx.fill();
+  fillRound(ctx, c.x, c.y, c.w, c.h, 3, T.wall);
+  fillRound(ctx, c.x, c.y, c.w, Math.min(4, c.h * 0.4), 2, T.lip);
+  ctx.fillStyle = T.skirt;                                   // skirting, both faces
+  if (c.w > c.h) {
+    ctx.fillRect(c.x, c.y + c.h - 2.5, c.w, 2.5);
+    ctx.fillRect(c.x, c.y, c.w, 2);
+  } else {
+    ctx.fillRect(c.x, c.y, 2, c.h);
+    ctx.fillRect(c.x + c.w - 2, c.y, 2, c.h);
+  }
+  // Doorway jambs at the open ends.
+  ctx.fillStyle = T.shade;
+  if (c.w > c.h) {
+    ctx.fillRect(c.x, c.y, 2, c.h);
+    ctx.fillRect(c.x + c.w - 2, c.y, 2, c.h);
+  } else {
+    ctx.fillRect(c.x, c.y, c.w, 2);
+    ctx.fillRect(c.x, c.y + c.h - 2, c.w, 2);
+  }
+}
+
 // Everything that never moves, drawn once per level into an offscreen canvas.
 export function paintStaticRoom(ctx, level) {
   T = THEMES[level.theme] || THEMES.bedroom;
@@ -628,6 +661,10 @@ export function paintStaticRoom(ctx, level) {
   // After the walls: the window is cut into one, and its light falls on top
   // of the floor that is already down.
   drawSunbeam(ctx, WINDOWS[level.layout] || 'left');
+  // Interior walls first, so furniture standing against them overlaps correctly.
+  for (const c of level.colliders) {
+    if (c.type === 'partition') drawPartition(ctx, c);
+  }
   for (const c of level.colliders) {
     if (c.type === 'furniture') drawFurniture(ctx, c);
   }

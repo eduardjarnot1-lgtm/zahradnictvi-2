@@ -44,16 +44,18 @@ export function furnitureStyle(c) {
   return options[Math.floor(hash(c.x + 7, c.y + 13) * options.length) % options.length];
 }
 
-// Walls are the room, not furniture: brushing one costs nothing.
+// Walls are the room, not furniture: brushing one costs nothing. Interior
+// partitions are walls too — they are the building, not something standing in it.
 export function bumpNoise(collider) {
-  if (!collider || collider.type === 'wall') return 0;
+  if (!collider || collider.type === 'wall' || collider.type === 'partition') return 0;
   return TUNING.hazards.bump[furnitureStyle(collider)] || 0;
 }
 
-// Seconds on the clock for a level. Gentle slope, with a floor.
+// Seconds on the clock for a level: a gentle slope with a floor, plus whatever
+// allowance a larger, partitioned map declares for itself.
 export function timeLimit(level) {
   const { base, perLevel, floor } = TUNING.time;
-  return Math.max(floor, base - Math.floor((level.id - 1) * perLevel));
+  return Math.max(floor, base - Math.floor((level.id - 1) * perLevel)) + (level.extraTime || 0);
 }
 
 export function itemStats(type) {

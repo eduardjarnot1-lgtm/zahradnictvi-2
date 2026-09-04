@@ -55,6 +55,51 @@ const LAYOUTS = {
       [160, 300, 110, 42], [250, 420, 120, 44], [40, 430, 90, 44]
     ]
   },
+  // --- multi-area layouts, for the sophisticated end of the campaign -------
+  // Two rooms and two ways between them: the short hop on the right, or the
+  // long way round on the left past less furniture.
+  G: {
+    bed: [148, 24, 110, 82],
+    partitions: [
+      [14, 258, 52, 14], [116, 258, 146, 14], [312, 258, 74, 14]
+    ],
+    furniture: [
+      [30, 130, 84, 46], [292, 132, 80, 48],
+      [36, 300, 120, 42], [246, 300, 120, 44],
+      [36, 420, 62, 120], [150, 430, 150, 42], [316, 430, 60, 60]
+    ]
+  },
+  // A bedroom and a study upstairs of a shared lounge, joined by one doorway:
+  // the valuable things are furthest from the way out.
+  H: {
+    bed: [26, 30, 104, 78],
+    partitions: [
+      [190, 14, 14, 168],
+      [14, 316, 116, 14], [196, 316, 190, 14]
+    ],
+    furniture: [
+      [30, 150, 96, 44],
+      [216, 40, 90, 50], [306, 56, 70, 88], [212, 186, 84, 44],
+      [40, 360, 130, 44], [250, 356, 120, 44],
+      [36, 456, 90, 46], [230, 470, 140, 44]
+    ]
+  },
+  // A central corridor with a room off each side, opening into a hall. The bed
+  // sits at the head of the corridor, so both side rooms cost a walk past him.
+  I: {
+    bed: [150, 22, 100, 74],
+    partitions: [
+      [122, 14, 14, 70], [122, 140, 14, 128],
+      [264, 14, 14, 110], [264, 180, 14, 88]
+    ],
+    furniture: [
+      [140, 150, 70, 42],
+      [30, 40, 78, 46], [28, 170, 80, 44],
+      [286, 40, 88, 48], [290, 200, 80, 50],
+      [40, 320, 120, 44], [246, 316, 124, 44],
+      [36, 430, 64, 120], [140, 450, 160, 42], [320, 440, 58, 58]
+    ]
+  },
   F: {
     bed: [230, 20, 140, 96],
     furniture: [
@@ -73,7 +118,10 @@ const RUGS = {
   C: { x: 96, y: 356, w: 190, h: 64 },
   D: { x: 150, y: 120, w: 150, h: 130 },
   E: { x: 130, y: 180, w: 140, h: 100 },
-  F: { x: 120, y: 200, w: 150, h: 100 }
+  F: { x: 120, y: 200, w: 150, h: 100 },
+  G: { x: 150, y: 300, w: 160, h: 100 },
+  H: { x: 210, y: 100, w: 150, h: 90 },
+  I: { x: 140, y: 300, w: 150, h: 110 }
 };
 
 function makeLevel(id, layoutKey, spawn, exitX, items, options = {}) {
@@ -81,6 +129,10 @@ function makeLevel(id, layoutKey, spawn, exitX, items, options = {}) {
   const bed = collider('bed', ...layout.bed);
   const colliders = [
     ...boundary(exitX),
+    // Interior walls. These are what turn one rectangle into connected areas,
+    // and they are structural rather than furniture: like the outer walls they
+    // are part of the building, so brushing one costs no noise.
+    ...(layout.partitions || []).map((w) => collider('partition', ...w)),
     bed,
     ...layout.furniture.map((f) => collider('furniture', ...f))
   ];
@@ -91,6 +143,10 @@ function makeLevel(id, layoutKey, spawn, exitX, items, options = {}) {
     // Theme drives palette and furniture flavour only — never the rules.
     theme: options.theme || 'bedroom',
     name: options.name || 'Bedroom',
+    // Bigger, partitioned rooms take longer to cross, so they carry their own
+    // allowance on top of the campaign's shrinking clock. Without it the
+    // sophisticated levels would land on the time floor and be unwinnable.
+    extraTime: options.extraTime || 0,
     // Creaky boards: plain trigger rectangles on the floor.
     creaks: (options.creaks || []).map(([x, y, w, h], i) => ({ id: `L${id}-c${i}`, x, y, w, h })),
     // Rugs. These are gameplay, not decoration: footsteps are silent on them,
@@ -240,7 +296,53 @@ export const LEVELS = [
     [180, 90, 'goldbar'], [120, 130, 'goldbar'], [60, 300, 'diamond'],
     [250, 290, 'painting'], [330, 350, 'goldbar'], [60, 370, 'diamond'],
     [180, 400, 'necklace'], [150, 500, 'painting'], [330, 520, 'vase']
-  ], { theme: 'penthouse', name: 'Penthouse', creaks: [[140, 240, 100, 44], [230, 460, 90, 44]] })
+  ], { theme: 'penthouse', name: 'Penthouse', creaks: [[140, 240, 100, 44], [230, 460, 90, 44]] }),
+
+  // ---- Large house: two rooms, two doorways, two routes ------------------
+  makeLevel(25, 'G', [200, 548], 160, [
+    [200, 150, 'camera'], [70, 60, 'wallet'], [330, 60, 'ring'],
+    [200, 220, 'tablet'], [90, 350, 'laptop'], [200, 360, 'console'],
+    [330, 380, 'headphones'], [120, 560, 'coin']
+  ], { theme: 'house', name: 'Large House', extraTime: 8, creaks: [[66, 262, 50, 44]] }),
+  makeLevel(26, 'G', [200, 548], 160, [
+    [200, 150, 'necklace'], [70, 60, 'ring'], [330, 60, 'camera'],
+    [200, 220, 'speaker'], [90, 350, 'console'], [200, 360, 'mirror'],
+    [330, 380, 'tablet'], [120, 560, 'wallet'], [286, 520, 'coin']
+  ], { theme: 'house', name: 'Large House', extraTime: 8, creaks: [[66, 262, 50, 44], [262, 262, 50, 44]] }),
+
+  // ---- The study is furthest from the door, and worth the most -----------
+  makeLevel(27, 'H', [200, 548], 160, [
+    [160, 60, 'jewel'], [70, 250, 'cash'], [160, 240, 'laptop'],
+    [350, 250, 'painting'], [250, 130, 'console'], [200, 400, 'watch'],
+    [200, 540, 'coin'], [350, 430, 'camera']
+  ], { theme: 'house', name: 'Large House', extraTime: 9, creaks: [[130, 320, 66, 44]] }),
+  makeLevel(28, 'H', [200, 548], 160, [
+    [160, 60, 'diamond'], [70, 250, 'necklace'], [160, 240, 'vase'],
+    [350, 250, 'painting'], [250, 130, 'mirror'], [200, 400, 'console'],
+    [200, 540, 'wallet'], [350, 430, 'speaker']
+  ], { theme: 'house', name: 'Large House', extraTime: 9, creaks: [[130, 320, 66, 44], [40, 400, 60, 44]] }),
+
+  // ---- Mansion: side rooms cost a walk past the bed ----------------------
+  makeLevel(29, 'I', [200, 548], 160, [
+    [200, 110, 'painting'], [66, 110, 'jewel'], [66, 250, 'necklace'],
+    [330, 130, 'diamond'], [330, 280, 'mirror'], [200, 250, 'ring'],
+    [200, 390, 'camera'], [60, 560, 'coin']
+  ], { theme: 'mansion', name: 'Mansion', extraTime: 11, creaks: [[136, 200, 60, 50]] }),
+  makeLevel(30, 'I', [200, 548], 160, [
+    [200, 110, 'goldbar'], [66, 110, 'painting'], [66, 250, 'diamond'],
+    [330, 130, 'goldbar'], [330, 280, 'necklace'], [200, 250, 'vase'],
+    [200, 390, 'mirror'], [60, 560, 'wallet']
+  ], { theme: 'mansion', name: 'Mansion', extraTime: 11, creaks: [[136, 200, 60, 50], [190, 290, 80, 40]] }),
+  makeLevel(31, 'I', [200, 548], 160, [
+    [200, 110, 'goldbar', 'bonus'], [66, 110, 'diamond'], [66, 250, 'painting'],
+    [330, 130, 'diamond'], [330, 280, 'goldbar'], [200, 250, 'necklace'],
+    [200, 390, 'jewel'], [60, 560, 'ring'], [286, 520, 'coin']
+  ], { theme: 'mansion', name: 'Mansion', extraTime: 11, creaks: [[136, 200, 60, 50], [190, 290, 80, 40]] }),
+  makeLevel(32, 'I', [200, 548], 160, [
+    [200, 110, 'goldbar', 'bonus'], [66, 110, 'goldbar'], [66, 250, 'diamond'],
+    [330, 130, 'goldbar'], [330, 280, 'diamond'], [200, 250, 'painting'],
+    [200, 390, 'necklace'], [60, 560, 'vase'], [286, 520, 'ring']
+  ], { theme: 'mansion', name: 'Mansion', extraTime: 11, creaks: [[136, 200, 60, 50], [190, 290, 80, 40]] })
 ];
 
 export const collidersOfType = (level, type) =>

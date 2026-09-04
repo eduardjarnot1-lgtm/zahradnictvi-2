@@ -85,6 +85,27 @@ upgrades and none of them makes a stolen item quieter — a test asserts this,
 because the moment the shop can soften the risk, the core decision stops
 mattering.
 
+### Map structure
+
+Levels 1-24 are single rooms. From 25 on they are **multi-area maps**: interior
+walls (`partition` colliders) divide the space into connected rooms joined by
+doorways. Partitions are part of the building, so like the outer walls they
+cost no noise to brush — furniture remains the hazard.
+
+The layouts are designed around choices rather than complexity for its own
+sake. Layout `G` joins two rooms with *two* doorways, so there is a short noisy
+route and a long clear one; a test seals each doorway in turn and asserts the
+level is still completable through the other, then seals both and asserts it
+breaks — otherwise the first half of the test would prove nothing. Layout `H`
+puts the study, which holds the best things, furthest from the way out. Layout
+`I` is a corridor with a room off each side and the bed at its head, so both
+side rooms cost a walk past him.
+
+Bigger maps take longer to cross, so a partitioned level declares its own
+`extraTime` on top of the campaign's shrinking clock. Without it the
+sophisticated levels land on the 15s floor and are simply unwinnable; a test
+asserts the allowance and the partitions go together in both directions.
+
 ### Chapters
 
 Levels are grouped into themed chapters (Bedroom, Apartment, Hotel, Office,
