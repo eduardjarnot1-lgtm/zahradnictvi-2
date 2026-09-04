@@ -65,6 +65,17 @@ const LAYOUTS = {
   }
 };
 
+// One rug per layout, positioned to offer a genuine alternative route rather
+// than sitting decoratively out of the way.
+const RUGS = {
+  A: { x: 96, y: 372, w: 190, h: 118 },
+  B: { x: 60, y: 92, w: 120, h: 96 },
+  C: { x: 96, y: 356, w: 190, h: 64 },
+  D: { x: 150, y: 120, w: 150, h: 130 },
+  E: { x: 130, y: 180, w: 140, h: 100 },
+  F: { x: 120, y: 200, w: 150, h: 100 }
+};
+
 function makeLevel(id, layoutKey, spawn, exitX, items, options = {}) {
   const layout = LAYOUTS[layoutKey];
   const bed = collider('bed', ...layout.bed);
@@ -82,13 +93,24 @@ function makeLevel(id, layoutKey, spawn, exitX, items, options = {}) {
     name: options.name || 'Bedroom',
     // Creaky boards: plain trigger rectangles on the floor.
     creaks: (options.creaks || []).map(([x, y, w, h], i) => ({ id: `L${id}-c${i}`, x, y, w, h })),
+    // Rugs. These are gameplay, not decoration: footsteps are silent on them,
+    // which is what makes a longer route worth considering. The renderer draws
+    // them from this same data, so what looks soft is soft.
+    rugs: RUGS[layoutKey] ? [RUGS[layoutKey]] : [],
     spawn: { x: spawn[0], y: spawn[1] },
     exit: { x: exitX, y: H - WT - 10, w: EXIT_W, h: WT + 18 },
     bed,
     // Where his head sits on the pillow — the renderer draws the face here.
     sleeper: { x: bed.x + bed.w / 2, y: bed.y + bed.h * 0.26 },
     colliders,
-    items: items.map((it, i) => ({ id: `L${id}-${i}`, type: it[2], x: it[0], y: it[1] }))
+    items: items.map((it, i) => ({
+      id: `L${id}-${i}`,
+      type: it[2],
+      x: it[0],
+      y: it[1],
+      // A marked prize: the same item, drawn so you cannot miss it.
+      bonus: it[3] === 'bonus'
+    }))
   };
 }
 
@@ -165,7 +187,7 @@ export const LEVELS = [
     [120, 370, 'console'], [280, 350, 'ring'], [170, 470, 'wallet']
   ], { theme: 'hotel', name: 'Hotel Room', creaks: [[150, 190, 90, 40], [60, 350, 60, 50]] }),
   makeLevel(15, 'E', [200, 548], 160, [
-    [70, 120, 'vase'], [200, 140, 'console'], [330, 110, 'necklace'],
+    [70, 120, 'vase'], [200, 140, 'console'], [330, 110, 'necklace', 'bonus'],
     [140, 220, 'tablet'], [250, 240, 'camera'], [330, 260, 'ring'],
     [120, 370, 'speaker'], [280, 350, 'headphones'], [330, 515, 'coin']
   ], { theme: 'hotel', name: 'Hotel Room', creaks: [[150, 190, 90, 40], [230, 470, 80, 44]] }),
@@ -182,7 +204,7 @@ export const LEVELS = [
     [230, 370, 'camera'], [330, 515, 'wallet'], [60, 520, 'coin']
   ], { theme: 'office', name: 'Office', creaks: [[170, 210, 90, 44], [60, 440, 70, 44]] }),
   makeLevel(18, 'D', [200, 548], 160, [
-    [150, 130, 'tv'], [250, 130, 'speaker'], [60, 260, 'laptop'],
+    [150, 130, 'tv', 'bonus'], [250, 130, 'speaker'], [60, 260, 'laptop'],
     [200, 240, 'console'], [330, 300, 'mirror'], [100, 360, 'tv'],
     [230, 370, 'tablet'], [330, 515, 'camera']
   ], { theme: 'office', name: 'Office', creaks: [[170, 210, 90, 44], [230, 300, 90, 44]] }),
@@ -199,7 +221,7 @@ export const LEVELS = [
     [180, 400, 'ring'], [150, 500, 'necklace'], [330, 520, 'coin']
   ], { theme: 'luxury', name: 'Luxury Bedroom', creaks: [[140, 240, 100, 44]] }),
   makeLevel(21, 'F', [200, 548], 160, [
-    [180, 90, 'diamond'], [120, 130, 'painting'], [60, 300, 'necklace'],
+    [180, 90, 'diamond', 'bonus'], [120, 130, 'painting'], [60, 300, 'necklace'],
     [250, 290, 'vase'], [330, 350, 'jewel'], [60, 370, 'mirror'],
     [180, 400, 'painting'], [150, 500, 'ring']
   ], { theme: 'luxury', name: 'Luxury Bedroom', creaks: [[140, 240, 100, 44], [230, 380, 90, 44]] }),
@@ -210,7 +232,7 @@ export const LEVELS = [
     [60, 370, 'jewel'], [180, 400, 'ring'], [150, 500, 'vase']
   ], { theme: 'penthouse', name: "Penthouse", creaks: [[140, 240, 100, 44]] }),
   makeLevel(23, 'C', [200, 548], 160, [
-    [196, 70, 'goldbar'], [70, 150, 'diamond'], [330, 150, 'painting'],
+    [196, 70, 'goldbar', 'bonus'], [70, 150, 'diamond'], [330, 150, 'painting'],
     [160, 238, 'necklace'], [186, 352, 'diamond'], [330, 400, 'goldbar'],
     [60, 470, 'painting'], [330, 520, 'jewel']
   ], { theme: 'penthouse', name: 'Penthouse', creaks: [[100, 210, 110, 44]] }),

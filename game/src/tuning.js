@@ -89,6 +89,46 @@ export const TUNING = {
     goldbar:    { value: 300, noise: 38 }
   },
 
+  // What a thing is worth tells you how loud and how slow it is. The bands are
+  // read off the value, so a new item type cannot forget to declare its risk.
+  rarity: {
+    bands: [
+      { name: 'Common',    upTo: 24,   tint: '#b9c3cf', pickup: 0.30 },
+      { name: 'Uncommon',  upTo: 59,   tint: '#79c47a', pickup: 0.38 },
+      { name: 'Rare',      upTo: 149,  tint: '#5aa9e6', pickup: 0.50 },
+      { name: 'Very Rare', upTo: 9999, tint: '#e0a13a', pickup: 0.68 }
+    ],
+    bigScoreAt: 150      // at or above this, a steal is an event
+  },
+
+  // Stealing quickly, without dawdling, pays a little extra.
+  combo: {
+    window: 4.5,         // seconds between steals before the streak lapses
+    tiers: [
+      { at: 3, bonus: 0.05 },
+      { at: 5, bonus: 0.10 },
+      { at: 8, bonus: 0.15 }
+    ]
+  },
+
+  // How you left, not just that you left.
+  escape: {
+    perfectNoise: 30,    // quiet...
+    perfectTimeShare: 0.35, // ...and with a third of the clock still unspent
+    perfectBonus: 25,
+    closeCallNoise: 85,  // loud...
+    closeCallTime: 2.5   // ...and on the buzzer
+  },
+
+  // Stars come from objectives, measured against what the room can actually
+  // give up without waking him — never against its raw total, which is
+  // frequently impossible.
+  stars: {
+    two: 0.5,
+    three: 0.85,
+    budget: 92           // the noise a perfect run is assumed to spend
+  },
+
   // Two resources now: the meter and the clock.
   time: {
     base: 30,             // seconds on level 1
@@ -111,7 +151,12 @@ export const TUNING = {
       chest: 4, tvBench: 4, wardrobe: 5, bookshelf: 6
     },
     bumpCooldown: 1.0,    // one bump per collision, not one per frame
-    bumpThreshold: 0.62   // how squarely you must hit it to count at all
+    bumpThreshold: 0.62,  // how squarely you must hit it to count at all
+
+    // Footsteps. Bare boards carry; a rug swallows them. Small on purpose —
+    // it is a reason to prefer one route over another, not a second clock.
+    walkNoise: 0.55,      // per second at full speed on hard floor
+    softFloorScale: 0     // ...and on a rug
   },
 
   // Standing perfectly still lets the room settle. Slow enough that it is a
@@ -119,12 +164,6 @@ export const TUNING = {
   recovery: {
     delay: 0.6,           // how long you must be still before it starts
     rate: 2               // noise per second once it does
-  },
-
-  // Escape with a big enough share of the room's total value.
-  stars: {
-    two: 0.5,
-    three: 0.8
   },
 
   // Three upgrades, deliberately few. None of them touches the risk/reward

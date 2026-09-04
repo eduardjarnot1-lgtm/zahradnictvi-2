@@ -124,3 +124,32 @@ test('settings persist individually', () => {
   assert.equal(JSON.parse(storage.raw).settings.quality, 'low');
   assert.equal(JSON.parse(storage.raw).settings.sound, true, 'other settings untouched');
 });
+
+test('a v3 save gains records without losing anything', () => {
+  const migrated = migrate({
+    v: 3, unlocked: 7, bank: 500, best: { 1: 100 }, stars: { 1: 3 },
+    collection: ['phone'], upgrades: { shoes: 1, feet: 0, bag: 2 },
+    settings: { sound: false, music: true, vibration: true, quality: 'medium' }
+  });
+  assert.equal(migrated.v, SAVE_VERSION);
+  assert.equal(migrated.unlocked, 7);
+  assert.equal(migrated.bank, 500);
+  assert.deepEqual(migrated.stars, { 1: 3 });
+  assert.deepEqual(migrated.upgrades, { shoes: 1, feet: 0, bag: 2 });
+  assert.equal(migrated.settings.quality, 'medium');
+  assert.deepEqual(migrated.records, {});
+});
+
+test('personal bests track separately and only ever improve', () => {
+  const store = createSaveStore(fakeStorage());
+  store.recordWin(3, 400, { stars: 2, seconds: 18.4, noise: 70 });
+  assert.deepEqual(store.data.records[3], { money: 400, time: 18.4, noise: 70 });
+
+  // A faster, quieter, poorer run improves two of the three.
+  store.recordWin(3, 120, { stars: 1, seconds: 11.2, noise: 22 });
+  assert.deepEqual(store.data.records[3], { money: 400, time: 11.2, noise: 22 });
+
+  // A slower, louder, richer run improves only the money.
+  store.recordWin(3, 900, { stars: 3, seconds: 25, noise: 95 });
+  assert.deepEqual(store.data.records[3], { money: 900, time: 11.2, noise: 22 });
+});

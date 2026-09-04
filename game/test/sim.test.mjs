@@ -6,13 +6,15 @@ import { LEVELS } from '../src/levels.js';
 import { TUNING } from '../src/tuning.js';
 import { play, createRun, tick, walkTo, steal, escape } from './harness.mjs';
 import {
-  addNoise, sleepStage, SLEEP_AWAKE, SLEEP_ASLEEP, starsFor, levelTotals, timeLimit
+  addNoise, sleepStage, SLEEP_AWAKE, SLEEP_ASLEEP, starsFor, levelTotals, timeLimit,
+  rarityOf, starThresholds
 } from '../src/rules.js';
 
 test('a scripted run wins with exactly the money it stole', () => {
   const { result } = play(1, { take: ['L1-0', 'L1-2'] });
   assert.equal(result.status, 'won');
-  assert.equal(result.money, 30 + 45);
+  assert.equal(result.haul, 30 + 45, 'the raw haul is exact');
+  assert.ok(result.money >= result.haul, 'bonuses only ever add');
   // Noise is no longer a pure sum: bumping furniture adds to it and standing
   // still bleeds it off, so only the money is exact.
   assert.ok(result.noise > 0 && result.noise < TUNING.noise.max);
@@ -434,4 +436,96 @@ test('noise never goes negative and never exceeds the cap', () => {
     tick(loud, { x: 0, y: 0, take: i % 2 === 0 });
   }
   assert.ok(loud.sim.noise <= TUNING.noise.max);
+});
+
+// --- expansion 2: rarity, streaks, surfaces, escape grades -------------------
+
+test('rarity is read off the value, so no item can forget to declare its risk', () => {
+  assert.equal(rarityOf('coin').name, 'Common');
+  assert.equal(rarityOf('headphones').name, 'Uncommon');
+  assert.equal(rarityOf('laptop').name, 'Rare');
+  assert.equal(rarityOf('diamond').name, 'Very Rare');
+  // ...and the more it is worth, the longer it takes to lift.
+  assert.ok(rarityOf('diamond').pickup > rarityOf('coin').pickup);
+});
+
+test('star targets are always reachable without waking him', () => {
+  for (const level of LEVELS) {
+    const marks = starThresholds(level);
+    assert.ok(marks.three <= marks.reachable,
+      `level ${level.id} asks for $${marks.three} but only $${marks.reachable} is gettable`);
+    assert.ok(marks.two < marks.three, `level ${level.id} star targets are not ordered`);
+    // The naive alternative — a share of the room's raw total — would routinely
+    // demand more than the noise cap allows.
+    assert.ok(marks.reachable <= levelTotals(level).value);
+  }
+});
+
+test('a streak forms from quick steals and pays a bonus', () => {
+  const run = createRun(2);
+  for (const item of run.sim.items.slice(0, 3)) {
+    if (run.sim.status !== 'running') break;
+    steal(run, item.id);
+  }
+  assert.ok(run.sim.streak >= 3, `streak was ${run.sim.streak}`);
+  assert.ok(run.sim.money > run.sim.haul, 'a streak should pay over the raw haul');
+});
+
+test('a streak lapses if you dawdle', () => {
+  const run = createRun(2);
+  steal(run, run.sim.items[0].id);
+  assert.equal(run.sim.streak, 1);
+  for (let i = 0; i < 60 * (TUNING.combo.window + 1); i++) tick(run, { x: 0, y: 0 });
+  assert.equal(run.sim.streak, 0);
+});
+
+test('footsteps are silent on a rug and audible on bare boards', () => {
+  const level = LEVELS.find((l) => l.rugs.length > 0);
+  const rug = level.rugs[0];
+
+  const onRug = createRun(level.id);
+  const a = playerOf(onRug.sim);
+  a.x = rug.x + 12;
+  a.y = rug.y + rug.h / 2;
+  for (let i = 0; i < 60; i++) tick(onRug, { x: 1, y: 0 });
+  assert.equal(onRug.sim.noise, 0, 'a rug should swallow footsteps');
+  assert.equal(onRug.sim.onSoftFloor, true);
+
+  const onBoards = createRun(level.id);
+  const b = playerOf(onBoards.sim);
+  b.x = 120;
+  b.y = 560;                                   // open boards near the spawn
+  for (let i = 0; i < 60; i++) tick(onBoards, { x: 1, y: 0 });
+  assert.ok(onBoards.sim.noise > 0, 'bare boards should carry');
+  assert.ok(onBoards.sim.noise < 2, `a second of walking cost ${onBoards.sim.noise}`);
+});
+
+test('a quiet, unhurried escape is graded perfect and pays a bonus', () => {
+  const run = createRun(1);
+  steal(run, 'L1-0');                          // one quiet item
+  escape(run);
+  assert.equal(run.sim.status, 'won');
+  assert.equal(run.sim.escapeGrade.grade, 'perfect');
+  assert.ok(run.sim.money > run.sim.haul);
+});
+
+test('a loud or last-second escape is graded a close call, with no bonus', () => {
+  const run = createRun(1);
+  run.sim.noise = 90;
+  escape(run);
+  assert.equal(run.sim.status, 'won');
+  assert.equal(run.sim.escapeGrade.grade, 'close');
+  assert.equal(run.sim.escapeGrade.bonus, 0);
+});
+
+test('bonuses never turn a loss into a win', () => {
+  const run = createRun(1);
+  run.sim.noise = 99.9;
+  const item = run.sim.items[0];
+  walkTo(run, item);
+  for (let i = 0; i < 40 && run.sim.status === 'running'; i++) {
+    tick(run, { x: 0, y: 0, take: i % 2 === 0 });
+  }
+  assert.equal(run.sim.status, 'lost');
+  assert.equal(run.sim.escapeGrade, null);
 });

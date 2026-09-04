@@ -5,7 +5,8 @@ import { TUNING } from './tuning.js';
 import { createRng } from './rng.js';
 import { solveMove, clampToWorld } from './physics.js';
 import {
-  addNoise, isAwake, itemStats, canBank, sleepStage, resolveUpgrades, bumpNoise, timeLimit
+  addNoise, isAwake, itemStats, canBank, sleepStage, resolveUpgrades, bumpNoise, timeLimit,
+  rarityOf, comboBonus, gradeEscape, isBigScore
 } from './rules.js';
 
 export const STEP_SECONDS = 1 / TUNING.sim.hz;
@@ -114,6 +115,7 @@ export function createSim({ level, seed = 1, upgrades = {} }) {
     failReason: null,  // 'awake' | 'time'
     timeLeft: timeLimit(level),
     timeLimit: timeLimit(level),
+    escapeGrade: null,
     stillFor: 0,       // seconds spent perfectly still, for noise recovery
     bumpCooldown: 0,
     money: 0,          // what you get paid (haul plus any bag bonus)
@@ -131,6 +133,10 @@ export function createSim({ level, seed = 1, upgrades = {} }) {
         rawValue: stats.value,
         noise: stats.noise,
         fragile: !!stats.fragile,
+        bonus: !!item.bonus,
+        rarity: rarityOf(item.type).name,
+        // Bigger, more valuable things take longer to lift.
+        pickupTime: rarityOf(item.type).pickup,
         taken: false,
         inRange: false,
         takenAtFrame: -1
@@ -138,6 +144,9 @@ export function createSim({ level, seed = 1, upgrades = {} }) {
     }),
     targetId: null,   // the in-range item a TAKE would consume
     reach: null,      // the in-progress grab animation, if any
+    streak: 0,        // steals in quick succession
+    streakTimer: 0,   // ...and how long is left to keep it
+    onSoftFloor: false,
     // Creaky boards: plain trigger zones, each with its own cooldown so
     // standing on one does not drain the meter.
     creaks: level.creaks.map((zone) => ({ ...zone, cooldown: 0, active: false })),
@@ -164,6 +173,7 @@ function finish(sim, status, reason = null) {
     haul: sim.haul,
     noise: sim.noise,
     timeLeft: Math.max(0, sim.timeLeft),
+    grade: sim.escapeGrade,
     frame: sim.frame,
     taken: sim.items.filter((i) => i.taken).map((i) => i.type)
   });
@@ -173,19 +183,31 @@ function takeItem(sim, item) {
   item.taken = true;
   item.inRange = false;
   item.takenAtFrame = sim.frame;
-  sim.money += item.value;
+
+  // A streak only survives if you keep moving between prizes.
+  sim.streak = sim.streakTimer > 0 ? sim.streak + 1 : 1;
+  sim.streakTimer = TUNING.combo.window;
+  const bonusRate = comboBonus(sim.streak);
+  const paid = Math.round(item.value * (1 + bonusRate));
+
+  sim.money += paid;
   sim.haul += item.rawValue;
   sim.noise = addNoise(sim.noise, item.noise);
   // Drives the reach-and-grab animation. Money and noise are already credited,
   // so the animation is presentation only and can never affect the outcome.
-  sim.reach = { t: 0, duration: TUNING.pickup.reachSeconds, x: item.x, y: item.y, type: item.type };
+  sim.reach = { t: 0, duration: item.pickupTime, x: item.x, y: item.y, type: item.type };
   sim.shake = Math.min(TUNING.feedback.shakeMax, item.noise * TUNING.feedback.shakePerNoise);
   sim.shakePhase = 0;
   sim.events.push({
     type: 'took',
     id: item.id,
     itemType: item.type,
-    value: item.value,
+    value: paid,
+    baseValue: item.value,
+    bonusRate,
+    streak: sim.streak,
+    big: isBigScore(item.rawValue),
+    rarity: item.rarity,
     noise: item.noise,
     fragile: item.fragile,
     x: item.x,
@@ -247,6 +269,26 @@ export function stepSim(sim, input = EMPTY_INPUT) {
       zone.cooldown = TUNING.hazards.creakCooldown;
     }
     zone.active = inside;
+  }
+
+  // Which surface is underfoot. A rug swallows footsteps; bare boards do not.
+  sim.onSoftFloor = sim.level.rugs.some(
+    (rug) => player.x > rug.x && player.x < rug.x + rug.w &&
+             player.y > rug.y && player.y < rug.y + rug.h
+  );
+  if (player.moving && sim.status === 'running') {
+    const surface = sim.onSoftFloor ? TUNING.hazards.softFloorScale : 1;
+    const share = Math.min(1, player.speed / TUNING.player.speed);
+    const amount = TUNING.hazards.walkNoise * surface * share * STEP_SECONDS * sim.mods.hazardNoise;
+    if (amount > 0) {
+      sim.noise = addNoise(sim.noise, amount);
+      if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
+    }
+  }
+
+  if (sim.streakTimer > 0) {
+    sim.streakTimer = Math.max(0, sim.streakTimer - STEP_SECONDS);
+    if (sim.streakTimer === 0) sim.streak = 0;
   }
 
   // Walking into furniture. One event per collision, never one per frame: a
@@ -317,7 +359,16 @@ export function stepSim(sim, input = EMPTY_INPUT) {
       player.x + player.w / 2 > exit.x &&
       player.x - player.w / 2 < exit.x + exit.w &&
       player.y + player.h / 2 > exit.y;
-    if (atExit && canBank(sim.noise)) finish(sim, 'won');
+    if (atExit && canBank(sim.noise)) {
+      const grade = gradeEscape({
+        noise: sim.noise,
+        timeLeft: sim.timeLeft,
+        limit: sim.timeLimit
+      });
+      sim.money += grade.bonus;
+      sim.escapeGrade = grade;
+      finish(sim, 'won');
+    }
   }
 
   sim.frame++;

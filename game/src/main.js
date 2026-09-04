@@ -11,7 +11,8 @@ import { createAudio } from './audio.js';
 import { createInput } from './input.js';
 import { createRenderer } from './render.js';
 import {
-  sleepStage, starsFor, starThresholds, levelTotals, upgradeCost, SLEEP_LABELS
+  sleepStage, starsFor, starThresholds, levelTotals, upgradeCost, SLEEP_LABELS,
+  objectivesFor, isBigScore, rarityOf
 } from './rules.js';
 import { ITEM_ART, ITEM_NAMES } from './art.js';
 
@@ -55,6 +56,8 @@ export function boot() {
   let pendingEnd = null;
   let lastStepPhase = 0;
   let lastTick = -1;
+  let flash = 0;
+  let lastHeartbeat = 0;
   const stats = { fps: 0, steps: 0 };
 
   const setting = (key) => saveStore.data.settings[key];
@@ -114,16 +117,39 @@ export function boot() {
 
   function showEnd(won, ctx) {
     showOnly(screens.end);
+    const level = LEVELS.find((l) => l.id === currentLevelId);
+    const gradeEl = $('grade');
+    gradeEl.textContent = won && ctx.grade ? ctx.grade.label : '';
+    gradeEl.className = won && ctx.grade ? ctx.grade.grade : '';
+
+    // What the level asked for, and which of it you managed.
+    const objectives = $('objectives');
+    objectives.innerHTML = won || !level ? '' : '';
+    if (level) {
+      objectives.innerHTML = objectivesFor(level).map((objective) => {
+        const done = won && ctx.stars >= objective.stars;
+        return `<div class="obj${done ? ' done' : ''}">` +
+          `<b>${'★'.repeat(objective.stars)}</b>${objective.text}` +
+          `<span style="margin-left:auto">${done ? '✓' : ''}</span></div>`;
+      }).join('');
+    }
+
+    const record = (saveStore.data.records || {})[currentLevelId];
+    $('records').innerHTML = record
+      ? `<div>BEST LOOT<b>$${(record.money || 0).toLocaleString()}</b></div>` +
+        `<div>BEST TIME<b>${record.time !== undefined ? record.time.toFixed(1) + 's' : '—'}</b></div>` +
+        `<div>QUIETEST<b>${record.noise !== undefined ? record.noise : '—'}</b></div>`
+      : '';
     $('endTitle').textContent = won ? 'LEVEL COMPLETE'
       : ctx.reason === 'time' ? "TIME'S UP" : 'HE WOKE UP!';
     $('stars').innerHTML = won ? starRow(ctx.stars) : '';
     $('endTally').innerHTML = won
       ? `<div>HAUL<b>$${ctx.money.toLocaleString()}</b></div>` +
-        `<div>ITEMS<b>${ctx.taken.length}</b></div>` +
-        `<div>NOISE<b>${ctx.noise}/${TUNING.noise.max}</b></div>`
+        `<div>ITEMS<b>${ctx.taken.length}/${level ? level.items.length : '?'}</b></div>` +
+        `<div>NOISE<b>${Math.round(ctx.noise)}</b></div>` +
+        `<div>LEFT<b>${(ctx.timeLeft || 0).toFixed(1)}s</b></div>`
       : '';
     if (won) {
-      const level = LEVELS.find((l) => l.id === currentLevelId);
       const marks = starThresholds(level);
       $('endText').innerHTML = ctx.stars < 3
         ? `Steal $${(ctx.stars < 2 ? marks.two : marks.three).toLocaleString()} in one run for ${ctx.stars < 2 ? 2 : 3} stars.`
@@ -131,7 +157,7 @@ export function boot() {
     } else {
       const cause = ctx.reason === 'time'
         ? 'You were still in the room when the clock ran out.'
-        : 'One item too many.';
+        : 'The noise reached 100 and he woke up.';
       $('endText').innerHTML =
         `${cause}<br>You lost <b style="color:#ffd34d">$${ctx.money.toLocaleString()}</b>.`;
     }
@@ -268,11 +294,16 @@ export function boot() {
   function handleEvents() {
     for (const event of sim.events) {
       if (event.type === 'took') {
-        pops.push({ x: event.x, y: event.y, value: event.value, life: 1 });
-        spawnSparks(event.x, event.y, event.fragile ? 10 : 6,
-          event.fragile ? '#bfe6ff' : '#ffd34d');
+        pops.push({
+          x: event.x, y: event.y, value: event.value, life: 1,
+          big: event.big, color: event.big ? '#ffe9a8' : rarityOf(event.itemType).tint
+        });
+        spawnSparks(event.x, event.y, event.big ? 14 : event.fragile ? 10 : 6,
+          event.big ? '#ffd98a' : event.fragile ? '#bfe6ff' : '#ffd34d');
         audio.take(event.noise, event.fragile);
-        buzz(event.fragile ? [12, 30, 12] : 14);
+        if (event.big) { flash = 1; audio.jackpot(); buzz([18, 40, 24]); }
+        else buzz(event.fragile ? [12, 30, 12] : 14);
+        if (event.streak >= TUNING.combo.tiers[0].at) audio.streak(event.streak);
         const stageNow = sleepStage(sim.noise);
         if (stageNow > warnedAt && stageNow > 0 && sim.status === 'running') {
           warnedAt = stageNow;
@@ -289,12 +320,17 @@ export function boot() {
       } else if (event.type === 'won') {
         const level = LEVELS.find((l) => l.id === currentLevelId);
         const stars = starsFor(level, event.haul);
-        saveStore.recordWin(currentLevelId, event.money, { stars, types: event.taken });
+        saveStore.recordWin(currentLevelId, event.money, {
+          stars,
+          types: event.taken,
+          seconds: sim.timeLimit - event.timeLeft,
+          noise: event.noise
+        });
         audio.win();
         buzz([16, 40, 16]);
         machine.set('won', {
           money: event.money, noise: event.noise, stars,
-          taken: event.taken, timeLeft: event.timeLeft
+          taken: event.taken, timeLeft: event.timeLeft, grade: event.grade
         });
         if (debug) console.info('[dwh] replay', frameCount(recording), 'frames', JSON.stringify(recording));
       } else if (event.type === 'lost') {
@@ -321,7 +357,8 @@ export function boot() {
   // style write still costs a style recalculation.
   const hudEls = {
     money: $('money'), time: $('time'), level: $('lvl'),
-    bar: $('noisebar'), noise: $('noisetxt'), wrap: $('noisewrap')
+    bar: $('noisebar'), noise: $('noisetxt'), wrap: $('noisewrap'),
+    warn: $('warn'), streak: $('streak')
   };
   const hudLast = {};
   const setText = (key, el, value) => {
@@ -333,6 +370,12 @@ export function boot() {
     if (hudLast[key] === value) return;
     hudLast[key] = value;
     el.style[prop] = value;
+  };
+
+  const comboBonusOf = (streak) => {
+    let bonus = 0;
+    for (const tier of TUNING.combo.tiers) if (streak >= tier.at) bonus = tier.bonus;
+    return bonus;
   };
 
   function paintHud() {
@@ -369,6 +412,36 @@ export function boot() {
       hudLast.calming = calming;
       hudEls.wrap.classList.toggle('calming', calming);
     }
+    // He's stirring. The warning escalates rather than appearing all at once.
+    const warnEl = hudEls.warn;
+    const warning = sim.status !== 'running' ? null
+      : sim.noise >= 95 ? { text: "HE'S WAKING UP!", cls: 'hard critical' }
+        : sim.noise >= 90 ? { text: "HE'S ALMOST AWAKE", cls: 'hard' }
+          : sim.noise >= 80 ? { text: "HE'S STIRRING…", cls: '' } : null;
+    if (hudLast.warnText !== (warning ? warning.text : '')) {
+      hudLast.warnText = warning ? warning.text : '';
+      warnEl.hidden = !warning;
+      if (warning) {
+        warnEl.textContent = warning.text;
+        warnEl.className = warning.cls;
+        buzz(sim.noise >= 95 ? [20, 40, 20] : 12);
+      }
+    }
+    // A heartbeat once he is on the edge.
+    if (sim.noise >= 95 && sim.status === 'running') {
+      if (clock - lastHeartbeat > 0.62) { lastHeartbeat = clock; audio.heartbeat(); }
+    }
+
+    const streakEl = hudEls.streak;
+    const showStreak = sim.streak >= TUNING.combo.tiers[0].at && sim.status === 'running';
+    const streakText = showStreak
+      ? `STEAL STREAK x${sim.streak}  +${Math.round(comboBonusOf(sim.streak) * 100)}%` : '';
+    if (hudLast.streakText !== streakText) {
+      hudLast.streakText = streakText;
+      streakEl.hidden = !showStreak;
+      streakEl.textContent = streakText;
+    }
+
     const targeted = !!sim.targetId;
     if (hudLast.targeted !== targeted) {
       hudLast.targeted = targeted;
@@ -428,7 +501,8 @@ export function boot() {
       }
 
       if (sim) {
-        renderer.draw(sim, Math.min(1, accumulator / STEP_SECONDS), clock, pops, stats, sparks);
+        if (flash > 0) flash = Math.max(0, flash - elapsed * 2.4);
+        renderer.draw(sim, Math.min(1, accumulator / STEP_SECONDS), clock, pops, stats, sparks, flash);
         paintHud();
       }
       consecutiveErrors = 0;
@@ -534,7 +608,11 @@ export function boot() {
     if (debug && /^[0-9]$/.test(e.key)) startLevel(e.key === '0' ? 10 : Number(e.key));
   });
 
-  const resize = () => renderer.resize(stage);
+  const resize = () => {
+    renderer.resize(stage);
+    const hudHeight = $('hud').getBoundingClientRect().height;
+    $('banner').style.top = `${hudHeight + 8}px`;
+  };
   addEventListener('resize', resize);
   addEventListener('orientationchange', () => setTimeout(resize, 200));
 

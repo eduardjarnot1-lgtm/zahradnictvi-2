@@ -120,6 +120,24 @@ export function createAudio(saveStore) {
       tone(pitch * 0.62, 0.13, 'triangle', 0.03, 0.03);
     },
 
+    // Something genuinely valuable just came off the shelf.
+    jackpot() {
+      tone(660, 0.07, 'triangle', 0.055);
+      tone(880, 0.07, 'triangle', 0.055, 0.06);
+      tone(1320, 0.22, 'triangle', 0.05, 0.12);
+    },
+
+    // A rising blip per streak tier.
+    streak(count) {
+      tone(520 + Math.min(6, count) * 60, 0.06, 'square', 0.03);
+    },
+
+    // Two soft thumps, once he is on the edge.
+    heartbeat() {
+      tone(58, 0.11, 'sine', 0.075);
+      tone(48, 0.15, 'sine', 0.06, 0.15);
+    },
+
     // The clock, in the last few seconds.
     tick() {
       tone(1250, 0.035, 'square', 0.03);

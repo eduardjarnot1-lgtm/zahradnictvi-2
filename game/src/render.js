@@ -2,10 +2,10 @@
 // paints it, interpolating between the last two fixed steps so 60Hz sim motion
 // stays smooth on any refresh rate.
 import { TUNING } from './tuning.js';
-import { sleepStage } from './rules.js';
+import { sleepStage, rarityOf, isBigScore } from './rules.js';
 import { playerOf } from './sim.js';
 import {
-  paintStaticRoom, drawSleeper, drawThief, drawGrabbedItem, roundRect, ITEM_ART
+  paintStaticRoom, drawSleeper, drawThief, drawGrabbedItem, roundRect, ITEM_ART, lampPositions
 } from './art.js';
 
 const { width: W, height: H, wallThickness: WT, hudStrip: HUD_H } = TUNING.world;
@@ -66,8 +66,12 @@ export function createRenderer(canvas, options = {}) {
   let exitGlowKey = '';
   function drawExit(sim, time) {
     const exit = sim.level.exit;
-    const pulse = 0.5 + 0.5 * Math.sin(time * 3);
-    const alpha = (0.30 + 0.16 * pulse).toFixed(2);
+    const player = playerOf(sim);
+    // Brighter and faster the closer you are: the way out should feel like it
+    // is calling you once escaping is actually on the table.
+    const near = Math.max(0, 1 - Math.hypot(player.x - (exit.x + exit.w / 2), player.y - exit.y) / 170);
+    const pulse = 0.5 + 0.5 * Math.sin(time * (3 + near * 4));
+    const alpha = (0.26 + 0.20 * pulse + near * 0.22).toFixed(2);
     const key = `${exit.y}:${alpha}`;
     if (exitGlowKey !== key) {
       exitGlow = ctx.createLinearGradient(0, exit.y - 34, 0, H);
@@ -120,6 +124,16 @@ export function createRenderer(canvas, options = {}) {
       ctx.arc(item.x, y, 21, 0, TAU);
       ctx.fill();
 
+      // A marked prize gets a slow halo of its own, even out of range.
+      if (item.bonus) {
+        const shine = 0.5 + 0.5 * Math.sin(time * 2.2 + item.x);
+        ctx.strokeStyle = `rgba(255,196,77,${0.35 + 0.35 * shine})`;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(item.x, y, 24 + shine * 3, 0, TAU);
+        ctx.stroke();
+      }
+
       if (isTarget) {
         const ring = 0.5 + 0.5 * Math.sin(time * 5);
         ctx.strokeStyle = `rgba(255,222,120,${0.6 + 0.35 * ring})`;
@@ -137,11 +151,22 @@ export function createRenderer(canvas, options = {}) {
       ctx.strokeStyle = 'rgba(20,10,26,0.85)';
       ctx.lineJoin = 'round';
       ctx.strokeText(`$${item.value}`, item.x, y - 15);
-      ctx.fillStyle = isTarget ? '#fff4cf' : '#ffe07a';
+      // Price is tinted by rarity, so how tempting a thing is reads instantly.
+      ctx.fillStyle = isTarget ? '#fff4cf' : rarityOf(item.type).tint;
       ctx.fillText(`$${item.value}`, item.x, y - 15);
       ctx.strokeText(`+${item.noise}`, item.x, y + 24);
       ctx.fillStyle = '#ffab7d';
       ctx.fillText(`+${item.noise}`, item.x, y + 24);
+
+      // The prompt appears only for the thing a TAKE would actually consume.
+      if (isTarget) {
+        ctx.font = 'bold 9px system-ui';
+        ctx.fillStyle = 'rgba(20,10,26,0.75)';
+        roundRect(ctx, item.x - 19, y + 28, 38, 13, 6);
+        ctx.fill();
+        ctx.fillStyle = '#ffe9a8';
+        ctx.fillText('STEAL', item.x, y + 37);
+      }
     }
   }
 
@@ -162,13 +187,13 @@ export function createRenderer(canvas, options = {}) {
     for (const pop of pops) {
       const rise = (1 - pop.life) * 26;
       ctx.globalAlpha = Math.max(0, Math.min(1, pop.life * 1.4));
-      ctx.font = 'bold 14px system-ui';
-      ctx.lineWidth = 3;
+      ctx.font = `bold ${pop.big ? 21 : 14}px system-ui`;
+      ctx.lineWidth = pop.big ? 4 : 3;
       ctx.lineJoin = 'round';
       ctx.strokeStyle = 'rgba(20,10,26,0.8)';
       const label = pop.text || `+$${pop.value}`;
       ctx.strokeText(label, pop.x, pop.y - 18 - rise);
-      ctx.fillStyle = pop.text ? '#ff9c6e' : '#ffd34d';
+      ctx.fillStyle = pop.color || (pop.text ? '#ff9c6e' : '#ffd34d');
       ctx.fillText(label, pop.x, pop.y - 18 - rise);
       ctx.globalAlpha = 1;
     }
@@ -226,7 +251,7 @@ export function createRenderer(canvas, options = {}) {
     invalidateRoom() { roomKey = ''; },
     setQuality(next) { if (next) { quality = next; roomKey = ''; } },
 
-    draw(sim, alpha, time, pops, stats, sparks = []) {
+    draw(sim, alpha, time, pops, stats, sparks = [], flash = 0) {
       ensureRoom(sim.level);
 
       ctx.save();
@@ -256,9 +281,27 @@ export function createRenderer(canvas, options = {}) {
         drawGrabbedItem(ctx, ITEM_ART[sim.reach.type] || '?', sim.reach, hand, reachProgress);
       }
 
+      // Lamps breathe over the cached room. Flat circles, not gradients: this
+      // runs every frame.
+      for (let i = 0; i < lampPositions.length; i++) {
+        const lamp = lampPositions[i];
+        const flicker = 0.5 + 0.5 * Math.sin(time * (2.1 + i * 0.7) + i);
+        ctx.globalAlpha = 0.05 + flicker * 0.05;
+        ctx.fillStyle = '#ffe6a8';
+        ctx.beginPath();
+        ctx.arc(lamp.x, lamp.y, 22, 0, TAU);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+
       drawSparks(sparks);
       drawPops(pops);
       drawDanger(sim, time);
+      // A brief warm wash when something genuinely valuable comes off the shelf.
+      if (flash > 0) {
+        ctx.fillStyle = `rgba(255,214,120,${(flash * 0.20).toFixed(3)})`;
+        ctx.fillRect(0, 0, W, H);
+      }
       if (debug) drawDebug(sim, stats, { x: px, y: py });
       ctx.restore();
     }

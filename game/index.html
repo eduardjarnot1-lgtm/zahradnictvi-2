@@ -41,16 +41,32 @@
     border-radius:8px;padding:4px 8px;font-size:13px;font-weight:700;line-height:1.1}
   .hudbtn:focus-visible{outline:2px solid #ffd34d;outline-offset:2px}
 
+  /* Status chips sit just under the HUD, clear of the room's furniture. */
+  #banner{position:absolute;left:0;right:0;display:flex;flex-direction:column;
+    align-items:center;gap:5px;pointer-events:none;z-index:3}
+  #streak,#warn{padding:4px 12px;border-radius:999px;font-size:12px;font-weight:800;
+    letter-spacing:.6px;text-shadow:0 1px 3px #000a}
+  #streak{background:#7c4dff33;border:1px solid #7c4dff88;color:#d9c9ff}
+  #warn{background:#ff4d4d26;border:1px solid #ff6b6b88;color:#ffc9c9}
+  #warn.hard{background:#ff4d4d40;border-color:#ff4d4d;color:#fff;
+    animation:pulsewarn .6s ease-in-out infinite}
+  #warn.critical{animation-duration:.32s}
+  @keyframes pulsewarn{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.06);opacity:1}}
+  @media (prefers-reduced-motion: reduce){ #warn.hard{animation:none} }
+
   #joy{position:absolute;width:110px;height:110px;border-radius:50%;
     background:#ffffff14;border:2px solid #ffffff33;display:none;pointer-events:none}
   #knob{position:absolute;width:48px;height:48px;border-radius:50%;
     background:#ffffff4d;border:2px solid #ffffff80;left:31px;top:31px}
 
-  #take{position:absolute;right:18px;bottom:22px;width:86px;height:86px;border-radius:50%;
-    background:#ffd34d1f;border:2px solid #ffd34d80;color:#ffe07a;font-size:13px;
+  /* Several levels place items in this corner, so the button stays small and
+     mostly transparent until it actually has something to take. */
+  #take{position:absolute;right:12px;bottom:16px;width:76px;height:76px;border-radius:50%;
+    background:#ffd34d10;border:2px solid #ffd34d55;color:#ffe07acc;font-size:13px;
     font-weight:800;letter-spacing:1px;display:none;align-items:center;justify-content:center;
     pointer-events:auto}
-  #take.on{background:#ffd34d33;border-color:#ffd34d;color:#fff5d1}
+  #take.on{background:#ffd34d38;border-color:#ffd34d;color:#fff5d1;
+    box-shadow:0 0 0 4px #ffd34d1a}
   #take.down{transform:scale(.94);background:#ffd34d55}
   #take:focus-visible{outline:2px solid #ffd34d;outline-offset:3px}
   body[data-screen="playing"] #take{display:flex}
@@ -129,6 +145,16 @@
     border-radius:8px;padding:6px 9px;font-size:11px;font-weight:800}
   .seg button.on{background:#7c4dff;border-color:#7c4dff;color:#fff}
 
+  #grade{font-size:15px;font-weight:800;letter-spacing:1.5px;min-height:19px}
+  #grade.perfect{color:#7ce8a4}
+  #grade.close{color:#ff9c6e}
+  #objectives{display:flex;flex-direction:column;gap:4px;width:100%;font-size:11.5px}
+  .obj{display:flex;align-items:center;gap:7px;color:#8d7f9b;
+    background:#ffffff08;border-radius:8px;padding:5px 9px}
+  .obj.done{color:#dcd2e6;background:#4cc17218}
+  .obj b{color:#ffd34d;font-size:11px;min-width:26px}
+  #records{display:flex;gap:12px;justify-content:center;font-size:10.5px;color:#8d7f9b}
+  #records b{display:block;font-size:12px;color:#bcaec8;margin-top:1px}
   #stars{font-size:30px;letter-spacing:6px;color:#ffd34d;min-height:38px}
   #stars s{text-decoration:none;color:#ffffff1f}
   .tally{display:flex;gap:14px;justify-content:center;font-size:12px;color:#bcaec8}
@@ -158,6 +184,11 @@
       <button id="btnpause" class="hudbtn" aria-label="Pause">II</button>
     </div>
     <div id="noisewrap"><div id="noisebar"></div><div id="noisetxt">0 / 100</div></div>
+  </div>
+
+  <div id="banner">
+    <div id="streak" hidden></div>
+    <div id="warn" hidden></div>
   </div>
 
   <div id="joy"><div id="knob"></div></div>
@@ -225,9 +256,12 @@
   <div class="screen" id="scEnd">
     <div class="sheet">
       <h2 id="endTitle">LEVEL COMPLETE</h2>
+      <div id="grade"></div>
       <div id="stars"></div>
       <div class="tally" id="endTally"></div>
+      <div id="objectives"></div>
       <p id="endText"></p>
+      <div id="records"></div>
       <button class="btn" id="bNext">NEXT LEVEL</button>
       <button class="btn alt" id="bRetry">RETRY</button>
       <button class="btn alt" id="bMenu">MENU</button>
@@ -344,6 +378,46 @@ __mod.tuning = (function () {
       goldbar:    { value: 300, noise: 38 }
     },
 
+    // What a thing is worth tells you how loud and how slow it is. The bands are
+    // read off the value, so a new item type cannot forget to declare its risk.
+    rarity: {
+      bands: [
+        { name: 'Common',    upTo: 24,   tint: '#b9c3cf', pickup: 0.30 },
+        { name: 'Uncommon',  upTo: 59,   tint: '#79c47a', pickup: 0.38 },
+        { name: 'Rare',      upTo: 149,  tint: '#5aa9e6', pickup: 0.50 },
+        { name: 'Very Rare', upTo: 9999, tint: '#e0a13a', pickup: 0.68 }
+      ],
+      bigScoreAt: 150      // at or above this, a steal is an event
+    },
+
+    // Stealing quickly, without dawdling, pays a little extra.
+    combo: {
+      window: 4.5,         // seconds between steals before the streak lapses
+      tiers: [
+        { at: 3, bonus: 0.05 },
+        { at: 5, bonus: 0.10 },
+        { at: 8, bonus: 0.15 }
+      ]
+    },
+
+    // How you left, not just that you left.
+    escape: {
+      perfectNoise: 30,    // quiet...
+      perfectTimeShare: 0.35, // ...and with a third of the clock still unspent
+      perfectBonus: 25,
+      closeCallNoise: 85,  // loud...
+      closeCallTime: 2.5   // ...and on the buzzer
+    },
+
+    // Stars come from objectives, measured against what the room can actually
+    // give up without waking him — never against its raw total, which is
+    // frequently impossible.
+    stars: {
+      two: 0.5,
+      three: 0.85,
+      budget: 92           // the noise a perfect run is assumed to spend
+    },
+
     // Two resources now: the meter and the clock.
     time: {
       base: 30,             // seconds on level 1
@@ -366,7 +440,12 @@ __mod.tuning = (function () {
         chest: 4, tvBench: 4, wardrobe: 5, bookshelf: 6
       },
       bumpCooldown: 1.0,    // one bump per collision, not one per frame
-      bumpThreshold: 0.62   // how squarely you must hit it to count at all
+      bumpThreshold: 0.62,  // how squarely you must hit it to count at all
+
+      // Footsteps. Bare boards carry; a rug swallows them. Small on purpose —
+      // it is a reason to prefer one route over another, not a second clock.
+      walkNoise: 0.55,      // per second at full speed on hard floor
+      softFloorScale: 0     // ...and on a rug
     },
 
     // Standing perfectly still lets the room settle. Slow enough that it is a
@@ -374,12 +453,6 @@ __mod.tuning = (function () {
     recovery: {
       delay: 0.6,           // how long you must be still before it starts
       rate: 2               // noise per second once it does
-    },
-
-    // Escape with a big enough share of the room's total value.
-    stars: {
-      two: 0.5,
-      three: 0.8
     },
 
     // Three upgrades, deliberately few. None of them touches the risk/reward
@@ -543,22 +616,78 @@ __mod.rules = (function () {
     return levelTotals(level).noise > TUNING.noise.max;
   }
 
+  function rarityOf(type) {
+    const { value } = itemStats(type);
+    return TUNING.rarity.bands.find((band) => value <= band.upTo);
+  }
+
+  const isBigScore = (value) => value >= TUNING.rarity.bigScoreAt;
+
+  // The most valuable haul this room can give up inside a noise budget. Items are
+  // few, so this is an exact search rather than a greedy guess — and it matters,
+  // because the star targets are read off it. Setting targets against the room's
+  // raw total would demand hauls that wake him every time.
+  function bestHaul(level, budget = TUNING.stars.budget) {
+    const items = level.items.map((item) => itemStats(item.type));
+    let best = 0;
+    const walk = (index, noise, value) => {
+      if (noise > budget) return;
+      if (value > best) best = value;
+      if (index >= items.length) return;
+      walk(index + 1, noise + items[index].noise, value + items[index].value);
+      walk(index + 1, noise, value);
+    };
+    walk(0, 0, 0);
+    return best;
+  }
+
   // Stars are earned on the raw haul, never on the upgraded payout — otherwise
   // buying the Velvet Bag would quietly hand you three stars everywhere.
+  function starThresholds(level) {
+    const reachable = bestHaul(level);
+    return {
+      two: Math.max(1, Math.round(reachable * TUNING.stars.two)),
+      three: Math.max(2, Math.round(reachable * TUNING.stars.three)),
+      reachable
+    };
+  }
+
   function starsFor(level, haul) {
     if (haul <= 0) return 1;
-    const share = haul / levelTotals(level).value;
-    if (share >= TUNING.stars.three) return 3;
-    if (share >= TUNING.stars.two) return 2;
+    const marks = starThresholds(level);
+    if (haul >= marks.three) return 3;
+    if (haul >= marks.two) return 2;
     return 1;
   }
 
-  function starThresholds(level) {
-    const total = levelTotals(level).value;
-    return {
-      two: Math.ceil(total * TUNING.stars.two),
-      three: Math.ceil(total * TUNING.stars.three)
-    };
+  // What the level asks of you, in words, for the results and level-select screens.
+  function objectivesFor(level) {
+    const marks = starThresholds(level);
+    return [
+      { stars: 1, text: 'Escape the room' },
+      { stars: 2, text: `Escape with $${marks.two.toLocaleString()}` },
+      { stars: 3, text: `Escape with $${marks.three.toLocaleString()}` }
+    ];
+  }
+
+  // How the escape itself went. Presentation, not points — except the small
+  // bonus for leaving quietly with time to spare.
+  function gradeEscape({ noise, timeLeft, limit }) {
+    const { perfectNoise, perfectTimeShare, perfectBonus, closeCallNoise, closeCallTime } = TUNING.escape;
+    if (noise < perfectNoise && timeLeft > limit * perfectTimeShare) {
+      return { grade: 'perfect', label: 'PERFECT ESCAPE!', bonus: perfectBonus };
+    }
+    if (noise >= closeCallNoise || timeLeft <= closeCallTime) {
+      return { grade: 'close', label: 'CLOSE CALL!', bonus: 0 };
+    }
+    return { grade: 'clean', label: '', bonus: 0 };
+  }
+
+  // A streak pays a little extra for stealing without dawdling.
+  function comboBonus(streak) {
+    let bonus = 0;
+    for (const tier of TUNING.combo.tiers) if (streak >= tier.at) bonus = tier.bonus;
+    return bonus;
   }
 
   // Turn owned upgrade levels into the multipliers the simulation applies.
@@ -575,7 +704,7 @@ __mod.rules = (function () {
     const costs = TUNING.upgrades[key].costs;
     return ownedLevel >= costs.length ? null : costs[ownedLevel];
   }
-  return { SLEEP_DEEP, SLEEP_LIGHT, SLEEP_DISTURBED, SLEEP_ALMOST, SLEEP_CRITICAL, SLEEP_AWAKE, SLEEP_ASLEEP, SLEEP_STIRRING, SLEEP_LABELS, hash, furnitureStyle, bumpNoise, timeLimit, itemStats, addNoise, isAwake, sleepStage, canBank, levelTotals, forcesChoice, starsFor, starThresholds, resolveUpgrades, upgradeCost };
+  return { SLEEP_DEEP, SLEEP_LIGHT, SLEEP_DISTURBED, SLEEP_ALMOST, SLEEP_CRITICAL, SLEEP_AWAKE, SLEEP_ASLEEP, SLEEP_STIRRING, SLEEP_LABELS, hash, furnitureStyle, bumpNoise, timeLimit, itemStats, addNoise, isAwake, sleepStage, canBank, levelTotals, forcesChoice, rarityOf, isBigScore, bestHaul, starThresholds, starsFor, objectivesFor, gradeEscape, comboBonus, resolveUpgrades, upgradeCost };
 })();
 __mod.physics = (function () {
   // One mover for every moving thing. Sub-stepped so nothing can tunnel through a
@@ -713,6 +842,17 @@ __mod.levels = (function () {
     }
   };
 
+  // One rug per layout, positioned to offer a genuine alternative route rather
+  // than sitting decoratively out of the way.
+  const RUGS = {
+    A: { x: 96, y: 372, w: 190, h: 118 },
+    B: { x: 60, y: 92, w: 120, h: 96 },
+    C: { x: 96, y: 356, w: 190, h: 64 },
+    D: { x: 150, y: 120, w: 150, h: 130 },
+    E: { x: 130, y: 180, w: 140, h: 100 },
+    F: { x: 120, y: 200, w: 150, h: 100 }
+  };
+
   function makeLevel(id, layoutKey, spawn, exitX, items, options = {}) {
     const layout = LAYOUTS[layoutKey];
     const bed = collider('bed', ...layout.bed);
@@ -730,13 +870,24 @@ __mod.levels = (function () {
       name: options.name || 'Bedroom',
       // Creaky boards: plain trigger rectangles on the floor.
       creaks: (options.creaks || []).map(([x, y, w, h], i) => ({ id: `L${id}-c${i}`, x, y, w, h })),
+      // Rugs. These are gameplay, not decoration: footsteps are silent on them,
+      // which is what makes a longer route worth considering. The renderer draws
+      // them from this same data, so what looks soft is soft.
+      rugs: RUGS[layoutKey] ? [RUGS[layoutKey]] : [],
       spawn: { x: spawn[0], y: spawn[1] },
       exit: { x: exitX, y: H - WT - 10, w: EXIT_W, h: WT + 18 },
       bed,
       // Where his head sits on the pillow — the renderer draws the face here.
       sleeper: { x: bed.x + bed.w / 2, y: bed.y + bed.h * 0.26 },
       colliders,
-      items: items.map((it, i) => ({ id: `L${id}-${i}`, type: it[2], x: it[0], y: it[1] }))
+      items: items.map((it, i) => ({
+        id: `L${id}-${i}`,
+        type: it[2],
+        x: it[0],
+        y: it[1],
+        // A marked prize: the same item, drawn so you cannot miss it.
+        bonus: it[3] === 'bonus'
+      }))
     };
   }
 
@@ -813,7 +964,7 @@ __mod.levels = (function () {
       [120, 370, 'console'], [280, 350, 'ring'], [170, 470, 'wallet']
     ], { theme: 'hotel', name: 'Hotel Room', creaks: [[150, 190, 90, 40], [60, 350, 60, 50]] }),
     makeLevel(15, 'E', [200, 548], 160, [
-      [70, 120, 'vase'], [200, 140, 'console'], [330, 110, 'necklace'],
+      [70, 120, 'vase'], [200, 140, 'console'], [330, 110, 'necklace', 'bonus'],
       [140, 220, 'tablet'], [250, 240, 'camera'], [330, 260, 'ring'],
       [120, 370, 'speaker'], [280, 350, 'headphones'], [330, 515, 'coin']
     ], { theme: 'hotel', name: 'Hotel Room', creaks: [[150, 190, 90, 40], [230, 470, 80, 44]] }),
@@ -830,7 +981,7 @@ __mod.levels = (function () {
       [230, 370, 'camera'], [330, 515, 'wallet'], [60, 520, 'coin']
     ], { theme: 'office', name: 'Office', creaks: [[170, 210, 90, 44], [60, 440, 70, 44]] }),
     makeLevel(18, 'D', [200, 548], 160, [
-      [150, 130, 'tv'], [250, 130, 'speaker'], [60, 260, 'laptop'],
+      [150, 130, 'tv', 'bonus'], [250, 130, 'speaker'], [60, 260, 'laptop'],
       [200, 240, 'console'], [330, 300, 'mirror'], [100, 360, 'tv'],
       [230, 370, 'tablet'], [330, 515, 'camera']
     ], { theme: 'office', name: 'Office', creaks: [[170, 210, 90, 44], [230, 300, 90, 44]] }),
@@ -847,7 +998,7 @@ __mod.levels = (function () {
       [180, 400, 'ring'], [150, 500, 'necklace'], [330, 520, 'coin']
     ], { theme: 'luxury', name: 'Luxury Bedroom', creaks: [[140, 240, 100, 44]] }),
     makeLevel(21, 'F', [200, 548], 160, [
-      [180, 90, 'diamond'], [120, 130, 'painting'], [60, 300, 'necklace'],
+      [180, 90, 'diamond', 'bonus'], [120, 130, 'painting'], [60, 300, 'necklace'],
       [250, 290, 'vase'], [330, 350, 'jewel'], [60, 370, 'mirror'],
       [180, 400, 'painting'], [150, 500, 'ring']
     ], { theme: 'luxury', name: 'Luxury Bedroom', creaks: [[140, 240, 100, 44], [230, 380, 90, 44]] }),
@@ -858,7 +1009,7 @@ __mod.levels = (function () {
       [60, 370, 'jewel'], [180, 400, 'ring'], [150, 500, 'vase']
     ], { theme: 'penthouse', name: "Penthouse", creaks: [[140, 240, 100, 44]] }),
     makeLevel(23, 'C', [200, 548], 160, [
-      [196, 70, 'goldbar'], [70, 150, 'diamond'], [330, 150, 'painting'],
+      [196, 70, 'goldbar', 'bonus'], [70, 150, 'diamond'], [330, 150, 'painting'],
       [160, 238, 'necklace'], [186, 352, 'diamond'], [330, 400, 'goldbar'],
       [60, 470, 'painting'], [330, 520, 'jewel']
     ], { theme: 'penthouse', name: 'Penthouse', creaks: [[100, 210, 110, 44]] }),
@@ -1036,7 +1187,7 @@ __mod.sim = (function () {
   const { TUNING } = __mod.tuning;
   const { createRng } = __mod.rng;
   const { solveMove, clampToWorld } = __mod.physics;
-  const { addNoise, isAwake, itemStats, canBank, sleepStage, resolveUpgrades, bumpNoise, timeLimit } = __mod.rules;
+  const { addNoise, isAwake, itemStats, canBank, sleepStage, resolveUpgrades, bumpNoise, timeLimit, rarityOf, comboBonus, gradeEscape, isBigScore } = __mod.rules;
 
   const STEP_SECONDS = 1 / TUNING.sim.hz;
 
@@ -1144,6 +1295,7 @@ __mod.sim = (function () {
       failReason: null,  // 'awake' | 'time'
       timeLeft: timeLimit(level),
       timeLimit: timeLimit(level),
+      escapeGrade: null,
       stillFor: 0,       // seconds spent perfectly still, for noise recovery
       bumpCooldown: 0,
       money: 0,          // what you get paid (haul plus any bag bonus)
@@ -1161,6 +1313,10 @@ __mod.sim = (function () {
           rawValue: stats.value,
           noise: stats.noise,
           fragile: !!stats.fragile,
+          bonus: !!item.bonus,
+          rarity: rarityOf(item.type).name,
+          // Bigger, more valuable things take longer to lift.
+          pickupTime: rarityOf(item.type).pickup,
           taken: false,
           inRange: false,
           takenAtFrame: -1
@@ -1168,6 +1324,9 @@ __mod.sim = (function () {
       }),
       targetId: null,   // the in-range item a TAKE would consume
       reach: null,      // the in-progress grab animation, if any
+      streak: 0,        // steals in quick succession
+      streakTimer: 0,   // ...and how long is left to keep it
+      onSoftFloor: false,
       // Creaky boards: plain trigger zones, each with its own cooldown so
       // standing on one does not drain the meter.
       creaks: level.creaks.map((zone) => ({ ...zone, cooldown: 0, active: false })),
@@ -1194,6 +1353,7 @@ __mod.sim = (function () {
       haul: sim.haul,
       noise: sim.noise,
       timeLeft: Math.max(0, sim.timeLeft),
+      grade: sim.escapeGrade,
       frame: sim.frame,
       taken: sim.items.filter((i) => i.taken).map((i) => i.type)
     });
@@ -1203,19 +1363,31 @@ __mod.sim = (function () {
     item.taken = true;
     item.inRange = false;
     item.takenAtFrame = sim.frame;
-    sim.money += item.value;
+
+    // A streak only survives if you keep moving between prizes.
+    sim.streak = sim.streakTimer > 0 ? sim.streak + 1 : 1;
+    sim.streakTimer = TUNING.combo.window;
+    const bonusRate = comboBonus(sim.streak);
+    const paid = Math.round(item.value * (1 + bonusRate));
+
+    sim.money += paid;
     sim.haul += item.rawValue;
     sim.noise = addNoise(sim.noise, item.noise);
     // Drives the reach-and-grab animation. Money and noise are already credited,
     // so the animation is presentation only and can never affect the outcome.
-    sim.reach = { t: 0, duration: TUNING.pickup.reachSeconds, x: item.x, y: item.y, type: item.type };
+    sim.reach = { t: 0, duration: item.pickupTime, x: item.x, y: item.y, type: item.type };
     sim.shake = Math.min(TUNING.feedback.shakeMax, item.noise * TUNING.feedback.shakePerNoise);
     sim.shakePhase = 0;
     sim.events.push({
       type: 'took',
       id: item.id,
       itemType: item.type,
-      value: item.value,
+      value: paid,
+      baseValue: item.value,
+      bonusRate,
+      streak: sim.streak,
+      big: isBigScore(item.rawValue),
+      rarity: item.rarity,
       noise: item.noise,
       fragile: item.fragile,
       x: item.x,
@@ -1277,6 +1449,26 @@ __mod.sim = (function () {
         zone.cooldown = TUNING.hazards.creakCooldown;
       }
       zone.active = inside;
+    }
+
+    // Which surface is underfoot. A rug swallows footsteps; bare boards do not.
+    sim.onSoftFloor = sim.level.rugs.some(
+      (rug) => player.x > rug.x && player.x < rug.x + rug.w &&
+               player.y > rug.y && player.y < rug.y + rug.h
+    );
+    if (player.moving && sim.status === 'running') {
+      const surface = sim.onSoftFloor ? TUNING.hazards.softFloorScale : 1;
+      const share = Math.min(1, player.speed / TUNING.player.speed);
+      const amount = TUNING.hazards.walkNoise * surface * share * STEP_SECONDS * sim.mods.hazardNoise;
+      if (amount > 0) {
+        sim.noise = addNoise(sim.noise, amount);
+        if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
+      }
+    }
+
+    if (sim.streakTimer > 0) {
+      sim.streakTimer = Math.max(0, sim.streakTimer - STEP_SECONDS);
+      if (sim.streakTimer === 0) sim.streak = 0;
     }
 
     // Walking into furniture. One event per collision, never one per frame: a
@@ -1347,7 +1539,16 @@ __mod.sim = (function () {
         player.x + player.w / 2 > exit.x &&
         player.x - player.w / 2 < exit.x + exit.w &&
         player.y + player.h / 2 > exit.y;
-      if (atExit && canBank(sim.noise)) finish(sim, 'won');
+      if (atExit && canBank(sim.noise)) {
+        const grade = gradeEscape({
+          noise: sim.noise,
+          timeLeft: sim.timeLeft,
+          limit: sim.timeLimit
+        });
+        sim.money += grade.bonus;
+        sim.escapeGrade = grade;
+        finish(sim, 'won');
+      }
     }
 
     sim.frame++;
@@ -1428,7 +1629,7 @@ __mod.save = (function () {
   // Versioned save with an explicit migration chain. Adding a field later means
   // appending one migration, not breaking every existing player's progress.
   const SAVE_KEY = 'dwh_save';
-  const SAVE_VERSION = 3;
+  const SAVE_VERSION = 4;
 
   function defaultSettings() {
     return { sound: true, music: true, vibration: true, quality: 'high' };
@@ -1442,6 +1643,8 @@ __mod.save = (function () {
       best: {},
       stars: {},
       collection: [],
+      // Per level: best haul, fastest escape, quietest run.
+      records: {},
       upgrades: { shoes: 0, feet: 0, bag: 0 },
       settings: defaultSettings()
     };
@@ -1461,7 +1664,8 @@ __mod.save = (function () {
       upgrades: { shoes: 0, feet: 0, bag: 0 },
       // Only a real `true` means muted; a corrupt value must not silence the game.
       settings: { ...defaultSettings(), sound: save.muted !== true }
-    })
+    }),
+    3: (save) => ({ ...save, v: 4, records: {} })
   };
 
   const QUALITIES = ['low', 'medium', 'high'];
@@ -1490,6 +1694,7 @@ __mod.save = (function () {
       bank: clampInt(save.bank, 0, Number.MAX_SAFE_INTEGER, base.bank),
       best: plainObject(save.best),
       stars: plainObject(save.stars),
+      records: plainObject(save.records),
       collection: Array.isArray(save.collection)
         ? [...new Set(save.collection.filter((t) => typeof t === 'string'))]
         : [],
@@ -1557,12 +1762,27 @@ __mod.save = (function () {
         const earned = Number.isFinite(money) && money > 0 ? Math.floor(money) : 0;
         const stars = clampInt(extra.stars, 0, 3, 0);
         const types = Array.isArray(extra.types) ? extra.types.filter((t) => typeof t === 'string') : [];
+
+        // Personal bests. Each is tracked separately, so a greedy run and a
+        // quiet run can both leave a mark on the same level.
+        const previous = cache.records[levelId] || {};
+        const seconds = Number.isFinite(extra.seconds) ? Math.round(extra.seconds * 10) / 10 : null;
+        const noise = Number.isFinite(extra.noise) ? Math.round(extra.noise) : null;
+        const record = {
+          money: Math.max(previous.money || 0, earned),
+          time: seconds === null ? previous.time
+            : previous.time === undefined ? seconds : Math.min(previous.time, seconds),
+          noise: noise === null ? previous.noise
+            : previous.noise === undefined ? noise : Math.min(previous.noise, noise)
+        };
+
         cache = {
           ...cache,
           bank: cache.bank + earned,
           unlocked: Math.max(cache.unlocked, levelId + 1),
           best: { ...cache.best, [levelId]: Math.max(cache.best[levelId] || 0, earned) },
           stars: { ...cache.stars, [levelId]: Math.max(cache.stars[levelId] || 0, stars) },
+          records: { ...cache.records, [levelId]: record },
           collection: [...new Set([...cache.collection, ...types])]
         };
         return write();
@@ -1757,6 +1977,24 @@ __mod.audio = (function () {
         const pitch = 210 - Math.min(6, amount) * 12;
         tone(pitch, 0.06, 'square', 0.032);
         tone(pitch * 0.62, 0.13, 'triangle', 0.03, 0.03);
+      },
+
+      // Something genuinely valuable just came off the shelf.
+      jackpot() {
+        tone(660, 0.07, 'triangle', 0.055);
+        tone(880, 0.07, 'triangle', 0.055, 0.06);
+        tone(1320, 0.22, 'triangle', 0.05, 0.12);
+      },
+
+      // A rising blip per streak tier.
+      streak(count) {
+        tone(520 + Math.min(6, count) * 60, 0.06, 'square', 0.03);
+      },
+
+      // Two soft thumps, once he is on the edge.
+      heartbeat() {
+        tone(58, 0.11, 'sine', 0.075);
+        tone(48, 0.15, 'sine', 0.06, 0.15);
       },
 
       // The clock, in the last few seconds.
@@ -2101,7 +2339,12 @@ __mod.art = (function () {
     }
   }
 
+  // Lamps are painted into the cached room, but their glow flickers every frame,
+  // so their positions are collected as the room is painted.
+  const lampPositions = [];
+
   function drawLamp(ctx, x, y) {
+    lampPositions.push({ x, y });
     const glow = ctx.createRadialGradient(x, y, 2, x, y, 26);
     glow.addColorStop(0, 'rgba(255,222,150,0.55)');
     glow.addColorStop(1, 'rgba(255,222,150,0)');
@@ -2436,13 +2679,7 @@ __mod.art = (function () {
     drawPlant(ctx, sillX, top + height - 6, 0.52);
   }
 
-  function drawRug(ctx, layout) {
-    const rugs = {
-      A: { x: 96, y: 372, w: 190, h: 118 },
-      B: { x: 60, y: 92, w: 120, h: 96 },
-      C: { x: 96, y: 356, w: 190, h: 64 }
-    };
-    const r = rugs[layout];
+  function drawRug(ctx, r) {
     if (!r) return;
     // Faint and fringed, so it reads as a textile lying on the floor. A rug that
     // looked solid would read as something you collide with — a lie the player
@@ -2519,12 +2756,42 @@ __mod.art = (function () {
     fillRound(ctx, bed.x + 7, bed.y + 10, bed.w - 14, bed.h - 25, 6, PALETTE.mattress);
   }
 
+  // Old boards that announce you. Drawn as a worn patch with nail heads — the
+  // player should be able to see the hazard before stepping on it.
+  function drawCreakZone(ctx, zone) {
+    ctx.save();
+    ctx.globalAlpha = 0.5;
+    fillRound(ctx, zone.x, zone.y, zone.w, zone.h, 3, 'rgba(60,34,16,0.42)');
+    ctx.globalAlpha = 0.75;
+    ctx.strokeStyle = 'rgba(40,22,10,0.6)';
+    ctx.lineWidth = 1.4;
+    const boards = Math.max(2, Math.round(zone.h / 14));
+    for (let i = 1; i < boards; i++) {
+      const y = zone.y + (zone.h / boards) * i;
+      ctx.beginPath();
+      ctx.moveTo(zone.x + 2, y);
+      ctx.lineTo(zone.x + zone.w - 2, y);
+      ctx.stroke();
+    }
+    ctx.fillStyle = 'rgba(228,206,168,0.55)';                  // nail heads
+    for (let i = 0; i < boards; i++) {
+      const y = zone.y + (zone.h / boards) * (i + 0.5);
+      for (const x of [zone.x + 5, zone.x + zone.w - 5]) {
+        ctx.beginPath();
+        ctx.arc(x, y, 1.3, 0, TAU);
+        ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
   // Everything that never moves, drawn once per level into an offscreen canvas.
   function paintStaticRoom(ctx, level) {
     T = THEMES[level.theme] || THEMES.bedroom;
+    lampPositions.length = 0;
     drawFloor(ctx);
+    for (const rug of level.rugs) drawRug(ctx, rug);
     for (const zone of level.creaks) drawCreakZone(ctx, zone);
-    drawRug(ctx, level.layout);
     drawWalls(ctx);
     // After the walls: the window is cut into one, and its light falls on top
     // of the floor that is already down.
@@ -2859,16 +3126,16 @@ __mod.art = (function () {
     ctx.fillText(art, 0, 8);
     ctx.restore();
   }
-  return { PALETTE, ITEM_ART, ITEM_NAMES, roundRect, drawFurniture, paintStaticRoom, drawSleeper, drawThief, drawGrabbedItem };
+  return { PALETTE, ITEM_ART, ITEM_NAMES, roundRect, lampPositions, drawFurniture, paintStaticRoom, drawSleeper, drawThief, drawGrabbedItem };
 })();
 __mod.render = (function () {
   // Draws a simulation snapshot. Knows nothing about rules — it reads state and
   // paints it, interpolating between the last two fixed steps so 60Hz sim motion
   // stays smooth on any refresh rate.
   const { TUNING } = __mod.tuning;
-  const { sleepStage } = __mod.rules;
+  const { sleepStage, rarityOf, isBigScore } = __mod.rules;
   const { playerOf } = __mod.sim;
-  const { paintStaticRoom, drawSleeper, drawThief, drawGrabbedItem, roundRect, ITEM_ART } = __mod.art;
+  const { paintStaticRoom, drawSleeper, drawThief, drawGrabbedItem, roundRect, ITEM_ART, lampPositions } = __mod.art;
 
   const { width: W, height: H, wallThickness: WT, hudStrip: HUD_H } = TUNING.world;
   const TAU = Math.PI * 2;
@@ -2928,8 +3195,12 @@ __mod.render = (function () {
     let exitGlowKey = '';
     function drawExit(sim, time) {
       const exit = sim.level.exit;
-      const pulse = 0.5 + 0.5 * Math.sin(time * 3);
-      const alpha = (0.30 + 0.16 * pulse).toFixed(2);
+      const player = playerOf(sim);
+      // Brighter and faster the closer you are: the way out should feel like it
+      // is calling you once escaping is actually on the table.
+      const near = Math.max(0, 1 - Math.hypot(player.x - (exit.x + exit.w / 2), player.y - exit.y) / 170);
+      const pulse = 0.5 + 0.5 * Math.sin(time * (3 + near * 4));
+      const alpha = (0.26 + 0.20 * pulse + near * 0.22).toFixed(2);
       const key = `${exit.y}:${alpha}`;
       if (exitGlowKey !== key) {
         exitGlow = ctx.createLinearGradient(0, exit.y - 34, 0, H);
@@ -2982,6 +3253,16 @@ __mod.render = (function () {
         ctx.arc(item.x, y, 21, 0, TAU);
         ctx.fill();
 
+        // A marked prize gets a slow halo of its own, even out of range.
+        if (item.bonus) {
+          const shine = 0.5 + 0.5 * Math.sin(time * 2.2 + item.x);
+          ctx.strokeStyle = `rgba(255,196,77,${0.35 + 0.35 * shine})`;
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.arc(item.x, y, 24 + shine * 3, 0, TAU);
+          ctx.stroke();
+        }
+
         if (isTarget) {
           const ring = 0.5 + 0.5 * Math.sin(time * 5);
           ctx.strokeStyle = `rgba(255,222,120,${0.6 + 0.35 * ring})`;
@@ -2999,11 +3280,22 @@ __mod.render = (function () {
         ctx.strokeStyle = 'rgba(20,10,26,0.85)';
         ctx.lineJoin = 'round';
         ctx.strokeText(`$${item.value}`, item.x, y - 15);
-        ctx.fillStyle = isTarget ? '#fff4cf' : '#ffe07a';
+        // Price is tinted by rarity, so how tempting a thing is reads instantly.
+        ctx.fillStyle = isTarget ? '#fff4cf' : rarityOf(item.type).tint;
         ctx.fillText(`$${item.value}`, item.x, y - 15);
         ctx.strokeText(`+${item.noise}`, item.x, y + 24);
         ctx.fillStyle = '#ffab7d';
         ctx.fillText(`+${item.noise}`, item.x, y + 24);
+
+        // The prompt appears only for the thing a TAKE would actually consume.
+        if (isTarget) {
+          ctx.font = 'bold 9px system-ui';
+          ctx.fillStyle = 'rgba(20,10,26,0.75)';
+          roundRect(ctx, item.x - 19, y + 28, 38, 13, 6);
+          ctx.fill();
+          ctx.fillStyle = '#ffe9a8';
+          ctx.fillText('STEAL', item.x, y + 37);
+        }
       }
     }
 
@@ -3024,13 +3316,13 @@ __mod.render = (function () {
       for (const pop of pops) {
         const rise = (1 - pop.life) * 26;
         ctx.globalAlpha = Math.max(0, Math.min(1, pop.life * 1.4));
-        ctx.font = 'bold 14px system-ui';
-        ctx.lineWidth = 3;
+        ctx.font = `bold ${pop.big ? 21 : 14}px system-ui`;
+        ctx.lineWidth = pop.big ? 4 : 3;
         ctx.lineJoin = 'round';
         ctx.strokeStyle = 'rgba(20,10,26,0.8)';
         const label = pop.text || `+$${pop.value}`;
         ctx.strokeText(label, pop.x, pop.y - 18 - rise);
-        ctx.fillStyle = pop.text ? '#ff9c6e' : '#ffd34d';
+        ctx.fillStyle = pop.color || (pop.text ? '#ff9c6e' : '#ffd34d');
         ctx.fillText(label, pop.x, pop.y - 18 - rise);
         ctx.globalAlpha = 1;
       }
@@ -3088,7 +3380,7 @@ __mod.render = (function () {
       invalidateRoom() { roomKey = ''; },
       setQuality(next) { if (next) { quality = next; roomKey = ''; } },
 
-      draw(sim, alpha, time, pops, stats, sparks = []) {
+      draw(sim, alpha, time, pops, stats, sparks = [], flash = 0) {
         ensureRoom(sim.level);
 
         ctx.save();
@@ -3118,9 +3410,27 @@ __mod.render = (function () {
           drawGrabbedItem(ctx, ITEM_ART[sim.reach.type] || '?', sim.reach, hand, reachProgress);
         }
 
+        // Lamps breathe over the cached room. Flat circles, not gradients: this
+        // runs every frame.
+        for (let i = 0; i < lampPositions.length; i++) {
+          const lamp = lampPositions[i];
+          const flicker = 0.5 + 0.5 * Math.sin(time * (2.1 + i * 0.7) + i);
+          ctx.globalAlpha = 0.05 + flicker * 0.05;
+          ctx.fillStyle = '#ffe6a8';
+          ctx.beginPath();
+          ctx.arc(lamp.x, lamp.y, 22, 0, TAU);
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+
         drawSparks(sparks);
         drawPops(pops);
         drawDanger(sim, time);
+        // A brief warm wash when something genuinely valuable comes off the shelf.
+        if (flash > 0) {
+          ctx.fillStyle = `rgba(255,214,120,${(flash * 0.20).toFixed(3)})`;
+          ctx.fillRect(0, 0, W, H);
+        }
         if (debug) drawDebug(sim, stats, { x: px, y: py });
         ctx.restore();
       }
@@ -3141,7 +3451,7 @@ __mod.main = (function () {
   const { createAudio } = __mod.audio;
   const { createInput } = __mod.input;
   const { createRenderer } = __mod.render;
-  const { sleepStage, starsFor, starThresholds, levelTotals, upgradeCost, SLEEP_LABELS } = __mod.rules;
+  const { sleepStage, starsFor, starThresholds, levelTotals, upgradeCost, SLEEP_LABELS, objectivesFor, isBigScore, rarityOf } = __mod.rules;
   const { ITEM_ART, ITEM_NAMES } = __mod.art;
 
   const $ = (id) => document.getElementById(id);
@@ -3184,6 +3494,8 @@ __mod.main = (function () {
     let pendingEnd = null;
     let lastStepPhase = 0;
     let lastTick = -1;
+    let flash = 0;
+    let lastHeartbeat = 0;
     const stats = { fps: 0, steps: 0 };
 
     const setting = (key) => saveStore.data.settings[key];
@@ -3243,16 +3555,39 @@ __mod.main = (function () {
 
     function showEnd(won, ctx) {
       showOnly(screens.end);
+      const level = LEVELS.find((l) => l.id === currentLevelId);
+      const gradeEl = $('grade');
+      gradeEl.textContent = won && ctx.grade ? ctx.grade.label : '';
+      gradeEl.className = won && ctx.grade ? ctx.grade.grade : '';
+
+      // What the level asked for, and which of it you managed.
+      const objectives = $('objectives');
+      objectives.innerHTML = won || !level ? '' : '';
+      if (level) {
+        objectives.innerHTML = objectivesFor(level).map((objective) => {
+          const done = won && ctx.stars >= objective.stars;
+          return `<div class="obj${done ? ' done' : ''}">` +
+            `<b>${'★'.repeat(objective.stars)}</b>${objective.text}` +
+            `<span style="margin-left:auto">${done ? '✓' : ''}</span></div>`;
+        }).join('');
+      }
+
+      const record = (saveStore.data.records || {})[currentLevelId];
+      $('records').innerHTML = record
+        ? `<div>BEST LOOT<b>$${(record.money || 0).toLocaleString()}</b></div>` +
+          `<div>BEST TIME<b>${record.time !== undefined ? record.time.toFixed(1) + 's' : '—'}</b></div>` +
+          `<div>QUIETEST<b>${record.noise !== undefined ? record.noise : '—'}</b></div>`
+        : '';
       $('endTitle').textContent = won ? 'LEVEL COMPLETE'
         : ctx.reason === 'time' ? "TIME'S UP" : 'HE WOKE UP!';
       $('stars').innerHTML = won ? starRow(ctx.stars) : '';
       $('endTally').innerHTML = won
         ? `<div>HAUL<b>$${ctx.money.toLocaleString()}</b></div>` +
-          `<div>ITEMS<b>${ctx.taken.length}</b></div>` +
-          `<div>NOISE<b>${ctx.noise}/${TUNING.noise.max}</b></div>`
+          `<div>ITEMS<b>${ctx.taken.length}/${level ? level.items.length : '?'}</b></div>` +
+          `<div>NOISE<b>${Math.round(ctx.noise)}</b></div>` +
+          `<div>LEFT<b>${(ctx.timeLeft || 0).toFixed(1)}s</b></div>`
         : '';
       if (won) {
-        const level = LEVELS.find((l) => l.id === currentLevelId);
         const marks = starThresholds(level);
         $('endText').innerHTML = ctx.stars < 3
           ? `Steal $${(ctx.stars < 2 ? marks.two : marks.three).toLocaleString()} in one run for ${ctx.stars < 2 ? 2 : 3} stars.`
@@ -3260,7 +3595,7 @@ __mod.main = (function () {
       } else {
         const cause = ctx.reason === 'time'
           ? 'You were still in the room when the clock ran out.'
-          : 'One item too many.';
+          : 'The noise reached 100 and he woke up.';
         $('endText').innerHTML =
           `${cause}<br>You lost <b style="color:#ffd34d">$${ctx.money.toLocaleString()}</b>.`;
       }
@@ -3397,11 +3732,16 @@ __mod.main = (function () {
     function handleEvents() {
       for (const event of sim.events) {
         if (event.type === 'took') {
-          pops.push({ x: event.x, y: event.y, value: event.value, life: 1 });
-          spawnSparks(event.x, event.y, event.fragile ? 10 : 6,
-            event.fragile ? '#bfe6ff' : '#ffd34d');
+          pops.push({
+            x: event.x, y: event.y, value: event.value, life: 1,
+            big: event.big, color: event.big ? '#ffe9a8' : rarityOf(event.itemType).tint
+          });
+          spawnSparks(event.x, event.y, event.big ? 14 : event.fragile ? 10 : 6,
+            event.big ? '#ffd98a' : event.fragile ? '#bfe6ff' : '#ffd34d');
           audio.take(event.noise, event.fragile);
-          buzz(event.fragile ? [12, 30, 12] : 14);
+          if (event.big) { flash = 1; audio.jackpot(); buzz([18, 40, 24]); }
+          else buzz(event.fragile ? [12, 30, 12] : 14);
+          if (event.streak >= TUNING.combo.tiers[0].at) audio.streak(event.streak);
           const stageNow = sleepStage(sim.noise);
           if (stageNow > warnedAt && stageNow > 0 && sim.status === 'running') {
             warnedAt = stageNow;
@@ -3418,12 +3758,17 @@ __mod.main = (function () {
         } else if (event.type === 'won') {
           const level = LEVELS.find((l) => l.id === currentLevelId);
           const stars = starsFor(level, event.haul);
-          saveStore.recordWin(currentLevelId, event.money, { stars, types: event.taken });
+          saveStore.recordWin(currentLevelId, event.money, {
+            stars,
+            types: event.taken,
+            seconds: sim.timeLimit - event.timeLeft,
+            noise: event.noise
+          });
           audio.win();
           buzz([16, 40, 16]);
           machine.set('won', {
             money: event.money, noise: event.noise, stars,
-            taken: event.taken, timeLeft: event.timeLeft
+            taken: event.taken, timeLeft: event.timeLeft, grade: event.grade
           });
           if (debug) console.info('[dwh] replay', frameCount(recording), 'frames', JSON.stringify(recording));
         } else if (event.type === 'lost') {
@@ -3450,7 +3795,8 @@ __mod.main = (function () {
     // style write still costs a style recalculation.
     const hudEls = {
       money: $('money'), time: $('time'), level: $('lvl'),
-      bar: $('noisebar'), noise: $('noisetxt'), wrap: $('noisewrap')
+      bar: $('noisebar'), noise: $('noisetxt'), wrap: $('noisewrap'),
+      warn: $('warn'), streak: $('streak')
     };
     const hudLast = {};
     const setText = (key, el, value) => {
@@ -3462,6 +3808,12 @@ __mod.main = (function () {
       if (hudLast[key] === value) return;
       hudLast[key] = value;
       el.style[prop] = value;
+    };
+
+    const comboBonusOf = (streak) => {
+      let bonus = 0;
+      for (const tier of TUNING.combo.tiers) if (streak >= tier.at) bonus = tier.bonus;
+      return bonus;
     };
 
     function paintHud() {
@@ -3498,6 +3850,36 @@ __mod.main = (function () {
         hudLast.calming = calming;
         hudEls.wrap.classList.toggle('calming', calming);
       }
+      // He's stirring. The warning escalates rather than appearing all at once.
+      const warnEl = hudEls.warn;
+      const warning = sim.status !== 'running' ? null
+        : sim.noise >= 95 ? { text: "HE'S WAKING UP!", cls: 'hard critical' }
+          : sim.noise >= 90 ? { text: "HE'S ALMOST AWAKE", cls: 'hard' }
+            : sim.noise >= 80 ? { text: "HE'S STIRRING…", cls: '' } : null;
+      if (hudLast.warnText !== (warning ? warning.text : '')) {
+        hudLast.warnText = warning ? warning.text : '';
+        warnEl.hidden = !warning;
+        if (warning) {
+          warnEl.textContent = warning.text;
+          warnEl.className = warning.cls;
+          buzz(sim.noise >= 95 ? [20, 40, 20] : 12);
+        }
+      }
+      // A heartbeat once he is on the edge.
+      if (sim.noise >= 95 && sim.status === 'running') {
+        if (clock - lastHeartbeat > 0.62) { lastHeartbeat = clock; audio.heartbeat(); }
+      }
+
+      const streakEl = hudEls.streak;
+      const showStreak = sim.streak >= TUNING.combo.tiers[0].at && sim.status === 'running';
+      const streakText = showStreak
+        ? `STEAL STREAK x${sim.streak}  +${Math.round(comboBonusOf(sim.streak) * 100)}%` : '';
+      if (hudLast.streakText !== streakText) {
+        hudLast.streakText = streakText;
+        streakEl.hidden = !showStreak;
+        streakEl.textContent = streakText;
+      }
+
       const targeted = !!sim.targetId;
       if (hudLast.targeted !== targeted) {
         hudLast.targeted = targeted;
@@ -3557,7 +3939,8 @@ __mod.main = (function () {
         }
 
         if (sim) {
-          renderer.draw(sim, Math.min(1, accumulator / STEP_SECONDS), clock, pops, stats, sparks);
+          if (flash > 0) flash = Math.max(0, flash - elapsed * 2.4);
+          renderer.draw(sim, Math.min(1, accumulator / STEP_SECONDS), clock, pops, stats, sparks, flash);
           paintHud();
         }
         consecutiveErrors = 0;
@@ -3663,7 +4046,11 @@ __mod.main = (function () {
       if (debug && /^[0-9]$/.test(e.key)) startLevel(e.key === '0' ? 10 : Number(e.key));
     });
 
-    const resize = () => renderer.resize(stage);
+    const resize = () => {
+      renderer.resize(stage);
+      const hudHeight = $('hud').getBoundingClientRect().height;
+      $('banner').style.top = `${hudHeight + 8}px`;
+    };
     addEventListener('resize', resize);
     addEventListener('orientationchange', () => setTimeout(resize, 200));
 

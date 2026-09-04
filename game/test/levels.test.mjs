@@ -115,7 +115,10 @@ test('taking two named items pays exactly what they are worth', () => {
     const expected = level.items
       .filter((i) => ids.includes(i.id))
       .reduce((sum, i) => sum + itemStats(i.type).value, 0);
-    assert.equal(result.money, expected, `level ${level.id} paid the wrong amount`);
+    // `haul` is the raw worth of what was lifted; `money` is what you are paid,
+    // which now includes streak and escape bonuses on top.
+    assert.equal(result.haul, expected, `level ${level.id} hauled the wrong amount`);
+    assert.ok(result.money >= expected, `level ${level.id} paid less than the haul`);
   }
 });
 

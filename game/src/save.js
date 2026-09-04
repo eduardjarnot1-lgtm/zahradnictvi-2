@@ -1,7 +1,7 @@
 // Versioned save with an explicit migration chain. Adding a field later means
 // appending one migration, not breaking every existing player's progress.
 export const SAVE_KEY = 'dwh_save';
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
 
 export function defaultSettings() {
   return { sound: true, music: true, vibration: true, quality: 'high' };
@@ -15,6 +15,8 @@ export function defaultSave() {
     best: {},
     stars: {},
     collection: [],
+    // Per level: best haul, fastest escape, quietest run.
+    records: {},
     upgrades: { shoes: 0, feet: 0, bag: 0 },
     settings: defaultSettings()
   };
@@ -34,7 +36,8 @@ const MIGRATIONS = {
     upgrades: { shoes: 0, feet: 0, bag: 0 },
     // Only a real `true` means muted; a corrupt value must not silence the game.
     settings: { ...defaultSettings(), sound: save.muted !== true }
-  })
+  }),
+  3: (save) => ({ ...save, v: 4, records: {} })
 };
 
 const QUALITIES = ['low', 'medium', 'high'];
@@ -63,6 +66,7 @@ export function migrate(raw) {
     bank: clampInt(save.bank, 0, Number.MAX_SAFE_INTEGER, base.bank),
     best: plainObject(save.best),
     stars: plainObject(save.stars),
+    records: plainObject(save.records),
     collection: Array.isArray(save.collection)
       ? [...new Set(save.collection.filter((t) => typeof t === 'string'))]
       : [],
@@ -130,12 +134,27 @@ export function createSaveStore(storage) {
       const earned = Number.isFinite(money) && money > 0 ? Math.floor(money) : 0;
       const stars = clampInt(extra.stars, 0, 3, 0);
       const types = Array.isArray(extra.types) ? extra.types.filter((t) => typeof t === 'string') : [];
+
+      // Personal bests. Each is tracked separately, so a greedy run and a
+      // quiet run can both leave a mark on the same level.
+      const previous = cache.records[levelId] || {};
+      const seconds = Number.isFinite(extra.seconds) ? Math.round(extra.seconds * 10) / 10 : null;
+      const noise = Number.isFinite(extra.noise) ? Math.round(extra.noise) : null;
+      const record = {
+        money: Math.max(previous.money || 0, earned),
+        time: seconds === null ? previous.time
+          : previous.time === undefined ? seconds : Math.min(previous.time, seconds),
+        noise: noise === null ? previous.noise
+          : previous.noise === undefined ? noise : Math.min(previous.noise, noise)
+      };
+
       cache = {
         ...cache,
         bank: cache.bank + earned,
         unlocked: Math.max(cache.unlocked, levelId + 1),
         best: { ...cache.best, [levelId]: Math.max(cache.best[levelId] || 0, earned) },
         stars: { ...cache.stars, [levelId]: Math.max(cache.stars[levelId] || 0, stars) },
+        records: { ...cache.records, [levelId]: record },
         collection: [...new Set([...cache.collection, ...types])]
       };
       return write();

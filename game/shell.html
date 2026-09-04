@@ -41,16 +41,32 @@
     border-radius:8px;padding:4px 8px;font-size:13px;font-weight:700;line-height:1.1}
   .hudbtn:focus-visible{outline:2px solid #ffd34d;outline-offset:2px}
 
+  /* Status chips sit just under the HUD, clear of the room's furniture. */
+  #banner{position:absolute;left:0;right:0;display:flex;flex-direction:column;
+    align-items:center;gap:5px;pointer-events:none;z-index:3}
+  #streak,#warn{padding:4px 12px;border-radius:999px;font-size:12px;font-weight:800;
+    letter-spacing:.6px;text-shadow:0 1px 3px #000a}
+  #streak{background:#7c4dff33;border:1px solid #7c4dff88;color:#d9c9ff}
+  #warn{background:#ff4d4d26;border:1px solid #ff6b6b88;color:#ffc9c9}
+  #warn.hard{background:#ff4d4d40;border-color:#ff4d4d;color:#fff;
+    animation:pulsewarn .6s ease-in-out infinite}
+  #warn.critical{animation-duration:.32s}
+  @keyframes pulsewarn{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.06);opacity:1}}
+  @media (prefers-reduced-motion: reduce){ #warn.hard{animation:none} }
+
   #joy{position:absolute;width:110px;height:110px;border-radius:50%;
     background:#ffffff14;border:2px solid #ffffff33;display:none;pointer-events:none}
   #knob{position:absolute;width:48px;height:48px;border-radius:50%;
     background:#ffffff4d;border:2px solid #ffffff80;left:31px;top:31px}
 
-  #take{position:absolute;right:18px;bottom:22px;width:86px;height:86px;border-radius:50%;
-    background:#ffd34d1f;border:2px solid #ffd34d80;color:#ffe07a;font-size:13px;
+  /* Several levels place items in this corner, so the button stays small and
+     mostly transparent until it actually has something to take. */
+  #take{position:absolute;right:12px;bottom:16px;width:76px;height:76px;border-radius:50%;
+    background:#ffd34d10;border:2px solid #ffd34d55;color:#ffe07acc;font-size:13px;
     font-weight:800;letter-spacing:1px;display:none;align-items:center;justify-content:center;
     pointer-events:auto}
-  #take.on{background:#ffd34d33;border-color:#ffd34d;color:#fff5d1}
+  #take.on{background:#ffd34d38;border-color:#ffd34d;color:#fff5d1;
+    box-shadow:0 0 0 4px #ffd34d1a}
   #take.down{transform:scale(.94);background:#ffd34d55}
   #take:focus-visible{outline:2px solid #ffd34d;outline-offset:3px}
   body[data-screen="playing"] #take{display:flex}
@@ -129,6 +145,16 @@
     border-radius:8px;padding:6px 9px;font-size:11px;font-weight:800}
   .seg button.on{background:#7c4dff;border-color:#7c4dff;color:#fff}
 
+  #grade{font-size:15px;font-weight:800;letter-spacing:1.5px;min-height:19px}
+  #grade.perfect{color:#7ce8a4}
+  #grade.close{color:#ff9c6e}
+  #objectives{display:flex;flex-direction:column;gap:4px;width:100%;font-size:11.5px}
+  .obj{display:flex;align-items:center;gap:7px;color:#8d7f9b;
+    background:#ffffff08;border-radius:8px;padding:5px 9px}
+  .obj.done{color:#dcd2e6;background:#4cc17218}
+  .obj b{color:#ffd34d;font-size:11px;min-width:26px}
+  #records{display:flex;gap:12px;justify-content:center;font-size:10.5px;color:#8d7f9b}
+  #records b{display:block;font-size:12px;color:#bcaec8;margin-top:1px}
   #stars{font-size:30px;letter-spacing:6px;color:#ffd34d;min-height:38px}
   #stars s{text-decoration:none;color:#ffffff1f}
   .tally{display:flex;gap:14px;justify-content:center;font-size:12px;color:#bcaec8}
@@ -158,6 +184,11 @@
       <button id="btnpause" class="hudbtn" aria-label="Pause">II</button>
     </div>
     <div id="noisewrap"><div id="noisebar"></div><div id="noisetxt">0 / 100</div></div>
+  </div>
+
+  <div id="banner">
+    <div id="streak" hidden></div>
+    <div id="warn" hidden></div>
   </div>
 
   <div id="joy"><div id="knob"></div></div>
@@ -225,9 +256,12 @@
   <div class="screen" id="scEnd">
     <div class="sheet">
       <h2 id="endTitle">LEVEL COMPLETE</h2>
+      <div id="grade"></div>
       <div id="stars"></div>
       <div class="tally" id="endTally"></div>
+      <div id="objectives"></div>
       <p id="endText"></p>
+      <div id="records"></div>
       <button class="btn" id="bNext">NEXT LEVEL</button>
       <button class="btn alt" id="bRetry">RETRY</button>
       <button class="btn alt" id="bMenu">MENU</button>

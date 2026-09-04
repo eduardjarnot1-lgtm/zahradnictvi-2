@@ -162,7 +162,12 @@ function drawPlant(ctx, x, y, size = 1) {
   }
 }
 
+// Lamps are painted into the cached room, but their glow flickers every frame,
+// so their positions are collected as the room is painted.
+export const lampPositions = [];
+
 function drawLamp(ctx, x, y) {
+  lampPositions.push({ x, y });
   const glow = ctx.createRadialGradient(x, y, 2, x, y, 26);
   glow.addColorStop(0, 'rgba(255,222,150,0.55)');
   glow.addColorStop(1, 'rgba(255,222,150,0)');
@@ -497,13 +502,7 @@ function drawSunbeam(ctx, side) {
   drawPlant(ctx, sillX, top + height - 6, 0.52);
 }
 
-function drawRug(ctx, layout) {
-  const rugs = {
-    A: { x: 96, y: 372, w: 190, h: 118 },
-    B: { x: 60, y: 92, w: 120, h: 96 },
-    C: { x: 96, y: 356, w: 190, h: 64 }
-  };
-  const r = rugs[layout];
+function drawRug(ctx, r) {
   if (!r) return;
   // Faint and fringed, so it reads as a textile lying on the floor. A rug that
   // looked solid would read as something you collide with — a lie the player
@@ -580,12 +579,42 @@ function drawBedBase(ctx, level) {
   fillRound(ctx, bed.x + 7, bed.y + 10, bed.w - 14, bed.h - 25, 6, PALETTE.mattress);
 }
 
+// Old boards that announce you. Drawn as a worn patch with nail heads — the
+// player should be able to see the hazard before stepping on it.
+function drawCreakZone(ctx, zone) {
+  ctx.save();
+  ctx.globalAlpha = 0.5;
+  fillRound(ctx, zone.x, zone.y, zone.w, zone.h, 3, 'rgba(60,34,16,0.42)');
+  ctx.globalAlpha = 0.75;
+  ctx.strokeStyle = 'rgba(40,22,10,0.6)';
+  ctx.lineWidth = 1.4;
+  const boards = Math.max(2, Math.round(zone.h / 14));
+  for (let i = 1; i < boards; i++) {
+    const y = zone.y + (zone.h / boards) * i;
+    ctx.beginPath();
+    ctx.moveTo(zone.x + 2, y);
+    ctx.lineTo(zone.x + zone.w - 2, y);
+    ctx.stroke();
+  }
+  ctx.fillStyle = 'rgba(228,206,168,0.55)';                  // nail heads
+  for (let i = 0; i < boards; i++) {
+    const y = zone.y + (zone.h / boards) * (i + 0.5);
+    for (const x of [zone.x + 5, zone.x + zone.w - 5]) {
+      ctx.beginPath();
+      ctx.arc(x, y, 1.3, 0, TAU);
+      ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+
 // Everything that never moves, drawn once per level into an offscreen canvas.
 export function paintStaticRoom(ctx, level) {
   T = THEMES[level.theme] || THEMES.bedroom;
+  lampPositions.length = 0;
   drawFloor(ctx);
+  for (const rug of level.rugs) drawRug(ctx, rug);
   for (const zone of level.creaks) drawCreakZone(ctx, zone);
-  drawRug(ctx, level.layout);
   drawWalls(ctx);
   // After the walls: the window is cut into one, and its light falls on top
   // of the floor that is already down.

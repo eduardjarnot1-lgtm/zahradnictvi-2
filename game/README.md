@@ -28,6 +28,7 @@ on the next build.
 | `npm run build` | validate levels, bundle `src/` into `index.html` |
 | `npm run validate` | validate levels only |
 | `npm test` | headless simulation + level + save + replay tests |
+| — | the node suite covers the simulation; only a browser run catches a drawing path that throws, so every level is also rendered in Chromium before release |
 | `npm run check` | test, then build |
 
 ## Architecture
@@ -91,6 +92,19 @@ Luxury, Penthouse). Each chapter opens easier than the last one ended and then
 climbs; tests assert both. Levels 1-10 are the original beta set and are
 deliberately unchanged.
 
+### Risk, reward and grading
+
+Item rarity is read off the value, so a new type cannot forget to declare its
+risk: rarer things cost more noise, take longer to lift, and tint their own
+price label. Stealing without dawdling builds a streak worth up to 15%, and the
+escape itself is graded — quiet and unhurried pays a Perfect Escape bonus, loud
+or last-second is a Close Call.
+
+Star targets come from an exact knapsack over each room: the best haul actually
+gettable inside a 92-noise budget. Setting them against the room's raw total
+(the obvious approach) would routinely demand hauls that wake him every time —
+a test asserts every three-star target is reachable.
+
 ### Two resources
 
 The clock and the meter are managed together. Time starts at 30s on level 1 and
@@ -107,6 +121,13 @@ by playing efficiently with time to spare — rule 26 made executable.
 Collision noise is measured on the **blocked axis** of the move, not on the
 resulting speed: a head-on walk into a cabinet stops you dead, so reading speed
 after the move would score the hardest collisions as the gentlest ones.
+
+### Surfaces
+
+Rugs live in level data, not in the renderer, because they are gameplay:
+footsteps are silent on them and audible on bare boards, which is what makes a
+longer route worth considering. The renderer draws them from that same data, so
+what looks soft is soft.
 
 ### Hazards
 

@@ -101,22 +101,78 @@ export function forcesChoice(level) {
   return levelTotals(level).noise > TUNING.noise.max;
 }
 
+export function rarityOf(type) {
+  const { value } = itemStats(type);
+  return TUNING.rarity.bands.find((band) => value <= band.upTo);
+}
+
+export const isBigScore = (value) => value >= TUNING.rarity.bigScoreAt;
+
+// The most valuable haul this room can give up inside a noise budget. Items are
+// few, so this is an exact search rather than a greedy guess — and it matters,
+// because the star targets are read off it. Setting targets against the room's
+// raw total would demand hauls that wake him every time.
+export function bestHaul(level, budget = TUNING.stars.budget) {
+  const items = level.items.map((item) => itemStats(item.type));
+  let best = 0;
+  const walk = (index, noise, value) => {
+    if (noise > budget) return;
+    if (value > best) best = value;
+    if (index >= items.length) return;
+    walk(index + 1, noise + items[index].noise, value + items[index].value);
+    walk(index + 1, noise, value);
+  };
+  walk(0, 0, 0);
+  return best;
+}
+
 // Stars are earned on the raw haul, never on the upgraded payout — otherwise
 // buying the Velvet Bag would quietly hand you three stars everywhere.
+export function starThresholds(level) {
+  const reachable = bestHaul(level);
+  return {
+    two: Math.max(1, Math.round(reachable * TUNING.stars.two)),
+    three: Math.max(2, Math.round(reachable * TUNING.stars.three)),
+    reachable
+  };
+}
+
 export function starsFor(level, haul) {
   if (haul <= 0) return 1;
-  const share = haul / levelTotals(level).value;
-  if (share >= TUNING.stars.three) return 3;
-  if (share >= TUNING.stars.two) return 2;
+  const marks = starThresholds(level);
+  if (haul >= marks.three) return 3;
+  if (haul >= marks.two) return 2;
   return 1;
 }
 
-export function starThresholds(level) {
-  const total = levelTotals(level).value;
-  return {
-    two: Math.ceil(total * TUNING.stars.two),
-    three: Math.ceil(total * TUNING.stars.three)
-  };
+// What the level asks of you, in words, for the results and level-select screens.
+export function objectivesFor(level) {
+  const marks = starThresholds(level);
+  return [
+    { stars: 1, text: 'Escape the room' },
+    { stars: 2, text: `Escape with $${marks.two.toLocaleString()}` },
+    { stars: 3, text: `Escape with $${marks.three.toLocaleString()}` }
+  ];
+}
+
+// How the escape itself went. Presentation, not points — except the small
+// bonus for leaving quietly with time to spare.
+export function gradeEscape({ noise, timeLeft, limit }) {
+  const { perfectNoise, perfectTimeShare, perfectBonus, closeCallNoise, closeCallTime } = TUNING.escape;
+  if (noise < perfectNoise && timeLeft > limit * perfectTimeShare) {
+    return { grade: 'perfect', label: 'PERFECT ESCAPE!', bonus: perfectBonus };
+  }
+  if (noise >= closeCallNoise || timeLeft <= closeCallTime) {
+    return { grade: 'close', label: 'CLOSE CALL!', bonus: 0 };
+  }
+  return { grade: 'clean', label: '', bonus: 0 };
+}
+
+// A streak pays a little extra for stealing without dawdling.
+export function comboBonus(streak) {
+  let bonus = 0;
+  for (const tier of TUNING.combo.tiers) if (streak >= tier.at) bonus = tier.bonus;
+  return bonus;
 }
 
 // Turn owned upgrade levels into the multipliers the simulation applies.
