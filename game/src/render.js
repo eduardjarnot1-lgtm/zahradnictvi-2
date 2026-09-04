@@ -29,6 +29,10 @@ export function createRenderer(canvas, options = {}) {
     const cssHeight = Math.round(viewHeight * fit);
     stage.style.width = `${cssWidth}px`;
     stage.style.height = `${cssHeight}px`;
+    // The HUD's CSS height is derived from the same world value the room is
+    // offset by, so the strip and the room can never drift out of step.
+    const hud = document.getElementById('hud');
+    if (hud) hud.style.height = `${(HUD_H * cssWidth) / W}px`;
 
     // Sharper than the old flat cap of 2, but never more pixels than a
     // mid-range phone GPU is happy to push every frame.

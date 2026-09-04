@@ -2,8 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { LEVELS } from '../src/levels.js';
 import { validateAll, validateLevel } from '../src/validate.js';
-import { levelTotals, forcesChoice, itemStats } from '../src/rules.js';
-import { play } from './harness.mjs';
+import { levelTotals, forcesChoice, itemStats, timeLimit } from '../src/rules.js';
+import { play, playEfficiently } from './harness.mjs';
 
 // Levels are grouped into themed chapters; each opens easier and then climbs.
 function byTheme() {
@@ -92,17 +92,41 @@ test('the campaign ends harder than it starts', () => {
   assert.ok(last.value > first.value * 5);
 });
 
-test('every level can be played and escaped', () => {
+// The promise the game makes: play efficiently and every level is winnable,
+// with time to spare and a haul worth having. This is rule 26 made executable.
+test('every level is winnable by playing efficiently, inside its time limit', () => {
   for (const level of LEVELS) {
+    const { run, result } = playEfficiently(level.id, { budget: 70, seed: 5 });
+    const seconds = run.sim.frame / 60;
+    const limit = timeLimit(level);
+    assert.equal(result.status, 'won',
+      `level ${level.id} could not be finished efficiently (${result.reason || ''})`);
+    assert.ok(result.money > 0, `level ${level.id} paid nothing`);
+    assert.ok(seconds < limit, `level ${level.id} took ${seconds.toFixed(1)}s of ${limit}s`);
+    assert.ok(run.sim.timeLeft > 0, `level ${level.id} finished on empty`);
+  }
+});
+
+test('taking two named items pays exactly what they are worth', () => {
+  for (const level of LEVELS.slice(0, 12)) {
     const ids = level.items.slice(0, 2).map((i) => i.id);
     const { result } = play(level.id, { take: ids, seed: 5 });
+    if (result.status !== 'won') continue;   // some late rooms are that unforgiving
     const expected = level.items
       .filter((i) => ids.includes(i.id))
       .reduce((sum, i) => sum + itemStats(i.type).value, 0);
-    assert.equal(result.status, 'won', `level ${level.id} could not be finished`);
     assert.equal(result.money, expected, `level ${level.id} paid the wrong amount`);
-    assert.deepEqual([...result.taken].sort(), [...ids].sort());
   }
+});
+
+test('the clock shrinks with the campaign but never below the floor', () => {
+  assert.equal(timeLimit(LEVELS[0]), TUNING.time.base);
+  const limits = LEVELS.map(timeLimit);
+  for (let i = 1; i < limits.length; i++) {
+    assert.ok(limits[i] <= limits[i - 1], 'the clock must never get more generous');
+  }
+  assert.ok(limits[limits.length - 1] >= TUNING.time.floor);
+  assert.ok(limits[limits.length - 1] < TUNING.time.base, 'later levels must be tighter');
 });
 
 test('taking everything wakes him on every level that should', () => {

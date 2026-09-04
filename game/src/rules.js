@@ -15,6 +15,47 @@ export const SLEEP_LABELS = [
   'Deep sleep', 'Light sleep', 'Stirring', 'Almost awake', 'About to wake', 'Awake'
 ];
 
+// Deterministic per-position jitter. Shared by the classifier below and by the
+// renderer's decoration, so what you see is what you collide with.
+export function hash(x, y) {
+  let h = Math.imul((Math.round(x) | 0) + 0x9e3779b9, 374761393);
+  h = Math.imul(h ^ ((Math.round(y) | 0) + 0x85ebca6b), 668265263);
+  h ^= h >>> 15;
+  h = Math.imul(h, 2246822519);
+  h ^= h >>> 13;
+  return (h >>> 0) / 4294967296;
+}
+
+const STYLE_GROUPS = {
+  tall: ['wardrobe', 'bookshelf'],
+  wide: ['sofa', 'tvBench'],
+  mid: ['table', 'chest'],
+  small: ['nightstand', 'table']
+};
+
+// What a piece of furniture *is*, derived from its shape and position. The
+// renderer draws it and the simulation charges for bumping it from this same
+// answer, so a sofa is always soft and a bookshelf is always loud.
+export function furnitureStyle(c) {
+  if (c.type === 'bed') return 'bed';
+  const ratio = c.w / c.h;
+  const group = c.h >= 100 ? 'tall' : ratio >= 2.3 ? 'wide' : ratio >= 1.35 ? 'mid' : 'small';
+  const options = STYLE_GROUPS[group];
+  return options[Math.floor(hash(c.x + 7, c.y + 13) * options.length) % options.length];
+}
+
+// Walls are the room, not furniture: brushing one costs nothing.
+export function bumpNoise(collider) {
+  if (!collider || collider.type === 'wall') return 0;
+  return TUNING.hazards.bump[furnitureStyle(collider)] || 0;
+}
+
+// Seconds on the clock for a level. Gentle slope, with a floor.
+export function timeLimit(level) {
+  const { base, perLevel, floor } = TUNING.time;
+  return Math.max(floor, base - Math.floor((level.id - 1) * perLevel));
+}
+
 export function itemStats(type) {
   const stats = TUNING.items[type];
   if (!stats) throw new Error(`unknown item type: ${type}`);
@@ -22,7 +63,7 @@ export function itemStats(type) {
 }
 
 export function addNoise(current, amount) {
-  return Math.min(TUNING.noise.max, current + amount);
+  return Math.max(0, Math.min(TUNING.noise.max, current + amount));
 }
 
 export function isAwake(noise) {

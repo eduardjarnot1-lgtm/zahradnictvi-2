@@ -8,7 +8,8 @@
 // on the floor where they would fake a wall the player collides with.
 import { TUNING } from './tuning.js';
 import {
-  SLEEP_DEEP, SLEEP_LIGHT, SLEEP_DISTURBED, SLEEP_ALMOST, SLEEP_CRITICAL, SLEEP_AWAKE
+  SLEEP_DEEP, SLEEP_LIGHT, SLEEP_DISTURBED, SLEEP_ALMOST, SLEEP_CRITICAL, SLEEP_AWAKE,
+  furnitureStyle, hash
 } from './rules.js';
 
 const { width: W, height: H, wallThickness: WT } = TUNING.world;
@@ -125,18 +126,6 @@ const fillRound = (ctx, x, y, w, h, r, color) => {
   ctx.fill();
 };
 
-// Deterministic per-position jitter, so decoration is varied but never random.
-// Integer mixing rather than a sin() trick — coordinates in this room sit in a
-// narrow range, and sin() clusters badly over it.
-function hash(x, y) {
-  let h = Math.imul((Math.round(x) | 0) + 0x9e3779b9, 374761393);
-  h = Math.imul(h ^ ((Math.round(y) | 0) + 0x85ebca6b), 668265263);
-  h ^= h >>> 15;
-  h = Math.imul(h, 2246822519);
-  h ^= h >>> 13;
-  return (h >>> 0) / 4294967296;
-}
-
 // ---------------------------------------------------------------- solids
 // The thickness trick: a dark base fills the whole collider, the lit top face
 // covers all but the bottom lip. The silhouette still equals the collider
@@ -242,20 +231,6 @@ function dressSurface(ctx, c, topH) {
 }
 
 // ---------------------------------------------------------------- furniture
-const STYLE_GROUPS = {
-  tall: ['wardrobe', 'bookshelf'],
-  wide: ['sofa', 'tvBench'],
-  mid: ['table', 'chest'],
-  small: ['nightstand', 'table']
-};
-
-export function furnitureStyle(c) {
-  const ratio = c.w / c.h;
-  const group = c.h >= 100 ? 'tall' : ratio >= 2.3 ? 'wide' : ratio >= 1.35 ? 'mid' : 'small';
-  const options = STYLE_GROUPS[group];
-  return options[Math.floor(hash(c.x + 7, c.y + 13) * options.length) % options.length];
-}
-
 const woodTone = (c) => PALETTE.woods[Math.floor(hash(c.y, c.x + 3) * PALETTE.woods.length) % PALETTE.woods.length];
 const fabricTone = (c) => PALETTE.fabrics[Math.floor(hash(c.x + 5, c.y) * PALETTE.fabrics.length) % PALETTE.fabrics.length];
 
@@ -563,43 +538,46 @@ function drawRug(ctx, layout) {
 
 function drawBedBase(ctx, level) {
   const bed = level.bed;
-  ctx.fillStyle = SHADOW;
-  roundRect(ctx, bed.x + 3, bed.y + 8, bed.w, bed.h, 8);
-  ctx.fill();
-  fillRound(ctx, bed.x, bed.y, bed.w, bed.h, 8, PALETTE.bedFrameDark);
-  fillRound(ctx, bed.x, bed.y, bed.w, bed.h - 7, 8, PALETTE.bedFrame);
-  fillRound(ctx, bed.x + 4, bed.y - 5, bed.w - 8, 15, 5, PALETTE.bedFrame);   // headboard
-  fillRound(ctx, bed.x + 7, bed.y - 3, bed.w - 14, 8, 4, PALETTE.woods[2].top);
-  fillRound(ctx, bed.x + 5, bed.y + 9, bed.w - 10, bed.h - 20, 6, PALETTE.mattress);
-}
 
-// Old boards that announce you. Drawn as a worn patch with nail heads — the
-// player should be able to see the hazard before stepping on it.
-function drawCreakZone(ctx, zone) {
-  ctx.save();
-  ctx.globalAlpha = 0.5;
-  fillRound(ctx, zone.x, zone.y, zone.w, zone.h, 3, 'rgba(60,34,16,0.42)');
-  ctx.globalAlpha = 0.75;
-  ctx.strokeStyle = 'rgba(40,22,10,0.6)';
+  // A warm pool under the bed: it is the most important object in the room and
+  // should read that way without darkening anything else.
+  const pool = ctx.createRadialGradient(
+    bed.x + bed.w / 2, bed.y + bed.h / 2, 10,
+    bed.x + bed.w / 2, bed.y + bed.h / 2, bed.w * 0.95
+  );
+  pool.addColorStop(0, 'rgba(255,236,196,0.22)');
+  pool.addColorStop(1, 'rgba(255,236,196,0)');
+  ctx.fillStyle = pool;
+  ctx.fillRect(bed.x - bed.w, bed.y - bed.h, bed.w * 3, bed.h * 3);
+
+  ctx.fillStyle = SHADOW;
+  roundRect(ctx, bed.x + 3, bed.y + 9, bed.w, bed.h, 9);
+  ctx.fill();
+
+  // Frame: a dark base with a lit rail, and posts at the corners.
+  fillRound(ctx, bed.x, bed.y, bed.w, bed.h, 9, PALETTE.bedFrameDark);
+  fillRound(ctx, bed.x, bed.y, bed.w, bed.h - 8, 9, PALETTE.bedFrame);
+  for (const px of [bed.x + 3, bed.x + bed.w - 11]) {
+    fillRound(ctx, px, bed.y + bed.h - 13, 8, 11, 3, PALETTE.woods[2].dark);
+    fillRound(ctx, px, bed.y + bed.h - 13, 8, 6, 3, PALETTE.woods[2].top);
+  }
+
+  // Headboard with slats.
+  fillRound(ctx, bed.x + 2, bed.y - 7, bed.w - 4, 17, 6, PALETTE.bedFrameDark);
+  fillRound(ctx, bed.x + 4, bed.y - 6, bed.w - 8, 13, 5, PALETTE.bedFrame);
+  ctx.strokeStyle = 'rgba(60,32,14,0.35)';
   ctx.lineWidth = 1.4;
-  const boards = Math.max(2, Math.round(zone.h / 14));
-  for (let i = 1; i < boards; i++) {
-    const y = zone.y + (zone.h / boards) * i;
+  for (let i = 1; i < 4; i++) {
+    const sx = bed.x + (bed.w / 4) * i;
     ctx.beginPath();
-    ctx.moveTo(zone.x + 2, y);
-    ctx.lineTo(zone.x + zone.w - 2, y);
+    ctx.moveTo(sx, bed.y - 4);
+    ctx.lineTo(sx, bed.y + 5);
     ctx.stroke();
   }
-  ctx.fillStyle = 'rgba(228,206,168,0.55)';                  // nail heads
-  for (let i = 0; i < boards; i++) {
-    const y = zone.y + (zone.h / boards) * (i + 0.5);
-    for (const x of [zone.x + 5, zone.x + zone.w - 5]) {
-      ctx.beginPath();
-      ctx.arc(x, y, 1.3, 0, TAU);
-      ctx.fill();
-    }
-  }
-  ctx.restore();
+
+  // Mattress with a fitted-sheet edge.
+  fillRound(ctx, bed.x + 5, bed.y + 9, bed.w - 10, bed.h - 22, 7, '#e6ddcd');
+  fillRound(ctx, bed.x + 7, bed.y + 10, bed.w - 14, bed.h - 25, 6, PALETTE.mattress);
 }
 
 // Everything that never moves, drawn once per level into an offscreen canvas.
@@ -650,6 +628,21 @@ export function drawSleeper(ctx, level, stage, clock, wake = 0) {
   fillRound(ctx, bed.x + 5, duvetY, bed.w - 10, duvetH, 7, PALETTE.duvet);
   fillRound(ctx, bed.x + 5, duvetY, bed.w - 10, Math.min(duvetH, 9 + breath * 1.2), 5, PALETTE.duvetTop);
 
+  // An arm lying on top of the covers, rising and falling with him.
+  if (stage !== SLEEP_AWAKE) {
+    ctx.strokeStyle = '#eef2f8';
+    ctx.lineCap = 'round';
+    ctx.lineWidth = 7;
+    ctx.beginPath();
+    ctx.moveTo(hx + 13, duvetY + 4);
+    ctx.quadraticCurveTo(hx + 24, duvetY + 12 + breath, hx + 19, duvetY + 22 + breath * 1.4);
+    ctx.stroke();
+    ctx.fillStyle = PALETTE.skin;
+    ctx.beginPath();
+    ctx.arc(hx + 19, duvetY + 23 + breath * 1.4, 3.4, 0, TAU);
+    ctx.fill();
+  }
+
   ctx.strokeStyle = PALETTE.duvetFold;                      // duvet folds
   ctx.lineWidth = 1.5;
   for (let i = 1; i <= 2; i++) {
@@ -660,14 +653,27 @@ export function drawSleeper(ctx, level, stage, clock, wake = 0) {
     ctx.stroke();
   }
 
-  fillRound(ctx, hx - 27, hy - 16, 54, 31, 9, PALETTE.pillow);
-  ctx.fillStyle = 'rgba(214,204,186,0.6)';
-  roundRect(ctx, hx - 22, hy + 6, 44, 6, 3);
+  // Two pillows, with the near one creased under his head.
+  fillRound(ctx, hx - 29, hy - 18, 58, 33, 10, '#ece3d3');
+  fillRound(ctx, hx - 27, hy - 17, 54, 30, 9, PALETTE.pillow);
+  ctx.strokeStyle = 'rgba(206,194,174,0.75)';
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(hx, hy - 15);
+  ctx.lineTo(hx, hy + 11);
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(206,194,174,0.55)';
+  roundRect(ctx, hx - 22, hy + 7, 44, 5, 2.5);
   ctx.fill();
+
+  // Shoulders, just above the duvet line, so he is lying *in* the bed rather
+  // than floating on top of it.
+  fillRound(ctx, hx - 17, hy + 6, 34, 14, 7, '#dfe6f0');
+  fillRound(ctx, hx - 15, hy + 7, 30, 10, 5, '#eef2f8');
 
   // Torso appears as he sits up.
   if (ease > 0.05) {
-    fillRound(ctx, hx - 15, hy + 2, 30, 26 * ease, 8, '#e7ebf2');
+    fillRound(ctx, hx - 16, hy + 2, 32, 28 * ease, 8, '#e7ebf2');
   }
 
   const headX = hx + settle * 0.9 + fidget * (stage >= SLEEP_DISTURBED ? 1 : 0.4);
@@ -680,9 +686,16 @@ export function drawSleeper(ctx, level, stage, clock, wake = 0) {
   ctx.beginPath();
   ctx.arc(headX, headY, 15, 0, TAU);
   ctx.fill();
-  ctx.fillStyle = PALETTE.hair;
+  ctx.fillStyle = PALETTE.hair;                          // hair, with a fringe
   ctx.beginPath();
-  ctx.arc(headX, headY - 7, 14, Math.PI, TAU);
+  ctx.arc(headX, headY - 6, 14.5, Math.PI, TAU);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(headX - 5, headY - 4, 7, 4.5, -0.35, 0, TAU);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.10)';
+  ctx.beginPath();
+  ctx.ellipse(headX + 4, headY - 9, 5, 2.6, 0.3, 0, TAU);
   ctx.fill();
 
   const ey = headY + 1;
@@ -779,6 +792,9 @@ export function drawThief(ctx, x, y, { facing, walkPhase, walk, clock, reach }) 
   const swing = Math.sin(walkPhase) * walk;
   const breathe = Math.sin(clock * 1.9) * (1 - walk) * 0.6;
   const bob = -Math.abs(Math.sin(walkPhase)) * 1.5 * walk + breathe;
+  // Weight shifts onto the planted foot: the torso leans a touch that way.
+  const weight = -swing * 1.3;
+  const bodyX = x + sideX * weight;
   const bodyY = y + bob;
 
   ctx.fillStyle = 'rgba(20,10,26,0.30)';
@@ -786,41 +802,62 @@ export function drawThief(ctx, x, y, { facing, walkPhase, walk, clock, reach }) 
   ctx.ellipse(x, y + 20, 10.5, 4, 0, 0, TAU);
   ctx.fill();
 
-  // Both feet stay below the torso whichever way he faces: the stride runs
-  // along the heading, but its vertical share is small and the lifted foot
-  // squashes rather than rising out of sight. Short legs keep them attached.
+  // Legs are two segments with a knee, so the stride reads as walking rather
+  // than as feet sliding. Both stay below the torso whichever way he faces.
   const stride = 5.4;
   const drawLeg = (side, phase) => {
     const lift = Math.max(0, phase) * walk;
-    const fx = x + sideX * 4.6 * side + faceX * phase * stride;
-    const fy = y + 13 + sideY * 4.6 * side + faceY * phase * 1.7 - lift * 1.2;
-    fillRound(ctx, fx - 2.6, bodyY + 4, 5.2, fy - bodyY - 3, 2.4, PALETTE.thief); // leg
-    fillRound(ctx, fx - 3.7, fy - 4, 7.4, 8.6 - lift * 1.8, 3, PALETTE.thiefBelt); // shoe
-    fillRound(ctx, fx - 2.7, fy - 3.2, 5.4, 3, 1.8, '#3f4568');
+    const hipX = bodyX + sideX * 4.4 * side;
+    const hipY = bodyY + 4 + sideY * 4.4 * side;
+    const footX = x + sideX * 4.6 * side + faceX * phase * stride;
+    const footY = y + 14 + sideY * 4.6 * side + faceY * phase * 1.7 - lift * 1.2;
+
+    // The knee sits between hip and foot, pushed forward as the leg swings.
+    const kneeX = (hipX + footX) / 2 + faceX * lift * 2.2;
+    const kneeY = (hipY + footY) / 2 - 0.6 - lift * 1.1;
+
+    ctx.strokeStyle = PALETTE.thief;
+    ctx.lineCap = 'round';
+    ctx.lineWidth = 5.4;
+    ctx.beginPath();
+    ctx.moveTo(hipX, hipY);
+    ctx.lineTo(kneeX, kneeY);
+    ctx.stroke();
+    ctx.lineWidth = 4.6;
+    ctx.beginPath();
+    ctx.moveTo(kneeX, kneeY);
+    ctx.lineTo(footX, footY - 1);
+    ctx.stroke();
+
+    fillRound(ctx, footX - 3.7, footY - 4, 7.4, 8.6 - lift * 1.8, 3, PALETTE.thiefBelt);
+    fillRound(ctx, footX - 2.7, footY - 3.2, 5.4, 3, 1.8, '#3f4568');
   };
   drawLeg(-1, swing);
   drawLeg(1, -swing);
 
-  fillRound(ctx, x - 8.5, bodyY - 9, 17, 17, 7, PALETTE.thief);
-  fillRound(ctx, x - 8.5, bodyY - 9, 17, 8, 6, PALETTE.thiefTop);
+  fillRound(ctx, bodyX - 8.5, bodyY - 9, 17, 17, 7, PALETTE.thief);
+  fillRound(ctx, bodyX - 8.5, bodyY - 9, 17, 8, 6, PALETTE.thiefTop);
   ctx.fillStyle = PALETTE.thiefBelt;
-  ctx.fillRect(x - 8.5, bodyY + 3.5, 17, 3.2);
+  ctx.fillRect(bodyX - 8.5, bodyY + 3.5, 17, 3.2);
   ctx.fillStyle = '#d8b24a';
-  ctx.fillRect(x - 2, bodyY + 3.5, 4, 3.2);
+  ctx.fillRect(bodyX - 2, bodyY + 3.5, 4, 3.2);
 
-  // Arms sit outside the torso and are drawn over it, so the swing reads.
+  // Arms sit outside the torso and are drawn over it, with a slight elbow.
   const drawArm = (side, extend) => {
-    const shoulderX = x + sideX * 8.8 * side;
+    const shoulderX = bodyX + sideX * 8.8 * side;
     const shoulderY = bodyY - 4 + sideY * 8.8 * side;
     const reachOut = -swing * side * 3.8 + extend;
     const handX = shoulderX + faceX * reachOut + sideX * side * 1.6;
     const handY = shoulderY + faceY * reachOut * 0.66 + sideY * side * 1.6 + 4;
+    const elbowX = (shoulderX + handX) / 2 + sideX * side * 1.1;
+    const elbowY = (shoulderY + handY) / 2 + 0.8;
+
     ctx.strokeStyle = PALETTE.thiefTop;
     ctx.lineWidth = 5;
     ctx.lineCap = 'round';
     ctx.beginPath();
     ctx.moveTo(shoulderX, shoulderY);
-    ctx.lineTo(handX, handY);
+    ctx.quadraticCurveTo(elbowX, elbowY, handX, handY);
     ctx.stroke();
     ctx.fillStyle = PALETTE.skin;
     ctx.beginPath();
@@ -834,23 +871,36 @@ export function drawThief(ctx, x, y, { facing, walkPhase, walk, clock, reach }) 
   drawArm(-1, extend * 0.3);
   const hand = drawArm(1, extend);
 
-  const headY = bodyY - 16;
+  const headY = bodyY - 16 + Math.sin(walkPhase * 2) * 0.4 * walk;
   ctx.fillStyle = PALETTE.skin;
   ctx.beginPath();
-  ctx.arc(x, headY, 8, 0, TAU);
+  ctx.arc(bodyX, headY, 8, 0, TAU);
   ctx.fill();
-  ctx.fillStyle = PALETTE.thiefBelt;                       // beanie
-  ctx.beginPath();
-  ctx.arc(x, headY - 1, 8, Math.PI, TAU);
-  ctx.fill();
-  ctx.fillRect(x - 8, headY - 2, 16, 3.6);
-  ctx.fillStyle = '#fff';                                  // eyes track the heading
-  const gaze = faceX * 1.6;
-  const gazeY = faceY * 0.9;
-  ctx.beginPath();
-  ctx.arc(x - 3 + gaze, headY + 2 + gazeY, 1.8, 0, TAU);
-  ctx.arc(x + 3 + gaze, headY + 2 + gazeY, 1.8, 0, TAU);
-  ctx.fill();
+
+  if (faceY < -0.45) {
+    // Walking away: you see the back of his head, not his face.
+    ctx.fillStyle = PALETTE.thiefBelt;
+    ctx.beginPath();
+    ctx.arc(bodyX, headY, 8, 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = '#2a2f4d';
+    ctx.beginPath();
+    ctx.arc(bodyX, headY + 2.5, 5.4, 0, Math.PI);
+    ctx.fill();
+  } else {
+    ctx.fillStyle = PALETTE.thiefBelt;                     // beanie
+    ctx.beginPath();
+    ctx.arc(bodyX, headY - 1, 8, Math.PI, TAU);
+    ctx.fill();
+    ctx.fillRect(bodyX - 8, headY - 2, 16, 3.6);
+    ctx.fillStyle = '#fff';                                // eyes track the heading
+    const gaze = faceX * 1.6;
+    const gazeY = Math.max(0, faceY) * 1.2;
+    ctx.beginPath();
+    ctx.arc(bodyX - 3 + gaze, headY + 2 + gazeY, 1.8, 0, TAU);
+    ctx.arc(bodyX + 3 + gaze, headY + 2 + gazeY, 1.8, 0, TAU);
+    ctx.fill();
+  }
 
   return hand;
 }

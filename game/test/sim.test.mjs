@@ -6,14 +6,16 @@ import { LEVELS } from '../src/levels.js';
 import { TUNING } from '../src/tuning.js';
 import { play, createRun, tick, walkTo, steal, escape } from './harness.mjs';
 import {
-  addNoise, sleepStage, SLEEP_AWAKE, SLEEP_ASLEEP, starsFor, levelTotals
+  addNoise, sleepStage, SLEEP_AWAKE, SLEEP_ASLEEP, starsFor, levelTotals, timeLimit
 } from '../src/rules.js';
 
 test('a scripted run wins with exactly the money it stole', () => {
   const { result } = play(1, { take: ['L1-0', 'L1-2'] });
   assert.equal(result.status, 'won');
   assert.equal(result.money, 30 + 45);
-  assert.equal(result.noise, 8 + 10);
+  // Noise is no longer a pure sum: bumping furniture adds to it and standing
+  // still bleeds it off, so only the money is exact.
+  assert.ok(result.noise > 0 && result.noise < TUNING.noise.max);
 });
 
 test('taking everything on level 10 wakes him', () => {
@@ -235,8 +237,13 @@ test('a creaky board costs noise once, then goes quiet', () => {
   stepSim(sim, { x: 0, y: 0 });
   assert.equal(sim.noise, TUNING.hazards.creakNoise);
 
-  for (let i = 0; i < 120; i++) stepSim(sim, { x: 0, y: 0 });  // stand on it
-  assert.equal(sim.noise, TUNING.hazards.creakNoise, 'a board must not drain you');
+  const events = [];
+  for (let i = 0; i < 120; i++) {                     // stand on it
+    stepSim(sim, { x: 0, y: 0 });
+    events.push(...sim.events.filter((e) => e.type === 'creak'));
+  }
+  assert.equal(events.length, 0, 'a board must not creak again while stood on');
+  assert.ok(sim.noise <= TUNING.hazards.creakNoise, 'a board must not drain you');
 });
 
 test('Soft Shoes silence the creaky boards', () => {
@@ -293,4 +300,138 @@ test('the win event reports what was taken, for the collection', () => {
   const win = run.sim.events.find((e) => e.type === 'won')
     || { taken: run.sim.items.filter((i) => i.taken).map((i) => i.type) };
   assert.deepEqual([...win.taken].sort(), ['cash', 'watch']);
+});
+
+// --- the clock ---------------------------------------------------------------
+
+test('the clock starts full and runs down', () => {
+  const run = createRun(1);
+  const limit = timeLimit(run.level);
+  assert.equal(run.sim.timeLeft, limit);
+  for (let i = 0; i < 60; i++) tick(run, { x: 0, y: 0 });
+  assert.ok(Math.abs(run.sim.timeLeft - (limit - 1)) < 0.05, `${run.sim.timeLeft}`);
+});
+
+test('running out of time fails the level, distinctly from being heard', () => {
+  const run = createRun(1);
+  for (let i = 0; i < 60 * 40 && run.sim.status === 'running'; i++) tick(run, { x: 0, y: 0 });
+  assert.equal(run.sim.status, 'lost');
+  assert.equal(run.sim.failReason, 'time');
+  assert.equal(run.sim.timeLeft, 0);
+  assert.ok(run.sim.noise < TUNING.noise.max, 'he was never woken — the clock ran out');
+});
+
+test('the clock stops when the level ends', () => {
+  const run = createRun(1);
+  escape(run);
+  assert.equal(run.sim.status, 'won');
+  const remaining = run.sim.timeLeft;
+  for (let i = 0; i < 120; i++) tick(run, { x: 0, y: 0 });
+  assert.equal(run.sim.timeLeft, remaining, 'the clock kept running after the win');
+});
+
+test('escaping in time still wins even with the clock nearly out', () => {
+  const run = createRun(1);
+  run.sim.timeLeft = 3;
+  escape(run);
+  assert.equal(run.sim.status, 'won');
+});
+
+// --- bumping into things -----------------------------------------------------
+
+const wardrobeLevel = () => LEVELS.find((l) => l.colliders.some((c) => c.type === 'furniture'));
+
+test('walking squarely into furniture costs noise', () => {
+  const level = LEVELS[0];
+  const furniture = level.colliders.find((c) => c.type === 'furniture');
+  const run = createRun(level.id);
+  const player = playerOf(run.sim);
+  player.x = furniture.x + furniture.w / 2;
+  player.y = furniture.y - 40;
+  for (let i = 0; i < 60 && run.sim.noise === 0; i++) tick(run, { x: 0, y: 1 });
+  assert.ok(run.sim.noise > 0, 'bumping a cabinet should be heard');
+});
+
+test('a wall is not furniture: brushing the room costs nothing', () => {
+  const run = createRun(1);
+  const player = playerOf(run.sim);
+  player.x = 200;
+  player.y = 60;
+  for (let i = 0; i < 90; i++) tick(run, { x: 0, y: -1 });   // hold into the top wall
+  assert.equal(run.sim.noise, 0);
+});
+
+test('leaning on furniture does not drain the meter', () => {
+  const level = LEVELS[0];
+  const furniture = level.colliders.find((c) => c.type === 'furniture');
+  const run = createRun(level.id);
+  const player = playerOf(run.sim);
+  player.x = furniture.x + furniture.w / 2;
+  player.y = furniture.y - 40;
+  for (let i = 0; i < 60 * 8; i++) tick(run, { x: 0, y: 1 });  // shove for 8 seconds
+  // Without a cooldown this would be hundreds of noise; with one it is a
+  // handful of separate collisions.
+  assert.ok(run.sim.noise < 40, `leaning cost ${run.sim.noise} noise`);
+});
+
+test('a glancing slide along furniture is not a collision', () => {
+  const level = LEVELS[0];
+  const furniture = level.colliders.find((c) => c.type === 'furniture');
+  const run = createRun(level.id);
+  const player = playerOf(run.sim);
+  player.x = furniture.x - 30;
+  player.y = furniture.y + 4;                 // just grazing the top edge
+  for (let i = 0; i < 90; i++) tick(run, { x: 1, y: 0.06 });
+  assert.equal(run.sim.noise, 0, 'sliding past should be silent');
+});
+
+// --- recovery ----------------------------------------------------------------
+
+test('standing perfectly still bleeds noise off, slowly', () => {
+  const run = createRun(1);
+  run.sim.noise = 60;
+  for (let i = 0; i < 30; i++) tick(run, { x: 0, y: 0 });    // half a second
+  assert.equal(run.sim.noise, 60, 'recovery should not start instantly');
+
+  for (let i = 0; i < 60 * 2; i++) tick(run, { x: 0, y: 0 });
+  const dropped = 60 - run.sim.noise;
+  assert.ok(dropped > 2 && dropped < 6, `dropped ${dropped.toFixed(1)} in two seconds`);
+});
+
+test('recovery is far too slow to be a reset button', () => {
+  const run = createRun(1);
+  run.sim.noise = 90;
+  for (let i = 0; i < 60 * 2; i++) tick(run, { x: 0, y: 0 });
+  assert.ok(run.sim.noise > 80, `90 fell to ${run.sim.noise.toFixed(1)} in two seconds`);
+});
+
+test('moving stops recovery', () => {
+  const run = createRun(1);
+  const player = playerOf(run.sim);
+  player.x = 120;
+  player.y = 420;
+  run.sim.noise = 50;
+  let lowest = 50;
+  for (let i = 0; i < 60 * 2; i++) {
+    tick(run, { x: 1, y: 0 });
+    lowest = Math.min(lowest, run.sim.noise);
+  }
+  // It may well have gone *up* — there is furniture over there to walk into.
+  assert.equal(lowest, 50, 'walking should never calm the room');
+});
+
+test('noise never goes negative and never exceeds the cap', () => {
+  const run = createRun(1);
+  run.sim.noise = 1;
+  for (let i = 0; i < 60 * 5; i++) tick(run, { x: 0, y: 0 });
+  assert.equal(run.sim.noise, 0);
+
+  const loud = createRun(10);
+  loud.sim.noise = 99;
+  const item = loud.sim.items[0];
+  walkTo(loud, item);
+  for (let i = 0; i < 40 && !item.taken && loud.sim.status === 'running'; i++) {
+    tick(loud, { x: 0, y: 0, take: i % 2 === 0 });
+  }
+  assert.ok(loud.sim.noise <= TUNING.noise.max);
 });

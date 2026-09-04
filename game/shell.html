@@ -15,19 +15,28 @@
     overflow:hidden;border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,.6)}
   canvas{display:block;width:100%;height:100%}
 
-  #hud{position:absolute;left:0;top:0;right:0;padding:8px 10px;display:flex;
-    align-items:center;gap:8px;font-size:13px;font-weight:700;
-    background:#191320;height:40px;pointer-events:none}
-  #money{color:#ffd34d;min-width:58px;font-variant-numeric:tabular-nums}
-  #lvl{color:#cbbcd8;font-variant-numeric:tabular-nums}
-  #noisewrap{flex:1;height:14px;border-radius:7px;background:#0006;
+  /* Two resources now, so the HUD is two rows: the readouts, then the meter. */
+  /* height is set from TUNING.world.hudStrip at resize time */
+  #hud{position:absolute;left:0;top:0;right:0;padding:6px 10px 7px;display:flex;
+    flex-direction:column;justify-content:center;gap:5px;font-size:13px;font-weight:700;
+    background:#191320;pointer-events:none}
+  #hudtop{display:flex;align-items:center;gap:8px}
+  #money{color:#ffd34d;min-width:52px;font-variant-numeric:tabular-nums}
+  #time{margin-left:auto;color:#cfe6ff;font-variant-numeric:tabular-nums;
+    min-width:62px;text-align:right;letter-spacing:.3px}
+  #time.warn{color:#ff6b6b;animation:tick .5s ease-in-out infinite}
+  @keyframes tick{0%,100%{transform:scale(1)}50%{transform:scale(1.13)}}
+  #lvl{color:#cbbcd8;font-variant-numeric:tabular-nums;font-size:11px}
+  #noisewrap{height:14px;border-radius:7px;background:#0006;
     border:1px solid #ffffff26;overflow:hidden;position:relative}
   #noisebar{height:100%;width:0%;background:#4cc172;transition:width .1s linear}
   /* Near the cap the meter starts insisting. */
   #noisewrap.danger{border-color:#ff6b6b;animation:alarm .7s ease-in-out infinite}
   @keyframes alarm{0%,100%{box-shadow:0 0 0 0 #ff4d4d00}50%{box-shadow:0 0 0 3px #ff4d4d55}}
-  #noisetxt{position:absolute;inset:0;text-align:center;font-size:10px;line-height:12px;
-    text-shadow:0 1px 2px #000;font-variant-numeric:tabular-nums}
+  #noisetxt{position:absolute;inset:0;text-align:center;font-size:10px;line-height:13px;
+    text-shadow:0 1px 2px #000;font-variant-numeric:tabular-nums;letter-spacing:.4px}
+  /* The meter settling back down while you stand still. */
+  #noisewrap.calming #noisebar{box-shadow:inset 0 0 0 2px #ffffff44}
   .hudbtn{pointer-events:auto;background:#ffffff1a;border:1px solid #ffffff2e;color:#fff;
     border-radius:8px;padding:4px 8px;font-size:13px;font-weight:700;line-height:1.1}
   .hudbtn:focus-visible{outline:2px solid #ffd34d;outline-offset:2px}
@@ -141,11 +150,14 @@
   <canvas id="cv"></canvas>
 
   <div id="hud">
-    <span id="money">$0</span>
+    <div id="hudtop">
+      <span id="money">$0</span>
+      <span id="lvl">LV 1</span>
+      <span id="time">30.0</span>
+      <button id="btnmute" class="hudbtn" aria-label="Mute">🔊</button>
+      <button id="btnpause" class="hudbtn" aria-label="Pause">II</button>
+    </div>
     <div id="noisewrap"><div id="noisebar"></div><div id="noisetxt">0 / 100</div></div>
-    <span id="lvl">LV 1</span>
-    <button id="btnmute" class="hudbtn" aria-label="Mute">🔊</button>
-    <button id="btnpause" class="hudbtn" aria-label="Pause">II</button>
   </div>
 
   <div id="joy"><div id="knob"></div></div>

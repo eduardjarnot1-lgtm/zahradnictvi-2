@@ -91,6 +91,23 @@ Luxury, Penthouse). Each chapter opens easier than the last one ended and then
 climbs; tests assert both. Levels 1-10 are the original beta set and are
 deliberately unchanged.
 
+### Two resources
+
+The clock and the meter are managed together. Time starts at 30s on level 1 and
+shrinks by roughly half a second a level to a floor of 15s. Noise comes from
+three places now — stealing, creaky boards, and walking into furniture — and
+bleeds off at 2/second once you have stood perfectly still for 0.6s.
+
+Those two systems only work as a pair. Recovery on its own would dissolve the
+one-way commitment that makes "one more thing?" a real question; the clock is
+what stops you from simply waiting the meter down. A test asserts recovery is
+far too slow to be a reset button, and another asserts every level is winnable
+by playing efficiently with time to spare — rule 26 made executable.
+
+Collision noise is measured on the **blocked axis** of the move, not on the
+resulting speed: a head-on walk into a cabinet stops you dead, so reading speed
+after the move would score the hardest collisions as the gentlest ones.
+
 ### Hazards
 
 Creaky boards are plain trigger rectangles in `level.creaks`. Stepping onto one

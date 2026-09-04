@@ -54,6 +54,7 @@ export function boot() {
   let endHold = 0;            // wake-up beat before the fail screen
   let pendingEnd = null;
   let lastStepPhase = 0;
+  let lastTick = -1;
   const stats = { fps: 0, steps: 0 };
 
   const setting = (key) => saveStore.data.settings[key];
@@ -113,7 +114,8 @@ export function boot() {
 
   function showEnd(won, ctx) {
     showOnly(screens.end);
-    $('endTitle').textContent = won ? 'LEVEL COMPLETE' : 'HE WOKE UP!';
+    $('endTitle').textContent = won ? 'LEVEL COMPLETE'
+      : ctx.reason === 'time' ? "TIME'S UP" : 'HE WOKE UP!';
     $('stars').innerHTML = won ? starRow(ctx.stars) : '';
     $('endTally').innerHTML = won
       ? `<div>HAUL<b>$${ctx.money.toLocaleString()}</b></div>` +
@@ -127,8 +129,11 @@ export function boot() {
         ? `Steal $${(ctx.stars < 2 ? marks.two : marks.three).toLocaleString()} in one run for ${ctx.stars < 2 ? 2 : 3} stars.`
         : 'A clean sweep. Nothing left worth taking.';
     } else {
+      const cause = ctx.reason === 'time'
+        ? 'You were still in the room when the clock ran out.'
+        : 'One item too many.';
       $('endText').innerHTML =
-        `One item too many.<br>You lost <b style="color:#ffd34d">$${ctx.money.toLocaleString()}</b>.`;
+        `${cause}<br>You lost <b style="color:#ffd34d">$${ctx.money.toLocaleString()}</b>.`;
     }
     $('bNext').style.display = won && currentLevelId < LEVELS.length ? '' : 'none';
   }
@@ -277,20 +282,35 @@ export function boot() {
         pops.push({ x: event.x, y: event.y - 6, value: null, text: 'CREAK', life: 1 });
         audio.creak();
         buzz(18);
+      } else if (event.type === 'bump') {
+        pops.push({ x: event.x, y: event.y - 6, value: null, text: `+${event.noise}`, life: 1 });
+        audio.bump(event.what === 'bed' ? 'soft' : 'hard', event.noise);
+        buzz(10);
       } else if (event.type === 'won') {
         const level = LEVELS.find((l) => l.id === currentLevelId);
         const stars = starsFor(level, event.haul);
         saveStore.recordWin(currentLevelId, event.money, { stars, types: event.taken });
         audio.win();
         buzz([16, 40, 16]);
-        machine.set('won', { money: event.money, noise: event.noise, stars, taken: event.taken });
+        machine.set('won', {
+          money: event.money, noise: event.noise, stars,
+          taken: event.taken, timeLeft: event.timeLeft
+        });
         if (debug) console.info('[dwh] replay', frameCount(recording), 'frames', JSON.stringify(recording));
       } else if (event.type === 'lost') {
-        // Let him sit up before the fail screen lands.
-        audio.wake();
-        buzz([30, 60, 90]);
-        endHold = WAKE_BEAT;
-        pendingEnd = { money: event.money, noise: event.noise };
+        const end = { money: event.money, noise: event.noise, reason: event.reason };
+        if (event.reason === 'time') {
+          // Nothing to animate: the clock simply ran out.
+          audio.lose();
+          buzz([40, 60]);
+          machine.set('lost', end);
+        } else {
+          // Let him sit up before the fail screen lands.
+          audio.wake();
+          buzz([30, 60, 90]);
+          endHold = WAKE_BEAT;
+          pendingEnd = end;
+        }
       }
     }
   }
@@ -300,12 +320,25 @@ export function boot() {
     if (!sim) return;
     const percent = (sim.noise / TUNING.noise.max) * 100;
     $('money').textContent = `$${sim.money.toLocaleString()}`;
+
+    const seconds = Math.max(0, sim.timeLeft);
+    const timeEl = $('time');
+    timeEl.textContent = seconds.toFixed(1);
+    const urgent = seconds <= TUNING.time.warnAt && sim.status === 'running';
+    timeEl.classList.toggle('warn', urgent);
+    // One tick per second in the last few seconds.
+    const whole = Math.ceil(seconds);
+    if (urgent && whole !== lastTick) { lastTick = whole; audio.tick(); }
+    if (!urgent) lastTick = -1;
+
+    $('noisewrap').classList.toggle('calming',
+      sim.stillFor > TUNING.recovery.delay && sim.noise > 0 && sim.status === 'running');
     const bar = $('noisebar');
     bar.style.width = `${percent}%`;
     bar.style.background =
       sim.noise >= TUNING.noise.almostAt ? '#ff4d4d'
         : sim.noise >= TUNING.noise.stirringAt ? '#ffb020' : '#4cc172';
-    $('noisetxt').textContent = `${sim.noise} / ${TUNING.noise.max}`;
+    $('noisetxt').textContent = `${Math.round(sim.noise)} / ${TUNING.noise.max}`;
     $('lvl').textContent = `LV ${sim.level.id}`;
     $('noisewrap').classList.toggle('danger', sim.noise >= TUNING.noise.almostAt);
     takeButton.classList.toggle('on', !!sim.targetId);

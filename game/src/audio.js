@@ -108,6 +108,23 @@ export function createAudio(saveStore) {
       tone(130 + noiseAmount, 0.18, 'sawtooth', 0.035, 0.02);
     },
 
+    // Walking into something. Soft furniture thuds; hard furniture knocks.
+    bump(material, amount) {
+      if (material === 'soft') {
+        tone(90, 0.09, 'sine', 0.035);
+        tone(64, 0.13, 'sine', 0.028, 0.03);
+        return;
+      }
+      const pitch = 210 - Math.min(6, amount) * 12;
+      tone(pitch, 0.06, 'square', 0.032);
+      tone(pitch * 0.62, 0.13, 'triangle', 0.03, 0.03);
+    },
+
+    // The clock, in the last few seconds.
+    tick() {
+      tone(1250, 0.035, 'square', 0.03);
+    },
+
     // A dry knock under the foot.
     creak() {
       tone(220, 0.11, 'sawtooth', 0.05);

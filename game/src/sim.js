@@ -4,7 +4,9 @@
 import { TUNING } from './tuning.js';
 import { createRng } from './rng.js';
 import { solveMove, clampToWorld } from './physics.js';
-import { addNoise, isAwake, itemStats, canBank, sleepStage, resolveUpgrades } from './rules.js';
+import {
+  addNoise, isAwake, itemStats, canBank, sleepStage, resolveUpgrades, bumpNoise, timeLimit
+} from './rules.js';
 
 export const STEP_SECONDS = 1 / TUNING.sim.hz;
 
@@ -44,9 +46,19 @@ const UPDATERS = {
       entity.vy * STEP_SECONDS,
       sim.level.colliders
     );
+    // How hard the collision was, measured on the blocked axis only. A head-on
+    // walk into a cabinet registers; sliding along its edge does not. (Reading
+    // entity.speed after the move would be exactly backwards: a head-on hit
+    // stops you dead, so it would look like the gentlest collision of all.)
+    let impact = 0;
+    if (moved.hitX) impact = Math.max(impact, Math.abs(entity.vx));
+    if (moved.hitY) impact = Math.max(impact, Math.abs(entity.vy));
+
     // Walking into a wall must not bank up velocity to spend later.
     if (moved.hitX) entity.vx = 0;
     if (moved.hitY) entity.vy = 0;
+    entity.bumped = moved.hit;
+    entity.bumpImpact = impact;
 
     const clamped = clampToWorld(moved.x, moved.y, entity.w, entity.h);
     entity.x = clamped.x;
@@ -82,6 +94,8 @@ export function createSim({ level, seed = 1, upgrades = {} }) {
     w: TUNING.player.boxWidth,
     h: TUNING.player.boxHeight,
     moving: false,
+    bumped: null,
+    bumpImpact: 0,
     speed: 0,
     facing: Math.PI / 2,   // facing "down" into the room
     walkPhase: 0,
@@ -97,6 +111,11 @@ export function createSim({ level, seed = 1, upgrades = {} }) {
     rng: createRng(seed),
     frame: 0,
     status: 'running', // running | won | lost
+    failReason: null,  // 'awake' | 'time'
+    timeLeft: timeLimit(level),
+    timeLimit: timeLimit(level),
+    stillFor: 0,       // seconds spent perfectly still, for noise recovery
+    bumpCooldown: 0,
     money: 0,          // what you get paid (haul plus any bag bonus)
     haul: 0,           // raw value of what you took — stars are judged on this
     noise: 0,
@@ -134,14 +153,17 @@ export function createSim({ level, seed = 1, upgrades = {} }) {
 
 export const playerOf = (sim) => sim.entities.find((e) => e.kind === 'player');
 
-function finish(sim, status) {
+function finish(sim, status, reason = null) {
   if (sim.status !== 'running') return; // a level can only end once
   sim.status = status;
+  sim.failReason = reason;
   sim.events.push({
     type: status,
+    reason,
     money: sim.money,
     haul: sim.haul,
     noise: sim.noise,
+    timeLeft: Math.max(0, sim.timeLeft),
     frame: sim.frame,
     taken: sim.items.filter((i) => i.taken).map((i) => i.type)
   });
@@ -170,7 +192,7 @@ function takeItem(sim, item) {
     y: item.y,
     stage: sleepStage(sim.noise)
   });
-  if (isAwake(sim.noise)) finish(sim, 'lost');
+  if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
 }
 
 // Exactly one fixed simulation tick.
@@ -220,11 +242,42 @@ export function stepSim(sim, input = EMPTY_INPUT) {
       if (amount > 0) {
         sim.noise = addNoise(sim.noise, amount);
         sim.events.push({ type: 'creak', x: player.x, y: player.y, noise: amount });
-        if (isAwake(sim.noise)) finish(sim, 'lost');
+        if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
       }
       zone.cooldown = TUNING.hazards.creakCooldown;
     }
     zone.active = inside;
+  }
+
+  // Walking into furniture. One event per collision, never one per frame: a
+  // cooldown means leaning on a cabinet cannot drain the meter to zero.
+  if (sim.bumpCooldown > 0) sim.bumpCooldown = Math.max(0, sim.bumpCooldown - STEP_SECONDS);
+  const hardEnough = player.bumpImpact > TUNING.player.speed * TUNING.hazards.bumpThreshold;
+  if (player.bumped && hardEnough && sim.bumpCooldown === 0 && sim.status === 'running') {
+    const amount = Math.round(bumpNoise(player.bumped) * sim.mods.hazardNoise);
+    if (amount > 0) {
+      sim.noise = addNoise(sim.noise, amount);
+      sim.events.push({
+        type: 'bump',
+        x: player.x,
+        y: player.y,
+        noise: amount,
+        what: player.bumped.type
+      });
+      if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
+    }
+    sim.bumpCooldown = TUNING.hazards.bumpCooldown;
+  }
+
+  // Standing perfectly still lets the room settle — slowly, and only after a
+  // beat, so it is a decision against the clock rather than a reset button.
+  if (!player.moving && !sim.reach && sim.status === 'running') {
+    sim.stillFor += STEP_SECONDS;
+    if (sim.stillFor > TUNING.recovery.delay && sim.noise > 0) {
+      sim.noise = Math.max(0, sim.noise - TUNING.recovery.rate * STEP_SECONDS);
+    }
+  } else {
+    sim.stillFor = 0;
   }
 
   const pressedTake = input.take && !sim.prevTake;
@@ -249,6 +302,15 @@ export function stepSim(sim, input = EMPTY_INPUT) {
     sim.shakeY = 0;
   }
 
+  // The clock. It only runs while the level does.
+  if (sim.status === 'running') {
+    sim.timeLeft -= STEP_SECONDS;
+    if (sim.timeLeft <= 0) {
+      sim.timeLeft = 0;
+      finish(sim, 'lost', 'time');
+    }
+  }
+
   if (sim.status === 'running') {
     const exit = sim.level.exit;
     const atExit =
@@ -270,7 +332,8 @@ export function snapshot(sim) {
     status: sim.status,
     money: sim.money,
     haul: sim.haul,
-    noise: sim.noise,
+    noise: Math.round(sim.noise),
+    reason: sim.failReason,
     taken: sim.items.filter((i) => i.taken).map((i) => i.id),
     x: Math.round(player.x * 100) / 100,
     y: Math.round(player.y * 100) / 100

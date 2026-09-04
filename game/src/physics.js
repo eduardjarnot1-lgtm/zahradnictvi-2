@@ -12,11 +12,17 @@ export function overlaps(box, c) {
 }
 
 export function blocked(x, y, w, h, colliders) {
+  return !!blocker(x, y, w, h, colliders);
+}
+
+// Which collider is in the way — the caller needs to know what it walked into,
+// not merely that something stopped it.
+export function blocker(x, y, w, h, colliders) {
   const box = { x, y, w, h };
   for (let i = 0; i < colliders.length; i++) {
-    if (overlaps(box, colliders[i])) return true;
+    if (overlaps(box, colliders[i])) return colliders[i];
   }
-  return false;
+  return null;
 }
 
 // Advance a box by (dx, dy), stopping against colliders. Returns the resolved
@@ -31,20 +37,23 @@ export function solveMove(box, dx, dy, colliders, maxSubStep = TUNING.player.max
   let { x, y } = box;
   let hitX = false;
   let hitY = false;
+  let hit = null;
 
   for (let i = 0; i < steps; i++) {
     if (stepX !== 0) {
       const nx = x + stepX;
-      if (blocked(nx, y, box.w, box.h, colliders)) hitX = true;
+      const against = blocker(nx, y, box.w, box.h, colliders);
+      if (against) { hitX = true; hit = hit || against; }
       else x = nx;
     }
     if (stepY !== 0) {
       const ny = y + stepY;
-      if (blocked(x, ny, box.w, box.h, colliders)) hitY = true;
+      const against = blocker(x, ny, box.w, box.h, colliders);
+      if (against) { hitY = true; hit = hit || against; }
       else y = ny;
     }
   }
-  return { x, y, hitX, hitY };
+  return { x, y, hitX, hitY, hit };
 }
 
 export function clampToWorld(x, y, w, h) {

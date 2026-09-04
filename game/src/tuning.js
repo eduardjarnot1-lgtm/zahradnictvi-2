@@ -5,7 +5,7 @@ export const TUNING = {
     width: 400,          // room coordinate space
     height: 620,
     wallThickness: 14,
-    hudStrip: 40,        // reserved band above the room, in world units
+    hudStrip: 54,        // reserved band above the room, in world units
     exitWidth: 80
   },
 
@@ -89,10 +89,36 @@ export const TUNING = {
     goldbar:    { value: 300, noise: 38 }
   },
 
-  // Simple environmental hazards. Trigger zones, nothing more.
+  // Two resources now: the meter and the clock.
+  time: {
+    base: 30,             // seconds on level 1
+    perLevel: 0.56,       // ...shrinking by roughly half a second a level
+    floor: 15,            // never tighter than this
+    warnAt: 6             // the clock starts insisting here
+  },
+
+  // Simple environmental hazards. Trigger zones and bumps, nothing more.
   hazards: {
     creakNoise: 5,        // stepping onto a creaky board
-    creakCooldown: 1.4    // seconds before the same board can creak again
+    creakCooldown: 1.4,   // seconds before the same board can creak again
+
+    // Walking into furniture. Soft things barely register; hard, hollow things
+    // carry across a room. Scaled back from the first pass, where collisions
+    // were contributing a third of the meter and the game quietly stopped
+    // being about whether to steal one more thing.
+    bump: {
+      bed: 2, sofa: 2, nightstand: 3, table: 4,
+      chest: 4, tvBench: 4, wardrobe: 5, bookshelf: 6
+    },
+    bumpCooldown: 1.0,    // one bump per collision, not one per frame
+    bumpThreshold: 0.62   // how squarely you must hit it to count at all
+  },
+
+  // Standing perfectly still lets the room settle. Slow enough that it is a
+  // real decision against the clock, never a reset button.
+  recovery: {
+    delay: 0.6,           // how long you must be still before it starts
+    rate: 2               // noise per second once it does
   },
 
   // Escape with a big enough share of the room's total value.
