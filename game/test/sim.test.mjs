@@ -1,13 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createSim, stepSim, snapshot, playerOf, STEP_SECONDS } from '../src/sim.js';
-import { solveMove } from '../src/physics.js';
+import { solveMove, blocked } from '../src/physics.js';
 import { LEVELS } from '../src/levels.js';
 import { TUNING } from '../src/tuning.js';
 import { play, createRun, tick, walkTo, steal, escape } from './harness.mjs';
 import {
   addNoise, sleepStage, SLEEP_AWAKE, SLEEP_ASLEEP, starsFor, levelTotals, timeLimit,
-  rarityOf, starThresholds
+  rarityOf, starThresholds, shapeStick
 } from '../src/rules.js';
 
 test('a scripted run wins with exactly the money it stole', () => {
@@ -528,4 +528,116 @@ test('bonuses never turn a loss into a win', () => {
   }
   assert.equal(run.sim.status, 'lost');
   assert.equal(run.sim.escapeGrade, null);
+});
+
+// --- movement feel: the stick is an analog control -------------------------
+
+test('joystick magnitude maps straight through to speed', () => {
+  for (const magnitude of [0.25, 0.5, 0.75, 1]) {
+    const run = openRun();
+    for (let i = 0; i < 40; i++) tick(run, { x: magnitude, y: 0 });
+    const share = playerOf(run.sim).speed / TUNING.player.speed;
+    assert.ok(Math.abs(share - magnitude) < 0.06,
+      `stick at ${magnitude} produced ${(share * 100).toFixed(0)}% speed`);
+  }
+});
+
+test('a resting thumb does not creep, but a gentle push still walks', () => {
+  const dead = TUNING.player.deadZone;
+  assert.deepEqual(shapeStick(dead * 0.6, 0), { x: 0, y: 0 }, 'inside the dead zone is still');
+  assert.deepEqual(shapeStick(0, 0), { x: 0, y: 0 });
+
+  const gentle = shapeStick(dead + 0.02, 0);
+  assert.ok(gentle.x > 0 && gentle.x < 0.1, `a gentle push gave ${gentle.x.toFixed(3)}`);
+
+  // Above the dead zone, displacement maps one-to-one onto speed — a stick
+  // pushed a quarter of the way is a quarter speed, exactly.
+  for (const magnitude of [0.25, 0.5, 0.75, 1]) {
+    assert.ok(Math.abs(shapeStick(magnitude, 0).x - magnitude) < 1e-9,
+      `${magnitude} did not pass through`);
+  }
+  assert.ok(Math.abs(Math.hypot(...Object.values(shapeStick(0.8, 0.8))) - 1) < 1e-9,
+    'a diagonal at full deflection is still full speed, not faster');
+});
+
+test('the walk cycle advances with distance, not with time', () => {
+  const slow = openRun();
+  const fast = openRun();
+  for (let i = 0; i < 90; i++) tick(slow, { x: 0.35, y: 0 });
+  for (let i = 0; i < 90; i++) tick(fast, { x: 1, y: 0 });
+  const slowPlayer = playerOf(slow.sim);
+  const fastPlayer = playerOf(fast.sim);
+  const slowPerUnit = slowPlayer.walkPhase / (slowPlayer.x - 120);
+  const fastPerUnit = fastPlayer.walkPhase / (fastPlayer.x - 120);
+  // Same phase per unit travelled at any speed: that is what stops feet skating.
+  assert.ok(Math.abs(slowPerUnit - fastPerUnit) < 0.01,
+    `${slowPerUnit.toFixed(4)} vs ${fastPerUnit.toFixed(4)} phase per unit`);
+  assert.ok(fastPlayer.walkPhase > slowPlayer.walkPhase * 2, 'faster must step more often');
+});
+
+// --- collisions scale with how hard you hit ---------------------------------
+
+function bumpInto(magnitude) {
+  const level = LEVELS[0];
+  const furniture = level.colliders.find((c) => c.type === 'furniture');
+  const run = createRun(level.id);
+  const player = playerOf(run.sim);
+  player.x = furniture.x + furniture.w / 2;
+  player.y = furniture.y - 46;
+  for (let i = 0; i < 80; i++) {
+    tick(run, { x: 0, y: magnitude });
+    const bump = run.sim.events.find((e) => e.type === 'bump');
+    if (bump) return bump;
+  }
+  return null;
+}
+
+test('the same furniture costs more noise the faster you hit it', () => {
+  const gentle = bumpInto(0.4);
+  const hard = bumpInto(1);
+  assert.ok(gentle, 'a slow walk into furniture should still register');
+  assert.ok(hard.noise > gentle.noise * 2,
+    `slow ${gentle.noise} vs fast ${hard.noise} — impact should matter`);
+  assert.ok(hard.force > gentle.force);
+});
+
+test('a hard collision bounces you back and shakes the room', () => {
+  const level = LEVELS[0];
+  const furniture = level.colliders.find((c) => c.type === 'furniture');
+  const run = createRun(level.id);
+  const player = playerOf(run.sim);
+  player.x = furniture.x + furniture.w / 2;
+  player.y = furniture.y - 46;
+  let atImpact = null;
+  for (let i = 0; i < 80; i++) {
+    tick(run, { x: 0, y: 1 });
+    if (run.sim.events.some((e) => e.type === 'bump')) { atImpact = playerOf(run.sim).y; break; }
+  }
+  assert.ok(atImpact !== null);
+  assert.ok(run.sim.shake > 0, 'a hard hit should shake');
+  assert.ok(run.sim.startle > 0, 'a hard hit should make him flinch');
+});
+
+test('a bang makes him flinch, and the flinch fades on its own', () => {
+  const run = createRun(1);
+  run.sim.startle = 1;
+  for (let i = 0; i < 60 * 2; i++) tick(run, { x: 0, y: 0 });
+  assert.equal(run.sim.startle, 0);
+});
+
+test('you can always walk away from furniture — never stuck, never jittering', () => {
+  const level = LEVELS[0];
+  const furniture = level.colliders.find((c) => c.type === 'furniture');
+  const run = createRun(level.id);
+  const player = playerOf(run.sim);
+  player.x = furniture.x + furniture.w / 2;
+  player.y = furniture.y - 46;
+  for (let i = 0; i < 90; i++) tick(run, { x: 0, y: 1 });      // shove into it
+  const stuckAt = playerOf(run.sim).y;
+
+  for (let i = 0; i < 60; i++) tick(run, { x: 0, y: -1 });     // and walk away
+  assert.ok(playerOf(run.sim).y < stuckAt - 40, 'should have escaped the furniture');
+  assert.ok(!blocked(playerOf(run.sim).x, playerOf(run.sim).y,
+    TUNING.player.boxWidth, TUNING.player.boxHeight, level.colliders),
+    'must never end up inside a collider');
 });

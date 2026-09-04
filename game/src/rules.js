@@ -101,6 +101,22 @@ export function forcesChoice(level) {
   return levelTotals(level).noise > TUNING.noise.max;
 }
 
+// Input shaping, kept pure so it can be tested without a browser.
+//
+// A dead zone that re-stretches the remaining range is the usual approach, but
+// it means a stick pushed a quarter of the way gives noticeably less than a
+// quarter speed. Here the magnitude passes through *unchanged* above the dead
+// zone, so displacement maps one-to-one onto speed, and only the first sliver
+// past the threshold is ramped — enough to remove the step, too small to feel.
+export function shapeStick(x, y, deadZone = TUNING.player.deadZone) {
+  let length = Math.hypot(x, y);
+  if (length === 0) return { x: 0, y: 0 };
+  if (length > 1) { x /= length; y /= length; length = 1; }
+  if (length < deadZone) return { x: 0, y: 0 };
+  const ramp = Math.min(1, (length - deadZone) / 0.06);
+  return { x: x * ramp, y: y * ramp };
+}
+
 export function rarityOf(type) {
   const { value } = itemStats(type);
   return TUNING.rarity.bands.find((band) => value <= band.upTo);

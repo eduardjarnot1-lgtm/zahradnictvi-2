@@ -1,6 +1,7 @@
 // One normalised input for the whole game, from keyboard or touch. Pointers are
 // tracked by id, so a thumb on the stick and a thumb on TAKE coexist.
 import { quantise } from './replay.js';
+import { shapeStick } from './rules.js';
 
 const KEY_MAP = {
   arrowleft: 'left', a: 'left',
@@ -118,8 +119,11 @@ export function createInput({ stage, joystick, knob, takeButton, onBlur }) {
       if (held.right) x += 1;
       if (held.up) y -= 1;
       if (held.down) y += 1;
-      const length = Math.hypot(x, y);
-      if (length > 1) { x /= length; y /= length; }
+      // Dead zone and range restretch live in rules.js so they can be tested
+      // without a browser.
+      const shaped = shapeStick(x, y);
+      x = shaped.x;
+      y = shaped.y;
       const take = held.take || takeBuffered;
       takeBuffered = false;
       return quantise({ x, y, take });

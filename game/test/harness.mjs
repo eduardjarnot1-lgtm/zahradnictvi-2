@@ -8,6 +8,16 @@ import { createRecorder, recordFrame, quantise } from '../src/replay.js';
 
 const GRID = 4;
 
+// Is there furniture within arm's reach? Used to make the bot approach tight
+// spots slowly, the way a player who values the noise meter would.
+function nearFurniture(level, player, margin = 20) {
+  const { boxWidth: PW, boxHeight: PH } = TUNING.player;
+  return level.colliders.some((c) =>
+    c.type !== 'wall' &&
+    player.x - PW / 2 - margin < c.x + c.w && player.x + PW / 2 + margin > c.x &&
+    player.y - PH / 2 - margin < c.y + c.h && player.y + PH / 2 + margin > c.y);
+}
+
 // Grid path around furniture, so a script can say "go to that laptop" and mean it.
 export function pathTo(level, from, to) {
   const { width: W, height: H } = TUNING.world;
@@ -94,7 +104,10 @@ export function walkTo(run, target, maxFrames = null) {
       const wasY = p.y;
       // Ease off approaching the destination only — throttling at every 4px
       // path cell would make the bot crawl the whole way there.
-      const throttle = isLast ? Math.max(0.35, Math.min(1, distance / 14)) : 1;
+      const arriving = isLast ? Math.max(0.35, Math.min(1, distance / 14)) : 1;
+      // ...and ease off near furniture, which is what a careful player does now
+      // that a full-speed collision costs several times what a brush does.
+      const throttle = Math.min(arriving, nearFurniture(run.level, p) ? 0.7 : 1);
       tick(run, { x: (dx / distance) * throttle, y: (dy / distance) * throttle, take: false });
       // Wedged against geometry: give up on this cell rather than burn the budget.
       if (Math.abs(p.x - wasX) < 0.05 && Math.abs(p.y - wasY) < 0.05 && ++stalled > 6) break;
@@ -130,8 +143,11 @@ export function escape(run) {
 // Play the way an efficient player would: take the quietest items first while
 // staying under a noise budget, then leave. This is the shape of run the game
 // promises is always possible, so it is what the fairness test drives.
-export function playEfficiently(levelId, { budget = 70, reserve = 9, seed = 7 } = {}) {
+export function playEfficiently(levelId, { budget = 70, reserve = null, seed = 7 } = {}) {
   const run = createRun(levelId, seed);
+  // Leave a share of the clock for the walk out. Moving carefully near
+  // furniture is slower, so the tighter the level the earlier you stop.
+  const keepBack = reserve === null ? Math.max(9, run.sim.timeLimit * 0.45) : reserve;
   // Best deals first: most value per point of noise.
   const order = [...run.sim.items].sort((a, b) => b.value / b.noise - a.value / a.noise);
   let planned = 0;
@@ -140,7 +156,7 @@ export function playEfficiently(levelId, { budget = 70, reserve = 9, seed = 7 } 
     if (planned + item.noise > budget) continue;
     // Leave enough clock to actually get out. Stealing until the timer dies is
     // the greed the game is supposed to punish, not efficient play.
-    if (run.sim.timeLeft < reserve) break;
+    if (run.sim.timeLeft < keepBack) break;
     planned += item.noise;
     steal(run, item.id);
   }

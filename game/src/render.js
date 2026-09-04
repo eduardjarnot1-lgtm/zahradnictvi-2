@@ -259,20 +259,27 @@ export function createRenderer(canvas, options = {}) {
 
       ctx.drawImage(roomCache, 0, 0, W, H);
       drawExit(sim, time);
-      drawSleeper(ctx, sim.level, sleepStage(sim.noise), time, sim.wakeSeconds || 0);
+      drawSleeper(ctx, sim.level, sleepStage(sim.noise), time, sim.wakeSeconds || 0, sim.startle || 0);
       drawItems(sim, time);
 
       // The thief is drawn between the last two simulation steps.
       const player = playerOf(sim);
       const px = player.prevX + (player.x - player.prevX) * alpha;
       const py = player.prevY + (player.y - player.prevY) * alpha;
-      const walk = Math.min(1, player.speed / (TUNING.player.speed * 0.55));
+      // Full range, not saturated at half speed: the animation has to keep
+      // getting faster and longer-strided right up to a run.
+      const walk = Math.min(1, player.speed / TUNING.player.speed);
       const reachProgress = sim.reach ? sim.reach.t / sim.reach.duration : 0;
+
+      // How far past a walk he is, eased so the gait shifts rather than snaps.
+      const runAt = TUNING.player.runAt;
+      const run = walk <= runAt ? 0 : Math.min(1, (walk - runAt) / (1 - runAt)) ** 2;
 
       const hand = drawThief(ctx, px, py, {
         facing: player.facing,
         walkPhase: player.walkPhase,
         walk,
+        run,
         clock: time,
         reach: reachProgress
       });

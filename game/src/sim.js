@@ -52,14 +52,24 @@ const UPDATERS = {
     // entity.speed after the move would be exactly backwards: a head-on hit
     // stops you dead, so it would look like the gentlest collision of all.)
     let impact = 0;
-    if (moved.hitX) impact = Math.max(impact, Math.abs(entity.vx));
-    if (moved.hitY) impact = Math.max(impact, Math.abs(entity.vy));
+    let normalX = 0;
+    let normalY = 0;
+    if (moved.hitX) {
+      impact = Math.max(impact, Math.abs(entity.vx));
+      normalX = entity.vx > 0 ? -1 : 1;
+    }
+    if (moved.hitY) {
+      impact = Math.max(impact, Math.abs(entity.vy));
+      normalY = entity.vy > 0 ? -1 : 1;
+    }
 
     // Walking into a wall must not bank up velocity to spend later.
     if (moved.hitX) entity.vx = 0;
     if (moved.hitY) entity.vy = 0;
     entity.bumped = moved.hit;
     entity.bumpImpact = impact;
+    entity.bumpNormalX = normalX;
+    entity.bumpNormalY = normalY;
 
     const clamped = clampToWorld(moved.x, moved.y, entity.w, entity.h);
     entity.x = clamped.x;
@@ -151,6 +161,7 @@ export function createSim({ level, seed = 1, upgrades = {} }) {
     // standing on one does not drain the meter.
     creaks: level.creaks.map((zone) => ({ ...zone, cooldown: 0, active: false })),
     wakeSeconds: 0,   // drives the wake-up animation only
+    startle: 0,       // a visible flinch from a bang, separate from the meter
     shake: 0,
     shakePhase: 0,
     shakeX: 0,
@@ -294,22 +305,47 @@ export function stepSim(sim, input = EMPTY_INPUT) {
   // Walking into furniture. One event per collision, never one per frame: a
   // cooldown means leaning on a cabinet cannot drain the meter to zero.
   if (sim.bumpCooldown > 0) sim.bumpCooldown = Math.max(0, sim.bumpCooldown - STEP_SECONDS);
-  const hardEnough = player.bumpImpact > TUNING.player.speed * TUNING.hazards.bumpThreshold;
+  const { bumpThreshold, bumpSoftest, bumpHardest, recoil } = TUNING.hazards;
+  const share = player.bumpImpact / TUNING.player.speed;
+  const hardEnough = share > bumpThreshold;
   if (player.bumped && hardEnough && sim.bumpCooldown === 0 && sim.status === 'running') {
-    const amount = Math.round(bumpNoise(player.bumped) * sim.mods.hazardNoise);
-    if (amount > 0) {
-      sim.noise = addNoise(sim.noise, amount);
-      sim.events.push({
-        type: 'bump',
-        x: player.x,
-        y: player.y,
-        noise: amount,
-        what: player.bumped.type
-      });
-      if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
+    // How hard you hit it, from a brush at the threshold to a full-speed run.
+    const force = Math.min(1, (share - bumpThreshold) / (1 - bumpThreshold));
+    const scale = bumpSoftest + (bumpHardest - bumpSoftest) * force;
+    const amount = Math.max(1, Math.round(bumpNoise(player.bumped) * scale * sim.mods.hazardNoise));
+
+    sim.noise = addNoise(sim.noise, amount);
+    // He flinches at a bang, over and above what it did to the meter.
+    sim.startle = Math.min(1, sim.startle + force * TUNING.startle.fromImpact);
+    sim.shake = Math.min(TUNING.feedback.shakeMax, TUNING.feedback.shakeMax * force);
+    sim.shakePhase = 0;
+
+    // A small bounce back, so a hard collision reads as one.
+    if (force > 0.3) {
+      const bounced = solveMove(
+        player,
+        player.bumpNormalX * recoil * force,
+        player.bumpNormalY * recoil * force,
+        sim.level.colliders
+      );
+      player.x = bounced.x;
+      player.y = bounced.y;
     }
+
+    sim.events.push({
+      type: 'bump',
+      x: player.x,
+      y: player.y,
+      noise: amount,
+      force,
+      what: player.bumped.type
+    });
+    if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
     sim.bumpCooldown = TUNING.hazards.bumpCooldown;
   }
+
+  // The flinch fades on its own.
+  if (sim.startle > 0) sim.startle = Math.max(0, sim.startle - TUNING.startle.decay * STEP_SECONDS);
 
   // Standing perfectly still lets the room settle — slowly, and only after a
   // beat, so it is a decision against the clock rather than a reset button.

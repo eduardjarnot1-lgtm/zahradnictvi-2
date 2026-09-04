@@ -108,16 +108,20 @@ export function createAudio(saveStore) {
       tone(130 + noiseAmount, 0.18, 'sawtooth', 0.035, 0.02);
     },
 
-    // Walking into something. Soft furniture thuds; hard furniture knocks.
-    bump(material, amount) {
+    // Walking into something. Soft furniture thuds; hard furniture knocks; and
+    // how hard you hit it sets the volume and the weight of the sound.
+    bump(material, amount, force = 0.5) {
+      const punch = 0.5 + force * 1.6;
       if (material === 'soft') {
-        tone(90, 0.09, 'sine', 0.035);
-        tone(64, 0.13, 'sine', 0.028, 0.03);
+        tone(96 - force * 22, 0.09 + force * 0.05, 'sine', 0.03 * punch);
+        tone(64, 0.14, 'sine', 0.024 * punch, 0.03);
         return;
       }
-      const pitch = 210 - Math.min(6, amount) * 12;
-      tone(pitch, 0.06, 'square', 0.032);
-      tone(pitch * 0.62, 0.13, 'triangle', 0.03, 0.03);
+      const pitch = 215 - Math.min(8, amount) * 12 - force * 30;
+      tone(pitch, 0.06 + force * 0.04, 'square', 0.028 * punch);
+      tone(pitch * 0.62, 0.13 + force * 0.09, 'triangle', 0.026 * punch, 0.03);
+      // A hard collision picks up a low body thump.
+      if (force > 0.55) tone(70, 0.2, 'sine', 0.05 * force, 0.02);
     },
 
     // Something genuinely valuable just came off the shelf.
@@ -149,9 +153,11 @@ export function createAudio(saveStore) {
       tone(140, 0.20, 'sawtooth', 0.04, 0.05);
     },
 
-    // Barely-there footfall, alternating so a walk cycle has two feet.
-    step(left) {
-      tone(left ? 96 : 108, 0.045, 'triangle', 0.022);
+    // Barely-there footfall, alternating so a walk cycle has two feet. Louder
+    // and brighter the faster you are going.
+    step(left, speedShare = 0.6) {
+      tone((left ? 96 : 108) + speedShare * 22, 0.04 + speedShare * 0.02,
+        'triangle', 0.012 + speedShare * 0.022);
     },
 
     wake() {

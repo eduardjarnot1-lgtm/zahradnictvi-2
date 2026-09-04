@@ -105,6 +105,27 @@ gettable inside a 92-noise budget. Setting them against the room's raw total
 (the obvious approach) would routinely demand hauls that wake him every time —
 a test asserts every three-star target is reachable.
 
+### The movement chain
+
+Stick displacement maps **one-to-one** onto speed: a quarter push is a quarter
+speed. A dead zone stops a resting thumb creeping, and above it the magnitude
+passes through unchanged — the usual trick of re-stretching the remaining range
+would mean a quarter push gave noticeably less than a quarter speed.
+
+The walk cycle advances with **distance travelled**, not with time, so feet
+never skate at any speed and footsteps land on the actual footfalls. Stride
+length, bounce and lean grow into a run past 72% speed.
+
+Collision noise scales with how hard you hit: the same cabinet costs +2 at a
+crawl and +8 at a sprint, a bookshelf +13. Impact is measured on the blocked
+axis, a hard hit bounces you back and shakes the room, and it makes the sleeper
+visibly flinch on top of what it does to the meter. So:
+
+    stick position → speed → animation → footsteps
+    speed → impact → noise → how he reacts
+
+Moving fast is a real decision, not a free upgrade.
+
 ### Two resources
 
 The clock and the meter are managed together. Time starts at 30s on level 1 and

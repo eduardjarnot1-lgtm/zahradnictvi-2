@@ -314,9 +314,14 @@ export function boot() {
         audio.creak();
         buzz(18);
       } else if (event.type === 'bump') {
-        pops.push({ x: event.x, y: event.y - 6, value: null, text: `+${event.noise}`, life: 1 });
-        audio.bump(event.what === 'bed' ? 'soft' : 'hard', event.noise);
-        buzz(10);
+        pops.push({
+          x: event.x, y: event.y - 6, value: null, text: `+${event.noise}`,
+          life: 1, big: event.force > 0.6, color: '#ff9c6e'
+        });
+        audio.bump(event.what === 'bed' ? 'soft' : 'hard', event.noise, event.force);
+        // A harder knock is felt as well as heard.
+        buzz(event.force > 0.6 ? [18, 30, 22] : Math.round(8 + event.force * 14));
+        if (event.force > 0.5) spawnSparks(event.x, event.y, 5, '#e8d5b8');
       } else if (event.type === 'won') {
         const level = LEVELS.find((l) => l.id === currentLevelId);
         const stars = starsFor(level, event.haul);
@@ -525,7 +530,10 @@ export function boot() {
     if (!player.moving) { lastStepPhase = player.walkPhase; return; }
     const half = Math.PI;
     if (Math.floor(player.walkPhase / half) !== Math.floor(lastStepPhase / half)) {
-      audio.step(Math.floor(player.walkPhase / half) % 2 === 0);
+      // Footsteps land on the walk cycle, which is driven by distance, so they
+      // stay in step at any speed — and get louder the faster you move.
+      audio.step(Math.floor(player.walkPhase / half) % 2 === 0,
+        Math.min(1, player.speed / TUNING.player.speed));
     }
     lastStepPhase = player.walkPhase;
   }

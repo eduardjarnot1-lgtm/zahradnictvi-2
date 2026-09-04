@@ -577,6 +577,15 @@ function drawBedBase(ctx, level) {
   // Mattress with a fitted-sheet edge.
   fillRound(ctx, bed.x + 5, bed.y + 9, bed.w - 10, bed.h - 22, 7, '#e6ddcd');
   fillRound(ctx, bed.x + 7, bed.y + 10, bed.w - 14, bed.h - 25, 6, PALETTE.mattress);
+  // Mattress buttons, so it reads as something soft rather than a slab.
+  ctx.fillStyle = 'rgba(198,186,166,0.55)';
+  for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < 2; j++) {
+      ctx.beginPath();
+      ctx.arc(bed.x + bed.w * (0.28 + i * 0.22), bed.y + 22 + j * 22, 1.4, 0, TAU);
+      ctx.fill();
+    }
+  }
 }
 
 // Old boards that announce you. Drawn as a worn patch with nail heads — the
@@ -632,7 +641,7 @@ export function paintStaticRoom(ctx, level) {
 }
 
 // ---------------------------------------------------------------- sleeper
-export function drawSleeper(ctx, level, stage, clock, wake = 0) {
+export function drawSleeper(ctx, level, stage, clock, wake = 0, startle = 0) {
   const bed = level.bed;
   const hx = level.sleeper.x;
   const hy = level.sleeper.y;
@@ -647,15 +656,33 @@ export function drawSleeper(ctx, level, stage, clock, wake = 0) {
   const fidgetRate = [0.09, 0.16, 0.3, 0.55, 0.9, 0][stage];
   const fidget = Math.max(0, Math.sin(clock * fidgetRate * TAU) - 0.86) * 7;
   const settle = Math.sin(clock * 0.21) * 0.7 + Math.sin(clock * 0.13 + 1.7) * 0.5;
+  // A bang makes him jolt: a fast shudder that settles, on top of everything
+  // the meter is already doing.
+  const jolt = startle > 0 ? Math.sin(clock * 26) * startle * 4.5 : 0;
+  const joltLift = startle * 2.2;
 
   // Waking is a sit-up: the duvet slips down and the head lifts off the pillow.
   const rise = stage === SLEEP_AWAKE ? Math.min(1, wake / 0.45) : 0;
   const ease = rise * rise * (3 - 2 * rise);
 
-  const duvetY = bed.y + bed.h * 0.40 - breath * 1.4 + ease * 16;
+  const duvetY = bed.y + bed.h * 0.40 - breath * 1.4 + ease * 16 - joltLift;
   const duvetH = Math.max(6, bed.y + bed.h - 6 - duvetY);
   fillRound(ctx, bed.x + 5, duvetY, bed.w - 10, duvetH, 7, PALETTE.duvet);
-  fillRound(ctx, bed.x + 5, duvetY, bed.w - 10, Math.min(duvetH, 9 + breath * 1.2), 5, PALETTE.duvetTop);
+  // A turned-down sheet along the top edge of the covers.
+  fillRound(ctx, bed.x + 5, duvetY, bed.w - 10, Math.min(duvetH, 10 + breath * 1.2), 5, '#f3f7fb');
+  fillRound(ctx, bed.x + 6, duvetY + 2, bed.w - 12, Math.min(duvetH - 3, 6 + breath), 4, PALETTE.duvetTop);
+  // Faint quilting, so the duvet has a fabric rather than a flat fill.
+  ctx.save();
+  ctx.globalAlpha = 0.16;
+  ctx.strokeStyle = '#f6fbff';
+  ctx.lineWidth = 1;
+  for (let qx = bed.x + 16; qx < bed.x + bed.w - 8; qx += 18) {
+    ctx.beginPath();
+    ctx.moveTo(qx, duvetY + 12);
+    ctx.lineTo(qx - 10, duvetY + duvetH);
+    ctx.stroke();
+  }
+  ctx.restore();
 
   // An arm lying on top of the covers, rising and falling with him.
   if (stage !== SLEEP_AWAKE) {
@@ -705,8 +732,8 @@ export function drawSleeper(ctx, level, stage, clock, wake = 0) {
     fillRound(ctx, hx - 16, hy + 2, 32, 28 * ease, 8, '#e7ebf2');
   }
 
-  const headX = hx + settle * 0.9 + fidget * (stage >= SLEEP_DISTURBED ? 1 : 0.4);
-  const headY = hy + breath * 0.5 - ease * 9;
+  const headX = hx + settle * 0.9 + fidget * (stage >= SLEEP_DISTURBED ? 1 : 0.4) + jolt;
+  const headY = hy + breath * 0.5 - ease * 9 - joltLift * 0.6;
   ctx.fillStyle = PALETTE.skinShade;
   ctx.beginPath();
   ctx.arc(headX, headY + 1.5, 15, 0, TAU);
@@ -806,11 +833,20 @@ export function drawSleeper(ctx, level, stage, clock, wake = 0) {
     ctx.fillText(marks, hx, floor(bed.y - 10));
     ctx.globalAlpha = 1;
   }
+
+  if (startle > 0.25 && stage !== SLEEP_AWAKE) {
+    ctx.textAlign = 'center';
+    ctx.globalAlpha = Math.min(1, startle);
+    ctx.font = 'bold 17px system-ui';
+    ctx.fillStyle = '#ffd0d0';
+    ctx.fillText('!', hx + 26, floor(bed.y + 2));
+    ctx.globalAlpha = 1;
+  }
 }
 
 // ---------------------------------------------------------------- the thief
 // walk: 0..1 blend between idle and walking. reach: 0..1 grab progress.
-export function drawThief(ctx, x, y, { facing, walkPhase, walk, clock, reach }) {
+export function drawThief(ctx, x, y, { facing, walkPhase, walk, run = 0, clock, reach }) {
   const faceX = Math.cos(facing);
   const faceY = Math.sin(facing);
   // Sideways axis, so the two feet always sit beside each other whichever way
@@ -818,13 +854,18 @@ export function drawThief(ctx, x, y, { facing, walkPhase, walk, clock, reach }) 
   const sideX = -faceY;
   const sideY = faceX;
 
-  const swing = Math.sin(walkPhase) * walk;
+  // Stride reach and bounce grow with speed, so a run reads as a run rather
+  // than a fast walk. Frequency already tracks distance travelled.
+  const gait = walk + run * 0.55;
+  const swing = Math.sin(walkPhase) * gait;
   const breathe = Math.sin(clock * 1.9) * (1 - walk) * 0.6;
-  const bob = -Math.abs(Math.sin(walkPhase)) * 1.5 * walk + breathe;
-  // Weight shifts onto the planted foot: the torso leans a touch that way.
-  const weight = -swing * 1.3;
-  const bodyX = x + sideX * weight;
-  const bodyY = y + bob;
+  const bob = -Math.abs(Math.sin(walkPhase)) * (1.5 + run * 1.9) * walk + breathe;
+  // Weight shifts onto the planted foot: the torso leans a touch that way, and
+  // leans into the run.
+  const weight = -swing * (1.3 + run * 0.9);
+  const lean = run * 1.8;
+  const bodyX = x + sideX * weight + faceX * lean;
+  const bodyY = y + bob + faceY * lean * 0.5;
 
   ctx.fillStyle = 'rgba(20,10,26,0.30)';
   ctx.beginPath();
@@ -833,9 +874,9 @@ export function drawThief(ctx, x, y, { facing, walkPhase, walk, clock, reach }) 
 
   // Legs are two segments with a knee, so the stride reads as walking rather
   // than as feet sliding. Both stay below the torso whichever way he faces.
-  const stride = 5.4;
+  const stride = 5.4 + run * 3.4;
   const drawLeg = (side, phase) => {
-    const lift = Math.max(0, phase) * walk;
+    const lift = Math.max(0, phase) * walk * (1 + run * 0.8);
     const hipX = bodyX + sideX * 4.4 * side;
     const hipY = bodyY + 4 + sideY * 4.4 * side;
     const footX = x + sideX * 4.6 * side + faceX * phase * stride;
@@ -860,22 +901,32 @@ export function drawThief(ctx, x, y, { facing, walkPhase, walk, clock, reach }) 
 
     fillRound(ctx, footX - 3.7, footY - 4, 7.4, 8.6 - lift * 1.8, 3, PALETTE.thiefBelt);
     fillRound(ctx, footX - 2.7, footY - 3.2, 5.4, 3, 1.8, '#3f4568');
+    fillRound(ctx, footX - 3.5, footY + 3.2 - lift * 1.8, 7, 1.8, 0.9, '#6a7196');  // sole
   };
   drawLeg(-1, swing);
   drawLeg(1, -swing);
 
   fillRound(ctx, bodyX - 8.5, bodyY - 9, 17, 17, 7, PALETTE.thief);
   fillRound(ctx, bodyX - 8.5, bodyY - 9, 17, 8, 6, PALETTE.thiefTop);
+  // Cloth folds across the chest, leaning with the weight shift.
+  ctx.strokeStyle = 'rgba(12,14,26,0.30)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(bodyX - 5, bodyY - 2);
+  ctx.quadraticCurveTo(bodyX + weight * 0.4, bodyY + 0.5, bodyX + 5, bodyY - 2);
+  ctx.stroke();
   ctx.fillStyle = PALETTE.thiefBelt;
   ctx.fillRect(bodyX - 8.5, bodyY + 3.5, 17, 3.2);
-  ctx.fillStyle = '#d8b24a';
-  ctx.fillRect(bodyX - 2, bodyY + 3.5, 4, 3.2);
+  ctx.fillStyle = '#d8b24a';                                     // buckle
+  fillRound(ctx, bodyX - 2.4, bodyY + 3.4, 4.8, 3.4, 1, '#d8b24a');
+  ctx.fillStyle = '#8d6f22';
+  ctx.fillRect(bodyX - 0.6, bodyY + 4.2, 1.2, 1.8);
 
   // Arms sit outside the torso and are drawn over it, with a slight elbow.
   const drawArm = (side, extend) => {
     const shoulderX = bodyX + sideX * 8.8 * side;
     const shoulderY = bodyY - 4 + sideY * 8.8 * side;
-    const reachOut = -swing * side * 3.8 + extend;
+    const reachOut = -swing * side * (3.8 + run * 3.2) + extend;
     const handX = shoulderX + faceX * reachOut + sideX * side * 1.6;
     const handY = shoulderY + faceY * reachOut * 0.66 + sideY * side * 1.6 + 4;
     const elbowX = (shoulderX + handX) / 2 + sideX * side * 1.1;
@@ -888,10 +939,14 @@ export function drawThief(ctx, x, y, { facing, walkPhase, walk, clock, reach }) 
     ctx.moveTo(shoulderX, shoulderY);
     ctx.quadraticCurveTo(elbowX, elbowY, handX, handY);
     ctx.stroke();
-    ctx.fillStyle = PALETTE.skin;
+    ctx.fillStyle = PALETTE.skin;                          // a mitt, not a dot
+    ctx.save();
+    ctx.translate(handX, handY);
+    ctx.rotate(Math.atan2(handY - shoulderY, handX - shoulderX));
     ctx.beginPath();
-    ctx.arc(handX, handY, 2.7, 0, TAU);
+    ctx.ellipse(0, 0, 3.2, 2.5, 0, 0, TAU);
     ctx.fill();
+    ctx.restore();
     return { x: handX, y: handY };
   };
 
@@ -917,11 +972,19 @@ export function drawThief(ctx, x, y, { facing, walkPhase, walk, clock, reach }) 
     ctx.arc(bodyX, headY + 2.5, 5.4, 0, Math.PI);
     ctx.fill();
   } else {
+    ctx.fillStyle = '#4a3a2c';                             // hair under the brim
+    ctx.beginPath();
+    ctx.arc(bodyX, headY + 0.5, 7.6, Math.PI * 0.9, TAU * 1.05);
+    ctx.fill();
     ctx.fillStyle = PALETTE.thiefBelt;                     // beanie
     ctx.beginPath();
     ctx.arc(bodyX, headY - 1, 8, Math.PI, TAU);
     ctx.fill();
     ctx.fillRect(bodyX - 8, headY - 2, 16, 3.6);
+    ctx.fillStyle = 'rgba(255,255,255,0.13)';              // rim light
+    ctx.beginPath();
+    ctx.ellipse(bodyX - 2.5, headY - 5, 4.4, 2, -0.4, 0, TAU);
+    ctx.fill();
     ctx.fillStyle = '#fff';                                // eyes track the heading
     const gaze = faceX * 1.6;
     const gazeY = Math.max(0, faceY) * 1.2;

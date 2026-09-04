@@ -23,7 +23,12 @@ export const TUNING = {
     boxHeight: 24,
     maxSubStep: 4,       // swept move: never advance more than this per sub-step
     strideRate: 0.062,   // walk-cycle phase per unit travelled — ties feet to speed
-    turnRate: 14         // how fast the character turns to face its heading
+    turnRate: 14,        // how fast the character turns to face its heading
+    // A thumb resting on the stick should not creep. Past the dead zone the
+    // remaining range is stretched back out, so a gentle push is still a slow
+    // walk rather than a jump to a quarter speed.
+    deadZone: 0.08,
+    runAt: 0.72          // where the walk starts turning into a run
   },
 
   noise: {
@@ -151,12 +156,24 @@ export const TUNING = {
       chest: 4, tvBench: 4, wardrobe: 5, bookshelf: 6
     },
     bumpCooldown: 1.0,    // one bump per collision, not one per frame
-    bumpThreshold: 0.62,  // how squarely you must hit it to count at all
+    bumpThreshold: 0.34,  // how squarely you must hit it to count at all
+    // How hard you hit it matters as much as what you hit: a brush at the
+    // threshold costs a fraction, a full-speed run into a bookshelf costs
+    // double. This is what makes moving fast a real decision.
+    bumpSoftest: 0.35,
+    bumpHardest: 2.1,
+    recoil: 4,            // world units bounced back on a hard collision
 
     // Footsteps. Bare boards carry; a rug swallows them. Small on purpose —
     // it is a reason to prefer one route over another, not a second clock.
     walkNoise: 0.55,      // per second at full speed on hard floor
     softFloorScale: 0     // ...and on a rug
+  },
+
+  // A hard bang makes him flinch visibly, on top of what it does to the meter.
+  startle: {
+    fromImpact: 1,       // scale of the flinch, 0..1, from collision strength
+    decay: 1.1           // per second
   },
 
   // Standing perfectly still lets the room settle. Slow enough that it is a
