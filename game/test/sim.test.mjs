@@ -121,3 +121,96 @@ test('the exit does nothing once he is awake', () => {
   stepSim(sim, { x: 0, y: 1, take: false });
   assert.notEqual(sim.status, 'won');
 });
+
+// --- movement feel ----------------------------------------------------------
+
+const openRun = () => {
+  const run = createRun(1);
+  const player = playerOf(run.sim);
+  // A genuinely clear stretch of floor on level 1: furniture sits at x<98 and
+  // x>286 on this row, so there is room to reach top speed and turn around.
+  player.x = 120;
+  player.y = 420;
+  return run;
+};
+
+test('top speed is unchanged: the polish did not make the game slower', () => {
+  const run = openRun();
+  for (let i = 0; i < 30; i++) tick(run, { x: 1, y: 0 });
+  assert.ok(
+    Math.abs(playerOf(run.sim).speed - TUNING.player.speed) < 2,
+    `expected ~${TUNING.player.speed}, got ${playerOf(run.sim).speed}`
+  );
+});
+
+test('movement accelerates instead of snapping to full speed', () => {
+  const run = openRun();
+  tick(run, { x: 1, y: 0 });
+  const first = playerOf(run.sim).speed;
+  assert.ok(first > 0, 'should start moving immediately');
+  assert.ok(first < TUNING.player.speed * 0.5, `first frame jumped to ${first}`);
+  // ...and still reaches full speed quickly enough to feel responsive
+  for (let i = 0; i < 12; i++) tick(run, { x: 1, y: 0 });
+  assert.ok(playerOf(run.sim).speed > TUNING.player.speed * 0.9, 'too slow to get going');
+});
+
+test('releasing the stick coasts to a stop, quickly', () => {
+  const run = openRun();
+  for (let i = 0; i < 30; i++) tick(run, { x: 1, y: 0 });
+  for (let i = 0; i < 12; i++) tick(run, { x: 0, y: 0 });
+  assert.equal(playerOf(run.sim).speed, 0);
+  assert.equal(playerOf(run.sim).moving, false);
+});
+
+test('turning is eased, not instant', () => {
+  const run = openRun();
+  for (let i = 0; i < 30; i++) tick(run, { x: 1, y: 0 });
+  const before = playerOf(run.sim).facing;
+  tick(run, { x: -1, y: 0 });
+  const after = playerOf(run.sim).facing;
+  assert.notEqual(before, after, 'should begin turning');
+  assert.ok(Math.abs(after - before) < Math.PI * 0.75, 'turned instantly instead of easing');
+});
+
+test('pushing into a wall does not bank up velocity', () => {
+  const run = createRun(1);
+  const player = playerOf(run.sim);
+  player.x = 200;
+  player.y = 100;
+  for (let i = 0; i < 90; i++) tick(run, { x: 0, y: -1 }); // hold into the top wall
+  const stuckY = playerOf(run.sim).y;
+  assert.ok(playerOf(run.sim).vy === 0, 'velocity accumulated against the wall');
+  tick(run, { x: 0, y: 0 });
+  assert.ok(Math.abs(playerOf(run.sim).y - stuckY) < 1, 'lurched after releasing');
+});
+
+test('the pickup reach slows the player without freezing them', () => {
+  const run = createRun(1);
+  const item = run.sim.items[0];
+  walkTo(run, item);
+  for (let i = 0; i < 40 && !item.taken; i++) tick(run, { x: 0, y: 0, take: i % 2 === 0 });
+  assert.equal(item.taken, true);
+  assert.ok(run.sim.reach, 'a reach animation should be running');
+
+  const start = { x: playerOf(run.sim).x, y: playerOf(run.sim).y };
+  for (let i = 0; i < 10; i++) tick(run, { x: 0, y: 1 });
+  const moved = Math.hypot(playerOf(run.sim).x - start.x, playerOf(run.sim).y - start.y);
+  assert.ok(moved > 0.5, 'the player froze during the pickup');
+
+  // and it ends on its own, well under a second
+  let frames = 0;
+  while (run.sim.reach && frames < 120) { tick(run, { x: 0, y: 0 }); frames++; }
+  assert.ok(frames / 60 < 0.6, `reach ran for ${(frames / 60).toFixed(2)}s`);
+});
+
+test('screen shake settles instead of jittering forever', () => {
+  const run = createRun(1);
+  const item = run.sim.items[0];
+  walkTo(run, item);
+  for (let i = 0; i < 40 && !item.taken; i++) tick(run, { x: 0, y: 0, take: i % 2 === 0 });
+  assert.ok(run.sim.shake > 0, 'taking a noisy item should register');
+  for (let i = 0; i < 60; i++) tick(run, { x: 0, y: 0 });
+  assert.equal(run.sim.shake, 0);
+  assert.equal(run.sim.shakeX, 0);
+  assert.equal(run.sim.shakeY, 0);
+});

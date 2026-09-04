@@ -2,7 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { LEVELS } from '../src/levels.js';
 import { validateAll, validateLevel } from '../src/validate.js';
-import { levelTotals, forcesChoice } from '../src/rules.js';
+import { levelTotals, forcesChoice, itemStats } from '../src/rules.js';
+import { play } from './harness.mjs';
 import { TUNING } from '../src/tuning.js';
 
 test('every shipped level passes the validator', () => {
@@ -58,4 +59,27 @@ test('level noise totals never decrease across the campaign after level 2', () =
   const inversions = totals.filter((n, i) => i > 0 && n < totals[i - 1]).length;
   assert.ok(inversions <= 1, `too many difficulty inversions: ${totals}`);
   assert.ok(sorted[sorted.length - 1] > TUNING.noise.max);
+});
+
+// Every level is still completable after the polish pass. This is the check
+// that answers "did the visual work break any of the ten levels".
+test('all ten levels can still be played and escaped', () => {
+  for (const level of LEVELS) {
+    const ids = level.items.slice(0, 2).map((i) => i.id);
+    const { result } = play(level.id, { take: ids, seed: 5 });
+    const expected = level.items
+      .filter((i) => ids.includes(i.id))
+      .reduce((sum, i) => sum + itemStats(i.type).value, 0);
+    assert.equal(result.status, 'won', `level ${level.id} could not be finished`);
+    assert.equal(result.money, expected, `level ${level.id} paid the wrong amount`);
+    assert.deepEqual([...result.taken].sort(), [...ids].sort());
+  }
+});
+
+test('taking everything wakes him on every level that should', () => {
+  for (const level of LEVELS.filter(forcesChoice)) {
+    const { result } = play(level.id, { seed: 5 });
+    assert.equal(result.status, 'lost', `level ${level.id} should be unsurvivable if greedy`);
+    assert.equal(result.noise, 100);
+  }
 });

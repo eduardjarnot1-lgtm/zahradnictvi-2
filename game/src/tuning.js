@@ -16,10 +16,14 @@ export const TUNING = {
   },
 
   player: {
-    speed: 132,          // world units per second
+    speed: 132,          // world units per second (top speed is unchanged)
+    accel: 950,          // ~0.14s from standing to full speed: smooth, still snappy
+    decel: 1250,         // stopping is a little crisper than starting
     boxWidth: 22,
     boxHeight: 24,
-    maxSubStep: 4        // swept move: never advance more than this per sub-step
+    maxSubStep: 4,       // swept move: never advance more than this per sub-step
+    strideRate: 0.062,   // walk-cycle phase per unit travelled — ties feet to speed
+    turnRate: 14         // how fast the character turns to face its heading
   },
 
   noise: {
@@ -32,13 +36,23 @@ export const TUNING = {
     radius: 26,          // circular, so range is the same in every direction
     // 'action' = you must press TAKE while in range (deliberate).
     // 'auto'   = the original beta behaviour, taken on touch.
-    mode: 'action'
+    mode: 'action',
+    reachSeconds: 0.42,  // the reach-and-grab animation
+    reachSlow: 0.4       // movement scale while reaching — a hesitation, not a stop
   },
 
   feedback: {
-    shakePerNoise: 0.35, // screen shake scales with how loud the item was
-    shakeMax: 10,
-    shakeDecay: 22
+    // A damped thud rather than random jitter: it reads as the room reacting,
+    // not as the camera malfunctioning.
+    shakePerNoise: 0.16,
+    shakeMax: 3.4,
+    shakeDecay: 9,
+    shakeHz: 13
+  },
+
+  render: {
+    maxPixelRatio: 3,        // sharper on modern phones than the old cap of 2
+    maxCanvasPixels: 3.2e6   // ...but never more pixels than a mid-range GPU likes
   },
 
   // Item value / noise table. Art for each type lives in render.js, not here:

@@ -49,6 +49,7 @@ new state, so the whole game runs in node with no browser.
 | `fsm.js` | screen state machine with enter/exit hooks |
 | `input.js` | keyboard + multi-touch into one `read()` |
 | `audio.js` | master gain, persisted mute, context revival |
+| `art.js` | room, furniture and character painting |
 | `render.js` | canvas drawing with interpolation + debug overlay |
 | `main.js` | wiring and the fixed-timestep loop |
 
@@ -60,6 +61,20 @@ two steps. A long frame costs catch-up steps, never simulated distance.
 Runs are deterministic: `(level id, seed, input log)` fully reproduces a run,
 including screen shake. `test/fixtures/golden-l3.json` is a recorded 960-frame
 playthrough asserted to still pay out exactly $330.
+
+### Look and feel
+
+Movement runs through an acceleration/deceleration ramp (top speed unchanged),
+with eased turning and a walk cycle driven by distance travelled, so feet never
+skate. Taking an item plays a ~0.4s reach: the thief slows, extends an arm, and
+the item flies into his hand. Money and noise are credited when TAKE is pressed,
+so the animation is presentation only and can never change an outcome.
+
+The room is painted once per level into an offscreen canvas at device
+resolution and blitted 1:1, so detail costs nothing per frame. Furniture style
+and tone are derived from each collider's shape and position — level files say
+`furniture` and get a bookshelf, chest, sofa, wardrobe, TV bench, table or
+nightstand — so a room can be redecorated without touching level data.
 
 ### Adding a level
 

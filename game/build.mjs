@@ -15,7 +15,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 // Dependency order. A module may only import from ones above it.
 const ORDER = [
   'tuning', 'rng', 'rules', 'physics', 'levels', 'validate',
-  'sim', 'replay', 'save', 'fsm', 'audio', 'input', 'render', 'main'
+  'sim', 'replay', 'save', 'fsm', 'audio', 'input', 'art', 'render', 'main'
 ];
 
 const IMPORT_RE = /^import\s*\{([^}]*)\}\s*from\s*'\.\/([\w-]+)\.js';?\s*$/;

@@ -18,8 +18,24 @@ const UPDATERS = {
     const length = Math.hypot(ix, iy);
     if (length > 1) { ix /= length; iy /= length; }
 
-    entity.vx = ix * TUNING.player.speed;
-    entity.vy = iy * TUNING.player.speed;
+    // Reaching for an item is a hesitation, not a stop: you keep steering.
+    const slowed = sim.reach ? TUNING.pickup.reachSlow : 1;
+    const targetVx = ix * TUNING.player.speed * slowed;
+    const targetVy = iy * TUNING.player.speed * slowed;
+
+    // Approach the target velocity as a vector, so turning is a curve rather
+    // than a snap and there is no direction the character accelerates faster in.
+    const rate = (length > 0.01 ? TUNING.player.accel : TUNING.player.decel) * STEP_SECONDS;
+    const dvx = targetVx - entity.vx;
+    const dvy = targetVy - entity.vy;
+    const delta = Math.hypot(dvx, dvy);
+    if (delta <= rate || delta === 0) {
+      entity.vx = targetVx;
+      entity.vy = targetVy;
+    } else {
+      entity.vx += (dvx / delta) * rate;
+      entity.vy += (dvy / delta) * rate;
+    }
 
     const moved = solveMove(
       entity,
@@ -27,10 +43,29 @@ const UPDATERS = {
       entity.vy * STEP_SECONDS,
       sim.level.colliders
     );
+    // Walking into a wall must not bank up velocity to spend later.
+    if (moved.hitX) entity.vx = 0;
+    if (moved.hitY) entity.vy = 0;
+
     const clamped = clampToWorld(moved.x, moved.y, entity.w, entity.h);
     entity.x = clamped.x;
     entity.y = clamped.y;
-    entity.moving = length > 0.01 && (moved.x !== entity.prevX || moved.y !== entity.prevY);
+
+    const travelled = Math.hypot(entity.x - entity.prevX, entity.y - entity.prevY);
+    entity.speed = travelled / STEP_SECONDS;
+    entity.moving = entity.speed > 4;
+
+    // Facing eases toward the heading so the character never spins on the spot.
+    if (entity.moving) {
+      const heading = Math.atan2(entity.vy, entity.vx);
+      let turn = heading - entity.facing;
+      while (turn > Math.PI) turn -= Math.PI * 2;
+      while (turn < -Math.PI) turn += Math.PI * 2;
+      entity.facing += turn * Math.min(1, TUNING.player.turnRate * STEP_SECONDS);
+    }
+    // The walk cycle is driven by distance travelled, so feet never skate.
+    entity.walkPhase += travelled * TUNING.player.strideRate;
+    entity.idleSeconds = entity.moving ? 0 : entity.idleSeconds + STEP_SECONDS;
   }
 };
 
@@ -45,7 +80,11 @@ export function createSim({ level, seed = 1 }) {
     vy: 0,
     w: TUNING.player.boxWidth,
     h: TUNING.player.boxHeight,
-    moving: false
+    moving: false,
+    speed: 0,
+    facing: Math.PI / 2,   // facing "down" into the room
+    walkPhase: 0,
+    idleSeconds: 0
   };
 
   return {
@@ -72,7 +111,9 @@ export function createSim({ level, seed = 1 }) {
       };
     }),
     targetId: null,   // the in-range item a TAKE would consume
+    reach: null,      // the in-progress grab animation, if any
     shake: 0,
+    shakePhase: 0,
     shakeX: 0,
     shakeY: 0,
     prevTake: false,
@@ -94,7 +135,11 @@ function takeItem(sim, item) {
   item.takenAtFrame = sim.frame;
   sim.money += item.value;
   sim.noise = addNoise(sim.noise, item.noise);
+  // Drives the reach-and-grab animation. Money and noise are already credited,
+  // so the animation is presentation only and can never affect the outcome.
+  sim.reach = { t: 0, duration: TUNING.pickup.reachSeconds, x: item.x, y: item.y, type: item.type };
   sim.shake = Math.min(TUNING.feedback.shakeMax, item.noise * TUNING.feedback.shakePerNoise);
+  sim.shakePhase = 0;
   sim.events.push({
     type: 'took',
     id: item.id,
@@ -143,12 +188,20 @@ export function stepSim(sim, input = EMPTY_INPUT) {
   sim.prevTake = input.take;
   if (nearest && (TUNING.pickup.mode === 'auto' || pressedTake)) takeItem(sim, nearest);
 
-  // Screen shake is seeded, so a replay shakes identically.
-  if (sim.shake > 0) {
-    sim.shakeX = (sim.rng.next() - 0.5) * sim.shake;
-    sim.shakeY = (sim.rng.next() - 0.5) * sim.shake;
+  if (sim.reach) {
+    sim.reach.t += STEP_SECONDS;
+    if (sim.reach.t >= sim.reach.duration) sim.reach = null;
+  }
+
+  // A damped thud, not random jitter: one soft oscillation that settles.
+  if (sim.shake > 0.01) {
+    sim.shakePhase += STEP_SECONDS;
+    const wobble = Math.sin(sim.shakePhase * TUNING.feedback.shakeHz * Math.PI * 2);
+    sim.shakeX = wobble * sim.shake * 0.35;
+    sim.shakeY = wobble * sim.shake;
     sim.shake = Math.max(0, sim.shake - TUNING.feedback.shakeDecay * STEP_SECONDS);
   } else {
+    sim.shake = 0;
     sim.shakeX = 0;
     sim.shakeY = 0;
   }
