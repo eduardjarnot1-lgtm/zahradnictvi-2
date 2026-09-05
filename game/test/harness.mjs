@@ -2,6 +2,7 @@
 // browser at all. Every assertion in the suite goes through this.
 import { TUNING } from '../src/tuning.js';
 import { blocked } from '../src/physics.js';
+import { proximityScale } from '../src/rules.js';
 import { createSim, stepSim, playerOf, snapshot } from '../src/sim.js';
 import { LEVELS } from '../src/levels.js';
 import { createRecorder, recordFrame, quantise } from '../src/replay.js';
@@ -150,6 +151,30 @@ export function escape(run) {
   return snapshot(run.sim);
 }
 
+// What lifting this item will actually cost, here, on this map. Where a
+// location makes noise depend on how close the listener is, a player who plans
+// against the printed number is planning against the wrong number — and so was
+// this bot, which is how it kept waking the caretaker.
+function costOf(sim, item) {
+  if (!sim.rules.proximity) return item.noise;
+  const listener = sim.investigator || sim.level.watcher;
+  return item.noise * proximityScale(
+    sim.rules, Math.hypot(item.x - listener.x, item.y - listener.y));
+}
+
+// Someone is up and looking for you. Stand absolutely still and let the meter
+// fall until he loses interest — the loop the level is built around, and the
+// one thing a bot that does not know about it will always get wrong.
+export function waitOut(run, maxFrames = 60 * 25) {
+  const w = run.sim.investigator;
+  if (!w) return true;
+  for (let i = 0; i < maxFrames && run.sim.status === 'running'; i++) {
+    if (w.state === 'asleep') return true;
+    tick(run);
+  }
+  return run.sim.status === 'running' && w.state === 'asleep';
+}
+
 // Play the way an efficient player would: take the quietest items first while
 // staying under a noise budget, then leave. This is the shape of run the game
 // promises is always possible, so it is what the fairness test drives.
@@ -180,14 +205,17 @@ export function playEfficiently(levelId, { budget = 70, reserve = null, seed = 7
       // Judge against the meter, not against a plan: walking across a
       // floorplan costs real noise, so a budget counted from item values alone
       // quietly overspends by the length of the walk.
-      if (run.sim.noise + item.noise > budget) continue;
+      if (run.sim.noise + costOf(run.sim, item) > budget) continue;
       const distance = Math.hypot(item.x - player.x, item.y - player.y);
-      const score = item.value / (item.noise * (1 + distance / 300));
+      const score = item.value / (costOf(run.sim, item) * (1 + distance / 300));
       if (score > bestScore) { bestScore = score; best = item; }
     }
     if (!best) break;
     steal(run, best.id);
     if (!best.taken) gaveUp.add(best.id);
+    // Woke him anyway? Then freeze until he gives up, exactly as a player
+    // would, rather than walking on and into him.
+    if (run.sim.investigator && run.sim.investigator.state !== 'asleep') waitOut(run);
   }
   if (run.sim.status === 'running') escape(run);
   return { run, result: snapshot(run.sim) };

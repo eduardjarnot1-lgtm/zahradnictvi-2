@@ -45,6 +45,24 @@ export const TUNING = {
     maxSubStep: 4,       // swept move: never advance more than this per sub-step
     strideRate: 0.062,   // walk-cycle phase per unit travelled — ties feet to speed
     turnRate: 14,        // how fast the character turns to face its heading
+
+    // How the walk cycle changes shape with speed. The phase has always
+    // advanced with distance travelled rather than with time, so the feet could
+    // never skate — but the number of steps per unit was fixed, which meant a
+    // creep and a sprint were the same stride played at two rates.
+    //
+    // Cadence is speed divided by stride length, so a shorter stride means more
+    // steps over the same ground: tiptoeing raises the per-unit rate, running
+    // lowers it. That is the whole trick, and it is why the animation cannot
+    // drift out of sync with the movement — both are driven by the distance
+    // actually covered.
+    gait: {
+      creepAt: 0.34,      // at or below this share of top speed he is tiptoeing
+      walkAt: 0.58,       // ...and at or above it he is walking properly
+      strideCreep: 0.088, // short careful steps: more of them per unit
+      strideWalk: 0.062,  // unchanged, so a normal walk looks exactly as it did
+      strideRun: 0.047    // long strides: fewer, bigger ones
+    },
     // A thumb resting on the stick should not creep. Past the dead zone the
     // remaining range is stretched back out, so a gentle push is still a slow
     // walk rather than a jump to a quarter speed.
@@ -215,7 +233,15 @@ export const TUNING = {
       meter: 'NOISE', person: 'Mr. Vrána', sees: 0, seeRate: 0, pose: 'couch',
       warnings: ['MR. VRÁNA STIRS…', 'MR. VRÁNA IS ALMOST AWAKE',
         'MR. VRÁNA IS WAKING!'],
-      lost: 'HE WOKE UP!', lostWhy: 'The noise reached 100 and the caretaker woke up.'
+      lost: 'HE WOKE UP!', lostWhy: 'The noise reached 100 and the caretaker woke up.',
+      // He is the only one who gets up and comes looking, so he is the only one
+      // who can walk into you.
+      caught: 'CAUGHT!',
+      caughtWhy: 'Mr. Vrána walked in on you while he was investigating the noise.',
+      // Shown while he is on his feet, in place of the noise-threshold
+      // warnings: what he is doing matters more than the number by then.
+      onFoot: ['MR. VRÁNA IS GETTING UP', 'HE IS COMING TO LOOK',
+        'HE IS LOOKING AROUND', 'HE IS GOING BACK']
     },
 
     // --- the seven named people of the floorplan levels ---------------------
@@ -289,6 +315,53 @@ export const TUNING = {
   recovery: {
     delay: 0.6,           // how long you must be still before it starts
     rate: 2               // noise per second once it does
+  },
+
+  // Mechanics that belong to one location and nowhere else.
+  //
+  // Everything above this point is the game. Everything in here is a named
+  // location asking for something the game does not otherwise do — so a level
+  // that is not listed keeps exactly the behaviour it had before this block
+  // existed, and there is one place to look to find out which levels are
+  // special and how.
+  locations: {
+    School: {
+      // How close you are to Mr. Vrána decides how much a given noise costs.
+      // Standing over him, a dropped phone is deafening; three classrooms
+      // away, the same phone barely registers.
+      //
+      // The curve is smooth between the two distances, so there is no line to
+      // step across and be surprised by — you can feel it tighten as you walk
+      // towards him. Both ends are deliberately far from 1.0: if the far end
+      // were 0.9 the whole mechanic would be a rounding error.
+      proximity: {
+        near: 92,          // world units — about four tiles, i.e. the same room
+        far: 320,          // ...and beyond this he is most of a corridor away
+        nearScale: 2.5,    // everything is two and a half times as loud
+        farScale: 0.45     // ...against under half out at the far end
+      },
+      // The school is the one place noise comes back down fast enough to be a
+      // tactic rather than a consolation. Standing still is how you send him
+      // back to the staff room, so it has to actually work inside the clock —
+      // but the delay is longer than elsewhere, so it is never a reflex.
+      recovery: { delay: 0.9, rate: 7 },
+      // Mr. Vrána, once he is awake.
+      investigate: {
+        wakeAt: 80,        // he gets up when the meter passes this
+        calmAt: 50,        // ...and gives up when it falls back under this
+        rising: 0.75,      // seconds spent getting off the couch
+        settling: 0.9,     // ...and lying back down again
+        speed: 78,         // world units a second: a walk, not a chase
+        accel: 430,        // he is a heavy man getting going
+        decel: 620,
+        arriveAt: 16,      // how near the target counts as having reached it
+        searchFor: 3.2,    // seconds spent looking around before giving up
+        catchAt: 22,       // this close to you and the level is over
+        // He gets one look at where the sound came from. If you are still
+        // there when he arrives, that is on you.
+        forget: true
+      }
+    }
   },
 
   // Three upgrades, deliberately few. None of them touches the risk/reward

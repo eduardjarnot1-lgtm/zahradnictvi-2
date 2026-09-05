@@ -7,7 +7,8 @@ import { TUNING } from '../src/tuning.js';
 import { play, createRun, tick, walkTo, steal, escape } from './harness.mjs';
 import {
   addNoise, sleepStage, SLEEP_AWAKE, SLEEP_ASLEEP, starsFor, levelTotals, timeLimit,
-  rarityOf, starThresholds, shapeStick, watcherConfig, detectionRate
+  rarityOf, starThresholds, shapeStick, watcherConfig, detectionRate,
+  gaitBlend, stridePerUnit, proximityScale, locationRules
 } from '../src/rules.js';
 
 test('a scripted run wins with exactly the money it stole', () => {
@@ -643,21 +644,83 @@ test('a resting thumb does not creep, but a gentle push still walks', () => {
     'a diagonal at full deflection is still full speed, not faster');
 });
 
-test('the walk cycle advances with distance, not with time', () => {
-  const slow = openRun();
-  const fast = openRun();
-  for (let i = 0; i < 90; i++) tick(slow, { x: 0.35, y: 0 });
-  for (let i = 0; i < 90; i++) tick(fast, { x: 1, y: 0 });
-  const slowPlayer = playerOf(slow.sim);
-  const fastPlayer = playerOf(fast.sim);
-  const start = openRun();
-  const startX = playerOf(start.sim).x;
-  const slowPerUnit = slowPlayer.walkPhase / (slowPlayer.x - startX);
-  const fastPerUnit = fastPlayer.walkPhase / (fastPlayer.x - startX);
-  // Same phase per unit travelled at any speed: that is what stops feet skating.
-  assert.ok(Math.abs(slowPerUnit - fastPerUnit) < 0.01,
-    `${slowPerUnit.toFixed(4)} vs ${fastPerUnit.toFixed(4)} phase per unit`);
-  assert.ok(fastPlayer.walkPhase > slowPlayer.walkPhase * 2, 'faster must step more often');
+test('the walk cycle advances with distance, never with time', () => {
+  // Held at one speed, phase and distance stay in lockstep. This is the
+  // promise that stops feet skating: the cycle cannot advance while the
+  // character is not going anywhere, whatever the frame rate is doing.
+  const run = openRun();
+  for (let i = 0; i < 40; i++) tick(run, { x: 1, y: 0 });   // reach top speed
+  const p = playerOf(run.sim);
+  const mark = { phase: p.walkPhase, x: p.x };
+  for (let i = 0; i < 30; i++) tick(run, { x: 1, y: 0 });
+  const first = (p.walkPhase - mark.phase) / (p.x - mark.x);
+  const mark2 = { phase: p.walkPhase, x: p.x };
+  for (let i = 0; i < 30; i++) tick(run, { x: 1, y: 0 });
+  const second = (p.walkPhase - mark2.phase) / (p.x - mark2.x);
+  assert.ok(Math.abs(first - second) < 1e-9,
+    `phase per unit drifted: ${first} then ${second}`);
+
+  // Once he has actually come to rest — he still coasts a little while
+  // decelerating, and those steps are real — the cycle stops dead.
+  for (let i = 0; i < 60; i++) tick(run);
+  assert.equal(p.speed, 0, 'he should have stopped by now');
+  const held = p.walkPhase;
+  for (let i = 0; i < 60; i++) tick(run);
+  assert.equal(playerOf(run.sim).walkPhase, held, 'a standing character must not step');
+});
+
+test('a creep takes more, shorter steps per unit than a run', () => {
+  // The gait itself changes with speed, which is the point: tiptoeing is not a
+  // walk in slow motion, it is a different, shorter stride. So the same metre
+  // of floor costs more steps when you cross it carefully.
+  const creep = openRun();
+  const sprint = openRun();
+  for (let i = 0; i < 150; i++) tick(creep, { x: 0.25, y: 0 });
+  for (let i = 0; i < 150; i++) tick(sprint, { x: 1, y: 0 });
+  const startX = playerOf(openRun().sim).x;
+  const cp = playerOf(creep.sim);
+  const sp = playerOf(sprint.sim);
+  const creepPerUnit = cp.walkPhase / (cp.x - startX);
+  const runPerUnit = sp.walkPhase / (sp.x - startX);
+  assert.ok(creepPerUnit > runPerUnit * 1.4,
+    `creeping should be far more steps per unit: ${creepPerUnit.toFixed(4)} vs ${runPerUnit.toFixed(4)}`);
+  // ...and yet moving faster is still more steps per second, or the animation
+  // would visibly lag the movement.
+  assert.ok(sp.walkPhase > cp.walkPhase * 1.5,
+    `faster must still step more often: ${sp.walkPhase.toFixed(2)} vs ${cp.walkPhase.toFixed(2)}`);
+});
+
+test('the gait blend follows the actual speed, and only the speed', () => {
+  const still = gaitBlend(0);
+  assert.equal(still.creep, 0);
+  assert.equal(still.run, 0);
+  assert.equal(still.walk, 0);
+  assert.equal(still.moving, 0, 'a standing character has no cycle at all');
+  const creeping = gaitBlend(0.2);
+  assert.equal(creeping.creep, 1, 'a quarter speed is a full tiptoe');
+  assert.equal(creeping.run, 0);
+  const walking = gaitBlend(0.65);
+  assert.equal(walking.creep, 0, 'a normal walk has no creep left in it');
+  assert.equal(walking.run, 0, '...and is not yet a run');
+  const running = gaitBlend(1);
+  assert.equal(running.run, 1, 'top speed is a full run');
+  // Step length is the reciprocal of cadence, which is the whole reason the
+  // feet stay on the floor: a run covers more ground per step than a creep.
+  assert.ok(running.stride > walking.stride && walking.stride > creeping.stride,
+    `stride should grow with speed: ${creeping.stride} / ${walking.stride} / ${running.stride}`);
+  assert.ok(Math.abs(walking.stride - 1) < 1e-9, 'a normal walk is the unit stride');
+  for (const share of [0.15, 0.3, 0.5, 0.75, 0.9, 1]) {
+    const g = gaitBlend(share);
+    assert.ok(Math.abs(g.stride * stridePerUnit(share) - TUNING.player.gait.strideWalk) < 1e-9,
+      `stride and cadence disagree at ${share}: the feet would skate`);
+  }
+  // No jumps: the blend is continuous across both handover points.
+  for (const at of [TUNING.player.gait.creepAt, TUNING.player.gait.walkAt, TUNING.player.runAt]) {
+    const below = gaitBlend(at - 1e-4);
+    const above = gaitBlend(at + 1e-4);
+    assert.ok(Math.abs(below.creep - above.creep) < 0.01 && Math.abs(below.run - above.run) < 0.01,
+      `the gait jumps at ${at}`);
+  }
 });
 
 // --- collisions scale with how hard you hit ---------------------------------

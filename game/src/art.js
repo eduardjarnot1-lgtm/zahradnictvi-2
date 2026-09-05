@@ -1508,103 +1508,180 @@ export function drawGuard(ctx, level, stage, clock, wake = 0, startle = 0, seen 
   }
 }
 
-// ---------------------------------------------------------------- the thief
-// walk: 0..1 blend between idle and walking. reach: 0..1 grab progress.
-export function drawThief(ctx, x, y, { facing, walkPhase, walk, run = 0, clock, reach }) {
+// ------------------------------------------------------------- people walking
+// One figure, drawn for anyone who walks: the thief, and Mr. Vrána once he is
+// off the couch. Sharing the code is not tidiness — it is the guarantee that
+// the caretaker moves like a person rather than like a prop, because there is
+// only one idea of what walking looks like in the game and both of them use it.
+//
+// Everything about the pose is driven by how fast the figure is actually
+// travelling, which the simulation measures from ground covered rather than
+// from what the stick is doing. So the legs can never run while the body
+// crawls: there is nothing for them to disagree about.
+const THIEF_LOOK = {
+  body: PALETTE.thief, top: PALETTE.thiefTop, belt: PALETTE.thiefBelt,
+  skin: PALETTE.skin, skinShade: PALETTE.skinShade, hair: '#4a3a2c',
+  shoe: '#3f4568', sole: '#6a7196',
+  head: 'beanie', build: 1
+};
+
+// Mr. Vrána: heavier, in the school's olive work coat, grey and thin on top.
+const CARETAKER_LOOK = {
+  body: '#6f7c4e', top: '#899763', belt: '#4d5636',
+  skin: '#e8bb92', skinShade: '#cfa079', hair: '#9aa0a6', shoe: '#4a4034', sole: '#7d7263',
+  head: 'bare', build: 1.13
+};
+
+/**
+ * @param facing    heading in radians
+ * @param walkPhase walk-cycle phase, advanced by distance travelled
+ * @param walk      0..1 share of top speed
+ * @param creep     0..1 how much of a tiptoe this is
+ * @param run       0..1 how much of a run this is
+ * @param stand     0..1 upright, for getting off a couch
+ * @param reach     0..1 grab progress
+ */
+export function drawWalker(ctx, x, y, opts, look = THIEF_LOOK) {
+  const { facing, walkPhase, walk, clock, reach = 0 } = opts;
+  const creep = opts.creep || 0;
+  const run = opts.run || 0;
+  // How much the legs are cycling, and how long each step is. Kept apart on
+  // purpose: a slow creep is a short step taken often, not a faint suggestion
+  // of a step. Using speed for both is what made a quarter-speed walk look
+  // like a man standing still while sliding across the floor.
+  const cycling = opts.moving === undefined ? Math.min(1, walk / 0.12) : opts.moving;
+  const strideScale = opts.stride === undefined ? 1 : opts.stride;
+  const stand = opts.stand === undefined ? 1 : opts.stand;
+  const build = look.build || 1;
+
   const faceX = Math.cos(facing);
   const faceY = Math.sin(facing);
   // Sideways axis, so the two feet always sit beside each other whichever way
   // he walks, and the stride runs along the direction of travel.
   const sideX = -faceY;
   const sideY = faceX;
+  // How side-on he is. A body seen from the side is narrower than one seen
+  // face-on, and that — not a mirrored sprite — is what tells you he is
+  // travelling left or right rather than towards you.
+  const sideOn = Math.abs(faceX);
+  const turn = faceX;   // -1 hard left, +1 hard right
 
-  // Stride reach and bounce grow with speed, so a run reads as a run rather
-  // than a fast walk. Frequency already tracks distance travelled.
-  const gait = walk + run * 0.55;
-  const swing = Math.sin(walkPhase) * gait;
-  const breathe = Math.sin(clock * 1.9) * (1 - walk) * 0.6;
-  const bob = -Math.abs(Math.sin(walkPhase)) * (1.5 + run * 1.9) * walk + breathe;
+  // Still getting up? Everything is drawn shorter and closer to the couch, so
+  // he unfolds rather than popping into existence standing.
+  const upright = stand * stand * (3 - 2 * stand);
+  if (upright < 0.999) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(0.72 + 0.28 * upright, 0.34 + 0.66 * upright);
+    ctx.translate(-x, -y + (1 - upright) * 9);
+  }
+
+  const swing = Math.sin(walkPhase) * cycling;
+  const breathe = Math.sin(clock * 1.9) * (1 - cycling) * 0.6;
+  // Creeping keeps the head low and level; running throws it about.
+  const bob = -Math.abs(Math.sin(walkPhase)) * (1.5 + run * 1.9) * cycling * (1 - creep * 0.6)
+    + breathe;
   // Weight shifts onto the planted foot: the torso leans a touch that way, and
-  // leans into the run.
+  // leans into the run. A creep crouches instead.
   const weight = -swing * (1.3 + run * 0.9);
   const lean = run * 1.8;
+  const crouch = creep * 2.4 * cycling;
   const bodyX = x + sideX * weight + faceX * lean;
-  const bodyY = y + bob + faceY * lean * 0.5;
+  const bodyY = y + bob + faceY * lean * 0.5 + crouch;
 
   ctx.fillStyle = 'rgba(20,10,26,0.30)';
   ctx.beginPath();
-  ctx.ellipse(x, y + 20, 10.5, 4, 0, 0, TAU);
+  ctx.ellipse(x, y + 20, 10.5 * build, 4, 0, 0, TAU);
   ctx.fill();
 
   // Legs are two segments with a knee, so the stride reads as walking rather
   // than as feet sliding. Both stay below the torso whichever way he faces.
-  const stride = 5.4 + run * 3.4;
+  // Step length, from the cadence rather than from taste: the two multiply to
+  // speed, so this is the only value at which the feet are not skating.
+  const stride = 5.4 * strideScale;
   const drawLeg = (side, phase) => {
-    const lift = Math.max(0, phase) * walk * (1 + run * 0.8);
-    const hipX = bodyX + sideX * 4.4 * side;
-    const hipY = bodyY + 4 + sideY * 4.4 * side;
-    const footX = x + sideX * 4.6 * side + faceX * phase * stride;
-    const footY = y + 14 + sideY * 4.6 * side + faceY * phase * 1.7 - lift * 1.2;
+    // Creeping picks the foot up higher and puts it down more deliberately.
+    const lift = Math.max(0, phase) * (1 + run * 0.8 + creep * 0.5);
+    const hipX = bodyX + sideX * 4.4 * build * side;
+    const hipY = bodyY + 4 + sideY * 4.4 * build * side;
+    const footX = x + sideX * 4.6 * build * side + faceX * phase * stride;
+    const footY = y + 14 + sideY * 4.6 * build * side + faceY * phase * 1.7 - lift * 1.2;
 
-    // The knee sits between hip and foot, pushed forward as the leg swings.
-    const kneeX = (hipX + footX) / 2 + faceX * lift * 2.2;
+    // The knee sits between hip and foot, pushed forward as the leg swings —
+    // and bent further when creeping, which is what a crouch is.
+    const kneeX = (hipX + footX) / 2 + faceX * (lift * 2.2 + creep * 1.6 * cycling);
     const kneeY = (hipY + footY) / 2 - 0.6 - lift * 1.1;
 
-    ctx.strokeStyle = PALETTE.thief;
+    ctx.strokeStyle = look.body;
     ctx.lineCap = 'round';
-    ctx.lineWidth = 5.4;
+    ctx.lineWidth = 5.4 * build;
     ctx.beginPath();
     ctx.moveTo(hipX, hipY);
     ctx.lineTo(kneeX, kneeY);
     ctx.stroke();
-    ctx.lineWidth = 4.6;
+    ctx.lineWidth = 4.6 * build;
     ctx.beginPath();
     ctx.moveTo(kneeX, kneeY);
     ctx.lineTo(footX, footY - 1);
     ctx.stroke();
 
-    fillRound(ctx, footX - 3.7, footY - 4, 7.4, 8.6 - lift * 1.8, 3, PALETTE.thiefBelt);
-    fillRound(ctx, footX - 2.7, footY - 3.2, 5.4, 3, 1.8, '#3f4568');
-    fillRound(ctx, footX - 3.5, footY + 3.2 - lift * 1.8, 7, 1.8, 0.9, '#6a7196');  // sole
+    fillRound(ctx, footX - 3.7, footY - 4, 7.4, 8.6 - lift * 1.8, 3, look.belt);
+    fillRound(ctx, footX - 2.7, footY - 3.2, 5.4, 3, 1.8, look.shoe);
+    fillRound(ctx, footX - 3.5, footY + 3.2 - lift * 1.8, 7, 1.8, 0.9, look.sole);
   };
   drawLeg(-1, swing);
   drawLeg(1, -swing);
 
-  fillRound(ctx, bodyX - 8.5, bodyY - 9, 17, 17, 7, PALETTE.thief);
-  fillRound(ctx, bodyX - 8.5, bodyY - 9, 17, 8, 6, PALETTE.thiefTop);
+  // The torso narrows as he turns side-on, which is what actually reads as
+  // "he is facing that way" — a body square to the camera while walking left
+  // is the mismatch worth fixing.
+  const halfW = 8.5 * build * (1 - sideOn * 0.26);
+  // ...and leads with the near shoulder, so the chest is turned rather than
+  // merely thinner. A narrow square torso reads as a distant one, not a turned
+  // one; an offset one reads as a body angled across the screen.
+  const shoulderLead = turn * sideOn * 1.7;
+  fillRound(ctx, bodyX - halfW + shoulderLead, bodyY - 9, halfW * 2, 17, 7, look.body);
+  fillRound(ctx, bodyX - halfW + shoulderLead, bodyY - 9, halfW * 2, 8, 6, look.top);
   // Cloth folds across the chest, leaning with the weight shift.
   ctx.strokeStyle = 'rgba(12,14,26,0.30)';
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(bodyX - 5, bodyY - 2);
-  ctx.quadraticCurveTo(bodyX + weight * 0.4, bodyY + 0.5, bodyX + 5, bodyY - 2);
+  ctx.moveTo(bodyX - halfW * 0.6 + shoulderLead, bodyY - 2);
+  ctx.quadraticCurveTo(bodyX + weight * 0.4 + shoulderLead, bodyY + 0.5,
+    bodyX + halfW * 0.6 + shoulderLead, bodyY - 2);
   ctx.stroke();
-  ctx.fillStyle = PALETTE.thiefBelt;
-  ctx.fillRect(bodyX - 8.5, bodyY + 3.5, 17, 3.2);
-  ctx.fillStyle = '#d8b24a';                                     // buckle
-  fillRound(ctx, bodyX - 2.4, bodyY + 3.4, 4.8, 3.4, 1, '#d8b24a');
-  ctx.fillStyle = '#8d6f22';
-  ctx.fillRect(bodyX - 0.6, bodyY + 4.2, 1.2, 1.8);
+  ctx.fillStyle = look.belt;
+  ctx.fillRect(bodyX - halfW + shoulderLead, bodyY + 3.5, halfW * 2, 3.2);
+  if (look.head === 'beanie') {
+    fillRound(ctx, bodyX - 2.4 + shoulderLead, bodyY + 3.4, 4.8, 3.4, 1, '#d8b24a');  // buckle
+    ctx.fillStyle = '#8d6f22';
+    ctx.fillRect(bodyX - 0.6 + shoulderLead, bodyY + 4.2, 1.2, 1.8);
+  }
 
-  // Arms sit outside the torso and are drawn over it, with a slight elbow.
-  const drawArm = (side, extend) => {
-    const shoulderX = bodyX + sideX * 8.8 * side;
-    const shoulderY = bodyY - 4 + sideY * 8.8 * side;
-    const reachOut = -swing * side * (3.8 + run * 3.2) + extend;
+  // Arms sit outside the torso and are drawn over it, with a slight elbow. The
+  // far one is drawn first and darker, so side-on he has a near arm and a far
+  // arm rather than two arms at the same depth.
+  const drawArm = (side, extend, far) => {
+    const shoulderX = bodyX + shoulderLead + sideX * (halfW + 0.3) * side;
+    const shoulderY = bodyY - 4 + sideY * 8.8 * build * side;
+    // Creeping holds the arms in close; running throws them.
+    const swingScale = (3.8 + run * 3.2) * (1 - creep * 0.55);
+    const reachOut = -swing * side * swingScale + extend;
     const handX = shoulderX + faceX * reachOut + sideX * side * 1.6;
     const handY = shoulderY + faceY * reachOut * 0.66 + sideY * side * 1.6 + 4;
     const elbowX = (shoulderX + handX) / 2 + sideX * side * 1.1;
     const elbowY = (shoulderY + handY) / 2 + 0.8;
 
-    ctx.strokeStyle = PALETTE.thiefTop;
-    ctx.lineWidth = 5;
+    ctx.save();
+    if (far) ctx.globalAlpha = 1 - sideOn * 0.45;
+    ctx.strokeStyle = look.top;
+    ctx.lineWidth = 5 * build;
     ctx.lineCap = 'round';
     ctx.beginPath();
     ctx.moveTo(shoulderX, shoulderY);
     ctx.quadraticCurveTo(elbowX, elbowY, handX, handY);
     ctx.stroke();
-    ctx.fillStyle = PALETTE.skin;                          // a mitt, not a dot
-    ctx.save();
+    ctx.fillStyle = look.skin;                             // a mitt, not a dot
     ctx.translate(handX, handY);
     ctx.rotate(Math.atan2(handY - shoulderY, handX - shoulderX));
     ctx.beginPath();
@@ -1616,49 +1693,147 @@ export function drawThief(ctx, x, y, { facing, walkPhase, walk, run = 0, clock, 
 
   // Reach: out fast, back slower, so the grab has a snap to it.
   const extend = reach > 0 ? Math.sin(Math.min(1, reach) * Math.PI) * 11 : 0;
-  drawArm(-1, extend * 0.3);
-  const hand = drawArm(1, extend);
+  // Which arm is behind him depends on which way he has turned.
+  const farSide = turn >= 0 ? -1 : 1;
+  drawArm(farSide, extend * 0.3, true);
+  const hand = drawArm(-farSide, extend, false);
 
-  const headY = bodyY - 16 + Math.sin(walkPhase * 2) * 0.4 * walk;
-  ctx.fillStyle = PALETTE.skin;
+  drawHead(ctx, bodyX, bodyY - 16 + Math.sin(walkPhase * 2) * 0.4 * cycling,
+    { faceX, faceY, sideOn, turn, creep, cycling }, look);
+
+  if (upright < 0.999) ctx.restore();
+  return hand;
+}
+
+// The head, and everything about it that says which way he is looking.
+//
+// A round head is the same shape from every angle, so left and right have to
+// be told apart by what is on it: the face slides towards the direction of
+// travel, the hair and ear stay behind, and a nose leads. Drawn as a profile
+// when he is travelling sideways and face-on when he is coming towards you,
+// so the direction of travel is legible without a HUD arrow.
+function drawHead(ctx, x, headY, { faceX, faceY, sideOn, turn, creep, cycling }, look) {
+  const beanie = look.head === 'beanie';
+  const radius = 8;
+  // Creeping pulls the chin down and the head forward.
+  const y = headY + creep * cycling * 1.4;
+  // Everything on the face rides this far towards where he is going.
+  const shift = turn * sideOn * 2.2;
+
+  ctx.fillStyle = look.skin;
   ctx.beginPath();
-  ctx.arc(bodyX, headY, 8, 0, TAU);
+  ctx.arc(x, y, radius, 0, TAU);
   ctx.fill();
 
   if (faceY < -0.45) {
-    // Walking away: you see the back of his head, not his face.
-    ctx.fillStyle = PALETTE.thiefBelt;
+    // Walking away: the back of his head. It still has to read as a head —
+    // a flat dark disc is a hole in the floor, so the hat keeps its brim, the
+    // hair shows beneath it, and an ear catches the light on whichever side he
+    // is angled towards.
+    ctx.fillStyle = look.hair;
     ctx.beginPath();
-    ctx.arc(bodyX, headY, 8, 0, TAU);
+    ctx.arc(x, y + 1, radius, 0, TAU);
     ctx.fill();
-    ctx.fillStyle = '#2a2f4d';
+    if (sideOn > 0.28) {
+      ctx.fillStyle = look.skin;
+      ctx.beginPath();
+      ctx.ellipse(x + turn * (radius - 1.2), y + 2, 1.5, 2.2 * sideOn, 0, 0, TAU);
+      ctx.fill();
+    }
+    if (beanie) {
+      ctx.fillStyle = look.belt;
+      ctx.beginPath();
+      ctx.arc(x, y - 0.5, radius, Math.PI, TAU);
+      ctx.fill();
+      ctx.fillRect(x - radius, y - 1.5, radius * 2, 3.4);
+      // The turn-up, a shade lighter, so the hat is a hat from behind too.
+      ctx.fillStyle = look.top;
+      ctx.fillRect(x - radius, y + 0.6, radius * 2, 1.5);
+      ctx.fillStyle = 'rgba(255,255,255,0.10)';
+      ctx.beginPath();
+      ctx.ellipse(x - turn * 1.5, y - 4, 4.2, 1.9, 0, 0, TAU);
+      ctx.fill();
+    } else {
+      ctx.fillStyle = 'rgba(0,0,0,0.20)';
+      ctx.beginPath();
+      ctx.arc(x, y + 3, 5.2, 0, Math.PI);
+      ctx.fill();
+    }
+    return;
+  }
+
+  // Hair round the back of the head — the trailing side — so it swings across
+  // as he turns and the crown is always behind the face.
+  ctx.fillStyle = look.hair;
+  ctx.beginPath();
+  ctx.arc(x - turn * sideOn * 2.4, y - 0.2, radius - 0.3, Math.PI * 0.86, TAU * 1.08);
+  ctx.fill();
+
+  // The ear, on the trailing side, and the nose leading. Between them they are
+  // most of what makes a 16-pixel head point somewhere — but only just: a nose
+  // that clears the head is a beak, so it barely breaks the outline.
+  if (sideOn > 0.22) {
+    ctx.fillStyle = look.skinShade || 'rgba(0,0,0,0.16)';
     ctx.beginPath();
-    ctx.arc(bodyX, headY + 2.5, 5.4, 0, Math.PI);
+    ctx.ellipse(x - turn * (radius - 2), y + 1.6, 1.3, 2 * sideOn, 0, 0, TAU);
     ctx.fill();
-  } else {
-    ctx.fillStyle = '#4a3a2c';                             // hair under the brim
+    ctx.fillStyle = look.skin;
     ctx.beginPath();
-    ctx.arc(bodyX, headY + 0.5, 7.6, Math.PI * 0.9, TAU * 1.05);
-    ctx.fill();
-    ctx.fillStyle = PALETTE.thiefBelt;                     // beanie
-    ctx.beginPath();
-    ctx.arc(bodyX, headY - 1, 8, Math.PI, TAU);
-    ctx.fill();
-    ctx.fillRect(bodyX - 8, headY - 2, 16, 3.6);
-    ctx.fillStyle = 'rgba(255,255,255,0.13)';              // rim light
-    ctx.beginPath();
-    ctx.ellipse(bodyX - 2.5, headY - 5, 4.4, 2, -0.4, 0, TAU);
-    ctx.fill();
-    ctx.fillStyle = '#fff';                                // eyes track the heading
-    const gaze = faceX * 1.6;
-    const gazeY = Math.max(0, faceY) * 1.2;
-    ctx.beginPath();
-    ctx.arc(bodyX - 3 + gaze, headY + 2 + gazeY, 1.8, 0, TAU);
-    ctx.arc(bodyX + 3 + gaze, headY + 2 + gazeY, 1.8, 0, TAU);
+    ctx.moveTo(x + turn * (radius - 3.2), y + 1.2);
+    ctx.lineTo(x + turn * (radius - 0.4 + 0.9 * sideOn), y + 3);
+    ctx.lineTo(x + turn * (radius - 3.2), y + 4.4);
+    ctx.closePath();
     ctx.fill();
   }
 
-  return hand;
+  if (beanie) {
+    ctx.fillStyle = look.belt;
+    ctx.beginPath();
+    ctx.arc(x, y - 1, radius, Math.PI, TAU);
+    ctx.fill();
+    ctx.fillRect(x - radius, y - 2, radius * 2, 3.6);
+    ctx.fillStyle = 'rgba(255,255,255,0.13)';                // rim light
+    ctx.beginPath();
+    ctx.ellipse(x - 2.5 + shift, y - 5, 4.4, 2, -0.4, 0, TAU);
+    ctx.fill();
+  } else {
+    // Thin on top, so the crown shows: a different silhouette from the beanie
+    // at a glance, which is all a 16-pixel head has to manage.
+    ctx.fillStyle = look.skin;
+    ctx.beginPath();
+    ctx.ellipse(x - turn * 0.8, y - 3.4, radius - 2.4, 3.4, 0, 0, TAU);
+    ctx.fill();
+  }
+
+  // Eyes sit on the leading side of the face, and one of them goes behind the
+  // nose once he is properly side-on.
+  const gazeY = Math.max(0, faceY) * 1.2;
+  const spread = 3 * (1 - sideOn * 0.5);
+  const eye = (dx) => {
+    ctx.beginPath();
+    ctx.arc(x + shift + dx, y + 2 + gazeY, 1.8, 0, TAU);
+    ctx.fill();
+  };
+  ctx.fillStyle = '#fff';
+  eye(spread);
+  if (sideOn < 0.72) eye(-spread);
+  // Pupils, pushed to the leading edge: at this size two white dots read as
+  // surprise rather than as looking anywhere.
+  ctx.fillStyle = '#2a2233';
+  ctx.beginPath();
+  ctx.arc(x + shift + spread + turn * sideOn * 0.7, y + 2.2 + gazeY, 0.85, 0, TAU);
+  if (sideOn < 0.72) ctx.arc(x + shift - spread + turn * sideOn * 0.7, y + 2.2 + gazeY, 0.85, 0, TAU);
+  ctx.fill();
+}
+
+// ---------------------------------------------------------------- the thief
+export function drawThief(ctx, x, y, opts) {
+  return drawWalker(ctx, x, y, opts, THIEF_LOOK);
+}
+
+// Mr. Vrána on his feet — the same walk, a heavier man in it.
+export function drawCaretakerWalking(ctx, x, y, opts) {
+  return drawWalker(ctx, x, y, opts, CARETAKER_LOOK);
 }
 
 // The stolen item flying into the thief's hand.

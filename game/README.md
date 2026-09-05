@@ -44,6 +44,7 @@ new state, so the whole game runs in node with no browser.
 | `levels.js` | level data as tagged objects (`{type:'furniture', …}`) |
 | `validate.js` | level schema + reachability checks |
 | `physics.js` | `solveMove` — sub-stepped AABB, used by every mover |
+| `nav.js` | walkable grid + breadth-first routing, for characters nobody is steering |
 | `sim.js` | fixed-step simulation, entity list, event output |
 | `replay.js` | input quantisation, run-length recording, replay |
 | `save.js` | versioned save with a migration chain (progress, stars, shop, settings) |
@@ -249,7 +250,7 @@ the warnings, the loss text, and whether being *seen* fills the meter at all.
 |---|---|---|
 | `sleeper` | NOISE | noise |
 | `guest` | NOISE | noise, on a tighter clock |
-| `caretaker` | NOISE | noise, across a much larger building |
+| `caretaker` | NOISE | noise, scaled by distance — **and he gets up and comes looking** |
 | `guard` | ALERT | noise **and** being seen |
 | `security` | ALERT | noise and a longer line of sight |
 
@@ -264,6 +265,56 @@ game had to learn about any of this.
 Levels 1-40 predate the system and a test asserts all forty still default to
 `sleeper`; another asserts every kind that exists is actually used somewhere.
 
+### One location's own rules
+
+`TUNING.locations` is the only place a location may ask for behaviour the rest
+of the game does not have. A level whose location is not listed there gets an
+empty object and is bit-for-bit the game it was before the block existed — the
+golden replay fixture and a suite of isolation tests hold that line, asserting
+that every other location has no investigator, no proximity curve, no altered
+decay, and charges exactly the printed noise for an item.
+
+Today the School is the only entry, and it changes three things.
+
+**Noise depends on how close you are to Mr. Vrána.** Everything you do — a step,
+a knock, lifting something off a shelf — is multiplied by a curve that runs from
+2.5x within about four tiles of him to 0.45x beyond sixteen, smoothly, with no
+line to be caught out by. The meter says which end you are at (`‼ LOUD HERE`,
+`▲`, `▼ MUFFLED`), because a hidden multiplier is a trap rather than a mechanic.
+Distance is measured to where he actually *is*, so once he is up and walking the
+quiet end of the corridor moves with him.
+
+**The school settles faster.** 7/second after 0.9s of standing perfectly still,
+against 2/second after 0.6s everywhere else — fast enough that going still is a
+tactic rather than a consolation, and it has to be, because it is how you send
+him back to bed.
+
+**Over 80 he gets up and investigates.** The moment the meter crosses 80 his
+target is set to *where you were standing at that instant*, and it is never
+updated. He swings his legs off the couch, walks there — through the doorways,
+respecting every collider, at his own 78 units/second with his own acceleration
+— stands and looks around for three seconds, then goes home and lies back down.
+Under 50 he gives up wherever he is and turns round. Walking into you ends the
+level through the ordinary loss path, with `caught` as the reason.
+
+He is investigating a **place, not a person**, which is the whole mechanic: move
+away quietly and he walks past you to an empty corridor. A pulsing marker shows
+the spot he is heading for, so "can I be gone before he gets there?" is a
+question the player can actually answer.
+
+    make noise → he wakes → he walks to the spot → go still → the meter falls
+      → under 50 he gives up → he walks home → he goes back to sleep
+
+He walks on a coarse breadth-first distance field over the building
+(`src/nav.js`), flooded from wherever he is going and followed downhill with a
+line-of-sight shortcut so he cuts the corner of a doorway instead of shuffling
+along the grid. The field is a pure function of the level, built lazily and only
+for levels that need one — sub-millisecond on the largest school map, recomputed
+at most twice per investigation. A test walks the whole grid and asserts it
+never claims a spot the physics would refuse; another triggers him from a sample
+of every standable cell on all five school maps and asserts he always arrives
+and always gets home.
+
 ### The eleven locations
 
 | # | Location | Levels | Who | Hand-drawn level 5 |
@@ -272,7 +323,7 @@ Levels 1-40 predate the system and a test asserts all forty still default to
 | 2 | House | 6-10 | Grandpa, in the armchair | Grandpa's Cottage — 43x36 |
 | 3 | Hotel | 11-15 | Otakar, at the floor desk | Grand Hotel Bohemia — 49x34 |
 | 4 | Office | 16-20 | Mr. Halas, on the report | Fourth Floor — 44x33 |
-| 5 | School | 21-25 | Mr. Vrána, on the staff couch | Komenský Primary — 49x36 |
+| 5 | School | 21-25 | Mr. Vrána — **wakes at 80 and comes looking** | Komenský Primary — 49x36 |
 | 6 | Hospital | 26-30 | Dr. Marek, on the staff couch | St. Vitus — 45x32 |
 | 7 | Museum | 31-35 | Bruno, night guard — **he can see you** | The Museum — 43x40 |
 | 8 | Mansion | 36-40 | Security — **he can see you** | — |
@@ -327,8 +378,29 @@ passes through unchanged — the usual trick of re-stretching the remaining rang
 would mean a quarter push gave noticeably less than a quarter speed.
 
 The walk cycle advances with **distance travelled**, not with time, so feet
-never skate at any speed and footsteps land on the actual footfalls. Stride
-length, bounce and lean grow into a run past 72% speed.
+never skate at any speed and footsteps land on the actual footfalls.
+
+There are three gaits, blended rather than switched, and which one you see is
+read off the speed the character is *actually* travelling at:
+
+| share of top speed | gait | steps per unit | drawn stride |
+|---|---|---|---|
+| 0 | standing | — | none |
+| up to 34% | tiptoe — short careful steps, crouched, arms in | 0.088 | 0.70x |
+| 34-58% | blending | 0.088 → 0.062 | 0.70 → 1.0x |
+| 58-72% | walking | 0.062 | 1.0x |
+| 72-100% | running — long strides, bounce, lean | 0.062 → 0.047 | 1.0 → 1.32x |
+
+Cadence and stride length multiply to speed, so once the cadence is fixed the
+drawn step length is not a matter of taste: it is the reciprocal, and `gaitBlend`
+derives it rather than guessing. A test asserts the two agree to nine decimal
+places at every speed — that identity is exactly the promise that the legs are
+never lying about how far they carried him.
+
+The body turns to face where it is going, not just the feet: the torso narrows
+and leads with the near shoulder, the face slides towards the direction of
+travel, hair and ear stay behind, a nose leads, and one eye goes behind the nose
+once he is properly side-on. Walking away shows the back of his head.
 
 Collision noise scales with how hard you hit: the same cabinet costs +2 at a
 crawl and +8 at a sprint, a bookshelf +13. Impact is measured on the blocked
@@ -345,7 +417,8 @@ Moving fast is a real decision, not a free upgrade.
 The clock and the meter are managed together. Time starts at 30s on level 1 and
 shrinks by roughly half a second a level to a floor of 15s. Noise comes from
 three places now — stealing, creaky boards, and walking into furniture — and
-bleeds off at 2/second once you have stood perfectly still for 0.6s.
+bleeds off at 2/second once you have stood perfectly still for 0.6s — except in
+the School, which sets its own rate (see **One location's own rules**).
 
 Those two systems only work as a pair. Recovery on its own would dissolve the
 one-way commitment that makes "one more thing?" a real question; the clock is

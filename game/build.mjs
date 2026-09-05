@@ -14,7 +14,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 
 // Dependency order. A module may only import from ones above it.
 const ORDER = [
-  'tuning', 'rng', 'rules', 'physics', 'tilemap', 'maps', 'levels', 'validate',
+  'tuning', 'rng', 'rules', 'physics', 'nav', 'tilemap', 'maps', 'levels', 'validate',
   'sim', 'replay', 'save', 'fsm', 'audio', 'input', 'art', 'render', 'main'
 ];
 
@@ -45,7 +45,17 @@ function transform(name, source) {
           const [original, alias] = s.split(/\s+as\s+/).map((t) => t.trim());
           return alias ? `${original}: ${alias}` : original;
         });
-      out.push(`  const { ${names.join(', ')} } = __mod.${asImport[2]};`);
+      // A module missing from ORDER bundles into a file that parses, loads,
+      // and then reads properties off undefined the moment it runs. Catching
+      // it here costs a line; catching it in a browser costs an afternoon.
+      const from = asImport[2];
+      if (ORDER.indexOf(from) < 0) {
+        throw new Error(`${name}.js imports ./${from}.js, which is not in build.mjs ORDER`);
+      }
+      if (ORDER.indexOf(from) >= ORDER.indexOf(name)) {
+        throw new Error(`${name}.js imports ./${from}.js, which ORDER places after it`);
+      }
+      out.push(`  const { ${names.join(', ')} } = __mod.${from};`);
       continue;
     }
     if (/^import\s/.test(line)) {

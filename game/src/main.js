@@ -142,7 +142,9 @@ export function boot() {
       : '';
     const watcher = level ? watcherConfig(level.watcher.kind) : watcherConfig('sleeper');
     $('endTitle').textContent = won ? 'LEVEL COMPLETE'
-      : ctx.reason === 'time' ? "TIME'S UP" : watcher.lost;
+      : ctx.reason === 'time' ? "TIME'S UP"
+        : ctx.reason === 'caught' ? (watcher.caught || watcher.lost)
+          : watcher.lost;
     $('stars').innerHTML = won ? starRow(ctx.stars) : '';
     $('endTally').innerHTML = won
       ? `<div>HAUL<b>$${ctx.money.toLocaleString()}</b></div>` +
@@ -160,7 +162,9 @@ export function boot() {
         ? 'You were still in the room when the clock ran out.'
         : ctx.reason === 'seen'
           ? 'You moved through his line of sight once too often.'
-          : watcher.lostWhy;
+          : ctx.reason === 'caught'
+            ? (watcher.caughtWhy || 'He walked straight into you.')
+            : watcher.lostWhy;
       $('endText').innerHTML =
         `${cause}<br>You lost <b style="color:#ffd34d">$${ctx.money.toLocaleString()}</b>.`;
     }
@@ -372,7 +376,7 @@ export function boot() {
   // style write still costs a style recalculation.
   const hudEls = {
     money: $('money'), time: $('time'), level: $('lvl'),
-    bar: $('noisebar'), noise: $('noisetxt'), wrap: $('noisewrap'),
+    bar: $('noisebar'), noise: $('noisetxt'), wrap: $('noisewrap'), danger: $('danger'),
     warn: $('warn'), streak: $('streak')
   };
   const hudLast = {};
@@ -414,7 +418,13 @@ export function boot() {
     // The meter is the same meter; what it is called depends on who is in the
     // room. A sleeper raises NOISE; a guard raises ALERT.
     const meter = watcherConfig(sim.level.watcher.kind).meter;
-    setText('noiseText', hudEls.noise, `${meter} ${rounded} / ${TUNING.noise.max}`);
+    // Where a location makes noise depend on where you are standing, say so on
+    // the meter. A hidden multiplier is not a mechanic, it is a trap: the whole
+    // point is that the player can tell how much a mistake is about to cost.
+    const loudness = sim.proximity >= 1.6 ? '  ‼ LOUD HERE'
+      : sim.proximity >= 1.15 ? '  ▲'
+        : sim.proximity <= 0.7 ? '  ▼ MUFFLED' : '';
+    setText('noiseText', hudEls.noise, `${meter} ${rounded} / ${TUNING.noise.max}${loudness}`);
     setStyle('barWidth', hudEls.bar, 'width', `${(sim.noise / TUNING.noise.max) * 100}%`);
     setStyle('barColor', hudEls.bar, 'background',
       sim.noise >= TUNING.noise.almostAt ? '#ff4d4d'
@@ -425,6 +435,17 @@ export function boot() {
       hudLast.danger = danger;
       hudEls.wrap.classList.toggle('danger', danger);
     }
+    // The room closing in. Quantised to a hundredth, so this is a handful of
+    // style writes a second rather than one every frame — and the browser
+    // composites the layer itself instead of the game repainting the view.
+    const closeIn = danger && sim.status === 'running'
+      ? Math.round(((sim.noise - TUNING.noise.almostAt) / (TUNING.noise.max - TUNING.noise.almostAt))
+        * (0.22 + 0.13 * Math.sin(clock * 6)) * 100) / 100
+      : 0;
+    if (hudLast.closeIn !== closeIn) {
+      hudLast.closeIn = closeIn;
+      hudEls.danger.style.opacity = closeIn;
+    }
     const calming = sim.stillFor > TUNING.recovery.delay && sim.noise > 0 && sim.status === 'running';
     if (hudLast.calming !== calming) {
       hudLast.calming = calming;
@@ -432,11 +453,24 @@ export function boot() {
     }
     // He's stirring. The warning escalates rather than appearing all at once.
     const warnEl = hudEls.warn;
-    const warnings = watcherConfig(sim.level.watcher.kind).warnings;
+    const config = watcherConfig(sim.level.watcher.kind);
+    const warnings = config.warnings;
+    // Once someone is on his feet, what he is doing matters more than the
+    // number that got him there — the player's next decision depends on
+    // whether he is coming, looking, or already on his way back.
+    const up = sim.investigator && sim.investigator.state !== 'asleep' && config.onFoot;
+    const onFootText = up
+      ? sim.investigator.state === 'rising' ? config.onFoot[0]
+        : sim.investigator.state === 'investigating' ? config.onFoot[1]
+          : sim.investigator.state === 'searching' ? config.onFoot[2]
+            : config.onFoot[3]
+      : null;
     const warning = sim.status !== 'running' ? null
-      : sim.noise >= 95 ? { text: warnings[2], cls: 'hard critical' }
-        : sim.noise >= 90 ? { text: warnings[1], cls: 'hard' }
-          : sim.noise >= 80 ? { text: warnings[0], cls: '' } : null;
+      : onFootText
+        ? { text: onFootText, cls: sim.investigator.state === 'returning' ? '' : 'hard' }
+        : sim.noise >= 95 ? { text: warnings[2], cls: 'hard critical' }
+          : sim.noise >= 90 ? { text: warnings[1], cls: 'hard' }
+            : sim.noise >= 80 ? { text: warnings[0], cls: '' } : null;
     if (hudLast.warnText !== (warning ? warning.text : '')) {
       hudLast.warnText = warning ? warning.text : '';
       warnEl.hidden = !warning;

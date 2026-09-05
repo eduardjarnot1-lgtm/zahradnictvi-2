@@ -2,10 +2,11 @@
 // paints it, interpolating between the last two fixed steps so 60Hz sim motion
 // stays smooth on any refresh rate.
 import { TUNING } from './tuning.js';
-import { sleepStage, rarityOf, isBigScore, watcherConfig } from './rules.js';
+import { sleepStage, rarityOf, isBigScore, watcherConfig, gaitBlend } from './rules.js';
 import { playerOf } from './sim.js';
 import {
-  paintStaticRoom, drawSleeper, drawGuard, drawSlumped, drawThief, drawGrabbedItem,
+  paintStaticRoom, drawSleeper, drawGuard, drawSlumped, drawThief, drawCaretakerWalking,
+  drawGrabbedItem,
   roundRect, ITEM_ART, lampPositions
 } from './art.js';
 
@@ -71,6 +72,10 @@ export function createRenderer(canvas, options = {}) {
     // offset by, so the strip and the room can never drift out of step.
     const hud = document.getElementById('hud');
     if (hud) hud.style.height = `${(HUD_H * cssWidth) / W}px`;
+    // The danger wash belongs to the room, not to the readouts above it, so it
+    // starts where the canvas does.
+    const danger = document.getElementById('danger');
+    if (danger) danger.style.top = `${(HUD_H * cssWidth) / W}px`;
 
     // Sharper than the old flat cap of 2, but never more pixels than a
     // mid-range phone GPU is happy to push every frame.
@@ -302,20 +307,6 @@ export function createRenderer(canvas, options = {}) {
     }
   }
 
-  function drawDanger(sim, time) {
-    if (sim.noise <= TUNING.noise.almostAt) return;
-    const span = TUNING.noise.max - TUNING.noise.almostAt;
-    const a = ((sim.noise - TUNING.noise.almostAt) / span) * (0.22 + 0.13 * Math.sin(time * 6));
-    // A screen effect, not a world one: it hugs the view wherever the view is.
-    const mx = camera.x + W / 2;
-    const my = camera.y + H / 2;
-    const edge = ctx.createRadialGradient(mx, my, H * 0.30, mx, my, H * 0.62);
-    edge.addColorStop(0, 'rgba(255,40,40,0)');
-    edge.addColorStop(1, `rgba(255,45,45,${a.toFixed(3)})`);
-    ctx.fillStyle = edge;
-    ctx.fillRect(camera.x, camera.y, W, H);
-  }
-
   function drawDebug(sim, stats, playerPos) {
     ctx.save();
     ctx.strokeStyle = '#00e5ff88';
@@ -351,6 +342,57 @@ export function createRenderer(canvas, options = {}) {
     lines.forEach((line, i) =>
       ctx.fillText(line, camera.x + WT + 10, camera.y + WT + 18 + i * 11));
     ctx.restore();
+  }
+
+  // Mr. Vrána on his feet, and the spot he is walking to.
+  //
+  // The marker matters as much as the man. He is investigating a place, not a
+  // person, and that is only a decision the player can make if they can see
+  // where he thinks the noise came from — otherwise "move away quietly" is a
+  // rule they have to be told rather than one they can read off the room.
+  function drawInvestigation(sim, time, alpha) {
+    const w = sim.investigator;
+    if (w.target && (w.state === 'rising' || w.state === 'investigating')) {
+      const pulse = 0.5 + 0.5 * Math.sin(time * 4.2);
+      ctx.save();
+      ctx.globalAlpha = 0.30 + pulse * 0.35;
+      ctx.strokeStyle = '#ffb020';
+      ctx.lineWidth = 1.6;
+      ctx.setLineDash([5, 5]);
+      ctx.lineDashOffset = -time * 14;
+      ctx.beginPath();
+      ctx.arc(w.target.x, w.target.y, 13 + pulse * 4, 0, TAU);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.globalAlpha = 0.55 + pulse * 0.35;
+      ctx.fillStyle = '#ffcf6a';
+      ctx.font = 'bold 13px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('?', w.target.x, w.target.y + 4.5);
+      ctx.restore();
+    }
+
+    const wx = w.prevX + (w.x - w.prevX) * alpha;
+    const wy = w.prevY + (w.y - w.prevY) * alpha;
+    // Getting up and lying back down, as one number the figure unfolds from.
+    const rules = sim.investigateRules;
+    const stand = w.state === 'rising'
+      ? Math.min(1, w.stateFor / rules.rising)
+      : w.state === 'settling' ? Math.max(0, 1 - w.stateFor / rules.settling) : 1;
+    // The same speed-driven gait the thief uses, against his own top speed —
+    // he is slower, so a brisk walk for him is not a run.
+    const gait = gaitBlend(w.speed / rules.speed);
+    drawCaretakerWalking(ctx, wx, wy, {
+      facing: w.facing,
+      walkPhase: w.walkPhase,
+      walk: gait.walk,
+      creep: gait.creep,
+      run: gait.run,
+      moving: gait.moving,
+      stride: gait.stride,
+      clock: time,
+      stand
+    });
   }
 
   return {
@@ -398,7 +440,13 @@ export function createRenderer(canvas, options = {}) {
       const pose = config.pose || 'bed';
       // How this person is asleep decides what gets drawn — and nothing else in
       // the renderer has to know there is more than one kind of them.
-      if (pose === 'guard') {
+      // A watcher who is up and about is not on his couch to be drawn on. The
+      // couch itself is in the static cache, so leaving him out simply leaves
+      // it empty — which is exactly what the player needs to see.
+      const up = sim.investigator && sim.investigator.state !== 'asleep';
+      if (up) {
+        drawInvestigation(sim, time, alpha);
+      } else if (pose === 'guard') {
         drawGuard(ctx, sim.level, stage, time, sim.wakeSeconds || 0, sim.startle || 0,
           sim.seen || 0, sim.level.watcher.sees || config.sees, kind);
       } else if (pose === 'desk') {
@@ -409,20 +457,20 @@ export function createRenderer(canvas, options = {}) {
       }
       drawItems(sim, time);
 
-      // Full range, not saturated at half speed: the animation has to keep
-      // getting faster and longer-strided right up to a run.
-      const walk = Math.min(1, player.speed / TUNING.player.speed);
+      // Tiptoe, walk or run, read off the speed he is actually travelling at
+      // rather than off whether the stick is being touched. Blends, not modes:
+      // halfway between a creep and a walk should look halfway between them.
+      const gait = gaitBlend(player.speed / TUNING.player.speed);
       const reachProgress = sim.reach ? sim.reach.t / sim.reach.duration : 0;
-
-      // How far past a walk he is, eased so the gait shifts rather than snaps.
-      const runAt = TUNING.player.runAt;
-      const run = walk <= runAt ? 0 : Math.min(1, (walk - runAt) / (1 - runAt)) ** 2;
 
       const hand = drawThief(ctx, px, py, {
         facing: player.facing,
         walkPhase: player.walkPhase,
-        walk,
-        run,
+        walk: gait.walk,
+        creep: gait.creep,
+        run: gait.run,
+        moving: gait.moving,
+        stride: gait.stride,
         clock: time,
         reach: reachProgress
       });
@@ -446,7 +494,6 @@ export function createRenderer(canvas, options = {}) {
 
       drawSparks(sparks);
       drawPops(pops);
-      drawDanger(sim, time);
       // A brief warm wash when something genuinely valuable comes off the shelf.
       if (flash > 0) {
         ctx.fillStyle = `rgba(255,214,120,${(flash * 0.20).toFixed(3)})`;

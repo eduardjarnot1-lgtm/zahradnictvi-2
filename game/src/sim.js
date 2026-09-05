@@ -4,9 +4,11 @@
 import { TUNING } from './tuning.js';
 import { createRng } from './rng.js';
 import { solveMove, clampToWorld } from './physics.js';
+import { navGrid, flowField, steer, nearestStand } from './nav.js';
 import {
   addNoise, isAwake, itemStats, canBank, sleepStage, resolveUpgrades, bumpNoise, timeLimit,
-  rarityOf, comboBonus, gradeEscape, isBigScore, detectionRate, watcherConfig
+  rarityOf, comboBonus, gradeEscape, isBigScore, detectionRate, watcherConfig,
+  locationRules, proximityScale, stridePerUnit
 } from './rules.js';
 
 export const STEP_SECONDS = 1 / TUNING.sim.hz;
@@ -87,11 +89,239 @@ const UPDATERS = {
       while (turn < -Math.PI) turn += Math.PI * 2;
       entity.facing += turn * Math.min(1, TUNING.player.turnRate * STEP_SECONDS);
     }
-    // The walk cycle is driven by distance travelled, so feet never skate.
-    entity.walkPhase += travelled * TUNING.player.strideRate;
+    // The walk cycle is driven by distance travelled, so feet never skate —
+    // and how much phase a unit of ground is worth depends on how long his
+    // stride is at this speed, so a creep is short quick steps and a run is
+    // long ones rather than the same stride at two rates.
+    entity.walkPhase += travelled * stridePerUnit(entity.speed / TUNING.player.speed);
     entity.idleSeconds = entity.moving ? 0 : entity.idleSeconds + STEP_SECONDS;
+  },
+
+  // Someone walking a route of their own. Same movement model as the player —
+  // accelerate towards a target velocity, sweep, resolve, ease the facing round
+  // — because a person crossing a room should move like a person crossing a
+  // room whoever is steering. What differs is only where the direction comes
+  // from: a flow field over the building instead of a thumb.
+  watcher(entity, sim) {
+    const rules = sim.investigateRules;
+    const walking = entity.state === 'investigating' || entity.state === 'returning';
+    const scripted = entity.state === 'rising' || entity.state === 'settling';
+
+    if (!walking) {
+      entity.vx = 0;
+      entity.vy = 0;
+      entity.speed = 0;
+      entity.moving = false;
+      // Getting up and lying down are scripted, not driven: he is inside his
+      // own couch while he sleeps on it, and no amount of pushing gets a body
+      // out of a solid rectangle. So he swings his legs off to the nearest
+      // place a person can stand, and the physics takes over from there.
+      if (scripted && entity.stand) {
+        const duration = entity.state === 'rising' ? rules.rising : rules.settling;
+        const raw = Math.max(0, Math.min(1, entity.stateFor / duration));
+        const t = raw * raw * (3 - 2 * raw);
+        const share = entity.state === 'rising' ? t : 1 - t;
+        entity.x = entity.home.x + (entity.stand.x - entity.home.x) * share;
+        entity.y = entity.home.y + (entity.stand.y - entity.home.y) * share;
+      }
+      // Standing at the spot he came to look at, turning on the spot. He is
+      // searching, so he has to look somewhere other than straight ahead.
+      if (entity.state === 'searching') {
+        entity.facing += Math.sin(entity.stateFor * 2.4) * 2.6 * STEP_SECONDS;
+      }
+      return;
+    }
+
+    let dirX = 0;
+    let dirY = 0;
+
+    if (entity.field) {
+      const direction = steer(entity.nav, entity.field, entity.x, entity.y);
+      if (direction) { dirX = direction.x; dirY = direction.y; }
+    }
+
+    const top = rules.speed;
+    const wanted = Math.hypot(dirX, dirY) > 0.01;
+    const rate = (wanted ? rules.accel : rules.decel) * STEP_SECONDS;
+    const dvx = dirX * top - entity.vx;
+    const dvy = dirY * top - entity.vy;
+    const delta = Math.hypot(dvx, dvy);
+    if (delta <= rate || delta === 0) {
+      entity.vx = dirX * top;
+      entity.vy = dirY * top;
+    } else {
+      entity.vx += (dvx / delta) * rate;
+      entity.vy += (dvy / delta) * rate;
+    }
+
+    const moved = solveMove(
+      entity, entity.vx * STEP_SECONDS, entity.vy * STEP_SECONDS, sim.level.colliders
+    );
+    if (moved.hitX) entity.vx = 0;
+    if (moved.hitY) entity.vy = 0;
+    const clamped = clampToWorld(moved.x, moved.y, entity.w, entity.h, sim.level);
+    entity.x = clamped.x;
+    entity.y = clamped.y;
+
+    const travelled = Math.hypot(entity.x - entity.prevX, entity.y - entity.prevY);
+    entity.speed = travelled / STEP_SECONDS;
+    entity.moving = entity.speed > 4;
+    if (entity.moving) {
+      const heading = Math.atan2(entity.vy, entity.vx);
+      let turn = heading - entity.facing;
+      while (turn > Math.PI) turn -= Math.PI * 2;
+      while (turn < -Math.PI) turn += Math.PI * 2;
+      entity.facing += turn * Math.min(1, TUNING.player.turnRate * STEP_SECONDS);
+    }
+    entity.walkPhase += travelled * stridePerUnit(entity.speed / rules.speed);
   }
 };
+
+// Mr. Vrána, and anyone the design later gives the same job: a person who is
+// asleep until the room gets loud, then gets up and goes to look.
+//
+// He investigates the place the noise came from, not the person who made it.
+// That is the whole mechanic — he is walking towards a memory, so moving away
+// quietly works, and it is the one thing here that must not be "improved" into
+// tracking the player.
+const WATCHER_STATES = ['asleep', 'rising', 'investigating', 'searching', 'returning', 'settling'];
+
+function makeInvestigator(level, rules) {
+  return {
+    kind: 'watcher',
+    x: level.watcher.x,
+    y: level.watcher.y,
+    prevX: level.watcher.x,
+    prevY: level.watcher.y,
+    vx: 0,
+    vy: 0,
+    w: TUNING.player.boxWidth + 2,   // a broader man than the thief
+    h: TUNING.player.boxHeight,
+    state: 'asleep',
+    stateFor: 0,
+    // Where he sleeps, and therefore where he walks back to.
+    home: { x: level.watcher.x, y: level.watcher.y },
+    // The place the noise came from. Set once, when the meter crosses the
+    // line, and never updated to follow you.
+    target: null,
+    nav: null,       // built on the first wake, not at level load
+    field: null,     // ...and re-flooded only when the goal changes
+    goal: null,
+    speed: 0,
+    moving: false,
+    facing: Math.PI / 2,
+    walkPhase: 0
+  };
+}
+
+// Send him somewhere. The flood is a few hundred microseconds on the largest
+// school map and happens at most twice per investigation, so it is cheaper to
+// recompute than to maintain.
+function routeTo(entity, level, x, y) {
+  if (!entity.nav) entity.nav = navGrid(level, entity.w, entity.h);
+  if (entity.goal && entity.goal.x === x && entity.goal.y === y) return;
+  entity.goal = { x, y };
+  entity.field = flowField(entity.nav, x, y);
+}
+
+function setState(sim, entity, state) {
+  if (entity.state === state) return;
+  entity.state = state;
+  entity.stateFor = 0;
+  sim.events.push({ type: 'watcher', state, x: entity.x, y: entity.y });
+}
+
+// Has he got where he was going? Measured on the flow field as well as on the
+// straight-line distance, because his own couch is furniture: he can stand
+// beside it and never be within arm's reach of its centre.
+function arrived(entity, rules) {
+  if (!entity.goal) return true;
+  if (Math.hypot(entity.goal.x - entity.x, entity.goal.y - entity.y) <= rules.arriveAt) return true;
+  if (!entity.field) return true;
+  const grid = entity.nav;
+  const cx = Math.max(0, Math.min(grid.cols - 1, Math.floor(entity.x / grid.cell)));
+  const cy = Math.max(0, Math.min(grid.rows - 1, Math.floor(entity.y / grid.cell)));
+  const distance = entity.field[cx + cy * grid.cols];
+  return distance >= 0 && distance <= 1;
+}
+
+function updateInvestigation(sim, player) {
+  const entity = sim.investigator;
+  const rules = sim.investigateRules;
+  if (!entity || !rules) return;
+
+  entity.stateFor += STEP_SECONDS;
+
+  // Crossing the line wakes him — and where you were standing when you crossed
+  // it is the only thing he will ever know about you.
+  if (sim.noise > rules.wakeAt && sim.status === 'running'
+      && (entity.state === 'asleep' || entity.state === 'returning' || entity.state === 'settling')) {
+    entity.target = { x: player.x, y: player.y };
+    if (!entity.nav) entity.nav = navGrid(sim.level, entity.w, entity.h);
+    if (!entity.stand) entity.stand = nearestStand(entity.nav, entity.home.x, entity.home.y);
+    // Already on his feet? Then he simply turns round; only a man lying down
+    // has to get up first.
+    setState(sim, entity, entity.state === 'returning' ? 'investigating' : 'rising');
+    if (entity.state === 'investigating') routeTo(entity, sim.level, entity.target.x, entity.target.y);
+  }
+
+  switch (entity.state) {
+    case 'rising':
+      if (entity.stateFor >= rules.rising) {
+        entity.x = entity.stand.x;
+        entity.y = entity.stand.y;
+        setState(sim, entity, 'investigating');
+        routeTo(entity, sim.level, entity.target.x, entity.target.y);
+      }
+      break;
+    case 'investigating':
+      // Quiet again before he gets there and he stops bothering.
+      if (sim.noise < rules.calmAt) setState(sim, entity, 'returning');
+      else if (arrived(entity, rules)) setState(sim, entity, 'searching');
+      break;
+    case 'searching':
+      if (sim.noise < rules.calmAt || entity.stateFor >= rules.searchFor) {
+        setState(sim, entity, 'returning');
+      }
+      break;
+    case 'returning':
+      if (arrived(entity, rules)) setState(sim, entity, 'settling');
+      break;
+    case 'settling':
+      if (entity.stateFor >= rules.settling) {
+        setState(sim, entity, 'asleep');
+        entity.target = null;
+        entity.goal = null;
+        entity.field = null;
+        entity.x = entity.home.x;
+        entity.y = entity.home.y;
+        // The renderer draws between prevX and x; leaving the old value here
+        // would slide him back to the couch over one visible frame.
+        entity.prevX = entity.x;
+        entity.prevY = entity.y;
+        entity.vx = 0;
+        entity.vy = 0;
+      }
+      break;
+    default:
+      break;
+  }
+
+  if (entity.state === 'returning' && entity.stand
+      && (!entity.goal || entity.goal.x !== entity.stand.x || entity.goal.y !== entity.stand.y)) {
+    routeTo(entity, sim.level, entity.stand.x, entity.stand.y);
+  }
+
+  // Walking into you ends the level through the same door everything else
+  // does. Not while he is getting up or lying down: standing over him as he
+  // stirs deserves a moment to back away, not an instant loss.
+  const onFoot = entity.state === 'investigating' || entity.state === 'searching'
+    || entity.state === 'returning';
+  if (onFoot && sim.status === 'running'
+      && Math.hypot(player.x - entity.x, player.y - entity.y) <= rules.catchAt) {
+    finish(sim, 'lost', 'caught');
+  }
+}
 
 export function createSim({ level, seed = 1, upgrades = {} }) {
   const player = {
@@ -114,11 +344,23 @@ export function createSim({ level, seed = 1, upgrades = {} }) {
   };
 
   const mods = resolveUpgrades(upgrades);
+  // What, if anything, this location asks for beyond the ordinary rules.
+  // Everywhere but the school this is empty and nothing below it happens.
+  const rules = locationRules(level);
+  const investigator = rules.investigate ? makeInvestigator(level, rules.investigate) : null;
 
   return {
     level,
     seed,
     mods,
+    // Location-specific mechanics, resolved once so the tick does not have to
+    // ask again sixty times a second.
+    rules,
+    investigateRules: rules.investigate || null,
+    investigator,
+    // How loud this spot is, as a multiplier on everything you do. Always 1
+    // where a location has no proximity rule, which is everywhere but here.
+    proximity: 1,
     rng: createRng(seed),
     frame: 0,
     status: 'running', // running | won | lost
@@ -131,7 +373,7 @@ export function createSim({ level, seed = 1, upgrades = {} }) {
     money: 0,          // what you get paid (haul plus any bag bonus)
     haul: 0,           // raw value of what you took — stars are judged on this
     noise: 0,
-    entities: [player],
+    entities: investigator ? [player, investigator] : [player],
     items: level.items.map((item) => {
       const stats = itemStats(item.type);
       return {
@@ -205,9 +447,10 @@ function takeItem(sim, item) {
   const bonusRate = comboBonus(sim.streak);
   const paid = Math.round(item.value * (1 + bonusRate));
 
+  const lifted = item.noise * sim.proximity;
   sim.money += paid;
   sim.haul += item.rawValue;
-  sim.noise = addNoise(sim.noise, item.noise);
+  sim.noise = addNoise(sim.noise, lifted);
   // Drives the reach-and-grab animation. Money and noise are already credited,
   // so the animation is presentation only and can never affect the outcome.
   sim.reach = { t: 0, duration: item.pickupTime, x: item.x, y: item.y, type: item.type };
@@ -223,7 +466,7 @@ function takeItem(sim, item) {
     streak: sim.streak,
     big: isBigScore(item.rawValue),
     rarity: item.rarity,
-    noise: item.noise,
+    noise: Math.round(lifted),
     fragile: item.fragile,
     x: item.x,
     y: item.y,
@@ -252,6 +495,16 @@ export function stepSim(sim, input = EMPTY_INPUT) {
     if (update) update(entity, sim, entity.kind === 'player' ? input : EMPTY_INPUT);
   }
 
+  // How sensitive this spot is. Distance is measured to where the person
+  // actually is, so once Mr. Vrána is up and walking the quiet end of the
+  // corridor moves with him — which is the point.
+  if (sim.rules.proximity) {
+    const listener = sim.investigator || sim.level.watcher;
+    sim.proximity = proximityScale(
+      sim.rules, Math.hypot(player.x - listener.x, player.y - listener.y)
+    );
+  }
+
   // "In range" and "taken" are separate facts. Range is circular, so an item is
   // exactly as reachable diagonally as head-on.
   let nearest = null;
@@ -275,7 +528,8 @@ export function stepSim(sim, input = EMPTY_INPUT) {
       player.x > zone.x && player.x < zone.x + zone.w &&
       player.y > zone.y && player.y < zone.y + zone.h;
     if (inside && !zone.active && zone.cooldown === 0 && sim.status === 'running') {
-      const amount = Math.round(TUNING.hazards.creakNoise * sim.mods.hazardNoise);
+      const amount = Math.round(
+        TUNING.hazards.creakNoise * sim.mods.hazardNoise * sim.proximity);
       if (amount > 0) {
         sim.noise = addNoise(sim.noise, amount);
         sim.events.push({ type: 'creak', x: player.x, y: player.y, noise: amount });
@@ -294,7 +548,8 @@ export function stepSim(sim, input = EMPTY_INPUT) {
   if (player.moving && sim.status === 'running') {
     const surface = sim.onSoftFloor ? TUNING.hazards.softFloorScale : 1;
     const share = Math.min(1, player.speed / TUNING.player.speed);
-    const amount = TUNING.hazards.walkNoise * surface * share * STEP_SECONDS * sim.mods.hazardNoise;
+    const amount = TUNING.hazards.walkNoise * surface * share * STEP_SECONDS
+      * sim.mods.hazardNoise * sim.proximity;
     if (amount > 0) {
       sim.noise = addNoise(sim.noise, amount);
       if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
@@ -331,7 +586,8 @@ export function stepSim(sim, input = EMPTY_INPUT) {
     // How hard you hit it, from a brush at the threshold to a full-speed run.
     const force = Math.min(1, (share - bumpThreshold) / (1 - bumpThreshold));
     const scale = bumpSoftest + (bumpHardest - bumpSoftest) * force;
-    const amount = Math.max(1, Math.round(bumpNoise(player.bumped) * scale * sim.mods.hazardNoise));
+    const amount = Math.max(1, Math.round(
+      bumpNoise(player.bumped) * scale * sim.mods.hazardNoise * sim.proximity));
 
     sim.noise = addNoise(sim.noise, amount);
     // He flinches at a bang, over and above what it did to the meter.
@@ -369,9 +625,13 @@ export function stepSim(sim, input = EMPTY_INPUT) {
   // Standing perfectly still lets the room settle — slowly, and only after a
   // beat, so it is a decision against the clock rather than a reset button.
   if (!player.moving && !sim.reach && sim.status === 'running') {
+    // A location may settle at its own pace. The school comes down fast enough
+    // that standing still is a tactic — it is how you send Mr. Vrána back to
+    // bed — and waits longer before it starts, so it is never a reflex.
+    const settle = sim.rules.recovery || TUNING.recovery;
     sim.stillFor += STEP_SECONDS;
-    if (sim.stillFor > TUNING.recovery.delay && sim.noise > 0) {
-      sim.noise = Math.max(0, sim.noise - TUNING.recovery.rate * STEP_SECONDS);
+    if (sim.stillFor > settle.delay && sim.noise > 0) {
+      sim.noise = Math.max(0, sim.noise - settle.rate * STEP_SECONDS);
     }
   } else {
     sim.stillFor = 0;
@@ -385,6 +645,11 @@ export function stepSim(sim, input = EMPTY_INPUT) {
     sim.reach.t += STEP_SECONDS;
     if (sim.reach.t >= sim.reach.duration) sim.reach = null;
   }
+
+  // Last, so that the meter he reacts to is this tick's meter: lifting
+  // something off a shelf and crossing the line by doing it should send him to
+  // the shelf, not to wherever you were a frame earlier.
+  updateInvestigation(sim, player);
 
   // A damped thud, not random jitter: one soft oscillation that settles.
   if (sim.shake > 0.01) {

@@ -77,6 +77,73 @@ export function timeLimit(level) {
   return Math.max(floor, base - Math.floor((level.id - 1) * perLevel)) + (level.extraTime || 0);
 }
 
+// --- location-specific mechanics -------------------------------------------
+// A level either belongs to a location that asks for extra rules or it does
+// not. Everywhere else in the game asks this one question and gets an empty
+// object back, which is how eleven locations share one simulation.
+const NO_RULES = Object.freeze({});
+
+export function locationRules(level) {
+  return (level && TUNING.locations[level.location]) || NO_RULES;
+}
+
+// How much louder a noise is for being made near the person listening to it.
+// Smooth between the two distances on purpose: a threshold you can step across
+// without noticing is a trap, and this has to be something the player learns to
+// feel rather than something that catches them out.
+export function proximityScale(rules, distance) {
+  const p = rules.proximity;
+  if (!p) return 1;
+  if (distance <= p.near) return p.nearScale;
+  if (distance >= p.far) return p.farScale;
+  const t = (distance - p.near) / (p.far - p.near);
+  return p.nearScale + (p.farScale - p.nearScale) * (t * t * (3 - 2 * t));
+}
+
+// How long a step is at this speed, expressed as walk-cycle phase per unit of
+// ground covered. Short steps when creeping means more of them; long strides
+// when running means fewer. Driving the animation from distance rather than
+// from time is what keeps the feet on the floor at every speed.
+export function stridePerUnit(share) {
+  const g = TUNING.player.gait;
+  if (share <= g.creepAt) return g.strideCreep;
+  if (share >= g.walkAt) {
+    if (share <= TUNING.player.runAt) return g.strideWalk;
+    const t = Math.min(1, (share - TUNING.player.runAt) / (1 - TUNING.player.runAt));
+    return g.strideWalk + (g.strideRun - g.strideWalk) * t;
+  }
+  const t = (share - g.creepAt) / (g.walkAt - g.creepAt);
+  return g.strideCreep + (g.strideWalk - g.strideCreep) * t;
+}
+
+// The three gaits, as blend weights rather than as a mode: a character halfway
+// between a creep and a walk should look halfway between them, not snap.
+//
+// `stride` is the one that makes the animation honest. Step length and cadence
+// multiply to speed, and the cadence is already fixed by stridePerUnit — so if
+// the drawn step is not the reciprocal of that, the feet are lying about how
+// far they carried him. Expressed relative to a normal walk, it is exactly
+// that reciprocal, which is why it is derived here rather than picked by eye.
+export function gaitBlend(share) {
+  const g = TUNING.player.gait;
+  const runAt = TUNING.player.runAt;
+  const creep = share <= 0 ? 0
+    : share <= g.creepAt ? 1
+      : Math.max(0, 1 - (share - g.creepAt) / (g.walkAt - g.creepAt));
+  const run = share <= runAt ? 0 : Math.min(1, (share - runAt) / (1 - runAt)) ** 2;
+  return {
+    creep,
+    run,
+    walk: Math.min(1, share),
+    // Whether the legs are cycling at all. Reaches full weight quickly: a slow
+    // creep is a short step, not a barely-there twitch, and the old code's
+    // habit of using raw speed as the amplitude made a quarter-speed walk look
+    // like standing still while covering ground.
+    moving: Math.min(1, share / 0.12),
+    stride: g.strideWalk / stridePerUnit(share)
+  };
+}
+
 export function itemStats(type) {
   const stats = TUNING.items[type];
   if (!stats) throw new Error(`unknown item type: ${type}`);

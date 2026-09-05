@@ -17,7 +17,7 @@
 
   /* Two resources now, so the HUD is two rows: the readouts, then the meter. */
   /* height is set from TUNING.world.hudStrip at resize time */
-  #hud{position:absolute;left:0;top:0;right:0;padding:6px 10px 7px;display:flex;
+  #hud{position:absolute;left:0;top:0;right:0;z-index:4;padding:6px 10px 7px;display:flex;
     flex-direction:column;justify-content:center;gap:5px;font-size:13px;font-weight:700;
     background:#191320;pointer-events:none}
   #hudtop{display:flex;align-items:center;gap:8px}
@@ -54,6 +54,14 @@
   @keyframes pulsewarn{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.06);opacity:1}}
   @media (prefers-reduced-motion: reduce){ #warn.hard{animation:none} }
 
+  /* The room closing in as he surfaces. A composited layer whose opacity the
+     game sets, rather than a translucent fill painted over the whole canvas
+     every frame: the effect is identical and the GPU keeps it cached, so the
+     most frantic moment in the game is no longer the one that drops frames. */
+  #danger{position:absolute;inset:0;pointer-events:none;opacity:0;z-index:1;
+    background:radial-gradient(ellipse at 50% 50%,
+      rgba(255,40,40,0) 48%, rgba(255,45,45,1) 100%)}
+
   #joy{position:absolute;width:110px;height:110px;border-radius:50%;
     background:#ffffff14;border:2px solid #ffffff33;display:none;pointer-events:none}
   #knob{position:absolute;width:48px;height:48px;border-radius:50%;
@@ -72,6 +80,7 @@
   body[data-screen="playing"] #take{display:flex}
   /* the HUD belongs to the room, not to the menus */
   body[data-screen="menu"] #hud, body[data-screen="levels"] #hud{display:none}
+  body:not([data-screen="playing"]) #danger{opacity:0!important}
   body:not([data-screen="playing"]) #btnpause{opacity:.45}
 
   /* justify-content:center clips both ends once a screen scrolls; auto block
@@ -191,6 +200,7 @@
     <div id="warn" hidden></div>
   </div>
 
+  <div id="danger"></div>
   <div id="joy"><div id="knob"></div></div>
   <button id="take" aria-label="Take item">TAKE</button>
 
@@ -335,6 +345,24 @@ __mod.tuning = (function () {
       maxSubStep: 4,       // swept move: never advance more than this per sub-step
       strideRate: 0.062,   // walk-cycle phase per unit travelled — ties feet to speed
       turnRate: 14,        // how fast the character turns to face its heading
+
+      // How the walk cycle changes shape with speed. The phase has always
+      // advanced with distance travelled rather than with time, so the feet could
+      // never skate — but the number of steps per unit was fixed, which meant a
+      // creep and a sprint were the same stride played at two rates.
+      //
+      // Cadence is speed divided by stride length, so a shorter stride means more
+      // steps over the same ground: tiptoeing raises the per-unit rate, running
+      // lowers it. That is the whole trick, and it is why the animation cannot
+      // drift out of sync with the movement — both are driven by the distance
+      // actually covered.
+      gait: {
+        creepAt: 0.34,      // at or below this share of top speed he is tiptoeing
+        walkAt: 0.58,       // ...and at or above it he is walking properly
+        strideCreep: 0.088, // short careful steps: more of them per unit
+        strideWalk: 0.062,  // unchanged, so a normal walk looks exactly as it did
+        strideRun: 0.047    // long strides: fewer, bigger ones
+      },
       // A thumb resting on the stick should not creep. Past the dead zone the
       // remaining range is stretched back out, so a gentle push is still a slow
       // walk rather than a jump to a quarter speed.
@@ -505,7 +533,15 @@ __mod.tuning = (function () {
         meter: 'NOISE', person: 'Mr. Vrána', sees: 0, seeRate: 0, pose: 'couch',
         warnings: ['MR. VRÁNA STIRS…', 'MR. VRÁNA IS ALMOST AWAKE',
           'MR. VRÁNA IS WAKING!'],
-        lost: 'HE WOKE UP!', lostWhy: 'The noise reached 100 and the caretaker woke up.'
+        lost: 'HE WOKE UP!', lostWhy: 'The noise reached 100 and the caretaker woke up.',
+        // He is the only one who gets up and comes looking, so he is the only one
+        // who can walk into you.
+        caught: 'CAUGHT!',
+        caughtWhy: 'Mr. Vrána walked in on you while he was investigating the noise.',
+        // Shown while he is on his feet, in place of the noise-threshold
+        // warnings: what he is doing matters more than the number by then.
+        onFoot: ['MR. VRÁNA IS GETTING UP', 'HE IS COMING TO LOOK',
+          'HE IS LOOKING AROUND', 'HE IS GOING BACK']
       },
 
       // --- the seven named people of the floorplan levels ---------------------
@@ -579,6 +615,53 @@ __mod.tuning = (function () {
     recovery: {
       delay: 0.6,           // how long you must be still before it starts
       rate: 2               // noise per second once it does
+    },
+
+    // Mechanics that belong to one location and nowhere else.
+    //
+    // Everything above this point is the game. Everything in here is a named
+    // location asking for something the game does not otherwise do — so a level
+    // that is not listed keeps exactly the behaviour it had before this block
+    // existed, and there is one place to look to find out which levels are
+    // special and how.
+    locations: {
+      School: {
+        // How close you are to Mr. Vrána decides how much a given noise costs.
+        // Standing over him, a dropped phone is deafening; three classrooms
+        // away, the same phone barely registers.
+        //
+        // The curve is smooth between the two distances, so there is no line to
+        // step across and be surprised by — you can feel it tighten as you walk
+        // towards him. Both ends are deliberately far from 1.0: if the far end
+        // were 0.9 the whole mechanic would be a rounding error.
+        proximity: {
+          near: 92,          // world units — about four tiles, i.e. the same room
+          far: 320,          // ...and beyond this he is most of a corridor away
+          nearScale: 2.5,    // everything is two and a half times as loud
+          farScale: 0.45     // ...against under half out at the far end
+        },
+        // The school is the one place noise comes back down fast enough to be a
+        // tactic rather than a consolation. Standing still is how you send him
+        // back to the staff room, so it has to actually work inside the clock —
+        // but the delay is longer than elsewhere, so it is never a reflex.
+        recovery: { delay: 0.9, rate: 7 },
+        // Mr. Vrána, once he is awake.
+        investigate: {
+          wakeAt: 80,        // he gets up when the meter passes this
+          calmAt: 50,        // ...and gives up when it falls back under this
+          rising: 0.75,      // seconds spent getting off the couch
+          settling: 0.9,     // ...and lying back down again
+          speed: 78,         // world units a second: a walk, not a chase
+          accel: 430,        // he is a heavy man getting going
+          decel: 620,
+          arriveAt: 16,      // how near the target counts as having reached it
+          searchFor: 3.2,    // seconds spent looking around before giving up
+          catchAt: 22,       // this close to you and the level is over
+          // He gets one look at where the sound came from. If you are still
+          // there when he arrives, that is on you.
+          forget: true
+        }
+      }
     },
 
     // Three upgrades, deliberately few. None of them touches the risk/reward
@@ -716,6 +799,73 @@ __mod.rules = (function () {
     if (level.clock) return level.clock;
     const { base, perLevel, floor } = TUNING.time;
     return Math.max(floor, base - Math.floor((level.id - 1) * perLevel)) + (level.extraTime || 0);
+  }
+
+  // --- location-specific mechanics -------------------------------------------
+  // A level either belongs to a location that asks for extra rules or it does
+  // not. Everywhere else in the game asks this one question and gets an empty
+  // object back, which is how eleven locations share one simulation.
+  const NO_RULES = Object.freeze({});
+
+  function locationRules(level) {
+    return (level && TUNING.locations[level.location]) || NO_RULES;
+  }
+
+  // How much louder a noise is for being made near the person listening to it.
+  // Smooth between the two distances on purpose: a threshold you can step across
+  // without noticing is a trap, and this has to be something the player learns to
+  // feel rather than something that catches them out.
+  function proximityScale(rules, distance) {
+    const p = rules.proximity;
+    if (!p) return 1;
+    if (distance <= p.near) return p.nearScale;
+    if (distance >= p.far) return p.farScale;
+    const t = (distance - p.near) / (p.far - p.near);
+    return p.nearScale + (p.farScale - p.nearScale) * (t * t * (3 - 2 * t));
+  }
+
+  // How long a step is at this speed, expressed as walk-cycle phase per unit of
+  // ground covered. Short steps when creeping means more of them; long strides
+  // when running means fewer. Driving the animation from distance rather than
+  // from time is what keeps the feet on the floor at every speed.
+  function stridePerUnit(share) {
+    const g = TUNING.player.gait;
+    if (share <= g.creepAt) return g.strideCreep;
+    if (share >= g.walkAt) {
+      if (share <= TUNING.player.runAt) return g.strideWalk;
+      const t = Math.min(1, (share - TUNING.player.runAt) / (1 - TUNING.player.runAt));
+      return g.strideWalk + (g.strideRun - g.strideWalk) * t;
+    }
+    const t = (share - g.creepAt) / (g.walkAt - g.creepAt);
+    return g.strideCreep + (g.strideWalk - g.strideCreep) * t;
+  }
+
+  // The three gaits, as blend weights rather than as a mode: a character halfway
+  // between a creep and a walk should look halfway between them, not snap.
+  //
+  // `stride` is the one that makes the animation honest. Step length and cadence
+  // multiply to speed, and the cadence is already fixed by stridePerUnit — so if
+  // the drawn step is not the reciprocal of that, the feet are lying about how
+  // far they carried him. Expressed relative to a normal walk, it is exactly
+  // that reciprocal, which is why it is derived here rather than picked by eye.
+  function gaitBlend(share) {
+    const g = TUNING.player.gait;
+    const runAt = TUNING.player.runAt;
+    const creep = share <= 0 ? 0
+      : share <= g.creepAt ? 1
+        : Math.max(0, 1 - (share - g.creepAt) / (g.walkAt - g.creepAt));
+    const run = share <= runAt ? 0 : Math.min(1, (share - runAt) / (1 - runAt)) ** 2;
+    return {
+      creep,
+      run,
+      walk: Math.min(1, share),
+      // Whether the legs are cycling at all. Reaches full weight quickly: a slow
+      // creep is a short step, not a barely-there twitch, and the old code's
+      // habit of using raw speed as the amplitude made a quarter-speed walk look
+      // like standing still while covering ground.
+      moving: Math.min(1, share / 0.12),
+      stride: g.strideWalk / stridePerUnit(share)
+    };
   }
 
   function itemStats(type) {
@@ -890,7 +1040,7 @@ __mod.rules = (function () {
     const costs = TUNING.upgrades[key].costs;
     return ownedLevel >= costs.length ? null : costs[ownedLevel];
   }
-  return { SLEEP_DEEP, SLEEP_LIGHT, SLEEP_DISTURBED, SLEEP_ALMOST, SLEEP_CRITICAL, SLEEP_AWAKE, SLEEP_ASLEEP, SLEEP_STIRRING, SLEEP_LABELS, hash, furnitureStyle, bumpNoise, timeLimit, itemStats, addNoise, isAwake, sleepStage, canBank, levelTotals, forcesChoice, shapeStick, watcherConfig, detectionRate, rarityOf, isBigScore, bestHaul, starThresholds, starsFor, objectivesFor, gradeEscape, comboBonus, resolveUpgrades, upgradeCost };
+  return { SLEEP_DEEP, SLEEP_LIGHT, SLEEP_DISTURBED, SLEEP_ALMOST, SLEEP_CRITICAL, SLEEP_AWAKE, SLEEP_ASLEEP, SLEEP_STIRRING, SLEEP_LABELS, hash, furnitureStyle, bumpNoise, timeLimit, locationRules, proximityScale, stridePerUnit, gaitBlend, itemStats, addNoise, isAwake, sleepStage, canBank, levelTotals, forcesChoice, shapeStick, watcherConfig, detectionRate, rarityOf, isBigScore, bestHaul, starThresholds, starsFor, objectivesFor, gradeEscape, comboBonus, resolveUpgrades, upgradeCost };
 })();
 __mod.physics = (function () {
   // One mover for every moving thing. Sub-stepped so nothing can tunnel through a
@@ -963,6 +1113,208 @@ __mod.physics = (function () {
     };
   }
   return { overlaps, blocked, blocker, solveMove, clampToWorld };
+})();
+__mod.nav = (function () {
+  // Walking somewhere, for characters that are not being steered by a thumb.
+  //
+  // Mr. Vrána is the only one who needs this today: he has to cross a school
+  // that is mostly partitions and doorways, and "walk at the target and slide
+  // along whatever you hit" puts him in a corner within two rooms. So he gets a
+  // map instead — a coarse grid of where a person his size fits, a breadth-first
+  // distance field flooded out from wherever he is going, and a walk downhill.
+  //
+  // Everything here is a pure function of the level. No randomness, no clock, no
+  // document: the simulation stays replayable.
+  const { TUNING } = __mod.tuning;
+
+  // Half a tile. Fine enough that a two-tile doorway is three cells wide and he
+  // aims through the middle of it, coarse enough that flooding the biggest map
+  // in the game is a few thousand cells rather than a few hundred thousand.
+  const CELL = TUNING.world.tile / 2;
+
+  const grids = new Map();
+
+  // Where a box of this size can stand. Built by painting each collider onto the
+  // grid rather than by testing every cell against every collider: both the
+  // colliders and the box are axis-aligned, so "the box centred here overlaps
+  // this collider" is exactly "this point is inside the collider grown by half a
+  // box", and growing a rectangle is something you can rasterise directly.
+  function navGrid(level, boxW = TUNING.player.boxWidth, boxH = TUNING.player.boxHeight) {
+    const key = `${level.id}:${boxW}x${boxH}`;
+    const cached = grids.get(key);
+    if (cached) return cached;
+
+    const cols = Math.ceil(level.width / CELL);
+    const rows = Math.ceil(level.height / CELL);
+    const blocked = new Uint8Array(cols * rows);
+
+    const at = (cx, cy) => cx + cy * cols;
+    // Cell centres, so a cell is walkable if a person standing in the middle of
+    // it fits — which is the same question the physics asks.
+    const centre = (c) => c * CELL + CELL / 2;
+
+    // Outside the walkable bounds of the world.
+    const minX = boxW / 2;
+    const maxX = level.width - boxW / 2;
+    const minY = boxH / 2;
+    const maxY = level.height - boxH / 2;
+    for (let cy = 0; cy < rows; cy++) {
+      for (let cx = 0; cx < cols; cx++) {
+        const x = centre(cx);
+        const y = centre(cy);
+        if (x < minX || x > maxX || y < minY || y > maxY) blocked[at(cx, cy)] = 1;
+      }
+    }
+
+    for (const c of level.colliders) {
+      const x0 = c.x - boxW / 2;
+      const x1 = c.x + c.w + boxW / 2;
+      const y0 = c.y - boxH / 2;
+      const y1 = c.y + c.h + boxH / 2;
+      // Cells whose centre falls strictly inside the grown rectangle.
+      const cx0 = Math.max(0, Math.ceil((x0 - CELL / 2) / CELL));
+      const cx1 = Math.min(cols - 1, Math.floor((x1 - CELL / 2 - 1e-9) / CELL));
+      const cy0 = Math.max(0, Math.ceil((y0 - CELL / 2) / CELL));
+      const cy1 = Math.min(rows - 1, Math.floor((y1 - CELL / 2 - 1e-9) / CELL));
+      for (let cy = cy0; cy <= cy1; cy++) {
+        for (let cx = cx0; cx <= cx1; cx++) blocked[at(cx, cy)] = 1;
+      }
+    }
+
+    const grid = { cols, rows, cell: CELL, blocked };
+    grids.set(key, grid);
+    return grid;
+  }
+
+  const cellOf = (grid, x, y) => ({
+    cx: Math.max(0, Math.min(grid.cols - 1, Math.floor(x / grid.cell))),
+    cy: Math.max(0, Math.min(grid.rows - 1, Math.floor(y / grid.cell)))
+  });
+
+  const cellCentre = (grid, cx, cy) => ({
+    x: cx * grid.cell + grid.cell / 2,
+    y: cy * grid.cell + grid.cell / 2
+  });
+
+  // The nearest cell you could actually stand in. A goal read off a world
+  // position — the couch he sleeps on, the spot a crash came from — regularly
+  // lands inside furniture, and a flood from a blocked cell reaches nothing.
+  function nearestFree(grid, cx, cy) {
+    const index = cx + cy * grid.cols;
+    if (!grid.blocked[index]) return index;
+    for (let r = 1; r <= 12; r++) {
+      for (let dy = -r; dy <= r; dy++) {
+        for (let dx = -r; dx <= r; dx++) {
+          if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+          const nx = cx + dx;
+          const ny = cy + dy;
+          if (nx < 0 || ny < 0 || nx >= grid.cols || ny >= grid.rows) continue;
+          const i = nx + ny * grid.cols;
+          if (!grid.blocked[i]) return i;
+        }
+      }
+    }
+    return -1;
+  }
+
+  // Steps-to-goal for every cell that can reach the goal, and -1 for the rest.
+  // Four-connected, so the flood can never squeeze between two diagonally
+  // touching walls — the diagonals come back later, from the line-of-sight
+  // shortcut in `steer`, where they are checked against the real geometry.
+  function flowField(grid, x, y) {
+    const { cx, cy } = cellOf(grid, x, y);
+    const start = nearestFree(grid, cx, cy);
+    const field = new Int32Array(grid.cols * grid.rows).fill(-1);
+    if (start < 0) return field;
+
+    const queue = new Int32Array(grid.cols * grid.rows);
+    let head = 0;
+    let tail = 0;
+    field[start] = 0;
+    queue[tail++] = start;
+    while (head < tail) {
+      const index = queue[head++];
+      const d = field[index] + 1;
+      const cxi = index % grid.cols;
+      const cyi = (index - cxi) / grid.cols;
+      if (cxi > 0) { const i = index - 1; if (!grid.blocked[i] && field[i] < 0) { field[i] = d; queue[tail++] = i; } }
+      if (cxi < grid.cols - 1) { const i = index + 1; if (!grid.blocked[i] && field[i] < 0) { field[i] = d; queue[tail++] = i; } }
+      if (cyi > 0) { const i = index - grid.cols; if (!grid.blocked[i] && field[i] < 0) { field[i] = d; queue[tail++] = i; } }
+      if (cyi < grid.rows - 1) { const i = index + grid.cols; if (!grid.blocked[i] && field[i] < 0) { field[i] = d; queue[tail++] = i; } }
+    }
+    return field;
+  }
+
+  // Is the straight line between two points clear of anything a person his size
+  // would walk into? Sampled at half a cell, which is finer than the smallest
+  // gap the grid can represent.
+  function clearLine(grid, ax, ay, bx, by) {
+    const steps = Math.ceil(Math.hypot(bx - ax, by - ay) / (grid.cell / 2));
+    for (let i = 1; i <= steps; i++) {
+      const t = i / steps;
+      const { cx, cy } = cellOf(grid, ax + (bx - ax) * t, ay + (by - ay) * t);
+      if (grid.blocked[cx + cy * grid.cols]) return false;
+    }
+    return true;
+  }
+
+  /**
+   * Which way to walk from here. Follows the field downhill for a few cells to
+   * get a short piece of the route, then aims at the furthest point on it that
+   * can be reached in a straight line — so he cuts the corner of a doorway
+   * instead of shuffling along the grid like a chess piece.
+   *
+   * Returns a unit vector, or null when there is nowhere to go.
+   */
+  function steer(grid, field, x, y, lookahead = 6) {
+    const here = cellOf(grid, x, y);
+    let index = nearestFree(grid, here.cx, here.cy);
+    if (index < 0 || field[index] < 0) return null;
+
+    let target = cellCentre(grid, index % grid.cols, (index - (index % grid.cols)) / grid.cols);
+    for (let step = 0; step < lookahead; step++) {
+      const cxi = index % grid.cols;
+      const cyi = (index - cxi) / grid.cols;
+      let best = -1;
+      let bestDistance = field[index];
+      const consider = (i) => {
+        if (i < 0 || i >= field.length || grid.blocked[i]) return;
+        if (field[i] >= 0 && field[i] < bestDistance) { bestDistance = field[i]; best = i; }
+      };
+      if (cxi > 0) consider(index - 1);
+      if (cxi < grid.cols - 1) consider(index + 1);
+      if (cyi > 0) consider(index - grid.cols);
+      if (cyi < grid.rows - 1) consider(index + grid.cols);
+      if (best < 0) break;
+      index = best;
+      const candidate = cellCentre(grid, index % grid.cols, (index - (index % grid.cols)) / grid.cols);
+      // Keep the furthest one he can walk to directly; stop looking past the
+      // first one he cannot, or he would try to cut through the wall behind it.
+      if (!clearLine(grid, x, y, candidate.x, candidate.y)) break;
+      target = candidate;
+    }
+
+    const dx = target.x - x;
+    const dy = target.y - y;
+    const length = Math.hypot(dx, dy);
+    if (length < 0.001) return null;
+    return { x: dx / length, y: dy / length };
+  }
+
+  // The nearest spot to a point where a person of this size can actually stand.
+  // Somebody asleep on a couch is inside a collider: he has to get off it before
+  // he can walk anywhere, and this is where he puts his feet.
+  function nearestStand(grid, x, y) {
+    const { cx, cy } = cellOf(grid, x, y);
+    const index = nearestFree(grid, cx, cy);
+    if (index < 0) return { x, y };
+    const gx = index % grid.cols;
+    return cellCentre(grid, gx, (index - gx) / grid.cols);
+  }
+
+  // Only exported so a test can prove the grid says what the physics says.
+  const navCell = CELL;
+  return { navGrid, cellOf, cellCentre, flowField, steer, nearestStand, navCell };
 })();
 __mod.tilemap = (function () {
   // Hand-drawn maps, authored as a character grid.
@@ -4311,7 +4663,8 @@ __mod.sim = (function () {
   const { TUNING } = __mod.tuning;
   const { createRng } = __mod.rng;
   const { solveMove, clampToWorld } = __mod.physics;
-  const { addNoise, isAwake, itemStats, canBank, sleepStage, resolveUpgrades, bumpNoise, timeLimit, rarityOf, comboBonus, gradeEscape, isBigScore, detectionRate, watcherConfig } = __mod.rules;
+  const { navGrid, flowField, steer, nearestStand } = __mod.nav;
+  const { addNoise, isAwake, itemStats, canBank, sleepStage, resolveUpgrades, bumpNoise, timeLimit, rarityOf, comboBonus, gradeEscape, isBigScore, detectionRate, watcherConfig, locationRules, proximityScale, stridePerUnit } = __mod.rules;
 
   const STEP_SECONDS = 1 / TUNING.sim.hz;
 
@@ -4391,11 +4744,239 @@ __mod.sim = (function () {
         while (turn < -Math.PI) turn += Math.PI * 2;
         entity.facing += turn * Math.min(1, TUNING.player.turnRate * STEP_SECONDS);
       }
-      // The walk cycle is driven by distance travelled, so feet never skate.
-      entity.walkPhase += travelled * TUNING.player.strideRate;
+      // The walk cycle is driven by distance travelled, so feet never skate —
+      // and how much phase a unit of ground is worth depends on how long his
+      // stride is at this speed, so a creep is short quick steps and a run is
+      // long ones rather than the same stride at two rates.
+      entity.walkPhase += travelled * stridePerUnit(entity.speed / TUNING.player.speed);
       entity.idleSeconds = entity.moving ? 0 : entity.idleSeconds + STEP_SECONDS;
+    },
+
+    // Someone walking a route of their own. Same movement model as the player —
+    // accelerate towards a target velocity, sweep, resolve, ease the facing round
+    // — because a person crossing a room should move like a person crossing a
+    // room whoever is steering. What differs is only where the direction comes
+    // from: a flow field over the building instead of a thumb.
+    watcher(entity, sim) {
+      const rules = sim.investigateRules;
+      const walking = entity.state === 'investigating' || entity.state === 'returning';
+      const scripted = entity.state === 'rising' || entity.state === 'settling';
+
+      if (!walking) {
+        entity.vx = 0;
+        entity.vy = 0;
+        entity.speed = 0;
+        entity.moving = false;
+        // Getting up and lying down are scripted, not driven: he is inside his
+        // own couch while he sleeps on it, and no amount of pushing gets a body
+        // out of a solid rectangle. So he swings his legs off to the nearest
+        // place a person can stand, and the physics takes over from there.
+        if (scripted && entity.stand) {
+          const duration = entity.state === 'rising' ? rules.rising : rules.settling;
+          const raw = Math.max(0, Math.min(1, entity.stateFor / duration));
+          const t = raw * raw * (3 - 2 * raw);
+          const share = entity.state === 'rising' ? t : 1 - t;
+          entity.x = entity.home.x + (entity.stand.x - entity.home.x) * share;
+          entity.y = entity.home.y + (entity.stand.y - entity.home.y) * share;
+        }
+        // Standing at the spot he came to look at, turning on the spot. He is
+        // searching, so he has to look somewhere other than straight ahead.
+        if (entity.state === 'searching') {
+          entity.facing += Math.sin(entity.stateFor * 2.4) * 2.6 * STEP_SECONDS;
+        }
+        return;
+      }
+
+      let dirX = 0;
+      let dirY = 0;
+
+      if (entity.field) {
+        const direction = steer(entity.nav, entity.field, entity.x, entity.y);
+        if (direction) { dirX = direction.x; dirY = direction.y; }
+      }
+
+      const top = rules.speed;
+      const wanted = Math.hypot(dirX, dirY) > 0.01;
+      const rate = (wanted ? rules.accel : rules.decel) * STEP_SECONDS;
+      const dvx = dirX * top - entity.vx;
+      const dvy = dirY * top - entity.vy;
+      const delta = Math.hypot(dvx, dvy);
+      if (delta <= rate || delta === 0) {
+        entity.vx = dirX * top;
+        entity.vy = dirY * top;
+      } else {
+        entity.vx += (dvx / delta) * rate;
+        entity.vy += (dvy / delta) * rate;
+      }
+
+      const moved = solveMove(
+        entity, entity.vx * STEP_SECONDS, entity.vy * STEP_SECONDS, sim.level.colliders
+      );
+      if (moved.hitX) entity.vx = 0;
+      if (moved.hitY) entity.vy = 0;
+      const clamped = clampToWorld(moved.x, moved.y, entity.w, entity.h, sim.level);
+      entity.x = clamped.x;
+      entity.y = clamped.y;
+
+      const travelled = Math.hypot(entity.x - entity.prevX, entity.y - entity.prevY);
+      entity.speed = travelled / STEP_SECONDS;
+      entity.moving = entity.speed > 4;
+      if (entity.moving) {
+        const heading = Math.atan2(entity.vy, entity.vx);
+        let turn = heading - entity.facing;
+        while (turn > Math.PI) turn -= Math.PI * 2;
+        while (turn < -Math.PI) turn += Math.PI * 2;
+        entity.facing += turn * Math.min(1, TUNING.player.turnRate * STEP_SECONDS);
+      }
+      entity.walkPhase += travelled * stridePerUnit(entity.speed / rules.speed);
     }
   };
+
+  // Mr. Vrána, and anyone the design later gives the same job: a person who is
+  // asleep until the room gets loud, then gets up and goes to look.
+  //
+  // He investigates the place the noise came from, not the person who made it.
+  // That is the whole mechanic — he is walking towards a memory, so moving away
+  // quietly works, and it is the one thing here that must not be "improved" into
+  // tracking the player.
+  const WATCHER_STATES = ['asleep', 'rising', 'investigating', 'searching', 'returning', 'settling'];
+
+  function makeInvestigator(level, rules) {
+    return {
+      kind: 'watcher',
+      x: level.watcher.x,
+      y: level.watcher.y,
+      prevX: level.watcher.x,
+      prevY: level.watcher.y,
+      vx: 0,
+      vy: 0,
+      w: TUNING.player.boxWidth + 2,   // a broader man than the thief
+      h: TUNING.player.boxHeight,
+      state: 'asleep',
+      stateFor: 0,
+      // Where he sleeps, and therefore where he walks back to.
+      home: { x: level.watcher.x, y: level.watcher.y },
+      // The place the noise came from. Set once, when the meter crosses the
+      // line, and never updated to follow you.
+      target: null,
+      nav: null,       // built on the first wake, not at level load
+      field: null,     // ...and re-flooded only when the goal changes
+      goal: null,
+      speed: 0,
+      moving: false,
+      facing: Math.PI / 2,
+      walkPhase: 0
+    };
+  }
+
+  // Send him somewhere. The flood is a few hundred microseconds on the largest
+  // school map and happens at most twice per investigation, so it is cheaper to
+  // recompute than to maintain.
+  function routeTo(entity, level, x, y) {
+    if (!entity.nav) entity.nav = navGrid(level, entity.w, entity.h);
+    if (entity.goal && entity.goal.x === x && entity.goal.y === y) return;
+    entity.goal = { x, y };
+    entity.field = flowField(entity.nav, x, y);
+  }
+
+  function setState(sim, entity, state) {
+    if (entity.state === state) return;
+    entity.state = state;
+    entity.stateFor = 0;
+    sim.events.push({ type: 'watcher', state, x: entity.x, y: entity.y });
+  }
+
+  // Has he got where he was going? Measured on the flow field as well as on the
+  // straight-line distance, because his own couch is furniture: he can stand
+  // beside it and never be within arm's reach of its centre.
+  function arrived(entity, rules) {
+    if (!entity.goal) return true;
+    if (Math.hypot(entity.goal.x - entity.x, entity.goal.y - entity.y) <= rules.arriveAt) return true;
+    if (!entity.field) return true;
+    const grid = entity.nav;
+    const cx = Math.max(0, Math.min(grid.cols - 1, Math.floor(entity.x / grid.cell)));
+    const cy = Math.max(0, Math.min(grid.rows - 1, Math.floor(entity.y / grid.cell)));
+    const distance = entity.field[cx + cy * grid.cols];
+    return distance >= 0 && distance <= 1;
+  }
+
+  function updateInvestigation(sim, player) {
+    const entity = sim.investigator;
+    const rules = sim.investigateRules;
+    if (!entity || !rules) return;
+
+    entity.stateFor += STEP_SECONDS;
+
+    // Crossing the line wakes him — and where you were standing when you crossed
+    // it is the only thing he will ever know about you.
+    if (sim.noise > rules.wakeAt && sim.status === 'running'
+        && (entity.state === 'asleep' || entity.state === 'returning' || entity.state === 'settling')) {
+      entity.target = { x: player.x, y: player.y };
+      if (!entity.nav) entity.nav = navGrid(sim.level, entity.w, entity.h);
+      if (!entity.stand) entity.stand = nearestStand(entity.nav, entity.home.x, entity.home.y);
+      // Already on his feet? Then he simply turns round; only a man lying down
+      // has to get up first.
+      setState(sim, entity, entity.state === 'returning' ? 'investigating' : 'rising');
+      if (entity.state === 'investigating') routeTo(entity, sim.level, entity.target.x, entity.target.y);
+    }
+
+    switch (entity.state) {
+      case 'rising':
+        if (entity.stateFor >= rules.rising) {
+          entity.x = entity.stand.x;
+          entity.y = entity.stand.y;
+          setState(sim, entity, 'investigating');
+          routeTo(entity, sim.level, entity.target.x, entity.target.y);
+        }
+        break;
+      case 'investigating':
+        // Quiet again before he gets there and he stops bothering.
+        if (sim.noise < rules.calmAt) setState(sim, entity, 'returning');
+        else if (arrived(entity, rules)) setState(sim, entity, 'searching');
+        break;
+      case 'searching':
+        if (sim.noise < rules.calmAt || entity.stateFor >= rules.searchFor) {
+          setState(sim, entity, 'returning');
+        }
+        break;
+      case 'returning':
+        if (arrived(entity, rules)) setState(sim, entity, 'settling');
+        break;
+      case 'settling':
+        if (entity.stateFor >= rules.settling) {
+          setState(sim, entity, 'asleep');
+          entity.target = null;
+          entity.goal = null;
+          entity.field = null;
+          entity.x = entity.home.x;
+          entity.y = entity.home.y;
+          // The renderer draws between prevX and x; leaving the old value here
+          // would slide him back to the couch over one visible frame.
+          entity.prevX = entity.x;
+          entity.prevY = entity.y;
+          entity.vx = 0;
+          entity.vy = 0;
+        }
+        break;
+      default:
+        break;
+    }
+
+    if (entity.state === 'returning' && entity.stand
+        && (!entity.goal || entity.goal.x !== entity.stand.x || entity.goal.y !== entity.stand.y)) {
+      routeTo(entity, sim.level, entity.stand.x, entity.stand.y);
+    }
+
+    // Walking into you ends the level through the same door everything else
+    // does. Not while he is getting up or lying down: standing over him as he
+    // stirs deserves a moment to back away, not an instant loss.
+    const onFoot = entity.state === 'investigating' || entity.state === 'searching'
+      || entity.state === 'returning';
+    if (onFoot && sim.status === 'running'
+        && Math.hypot(player.x - entity.x, player.y - entity.y) <= rules.catchAt) {
+      finish(sim, 'lost', 'caught');
+    }
+  }
 
   function createSim({ level, seed = 1, upgrades = {} }) {
     const player = {
@@ -4418,11 +4999,23 @@ __mod.sim = (function () {
     };
 
     const mods = resolveUpgrades(upgrades);
+    // What, if anything, this location asks for beyond the ordinary rules.
+    // Everywhere but the school this is empty and nothing below it happens.
+    const rules = locationRules(level);
+    const investigator = rules.investigate ? makeInvestigator(level, rules.investigate) : null;
 
     return {
       level,
       seed,
       mods,
+      // Location-specific mechanics, resolved once so the tick does not have to
+      // ask again sixty times a second.
+      rules,
+      investigateRules: rules.investigate || null,
+      investigator,
+      // How loud this spot is, as a multiplier on everything you do. Always 1
+      // where a location has no proximity rule, which is everywhere but here.
+      proximity: 1,
       rng: createRng(seed),
       frame: 0,
       status: 'running', // running | won | lost
@@ -4435,7 +5028,7 @@ __mod.sim = (function () {
       money: 0,          // what you get paid (haul plus any bag bonus)
       haul: 0,           // raw value of what you took — stars are judged on this
       noise: 0,
-      entities: [player],
+      entities: investigator ? [player, investigator] : [player],
       items: level.items.map((item) => {
         const stats = itemStats(item.type);
         return {
@@ -4509,9 +5102,10 @@ __mod.sim = (function () {
     const bonusRate = comboBonus(sim.streak);
     const paid = Math.round(item.value * (1 + bonusRate));
 
+    const lifted = item.noise * sim.proximity;
     sim.money += paid;
     sim.haul += item.rawValue;
-    sim.noise = addNoise(sim.noise, item.noise);
+    sim.noise = addNoise(sim.noise, lifted);
     // Drives the reach-and-grab animation. Money and noise are already credited,
     // so the animation is presentation only and can never affect the outcome.
     sim.reach = { t: 0, duration: item.pickupTime, x: item.x, y: item.y, type: item.type };
@@ -4527,7 +5121,7 @@ __mod.sim = (function () {
       streak: sim.streak,
       big: isBigScore(item.rawValue),
       rarity: item.rarity,
-      noise: item.noise,
+      noise: Math.round(lifted),
       fragile: item.fragile,
       x: item.x,
       y: item.y,
@@ -4556,6 +5150,16 @@ __mod.sim = (function () {
       if (update) update(entity, sim, entity.kind === 'player' ? input : EMPTY_INPUT);
     }
 
+    // How sensitive this spot is. Distance is measured to where the person
+    // actually is, so once Mr. Vrána is up and walking the quiet end of the
+    // corridor moves with him — which is the point.
+    if (sim.rules.proximity) {
+      const listener = sim.investigator || sim.level.watcher;
+      sim.proximity = proximityScale(
+        sim.rules, Math.hypot(player.x - listener.x, player.y - listener.y)
+      );
+    }
+
     // "In range" and "taken" are separate facts. Range is circular, so an item is
     // exactly as reachable diagonally as head-on.
     let nearest = null;
@@ -4579,7 +5183,8 @@ __mod.sim = (function () {
         player.x > zone.x && player.x < zone.x + zone.w &&
         player.y > zone.y && player.y < zone.y + zone.h;
       if (inside && !zone.active && zone.cooldown === 0 && sim.status === 'running') {
-        const amount = Math.round(TUNING.hazards.creakNoise * sim.mods.hazardNoise);
+        const amount = Math.round(
+          TUNING.hazards.creakNoise * sim.mods.hazardNoise * sim.proximity);
         if (amount > 0) {
           sim.noise = addNoise(sim.noise, amount);
           sim.events.push({ type: 'creak', x: player.x, y: player.y, noise: amount });
@@ -4598,7 +5203,8 @@ __mod.sim = (function () {
     if (player.moving && sim.status === 'running') {
       const surface = sim.onSoftFloor ? TUNING.hazards.softFloorScale : 1;
       const share = Math.min(1, player.speed / TUNING.player.speed);
-      const amount = TUNING.hazards.walkNoise * surface * share * STEP_SECONDS * sim.mods.hazardNoise;
+      const amount = TUNING.hazards.walkNoise * surface * share * STEP_SECONDS
+        * sim.mods.hazardNoise * sim.proximity;
       if (amount > 0) {
         sim.noise = addNoise(sim.noise, amount);
         if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
@@ -4635,7 +5241,8 @@ __mod.sim = (function () {
       // How hard you hit it, from a brush at the threshold to a full-speed run.
       const force = Math.min(1, (share - bumpThreshold) / (1 - bumpThreshold));
       const scale = bumpSoftest + (bumpHardest - bumpSoftest) * force;
-      const amount = Math.max(1, Math.round(bumpNoise(player.bumped) * scale * sim.mods.hazardNoise));
+      const amount = Math.max(1, Math.round(
+        bumpNoise(player.bumped) * scale * sim.mods.hazardNoise * sim.proximity));
 
       sim.noise = addNoise(sim.noise, amount);
       // He flinches at a bang, over and above what it did to the meter.
@@ -4673,9 +5280,13 @@ __mod.sim = (function () {
     // Standing perfectly still lets the room settle — slowly, and only after a
     // beat, so it is a decision against the clock rather than a reset button.
     if (!player.moving && !sim.reach && sim.status === 'running') {
+      // A location may settle at its own pace. The school comes down fast enough
+      // that standing still is a tactic — it is how you send Mr. Vrána back to
+      // bed — and waits longer before it starts, so it is never a reflex.
+      const settle = sim.rules.recovery || TUNING.recovery;
       sim.stillFor += STEP_SECONDS;
-      if (sim.stillFor > TUNING.recovery.delay && sim.noise > 0) {
-        sim.noise = Math.max(0, sim.noise - TUNING.recovery.rate * STEP_SECONDS);
+      if (sim.stillFor > settle.delay && sim.noise > 0) {
+        sim.noise = Math.max(0, sim.noise - settle.rate * STEP_SECONDS);
       }
     } else {
       sim.stillFor = 0;
@@ -4689,6 +5300,11 @@ __mod.sim = (function () {
       sim.reach.t += STEP_SECONDS;
       if (sim.reach.t >= sim.reach.duration) sim.reach = null;
     }
+
+    // Last, so that the meter he reacts to is this tick's meter: lifting
+    // something off a shelf and crossing the line by doing it should send him to
+    // the shelf, not to wherever you were a frame earlier.
+    updateInvestigation(sim, player);
 
     // A damped thud, not random jitter: one soft oscillation that settles.
     if (sim.shake > 0.01) {
@@ -6889,103 +7505,180 @@ __mod.art = (function () {
     }
   }
 
-  // ---------------------------------------------------------------- the thief
-  // walk: 0..1 blend between idle and walking. reach: 0..1 grab progress.
-  function drawThief(ctx, x, y, { facing, walkPhase, walk, run = 0, clock, reach }) {
+  // ------------------------------------------------------------- people walking
+  // One figure, drawn for anyone who walks: the thief, and Mr. Vrána once he is
+  // off the couch. Sharing the code is not tidiness — it is the guarantee that
+  // the caretaker moves like a person rather than like a prop, because there is
+  // only one idea of what walking looks like in the game and both of them use it.
+  //
+  // Everything about the pose is driven by how fast the figure is actually
+  // travelling, which the simulation measures from ground covered rather than
+  // from what the stick is doing. So the legs can never run while the body
+  // crawls: there is nothing for them to disagree about.
+  const THIEF_LOOK = {
+    body: PALETTE.thief, top: PALETTE.thiefTop, belt: PALETTE.thiefBelt,
+    skin: PALETTE.skin, skinShade: PALETTE.skinShade, hair: '#4a3a2c',
+    shoe: '#3f4568', sole: '#6a7196',
+    head: 'beanie', build: 1
+  };
+
+  // Mr. Vrána: heavier, in the school's olive work coat, grey and thin on top.
+  const CARETAKER_LOOK = {
+    body: '#6f7c4e', top: '#899763', belt: '#4d5636',
+    skin: '#e8bb92', skinShade: '#cfa079', hair: '#9aa0a6', shoe: '#4a4034', sole: '#7d7263',
+    head: 'bare', build: 1.13
+  };
+
+  /**
+   * @param facing    heading in radians
+   * @param walkPhase walk-cycle phase, advanced by distance travelled
+   * @param walk      0..1 share of top speed
+   * @param creep     0..1 how much of a tiptoe this is
+   * @param run       0..1 how much of a run this is
+   * @param stand     0..1 upright, for getting off a couch
+   * @param reach     0..1 grab progress
+   */
+  function drawWalker(ctx, x, y, opts, look = THIEF_LOOK) {
+    const { facing, walkPhase, walk, clock, reach = 0 } = opts;
+    const creep = opts.creep || 0;
+    const run = opts.run || 0;
+    // How much the legs are cycling, and how long each step is. Kept apart on
+    // purpose: a slow creep is a short step taken often, not a faint suggestion
+    // of a step. Using speed for both is what made a quarter-speed walk look
+    // like a man standing still while sliding across the floor.
+    const cycling = opts.moving === undefined ? Math.min(1, walk / 0.12) : opts.moving;
+    const strideScale = opts.stride === undefined ? 1 : opts.stride;
+    const stand = opts.stand === undefined ? 1 : opts.stand;
+    const build = look.build || 1;
+
     const faceX = Math.cos(facing);
     const faceY = Math.sin(facing);
     // Sideways axis, so the two feet always sit beside each other whichever way
     // he walks, and the stride runs along the direction of travel.
     const sideX = -faceY;
     const sideY = faceX;
+    // How side-on he is. A body seen from the side is narrower than one seen
+    // face-on, and that — not a mirrored sprite — is what tells you he is
+    // travelling left or right rather than towards you.
+    const sideOn = Math.abs(faceX);
+    const turn = faceX;   // -1 hard left, +1 hard right
 
-    // Stride reach and bounce grow with speed, so a run reads as a run rather
-    // than a fast walk. Frequency already tracks distance travelled.
-    const gait = walk + run * 0.55;
-    const swing = Math.sin(walkPhase) * gait;
-    const breathe = Math.sin(clock * 1.9) * (1 - walk) * 0.6;
-    const bob = -Math.abs(Math.sin(walkPhase)) * (1.5 + run * 1.9) * walk + breathe;
+    // Still getting up? Everything is drawn shorter and closer to the couch, so
+    // he unfolds rather than popping into existence standing.
+    const upright = stand * stand * (3 - 2 * stand);
+    if (upright < 0.999) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(0.72 + 0.28 * upright, 0.34 + 0.66 * upright);
+      ctx.translate(-x, -y + (1 - upright) * 9);
+    }
+
+    const swing = Math.sin(walkPhase) * cycling;
+    const breathe = Math.sin(clock * 1.9) * (1 - cycling) * 0.6;
+    // Creeping keeps the head low and level; running throws it about.
+    const bob = -Math.abs(Math.sin(walkPhase)) * (1.5 + run * 1.9) * cycling * (1 - creep * 0.6)
+      + breathe;
     // Weight shifts onto the planted foot: the torso leans a touch that way, and
-    // leans into the run.
+    // leans into the run. A creep crouches instead.
     const weight = -swing * (1.3 + run * 0.9);
     const lean = run * 1.8;
+    const crouch = creep * 2.4 * cycling;
     const bodyX = x + sideX * weight + faceX * lean;
-    const bodyY = y + bob + faceY * lean * 0.5;
+    const bodyY = y + bob + faceY * lean * 0.5 + crouch;
 
     ctx.fillStyle = 'rgba(20,10,26,0.30)';
     ctx.beginPath();
-    ctx.ellipse(x, y + 20, 10.5, 4, 0, 0, TAU);
+    ctx.ellipse(x, y + 20, 10.5 * build, 4, 0, 0, TAU);
     ctx.fill();
 
     // Legs are two segments with a knee, so the stride reads as walking rather
     // than as feet sliding. Both stay below the torso whichever way he faces.
-    const stride = 5.4 + run * 3.4;
+    // Step length, from the cadence rather than from taste: the two multiply to
+    // speed, so this is the only value at which the feet are not skating.
+    const stride = 5.4 * strideScale;
     const drawLeg = (side, phase) => {
-      const lift = Math.max(0, phase) * walk * (1 + run * 0.8);
-      const hipX = bodyX + sideX * 4.4 * side;
-      const hipY = bodyY + 4 + sideY * 4.4 * side;
-      const footX = x + sideX * 4.6 * side + faceX * phase * stride;
-      const footY = y + 14 + sideY * 4.6 * side + faceY * phase * 1.7 - lift * 1.2;
+      // Creeping picks the foot up higher and puts it down more deliberately.
+      const lift = Math.max(0, phase) * (1 + run * 0.8 + creep * 0.5);
+      const hipX = bodyX + sideX * 4.4 * build * side;
+      const hipY = bodyY + 4 + sideY * 4.4 * build * side;
+      const footX = x + sideX * 4.6 * build * side + faceX * phase * stride;
+      const footY = y + 14 + sideY * 4.6 * build * side + faceY * phase * 1.7 - lift * 1.2;
 
-      // The knee sits between hip and foot, pushed forward as the leg swings.
-      const kneeX = (hipX + footX) / 2 + faceX * lift * 2.2;
+      // The knee sits between hip and foot, pushed forward as the leg swings —
+      // and bent further when creeping, which is what a crouch is.
+      const kneeX = (hipX + footX) / 2 + faceX * (lift * 2.2 + creep * 1.6 * cycling);
       const kneeY = (hipY + footY) / 2 - 0.6 - lift * 1.1;
 
-      ctx.strokeStyle = PALETTE.thief;
+      ctx.strokeStyle = look.body;
       ctx.lineCap = 'round';
-      ctx.lineWidth = 5.4;
+      ctx.lineWidth = 5.4 * build;
       ctx.beginPath();
       ctx.moveTo(hipX, hipY);
       ctx.lineTo(kneeX, kneeY);
       ctx.stroke();
-      ctx.lineWidth = 4.6;
+      ctx.lineWidth = 4.6 * build;
       ctx.beginPath();
       ctx.moveTo(kneeX, kneeY);
       ctx.lineTo(footX, footY - 1);
       ctx.stroke();
 
-      fillRound(ctx, footX - 3.7, footY - 4, 7.4, 8.6 - lift * 1.8, 3, PALETTE.thiefBelt);
-      fillRound(ctx, footX - 2.7, footY - 3.2, 5.4, 3, 1.8, '#3f4568');
-      fillRound(ctx, footX - 3.5, footY + 3.2 - lift * 1.8, 7, 1.8, 0.9, '#6a7196');  // sole
+      fillRound(ctx, footX - 3.7, footY - 4, 7.4, 8.6 - lift * 1.8, 3, look.belt);
+      fillRound(ctx, footX - 2.7, footY - 3.2, 5.4, 3, 1.8, look.shoe);
+      fillRound(ctx, footX - 3.5, footY + 3.2 - lift * 1.8, 7, 1.8, 0.9, look.sole);
     };
     drawLeg(-1, swing);
     drawLeg(1, -swing);
 
-    fillRound(ctx, bodyX - 8.5, bodyY - 9, 17, 17, 7, PALETTE.thief);
-    fillRound(ctx, bodyX - 8.5, bodyY - 9, 17, 8, 6, PALETTE.thiefTop);
+    // The torso narrows as he turns side-on, which is what actually reads as
+    // "he is facing that way" — a body square to the camera while walking left
+    // is the mismatch worth fixing.
+    const halfW = 8.5 * build * (1 - sideOn * 0.26);
+    // ...and leads with the near shoulder, so the chest is turned rather than
+    // merely thinner. A narrow square torso reads as a distant one, not a turned
+    // one; an offset one reads as a body angled across the screen.
+    const shoulderLead = turn * sideOn * 1.7;
+    fillRound(ctx, bodyX - halfW + shoulderLead, bodyY - 9, halfW * 2, 17, 7, look.body);
+    fillRound(ctx, bodyX - halfW + shoulderLead, bodyY - 9, halfW * 2, 8, 6, look.top);
     // Cloth folds across the chest, leaning with the weight shift.
     ctx.strokeStyle = 'rgba(12,14,26,0.30)';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(bodyX - 5, bodyY - 2);
-    ctx.quadraticCurveTo(bodyX + weight * 0.4, bodyY + 0.5, bodyX + 5, bodyY - 2);
+    ctx.moveTo(bodyX - halfW * 0.6 + shoulderLead, bodyY - 2);
+    ctx.quadraticCurveTo(bodyX + weight * 0.4 + shoulderLead, bodyY + 0.5,
+      bodyX + halfW * 0.6 + shoulderLead, bodyY - 2);
     ctx.stroke();
-    ctx.fillStyle = PALETTE.thiefBelt;
-    ctx.fillRect(bodyX - 8.5, bodyY + 3.5, 17, 3.2);
-    ctx.fillStyle = '#d8b24a';                                     // buckle
-    fillRound(ctx, bodyX - 2.4, bodyY + 3.4, 4.8, 3.4, 1, '#d8b24a');
-    ctx.fillStyle = '#8d6f22';
-    ctx.fillRect(bodyX - 0.6, bodyY + 4.2, 1.2, 1.8);
+    ctx.fillStyle = look.belt;
+    ctx.fillRect(bodyX - halfW + shoulderLead, bodyY + 3.5, halfW * 2, 3.2);
+    if (look.head === 'beanie') {
+      fillRound(ctx, bodyX - 2.4 + shoulderLead, bodyY + 3.4, 4.8, 3.4, 1, '#d8b24a');  // buckle
+      ctx.fillStyle = '#8d6f22';
+      ctx.fillRect(bodyX - 0.6 + shoulderLead, bodyY + 4.2, 1.2, 1.8);
+    }
 
-    // Arms sit outside the torso and are drawn over it, with a slight elbow.
-    const drawArm = (side, extend) => {
-      const shoulderX = bodyX + sideX * 8.8 * side;
-      const shoulderY = bodyY - 4 + sideY * 8.8 * side;
-      const reachOut = -swing * side * (3.8 + run * 3.2) + extend;
+    // Arms sit outside the torso and are drawn over it, with a slight elbow. The
+    // far one is drawn first and darker, so side-on he has a near arm and a far
+    // arm rather than two arms at the same depth.
+    const drawArm = (side, extend, far) => {
+      const shoulderX = bodyX + shoulderLead + sideX * (halfW + 0.3) * side;
+      const shoulderY = bodyY - 4 + sideY * 8.8 * build * side;
+      // Creeping holds the arms in close; running throws them.
+      const swingScale = (3.8 + run * 3.2) * (1 - creep * 0.55);
+      const reachOut = -swing * side * swingScale + extend;
       const handX = shoulderX + faceX * reachOut + sideX * side * 1.6;
       const handY = shoulderY + faceY * reachOut * 0.66 + sideY * side * 1.6 + 4;
       const elbowX = (shoulderX + handX) / 2 + sideX * side * 1.1;
       const elbowY = (shoulderY + handY) / 2 + 0.8;
 
-      ctx.strokeStyle = PALETTE.thiefTop;
-      ctx.lineWidth = 5;
+      ctx.save();
+      if (far) ctx.globalAlpha = 1 - sideOn * 0.45;
+      ctx.strokeStyle = look.top;
+      ctx.lineWidth = 5 * build;
       ctx.lineCap = 'round';
       ctx.beginPath();
       ctx.moveTo(shoulderX, shoulderY);
       ctx.quadraticCurveTo(elbowX, elbowY, handX, handY);
       ctx.stroke();
-      ctx.fillStyle = PALETTE.skin;                          // a mitt, not a dot
-      ctx.save();
+      ctx.fillStyle = look.skin;                             // a mitt, not a dot
       ctx.translate(handX, handY);
       ctx.rotate(Math.atan2(handY - shoulderY, handX - shoulderX));
       ctx.beginPath();
@@ -6997,49 +7690,147 @@ __mod.art = (function () {
 
     // Reach: out fast, back slower, so the grab has a snap to it.
     const extend = reach > 0 ? Math.sin(Math.min(1, reach) * Math.PI) * 11 : 0;
-    drawArm(-1, extend * 0.3);
-    const hand = drawArm(1, extend);
+    // Which arm is behind him depends on which way he has turned.
+    const farSide = turn >= 0 ? -1 : 1;
+    drawArm(farSide, extend * 0.3, true);
+    const hand = drawArm(-farSide, extend, false);
 
-    const headY = bodyY - 16 + Math.sin(walkPhase * 2) * 0.4 * walk;
-    ctx.fillStyle = PALETTE.skin;
+    drawHead(ctx, bodyX, bodyY - 16 + Math.sin(walkPhase * 2) * 0.4 * cycling,
+      { faceX, faceY, sideOn, turn, creep, cycling }, look);
+
+    if (upright < 0.999) ctx.restore();
+    return hand;
+  }
+
+  // The head, and everything about it that says which way he is looking.
+  //
+  // A round head is the same shape from every angle, so left and right have to
+  // be told apart by what is on it: the face slides towards the direction of
+  // travel, the hair and ear stay behind, and a nose leads. Drawn as a profile
+  // when he is travelling sideways and face-on when he is coming towards you,
+  // so the direction of travel is legible without a HUD arrow.
+  function drawHead(ctx, x, headY, { faceX, faceY, sideOn, turn, creep, cycling }, look) {
+    const beanie = look.head === 'beanie';
+    const radius = 8;
+    // Creeping pulls the chin down and the head forward.
+    const y = headY + creep * cycling * 1.4;
+    // Everything on the face rides this far towards where he is going.
+    const shift = turn * sideOn * 2.2;
+
+    ctx.fillStyle = look.skin;
     ctx.beginPath();
-    ctx.arc(bodyX, headY, 8, 0, TAU);
+    ctx.arc(x, y, radius, 0, TAU);
     ctx.fill();
 
     if (faceY < -0.45) {
-      // Walking away: you see the back of his head, not his face.
-      ctx.fillStyle = PALETTE.thiefBelt;
+      // Walking away: the back of his head. It still has to read as a head —
+      // a flat dark disc is a hole in the floor, so the hat keeps its brim, the
+      // hair shows beneath it, and an ear catches the light on whichever side he
+      // is angled towards.
+      ctx.fillStyle = look.hair;
       ctx.beginPath();
-      ctx.arc(bodyX, headY, 8, 0, TAU);
+      ctx.arc(x, y + 1, radius, 0, TAU);
       ctx.fill();
-      ctx.fillStyle = '#2a2f4d';
+      if (sideOn > 0.28) {
+        ctx.fillStyle = look.skin;
+        ctx.beginPath();
+        ctx.ellipse(x + turn * (radius - 1.2), y + 2, 1.5, 2.2 * sideOn, 0, 0, TAU);
+        ctx.fill();
+      }
+      if (beanie) {
+        ctx.fillStyle = look.belt;
+        ctx.beginPath();
+        ctx.arc(x, y - 0.5, radius, Math.PI, TAU);
+        ctx.fill();
+        ctx.fillRect(x - radius, y - 1.5, radius * 2, 3.4);
+        // The turn-up, a shade lighter, so the hat is a hat from behind too.
+        ctx.fillStyle = look.top;
+        ctx.fillRect(x - radius, y + 0.6, radius * 2, 1.5);
+        ctx.fillStyle = 'rgba(255,255,255,0.10)';
+        ctx.beginPath();
+        ctx.ellipse(x - turn * 1.5, y - 4, 4.2, 1.9, 0, 0, TAU);
+        ctx.fill();
+      } else {
+        ctx.fillStyle = 'rgba(0,0,0,0.20)';
+        ctx.beginPath();
+        ctx.arc(x, y + 3, 5.2, 0, Math.PI);
+        ctx.fill();
+      }
+      return;
+    }
+
+    // Hair round the back of the head — the trailing side — so it swings across
+    // as he turns and the crown is always behind the face.
+    ctx.fillStyle = look.hair;
+    ctx.beginPath();
+    ctx.arc(x - turn * sideOn * 2.4, y - 0.2, radius - 0.3, Math.PI * 0.86, TAU * 1.08);
+    ctx.fill();
+
+    // The ear, on the trailing side, and the nose leading. Between them they are
+    // most of what makes a 16-pixel head point somewhere — but only just: a nose
+    // that clears the head is a beak, so it barely breaks the outline.
+    if (sideOn > 0.22) {
+      ctx.fillStyle = look.skinShade || 'rgba(0,0,0,0.16)';
       ctx.beginPath();
-      ctx.arc(bodyX, headY + 2.5, 5.4, 0, Math.PI);
+      ctx.ellipse(x - turn * (radius - 2), y + 1.6, 1.3, 2 * sideOn, 0, 0, TAU);
       ctx.fill();
-    } else {
-      ctx.fillStyle = '#4a3a2c';                             // hair under the brim
+      ctx.fillStyle = look.skin;
       ctx.beginPath();
-      ctx.arc(bodyX, headY + 0.5, 7.6, Math.PI * 0.9, TAU * 1.05);
-      ctx.fill();
-      ctx.fillStyle = PALETTE.thiefBelt;                     // beanie
-      ctx.beginPath();
-      ctx.arc(bodyX, headY - 1, 8, Math.PI, TAU);
-      ctx.fill();
-      ctx.fillRect(bodyX - 8, headY - 2, 16, 3.6);
-      ctx.fillStyle = 'rgba(255,255,255,0.13)';              // rim light
-      ctx.beginPath();
-      ctx.ellipse(bodyX - 2.5, headY - 5, 4.4, 2, -0.4, 0, TAU);
-      ctx.fill();
-      ctx.fillStyle = '#fff';                                // eyes track the heading
-      const gaze = faceX * 1.6;
-      const gazeY = Math.max(0, faceY) * 1.2;
-      ctx.beginPath();
-      ctx.arc(bodyX - 3 + gaze, headY + 2 + gazeY, 1.8, 0, TAU);
-      ctx.arc(bodyX + 3 + gaze, headY + 2 + gazeY, 1.8, 0, TAU);
+      ctx.moveTo(x + turn * (radius - 3.2), y + 1.2);
+      ctx.lineTo(x + turn * (radius - 0.4 + 0.9 * sideOn), y + 3);
+      ctx.lineTo(x + turn * (radius - 3.2), y + 4.4);
+      ctx.closePath();
       ctx.fill();
     }
 
-    return hand;
+    if (beanie) {
+      ctx.fillStyle = look.belt;
+      ctx.beginPath();
+      ctx.arc(x, y - 1, radius, Math.PI, TAU);
+      ctx.fill();
+      ctx.fillRect(x - radius, y - 2, radius * 2, 3.6);
+      ctx.fillStyle = 'rgba(255,255,255,0.13)';                // rim light
+      ctx.beginPath();
+      ctx.ellipse(x - 2.5 + shift, y - 5, 4.4, 2, -0.4, 0, TAU);
+      ctx.fill();
+    } else {
+      // Thin on top, so the crown shows: a different silhouette from the beanie
+      // at a glance, which is all a 16-pixel head has to manage.
+      ctx.fillStyle = look.skin;
+      ctx.beginPath();
+      ctx.ellipse(x - turn * 0.8, y - 3.4, radius - 2.4, 3.4, 0, 0, TAU);
+      ctx.fill();
+    }
+
+    // Eyes sit on the leading side of the face, and one of them goes behind the
+    // nose once he is properly side-on.
+    const gazeY = Math.max(0, faceY) * 1.2;
+    const spread = 3 * (1 - sideOn * 0.5);
+    const eye = (dx) => {
+      ctx.beginPath();
+      ctx.arc(x + shift + dx, y + 2 + gazeY, 1.8, 0, TAU);
+      ctx.fill();
+    };
+    ctx.fillStyle = '#fff';
+    eye(spread);
+    if (sideOn < 0.72) eye(-spread);
+    // Pupils, pushed to the leading edge: at this size two white dots read as
+    // surprise rather than as looking anywhere.
+    ctx.fillStyle = '#2a2233';
+    ctx.beginPath();
+    ctx.arc(x + shift + spread + turn * sideOn * 0.7, y + 2.2 + gazeY, 0.85, 0, TAU);
+    if (sideOn < 0.72) ctx.arc(x + shift - spread + turn * sideOn * 0.7, y + 2.2 + gazeY, 0.85, 0, TAU);
+    ctx.fill();
+  }
+
+  // ---------------------------------------------------------------- the thief
+  function drawThief(ctx, x, y, opts) {
+    return drawWalker(ctx, x, y, opts, THIEF_LOOK);
+  }
+
+  // Mr. Vrána on his feet — the same walk, a heavier man in it.
+  function drawCaretakerWalking(ctx, x, y, opts) {
+    return drawWalker(ctx, x, y, opts, CARETAKER_LOOK);
   }
 
   // The stolen item flying into the thief's hand.
@@ -7057,16 +7848,16 @@ __mod.art = (function () {
     ctx.fillText(art, 0, 8);
     ctx.restore();
   }
-  return { PALETTE, sleeperLook, ITEM_ART, ITEM_NAMES, roundRect, lampPositions, drawFurniture, paintStaticRoom, drawWatcherFurniture, drawSleeper, drawSlumped, drawGuard, drawThief, drawGrabbedItem };
+  return { PALETTE, sleeperLook, ITEM_ART, ITEM_NAMES, roundRect, lampPositions, drawFurniture, paintStaticRoom, drawWatcherFurniture, drawSleeper, drawSlumped, drawGuard, drawWalker, drawThief, drawCaretakerWalking, drawGrabbedItem };
 })();
 __mod.render = (function () {
   // Draws a simulation snapshot. Knows nothing about rules — it reads state and
   // paints it, interpolating between the last two fixed steps so 60Hz sim motion
   // stays smooth on any refresh rate.
   const { TUNING } = __mod.tuning;
-  const { sleepStage, rarityOf, isBigScore, watcherConfig } = __mod.rules;
+  const { sleepStage, rarityOf, isBigScore, watcherConfig, gaitBlend } = __mod.rules;
   const { playerOf } = __mod.sim;
-  const { paintStaticRoom, drawSleeper, drawGuard, drawSlumped, drawThief, drawGrabbedItem, roundRect, ITEM_ART, lampPositions } = __mod.art;
+  const { paintStaticRoom, drawSleeper, drawGuard, drawSlumped, drawThief, drawCaretakerWalking, drawGrabbedItem, roundRect, ITEM_ART, lampPositions } = __mod.art;
 
   // W and H are the *window*, not the world: how much of a level fits on screen
   // at once. A level that is exactly this size never scrolls, which is every
@@ -7130,6 +7921,10 @@ __mod.render = (function () {
       // offset by, so the strip and the room can never drift out of step.
       const hud = document.getElementById('hud');
       if (hud) hud.style.height = `${(HUD_H * cssWidth) / W}px`;
+      // The danger wash belongs to the room, not to the readouts above it, so it
+      // starts where the canvas does.
+      const danger = document.getElementById('danger');
+      if (danger) danger.style.top = `${(HUD_H * cssWidth) / W}px`;
 
       // Sharper than the old flat cap of 2, but never more pixels than a
       // mid-range phone GPU is happy to push every frame.
@@ -7361,20 +8156,6 @@ __mod.render = (function () {
       }
     }
 
-    function drawDanger(sim, time) {
-      if (sim.noise <= TUNING.noise.almostAt) return;
-      const span = TUNING.noise.max - TUNING.noise.almostAt;
-      const a = ((sim.noise - TUNING.noise.almostAt) / span) * (0.22 + 0.13 * Math.sin(time * 6));
-      // A screen effect, not a world one: it hugs the view wherever the view is.
-      const mx = camera.x + W / 2;
-      const my = camera.y + H / 2;
-      const edge = ctx.createRadialGradient(mx, my, H * 0.30, mx, my, H * 0.62);
-      edge.addColorStop(0, 'rgba(255,40,40,0)');
-      edge.addColorStop(1, `rgba(255,45,45,${a.toFixed(3)})`);
-      ctx.fillStyle = edge;
-      ctx.fillRect(camera.x, camera.y, W, H);
-    }
-
     function drawDebug(sim, stats, playerPos) {
       ctx.save();
       ctx.strokeStyle = '#00e5ff88';
@@ -7410,6 +8191,57 @@ __mod.render = (function () {
       lines.forEach((line, i) =>
         ctx.fillText(line, camera.x + WT + 10, camera.y + WT + 18 + i * 11));
       ctx.restore();
+    }
+
+    // Mr. Vrána on his feet, and the spot he is walking to.
+    //
+    // The marker matters as much as the man. He is investigating a place, not a
+    // person, and that is only a decision the player can make if they can see
+    // where he thinks the noise came from — otherwise "move away quietly" is a
+    // rule they have to be told rather than one they can read off the room.
+    function drawInvestigation(sim, time, alpha) {
+      const w = sim.investigator;
+      if (w.target && (w.state === 'rising' || w.state === 'investigating')) {
+        const pulse = 0.5 + 0.5 * Math.sin(time * 4.2);
+        ctx.save();
+        ctx.globalAlpha = 0.30 + pulse * 0.35;
+        ctx.strokeStyle = '#ffb020';
+        ctx.lineWidth = 1.6;
+        ctx.setLineDash([5, 5]);
+        ctx.lineDashOffset = -time * 14;
+        ctx.beginPath();
+        ctx.arc(w.target.x, w.target.y, 13 + pulse * 4, 0, TAU);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.globalAlpha = 0.55 + pulse * 0.35;
+        ctx.fillStyle = '#ffcf6a';
+        ctx.font = 'bold 13px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText('?', w.target.x, w.target.y + 4.5);
+        ctx.restore();
+      }
+
+      const wx = w.prevX + (w.x - w.prevX) * alpha;
+      const wy = w.prevY + (w.y - w.prevY) * alpha;
+      // Getting up and lying back down, as one number the figure unfolds from.
+      const rules = sim.investigateRules;
+      const stand = w.state === 'rising'
+        ? Math.min(1, w.stateFor / rules.rising)
+        : w.state === 'settling' ? Math.max(0, 1 - w.stateFor / rules.settling) : 1;
+      // The same speed-driven gait the thief uses, against his own top speed —
+      // he is slower, so a brisk walk for him is not a run.
+      const gait = gaitBlend(w.speed / rules.speed);
+      drawCaretakerWalking(ctx, wx, wy, {
+        facing: w.facing,
+        walkPhase: w.walkPhase,
+        walk: gait.walk,
+        creep: gait.creep,
+        run: gait.run,
+        moving: gait.moving,
+        stride: gait.stride,
+        clock: time,
+        stand
+      });
     }
 
     return {
@@ -7457,7 +8289,13 @@ __mod.render = (function () {
         const pose = config.pose || 'bed';
         // How this person is asleep decides what gets drawn — and nothing else in
         // the renderer has to know there is more than one kind of them.
-        if (pose === 'guard') {
+        // A watcher who is up and about is not on his couch to be drawn on. The
+        // couch itself is in the static cache, so leaving him out simply leaves
+        // it empty — which is exactly what the player needs to see.
+        const up = sim.investigator && sim.investigator.state !== 'asleep';
+        if (up) {
+          drawInvestigation(sim, time, alpha);
+        } else if (pose === 'guard') {
           drawGuard(ctx, sim.level, stage, time, sim.wakeSeconds || 0, sim.startle || 0,
             sim.seen || 0, sim.level.watcher.sees || config.sees, kind);
         } else if (pose === 'desk') {
@@ -7468,20 +8306,20 @@ __mod.render = (function () {
         }
         drawItems(sim, time);
 
-        // Full range, not saturated at half speed: the animation has to keep
-        // getting faster and longer-strided right up to a run.
-        const walk = Math.min(1, player.speed / TUNING.player.speed);
+        // Tiptoe, walk or run, read off the speed he is actually travelling at
+        // rather than off whether the stick is being touched. Blends, not modes:
+        // halfway between a creep and a walk should look halfway between them.
+        const gait = gaitBlend(player.speed / TUNING.player.speed);
         const reachProgress = sim.reach ? sim.reach.t / sim.reach.duration : 0;
-
-        // How far past a walk he is, eased so the gait shifts rather than snaps.
-        const runAt = TUNING.player.runAt;
-        const run = walk <= runAt ? 0 : Math.min(1, (walk - runAt) / (1 - runAt)) ** 2;
 
         const hand = drawThief(ctx, px, py, {
           facing: player.facing,
           walkPhase: player.walkPhase,
-          walk,
-          run,
+          walk: gait.walk,
+          creep: gait.creep,
+          run: gait.run,
+          moving: gait.moving,
+          stride: gait.stride,
           clock: time,
           reach: reachProgress
         });
@@ -7505,7 +8343,6 @@ __mod.render = (function () {
 
         drawSparks(sparks);
         drawPops(pops);
-        drawDanger(sim, time);
         // A brief warm wash when something genuinely valuable comes off the shelf.
         if (flash > 0) {
           ctx.fillStyle = `rgba(255,214,120,${(flash * 0.20).toFixed(3)})`;
@@ -7660,7 +8497,9 @@ __mod.main = (function () {
         : '';
       const watcher = level ? watcherConfig(level.watcher.kind) : watcherConfig('sleeper');
       $('endTitle').textContent = won ? 'LEVEL COMPLETE'
-        : ctx.reason === 'time' ? "TIME'S UP" : watcher.lost;
+        : ctx.reason === 'time' ? "TIME'S UP"
+          : ctx.reason === 'caught' ? (watcher.caught || watcher.lost)
+            : watcher.lost;
       $('stars').innerHTML = won ? starRow(ctx.stars) : '';
       $('endTally').innerHTML = won
         ? `<div>HAUL<b>$${ctx.money.toLocaleString()}</b></div>` +
@@ -7678,7 +8517,9 @@ __mod.main = (function () {
           ? 'You were still in the room when the clock ran out.'
           : ctx.reason === 'seen'
             ? 'You moved through his line of sight once too often.'
-            : watcher.lostWhy;
+            : ctx.reason === 'caught'
+              ? (watcher.caughtWhy || 'He walked straight into you.')
+              : watcher.lostWhy;
         $('endText').innerHTML =
           `${cause}<br>You lost <b style="color:#ffd34d">$${ctx.money.toLocaleString()}</b>.`;
       }
@@ -7890,7 +8731,7 @@ __mod.main = (function () {
     // style write still costs a style recalculation.
     const hudEls = {
       money: $('money'), time: $('time'), level: $('lvl'),
-      bar: $('noisebar'), noise: $('noisetxt'), wrap: $('noisewrap'),
+      bar: $('noisebar'), noise: $('noisetxt'), wrap: $('noisewrap'), danger: $('danger'),
       warn: $('warn'), streak: $('streak')
     };
     const hudLast = {};
@@ -7932,7 +8773,13 @@ __mod.main = (function () {
       // The meter is the same meter; what it is called depends on who is in the
       // room. A sleeper raises NOISE; a guard raises ALERT.
       const meter = watcherConfig(sim.level.watcher.kind).meter;
-      setText('noiseText', hudEls.noise, `${meter} ${rounded} / ${TUNING.noise.max}`);
+      // Where a location makes noise depend on where you are standing, say so on
+      // the meter. A hidden multiplier is not a mechanic, it is a trap: the whole
+      // point is that the player can tell how much a mistake is about to cost.
+      const loudness = sim.proximity >= 1.6 ? '  ‼ LOUD HERE'
+        : sim.proximity >= 1.15 ? '  ▲'
+          : sim.proximity <= 0.7 ? '  ▼ MUFFLED' : '';
+      setText('noiseText', hudEls.noise, `${meter} ${rounded} / ${TUNING.noise.max}${loudness}`);
       setStyle('barWidth', hudEls.bar, 'width', `${(sim.noise / TUNING.noise.max) * 100}%`);
       setStyle('barColor', hudEls.bar, 'background',
         sim.noise >= TUNING.noise.almostAt ? '#ff4d4d'
@@ -7943,6 +8790,17 @@ __mod.main = (function () {
         hudLast.danger = danger;
         hudEls.wrap.classList.toggle('danger', danger);
       }
+      // The room closing in. Quantised to a hundredth, so this is a handful of
+      // style writes a second rather than one every frame — and the browser
+      // composites the layer itself instead of the game repainting the view.
+      const closeIn = danger && sim.status === 'running'
+        ? Math.round(((sim.noise - TUNING.noise.almostAt) / (TUNING.noise.max - TUNING.noise.almostAt))
+          * (0.22 + 0.13 * Math.sin(clock * 6)) * 100) / 100
+        : 0;
+      if (hudLast.closeIn !== closeIn) {
+        hudLast.closeIn = closeIn;
+        hudEls.danger.style.opacity = closeIn;
+      }
       const calming = sim.stillFor > TUNING.recovery.delay && sim.noise > 0 && sim.status === 'running';
       if (hudLast.calming !== calming) {
         hudLast.calming = calming;
@@ -7950,11 +8808,24 @@ __mod.main = (function () {
       }
       // He's stirring. The warning escalates rather than appearing all at once.
       const warnEl = hudEls.warn;
-      const warnings = watcherConfig(sim.level.watcher.kind).warnings;
+      const config = watcherConfig(sim.level.watcher.kind);
+      const warnings = config.warnings;
+      // Once someone is on his feet, what he is doing matters more than the
+      // number that got him there — the player's next decision depends on
+      // whether he is coming, looking, or already on his way back.
+      const up = sim.investigator && sim.investigator.state !== 'asleep' && config.onFoot;
+      const onFootText = up
+        ? sim.investigator.state === 'rising' ? config.onFoot[0]
+          : sim.investigator.state === 'investigating' ? config.onFoot[1]
+            : sim.investigator.state === 'searching' ? config.onFoot[2]
+              : config.onFoot[3]
+        : null;
       const warning = sim.status !== 'running' ? null
-        : sim.noise >= 95 ? { text: warnings[2], cls: 'hard critical' }
-          : sim.noise >= 90 ? { text: warnings[1], cls: 'hard' }
-            : sim.noise >= 80 ? { text: warnings[0], cls: '' } : null;
+        : onFootText
+          ? { text: onFootText, cls: sim.investigator.state === 'returning' ? '' : 'hard' }
+          : sim.noise >= 95 ? { text: warnings[2], cls: 'hard critical' }
+            : sim.noise >= 90 ? { text: warnings[1], cls: 'hard' }
+              : sim.noise >= 80 ? { text: warnings[0], cls: '' } : null;
       if (hudLast.warnText !== (warning ? warning.text : '')) {
         hudLast.warnText = warning ? warning.text : '';
         warnEl.hidden = !warning;

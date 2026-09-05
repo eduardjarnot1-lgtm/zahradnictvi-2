@@ -17,7 +17,7 @@
 
   /* Two resources now, so the HUD is two rows: the readouts, then the meter. */
   /* height is set from TUNING.world.hudStrip at resize time */
-  #hud{position:absolute;left:0;top:0;right:0;padding:6px 10px 7px;display:flex;
+  #hud{position:absolute;left:0;top:0;right:0;z-index:4;padding:6px 10px 7px;display:flex;
     flex-direction:column;justify-content:center;gap:5px;font-size:13px;font-weight:700;
     background:#191320;pointer-events:none}
   #hudtop{display:flex;align-items:center;gap:8px}
@@ -54,6 +54,14 @@
   @keyframes pulsewarn{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.06);opacity:1}}
   @media (prefers-reduced-motion: reduce){ #warn.hard{animation:none} }
 
+  /* The room closing in as he surfaces. A composited layer whose opacity the
+     game sets, rather than a translucent fill painted over the whole canvas
+     every frame: the effect is identical and the GPU keeps it cached, so the
+     most frantic moment in the game is no longer the one that drops frames. */
+  #danger{position:absolute;inset:0;pointer-events:none;opacity:0;z-index:1;
+    background:radial-gradient(ellipse at 50% 50%,
+      rgba(255,40,40,0) 48%, rgba(255,45,45,1) 100%)}
+
   #joy{position:absolute;width:110px;height:110px;border-radius:50%;
     background:#ffffff14;border:2px solid #ffffff33;display:none;pointer-events:none}
   #knob{position:absolute;width:48px;height:48px;border-radius:50%;
@@ -72,6 +80,7 @@
   body[data-screen="playing"] #take{display:flex}
   /* the HUD belongs to the room, not to the menus */
   body[data-screen="menu"] #hud, body[data-screen="levels"] #hud{display:none}
+  body:not([data-screen="playing"]) #danger{opacity:0!important}
   body:not([data-screen="playing"]) #btnpause{opacity:.45}
 
   /* justify-content:center clips both ends once a screen scrolls; auto block
@@ -191,6 +200,7 @@
     <div id="warn" hidden></div>
   </div>
 
+  <div id="danger"></div>
   <div id="joy"><div id="knob"></div></div>
   <button id="take" aria-label="Take item">TAKE</button>
 
