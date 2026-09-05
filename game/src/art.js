@@ -12,7 +12,12 @@ import {
   furnitureStyle, hash, watcherConfig
 } from './rules.js';
 
-const { width: W, height: H, wallThickness: WT } = TUNING.world;
+const { wallThickness: WT } = TUNING.world;
+// The room's own size, set once per paint. Every use of these lives inside
+// paintStaticRoom's call tree, which runs synchronously, so this is the same
+// arrangement the theme already uses rather than a new kind of global.
+let W = TUNING.world.width;
+let H = TUNING.world.height;
 const TAU = Math.PI * 2;
 
 export const PALETTE = {
@@ -82,7 +87,31 @@ const SLEEPER_LOOKS = {
   // the staff room under a worn olive blanket rather than a duvet.
   caretaker: { hair: '#9aa0a6', style: 'balding', skin: '#e8bb92', skinShade: '#cfa079',
                duvet: '#6f7c4e', duvetTop: '#899763', fold: 'rgba(40,52,26,0.35)',
-               sheet: '#e6e2d2', pillow: '#f2ecdc', shoulder: '#dfe0cf' }
+               sheet: '#e6e2d2', pillow: '#f2ecdc', shoulder: '#dfe0cf' },
+
+  // --- the seven of the floorplan levels ------------------------------------
+  // Dad: dark, greying at the temples, under the flat's grey-blue bedding.
+  dad:       { hair: '#4a3f38', style: 'short', skin: '#eec49c', skinShade: '#d6a97f',
+               duvet: '#7d8aa6', duvetTop: '#98a5be', fold: 'rgba(38,48,68,0.35)',
+               sheet: '#eef1f6', pillow: '#fbfaf6', shoulder: '#e8ecf3' },
+  // Dr. Marek: dark hair, still in his scrubs, under a thin hospital blanket.
+  doctor:    { hair: '#2f2a26', style: 'short', skin: '#e6b98f', skinShade: '#cca377',
+               duvet: '#5f8f92', duvetTop: '#7aa9ac', fold: 'rgba(26,58,60,0.35)',
+               sheet: '#e8f1f0', pillow: '#f4faf9', shoulder: '#cfe2e0' },
+  // Grandpa: white, thin on top, a knitted blanket over his knees.
+  grandpa:   { hair: '#dcd8d2', style: 'balding', skin: '#e2b58f', skinShade: '#c89a76',
+               duvet: '#8a5a3c', duvetTop: '#a5714f', fold: 'rgba(58,34,20,0.4)',
+               sheet: '#ead9c2', pillow: '#f3e6d2', shoulder: '#d9c4a8' },
+  // Mr. Halas: thinning, still in his shirt and tie.
+  worker:    { hair: '#3b342c', style: 'balding', skin: '#efc59c', skinShade: '#d6a87f',
+               duvet: '#5b6478', duvetTop: '#737d93', fold: 'rgba(30,36,48,0.35)',
+               sheet: '#eef0f4', pillow: '#f7f8fa', shoulder: '#dfe3ea',
+               shirt: '#eef2f7', tie: '#8c3a44' },
+  // Otakar: hotel burgundy and brass.
+  porter:    { hair: '#241d18', style: 'short', skin: '#e9bd94', skinShade: '#cfa176',
+               duvet: '#7a2f36', duvetTop: '#9a464d', fold: 'rgba(50,16,20,0.4)',
+               sheet: '#f0e3d6', pillow: '#f8efe2', shoulder: '#e5d3c0',
+               shirt: '#7a2f36', tie: '#c8a24a' }
 };
 
 export const sleeperLook = (kind) => SLEEPER_LOOKS[kind] || SLEEPER_LOOKS.sleeper;
@@ -137,7 +166,15 @@ const THEMES = {
   // Grey contract carpet and a dark ceiling, after the open-plan reference.
   officefloor:{ wall: '#333a44', lip: '#464e5b', shade: '#242a32', skirt: '#7f8b9c',
                floor: '#7f8a7c', alt: '#778274', seam: 'rgba(92,100,90,0.55)',
-               grain: 'rgba(160,170,158,0.24)', light: '214,236,255', vignette: '16,20,26' }
+               grain: 'rgba(160,170,158,0.24)', light: '214,236,255', vignette: '16,20,26' },
+  // Pale green tile and hard strip lighting: a hospital floor at night.
+  hospital:  { wall: '#33565a', lip: '#457076', shade: '#254045', skirt: '#bcd8d4',
+               floor: '#b6c4bd', alt: '#adbcb5', seam: 'rgba(126,140,132,0.5)',
+               grain: 'rgba(206,218,210,0.22)', light: '224,244,255', vignette: '16,28,30' },
+  // Dark green boards and firelight, after the cottage reference.
+  cottage:   { wall: '#3d4a35', lip: '#516046', shade: '#2c3627', skirt: '#c4b58c',
+               floor: '#b5763a', alt: '#a96d34', seam: 'rgba(134,84,38,0.6)',
+               grain: 'rgba(212,148,86,0.30)', light: '255,208,132', vignette: '26,24,14' }
 };
 
 let T = THEMES.bedroom;   // set once per room paint; drawing is synchronous
@@ -778,38 +815,147 @@ function drawDoorway(ctx, door) {
 }
 
 // Everything that never moves, drawn once per level into an offscreen canvas.
+// A wall slab on a hand-drawn map. The building's shape comes from the grid
+// rather than from a fixed rectangle round the edge, so each run of wall is
+// drawn as its own block: a dark base, a lit top edge, and skirting down the
+// faces that look into a room.
+function drawWallSlab(ctx, c) {
+  ctx.fillStyle = 'rgba(24,12,20,0.38)';
+  roundRect(ctx, c.x + 2, c.y + 5, c.w, c.h, 2);
+  ctx.fill();
+  fillRound(ctx, c.x, c.y, c.w, c.h, 2, T.shade);
+  fillRound(ctx, c.x, c.y, c.w, Math.max(3, c.h - 4), 2, T.wall);
+  fillRound(ctx, c.x, c.y, c.w, Math.min(4, c.h * 0.35), 1.5, T.lip);
+  ctx.fillStyle = T.skirt;
+  ctx.fillRect(c.x, c.y + c.h - 2.5, c.w, 2.5);
+}
+
+// A window: a lit pane in the wall, and the light it throws on the floor. On a
+// floorplan these are what tell you which side of the building you are on.
+function drawWindowPane(ctx, c) {
+  const vertical = c.h > c.w;
+  fillRound(ctx, c.x, c.y, c.w, c.h, 2, T.shade);
+  fillRound(ctx, c.x + 2, c.y + 2, c.w - 4, c.h - 4, 1.5, '#cfe6ff');
+  ctx.strokeStyle = 'rgba(70,90,120,0.55)';
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  const bars = Math.max(1, Math.round((vertical ? c.h : c.w) / 34));
+  for (let i = 1; i < bars; i++) {
+    if (vertical) {
+      const y = c.y + (c.h / bars) * i;
+      ctx.moveTo(c.x, y);
+      ctx.lineTo(c.x + c.w, y);
+    } else {
+      const x = c.x + (c.w / bars) * i;
+      ctx.moveTo(x, c.y);
+      ctx.lineTo(x, c.y + c.h);
+    }
+  }
+  ctx.stroke();
+
+  // A soft pool of moonlight spilling inward.
+  const cx = c.x + c.w / 2;
+  const cy = c.y + c.h / 2;
+  const reach = Math.max(c.w, c.h) * 1.5 + 40;
+  const pool = ctx.createRadialGradient(cx, cy, 4, cx, cy, reach);
+  pool.addColorStop(0, `rgba(${T.light},0.20)`);
+  pool.addColorStop(1, `rgba(${T.light},0)`);
+  ctx.fillStyle = pool;
+  ctx.beginPath();
+  ctx.arc(cx, cy, reach, 0, TAU);
+  ctx.fill();
+}
+
 export function paintStaticRoom(ctx, level) {
   T = THEMES[level.theme] || THEMES.bedroom;
+  W = level.width;
+  H = level.height;
   lampPositions.length = 0;
   drawFloor(ctx);
   for (const rug of level.rugs) drawRug(ctx, rug);
   for (const zone of level.creaks) drawCreakZone(ctx, zone);
-  drawWalls(ctx);
-  // After the walls: the window is cut into one, and its light falls on top
-  // of the floor that is already down.
-  drawSunbeam(ctx, WINDOWS[level.layout] || 'left');
-  // Interior walls first, so furniture standing against them overlaps correctly.
-  for (const c of level.colliders) {
-    if (c.type === 'partition') drawPartition(ctx, c);
+
+  if (level.tiles) {
+    // A hand-drawn map: the building is whatever the grid says it is.
+    for (const c of level.colliders) {
+      if (c.type === 'wall' && !c.window) drawWallSlab(ctx, c);
+    }
+    for (const c of level.colliders) {
+      if (c.type === 'partition') drawPartition(ctx, c);
+    }
+    // Windows after the walls, so their light falls over the room.
+    for (const c of level.colliders) {
+      if (c.type === 'wall' && c.window) drawWindowPane(ctx, c);
+    }
+  } else {
+    drawWalls(ctx);
+    // After the walls: the window is cut into one, and its light falls on top
+    // of the floor that is already down.
+    drawSunbeam(ctx, WINDOWS[level.layout] || 'left');
+    // Interior walls first, so furniture standing against them overlaps.
+    for (const c of level.colliders) {
+      if (c.type === 'partition') drawPartition(ctx, c);
+    }
   }
   for (const door of level.doors) drawDoorway(ctx, door);
   for (const c of level.colliders) {
     if (c.type === 'furniture') drawFurniture(ctx, c);
   }
-  // A guard's room gets a desk instead of a bed; the desk itself is drawn with
-  // the guard each frame, since his monitors flicker.
-  if (watcherConfig(level.watcher.kind).sees === 0) drawBedBase(ctx, level);
+  // Whatever this level's person is asleep on — a bed, a couch, an armchair —
+  // or nothing, when they are at a desk that is drawn live each frame.
+  drawWatcherFurniture(ctx, level, watcherConfig(level.watcher.kind).pose || 'bed');
 
-  const vignette = ctx.createRadialGradient(W / 2, H / 2, H * 0.30, W / 2, H / 2, H * 0.74);
+  // The vignette is sized to the map, so a wide floorplan is not darkened at
+  // its ends the way a tall one is at its corners.
+  const span = Math.max(W, H);
+  const vignette = ctx.createRadialGradient(W / 2, H / 2, span * 0.34, W / 2, H / 2, span * 0.80);
   vignette.addColorStop(0, 'rgba(0,0,0,0)');
   vignette.addColorStop(1, `rgba(${T.vignette},0.32)`);
   ctx.fillStyle = vignette;
   ctx.fillRect(0, 0, W, H);
 }
 
+// A couch, drawn from the watcher's own collider: what Dr. Marek and Mr. Vrána
+// are asleep on. Same construction as the room's sofas, at whatever size the
+// map drew it.
+function drawCouchBase(ctx, level) {
+  const c = level.bed;
+  ctx.fillStyle = SHADOW;
+  roundRect(ctx, c.x + 3, c.y + 8, c.w, c.h, 9);
+  ctx.fill();
+  fillRound(ctx, c.x, c.y, c.w, c.h, 9, '#6a5a52');
+  fillRound(ctx, c.x + 3, c.y + 3, c.w - 6, c.h * 0.34, 6, '#836f64');
+  fillRound(ctx, c.x, c.y + c.h * 0.24, 9, c.h * 0.72, 4, '#836f64');
+  fillRound(ctx, c.x + c.w - 9, c.y + c.h * 0.24, 9, c.h * 0.72, 4, '#836f64');
+}
+
+// An armchair pulled up to the fire, for Grandpa.
+function drawChairBase(ctx, level) {
+  const c = level.bed;
+  ctx.fillStyle = SHADOW;
+  roundRect(ctx, c.x + 3, c.y + 8, c.w, c.h, 10);
+  ctx.fill();
+  fillRound(ctx, c.x, c.y, c.w, c.h, 10, '#6d4630');
+  fillRound(ctx, c.x + 3, c.y + 3, c.w - 6, c.h * 0.40, 8, '#8a5c3f');
+  fillRound(ctx, c.x, c.y + c.h * 0.22, 11, c.h * 0.74, 6, '#8a5c3f');
+  fillRound(ctx, c.x + c.w - 11, c.y + c.h * 0.22, 11, c.h * 0.74, 6, '#8a5c3f');
+  // A worn seat cushion.
+  fillRound(ctx, c.x + 12, c.y + c.h * 0.42, c.w - 24, c.h * 0.46, 6, '#a97148');
+}
+
+export function drawWatcherFurniture(ctx, level, pose) {
+  if (pose === 'couch') drawCouchBase(ctx, level);
+  else if (pose === 'chair') drawChairBase(ctx, level);
+  else if (pose === 'bed') drawBedBase(ctx, level);
+  // 'desk' and 'guard' draw their own furniture every frame — their screens
+  // flicker and their papers shift, so they cannot live in the static cache.
+}
+
 // ---------------------------------------------------------------- sleeper
-export function drawSleeper(ctx, level, stage, clock, wake = 0, startle = 0, kind = 'sleeper') {
+export function drawSleeper(ctx, level, stage, clock, wake = 0, startle = 0, kind = 'sleeper',
+                            pose = 'bed') {
   const look = sleeperLook(kind);
+  const inBed = pose === 'bed';
   const bed = level.bed;
   const hx = level.sleeper.x;
   const hy = level.sleeper.y;
@@ -877,18 +1023,24 @@ export function drawSleeper(ctx, level, stage, clock, wake = 0, startle = 0, kin
     ctx.stroke();
   }
 
-  // Two pillows, with the near one creased under his head.
-  fillRound(ctx, hx - 29, hy - 18, 58, 33, 10, '#ece3d3');
-  fillRound(ctx, hx - 27, hy - 17, 54, 30, 9, look.pillow);
-  ctx.strokeStyle = 'rgba(206,194,174,0.75)';
-  ctx.lineWidth = 1.4;
-  ctx.beginPath();
-  ctx.moveTo(hx, hy - 15);
-  ctx.lineTo(hx, hy + 11);
-  ctx.stroke();
-  ctx.fillStyle = 'rgba(206,194,174,0.55)';
-  roundRect(ctx, hx - 22, hy + 7, 44, 5, 2.5);
-  ctx.fill();
+  if (inBed) {
+    // Two pillows, with the near one creased under his head.
+    fillRound(ctx, hx - 29, hy - 18, 58, 33, 10, '#ece3d3');
+    fillRound(ctx, hx - 27, hy - 17, 54, 30, 9, look.pillow);
+    ctx.strokeStyle = 'rgba(206,194,174,0.75)';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(hx, hy - 15);
+    ctx.lineTo(hx, hy + 11);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(206,194,174,0.55)';
+    roundRect(ctx, hx - 22, hy + 7, 44, 5, 2.5);
+    ctx.fill();
+  } else {
+    // Not in bed: one cushion shoved under the head, and that is all.
+    fillRound(ctx, hx - 20, hy - 13, 40, 26, 9, '#00000022');
+    fillRound(ctx, hx - 19, hy - 13, 38, 24, 8, look.pillow);
+  }
 
   // Shoulders, just above the duvet line, so he is lying *in* the bed rather
   // than floating on top of it.
@@ -1042,6 +1194,131 @@ export function drawSleeper(ctx, level, stage, clock, wake = 0, startle = 0, kin
     ctx.font = 'bold 17px system-ui';
     ctx.fillStyle = '#ffd0d0';
     ctx.fillText('!', hx + 26, floor(bed.y + 2));
+    ctx.globalAlpha = 1;
+  }
+}
+
+// Asleep at a desk: Mr. Halas face down on the quarterly report, Otakar at the
+// hotel's floor desk. Nothing about them is a bed, so this is its own drawing —
+// the desk, the papers, and a man folded over both.
+export function drawSlumped(ctx, level, stage, clock, wake = 0, startle = 0, kind = 'worker') {
+  const look = sleeperLook(kind);
+  const desk = level.bed;
+  const cx = desk.x + desk.w / 2;
+  const cy = desk.y + desk.h * 0.5;
+
+  // Breathing, slower and deeper than in a bed because he did not mean to
+  // fall asleep here.
+  const rate = [0.5, 0.75, 1.1, 1.55, 2.2, 2.6][stage];
+  const depth = [1.1, 0.9, 0.68, 0.48, 0.34, 0.3][stage];
+  const breath = Math.sin(clock * rate * TAU) * depth;
+  const fidgetRate = [0.08, 0.15, 0.3, 0.55, 0.9, 0][stage];
+  const fidget = Math.max(0, Math.sin(clock * fidgetRate * TAU) - 0.86) * 6;
+  const jolt = startle > 0 ? Math.sin(clock * 25) * startle * 4 : 0;
+  // Waking is sitting up off the desk.
+  const rise = stage === SLEEP_AWAKE ? Math.min(1, wake / 0.45) : 0;
+  const ease = rise * rise * (3 - 2 * rise);
+
+  // The desk.
+  ctx.fillStyle = SHADOW;
+  roundRect(ctx, desk.x + 3, desk.y + 8, desk.w, desk.h, 6);
+  ctx.fill();
+  fillRound(ctx, desk.x, desk.y, desk.w, desk.h, 6, PALETTE.woods[1].dark);
+  fillRound(ctx, desk.x, desk.y, desk.w, desk.h - 7, 6, PALETTE.woods[1].base);
+  fillRound(ctx, desk.x + 4, desk.y + 3, desk.w - 8, desk.h - 15, 4, PALETTE.woods[1].top);
+
+  // The quarterly report, and a lamp at the end of the desk.
+  drawPapers(ctx, desk.x + desk.w - 18, desk.y + desk.h * 0.34);
+  drawLamp(ctx, desk.x + 14, desk.y + desk.h * 0.30);
+
+  // The chair, behind him.
+  fillRound(ctx, cx - 14, cy + desk.h * 0.36, 28, 15, 5, '#3a3f52');
+  fillRound(ctx, cx - 12, cy + desk.h * 0.36 + 2, 24, 10, 4, '#4a5064');
+
+  // Shoulders folded over the desk, in his shirt.
+  const bodyY = cy + 10 - ease * 10;
+  const bodyX = cx + fidget * 0.6 + jolt;
+  fillRound(ctx, bodyX - 19, bodyY - 4 + breath * 0.4, 38, 20, 8, look.shirt || look.shoulder);
+  fillRound(ctx, bodyX - 19, bodyY - 4 + breath * 0.4, 38, 8, 6, '#ffffff22');
+  if (look.tie) {                                   // a tie he never loosened
+    ctx.fillStyle = look.tie;
+    ctx.fillRect(bodyX - 2.5, bodyY + 2, 5, 13);
+  }
+  // Arms out across the desk, one under his head.
+  ctx.strokeStyle = look.shirt || look.shoulder;
+  ctx.lineCap = 'round';
+  ctx.lineWidth = 8;
+  ctx.beginPath();
+  ctx.moveTo(bodyX - 16, bodyY + 2);
+  ctx.quadraticCurveTo(bodyX - 26, bodyY - 10, bodyX - 12, bodyY - 15 + breath * 0.5);
+  ctx.moveTo(bodyX + 16, bodyY + 2);
+  ctx.quadraticCurveTo(bodyX + 26, bodyY - 10, bodyX + 13, bodyY - 15 + breath * 0.5);
+  ctx.stroke();
+
+  // The head, face down on his own forearm.
+  const headX = bodyX;
+  const headY = bodyY - 12 + breath * 0.6 - ease * 12;
+  ctx.fillStyle = look.skinShade;
+  ctx.beginPath();
+  ctx.arc(headX, headY + 1.5, 13, 0, TAU);
+  ctx.fill();
+  ctx.fillStyle = look.skin;
+  ctx.beginPath();
+  ctx.arc(headX, headY, 13, 0, TAU);
+  ctx.fill();
+
+  // Hair. Face down, so mostly the back of his head — until he sits up.
+  ctx.fillStyle = look.hair;
+  if (ease < 0.4) {
+    ctx.beginPath();
+    ctx.arc(headX, headY, 13, 0, TAU);
+    ctx.fill();
+    if (look.style === 'balding') {                 // a thinning crown
+      ctx.fillStyle = look.skin;
+      ctx.beginPath();
+      ctx.ellipse(headX, headY - 1, 6, 5, 0, 0, TAU);
+      ctx.fill();
+    }
+  } else {
+    ctx.beginPath();
+    ctx.arc(headX, headY - 5, 12.5, Math.PI, TAU);
+    ctx.fill();
+    // Sitting up: eyes, and they are open.
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(headX - 5, headY + 2, 3.8, 0, TAU);
+    ctx.arc(headX + 5, headY + 2, 3.8, 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = '#33291f';
+    ctx.beginPath();
+    ctx.arc(headX - 5, headY + 2, 2, 0, TAU);
+    ctx.arc(headX + 5, headY + 2, 2, 0, TAU);
+    ctx.fill();
+  }
+
+  // The read-out above the desk: sleepy Z's, then escalating alarm.
+  const floor = (v) => Math.max(WT + 6, v);
+  if (stage <= SLEEP_LIGHT) {
+    const f = (clock * (stage === SLEEP_DEEP ? 0.42 : 0.6)) % 1;
+    ctx.textAlign = 'left';
+    ctx.globalAlpha = Math.max(0, 1 - f);
+    ctx.fillStyle = '#ffffffdd';
+    ctx.font = 'bold 13px system-ui';
+    ctx.fillText('z', cx + 20, floor(desk.y - 8 - f * 14));
+    if (stage === SLEEP_DEEP) {
+      ctx.font = 'bold 18px system-ui';
+      ctx.fillText('Z', cx + 29, floor(desk.y - 20 - f * 20));
+    }
+    ctx.globalAlpha = 1;
+  } else {
+    const marks = ['', '', '?', '!', '!!', '!!!'][stage];
+    const colors = ['', '', '#ffe08a', '#ffc24d', '#ff8c42', '#ff5252'];
+    const pulse = stage >= SLEEP_CRITICAL ? 0.6 + 0.4 * Math.sin(clock * 9) : 1;
+    ctx.textAlign = 'center';
+    ctx.globalAlpha = pulse;
+    ctx.font = `bold ${16 + stage * 2}px system-ui`;
+    ctx.fillStyle = colors[stage];
+    ctx.fillText(marks, cx, floor(desk.y - 10));
     ctx.globalAlpha = 1;
   }
 }

@@ -77,7 +77,10 @@ test('difficulty rises within each chapter', () => {
 });
 
 test('each new chapter opens easier than the previous one ended', () => {
-  const chapters = Object.values(byTheme());
+  // The generated chapters only. The seven hand-drawn floorplans are one-off
+  // showcase maps rather than a ramp, and each is its own location — grouping
+  // them by theme would give seven chapters of one level and assert nothing.
+  const chapters = Object.values(byTheme()).filter((c) => !c[0].tiles);
   for (let i = 1; i < chapters.length; i++) {
     const previousEnd = levelTotals(chapters[i - 1][chapters[i - 1].length - 1]).noise;
     const opening = levelTotals(chapters[i][0]).noise;
@@ -86,10 +89,47 @@ test('each new chapter opens easier than the previous one ended', () => {
 });
 
 test('the campaign ends harder than it starts', () => {
-  const first = levelTotals(LEVELS[0]);
-  const last = levelTotals(LEVELS[LEVELS.length - 1]);
+  const generated = LEVELS.filter((l) => !l.tiles);
+  const first = levelTotals(generated[0]);
+  const last = levelTotals(generated[generated.length - 1]);
   assert.ok(last.noise > first.noise * 3);
   assert.ok(last.value > first.value * 5);
+});
+
+// The floorplan levels are a different promise: not a ramp, but seven buildings
+// that each have to be worth walking around.
+test('every hand-drawn floorplan is a real building, not one big room', () => {
+  const plans = LEVELS.filter((l) => l.tiles);
+  assert.equal(plans.length, 7, 'expected the seven floorplans');
+  for (const level of plans) {
+    // Bigger than the screen, or the camera has nothing to do.
+    assert.ok(level.width > TUNING.world.width || level.height > TUNING.world.height,
+      `level ${level.id} fits on one screen`);
+    // Rooms, not one open hall.
+    const partitions = level.colliders.filter((c) => c.type === 'partition').length;
+    assert.ok(partitions >= 4, `level ${level.id} has only ${partitions} interior walls`);
+    assert.ok(level.doors.length >= 2, `level ${level.id} has ${level.doors.length} doorways`);
+    // And it has to force the decision the game is about.
+    assert.ok(levelTotals(level).noise > TUNING.noise.max,
+      `level ${level.id} can be cleared out without waking anyone`);
+  }
+});
+
+// The exact proportions asked for, checked rather than trusted: a map drawn at
+// 36x57 must be 36x57 in the game, not 36x55 because a wall moved.
+test('each floorplan is exactly the size it was drawn at', () => {
+  const SIZES = {
+    57: [43, 40], 58: [44, 33], 59: [36, 57], 60: [45, 32],
+    61: [49, 34], 62: [49, 36], 63: [43, 36]
+  };
+  for (const [id, [cols, rows]] of Object.entries(SIZES)) {
+    const level = LEVELS.find((l) => l.id === Number(id));
+    assert.ok(level && level.tiles, `level ${id} is not a tile map`);
+    assert.deepEqual([level.tiles.cols, level.tiles.rows], [cols, rows],
+      `level ${id} is ${level.tiles.cols}x${level.tiles.rows}, drawn as ${cols}x${rows}`);
+    assert.equal(level.width, cols * TUNING.world.tile);
+    assert.equal(level.height, rows * TUNING.world.tile);
+  }
 });
 
 // The promise the game makes: play efficiently and every level is winnable,
@@ -130,9 +170,18 @@ test('the clock shrinks with the campaign but never below the floor', () => {
   for (let i = 1; i < base.length; i++) {
     assert.ok(base[i] <= base[i - 1], 'the base clock must never get more generous');
   }
+  // "Leisurely" has to be measured against how far you have to walk, not in
+  // flat seconds: a 36x57 flat is nearly twice the window's diagonal, and
+  // holding it to a one-screen bedroom's clock would make it unplayable rather
+  // than tense. The allowance scales with distance, so no level is ever more
+  // generous per step than the tightest single-screen room.
+  const windowSpan = Math.hypot(TUNING.world.width, TUNING.world.height);
   for (const level of LEVELS) {
     assert.ok(timeLimit(level) >= TUNING.time.floor);
-    assert.ok(timeLimit(level) <= TUNING.time.base + 12, 'no level should be leisurely');
+    const span = Math.hypot(level.width, level.height);
+    const cap = (TUNING.time.base + 12) * (span / windowSpan);
+    assert.ok(timeLimit(level) <= cap,
+      `level ${level.id} has ${timeLimit(level)}s for a ${level.width}x${level.height} map (cap ${cap.toFixed(0)}s)`);
   }
   assert.ok(base[base.length - 1] < TUNING.time.base, 'later levels must be tighter');
 });

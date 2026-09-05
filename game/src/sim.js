@@ -71,7 +71,7 @@ const UPDATERS = {
     entity.bumpNormalX = normalX;
     entity.bumpNormalY = normalY;
 
-    const clamped = clampToWorld(moved.x, moved.y, entity.w, entity.h);
+    const clamped = clampToWorld(moved.x, moved.y, entity.w, entity.h, sim.level);
     entity.x = clamped.x;
     entity.y = clamped.y;
 

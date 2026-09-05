@@ -2,6 +2,7 @@
 // every collider says what it is, so adding a second bed, a door or a rug can
 // never silently shift what the renderer thinks it is looking at.
 import { TUNING } from './tuning.js';
+import { FLOORPLANS } from './maps.js';
 
 const { width: W, height: H, wallThickness: WT, exitWidth: EXIT_W } = TUNING.world;
 
@@ -341,6 +342,11 @@ function makeLevel(id, layoutKey, spawn, exitSpec, items, options = {}) {
   return {
     id,
     layout: layoutKey,
+    // Every level declares its own size. The rooms built before maps could be
+    // bigger than the screen are exactly one window across, so the camera has
+    // nowhere to travel and they look and play precisely as they always did.
+    width: W,
+    height: H,
     // Theme drives palette and furniture flavour only — never the rules.
     theme: options.theme || 'bedroom',
     name: options.name || 'Bedroom',
@@ -712,7 +718,13 @@ export const LEVELS = [
     [276, 30, 'goldbar', 'bonus'], [276, 220, 'diamond'], [180, 302, 'necklace'],
     [180, 380, 'mirror']
   ], { theme: 'officefloor', name: 'Office Floor', watcher: 'security', extraTime: 15,
-       creaks: [[150, 264, 66, 44], [170, 380, 60, 44]] })
+       creaks: [[150, 264, 66, 44], [170, 380, 60, 44]] }),
+
+  // ---- The seven hand-drawn floorplans, recreated from their references -----
+  // These are a different kind of level: bigger than the screen, walked with a
+  // following camera, and laid out tile for tile rather than generated from a
+  // template. Everything above is untouched.
+  ...FLOORPLANS
 ];
 
 export const collidersOfType = (level, type) =>

@@ -56,8 +56,12 @@ export function solveMove(box, dx, dy, colliders, maxSubStep = TUNING.player.max
   return { x, y, hitX, hitY, hit };
 }
 
-export function clampToWorld(x, y, w, h) {
-  const { width, height } = TUNING.world;
+// Levels are no longer all one size, so the bounds come from the level rather
+// than from a global constant. Defaulting to the window keeps every caller that
+// predates variable-size maps correct.
+export function clampToWorld(x, y, w, h, bounds = TUNING.world) {
+  const width = bounds.width;
+  const height = bounds.height;
   return {
     x: Math.max(w / 2, Math.min(width - w / 2, x)),
     y: Math.max(h / 2, Math.min(height - h / 2 + 10, y))

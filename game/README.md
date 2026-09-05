@@ -135,6 +135,63 @@ asserts the allowance and the partitions go together in both directions.
 - `P` an office floor at night: desk banks and a meeting room upstairs, a
   conference room and the lounge security sits in below.
 
+### Two kinds of level
+
+Levels 1-56 are **generated rooms**: a layout template plus a list of items, all
+exactly one screen across. Levels 57-63 are **hand-drawn floorplans**, recreated
+tile for tile from reference drawings, larger than the screen and walked with a
+following camera. Both produce the same level object, so nothing downstream —
+the simulation, the validator, the save, the test harness — knows there is more
+than one kind.
+
+### Map size and the camera
+
+A level declares its own `width` and `height`. `TUNING.world.width/height` is
+now the **window**: how much of a level you can see at once. A level exactly that
+size never scrolls, which is every one of the first fifty-six — the camera is a
+no-op there and they render identically to before it existed.
+
+The camera lives in the renderer, because where you are looking is presentation
+and the simulation must stay pure. It follows the *interpolated* player position
+rather than the stepped one (following the stepped one would reintroduce exactly
+the judder the interpolation exists to remove), eases exponentially so the feel
+is identical at 60 and 120Hz, and is clamped so no frame can show anything
+outside the map. A map narrower than the window is centred rather than shoved
+against an edge. Impact shake rides on top of the camera transform, so a bang
+can never knock the view off the thief.
+
+The room cache is capped: a whole floorplan at full device resolution can be
+several times the canvas budget, so it is painted at whatever scale fits and the
+small remainder is made up on the blit — and only the visible slice is blitted,
+so drawing the room costs the size of the screen, not the size of the map.
+Items outside the view are skipped entirely.
+
+### Hand-drawn maps
+
+`src/maps.js` holds the seven floorplans as character grids, and the grid *is*
+the map — you can read the building in it. `tilemap.js` turns a grid into a
+level: runs of the same character merge into maximal rectangles (fewer, larger
+colliders, and the physics loop is linear in collider count), and the tile size
+is the only conversion in the system, so a 43x40 drawing becomes a 43x40 map
+rather than 43x38. A test asserts each of the seven is exactly the size it was
+drawn at.
+
+```
+#  outer wall    %  interior wall   O  window    D  doorway
+.  floor         ,  rug (silent)    ~  creaky boards
+E  the sleeper's own furniture      @  spawn     X  the way out
+T table   S sofa/bed   W wardrobe   N nightstand   V tv bench
+C cabinet   B shelving   P display plinth        anything else: loot
+```
+
+Two rules the grids have to respect, both learned by watching rooms seal
+themselves: a doorway needs **two clear tiles** behind it, because the player is
+taller than one tile; and a room needs a walkable aisle from its door, because a
+landing on its own is not enough when the room behind is packed. The maps are
+drafted rather than typed by hand, and the drafting pass carves those aisles —
+but only as deep as connectivity actually needs, or a conference room loses its
+table and the map stops being the drawing.
+
 ### Side exits
 
 The way out is a doorway in the bottom wall unless a level says otherwise:
@@ -168,6 +225,29 @@ game had to learn about any of this.
 
 Levels 1-40 predate the system and a test asserts all forty still default to
 `sleeper`; another asserts every kind that exists is actually used somewhere.
+
+### The seven floorplans
+
+| # | Level | Size | Who |
+|---|---|---|---|
+| 57 | The Museum | 43x40 | Bruno, night guard dozing in the guard room |
+| 58 | Fourth Floor, After Hours | 44x33 | Mr. Halas, face down on the quarterly report |
+| 59 | The Flat, 02:14 | 36x57 | Dad |
+| 60 | St. Vitus, Third Floor | 45x32 | Dr. Marek, out on the staff couch |
+| 61 | Grand Hotel Bohemia | 49x34 | Otakar, asleep at the floor desk |
+| 62 | Komenský Primary | 49x36 | Mr. Vrána, the caretaker |
+| 63 | Grandpa's Cottage | 43x36 | Grandpa, by the fire |
+
+Sizes are in tiles and are exactly as specified — the aspect ratios differ on
+purpose and are never rounded to fit the screen. Bruno is the only one of the
+seven who can see you; the other six are noise alone, in four different poses
+(a bed, a couch, an armchair, face down at a desk), each drawn as its own person
+rather than one model in a different shirt.
+
+Their clocks are longer than the generated rooms', because they are much bigger
+to cross. The test that stops a level being leisurely scales its allowance with
+the map's diagonal, so no level is ever more generous *per step* than the
+tightest single-screen room.
 
 ### Chapters
 

@@ -278,6 +278,9 @@ export function boot() {
     if (setting('music')) audio.startMusic();
     hideCrash();
     renderer.invalidateRoom();
+    // Open the level already framed on the thief rather than easing the view in
+    // from wherever the previous level left it.
+    renderer.snapCamera(level, level.spawn.x, level.spawn.y);
     machine.set('playing');
     if (debug) window.__dwh = { sim, recording, TUNING, saveStore };
   }
@@ -514,7 +517,7 @@ export function boot() {
 
       if (sim) {
         if (flash > 0) flash = Math.max(0, flash - elapsed * 2.4);
-        renderer.draw(sim, Math.min(1, accumulator / STEP_SECONDS), clock, pops, stats, sparks, flash);
+        renderer.draw(sim, Math.min(1, accumulator / STEP_SECONDS), clock, pops, stats, sparks, flash, elapsed);
         paintHud();
       }
       consecutiveErrors = 0;
@@ -640,6 +643,7 @@ export function boot() {
 
   // Something must be on screen behind the menu.
   sim = createSim({ level: LEVELS[0], seed: 1 });
+  renderer.snapCamera(LEVELS[0], LEVELS[0].spawn.x, LEVELS[0].spawn.y);
   requestAnimationFrame((t) => { lastTime = t; frame(t); });
 
   // Debug-only, and a getter rather than the object: `sim` is replaced on every
@@ -648,5 +652,8 @@ export function boot() {
   if (debug) {
     window.__dwhBoot = { machine, saveStore, startLevel, LEVELS, TUNING, SLEEP_LABELS, levelTotals };
     Object.defineProperty(window.__dwhBoot, 'sim', { get: () => sim });
+    // The camera is presentation, so it lives in the renderer — exposed here so
+    // a test can assert it stays inside the map.
+    Object.defineProperty(window.__dwhBoot, 'camera', { get: () => renderer.camera });
   }
 }

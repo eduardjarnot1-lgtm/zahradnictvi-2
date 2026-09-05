@@ -291,11 +291,32 @@ __mod.tuning = (function () {
   // Changing balance is a data edit; a debug tuning panel only has to walk this object.
   const TUNING = {
     world: {
-      width: 400,          // room coordinate space
+      // The camera window, in world units. Every level used to be exactly this
+      // size and wholly on screen; a level may now be larger, in which case this
+      // is how much of it you can see at once. The zoom never changes, so a
+      // player, a door and a wardrobe are the same size in a 400-wide bedroom
+      // and in a 784-wide hotel floor.
+      width: 400,
       height: 620,
       wallThickness: 14,
       hudStrip: 54,        // reserved band above the room, in world units
-      exitWidth: 80
+      exitWidth: 80,
+      // Hand-drawn maps are authored on a tile grid. One tile is a shade under a
+      // player-width, so a corridor two tiles across is comfortably walkable and
+      // the floorplan proportions survive the conversion exactly.
+      // A tile is a little under a player-width, so a two-tile doorway is
+      // comfortably walkable and a five-tile bed is the size of the beds the
+      // hand-placed levels already use. Scale stays identical across map sizes.
+      tile: 20
+    },
+
+    // How the view follows you once a level is bigger than the window.
+    camera: {
+      // Exponential ease. Framerate-independent, so it feels the same at 60 and
+      // 120Hz: high enough to keep up with a run, low enough not to snap.
+      follow: 7.5,
+      // Shake is applied to the camera, so it must not fight the follow.
+      maxShake: 3.4
     },
 
     sim: {
@@ -492,10 +513,49 @@ __mod.tuning = (function () {
       // The school caretaker, asleep in the staff room. Noise only, like the
       // bedroom sleeper — an older man dozing in a chair is not watching for you.
       caretaker: {
-        meter: 'NOISE', person: 'The caretaker', sees: 0, seeRate: 0,
-        warnings: ['THE CARETAKER STIRS…', 'THE CARETAKER IS ALMOST AWAKE',
-          'THE CARETAKER IS WAKING!'],
+        meter: 'NOISE', person: 'Mr. Vrána', sees: 0, seeRate: 0, pose: 'couch',
+        warnings: ['MR. VRÁNA STIRS…', 'MR. VRÁNA IS ALMOST AWAKE',
+          'MR. VRÁNA IS WAKING!'],
         lost: 'HE WOKE UP!', lostWhy: 'The noise reached 100 and the caretaker woke up.'
+      },
+
+      // --- the seven named people of the floorplan levels ---------------------
+      // Bruno is a guard first and asleep second: doze off in front of him and he
+      // stays put, but cross the hall while he is stirring and he sees you.
+      nightguard: {
+        meter: 'ALERT', person: 'Bruno', sees: 150, seeRate: 20, pose: 'guard',
+        warnings: ['BRUNO LOOKS UP', 'BRUNO IS SUSPICIOUS', 'BRUNO IS GETTING UP!'],
+        lost: 'SPOTTED!', lostWhy: 'Bruno reached full alert and saw you.'
+      },
+      // Mr. Halas fell asleep on the quarterly report. Noise only — but he is
+      // face down at his desk, which is a lighter sleep than a bed.
+      worker: {
+        meter: 'NOISE', person: 'Mr. Halas', sees: 0, seeRate: 0, pose: 'desk',
+        warnings: ['MR. HALAS SHIFTS…', 'MR. HALAS IS ALMOST AWAKE', 'MR. HALAS IS WAKING!'],
+        lost: 'HE WOKE UP!', lostWhy: 'The noise reached 100 and Mr. Halas woke up.'
+      },
+      // Otakar, asleep at the floor desk with the whole corridor to watch.
+      porter: {
+        meter: 'NOISE', person: 'Otakar', sees: 0, seeRate: 0, pose: 'desk',
+        warnings: ['OTAKAR STIRS…', 'OTAKAR IS ALMOST AWAKE', 'OTAKAR IS WAKING!'],
+        lost: 'HE WOKE UP!', lostWhy: 'The noise reached 100 and Otakar woke up.'
+      },
+      dad: {
+        meter: 'NOISE', person: 'Dad', sees: 0, seeRate: 0, pose: 'bed',
+        warnings: ['DAD ROLLS OVER…', 'DAD IS ALMOST AWAKE', 'DAD IS WAKING UP!'],
+        lost: 'DAD WOKE UP!', lostWhy: 'The noise reached 100 and Dad woke up.'
+      },
+      // Dr. Marek, out on the staff couch after a long shift.
+      doctor: {
+        meter: 'NOISE', person: 'Dr. Marek', sees: 0, seeRate: 0, pose: 'couch',
+        warnings: ['DR. MAREK STIRS…', 'DR. MAREK IS ALMOST AWAKE', 'DR. MAREK IS WAKING!'],
+        lost: 'HE WOKE UP!', lostWhy: 'The noise reached 100 and Dr. Marek woke up.'
+      },
+      // Grandpa, asleep in the armchair by the fire.
+      grandpa: {
+        meter: 'NOISE', person: 'Grandpa', sees: 0, seeRate: 0, pose: 'chair',
+        warnings: ['GRANDPA STIRS…', 'GRANDPA IS ALMOST AWAKE', 'GRANDPA IS WAKING!'],
+        lost: 'GRANDPA WOKE UP!', lostWhy: 'The noise reached 100 and Grandpa woke up.'
       }
     },
 
@@ -618,6 +678,9 @@ __mod.rules = (function () {
   // answer, so a sofa is always soft and a bookshelf is always loud.
   function furnitureStyle(c) {
     if (c.type === 'bed') return 'bed';
+    // A hand-drawn map names what each piece is; only the older generated rooms
+    // fall through to inferring it from the shape.
+    if (c.style) return c.style;
     const ratio = c.w / c.h;
     // A gallery's small squares are plinths, not nightstands. The museum reads the
     // same way — without this its display blocks drew as brown bedroom furniture.
@@ -873,8 +936,12 @@ __mod.physics = (function () {
     return { x, y, hitX, hitY, hit };
   }
 
-  function clampToWorld(x, y, w, h) {
-    const { width, height } = TUNING.world;
+  // Levels are no longer all one size, so the bounds come from the level rather
+  // than from a global constant. Defaulting to the window keeps every caller that
+  // predates variable-size maps correct.
+  function clampToWorld(x, y, w, h, bounds = TUNING.world) {
+    const width = bounds.width;
+    const height = bounds.height;
     return {
       x: Math.max(w / 2, Math.min(width - w / 2, x)),
       y: Math.max(h / 2, Math.min(height - h / 2 + 10, y))
@@ -882,11 +949,592 @@ __mod.physics = (function () {
   }
   return { overlaps, blocked, blocker, solveMove, clampToWorld };
 })();
+__mod.tilemap = (function () {
+  // Hand-drawn maps, authored as a character grid.
+  //
+  // The seven floorplan levels are recreations of real reference drawings, and a
+  // list of pixel rectangles is the wrong way to write one down: you cannot see
+  // the building in it, and moving a wall means re-deriving every number beside
+  // it. A grid you can read as a floorplan is the right shape for the job — what
+  // is written here looks like the map it produces.
+  //
+  // One tile is TUNING.world.tile world units. That is the only conversion in the
+  // system, so a map's proportions on the grid are exactly its proportions in the
+  // game: a 43x40 drawing becomes a 43x40 map, never 43x38.
+  const { TUNING } = __mod.tuning;
+
+  const TILE = TUNING.world.tile;
+
+  // What each character means. Furniture names its own style rather than letting
+  // the renderer guess from the shape, because these maps place specific things
+  // in specific rooms and a hash is not an opinion about a floorplan.
+  const FURNITURE = {
+    T: 'table', S: 'sofa', W: 'wardrobe', N: 'nightstand',
+    V: 'tvBench', C: 'chest', B: 'bookshelf', P: 'plinth'
+  };
+
+  const FLOOR = new Set([' ', '.', 'D', ',', '~', '@', 'X']);
+
+  // Maximal-rectangle merge over cells sharing a character. Fewer, larger
+  // colliders than one box per tile: the physics loop is linear in collider
+  // count and a floorplan is mostly long straight walls.
+  function mergeRects(grid, rows, cols, wanted) {
+    const used = Array.from({ length: rows }, () => new Array(cols).fill(false));
+    const rects = [];
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        if (used[y][x] || grid[y][x] !== wanted) continue;
+        // Widest run on this row...
+        let w = 0;
+        while (x + w < cols && !used[y][x + w] && grid[y][x + w] === wanted) w++;
+        // ...then as far down as the whole run keeps matching.
+        let h = 1;
+        grow: while (y + h < rows) {
+          for (let i = 0; i < w; i++) {
+            if (used[y + h][x + i] || grid[y + h][x + i] !== wanted) break grow;
+          }
+          h++;
+        }
+        for (let dy = 0; dy < h; dy++) for (let dx = 0; dx < w; dx++) used[y + dy][x + dx] = true;
+        rects.push({ x: x * TILE, y: y * TILE, w: w * TILE, h: h * TILE });
+      }
+    }
+    return rects;
+  }
+
+  // Every cell of a given character, as its own tile rect — for things that must
+  // stay separate (items, the spawn) rather than merge.
+  function cellsOf(grid, rows, cols, test) {
+    const out = [];
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        if (test(grid[y][x])) out.push({ ch: grid[y][x], tx: x, ty: y, x: x * TILE + TILE / 2, y: y * TILE + TILE / 2 });
+      }
+    }
+    return out;
+  }
+
+  /**
+   * Build a level from a character grid.
+   *
+   * Characters:
+   *   `#` outer wall      `%` interior partition   `O` window (in a wall)
+   *   `.` or space floor  `D` doorway (floor, framed as a threshold)
+   *   `,` rug (soft floor, silent underfoot)        `~` creaky boards
+   *   `E` the watcher's own furniture — bed, desk, couch, armchair
+   *   `T S W N V C B P` table sofa wardrobe nightstand tvBench chest bookshelf plinth
+   *   `@` spawn           `X` the way out (cut into an outer wall)
+   *   anything in `legend` is an item of that type
+   */
+  function tileLevel(spec) {
+    const rows = spec.tiles.length;
+    const cols = spec.tiles[0].length;
+    for (let y = 0; y < rows; y++) {
+      if (spec.tiles[y].length !== cols) {
+        throw new Error(`level ${spec.id}: row ${y} is ${spec.tiles[y].length} tiles, expected ${cols}`);
+      }
+    }
+    const grid = spec.tiles.map((row) => [...row]);
+    const legend = spec.legend || {};
+
+    const width = cols * TILE;
+    const height = rows * TILE;
+
+    // --- the building ---------------------------------------------------------
+    const colliders = [];
+    for (const r of mergeRects(grid, rows, cols, '#')) colliders.push({ type: 'wall', ...r });
+    for (const r of mergeRects(grid, rows, cols, '%')) colliders.push({ type: 'partition', ...r });
+    // A window is a hole in a wall you cannot walk through: solid, but drawn as
+    // glass with light coming through it.
+    const windows = mergeRects(grid, rows, cols, 'O');
+    for (const r of windows) colliders.push({ type: 'wall', window: true, ...r });
+
+    // --- the watcher's furniture ---------------------------------------------
+    const watcherRects = mergeRects(grid, rows, cols, 'E');
+    if (!watcherRects.length) throw new Error(`level ${spec.id}: no watcher furniture ('E') on the map`);
+    // The largest, so a desk drawn beside its chair still resolves to the desk.
+    const bedRect = watcherRects.reduce((a, b) => (a.w * a.h >= b.w * b.h ? a : b));
+    const bed = { type: 'bed', ...bedRect };
+    colliders.push(bed);
+    for (const r of watcherRects) if (r !== bedRect) colliders.push({ type: 'furniture', style: 'chest', theme: spec.theme, ...r });
+
+    // --- everything standing in the rooms -------------------------------------
+    for (const [ch, style] of Object.entries(FURNITURE)) {
+      for (const r of mergeRects(grid, rows, cols, ch)) {
+        colliders.push({ type: 'furniture', style, theme: spec.theme, ...r });
+      }
+    }
+
+    // --- floor markings -------------------------------------------------------
+    const rugs = mergeRects(grid, rows, cols, ',');
+    const creaks = mergeRects(grid, rows, cols, '~')
+      .map((r, i) => ({ id: `L${spec.id}-c${i}`, ...r }));
+    const doors = mergeRects(grid, rows, cols, 'D');
+
+    // --- spawn ----------------------------------------------------------------
+    const spawnCells = cellsOf(grid, rows, cols, (ch) => ch === '@');
+    if (spawnCells.length !== 1) {
+      throw new Error(`level ${spec.id}: expected exactly one spawn ('@'), found ${spawnCells.length}`);
+    }
+    const spawn = { x: spawnCells[0].x, y: spawnCells[0].y };
+
+    // --- the way out ----------------------------------------------------------
+    const exitRects = mergeRects(grid, rows, cols, 'X');
+    if (exitRects.length !== 1) {
+      throw new Error(`level ${spec.id}: expected exactly one exit ('X'), found ${exitRects.length}`);
+    }
+    const e = exitRects[0];
+    // Which wall it is cut into, read off the map rather than declared twice.
+    const side = e.x <= TILE ? 'left' : e.x + e.w >= width - TILE ? 'right' : 'bottom';
+    const exit = side === 'bottom'
+      ? { side, x: e.x, y: e.y, w: e.w, h: e.h + TILE }
+      : { side, x: side === 'left' ? 0 : width - e.w, y: e.y, w: e.w, h: e.h };
+
+    // --- loot -----------------------------------------------------------------
+    const items = cellsOf(grid, rows, cols, (ch) => legend[ch] !== undefined)
+      .map((cell, i) => {
+        const entry = legend[cell.ch];
+        const type = typeof entry === 'string' ? entry : entry.type;
+        return {
+          id: `L${spec.id}-${i}`,
+          type,
+          x: cell.x,
+          y: cell.y,
+          bonus: typeof entry === 'object' && !!entry.bonus
+        };
+      });
+
+    // --- anything left over is a typo, and a typo is a broken level ------------
+    const known = new Set([...FLOOR, '#', '%', 'O', 'E', ...Object.keys(FURNITURE), ...Object.keys(legend)]);
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        if (!known.has(grid[y][x])) {
+          throw new Error(`level ${spec.id}: unknown tile '${grid[y][x]}' at ${x},${y}`);
+        }
+      }
+    }
+
+    const kind = spec.watcher || 'sleeper';
+    return {
+      id: spec.id,
+      layout: `tile:${spec.id}`,
+      tiles: { cols, rows },
+      width,
+      height,
+      theme: spec.theme || 'bedroom',
+      name: spec.name || 'Bedroom',
+      extraTime: spec.extraTime || 0,
+      doors,
+      windows,
+      creaks,
+      rugs,
+      spawn,
+      exit,
+      bed,
+      sleeper: { x: bed.x + bed.w / 2, y: bed.y + bed.h * 0.26 },
+      // Where the person actually is. Seated watchers sit at the middle of their
+      // desk; sleeping ones have their head at the pillow end.
+      watcher: {
+        kind,
+        x: bed.x + bed.w / 2,
+        y: bed.y + bed.h * (spec.seated ? 0.5 : 0.26)
+      },
+      colliders,
+      items
+    };
+  }
+
+  // Handy for asserting a map came out the size it was drawn at.
+  const tileSize = TILE;
+  return { tileLevel, tileSize };
+})();
+__mod.maps = (function () {
+  // The seven hand-drawn floorplans, recreated tile for tile from their reference
+  // drawings. Each grid below *is* the map: what you can read here is the shape of
+  // the building, at exactly the proportions the drawing was made at.
+  //
+  // See tilemap.js for what every character means. The short version:
+  //   #  outer wall    %  interior wall   O  window    D  doorway
+  //   .  floor         ,  rug (silent)    ~  creaky boards
+  //   E  the sleeper's own furniture      @  spawn     X  the way out
+  //   T table   S sofa or bed   W wardrobe   N nightstand   V tv bench
+  //   C cabinet   B shelving    P display plinth
+  // Everything else is loot, per LOOT below.
+  //
+  // The grids are drafted rather than typed: a doorway needs two clear tiles
+  // behind it (a player is taller than one tile), and furniture that would seal a
+  // room is trimmed back to leave the landing.
+  const { tileLevel } = __mod.tilemap;
+
+  // One legend for all seven maps, so a `d` is a diamond wherever you see it.
+  const LOOT = {
+    c: 'coin', w: 'wallet', p: 'phone', k: 'headphones', r: 'ring',
+    m: 'camera', t: 'tablet', n: 'console', l: 'laptop', v: 'tv',
+    j: 'jewel', d: 'diamond', g: 'goldbar'
+  };
+
+  const FLOORPLANS = [
+    // ---- 57. The Museum
+    tileLevel({
+      id: 57,
+      name: 'The Museum',
+      theme: 'museum',
+      watcher: 'nightguard',
+      seated: true,
+      extraTime: 42,
+      legend: LOOT,
+      tiles: [
+      '#####OOOOO####################OOOOO########',
+      '#.BBBBBB.....BBBBBB..%.BBBBBB.....BBBBBB..#',
+      '#.BBBBBB.....BBBBBB..%.BBBBBB.....BBBBBB..#',
+      '#....................%....................#',
+      'O..PPP...PPP...PPP...%..PPP...PPP...PPP...O',
+      'O..PPP...PPP...PPP...%..PPP...PPP...PPP...O',
+      'O..PPP...PPP...PPP......PPP...PPP...PPP...O',
+      'O.........................................O',
+      'O...g.....d.....p........d.....p.....g....O',
+      '#....................%....................#',
+      '#..PPP...PPP...PPP...%..PPP...PPP...PPP...#',
+      '#..PPP...PPP...PPP...%..PPP...PPP...PPP...#',
+      '#..PPP.....P...PPP...%..PPP...P.....PPP...#',
+      '#....................%....................#',
+      '#%%%%%%%DDD%%%%%%%%%%%%%%%%%%%%DDD%%%%%%%%#',
+      '#.........................................#',
+      '#............PPP...........PPP............#',
+      '#...SSSSSSS..PPP....v......PPP..SSSSSSS...#',
+      'O...SSSSSSS..PPP...........PPP..SSSSSSS...O',
+      'O..................PPPPP..................O',
+      'O..................PPPPP..................O',
+      'O...........n......PPPPP......m...........O',
+      'O..................PPPPP..................O',
+      '#..................PPPPP..................#',
+      '#...SSSSSSS..PPP...........PPP..SSSSSSS...#',
+      '#...SSSSSSS..PPP....d......PPP..SSSSSSS...#',
+      '#............PPP...,,,,,...PPP............#',
+      '#.........................................#',
+      '#%%%%%DDD%%%%%%%%%%%DDD%%%%%%%%%%%DDD%%%%%#',
+      '#.............%..............%............#',
+      '#.............%..TTT....TTTT.%.BBB...BBBB.#',
+      '#..EEEEEEEE...%..TTTT...TTTT.%.BBBB..BBBB.#',
+      '#..EEEEEEEE...%..............%.BBBBc.BBBB.#',
+      '#..EEEEEEEE.....~~~............BBBB..BBBB.#',
+      '#...............~~~............BBBB..BBBB.#',
+      '#...................,,,,,.................#',
+      '#.CCCCC..TTTT.%.....,,,,,....%.CCCCCCCCC..#',
+      '#.CCCCC..TTTT.%......@.......%.CCCCCCCCC..#',
+      '#.............%..............%............#',
+      '####################XXX####################',
+      ]
+    }),
+    // ---- 58. Fourth Floor
+    tileLevel({
+      id: 58,
+      name: 'Fourth Floor',
+      theme: 'officefloor',
+      watcher: 'worker',
+      seated: true,
+      extraTime: 40,
+      legend: LOOT,
+      tiles: [
+      '####OOOOOO###OOOOOO######OOOOO##############',
+      '#.....................%.........%....%.....#',
+      '#.TTTTTT..TTTTTT.TTTT.%..EEEEEE.%CCC.%TTTT.#',
+      '#.TTTTTT.lTTTTTTtTTTT.%..EEEEEEv%CCC..TTTT.O',
+      '#.....................%..EEEEEE............O',
+      '#.....................%BB..................O',
+      '#.TTTTTT..TTTTTT.TTTT.%BB.........w..%.p...O',
+      '#.TTTTTT.tTTTTTTlTTTT.%BB%%DDD%%%....%%DD%%O',
+      '#.....................%BB.......%....%.....#',
+      '#.....................%.........%....%.....#',
+      '#.TTTTTT..TTTTTT.TTTT.%....................#',
+      '#.TTTTTT.kTTTTTTcTTTT.%........n...........#',
+      '#.....................%....................#',
+      '#.BBBB................%.........%....%.....#',
+      '#.....................%.........%....%.....#',
+      '#%%%%%DDD%%%%%%%DDD%%%%%%%DDD%%%%DDD%%%DD%%#',
+      '#..........CCCC..............CCC...........#',
+      'X...SS.....CCCC.....~~~......CCC...........#',
+      'X...SS..............~~~.................@..#',
+      'X..............w...........................#',
+      '#..........................................#',
+      '#%%%%%%DDD%%%%%%%%%%DDD%%%%%%%DDD%%%%%%DDD%#',
+      '#................%......%..................#',
+      '#.......l........%......%..................#',
+      '#................%......%..................O',
+      '#..........................................O',
+      '#..........................................O',
+      '#............................,,,,,.k.......O',
+      '#................%......%....,,,,,.........O',
+      '#................%.CCCC.%...TTTTTT...VVVV..#',
+      '#.BBBBB..........%.CCCC.%...TTTTTT...VVVV..#',
+      '#.BBBBB..........%......%.m................#',
+      '#####OOOOOO#################OOOOOO##########',
+      ]
+    }),
+    // ---- 59. The Flat, 02:14
+    tileLevel({
+      id: 59,
+      name: 'The Flat, 02:14',
+      theme: 'apartment',
+      watcher: 'dad',
+      seated: false,
+      extraTime: 55,
+      legend: LOOT,
+      tiles: [
+      '#############OOOOOOOO###############',
+      '#..........%...........%...........#',
+      '#.CCC..CCC.%..TTTT.....%.CCCC.CCCC.#',
+      'O.CCC..CCC.%..TTTT.....%.CCCC.CCCC.O',
+      'O.....w....%..TTTT.....%.......r...O',
+      'O..........%.......SSS.%...........O',
+      'O..........%....k..SSS.%...........O',
+      '#..........%.......SSS.%...........#',
+      '#..........%...........%...........#',
+      '#%%%%DDD%%%%%%%DDD%%%%%%%%%%DDD%%%%#',
+      '#..........%...........%...........#',
+      '#..........%.......CCC.%...........#',
+      '#..........%.......CCC.%NNEEEEEE...#',
+      '#.....c....%....n......%NNEEEEEE...#',
+      '#.......................NNEEEEEE...#',
+      '#.CCC..CCC....,,,,,,....NNEEEEEE...#',
+      '#.CCC..CCC....,,,,,,......EEEEEE...#',
+      '#.CCC..CCC.%..,,,,,,...%.....j.....#',
+      '#.CCC..CCC.%..,,,,,,...%...........#',
+      '#..........%..,,,,,,...%...........#',
+      '#.TTT......%...........%.SSS.....w.#',
+      '#.TTT......%..~~~......%.SSS.......#',
+      '#%%%%DDD%%%%%%%DDD%%%%%%%%%%DDD%%%%#',
+      '#..........%...........%...........#',
+      '#..........%.......SSS.%.SSS.......#',
+      '#..........%.......SSS.%.SSS.......#',
+      'O..........%.......SSS.%.SSS.......O',
+      'O..........%.....v.....%....p......O',
+      'O.............,,,,,,...............O',
+      'O.............,,,,,,...............O',
+      'O..................................O',
+      '#......l...%...........%...........#',
+      'X..........%...........%...........#',
+      'X.....@....%..........m%...........#',
+      'X..........%....~~~....%...........#',
+      '#%%%%DDD%%%%%DDD%%%%%%%%%%%%DDD%%%%#',
+      '#..........%.....%.................#',
+      '#..........%.....%.................#',
+      '#..........%.....%..SSSSSS.........#',
+      'O..........%.....%..SSSSSS.t.......O',
+      'O...................SSSSSS.........O',
+      'O......r.......j....SSSSSS.......k.O',
+      'O..................................O',
+      '#..........%.....%.SSSSSSSS........O',
+      '#..........%.....%.SSSSSSSS........#',
+      '#..........%.....%.................#',
+      '#%%%%DDD%%%%%DDD%%%%%%%%%%%%DDD%%%%#',
+      '#..........%...........%...........#',
+      '#..........%...........%...........#',
+      '#......c...%...........%...........#',
+      '#..........%...........%...........#',
+      '#...............p..................#',
+      '#.CCCCCC.....SSSSSSSS....BBBBBBBB..#',
+      '#.CCCCCC.....SSSSSSSS....BBBBBBBB..#',
+      '#..........%...........%.....g.....#',
+      '#..........%...........%...........#',
+      '#############OOOOOOOO###############',
+      ]
+    }),
+    // ---- 60. St. Vitus, Third Floor
+    tileLevel({
+      id: 60,
+      name: 'St. Vitus, Third Floor',
+      theme: 'hospital',
+      watcher: 'doctor',
+      seated: false,
+      extraTime: 42,
+      legend: LOOT,
+      tiles: [
+      '###OOOOOO#####OOOOOO#####OOOOOO##############',
+      '#..........%..........%..........%..........#',
+      '#.SSS..SSS.%SSS..SSS..%SSS..SSS..%.....l....#',
+      'O.SSSNNSSS.%SSSNNSSS..%SSSNNSSS..%.EEEEEEE..O',
+      'O.SSSNNSSS.%SSSNNSSS..%SSSNNSSS..%.EEEEEEE..O',
+      'O.SSS..SSS.%SSS..SSS..%SSS..SSS..%.EEEEEEE..O',
+      '#.SSS..SSS.%SSS..SSS..%SSS..SSS..%.........k#',
+      '#..........%..........%..........%..,,,,,...#',
+      'O.....p....%.....w....%.....r....%..........O',
+      'O..........%..........%..........%..........O',
+      'O..........%..........%..........%..........O',
+      '#..........%..........%..........%..........#',
+      '#%%%%DDD%%%%%%%%DDD%%%%%%%%DDD%%%%%%%%DDD%%%#',
+      '#...........................................#',
+      '#CCC...............TTTTTT................CC.#',
+      'X..................TTTTTT.~~~............CC.#',
+      'X..........w.......TTTTTT.~~~...p..@.....CC.#',
+      'X...........................................#',
+      '#...........................................#',
+      '#%%%%DDD%%%%%%%%DDD%%%%%%%%DDD%%%%%%%%DDD%%%#',
+      '#..........%..........%..........%......m...#',
+      '#..........%..........%....c.....%CCCC......#',
+      '#..........%..........%SSS.......%CCCC......#',
+      'O..........%..........%SSSNN.....%CCCC......O',
+      'O..........%......n...%SSSNN.....%CCCC......O',
+      'O.....t....%.BBBBBBBB.%SSS.......%..........O',
+      '#.CCC..CCC.%.BBBBBBBB.%SSS.......%...j......#',
+      '#.CCC..CCC.%..........%..........%BBBBBBBBB.#',
+      'O.CCC..CCC.%.CCCC.....%..........%BBBBBBBBB.O',
+      'O.CCC..CCC.%.CCCC.....%CCCCCCCC..%BBBBBBBBB.O',
+      'O..........%..........%CCCCCCCC..%..........O',
+      '###OOOOOO#####OOOOOO#####OOOOOO##############',
+      ]
+    }),
+    // ---- 61. Grand Hotel Bohemia
+    tileLevel({
+      id: 61,
+      name: 'Grand Hotel Bohemia',
+      theme: 'hotelfloor',
+      watcher: 'porter',
+      seated: true,
+      extraTime: 45,
+      legend: LOOT,
+      tiles: [
+      '###OOOOOO######OOOOOO######OOOOOO######OOOOOO####',
+      '#...........%...........%...........%...........#',
+      '#SSSS..rWWW.%SSSS..jWWW.%SSSS..wWWW.%.CCCC..CCC.#',
+      '#SSSS...WWW.%SSSS...WWW.%SSSS...WWW.%.CCCC..CCC.#',
+      '#SSSS...WWW.%SSSS...WWW.%SSSS...WWW.%.CCCC..CCC.O',
+      '#SSSS.......%SSSS.......%SSSS.......%...........O',
+      '#....,,,....%....,,,....%....,,,....%.......c...O',
+      '#....,,,CCC.%....,,,CCC.%....,,,CCC.%..BBBBBBB..O',
+      '#TTTT...CCC.%TTTT...CCC.%TTTT...CCC.%..BBBBBBB..O',
+      '#TTTT...CCC.%TTTT...CCC.%TTTT...CCC.%..BBBBBBB..#',
+      '#.......k...%.......m...%.......p...%...........#',
+      '#...........%...........%...........%...........#',
+      '#...........%...........%...........%...........#',
+      '#%%%%DDD%%%%%%%%%DDD%%%%%%%%%DDD%%%%%%%%%DDD%%%%#',
+      '#...............................................#',
+      'X................................EEEEEE.........#',
+      'X,,,.....CCCCCC..~~~.CCCCCC......EEEEEE.........#',
+      'X,,,.....CCCCCC..~~~.CCCCCC......EEEEEE.........#',
+      '#............................................@..#',
+      '#...............................................#',
+      '#%%%%DDD%%%%%%%%%DDD%%%%%%%%%DDD%%%%%%%%%DDD%%%%#',
+      '#...........%...........%...........%...........#',
+      '#SSSS...WWW.%SSSS...WWW.%...........%SSSS...WWW.#',
+      '#SSSS..dWWW.%SSSS..rWWW.%...SSSS....%SSSS..jWWW.#',
+      '#SSSS...WWW.%SSSS...WWW.%...SSSS....%SSSS...WWW.O',
+      '#SSSS.......%SSSS.......%...SSSS....%SSSS.......O',
+      '#....,,,....%....,,,....%..,,,,,,...%....,,,....O',
+      '#....,,,CCC.%....,,,CCC.%..,,,,,,...%....,,,CCC.O',
+      '#TTTT...CCC.%TTTT...CCC.%...SSSS....%TTTT...CCC.O',
+      '#TTTT...CCC.%TTTT...CCC.%...SSSS....%TTTT...CCC.#',
+      '#...........%...........%...SSSS....%...........#',
+      '#.......n...%.......v...%...........%.......k...#',
+      '#...........%...........%.....t.....%...........#',
+      '###OOOOOO######OOOOOO######OOOOOO######OOOOOO####',
+      ]
+    }),
+    // ---- 62. Komenský Primary
+    tileLevel({
+      id: 62,
+      name: 'Komenský Primary',
+      theme: 'school',
+      watcher: 'caretaker',
+      seated: false,
+      extraTime: 45,
+      legend: LOOT,
+      tiles: [
+      '###OOOOOOOO#########OOOOOOOO########OOOOOOOO#####',
+      '#BBBBBB.........%BBBBBB.........%...............#',
+      '#...............%...............%BBB..BBB..BBBB.#',
+      '#TTT..TTT..TTT..%TTT..TTT..TTT..%BBB..BBB..BBBB.#',
+      'OTTT..TTT..TTT..%TTT..TTT..TTT..%BBB..BBB..BBBB.O',
+      'O....t..........%....l..........%BBB..BBB..BBBB.O',
+      'O...............%...............%BBB..BBB..BBBB.O',
+      'OTTT..TTT..TTT..%TTT..TTT..TTT..%...............O',
+      'OTTT..TTT..TTT..%TTT..TTT..TTT..%....p........n.O',
+      'O...........k...%...........t...%...........SSS.O',
+      '#...............%...............%...........SSS.#',
+      '#TTT.......TTT..%TTT.......TTT..%...........SSS.#',
+      '#TTT.......TTT..%TTT.......TTT..%...............#',
+      '#...............%...............%.w.............#',
+      '#%%%%%%DDD%%%%%%%%%%%%%DDD%%%%%%%%%%%%%DDD%%%%%%#',
+      '#CCCCC......CCCCCCCCC.......CCCCCCCCC......CCCCC#',
+      'X...CC......CCCCCCCCC..~~~..CCCCCCCCC......CCCCC#',
+      'X......................~~~......................#',
+      'X.,,,,,,,,...................................@..#',
+      '#.,,,,,,,,.c.............w..............p.......#',
+      '#...............................................#',
+      '#%%%%%%%%DDD%%%%%%%%%%%%%DDD%%%%%%%%%%%DDD%%%%%%#',
+      '#...................%.............%.............#',
+      '#...................%........CCCC.%.............#',
+      '#...................%........CCCC.%.............#',
+      '#...................%.............%.............#',
+      '#..................k%.CCCC........%.............#',
+      '#...................%.CCCC.....r................#',
+      '#.SSSSSSSSSSSSSSSS..%...................m.......#',
+      '#.SSSSSSSSSSSSSSSS..%..EEEEEEE..................#',
+      '#...................%..EEEEEEE....%CCCC...CCCCC.#',
+      '#...................%..EEEEEEE....%CCCC...CCCCC.#',
+      '#.SSSSSSSSSS........%.............%CCCC...CCCCC.#',
+      '#.SSSSSSSSSS..v.....%...,,,,,.....%.............#',
+      '#...................%.............%.............#',
+      '####OOOOOOOOOO########OOOOOOOO###################',
+      ]
+    }),
+    // ---- 63. Grandpa's Cottage
+    tileLevel({
+      id: 63,
+      name: "Grandpa's Cottage",
+      theme: 'cottage',
+      watcher: 'grandpa',
+      seated: false,
+      extraTime: 40,
+      legend: LOOT,
+      tiles: [
+      '####OOOOOOO##################OOOOOOOO######',
+      '#...............%.........%...............#',
+      '#...............%.CCCCCC..%...............#',
+      '#CC......c......%.CCCCCC..%NNSSSSSS.NN....#',
+      '#CC.......TTTTT.%....w....%NNSSSSSS.NN....#',
+      'OCCEEEEE..TTTTT.%.........%NNSSSSSS.NN....O',
+      'OCCEEEEE..TTTTT.%.,,,,,,..%..SSSSSS.......O',
+      'O..EEEEE..TTTTT...,,,,,,.....SSSSSS.......O',
+      'O.................,,,,,,..................O',
+      'O...,,,,,,,,.r....,,,,,,........j.....WWWWO',
+      '#...,,,,,,,,....%.,,,,,,..%.VVVVVVVV..WWWW#',
+      '#..SSSSSS..BBBB.%.,,,,,,..%.VVVVVVVV..WWWW#',
+      '#..SSSSSS..BBBB.%.,,,,,,..%.VVVVVVVV..WWWW#',
+      '#..........BBBB.%.,,,,,,..%...........WWWW#',
+      '#.CCCCC..n......%.........%t..............#',
+      '#.CCCCC.........%....p....%.CCCCCC...m....#',
+      '#...............%.........%...............#',
+      '#%%%%%%%%%%%%%%%%%%DDDD%%%%%%%%%%%%%%%%%%%%',
+      '#...............%..~~~....%...............#',
+      '#.CCCC..CCCCCCC.%..~~~....%.BBB.BBB.CCCCCC#',
+      '#.CCCC..CCCCCCC.%.,,,,,,..%.BBB.BBB.CCCCCC#',
+      '#...............%.,,,,,,....BBB.BBB.......#',
+      '#......k........%.,,,,,,....BBB.BBB.CCCCCC#',
+      '#...............%.,,,,,,....BBB.BBB.CCCCCC#',
+      'O...TTTTTTTT......,,,,,,..%...............#',
+      'O...TTTTTTTT......,,,,,,..%.......w....r..#',
+      'O...TTTTTTTT......,,,,,,..%%%%%DDD%%%%%%%%#',
+      'O...TTTTTTTT....%.,,,,,,..................#',
+      'O...............%.,,,,,,....TTT....SSSSSS.#',
+      '#..p.........c..%.,,,,,,....TTTTT..SSSSSS.O',
+      '#...............%....@......TTTTT..SSSSSS.O',
+      '#.CCCCCC..BBBBB.%.........................O',
+      '#.CCCCCC..BBBBB.%.C....C......v...........O',
+      '#...............%.C....C....SSSSSSSSSSSS..#',
+      '#...............%...........SSSSSSSSSSSS..#',
+      '###################XXXX######OOOOOOOOOO####',
+      ]
+    })
+  ];
+  return { FLOORPLANS };
+})();
 __mod.levels = (function () {
   // Level data in a tagged schema. Nothing is identified by array index any more:
   // every collider says what it is, so adding a second bed, a door or a rug can
   // never silently shift what the renderer thinks it is looking at.
   const { TUNING } = __mod.tuning;
+  const { FLOORPLANS } = __mod.maps;
 
   const { width: W, height: H, wallThickness: WT, exitWidth: EXIT_W } = TUNING.world;
 
@@ -1226,6 +1874,11 @@ __mod.levels = (function () {
     return {
       id,
       layout: layoutKey,
+      // Every level declares its own size. The rooms built before maps could be
+      // bigger than the screen are exactly one window across, so the camera has
+      // nowhere to travel and they look and play precisely as they always did.
+      width: W,
+      height: H,
       // Theme drives palette and furniture flavour only — never the rules.
       theme: options.theme || 'bedroom',
       name: options.name || 'Bedroom',
@@ -1597,7 +2250,13 @@ __mod.levels = (function () {
       [276, 30, 'goldbar', 'bonus'], [276, 220, 'diamond'], [180, 302, 'necklace'],
       [180, 380, 'mirror']
     ], { theme: 'officefloor', name: 'Office Floor', watcher: 'security', extraTime: 15,
-         creaks: [[150, 264, 66, 44], [170, 380, 60, 44]] })
+         creaks: [[150, 264, 66, 44], [170, 380, 60, 44]] }),
+
+    // ---- The seven hand-drawn floorplans, recreated from their references -----
+    // These are a different kind of level: bigger than the screen, walked with a
+    // following camera, and laid out tile for tile rather than generated from a
+    // template. Everything above is untouched.
+    ...FLOORPLANS
   ];
 
   const collidersOfType = (level, type) =>
@@ -1615,7 +2274,8 @@ __mod.validate = (function () {
 
   // Every position the player box can legally stand in, reachable from spawn.
   function reachableCells(level) {
-    const { width: W, height: H } = TUNING.world;
+    const W = level.width;
+    const H = level.height;
     const { boxWidth: PW, boxHeight: PH } = TUNING.player;
     const cols = Math.ceil(W / GRID);
     const rows = Math.ceil(H / GRID);
@@ -1659,11 +2319,13 @@ __mod.validate = (function () {
   function validateLevel(level) {
     const errors = [];
     const warnings = [];
-    const { width: W, height: H } = TUNING.world;
+    const W = level.width;
+    const H = level.height;
     const { boxWidth: PW, boxHeight: PH } = TUNING.player;
     const cols = Math.ceil(W / GRID);
 
     if (!level.items.length) errors.push('level has no items');
+    if (!(W > 0) || !(H > 0)) errors.push('level does not declare a size');
 
     // Spawn must be legal.
     if (blocked(level.spawn.x, level.spawn.y, PW, PH, level.colliders)) {
@@ -1855,7 +2517,7 @@ __mod.sim = (function () {
       entity.bumpNormalX = normalX;
       entity.bumpNormalY = normalY;
 
-      const clamped = clampToWorld(moved.x, moved.y, entity.w, entity.h);
+      const clamped = clampToWorld(moved.x, moved.y, entity.w, entity.h, sim.level);
       entity.x = clamped.x;
       entity.y = clamped.y;
 
@@ -2861,7 +3523,12 @@ __mod.art = (function () {
   const { TUNING } = __mod.tuning;
   const { SLEEP_DEEP, SLEEP_LIGHT, SLEEP_DISTURBED, SLEEP_ALMOST, SLEEP_CRITICAL, SLEEP_AWAKE, furnitureStyle, hash, watcherConfig } = __mod.rules;
 
-  const { width: W, height: H, wallThickness: WT } = TUNING.world;
+  const { wallThickness: WT } = TUNING.world;
+  // The room's own size, set once per paint. Every use of these lives inside
+  // paintStaticRoom's call tree, which runs synchronously, so this is the same
+  // arrangement the theme already uses rather than a new kind of global.
+  let W = TUNING.world.width;
+  let H = TUNING.world.height;
   const TAU = Math.PI * 2;
 
   const PALETTE = {
@@ -2931,7 +3598,31 @@ __mod.art = (function () {
     // the staff room under a worn olive blanket rather than a duvet.
     caretaker: { hair: '#9aa0a6', style: 'balding', skin: '#e8bb92', skinShade: '#cfa079',
                  duvet: '#6f7c4e', duvetTop: '#899763', fold: 'rgba(40,52,26,0.35)',
-                 sheet: '#e6e2d2', pillow: '#f2ecdc', shoulder: '#dfe0cf' }
+                 sheet: '#e6e2d2', pillow: '#f2ecdc', shoulder: '#dfe0cf' },
+
+    // --- the seven of the floorplan levels ------------------------------------
+    // Dad: dark, greying at the temples, under the flat's grey-blue bedding.
+    dad:       { hair: '#4a3f38', style: 'short', skin: '#eec49c', skinShade: '#d6a97f',
+                 duvet: '#7d8aa6', duvetTop: '#98a5be', fold: 'rgba(38,48,68,0.35)',
+                 sheet: '#eef1f6', pillow: '#fbfaf6', shoulder: '#e8ecf3' },
+    // Dr. Marek: dark hair, still in his scrubs, under a thin hospital blanket.
+    doctor:    { hair: '#2f2a26', style: 'short', skin: '#e6b98f', skinShade: '#cca377',
+                 duvet: '#5f8f92', duvetTop: '#7aa9ac', fold: 'rgba(26,58,60,0.35)',
+                 sheet: '#e8f1f0', pillow: '#f4faf9', shoulder: '#cfe2e0' },
+    // Grandpa: white, thin on top, a knitted blanket over his knees.
+    grandpa:   { hair: '#dcd8d2', style: 'balding', skin: '#e2b58f', skinShade: '#c89a76',
+                 duvet: '#8a5a3c', duvetTop: '#a5714f', fold: 'rgba(58,34,20,0.4)',
+                 sheet: '#ead9c2', pillow: '#f3e6d2', shoulder: '#d9c4a8' },
+    // Mr. Halas: thinning, still in his shirt and tie.
+    worker:    { hair: '#3b342c', style: 'balding', skin: '#efc59c', skinShade: '#d6a87f',
+                 duvet: '#5b6478', duvetTop: '#737d93', fold: 'rgba(30,36,48,0.35)',
+                 sheet: '#eef0f4', pillow: '#f7f8fa', shoulder: '#dfe3ea',
+                 shirt: '#eef2f7', tie: '#8c3a44' },
+    // Otakar: hotel burgundy and brass.
+    porter:    { hair: '#241d18', style: 'short', skin: '#e9bd94', skinShade: '#cfa176',
+                 duvet: '#7a2f36', duvetTop: '#9a464d', fold: 'rgba(50,16,20,0.4)',
+                 sheet: '#f0e3d6', pillow: '#f8efe2', shoulder: '#e5d3c0',
+                 shirt: '#7a2f36', tie: '#c8a24a' }
   };
 
   const sleeperLook = (kind) => SLEEPER_LOOKS[kind] || SLEEPER_LOOKS.sleeper;
@@ -2986,7 +3677,15 @@ __mod.art = (function () {
     // Grey contract carpet and a dark ceiling, after the open-plan reference.
     officefloor:{ wall: '#333a44', lip: '#464e5b', shade: '#242a32', skirt: '#7f8b9c',
                  floor: '#7f8a7c', alt: '#778274', seam: 'rgba(92,100,90,0.55)',
-                 grain: 'rgba(160,170,158,0.24)', light: '214,236,255', vignette: '16,20,26' }
+                 grain: 'rgba(160,170,158,0.24)', light: '214,236,255', vignette: '16,20,26' },
+    // Pale green tile and hard strip lighting: a hospital floor at night.
+    hospital:  { wall: '#33565a', lip: '#457076', shade: '#254045', skirt: '#bcd8d4',
+                 floor: '#b6c4bd', alt: '#adbcb5', seam: 'rgba(126,140,132,0.5)',
+                 grain: 'rgba(206,218,210,0.22)', light: '224,244,255', vignette: '16,28,30' },
+    // Dark green boards and firelight, after the cottage reference.
+    cottage:   { wall: '#3d4a35', lip: '#516046', shade: '#2c3627', skirt: '#c4b58c',
+                 floor: '#b5763a', alt: '#a96d34', seam: 'rgba(134,84,38,0.6)',
+                 grain: 'rgba(212,148,86,0.30)', light: '255,208,132', vignette: '26,24,14' }
   };
 
   let T = THEMES.bedroom;   // set once per room paint; drawing is synchronous
@@ -3627,38 +4326,147 @@ __mod.art = (function () {
   }
 
   // Everything that never moves, drawn once per level into an offscreen canvas.
+  // A wall slab on a hand-drawn map. The building's shape comes from the grid
+  // rather than from a fixed rectangle round the edge, so each run of wall is
+  // drawn as its own block: a dark base, a lit top edge, and skirting down the
+  // faces that look into a room.
+  function drawWallSlab(ctx, c) {
+    ctx.fillStyle = 'rgba(24,12,20,0.38)';
+    roundRect(ctx, c.x + 2, c.y + 5, c.w, c.h, 2);
+    ctx.fill();
+    fillRound(ctx, c.x, c.y, c.w, c.h, 2, T.shade);
+    fillRound(ctx, c.x, c.y, c.w, Math.max(3, c.h - 4), 2, T.wall);
+    fillRound(ctx, c.x, c.y, c.w, Math.min(4, c.h * 0.35), 1.5, T.lip);
+    ctx.fillStyle = T.skirt;
+    ctx.fillRect(c.x, c.y + c.h - 2.5, c.w, 2.5);
+  }
+
+  // A window: a lit pane in the wall, and the light it throws on the floor. On a
+  // floorplan these are what tell you which side of the building you are on.
+  function drawWindowPane(ctx, c) {
+    const vertical = c.h > c.w;
+    fillRound(ctx, c.x, c.y, c.w, c.h, 2, T.shade);
+    fillRound(ctx, c.x + 2, c.y + 2, c.w - 4, c.h - 4, 1.5, '#cfe6ff');
+    ctx.strokeStyle = 'rgba(70,90,120,0.55)';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    const bars = Math.max(1, Math.round((vertical ? c.h : c.w) / 34));
+    for (let i = 1; i < bars; i++) {
+      if (vertical) {
+        const y = c.y + (c.h / bars) * i;
+        ctx.moveTo(c.x, y);
+        ctx.lineTo(c.x + c.w, y);
+      } else {
+        const x = c.x + (c.w / bars) * i;
+        ctx.moveTo(x, c.y);
+        ctx.lineTo(x, c.y + c.h);
+      }
+    }
+    ctx.stroke();
+
+    // A soft pool of moonlight spilling inward.
+    const cx = c.x + c.w / 2;
+    const cy = c.y + c.h / 2;
+    const reach = Math.max(c.w, c.h) * 1.5 + 40;
+    const pool = ctx.createRadialGradient(cx, cy, 4, cx, cy, reach);
+    pool.addColorStop(0, `rgba(${T.light},0.20)`);
+    pool.addColorStop(1, `rgba(${T.light},0)`);
+    ctx.fillStyle = pool;
+    ctx.beginPath();
+    ctx.arc(cx, cy, reach, 0, TAU);
+    ctx.fill();
+  }
+
   function paintStaticRoom(ctx, level) {
     T = THEMES[level.theme] || THEMES.bedroom;
+    W = level.width;
+    H = level.height;
     lampPositions.length = 0;
     drawFloor(ctx);
     for (const rug of level.rugs) drawRug(ctx, rug);
     for (const zone of level.creaks) drawCreakZone(ctx, zone);
-    drawWalls(ctx);
-    // After the walls: the window is cut into one, and its light falls on top
-    // of the floor that is already down.
-    drawSunbeam(ctx, WINDOWS[level.layout] || 'left');
-    // Interior walls first, so furniture standing against them overlaps correctly.
-    for (const c of level.colliders) {
-      if (c.type === 'partition') drawPartition(ctx, c);
+
+    if (level.tiles) {
+      // A hand-drawn map: the building is whatever the grid says it is.
+      for (const c of level.colliders) {
+        if (c.type === 'wall' && !c.window) drawWallSlab(ctx, c);
+      }
+      for (const c of level.colliders) {
+        if (c.type === 'partition') drawPartition(ctx, c);
+      }
+      // Windows after the walls, so their light falls over the room.
+      for (const c of level.colliders) {
+        if (c.type === 'wall' && c.window) drawWindowPane(ctx, c);
+      }
+    } else {
+      drawWalls(ctx);
+      // After the walls: the window is cut into one, and its light falls on top
+      // of the floor that is already down.
+      drawSunbeam(ctx, WINDOWS[level.layout] || 'left');
+      // Interior walls first, so furniture standing against them overlaps.
+      for (const c of level.colliders) {
+        if (c.type === 'partition') drawPartition(ctx, c);
+      }
     }
     for (const door of level.doors) drawDoorway(ctx, door);
     for (const c of level.colliders) {
       if (c.type === 'furniture') drawFurniture(ctx, c);
     }
-    // A guard's room gets a desk instead of a bed; the desk itself is drawn with
-    // the guard each frame, since his monitors flicker.
-    if (watcherConfig(level.watcher.kind).sees === 0) drawBedBase(ctx, level);
+    // Whatever this level's person is asleep on — a bed, a couch, an armchair —
+    // or nothing, when they are at a desk that is drawn live each frame.
+    drawWatcherFurniture(ctx, level, watcherConfig(level.watcher.kind).pose || 'bed');
 
-    const vignette = ctx.createRadialGradient(W / 2, H / 2, H * 0.30, W / 2, H / 2, H * 0.74);
+    // The vignette is sized to the map, so a wide floorplan is not darkened at
+    // its ends the way a tall one is at its corners.
+    const span = Math.max(W, H);
+    const vignette = ctx.createRadialGradient(W / 2, H / 2, span * 0.34, W / 2, H / 2, span * 0.80);
     vignette.addColorStop(0, 'rgba(0,0,0,0)');
     vignette.addColorStop(1, `rgba(${T.vignette},0.32)`);
     ctx.fillStyle = vignette;
     ctx.fillRect(0, 0, W, H);
   }
 
+  // A couch, drawn from the watcher's own collider: what Dr. Marek and Mr. Vrána
+  // are asleep on. Same construction as the room's sofas, at whatever size the
+  // map drew it.
+  function drawCouchBase(ctx, level) {
+    const c = level.bed;
+    ctx.fillStyle = SHADOW;
+    roundRect(ctx, c.x + 3, c.y + 8, c.w, c.h, 9);
+    ctx.fill();
+    fillRound(ctx, c.x, c.y, c.w, c.h, 9, '#6a5a52');
+    fillRound(ctx, c.x + 3, c.y + 3, c.w - 6, c.h * 0.34, 6, '#836f64');
+    fillRound(ctx, c.x, c.y + c.h * 0.24, 9, c.h * 0.72, 4, '#836f64');
+    fillRound(ctx, c.x + c.w - 9, c.y + c.h * 0.24, 9, c.h * 0.72, 4, '#836f64');
+  }
+
+  // An armchair pulled up to the fire, for Grandpa.
+  function drawChairBase(ctx, level) {
+    const c = level.bed;
+    ctx.fillStyle = SHADOW;
+    roundRect(ctx, c.x + 3, c.y + 8, c.w, c.h, 10);
+    ctx.fill();
+    fillRound(ctx, c.x, c.y, c.w, c.h, 10, '#6d4630');
+    fillRound(ctx, c.x + 3, c.y + 3, c.w - 6, c.h * 0.40, 8, '#8a5c3f');
+    fillRound(ctx, c.x, c.y + c.h * 0.22, 11, c.h * 0.74, 6, '#8a5c3f');
+    fillRound(ctx, c.x + c.w - 11, c.y + c.h * 0.22, 11, c.h * 0.74, 6, '#8a5c3f');
+    // A worn seat cushion.
+    fillRound(ctx, c.x + 12, c.y + c.h * 0.42, c.w - 24, c.h * 0.46, 6, '#a97148');
+  }
+
+  function drawWatcherFurniture(ctx, level, pose) {
+    if (pose === 'couch') drawCouchBase(ctx, level);
+    else if (pose === 'chair') drawChairBase(ctx, level);
+    else if (pose === 'bed') drawBedBase(ctx, level);
+    // 'desk' and 'guard' draw their own furniture every frame — their screens
+    // flicker and their papers shift, so they cannot live in the static cache.
+  }
+
   // ---------------------------------------------------------------- sleeper
-  function drawSleeper(ctx, level, stage, clock, wake = 0, startle = 0, kind = 'sleeper') {
+  function drawSleeper(ctx, level, stage, clock, wake = 0, startle = 0, kind = 'sleeper',
+                              pose = 'bed') {
     const look = sleeperLook(kind);
+    const inBed = pose === 'bed';
     const bed = level.bed;
     const hx = level.sleeper.x;
     const hy = level.sleeper.y;
@@ -3726,18 +4534,24 @@ __mod.art = (function () {
       ctx.stroke();
     }
 
-    // Two pillows, with the near one creased under his head.
-    fillRound(ctx, hx - 29, hy - 18, 58, 33, 10, '#ece3d3');
-    fillRound(ctx, hx - 27, hy - 17, 54, 30, 9, look.pillow);
-    ctx.strokeStyle = 'rgba(206,194,174,0.75)';
-    ctx.lineWidth = 1.4;
-    ctx.beginPath();
-    ctx.moveTo(hx, hy - 15);
-    ctx.lineTo(hx, hy + 11);
-    ctx.stroke();
-    ctx.fillStyle = 'rgba(206,194,174,0.55)';
-    roundRect(ctx, hx - 22, hy + 7, 44, 5, 2.5);
-    ctx.fill();
+    if (inBed) {
+      // Two pillows, with the near one creased under his head.
+      fillRound(ctx, hx - 29, hy - 18, 58, 33, 10, '#ece3d3');
+      fillRound(ctx, hx - 27, hy - 17, 54, 30, 9, look.pillow);
+      ctx.strokeStyle = 'rgba(206,194,174,0.75)';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(hx, hy - 15);
+      ctx.lineTo(hx, hy + 11);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(206,194,174,0.55)';
+      roundRect(ctx, hx - 22, hy + 7, 44, 5, 2.5);
+      ctx.fill();
+    } else {
+      // Not in bed: one cushion shoved under the head, and that is all.
+      fillRound(ctx, hx - 20, hy - 13, 40, 26, 9, '#00000022');
+      fillRound(ctx, hx - 19, hy - 13, 38, 24, 8, look.pillow);
+    }
 
     // Shoulders, just above the duvet line, so he is lying *in* the bed rather
     // than floating on top of it.
@@ -3891,6 +4705,131 @@ __mod.art = (function () {
       ctx.font = 'bold 17px system-ui';
       ctx.fillStyle = '#ffd0d0';
       ctx.fillText('!', hx + 26, floor(bed.y + 2));
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // Asleep at a desk: Mr. Halas face down on the quarterly report, Otakar at the
+  // hotel's floor desk. Nothing about them is a bed, so this is its own drawing —
+  // the desk, the papers, and a man folded over both.
+  function drawSlumped(ctx, level, stage, clock, wake = 0, startle = 0, kind = 'worker') {
+    const look = sleeperLook(kind);
+    const desk = level.bed;
+    const cx = desk.x + desk.w / 2;
+    const cy = desk.y + desk.h * 0.5;
+
+    // Breathing, slower and deeper than in a bed because he did not mean to
+    // fall asleep here.
+    const rate = [0.5, 0.75, 1.1, 1.55, 2.2, 2.6][stage];
+    const depth = [1.1, 0.9, 0.68, 0.48, 0.34, 0.3][stage];
+    const breath = Math.sin(clock * rate * TAU) * depth;
+    const fidgetRate = [0.08, 0.15, 0.3, 0.55, 0.9, 0][stage];
+    const fidget = Math.max(0, Math.sin(clock * fidgetRate * TAU) - 0.86) * 6;
+    const jolt = startle > 0 ? Math.sin(clock * 25) * startle * 4 : 0;
+    // Waking is sitting up off the desk.
+    const rise = stage === SLEEP_AWAKE ? Math.min(1, wake / 0.45) : 0;
+    const ease = rise * rise * (3 - 2 * rise);
+
+    // The desk.
+    ctx.fillStyle = SHADOW;
+    roundRect(ctx, desk.x + 3, desk.y + 8, desk.w, desk.h, 6);
+    ctx.fill();
+    fillRound(ctx, desk.x, desk.y, desk.w, desk.h, 6, PALETTE.woods[1].dark);
+    fillRound(ctx, desk.x, desk.y, desk.w, desk.h - 7, 6, PALETTE.woods[1].base);
+    fillRound(ctx, desk.x + 4, desk.y + 3, desk.w - 8, desk.h - 15, 4, PALETTE.woods[1].top);
+
+    // The quarterly report, and a lamp at the end of the desk.
+    drawPapers(ctx, desk.x + desk.w - 18, desk.y + desk.h * 0.34);
+    drawLamp(ctx, desk.x + 14, desk.y + desk.h * 0.30);
+
+    // The chair, behind him.
+    fillRound(ctx, cx - 14, cy + desk.h * 0.36, 28, 15, 5, '#3a3f52');
+    fillRound(ctx, cx - 12, cy + desk.h * 0.36 + 2, 24, 10, 4, '#4a5064');
+
+    // Shoulders folded over the desk, in his shirt.
+    const bodyY = cy + 10 - ease * 10;
+    const bodyX = cx + fidget * 0.6 + jolt;
+    fillRound(ctx, bodyX - 19, bodyY - 4 + breath * 0.4, 38, 20, 8, look.shirt || look.shoulder);
+    fillRound(ctx, bodyX - 19, bodyY - 4 + breath * 0.4, 38, 8, 6, '#ffffff22');
+    if (look.tie) {                                   // a tie he never loosened
+      ctx.fillStyle = look.tie;
+      ctx.fillRect(bodyX - 2.5, bodyY + 2, 5, 13);
+    }
+    // Arms out across the desk, one under his head.
+    ctx.strokeStyle = look.shirt || look.shoulder;
+    ctx.lineCap = 'round';
+    ctx.lineWidth = 8;
+    ctx.beginPath();
+    ctx.moveTo(bodyX - 16, bodyY + 2);
+    ctx.quadraticCurveTo(bodyX - 26, bodyY - 10, bodyX - 12, bodyY - 15 + breath * 0.5);
+    ctx.moveTo(bodyX + 16, bodyY + 2);
+    ctx.quadraticCurveTo(bodyX + 26, bodyY - 10, bodyX + 13, bodyY - 15 + breath * 0.5);
+    ctx.stroke();
+
+    // The head, face down on his own forearm.
+    const headX = bodyX;
+    const headY = bodyY - 12 + breath * 0.6 - ease * 12;
+    ctx.fillStyle = look.skinShade;
+    ctx.beginPath();
+    ctx.arc(headX, headY + 1.5, 13, 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = look.skin;
+    ctx.beginPath();
+    ctx.arc(headX, headY, 13, 0, TAU);
+    ctx.fill();
+
+    // Hair. Face down, so mostly the back of his head — until he sits up.
+    ctx.fillStyle = look.hair;
+    if (ease < 0.4) {
+      ctx.beginPath();
+      ctx.arc(headX, headY, 13, 0, TAU);
+      ctx.fill();
+      if (look.style === 'balding') {                 // a thinning crown
+        ctx.fillStyle = look.skin;
+        ctx.beginPath();
+        ctx.ellipse(headX, headY - 1, 6, 5, 0, 0, TAU);
+        ctx.fill();
+      }
+    } else {
+      ctx.beginPath();
+      ctx.arc(headX, headY - 5, 12.5, Math.PI, TAU);
+      ctx.fill();
+      // Sitting up: eyes, and they are open.
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(headX - 5, headY + 2, 3.8, 0, TAU);
+      ctx.arc(headX + 5, headY + 2, 3.8, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#33291f';
+      ctx.beginPath();
+      ctx.arc(headX - 5, headY + 2, 2, 0, TAU);
+      ctx.arc(headX + 5, headY + 2, 2, 0, TAU);
+      ctx.fill();
+    }
+
+    // The read-out above the desk: sleepy Z's, then escalating alarm.
+    const floor = (v) => Math.max(WT + 6, v);
+    if (stage <= SLEEP_LIGHT) {
+      const f = (clock * (stage === SLEEP_DEEP ? 0.42 : 0.6)) % 1;
+      ctx.textAlign = 'left';
+      ctx.globalAlpha = Math.max(0, 1 - f);
+      ctx.fillStyle = '#ffffffdd';
+      ctx.font = 'bold 13px system-ui';
+      ctx.fillText('z', cx + 20, floor(desk.y - 8 - f * 14));
+      if (stage === SLEEP_DEEP) {
+        ctx.font = 'bold 18px system-ui';
+        ctx.fillText('Z', cx + 29, floor(desk.y - 20 - f * 20));
+      }
+      ctx.globalAlpha = 1;
+    } else {
+      const marks = ['', '', '?', '!', '!!', '!!!'][stage];
+      const colors = ['', '', '#ffe08a', '#ffc24d', '#ff8c42', '#ff5252'];
+      const pulse = stage >= SLEEP_CRITICAL ? 0.6 + 0.4 * Math.sin(clock * 9) : 1;
+      ctx.textAlign = 'center';
+      ctx.globalAlpha = pulse;
+      ctx.font = `bold ${16 + stage * 2}px system-ui`;
+      ctx.fillStyle = colors[stage];
+      ctx.fillText(marks, cx, floor(desk.y - 10));
       ctx.globalAlpha = 1;
     }
   }
@@ -4240,7 +5179,7 @@ __mod.art = (function () {
     ctx.fillText(art, 0, 8);
     ctx.restore();
   }
-  return { PALETTE, sleeperLook, ITEM_ART, ITEM_NAMES, roundRect, lampPositions, drawFurniture, paintStaticRoom, drawSleeper, drawGuard, drawThief, drawGrabbedItem };
+  return { PALETTE, sleeperLook, ITEM_ART, ITEM_NAMES, roundRect, lampPositions, drawFurniture, paintStaticRoom, drawWatcherFurniture, drawSleeper, drawSlumped, drawGuard, drawThief, drawGrabbedItem };
 })();
 __mod.render = (function () {
   // Draws a simulation snapshot. Knows nothing about rules — it reads state and
@@ -4249,8 +5188,11 @@ __mod.render = (function () {
   const { TUNING } = __mod.tuning;
   const { sleepStage, rarityOf, isBigScore, watcherConfig } = __mod.rules;
   const { playerOf } = __mod.sim;
-  const { paintStaticRoom, drawSleeper, drawGuard, drawThief, drawGrabbedItem, roundRect, ITEM_ART, lampPositions } = __mod.art;
+  const { paintStaticRoom, drawSleeper, drawGuard, drawSlumped, drawThief, drawGrabbedItem, roundRect, ITEM_ART, lampPositions } = __mod.art;
 
+  // W and H are the *window*, not the world: how much of a level fits on screen
+  // at once. A level that is exactly this size never scrolls, which is every
+  // level built before maps could be larger than the screen.
   const { width: W, height: H, wallThickness: WT, hudStrip: HUD_H } = TUNING.world;
   const TAU = Math.PI * 2;
 
@@ -4261,9 +5203,43 @@ __mod.render = (function () {
     let quality = TUNING.quality.high;
 
     // The room never moves, so it is painted once per level into an offscreen
-    // canvas at device resolution and blitted 1:1 — detailed *and* cheap.
+    // canvas at device resolution and blitted — detailed *and* cheap.
     let roomCache = null;
     let roomKey = '';
+    let cacheScale = 1;
+
+    // Where the window sits on the map, in world units: the top-left corner of
+    // what you can see. On a level the size of the window this is pinned at 0,0
+    // and every one of those levels draws exactly as it did before.
+    const camera = { x: 0, y: 0 };
+
+    // Where the camera wants to be: the player in the middle, then held inside
+    // the map so no frame ever shows anything outside it. A map narrower than
+    // the window is centred rather than shoved against an edge.
+    function cameraTarget(level, x, y) {
+      const spanX = level.width - W;
+      const spanY = level.height - H;
+      return {
+        x: spanX <= 0 ? spanX / 2 : Math.max(0, Math.min(spanX, x - W / 2)),
+        y: spanY <= 0 ? spanY / 2 : Math.max(0, Math.min(spanY, y - H / 2))
+      };
+    }
+
+    // Snapped, not eased — for the first frame of a level, where easing in from
+    // wherever the last level left the camera would read as a lurch.
+    function centreOn(level, x, y) {
+      const target = cameraTarget(level, x, y);
+      camera.x = target.x;
+      camera.y = target.y;
+    }
+
+    function followCamera(level, x, y, dt) {
+      const target = cameraTarget(level, x, y);
+      // Exponential ease, framerate-independent: identical feel at 60 and 120Hz.
+      const k = 1 - Math.exp(-TUNING.camera.follow * Math.max(0, Math.min(0.1, dt)));
+      camera.x += (target.x - camera.x) * k;
+      camera.y += (target.y - camera.y) * k;
+    }
 
     function resize(stage) {
       const viewHeight = H + HUD_H;
@@ -4294,13 +5270,33 @@ __mod.render = (function () {
     function ensureRoom(level) {
       const key = `${level.id}@${Math.round(scale * 1000)}`;
       if (roomKey === key && roomCache) return;
+      // A whole floorplan at full device resolution can be several times the
+      // canvas budget, so the cache is capped and blitted up by the small
+      // remainder. On a window-sized room the cap never binds and it stays 1:1.
+      const budget = TUNING.render.maxCanvasPixels;
+      cacheScale = Math.min(scale, Math.sqrt(budget / (level.width * level.height)));
       roomCache = document.createElement('canvas');
-      roomCache.width = Math.max(1, Math.ceil(W * scale));
-      roomCache.height = Math.max(1, Math.ceil(H * scale));
+      roomCache.width = Math.max(1, Math.ceil(level.width * cacheScale));
+      roomCache.height = Math.max(1, Math.ceil(level.height * cacheScale));
       const cacheCtx = roomCache.getContext('2d');
-      cacheCtx.setTransform(scale, 0, 0, scale, 0, 0);
+      cacheCtx.setTransform(cacheScale, 0, 0, cacheScale, 0, 0);
       paintStaticRoom(cacheCtx, level);
       roomKey = key;
+    }
+
+    // Only the visible slice of the cache is blitted, so the cost of drawing the
+    // room is the size of the screen rather than the size of the map.
+    function blitRoom(level) {
+      const sx = Math.max(0, camera.x * cacheScale);
+      const sy = Math.max(0, camera.y * cacheScale);
+      const sw = Math.min(roomCache.width - sx, W * cacheScale);
+      const sh = Math.min(roomCache.height - sy, H * cacheScale);
+      if (sw <= 0 || sh <= 0) return;
+      // sx/sy are already clamped into the cache, so dividing back out gives the
+      // world position of the slice — right even when the map is smaller than
+      // the window and the camera sits at a negative offset.
+      ctx.drawImage(roomCache, sx, sy, sw, sh,
+        sx / cacheScale, sy / cacheScale, sw / cacheScale, sh / cacheScale);
     }
 
     // The exit glow's geometry never changes, only its opacity, so the gradient
@@ -4309,36 +5305,73 @@ __mod.render = (function () {
     let exitGlowKey = '';
     function drawExit(sim, time) {
       const exit = sim.level.exit;
+      const level = sim.level;
       const player = playerOf(sim);
+      const cx = exit.x + exit.w / 2;
+      const cy = exit.y + exit.h / 2;
       // Brighter and faster the closer you are: the way out should feel like it
       // is calling you once escaping is actually on the table.
-      const near = Math.max(0, 1 - Math.hypot(player.x - (exit.x + exit.w / 2), player.y - exit.y) / 170);
+      const near = Math.max(0, 1 - Math.hypot(player.x - cx, player.y - cy) / 170);
       const pulse = 0.5 + 0.5 * Math.sin(time * (3 + near * 4));
       const alpha = (0.26 + 0.20 * pulse + near * 0.22).toFixed(2);
-      const key = `${exit.y}:${alpha}`;
+
+      // The glow spills inward from whichever wall the way out is cut into, so a
+      // corridor exit on the left reads exactly like a doorway in the bottom.
+      const side = exit.side || 'bottom';
+      const spill = 34;
+      const box = side === 'bottom'
+        ? { x: exit.x, y: exit.y - spill, w: exit.w, h: exit.h + spill }
+        : side === 'left'
+          ? { x: exit.x, y: exit.y, w: exit.w + spill, h: exit.h }
+          : { x: exit.x - spill, y: exit.y, w: exit.w + spill, h: exit.h };
+      const key = `${side}:${exit.x}:${exit.y}:${alpha}`;
       if (exitGlowKey !== key) {
-        exitGlow = ctx.createLinearGradient(0, exit.y - 34, 0, H);
+        // The gradient runs from the room toward the wall, whichever way that is.
+        const from = side === 'bottom' ? [box.x, box.y] : side === 'left' ? [box.x + box.w, box.y] : [box.x, box.y];
+        const to = side === 'bottom' ? [box.x, box.y + box.h] : side === 'left' ? [box.x, box.y] : [box.x + box.w, box.y];
+        exitGlow = ctx.createLinearGradient(from[0], from[1], to[0], to[1]);
         exitGlow.addColorStop(0, 'rgba(76,193,114,0)');
         exitGlow.addColorStop(1, `rgba(108,232,150,${alpha})`);
         exitGlowKey = key;
       }
       ctx.fillStyle = exitGlow;
-      ctx.fillRect(exit.x, exit.y - 34, exit.w, exit.h + 34);
+      ctx.fillRect(box.x, box.y, box.w, box.h);
 
+      // The lit threshold in the wall band itself.
+      const band = side === 'bottom'
+        ? { x: exit.x, y: level.height - WT, w: exit.w, h: WT }
+        : side === 'left'
+          ? { x: 0, y: exit.y, w: WT, h: exit.h }
+          : { x: level.width - WT, y: exit.y, w: WT, h: exit.h };
       ctx.fillStyle = '#2f8f4e';
-      ctx.fillRect(exit.x, H - WT, exit.w, WT);
+      ctx.fillRect(band.x, band.y, band.w, band.h);
       ctx.fillStyle = '#48b96a';
-      ctx.fillRect(exit.x, H - WT, exit.w, 4);
+      if (side === 'bottom') ctx.fillRect(band.x, band.y, band.w, 4);
+      else ctx.fillRect(side === 'left' ? band.x : band.x + band.w - 4, band.y, 4, band.h);
 
       ctx.fillStyle = '#eafff1';
       ctx.textAlign = 'center';
       ctx.font = 'bold 12px system-ui';
-      ctx.fillText('EXIT', exit.x + exit.w / 2, H - 19);
+      // Label and arrow sit just inside the room, pointing the way out.
+      const labelX = side === 'bottom' ? cx : side === 'left' ? WT + 22 : level.width - WT - 22;
+      const labelY = side === 'bottom' ? level.height - 19 : cy + 4;
+      ctx.fillText('EXIT', labelX, labelY);
+
       ctx.globalAlpha = 0.55 + 0.45 * pulse;
       ctx.beginPath();
-      ctx.moveTo(exit.x + exit.w / 2 - 7, H - 44);
-      ctx.lineTo(exit.x + exit.w / 2 + 7, H - 44);
-      ctx.lineTo(exit.x + exit.w / 2, H - 34);
+      if (side === 'bottom') {
+        ctx.moveTo(cx - 7, level.height - 44);
+        ctx.lineTo(cx + 7, level.height - 44);
+        ctx.lineTo(cx, level.height - 34);
+      } else if (side === 'left') {
+        ctx.moveTo(WT + 44, cy - 7);
+        ctx.lineTo(WT + 44, cy + 7);
+        ctx.lineTo(WT + 34, cy);
+      } else {
+        ctx.moveTo(level.width - WT - 44, cy - 7);
+        ctx.lineTo(level.width - WT - 44, cy + 7);
+        ctx.lineTo(level.width - WT - 34, cy);
+      }
       ctx.closePath();
       ctx.fill();
       ctx.globalAlpha = 1;
@@ -4348,8 +5381,16 @@ __mod.render = (function () {
     // them: a dark pool underneath, a bright disc behind, outlined labels.
     function drawItems(sim, time) {
       ctx.textAlign = 'center';
+      // On a floorplan most of the loot is off screen every frame, and each one
+      // costs a gradient, two outlined labels and a ring. Skip what the camera
+      // cannot see — with a generous margin so nothing pops in at the edge.
+      const left = camera.x - 40;
+      const right = camera.x + W + 40;
+      const top = camera.y - 40;
+      const bottom = camera.y + H + 40;
       for (const item of sim.items) {
         if (item.taken) continue;
+        if (item.x < left || item.x > right || item.y < top || item.y > bottom) continue;
         const bob = Math.sin(time * 2.2 + item.x * 0.07) * 1.6;
         const isTarget = sim.targetId === item.id;
         const y = item.y + bob;
@@ -4446,11 +5487,14 @@ __mod.render = (function () {
       if (sim.noise <= TUNING.noise.almostAt) return;
       const span = TUNING.noise.max - TUNING.noise.almostAt;
       const a = ((sim.noise - TUNING.noise.almostAt) / span) * (0.22 + 0.13 * Math.sin(time * 6));
-      const edge = ctx.createRadialGradient(W / 2, H / 2, H * 0.30, W / 2, H / 2, H * 0.62);
+      // A screen effect, not a world one: it hugs the view wherever the view is.
+      const mx = camera.x + W / 2;
+      const my = camera.y + H / 2;
+      const edge = ctx.createRadialGradient(mx, my, H * 0.30, mx, my, H * 0.62);
       edge.addColorStop(0, 'rgba(255,40,40,0)');
       edge.addColorStop(1, `rgba(255,45,45,${a.toFixed(3)})`);
       ctx.fillStyle = edge;
-      ctx.fillRect(0, 0, W, H);
+      ctx.fillRect(camera.x, camera.y, W, H);
     }
 
     function drawDebug(sim, stats, playerPos) {
@@ -4470,7 +5514,7 @@ __mod.render = (function () {
       ctx.strokeRect(player.x - player.w / 2, player.y - player.h / 2, player.w, player.h);
 
       ctx.fillStyle = '#000000bb';
-      roundRect(ctx, WT + 4, WT + 4, 156, 86, 5);
+      roundRect(ctx, camera.x + WT + 4, camera.y + WT + 4, 168, 97, 5);
       ctx.fill();
       ctx.fillStyle = '#7CFFB2';
       ctx.font = '10px ui-monospace, monospace';
@@ -4482,9 +5526,11 @@ __mod.render = (function () {
         `draw ${playerPos.x.toFixed(1)}, ${playerPos.y.toFixed(1)}`,
         `speed ${player.speed.toFixed(0)}  face ${player.facing.toFixed(2)}`,
         `noise ${sim.noise}  $${sim.money}`,
-        `target ${sim.targetId || '-'}  reach ${sim.reach ? sim.reach.t.toFixed(2) : '-'}`
+        `target ${sim.targetId || '-'}  reach ${sim.reach ? sim.reach.t.toFixed(2) : '-'}`,
+        `map ${sim.level.width}x${sim.level.height}  cam ${camera.x.toFixed(0)},${camera.y.toFixed(0)}`
       ];
-      lines.forEach((line, i) => ctx.fillText(line, WT + 10, WT + 18 + i * 11));
+      lines.forEach((line, i) =>
+        ctx.fillText(line, camera.x + WT + 10, camera.y + WT + 18 + i * 11));
       ctx.restore();
     }
 
@@ -4494,31 +5540,49 @@ __mod.render = (function () {
       invalidateRoom() { roomKey = ''; },
       setQuality(next) { if (next) { quality = next; roomKey = ''; } },
 
-      draw(sim, alpha, time, pops, stats, sparks = [], flash = 0) {
+      // Called when a level starts, so the view opens already framed on the
+      // player instead of sliding in from wherever the last level ended.
+      snapCamera(level, x, y) { centreOn(level, x, y); },
+      get camera() { return camera; },
+
+      draw(sim, alpha, time, pops, stats, sparks = [], flash = 0, dt = 1 / 60) {
         ensureRoom(sim.level);
 
+        // The thief is drawn between the last two simulation steps, and the
+        // camera follows that same interpolated position — following the stepped
+        // one would reintroduce the judder the interpolation exists to remove.
+        const player = playerOf(sim);
+        const px = player.prevX + (player.x - player.prevX) * alpha;
+        const py = player.prevY + (player.y - player.prevY) * alpha;
+        followCamera(sim.level, px, py, dt);
+
         ctx.save();
+        // One transform for the whole world: the camera, with the impact shake
+        // riding on top of it so a bang cannot knock the view off the player.
+        ctx.translate(-Math.round(camera.x * scale) / scale, -Math.round(camera.y * scale) / scale);
         if (sim.shake !== 0) ctx.translate(sim.shakeX, sim.shakeY);
 
-        ctx.drawImage(roomCache, 0, 0, W, H);
+        blitRoom(sim.level);
         drawExit(sim, time);
         // Who is in this room decides what gets drawn here — and nothing else in
         // the renderer has to care.
         const stage = sleepStage(sim.noise);
         const config = watcherConfig(sim.level.watcher.kind);
         const kind = sim.level.watcher.kind;
-        if (config.sees > 0) {
+        const pose = config.pose || 'bed';
+        // How this person is asleep decides what gets drawn — and nothing else in
+        // the renderer has to know there is more than one kind of them.
+        if (pose === 'guard') {
           drawGuard(ctx, sim.level, stage, time, sim.wakeSeconds || 0, sim.startle || 0,
             sim.seen || 0, config.sees, kind);
+        } else if (pose === 'desk') {
+          drawSlumped(ctx, sim.level, stage, time, sim.wakeSeconds || 0, sim.startle || 0, kind);
         } else {
-          drawSleeper(ctx, sim.level, stage, time, sim.wakeSeconds || 0, sim.startle || 0, kind);
+          drawSleeper(ctx, sim.level, stage, time, sim.wakeSeconds || 0, sim.startle || 0,
+            kind, pose);
         }
         drawItems(sim, time);
 
-        // The thief is drawn between the last two simulation steps.
-        const player = playerOf(sim);
-        const px = player.prevX + (player.x - player.prevX) * alpha;
-        const py = player.prevY + (player.y - player.prevY) * alpha;
         // Full range, not saturated at half speed: the animation has to keep
         // getting faster and longer-strided right up to a run.
         const walk = Math.min(1, player.speed / TUNING.player.speed);
@@ -4560,7 +5624,7 @@ __mod.render = (function () {
         // A brief warm wash when something genuinely valuable comes off the shelf.
         if (flash > 0) {
           ctx.fillStyle = `rgba(255,214,120,${(flash * 0.20).toFixed(3)})`;
-          ctx.fillRect(0, 0, W, H);
+          ctx.fillRect(camera.x, camera.y, W, H);
         }
         if (debug) drawDebug(sim, stats, { x: px, y: py });
         ctx.restore();
@@ -4847,6 +5911,9 @@ __mod.main = (function () {
       if (setting('music')) audio.startMusic();
       hideCrash();
       renderer.invalidateRoom();
+      // Open the level already framed on the thief rather than easing the view in
+      // from wherever the previous level left it.
+      renderer.snapCamera(level, level.spawn.x, level.spawn.y);
       machine.set('playing');
       if (debug) window.__dwh = { sim, recording, TUNING, saveStore };
     }
@@ -5083,7 +6150,7 @@ __mod.main = (function () {
 
         if (sim) {
           if (flash > 0) flash = Math.max(0, flash - elapsed * 2.4);
-          renderer.draw(sim, Math.min(1, accumulator / STEP_SECONDS), clock, pops, stats, sparks, flash);
+          renderer.draw(sim, Math.min(1, accumulator / STEP_SECONDS), clock, pops, stats, sparks, flash, elapsed);
           paintHud();
         }
         consecutiveErrors = 0;
@@ -5209,6 +6276,7 @@ __mod.main = (function () {
 
     // Something must be on screen behind the menu.
     sim = createSim({ level: LEVELS[0], seed: 1 });
+    renderer.snapCamera(LEVELS[0], LEVELS[0].spawn.x, LEVELS[0].spawn.y);
     requestAnimationFrame((t) => { lastTime = t; frame(t); });
 
     // Debug-only, and a getter rather than the object: `sim` is replaced on every
@@ -5217,6 +6285,9 @@ __mod.main = (function () {
     if (debug) {
       window.__dwhBoot = { machine, saveStore, startLevel, LEVELS, TUNING, SLEEP_LABELS, levelTotals };
       Object.defineProperty(window.__dwhBoot, 'sim', { get: () => sim });
+      // The camera is presentation, so it lives in the renderer — exposed here so
+      // a test can assert it stays inside the map.
+      Object.defineProperty(window.__dwhBoot, 'camera', { get: () => renderer.camera });
     }
   }
   return { boot };

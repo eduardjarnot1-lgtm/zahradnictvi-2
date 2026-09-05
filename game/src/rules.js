@@ -46,6 +46,9 @@ const THEME_GROUPS = {
 // answer, so a sofa is always soft and a bookshelf is always loud.
 export function furnitureStyle(c) {
   if (c.type === 'bed') return 'bed';
+  // A hand-drawn map names what each piece is; only the older generated rooms
+  // fall through to inferring it from the shape.
+  if (c.style) return c.style;
   const ratio = c.w / c.h;
   // A gallery's small squares are plinths, not nightstands. The museum reads the
   // same way — without this its display blocks drew as brown bedroom furniture.

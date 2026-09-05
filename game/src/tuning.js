@@ -2,11 +2,32 @@
 // Changing balance is a data edit; a debug tuning panel only has to walk this object.
 export const TUNING = {
   world: {
-    width: 400,          // room coordinate space
+    // The camera window, in world units. Every level used to be exactly this
+    // size and wholly on screen; a level may now be larger, in which case this
+    // is how much of it you can see at once. The zoom never changes, so a
+    // player, a door and a wardrobe are the same size in a 400-wide bedroom
+    // and in a 784-wide hotel floor.
+    width: 400,
     height: 620,
     wallThickness: 14,
     hudStrip: 54,        // reserved band above the room, in world units
-    exitWidth: 80
+    exitWidth: 80,
+    // Hand-drawn maps are authored on a tile grid. One tile is a shade under a
+    // player-width, so a corridor two tiles across is comfortably walkable and
+    // the floorplan proportions survive the conversion exactly.
+    // A tile is a little under a player-width, so a two-tile doorway is
+    // comfortably walkable and a five-tile bed is the size of the beds the
+    // hand-placed levels already use. Scale stays identical across map sizes.
+    tile: 20
+  },
+
+  // How the view follows you once a level is bigger than the window.
+  camera: {
+    // Exponential ease. Framerate-independent, so it feels the same at 60 and
+    // 120Hz: high enough to keep up with a run, low enough not to snap.
+    follow: 7.5,
+    // Shake is applied to the camera, so it must not fight the follow.
+    maxShake: 3.4
   },
 
   sim: {
@@ -203,10 +224,49 @@ export const TUNING = {
     // The school caretaker, asleep in the staff room. Noise only, like the
     // bedroom sleeper — an older man dozing in a chair is not watching for you.
     caretaker: {
-      meter: 'NOISE', person: 'The caretaker', sees: 0, seeRate: 0,
-      warnings: ['THE CARETAKER STIRS…', 'THE CARETAKER IS ALMOST AWAKE',
-        'THE CARETAKER IS WAKING!'],
+      meter: 'NOISE', person: 'Mr. Vrána', sees: 0, seeRate: 0, pose: 'couch',
+      warnings: ['MR. VRÁNA STIRS…', 'MR. VRÁNA IS ALMOST AWAKE',
+        'MR. VRÁNA IS WAKING!'],
       lost: 'HE WOKE UP!', lostWhy: 'The noise reached 100 and the caretaker woke up.'
+    },
+
+    // --- the seven named people of the floorplan levels ---------------------
+    // Bruno is a guard first and asleep second: doze off in front of him and he
+    // stays put, but cross the hall while he is stirring and he sees you.
+    nightguard: {
+      meter: 'ALERT', person: 'Bruno', sees: 150, seeRate: 20, pose: 'guard',
+      warnings: ['BRUNO LOOKS UP', 'BRUNO IS SUSPICIOUS', 'BRUNO IS GETTING UP!'],
+      lost: 'SPOTTED!', lostWhy: 'Bruno reached full alert and saw you.'
+    },
+    // Mr. Halas fell asleep on the quarterly report. Noise only — but he is
+    // face down at his desk, which is a lighter sleep than a bed.
+    worker: {
+      meter: 'NOISE', person: 'Mr. Halas', sees: 0, seeRate: 0, pose: 'desk',
+      warnings: ['MR. HALAS SHIFTS…', 'MR. HALAS IS ALMOST AWAKE', 'MR. HALAS IS WAKING!'],
+      lost: 'HE WOKE UP!', lostWhy: 'The noise reached 100 and Mr. Halas woke up.'
+    },
+    // Otakar, asleep at the floor desk with the whole corridor to watch.
+    porter: {
+      meter: 'NOISE', person: 'Otakar', sees: 0, seeRate: 0, pose: 'desk',
+      warnings: ['OTAKAR STIRS…', 'OTAKAR IS ALMOST AWAKE', 'OTAKAR IS WAKING!'],
+      lost: 'HE WOKE UP!', lostWhy: 'The noise reached 100 and Otakar woke up.'
+    },
+    dad: {
+      meter: 'NOISE', person: 'Dad', sees: 0, seeRate: 0, pose: 'bed',
+      warnings: ['DAD ROLLS OVER…', 'DAD IS ALMOST AWAKE', 'DAD IS WAKING UP!'],
+      lost: 'DAD WOKE UP!', lostWhy: 'The noise reached 100 and Dad woke up.'
+    },
+    // Dr. Marek, out on the staff couch after a long shift.
+    doctor: {
+      meter: 'NOISE', person: 'Dr. Marek', sees: 0, seeRate: 0, pose: 'couch',
+      warnings: ['DR. MAREK STIRS…', 'DR. MAREK IS ALMOST AWAKE', 'DR. MAREK IS WAKING!'],
+      lost: 'HE WOKE UP!', lostWhy: 'The noise reached 100 and Dr. Marek woke up.'
+    },
+    // Grandpa, asleep in the armchair by the fire.
+    grandpa: {
+      meter: 'NOISE', person: 'Grandpa', sees: 0, seeRate: 0, pose: 'chair',
+      warnings: ['GRANDPA STIRS…', 'GRANDPA IS ALMOST AWAKE', 'GRANDPA IS WAKING!'],
+      lost: 'GRANDPA WOKE UP!', lostWhy: 'The noise reached 100 and Grandpa woke up.'
     }
   },
 

@@ -20,7 +20,10 @@ function nearFurniture(level, player, margin = 20) {
 
 // Grid path around furniture, so a script can say "go to that laptop" and mean it.
 export function pathTo(level, from, to) {
-  const { width: W, height: H } = TUNING.world;
+  // The level's own bounds, not a global room size: these maps are not all one
+  // shape any more.
+  const W = level.width;
+  const H = level.height;
   const { boxWidth: PW, boxHeight: PH } = TUNING.player;
   const cols = Math.ceil(W / GRID);
   const rows = Math.ceil(H / GRID);

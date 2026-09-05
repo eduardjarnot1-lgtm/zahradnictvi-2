@@ -8,7 +8,8 @@ const GRID = 4; // flood-fill resolution in world units
 
 // Every position the player box can legally stand in, reachable from spawn.
 function reachableCells(level) {
-  const { width: W, height: H } = TUNING.world;
+  const W = level.width;
+  const H = level.height;
   const { boxWidth: PW, boxHeight: PH } = TUNING.player;
   const cols = Math.ceil(W / GRID);
   const rows = Math.ceil(H / GRID);
@@ -52,11 +53,13 @@ function cellsToPoints(cells, cols) {
 export function validateLevel(level) {
   const errors = [];
   const warnings = [];
-  const { width: W, height: H } = TUNING.world;
+  const W = level.width;
+  const H = level.height;
   const { boxWidth: PW, boxHeight: PH } = TUNING.player;
   const cols = Math.ceil(W / GRID);
 
   if (!level.items.length) errors.push('level has no items');
+  if (!(W > 0) || !(H > 0)) errors.push('level does not declare a size');
 
   // Spawn must be legal.
   if (blocked(level.spawn.x, level.spawn.y, PW, PH, level.colliders)) {
