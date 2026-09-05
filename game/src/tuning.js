@@ -57,8 +57,8 @@ export const TUNING = {
     // drift out of sync with the movement — both are driven by the distance
     // actually covered.
     gait: {
-      creepAt: 0.34,      // at or below this share of top speed he is tiptoeing
-      walkAt: 0.58,       // ...and at or above it he is walking properly
+      creepAt: 0.30,      // at or below this share of top speed he is tiptoeing
+      walkAt: 0.46,       // ...and at or above it he is walking properly
       strideCreep: 0.088, // short careful steps: more of them per unit
       strideWalk: 0.062,  // unchanged, so a normal walk looks exactly as it did
       strideRun: 0.047    // long strides: fewer, bigger ones
@@ -345,11 +345,20 @@ export const TUNING = {
       // back to the staff room, so it has to actually work inside the clock —
       // but the delay is longer than elsewhere, so it is never a reflex.
       recovery: { delay: 0.9, rate: 7 },
+      // The school's two characters are drawn by src/figure.js rather than by
+      // the older art.js walker. One flag, so making it the whole game's look
+      // is a one-line change rather than a rewrite.
+      figures: true,
       // Mr. Vrána, once he is awake.
       investigate: {
         wakeAt: 80,        // he gets up when the meter passes this
         calmAt: 50,        // ...and gives up when it falls back under this
-        rising: 0.75,      // seconds spent getting off the couch
+        // Getting off a couch is four beats, not a fade: he stirs, sits up,
+        // gets to his feet, then has a look round before he sets off. Long
+        // enough to read as a person waking up, and it is time the player can
+        // use — which is the point of showing it rather than cutting to him
+        // already walking.
+        rising: 1.35,      // seconds spent getting off the couch
         settling: 0.9,     // ...and lying back down again
         speed: 78,         // world units a second: a walk, not a chase
         accel: 430,        // he is a heavy man getting going

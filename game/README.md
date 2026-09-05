@@ -52,6 +52,7 @@ new state, so the whole game runs in node with no browser.
 | `input.js` | keyboard + multi-touch into one `read()` |
 | `audio.js` | master gain, persisted mute, context revival |
 | `art.js` | room, furniture and character painting |
+| `figure.js` | the drawn people: one function, any heading, any speed |
 | `render.js` | canvas drawing with interpolation + debug overlay |
 | `main.js` | wiring and the fixed-timestep loop |
 
@@ -305,6 +306,16 @@ question the player can actually answer.
     make noise → he wakes → he walks to the spot → go still → the meter falls
       → under 50 he gives up → he walks home → he goes back to sleep
 
+**And he is drawn, rather than abstracted.** `figures: true` in the school's
+rules is what switches both characters over to `figure.js`; every other location
+keeps the character it has always had. Getting off the couch is four beats
+rather than a fade — he stirs where he lies, sits up, gets his feet under him,
+then has a look round before he sets off. It takes 1.35 seconds, and those are
+seconds the player can use, which is the point of showing it at all instead of
+cutting to a man already walking. A test asserts he does not move an inch until
+he is upright: a sleeping figure sliding towards you is the exact bug the
+sequence exists to prevent.
+
 He walks on a coarse breadth-first distance field over the building
 (`src/nav.js`), flooded from wherever he is going and followed downhill with a
 line-of-sight shortcut so he cuts the corner of a doorway instead of shuffling
@@ -386,9 +397,9 @@ read off the speed the character is *actually* travelling at:
 | share of top speed | gait | steps per unit | drawn stride |
 |---|---|---|---|
 | 0 | standing | — | none |
-| up to 34% | tiptoe — short careful steps, crouched, arms in | 0.088 | 0.70x |
-| 34-58% | blending | 0.088 → 0.062 | 0.70 → 1.0x |
-| 58-72% | walking | 0.062 | 1.0x |
+| up to 30% | tiptoe — short careful steps, crouched, arms in | 0.088 | 0.70x |
+| 30-46% | blending | 0.088 → 0.062 | 0.70 → 1.0x |
+| 46-72% | walking | 0.062 | 1.0x |
 | 72-100% | running — long strides, bounce, lean | 0.062 → 0.047 | 1.0 → 1.32x |
 
 Cadence and stride length multiply to speed, so once the cadence is fixed the
@@ -401,6 +412,42 @@ The body turns to face where it is going, not just the feet: the torso narrows
 and leads with the near shoulder, the face slides towards the direction of
 travel, hair and ear stay behind, a nose leads, and one eye goes behind the nose
 once he is properly side-on. Walking away shows the back of his head.
+
+Arms oppose legs — left arm forward with the right leg. That is one sign in the
+source and it is the whole difference between a person walking and a toy
+marching; it was the wrong way round until it was drawn out large enough to see.
+
+### The drawn people
+
+`figure.js` is one function that draws one human from any heading at any speed
+out of flat shapes. No sprite sheets and no eight baked directions: the pose is
+computed, which is what lets a diagonal look like a diagonal instead of like a
+left-facing character shoved sideways.
+
+Its proportions come from a reference drawing — a big head on a chunky body,
+about three and a bit heads tall, with visible trouser legs and real shoes. The
+shading is flat: a base tone, a lit tone for the top of each mass, a dark tone
+underneath. Three fills rather than a gradient, because a gradient is rasterised
+per pixel per frame and these are not.
+
+The cycle underneath is a proper walk. Two dips per stride, hips shifting onto
+the planted foot, shoulders counter-rotating against them, the knee leading the
+ankle through the swing, the shoe rolling heel-to-toe and pointing where he is
+going. Creeping crouches, shortens the step, holds the arms in and keeps the
+heel up; running leans in, lengthens the stride and bends the arms.
+
+Two things worth knowing before editing it:
+
+- **Strokes are the expensive part.** A limb is two of them, not four, and the
+  thigh-to-shin taper that costs bought nothing at sixteen pixels.
+- **Never clip.** The first draft clipped a highlight to the sweater's own
+  outline. That single call cost a fifth of the frame budget under software
+  rasterisation — an inset shape stays inside by construction and costs nothing.
+
+Measured against the old character on the same level, the new one is free: the
+frame times are identical. Big maps do cost frames, but they cost them equally
+on locations that have none of this — the hotel and office floors are worse than
+the school is.
 
 Collision noise scales with how hard you hit: the same cabinet costs +2 at a
 crawl and +8 at a sprint, a bookshelf +13. Impact is measured on the blocked

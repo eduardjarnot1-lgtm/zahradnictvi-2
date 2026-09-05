@@ -3,6 +3,7 @@
 // stays smooth on any refresh rate.
 import { TUNING } from './tuning.js';
 import { sleepStage, rarityOf, isBigScore, watcherConfig, gaitBlend } from './rules.js';
+import { drawFigure, THIEF_LOOK, CARETAKER_LOOK } from './figure.js';
 import { playerOf } from './sim.js';
 import {
   paintStaticRoom, drawSleeper, drawGuard, drawSlumped, drawThief, drawCaretakerWalking,
@@ -350,39 +351,39 @@ export function createRenderer(canvas, options = {}) {
   // person, and that is only a decision the player can make if they can see
   // where he thinks the noise came from — otherwise "move away quietly" is a
   // rule they have to be told rather than one they can read off the room.
+  function drawInvestigationMark(w, time) {
+    if (!w.target || (w.state !== 'rising' && w.state !== 'investigating')) return;
+    const pulse = 0.5 + 0.5 * Math.sin(time * 4.2);
+    ctx.save();
+    ctx.globalAlpha = 0.30 + pulse * 0.35;
+    ctx.strokeStyle = '#ffb020';
+    ctx.lineWidth = 1.6;
+    ctx.setLineDash([5, 5]);
+    ctx.lineDashOffset = -time * 14;
+    ctx.beginPath();
+    ctx.arc(w.target.x, w.target.y, 13 + pulse * 4, 0, TAU);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.globalAlpha = 0.55 + pulse * 0.35;
+    ctx.fillStyle = '#ffcf6a';
+    ctx.font = 'bold 13px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('?', w.target.x, w.target.y + 4.5);
+    ctx.restore();
+  }
+
   function drawInvestigation(sim, time, alpha) {
     const w = sim.investigator;
-    if (w.target && (w.state === 'rising' || w.state === 'investigating')) {
-      const pulse = 0.5 + 0.5 * Math.sin(time * 4.2);
-      ctx.save();
-      ctx.globalAlpha = 0.30 + pulse * 0.35;
-      ctx.strokeStyle = '#ffb020';
-      ctx.lineWidth = 1.6;
-      ctx.setLineDash([5, 5]);
-      ctx.lineDashOffset = -time * 14;
-      ctx.beginPath();
-      ctx.arc(w.target.x, w.target.y, 13 + pulse * 4, 0, TAU);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.globalAlpha = 0.55 + pulse * 0.35;
-      ctx.fillStyle = '#ffcf6a';
-      ctx.font = 'bold 13px system-ui';
-      ctx.textAlign = 'center';
-      ctx.fillText('?', w.target.x, w.target.y + 4.5);
-      ctx.restore();
-    }
+    drawInvestigationMark(w, time);
 
     const wx = w.prevX + (w.x - w.prevX) * alpha;
     const wy = w.prevY + (w.y - w.prevY) * alpha;
-    // Getting up and lying back down, as one number the figure unfolds from.
     const rules = sim.investigateRules;
-    const stand = w.state === 'rising'
-      ? Math.min(1, w.stateFor / rules.rising)
-      : w.state === 'settling' ? Math.max(0, 1 - w.stateFor / rules.settling) : 1;
+    const { stand, glance } = gettingUp(w, rules, time);
     // The same speed-driven gait the thief uses, against his own top speed —
     // he is slower, so a brisk walk for him is not a run.
     const gait = gaitBlend(w.speed / rules.speed);
-    drawCaretakerWalking(ctx, wx, wy, {
+    const stance = {
       facing: w.facing,
       walkPhase: w.walkPhase,
       walk: gait.walk,
@@ -391,8 +392,37 @@ export function createRenderer(canvas, options = {}) {
       moving: gait.moving,
       stride: gait.stride,
       clock: time,
-      stand
-    });
+      stand,
+      glance
+    };
+    if (sim.rules.figures) drawFigure(ctx, wx, wy, stance, CARETAKER_LOOK);
+    else drawCaretakerWalking(ctx, wx, wy, stance);
+  }
+
+  // Getting off the couch, in beats. A man woken by a noise does not stand up
+  // in one motion: he stirs, pushes himself upright, gets his feet under him,
+  // and only then looks about for whatever it was. Cutting straight to a
+  // walking figure loses all of that, and loses the moment the player has to
+  // decide what to do about it.
+  //
+  // `stand` is how upright he is; `glance` turns his head without turning him.
+  function gettingUp(w, rules, time) {
+    const ease = (t) => t * t * (3 - 2 * t);
+    if (w.state === 'settling') {
+      return { stand: Math.max(0, 1 - w.stateFor / rules.settling), glance: 0 };
+    }
+    if (w.state !== 'rising') {
+      // Standing at the spot he came to look at, turning his head over it.
+      const searching = w.state === 'searching';
+      return { stand: 1, glance: searching ? Math.sin(w.stateFor * 2.1) * 0.9 : 0 };
+    }
+    const p = Math.min(1, w.stateFor / rules.rising);
+    // The first beat belongs to the sleeping figure, so this picks him up
+    // already sitting rather than flat on the couch.
+    if (p < 0.55) return { stand: 0.16 + ease((p - 0.18) / 0.37) * 0.44, glance: 0 };  // sits up
+    if (p < 0.82) return { stand: 0.60 + ease((p - 0.55) / 0.27) * 0.40, glance: 0 };  // stands
+    // On his feet, having a look round before he sets off.
+    return { stand: 1, glance: Math.sin((p - 0.82) / 0.18 * Math.PI * 1.5) * 1.15 };
   }
 
   return {
@@ -443,7 +473,16 @@ export function createRenderer(canvas, options = {}) {
       // A watcher who is up and about is not on his couch to be drawn on. The
       // couch itself is in the static cache, so leaving him out simply leaves
       // it empty — which is exactly what the player needs to see.
-      const up = sim.investigator && sim.investigator.state !== 'asleep';
+      //
+      // The exception is the first beat of getting up: he is still lying down
+      // and reacting to whatever woke him, so he is still the sleeping figure,
+      // twitching. Cutting to a standing man on the frame the meter crosses 80
+      // throws that moment away.
+      const w = sim.investigator;
+      const reacting = w && w.state === 'rising'
+        && w.stateFor < sim.investigateRules.rising * 0.18;
+      const up = w && w.state !== 'asleep' && !reacting;
+      if (w && w.target && !up) drawInvestigationMark(w, time);
       if (up) {
         drawInvestigation(sim, time, alpha);
       } else if (pose === 'guard') {
@@ -452,8 +491,12 @@ export function createRenderer(canvas, options = {}) {
       } else if (pose === 'desk') {
         drawSlumped(ctx, sim.level, stage, time, sim.wakeSeconds || 0, sim.startle || 0, kind);
       } else {
-        drawSleeper(ctx, sim.level, stage, time, sim.wakeSeconds || 0, sim.startle || 0,
-          kind, pose);
+        // Being woken is a startle in its own right, on top of any bang.
+        const jolt = reacting
+          ? Math.min(1, w.stateFor / (sim.investigateRules.rising * 0.18)) * 0.9
+          : 0;
+        drawSleeper(ctx, sim.level, stage, time, sim.wakeSeconds || 0,
+          Math.max(sim.startle || 0, jolt), kind, pose);
       }
       drawItems(sim, time);
 
@@ -463,7 +506,7 @@ export function createRenderer(canvas, options = {}) {
       const gait = gaitBlend(player.speed / TUNING.player.speed);
       const reachProgress = sim.reach ? sim.reach.t / sim.reach.duration : 0;
 
-      const hand = drawThief(ctx, px, py, {
+      const stance = {
         facing: player.facing,
         walkPhase: player.walkPhase,
         walk: gait.walk,
@@ -473,7 +516,12 @@ export function createRenderer(canvas, options = {}) {
         stride: gait.stride,
         clock: time,
         reach: reachProgress
-      });
+      };
+      // Locations that ask for the drawn figures get them; everywhere else
+      // keeps the character it has always had.
+      const hand = sim.rules.figures
+        ? drawFigure(ctx, px, py, stance, THIEF_LOOK)
+        : drawThief(ctx, px, py, stance);
 
       if (sim.reach) {
         drawGrabbedItem(ctx, ITEM_ART[sim.reach.type] || '?', sim.reach, hand, reachProgress);

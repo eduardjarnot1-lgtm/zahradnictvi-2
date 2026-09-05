@@ -85,7 +85,9 @@ const SLEEPER_LOOKS = {
                sheet: '#fbeee4', pillow: '#fff8ee', shoulder: '#f6e6da' },
   // The school caretaker: older, grey at the sides and thin on top, asleep in
   // the staff room under a worn olive blanket rather than a duvet.
-  caretaker: { hair: '#9aa0a6', style: 'balding', skin: '#e8bb92', skinShade: '#cfa079',
+  // Matched to the walking figure in figure.js: the man asleep on the couch
+  // has to be recognisably the man who gets up off it.
+  caretaker: { hair: '#b6bcc1', style: 'balding', skin: '#e9bd95', skinShade: '#c99b73',
                duvet: '#6f7c4e', duvetTop: '#899763', fold: 'rgba(40,52,26,0.35)',
                sheet: '#e6e2d2', pillow: '#f2ecdc', shoulder: '#dfe0cf' },
 
@@ -1666,7 +1668,10 @@ export function drawWalker(ctx, x, y, opts, look = THIEF_LOOK) {
     const shoulderY = bodyY - 4 + sideY * 8.8 * build * side;
     // Creeping holds the arms in close; running throws them.
     const swingScale = (3.8 + run * 3.2) * (1 - creep * 0.55);
-    const reachOut = -swing * side * swingScale + extend;
+    // Opposite arm, opposite leg. drawLeg(-1, …) sends the -1 leg forward on a
+    // positive swing, so the -1 arm has to go back on one — the sign here was
+    // inverted, which is the whole difference between a walk and a march.
+    const reachOut = swing * side * swingScale + extend;
     const handX = shoulderX + faceX * reachOut + sideX * side * 1.6;
     const handY = shoulderY + faceY * reachOut * 0.66 + sideY * side * 1.6 + 4;
     const elbowX = (shoulderX + handX) / 2 + sideX * side * 1.1;

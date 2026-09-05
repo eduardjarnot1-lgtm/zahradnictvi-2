@@ -26,6 +26,19 @@ const openSchool = (id = 21) => {
   return run;
 };
 
+// Tick until he has finished getting off the couch, holding the meter up so he
+// does not give up mid-rise. Waits on the state rather than on a frame count,
+// so re-timing the wake-up animation cannot silently break these tests.
+function untilWalking(run, hold = 85, limit = 60 * 10) {
+  const w = run.sim.investigator;
+  for (let i = 0; i < limit && run.sim.status === 'running'; i++) {
+    if (w.state === 'investigating') return true;
+    run.sim.noise = Math.max(run.sim.noise, hold);
+    tick(run);
+  }
+  return false;
+}
+
 // Put the player somewhere exactly, without walking there.
 function place(sim, x, y) {
   const p = playerOf(sim);
@@ -68,6 +81,17 @@ test('only the school has location rules at all', () => {
   for (const level of SCHOOL) assert.ok(locationRules(level).investigate, `L${level.id} missing rules`);
   for (const level of ELSEWHERE) {
     assert.deepEqual(locationRules(level), {}, `L${level.id} (${level.location}) picked up rules`);
+  }
+});
+
+test('the drawn figures are the school\'s, and nowhere else\'s', () => {
+  // A visual switch rather than a rewrite: the renderer asks the location
+  // whether it wants the new characters. One line moves it to the whole game,
+  // and this is the test that would need changing with it.
+  assert.equal(RULES.figures, true, 'the school should be drawing the new figures');
+  for (const level of ELSEWHERE) {
+    assert.ok(!locationRules(level).figures,
+      `L${level.id} (${level.location}) picked up the school's characters`);
   }
 });
 
@@ -287,6 +311,35 @@ test('crossing 80 wakes him and stores where you were, not where you go', () => 
     'the player really did move away');
 });
 
+test('getting up takes long enough to be a warning rather than a cut', () => {
+  // Four beats — stirs, sits up, stands, looks round — need room to read. If
+  // this ever drops back to a fraction of a second the animation is still
+  // "correct" and the moment is gone, so the duration is asserted rather than
+  // left to whoever last touched the tuning.
+  assert.ok(RULES.investigate.rising >= 1.2,
+    `${RULES.investigate.rising}s is too quick to read as waking up`);
+  const run = openSchool();
+  const { sim } = run;
+  const w = sim.investigator;
+  place(sim, sim.level.spawn.x, sim.level.spawn.y);
+  sim.noise = 81;
+  tick(run);
+  // He must not move an inch until he is on his feet: a man still on the couch
+  // sliding towards you is the exact bug this sequence exists to prevent.
+  const from = { x: w.x, y: w.y };
+  let frames = 0;
+  while (w.state === 'rising' && frames < 60 * 5) {
+    place(sim, 5000, 5000);
+    sim.noise = Math.max(sim.noise, 85);
+    tick(run);
+    frames++;
+    assert.ok(Math.hypot(w.x - from.x, w.y - from.y) < 40,
+      'he should get off the couch, not set off from it');
+  }
+  assert.ok(frames >= 60 * 1.2, `he was up after ${(frames / 60).toFixed(2)}s`);
+  assert.equal(w.state, 'investigating');
+});
+
 test('he walks there — through the doorways, never through the walls', () => {
   const run = openSchool();
   const { sim } = run;
@@ -351,7 +404,8 @@ test('under 50 he abandons it, walks home and goes back to sleep', () => {
   place(sim, 5000, 5000);
 
   // Let him get properly under way, then go quiet.
-  for (let i = 0; i < 60; i++) { sim.noise = Math.max(sim.noise, 85); tick(run); }
+  assert.ok(untilWalking(run), 'he should have got to his feet');
+  for (let i = 0; i < 30; i++) { sim.noise = Math.max(sim.noise, 85); tick(run); }
   assert.equal(w.state, 'investigating');
   sim.noise = RULES.investigate.calmAt - 1;
   tick(run);
@@ -372,8 +426,7 @@ test('he keeps investigating between 50 and 80 — the meter has to fall properl
   sim.noise = 81;
   tick(run);
   place(sim, 5000, 5000);
-  for (let i = 0; i < 30; i++) { sim.noise = 85; tick(run); }
-  sim.noise = 65;
+  assert.ok(untilWalking(run), 'he should have got to his feet');
   for (let i = 0; i < 30; i++) { sim.noise = 65; tick(run); }
   assert.ok(w.state === 'investigating' || w.state === 'searching',
     `at 65 he should still be looking, not ${w.state}`);
@@ -388,7 +441,8 @@ test('noise going back over 80 sends him out again, to the new spot', () => {
   tick(run);
   const first = { ...w.target };
   place(sim, 5000, 5000);
-  for (let i = 0; i < 60; i++) { sim.noise = Math.max(sim.noise, 85); tick(run); }
+  assert.ok(untilWalking(run), 'he should have got to his feet');
+  for (let i = 0; i < 30; i++) { sim.noise = Math.max(sim.noise, 85); tick(run); }
   sim.noise = 10;
   for (let i = 0; i < 30; i++) tick(run);
   assert.ok(w.state === 'returning' || w.state === 'settling', `he should be on his way back, not ${w.state}`);
