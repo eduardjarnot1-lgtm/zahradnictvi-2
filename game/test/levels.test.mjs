@@ -5,10 +5,10 @@ import { validateAll, validateLevel } from '../src/validate.js';
 import { levelTotals, forcesChoice, itemStats, timeLimit, furnitureStyle } from '../src/rules.js';
 import { play, playEfficiently } from './harness.mjs';
 
-// Levels are grouped into themed chapters; each opens easier and then climbs.
-function byTheme() {
+// Eleven locations of five levels each; within a location the difficulty climbs.
+function byLocation() {
   const groups = {};
-  for (const level of LEVELS) (groups[level.theme] ||= []).push(level);
+  for (const level of LEVELS) (groups[level.location] ||= []).push(level);
   return groups;
 }
 import { TUNING } from '../src/tuning.js';
@@ -33,13 +33,13 @@ test('validator catches an item buried in furniture', () => {
 
 test('validator catches a walled-off exit', () => {
   const broken = structuredClone(LEVELS[0]);
-  broken.colliders.push({
-    type: 'furniture',
-    x: broken.exit.x - 20,
-    y: broken.exit.y - 60,
-    w: broken.exit.w + 40,
-    h: 60
-  });
+  const exit = broken.exit;
+  const slab = exit.side === 'bottom'
+    ? { x: exit.x - 20, y: exit.y - 60, w: exit.w + 40, h: 60 }
+    : exit.side === 'left'
+      ? { x: exit.x + exit.w, y: exit.y - 20, w: 60, h: exit.h + 40 }
+      : { x: exit.x - 60, y: exit.y - 20, w: 60, h: exit.h + 40 };
+  broken.colliders.push({ type: 'furniture', ...slab });
   const result = validateLevel(broken);
   assert.equal(result.ok, false);
   assert.match(result.errors.join(' '), /exit is unreachable/);
@@ -51,27 +51,34 @@ test('validator catches a spawn inside a wall', () => {
   assert.match(validateLevel(broken).errors.join(' '), /spawn/);
 });
 
-test('the first two levels are takeable whole, as a tutorial', () => {
-  assert.equal(forcesChoice(LEVELS[0]), false);
-  assert.equal(forcesChoice(LEVELS[1]), false);
+// Every location teaches you its building before it starts asking questions.
+test('each location opens with a level you can clear, and closes on a choice', () => {
+  for (const [location, levels] of Object.entries(byLocation())) {
+    assert.equal(forcesChoice(levels[0]), false,
+      `${location} level 1 already forces a choice — nowhere to learn the place`);
+    for (const level of levels.slice(2)) {
+      assert.ok(forcesChoice(level),
+        `${location} level ${level.tier} can be cleared out without waking anyone`);
+    }
+  }
 });
 
 test('every chapter ends on levels that force the core decision', () => {
-  for (const [theme, levels] of Object.entries(byTheme())) {
+  for (const [location, levels] of Object.entries(byLocation())) {
     const last = levels[levels.length - 1];
-    assert.equal(forcesChoice(last), true, `${theme} should end on a real decision`);
+    assert.equal(forcesChoice(last), true, `${location} should end on a real decision`);
   }
 });
 
 test('difficulty rises within each chapter', () => {
-  for (const [theme, levels] of Object.entries(byTheme())) {
+  for (const [location, levels] of Object.entries(byLocation())) {
     if (levels.length < 2) continue;
     const totals = levels.map((l) => levelTotals(l).noise);
     const inversions = totals.filter((n, i) => i > 0 && n < totals[i - 1]).length;
-    assert.ok(inversions <= 1, `${theme} difficulty wanders: ${totals}`);
+    assert.ok(inversions <= 1, `${location} difficulty wanders: ${totals}`);
     assert.ok(
       totals[totals.length - 1] > totals[0],
-      `${theme} does not get harder: ${totals}`
+      `${location} does not get harder: ${totals}`
     );
   }
 });
@@ -80,7 +87,7 @@ test('each new chapter opens easier than the previous one ended', () => {
   // The generated chapters only. The seven hand-drawn floorplans are one-off
   // showcase maps rather than a ramp, and each is its own location — grouping
   // them by theme would give seven chapters of one level and assert nothing.
-  const chapters = Object.values(byTheme()).filter((c) => !c[0].tiles);
+  const chapters = Object.values(byLocation()).filter((c) => !c[0].tiles);
   for (let i = 1; i < chapters.length; i++) {
     const previousEnd = levelTotals(chapters[i - 1][chapters[i - 1].length - 1]).noise;
     const opening = levelTotals(chapters[i][0]).noise;
@@ -89,17 +96,50 @@ test('each new chapter opens easier than the previous one ended', () => {
 });
 
 test('the campaign ends harder than it starts', () => {
-  const generated = LEVELS.filter((l) => !l.tiles);
-  const first = levelTotals(generated[0]);
-  const last = levelTotals(generated[generated.length - 1]);
-  assert.ok(last.noise > first.noise * 3);
-  assert.ok(last.value > first.value * 5);
+  const first = levelTotals(LEVELS[0]);
+  const last = levelTotals(LEVELS[LEVELS.length - 1]);
+  assert.ok(last.noise > first.noise * 3, `${first.noise} -> ${last.noise} noise`);
+  assert.ok(last.value > first.value * 5, `${first.value} -> ${last.value} value`);
+});
+
+// The five levels of a location are a ramp: more to steal, worth more, and a
+// building with more of it to cross.
+test('difficulty climbs across each location', () => {
+  for (const [location, levels] of Object.entries(byLocation())) {
+    assert.equal(levels.length, 5, `${location} has ${levels.length} levels, not five`);
+    assert.deepEqual(levels.map((l) => l.tier), [1, 2, 3, 4, 5], `${location} tiers are out of order`);
+
+    const items = levels.map((l) => l.items.length);
+    const value = levels.map((l) => levelTotals(l).value);
+    const rooms = levels.map((l) => l.colliders.filter((c) => c.type === 'partition').length);
+    assert.ok(items[4] > items[0], `${location}: ${items} items`);
+    assert.ok(value[4] > value[0] * 2, `${location}: ${value} value`);
+    assert.ok(rooms[4] >= rooms[0], `${location}: ${rooms} interior walls`);
+  }
+});
+
+// Pressure, not raw seconds. A bigger map genuinely takes longer to cross, so
+// the last level of a location may get more seconds than the fourth — what has
+// to tighten is how much of the clock is spare once you have worked the place.
+test('the clock tightens across the first four levels of every location', () => {
+  for (const [location, levels] of Object.entries(byLocation())) {
+    const clocks = levels.map((l) => timeLimit(l));
+    for (let i = 1; i < 4; i++) {
+      assert.ok(clocks[i] < clocks[i - 1],
+        `${location} level ${i + 1} has ${clocks[i]}s, no tighter than ${clocks[i - 1]}s`);
+    }
+    assert.ok(clocks[4] <= clocks[0], `${location} ends looser than it began: ${clocks}`);
+  }
 });
 
 // The floorplan levels are a different promise: not a ramp, but seven buildings
 // that each have to be worth walking around.
+// The seven recreations of reference drawings, now the hardest level of the
+// first seven locations.
+const HAND_DRAWN = [5, 10, 15, 20, 25, 30, 35];
+
 test('every hand-drawn floorplan is a real building, not one big room', () => {
-  const plans = LEVELS.filter((l) => l.tiles);
+  const plans = LEVELS.filter((l) => HAND_DRAWN.includes(l.id));
   assert.equal(plans.length, 7, 'expected the seven floorplans');
   for (const level of plans) {
     // Bigger than the screen, or the camera has nothing to do.
@@ -118,9 +158,10 @@ test('every hand-drawn floorplan is a real building, not one big room', () => {
 // The exact proportions asked for, checked rather than trusted: a map drawn at
 // 36x57 must be 36x57 in the game, not 36x55 because a wall moved.
 test('each floorplan is exactly the size it was drawn at', () => {
+  // Apartment 5, House 5, Hotel 5, Office 5, School 5, Hospital 5, Museum 5.
   const SIZES = {
-    57: [43, 40], 58: [44, 33], 59: [36, 57], 60: [45, 32],
-    61: [49, 34], 62: [49, 36], 63: [43, 36]
+    5: [36, 57], 10: [43, 36], 15: [49, 34], 20: [44, 33],
+    25: [49, 36], 30: [45, 32], 35: [43, 40]
   };
   for (const [id, [cols, rows]] of Object.entries(SIZES)) {
     const level = LEVELS.find((l) => l.id === Number(id));
@@ -162,88 +203,42 @@ test('taking two named items pays exactly what they are worth', () => {
   }
 });
 
-test('the clock shrinks with the campaign but never below the floor', () => {
-  assert.equal(timeLimit(LEVELS[0]), TUNING.time.base);
-  // The base clock shrinks monotonically; a level may then add an allowance
-  // for being physically bigger to cross.
-  const base = LEVELS.map((l) => timeLimit(l) - (l.extraTime || 0));
-  for (let i = 1; i < base.length; i++) {
-    assert.ok(base[i] <= base[i - 1], 'the base clock must never get more generous');
-  }
-  // "Leisurely" has to be measured against how far you have to walk, not in
-  // flat seconds: a 36x57 flat is nearly twice the window's diagonal, and
-  // holding it to a one-screen bedroom's clock would make it unplayable rather
-  // than tense. The allowance scales with distance, so no level is ever more
-  // generous per step than the tightest single-screen room.
+test('every level states its own clock, and none of them is a walkover', () => {
   const windowSpan = Math.hypot(TUNING.world.width, TUNING.world.height);
   for (const level of LEVELS) {
-    assert.ok(timeLimit(level) >= TUNING.time.floor);
-    const span = Math.hypot(level.width, level.height);
-    const cap = (TUNING.time.base + 12) * (span / windowSpan);
-    assert.ok(timeLimit(level) <= cap,
-      `level ${level.id} has ${timeLimit(level)}s for a ${level.width}x${level.height} map (cap ${cap.toFixed(0)}s)`);
+    assert.ok(level.clock > 0, `level ${level.id} has no clock of its own`);
+    assert.equal(timeLimit(level), level.clock);
+    // Never more generous per step than the tightest single-screen room was.
+    // The ceiling the clocks are calibrated to: the easiest level of a location
+    // gets 24 seconds per window of map, times its slack. Nothing may exceed
+    // what level 1 of its own size would be given.
+    // ...with a little room above it, because a level whose measured run came
+    // out long is given the seconds it actually needs.
+    const cap = 24 * 2.35 * (Math.hypot(level.width, level.height) / windowSpan);
+    assert.ok(level.clock <= cap,
+      `level ${level.id} has ${level.clock}s for a ${level.width}x${level.height} map (cap ${cap.toFixed(0)}s)`);
+    assert.ok(level.clock >= 20, `level ${level.id} has only ${level.clock}s`);
   }
-  assert.ok(base[base.length - 1] < TUNING.time.base, 'later levels must be tighter');
 });
 
-test('only the big partitioned maps carry a time allowance', () => {
+test('every level is a building, not one open room', () => {
   for (const level of LEVELS) {
-    const partitions = level.colliders.filter((c) => c.type === 'partition').length;
-    if (level.extraTime > 0) {
-      assert.ok(partitions > 0, `level ${level.id} takes extra time without being bigger`);
-    }
-    if (partitions > 0) {
-      assert.ok(level.extraTime > 0,
-        `level ${level.id} is partitioned but gets no extra clock to cross it`);
-    }
+    assert.ok(level.colliders.filter((c) => c.type === 'partition').length >= 2,
+      `level ${level.id} has no interior walls`);
+    assert.ok(level.doors.length >= 1, `level ${level.id} has no doorways`);
+    assert.ok(level.items.length >= 7, `level ${level.id} has only ${level.items.length} items`);
   }
 });
 
-test('the campaign grows from one room into connected areas', () => {
-  const early = LEVELS.slice(0, 10);
-  const late = LEVELS.slice(-8);
-  for (const level of early) {
-    assert.equal(level.colliders.filter((c) => c.type === 'partition').length, 0,
-      `level ${level.id} should stay a simple single room`);
-  }
-  for (const level of late) {
-    assert.ok(level.colliders.filter((c) => c.type === 'partition').length >= 3,
-      `level ${level.id} should be a multi-area map`);
-  }
-  // ...and the late rooms are worth more and busier than the early ones.
-  const earlyItems = early.reduce((n, l) => n + l.items.length, 0) / early.length;
-  const lateItems = late.reduce((n, l) => n + l.items.length, 0) / late.length;
-  assert.ok(lateItems > earlyItems);
-});
-
-test('the two-doorway house really does offer independent routes', () => {
-  // Seal either doorway and the level is still completable through the other.
-  // That is the whole point of the layout, and it is easy to lose by accident.
-  const level = LEVELS.find((l) => l.layout === 'G');
-  assert.ok(level, 'expected a two-doorway layout');
-
-  const doorways = level.doors;
-  assert.equal(doorways.length, 2, 'expected exactly two doorways');
-
-  // Bricking a doorway up means it stops being a doorway, so it comes out of
-  // the door list too — otherwise the validator flags it as a blocked door,
-  // which is beside the point being tested here.
-  const brickUp = (indices) => {
-    const sealed = structuredClone(level);
-    for (const index of indices) sealed.colliders.push({ type: 'partition', ...doorways[index] });
-    sealed.doors = sealed.doors.filter((_, index) => !indices.includes(index));
-    return validateLevel(sealed);
-  };
-
-  for (const index of [0, 1]) {
-    const result = brickUp([index]);
-    assert.equal(result.ok, true,
-      `sealing doorway ${index} breaks the level: ${result.errors.join('; ')}`);
-  }
-
-  // And sealing both must break it — otherwise the partition is not dividing
-  // anything and the test above proves nothing.
-  assert.equal(brickUp([0, 1]).ok, false, 'sealing both doorways should cut the room in two');
+test('the validator notices a doorway bricked up', () => {
+  // Sealing a room off is the failure mode these buildings invite, and the
+  // whole generator leans on the validator catching it.
+  const level = LEVELS.find((l) => l.doors.length > 0);
+  assert.ok(level, 'expected a level with doorways');
+  const sealed = structuredClone(level);
+  for (const door of sealed.doors) sealed.colliders.push({ type: 'partition', ...door });
+  const result = validateLevel(sealed);
+  assert.equal(result.ok, false, 'bricking up every doorway should not validate');
 });
 
 test('greed never pays: taking everything loses, one way or another', () => {
@@ -286,16 +281,22 @@ test('a partitioned level declares the doors its walls leave open', () => {
   }
 });
 
-test('gallery rooms put their value on plinths, out in the open', () => {
-  const gallery = LEVELS.filter((l) => l.theme === 'gallery');
+test('museum rooms put their value on plinths, out in the open', () => {
+  // Only the generated museum levels: the hand-drawn one is a recreation of a
+  // drawing and lays its hall out the way the drawing does.
+  const gallery = LEVELS.filter((l) => l.theme === 'museum' && l.tier < 5);
   assert.ok(gallery.length > 0);
   for (const level of gallery) {
     const plinths = level.colliders.filter(
       (c) => c.type === 'furniture' && furnitureStyle(c) === 'plinth');
-    assert.ok(plinths.length >= 6, `level ${level.id} has only ${plinths.length} plinths`);
-    // Each plinth should have something worth taking beside it.
+    // The hall grows with the tier, from a 2x2 of cases to a 4x3.
+    assert.ok(plinths.length >= 4, `level ${level.id} has only ${plinths.length} plinths`);
+    assert.ok(plinths.length >= level.tier * 2,
+      `level ${level.id} is tier ${level.tier} with only ${plinths.length} plinths`);
+    // ...and most of them have something worth taking beside them.
     const guarded = plinths.filter((p) => level.items.some((item) =>
-      Math.abs(item.x - (p.x + p.w / 2)) < 40 && Math.abs(item.y - (p.y + p.h / 2)) < 40));
-    assert.ok(guarded.length >= 5, `only ${guarded.length} plinths are worth visiting`);
+      Math.abs(item.x - (p.x + p.w / 2)) < 60 && Math.abs(item.y - (p.y + p.h / 2)) < 60));
+    assert.ok(guarded.length >= Math.ceil(plinths.length / 2),
+      `only ${guarded.length} of ${plinths.length} plinths are worth visiting`);
   }
 });

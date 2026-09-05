@@ -170,14 +170,15 @@ export function boot() {
   function buildGrid() {
     const grid = $('grid');
     grid.innerHTML = '';
-    let theme = null;
+    let location = null;
     for (const level of LEVELS) {
-      if (level.theme !== theme) {
-        theme = level.theme;
+      if (level.location !== location) {
+        location = level.location;
         const heading = document.createElement('div');
         heading.className = 'chapter';
         heading.style.gridColumn = '1 / -1';
-        heading.textContent = level.name;
+        // The chapter, and how far through it you are.
+        heading.textContent = `${location} · 5 levels`;
         grid.appendChild(heading);
       }
       // The unlock-all switch opens the grid without rewriting progress, so

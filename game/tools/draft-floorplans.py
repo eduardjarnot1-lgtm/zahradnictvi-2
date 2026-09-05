@@ -34,7 +34,7 @@ class Grid:
     # forty coordinates against the furniture, ask for roughly where a thing
     # goes and snap it to the nearest free tile — and shout if there isn't one,
     # because that means the room is fuller than it looked.
-    def drop(self, x, y, ch, radius=3):
+    def drop(self, x, y, ch, radius=3, box=False):
         best = None
         for r in range(radius + 1):
             for dy in range(-r, r + 1):
@@ -43,8 +43,10 @@ class Grid:
                     nx, ny = x + dx, y + dy
                     if not (0 <= nx < self.cols and 0 <= ny < self.rows): continue
                     if self.g[ny][nx] != '.': continue
-                    # Never right up against a wall corner where the pickup
-                    # radius would be half inside the masonry.
+                    # The spawn has to be somewhere the player can actually
+                    # stand. A free tile is not enough: the box is wider than a
+                    # tile, so a gap beside a wall looks free and is not.
+                    if box and self._blocked(nx * 20 + 10, ny * 20 + 10): continue
                     best = (nx, ny)
                     break
                 if best: break
@@ -121,20 +123,42 @@ class Grid:
         return seen
 
     def connected(self):
-        TILE, G, R = 20, 4, 26
+        TILE, G = 20, 4
         seen = self._reached()
         if not seen: return False
+        # Loot and the way out have to be within reach of somewhere you can
+        # stand; a doorway has to be somewhere you can stand *in*. The game's
+        # validator checks all three, so this does too — otherwise the tool
+        # calls a map finished and the build rejects it.
         targets = []
         for y in range(self.rows):
             for x in range(self.cols):
                 ch = self.g[y][x]
                 if ch in LOOT or ch == 'X':
-                    targets.append((x * TILE + TILE / 2, y * TILE + TILE / 2))
-        for (tx, ty) in targets:
-            if not any(abs(gx * G + G / 2 - tx) <= R and abs(gy * G + G / 2 - ty) <= R
+                    targets.append((x * TILE + TILE / 2, y * TILE + TILE / 2, 26))
+                elif ch == 'D':
+                    targets.append((x * TILE + TILE / 2, y * TILE + TILE / 2, G * 3))
+        for (tx, ty, r) in targets:
+            if not any(abs(gx * G + G / 2 - tx) <= r and abs(gy * G + G / 2 - ty) <= r
                        for (gx, gy) in seen):
                 return False
         return True
+
+    # An item on the spawn is free money and an item in the doorway you leave by
+    # is taken on the way past. Neither is a decision, so neither survives.
+    def clear_freebies(self):
+        spawn = exit_ = None
+        for y in range(self.rows):
+            for x in range(self.cols):
+                if self.g[y][x] == '@': spawn = (x, y)
+                elif self.g[y][x] == 'X': exit_ = (x, y)
+        for y in range(self.rows):
+            for x in range(self.cols):
+                if self.g[y][x] not in LOOT: continue
+                if spawn and max(abs(x - spawn[0]), abs(y - spawn[1])) <= 2:
+                    self.g[y][x] = '.'
+                elif exit_ and max(abs(x - exit_[0]), abs(y - exit_[1])) <= 2:
+                    self.g[y][x] = '.'
 
     # Widen the aisles only as far as connectivity actually needs. Carving every
     # aisle to the far wall works, but it strips a conference room of its table
@@ -144,6 +168,56 @@ class Grid:
             if self.connected(): return depth
             self.carve_aisles(depth + 1)
         return None
+
+    # Aisles are carved from doorways, which handles a room packed behind its
+    # own door. It does not handle a piece of furniture sitting mid-corridor
+    # leaving a one-tile channel — the player is taller than a tile, so that
+    # reads as free floor and is not walkable. This pass finds whatever is
+    # actually separating the map and takes out the smallest thing that fixes
+    # it, so the room keeps as much of its furniture as it can.
+    def open_by_removal(self, limit=60):
+        TILE, G = 20, 4
+        for _ in range(limit):
+            if self.connected():
+                return True
+            cells = self._reached()
+            reached = set()
+            for (gx, gy) in cells:
+                reached.add(((gx * G) // TILE, (gy * G) // TILE))
+            # Blobs of furniture, and whether each touches both sides of the split.
+            solid = set('TSWNVCBP')
+            seen_tile = set()
+            best = None
+            for y in range(self.rows):
+                for x in range(self.cols):
+                    if (x, y) in seen_tile or self.g[y][x] not in solid:
+                        continue
+                    ch = self.g[y][x]
+                    blob, stack = set(), [(x, y)]
+                    while stack:
+                        cx, cy = stack.pop()
+                        if (cx, cy) in blob: continue
+                        if not (0 <= cx < self.cols and 0 <= cy < self.rows): continue
+                        if self.g[cy][cx] != ch: continue
+                        blob.add((cx, cy))
+                        stack += [(cx+1,cy),(cx-1,cy),(cx,cy+1),(cx,cy-1)]
+                    seen_tile |= blob
+                    touches_open = touches_closed = False
+                    for (bx, by) in blob:
+                        for (nx, ny) in ((bx+1,by),(bx-1,by),(bx,by+1),(bx,by-1)):
+                            if not (0 <= nx < self.cols and 0 <= ny < self.rows): continue
+                            if self.g[ny][nx] in '#%' or self.g[ny][nx] in solid: continue
+                            if (nx, ny) in reached: touches_open = True
+                            else: touches_closed = True
+                    # A blob with open floor on one side and cut-off floor on the
+                    # other is exactly what is holding the map apart.
+                    if touches_open and touches_closed and (best is None or len(blob) < len(best)):
+                        best = blob
+            if not best:
+                return False
+            for (bx, by) in best:
+                self.g[by][bx] = '.'
+        return self.connected()
 
     def carve_aisles(self, maxDepth=999):
         # Never the watcher's own furniture: that is the one piece of the map
@@ -613,10 +687,13 @@ MAPS = [('museum', museum), ('office', office), ('flat', flat),
         ('hospital', hospital), ('hotel', hotel), ('school', school),
         ('cottage', cottage)]
 
-want = sys.argv[1:] or [n for n, _ in MAPS]
-for name, fn in MAPS:
-    if name in want:
-        fn().out(name)
+# Guarded so build-locations.py can import the seven hand-drawn maps without
+# this file printing all of them as a side effect.
+if __name__ == '__main__':
+    want = sys.argv[1:] or [n for n, _ in MAPS]
+    for name, fn in MAPS:
+        if name in want:
+            fn().out(name)
 
 # ---------------------------------------------------------------------------
 # This is the drafting tool for src/maps.js, not part of the game. It exists so

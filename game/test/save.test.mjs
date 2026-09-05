@@ -11,10 +11,12 @@ const fakeStorage = (seed) => {
   };
 };
 
-test('a v0 save from the first beta migrates without losing progress', () => {
+test('a v0 save from the first beta migrates without losing what it earned', () => {
   const migrated = migrate({ unlocked: 6, bank: 1240 });
   assert.equal(migrated.v, SAVE_VERSION);
-  assert.equal(migrated.unlocked, 6);
+  // The money is kept; the level it had reached is not, because the campaign it
+  // reached into was rebuilt (see the v4 migration).
+  assert.equal(migrated.unlocked, 1);
   assert.equal(migrated.bank, 1240);
   assert.deepEqual(migrated.best, {});
   assert.deepEqual(migrated.stars, {});
@@ -26,7 +28,9 @@ test('a v0 save from the first beta migrates without losing progress', () => {
 test('a v2 save carries its mute preference into the new settings', () => {
   assert.equal(migrate({ v: 2, unlocked: 3, bank: 10, muted: true, best: { 1: 50 } }).settings.sound, false);
   assert.equal(migrate({ v: 2, unlocked: 3, bank: 10, muted: false, best: {} }).settings.sound, true);
-  assert.deepEqual(migrate({ v: 2, unlocked: 3, bank: 10, muted: false, best: { 2: 90 } }).best, { 2: 90 });
+  // Level records do not survive the rebuild, so the mute preference is the
+  // thing being tested here — not the scores beside it.
+  assert.deepEqual(migrate({ v: 2, unlocked: 3, bank: 10, muted: false, best: { 2: 90 } }).best, {});
 });
 
 test('garbage and hostile saves fall back to defaults instead of throwing', () => {
@@ -125,18 +129,20 @@ test('settings persist individually', () => {
   assert.equal(JSON.parse(storage.raw).settings.sound, true, 'other settings untouched');
 });
 
-test('a v3 save gains records without losing anything', () => {
+test('a v3 save keeps its money, collection and upgrades through the rebuild', () => {
   const migrated = migrate({
     v: 3, unlocked: 7, bank: 500, best: { 1: 100 }, stars: { 1: 3 },
     collection: ['phone'], upgrades: { shoes: 1, feet: 0, bag: 2 },
     settings: { sound: false, music: true, vibration: true, quality: 'medium' }
   });
   assert.equal(migrated.v, SAVE_VERSION);
-  assert.equal(migrated.unlocked, 7);
   assert.equal(migrated.bank, 500);
-  assert.deepEqual(migrated.stars, { 1: 3 });
+  assert.deepEqual(migrated.collection, ['phone']);
   assert.deepEqual(migrated.upgrades, { shoes: 1, feet: 0, bag: 2 });
   assert.equal(migrated.settings.quality, 'medium');
+  // Progress through the old numbering is cleared: those levels are gone.
+  assert.equal(migrated.unlocked, 1);
+  assert.deepEqual(migrated.stars, {});
   assert.deepEqual(migrated.records, {});
 });
 
@@ -157,7 +163,7 @@ test('personal bests track separately and only ever improve', () => {
 // The development switch: every level playable from the menu without the save
 // pretending the player earned them.
 test('unlock-all is a setting, not a rewrite of progress', () => {
-  const store = createSaveStore(fakeStorage(JSON.stringify({ v: 4, unlocked: 3, bank: 120, stars: { 1: 3 } })));
+  const store = createSaveStore(fakeStorage(JSON.stringify({ v: 5, unlocked: 3, bank: 120, stars: { 1: 3 } })));
   assert.equal(store.data.settings.unlockAll, true, 'defaults on while the game is in development');
   // The thing it must never do is inflate what the player actually reached.
   assert.equal(store.data.unlocked, 3);
@@ -165,4 +171,23 @@ test('unlock-all is a setting, not a rewrite of progress', () => {
   store.setSetting('unlockAll', false);
   assert.equal(store.data.settings.unlockAll, false);
   assert.equal(store.data.unlocked, 3, 'turning it off leaves progress where it was');
+});
+
+// The restructure into eleven locations renumbered every level.
+test('the location rebuild clears level records but keeps what was earned', () => {
+  const store = createSaveStore(fakeStorage(JSON.stringify({
+    v: 4, unlocked: 30, bank: 4200, best: { 12: 500 }, stars: { 12: 3 },
+    records: { 12: { money: 500 } }, collection: ['phone', 'diamond'],
+    upgrades: { shoes: 2, feet: 1, bag: 3 }
+  })));
+  assert.equal(store.data.v, SAVE_VERSION);
+  // Bought and collected things survive; progress through levels that no longer
+  // exist does not.
+  assert.equal(store.data.bank, 4200);
+  assert.deepEqual(store.data.upgrades, { shoes: 2, feet: 1, bag: 3 });
+  assert.deepEqual([...store.data.collection].sort(), ['diamond', 'phone']);
+  assert.equal(store.data.unlocked, 1);
+  assert.deepEqual(store.data.best, {});
+  assert.deepEqual(store.data.stars, {});
+  assert.deepEqual(store.data.records, {});
 });

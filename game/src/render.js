@@ -381,6 +381,13 @@ export function createRenderer(canvas, options = {}) {
       ctx.translate(-Math.round(camera.x * scale) / scale, -Math.round(camera.y * scale) / scale);
       if (sim.shake !== 0) ctx.translate(sim.shakeX, sim.shakeY);
 
+      // Clear the view first. A map can be smaller than the window — several
+      // are shorter than 620 — and the margin around it is never painted by
+      // the room blit, so without this it keeps whatever the previous frame
+      // left there: a ghost of the room, sliding as the camera moves.
+      ctx.fillStyle = '#0d0a10';
+      ctx.fillRect(camera.x, camera.y, W, H);
+
       blitRoom(sim.level);
       drawExit(sim, time);
       // Who is in this room decides what gets drawn here — and nothing else in
@@ -393,7 +400,7 @@ export function createRenderer(canvas, options = {}) {
       // the renderer has to know there is more than one kind of them.
       if (pose === 'guard') {
         drawGuard(ctx, sim.level, stage, time, sim.wakeSeconds || 0, sim.startle || 0,
-          sim.seen || 0, config.sees, kind);
+          sim.seen || 0, sim.level.watcher.sees || config.sees, kind);
       } else if (pose === 'desk') {
         drawSlumped(ctx, sim.level, stage, time, sim.wakeSeconds || 0, sim.startle || 0, kind);
       } else {

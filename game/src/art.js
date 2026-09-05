@@ -174,7 +174,15 @@ const THEMES = {
   // Dark green boards and firelight, after the cottage reference.
   cottage:   { wall: '#3d4a35', lip: '#516046', shade: '#2c3627', skirt: '#c4b58c',
                floor: '#b5763a', alt: '#a96d34', seam: 'rgba(134,84,38,0.6)',
-               grain: 'rgba(212,148,86,0.30)', light: '255,208,132', vignette: '26,24,14' }
+               grain: 'rgba(212,148,86,0.30)', light: '255,208,132', vignette: '26,24,14' },
+  // Shop lino and cold strip light, with the shutters down.
+  shop:      { wall: '#4a3f2e', lip: '#61533d', shade: '#362d21', skirt: '#d8c79c',
+               floor: '#a5a08f', alt: '#9c9787', seam: 'rgba(116,112,100,0.5)',
+               grain: 'rgba(198,192,176,0.22)', light: '236,244,220', vignette: '24,20,14' },
+  // Poured concrete and steel: no daylight ever gets in here.
+  vault:     { wall: '#2b2f36', lip: '#3d434d', shade: '#1e2127', skirt: '#8d97a6',
+               floor: '#6f747c', alt: '#686d75', seam: 'rgba(84,88,96,0.55)',
+               grain: 'rgba(140,146,156,0.20)', light: '198,222,255', vignette: '10,12,16' }
 };
 
 let T = THEMES.bedroom;   // set once per room paint; drawing is synchronous

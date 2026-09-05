@@ -11,9 +11,12 @@ import {
 } from '../src/rules.js';
 
 test('a scripted run wins with exactly the money it stole', () => {
-  const { result } = play(1, { take: ['L1-0', 'L1-2'] });
+  const level = LEVELS[0];
+  const pair = [level.items[0], level.items[1]];
+  const expected = pair.reduce((sum, item) => sum + TUNING.items[item.type].value, 0);
+  const { result } = play(1, { take: pair.map((i) => i.id) });
   assert.equal(result.status, 'won');
-  assert.equal(result.haul, 30 + 45, 'the raw haul is exact');
+  assert.equal(result.haul, expected, 'the raw haul is exact');
   assert.ok(result.money >= result.haul, 'bonuses only ever add');
   // Noise is no longer a pure sum: bumping furniture adds to it and standing
   // still bleeds it off, so only the money is exact.
@@ -130,13 +133,36 @@ test('the exit does nothing once he is awake', () => {
 
 // --- movement feel ----------------------------------------------------------
 
+// The longest unobstructed run of floor on a level, found rather than assumed:
+// hard-coding "a clear stretch" ties the test to one particular map, and these
+// maps change.
+const clearStretch = (level, { onRug = null } = {}) => {
+  const { boxWidth: PW, boxHeight: PH } = TUNING.player;
+  let best = null;
+  for (let y = PH; y < level.height - PH; y += 8) {
+    let start = null;
+    for (let x = PW; x <= level.width - PW; x += 8) {
+      const free = !blocked(x, y, PW + 8, PH + 8, level.colliders)
+        && (onRug === null || onRug === level.rugs.some(
+          (r) => x > r.x && x < r.x + r.w && y > r.y && y < r.y + r.h));
+      if (free) {
+        if (start === null) start = x;
+        const span = x - start;
+        if (!best || span > best.span) best = { x: start, y, span };
+      } else {
+        start = null;
+      }
+    }
+  }
+  return best;
+};
+
 const openRun = () => {
   const run = createRun(1);
   const player = playerOf(run.sim);
-  // A genuinely clear stretch of floor on level 1: furniture sits at x<98 and
-  // x>286 on this row, so there is room to reach top speed and turn around.
-  player.x = 120;
-  player.y = 420;
+  const lane = clearStretch(run.level);
+  player.x = lane.x + TUNING.player.boxWidth;
+  player.y = lane.y;
   return run;
 };
 
@@ -274,9 +300,8 @@ test('Quick Feet raise top speed, Velvet Bag raises the payout', () => {
   const level = LEVELS[0];
   const fast = createSim({ level, seed: 1, upgrades: { feet: 3 } });
   const player = playerOf(fast);
-  player.x = 120;
-  player.y = 420;
-  for (let i = 0; i < 40; i++) stepSim(fast, { x: 1, y: 0 });
+  // From the spawn, which is open floor on every map by construction.
+  for (let i = 0; i < 40; i++) stepSim(fast, { x: 0, y: -1 });
   assert.ok(player.speed > TUNING.player.speed * 1.15, `only reached ${player.speed}`);
 
   const rich = createSim({ level, seed: 1, upgrades: { bag: 3 } });
@@ -298,10 +323,12 @@ test('stars are judged on the raw haul, not the upgraded payout', () => {
 });
 
 test('the win event reports what was taken, for the collection', () => {
-  const { run } = play(2, { take: ['L2-0', 'L2-2'], seed: 8 });
+  const level = LEVELS[1];
+  const pair = [level.items[0], level.items[1]];
+  const { run } = play(2, { take: pair.map((i) => i.id), seed: 8 });
   const win = run.sim.events.find((e) => e.type === 'won')
     || { taken: run.sim.items.filter((i) => i.taken).map((i) => i.type) };
-  assert.deepEqual([...win.taken].sort(), ['cash', 'watch']);
+  assert.deepEqual([...win.taken].sort(), pair.map((i) => i.type).sort());
 });
 
 // --- the clock ---------------------------------------------------------------
@@ -316,7 +343,8 @@ test('the clock starts full and runs down', () => {
 
 test('running out of time fails the level, distinctly from being heard', () => {
   const run = createRun(1);
-  for (let i = 0; i < 60 * 40 && run.sim.status === 'running'; i++) tick(run, { x: 0, y: 0 });
+  const frames = Math.ceil(timeLimit(run.level) * 60) + 120;
+  for (let i = 0; i < frames && run.sim.status === 'running'; i++) tick(run, { x: 0, y: 0 });
   assert.equal(run.sim.status, 'lost');
   assert.equal(run.sim.failReason, 'time');
   assert.equal(run.sim.timeLeft, 0);
@@ -333,10 +361,16 @@ test('the clock stops when the level ends', () => {
 });
 
 test('escaping in time still wins even with the clock nearly out', () => {
+  // How long the walk out actually takes on this map, then barely enough of it.
+  const measure = createRun(1);
+  escape(measure);
+  const needed = measure.sim.frame / 60;
+
   const run = createRun(1);
-  run.sim.timeLeft = 3;
+  run.sim.timeLeft = needed + 0.5;
   escape(run);
   assert.equal(run.sim.status, 'won');
+  assert.ok(run.sim.timeLeft < 1, `finished with ${run.sim.timeLeft.toFixed(1)}s to spare`);
 });
 
 // --- bumping into things -----------------------------------------------------
@@ -357,9 +391,10 @@ test('walking squarely into furniture costs noise', () => {
 test('a wall is not furniture: brushing the room costs nothing', () => {
   const run = createRun(1);
   const player = playerOf(run.sim);
-  player.x = 200;
-  player.y = 60;
-  for (let i = 0; i < 90; i++) tick(run, { x: 0, y: -1 });   // hold into the top wall
+  // Put him against the outer wall on the spawn's own column and lean on it.
+  player.x = run.level.spawn.x;
+  player.y = run.level.height - TUNING.world.tile - TUNING.player.boxHeight / 2;
+  for (let i = 0; i < 90; i++) tick(run, { x: 0, y: 1 });
   assert.equal(run.sim.noise, 0);
 });
 
@@ -377,14 +412,51 @@ test('leaning on furniture does not drain the meter', () => {
 });
 
 test('a glancing slide along furniture is not a collision', () => {
-  const level = LEVELS[0];
-  const furniture = level.colliders.find((c) => c.type === 'furniture');
-  const run = createRun(level.id);
+  const { boxWidth: PW, boxHeight: PH } = TUNING.player;
+  // The widest piece of furniture in the game with genuinely clear floor along
+  // its top edge. Searching for the subject rather than naming one keeps the
+  // test about the rule instead of about one particular room.
+  let best = null;
+  for (const level of LEVELS) {
+    const others = (c) => level.colliders.filter((o) => o !== c);
+    for (const c of level.colliders.filter((x) => x.type === 'furniture')) {
+      let clear = true;
+      for (let x = c.x - 20; x < c.x + c.w + 20; x += 6) {
+        if (blocked(x, c.y - PH / 2 - 3, PW, PH, others(c))) { clear = false; break; }
+      }
+      if (clear && (!best || c.w > best.furniture.w)) best = { level, furniture: c };
+    }
+  }
+  assert.ok(best && best.furniture.w > 100, 'expected a long clear edge to slide along');
+
+  const run = createRun(best.level.id);
   const player = playerOf(run.sim);
-  player.x = furniture.x - 30;
-  player.y = furniture.y + 4;                 // just grazing the top edge
-  for (let i = 0; i < 90; i++) tick(run, { x: 1, y: 0.06 });
-  assert.equal(run.sim.noise, 0, 'sliding past should be silent');
+  // Start alongside it, just clear of the top edge, and drift down onto that
+  // edge while running along it. Approaching from the side and hitting the end
+  // face is a collision, not a graze — that is the test above.
+  player.x = best.furniture.x + PW;
+  player.y = best.furniture.y - PH / 2 - 3;
+  const strides = Math.floor((best.furniture.w - PW * 2) / 2.2);
+  let bumps = 0;
+  for (let i = 0; i < strides; i++) {
+    tick(run, { x: 1, y: 0.06 });
+    bumps += run.sim.events.filter((e) => e.type === 'bump').length;
+  }
+
+  // A control: the same run, the same distance, on open floor. Footsteps cost
+  // noise either way — the question is whether brushing the edge adds anything
+  // on top, and comparing against zero would only be testing the footsteps.
+  const control = createRun(best.level.id);
+  const lane = clearStretch(control.level);
+  const walker = playerOf(control.sim);
+  walker.x = lane.x + PW;
+  walker.y = lane.y;
+  for (let i = 0; i < strides; i++) tick(control, { x: 1, y: 0 });
+
+  assert.ok(player.y + PH / 2 <= best.furniture.y + 1, 'the slide should stay on the edge');
+  assert.equal(bumps, 0, 'grazing an edge is not a collision');
+  assert.ok(run.sim.noise <= control.sim.noise + 0.01,
+    `sliding cost ${run.sim.noise.toFixed(2)} against ${control.sim.noise.toFixed(2)} for the same walk`);
 });
 
 // --- recovery ----------------------------------------------------------------
@@ -463,7 +535,13 @@ test('star targets are always reachable without waking him', () => {
 
 test('a streak forms from quick steals and pays a bonus', () => {
   const run = createRun(2);
-  for (const item of run.sim.items.slice(0, 3)) {
+  // The three items closest together: a streak is about stealing without
+  // dawdling, and on a floorplan the first three in the list can be rooms apart.
+  const first = run.sim.items[0];
+  const near = [...run.sim.items]
+    .sort((a, b) => Math.hypot(a.x - first.x, a.y - first.y) - Math.hypot(b.x - first.x, b.y - first.y))
+    .slice(0, 3);
+  for (const item of near) {
     if (run.sim.status !== 'running') break;
     steal(run, item.id);
   }
@@ -480,21 +558,26 @@ test('a streak lapses if you dawdle', () => {
 });
 
 test('footsteps are silent on a rug and audible on bare boards', () => {
-  const level = LEVELS.find((l) => l.rugs.length > 0);
-  const rug = level.rugs[0];
+  // The roomiest rug in the game, so the walk stays on it for the whole test.
+  const level = LEVELS.filter((l) => l.rugs.length > 0)
+    .sort((a, b) => Math.max(...b.rugs.map((r) => r.w * r.h)) - Math.max(...a.rugs.map((r) => r.w * r.h)))[0];
+  const rug = [...level.rugs].sort((a, b) => b.w * b.h - a.w * a.h)[0];
 
   const onRug = createRun(level.id);
   const a = playerOf(onRug.sim);
-  a.x = rug.x + 12;
+  a.x = rug.x + TUNING.player.boxWidth;
   a.y = rug.y + rug.h / 2;
-  for (let i = 0; i < 60; i++) tick(onRug, { x: 1, y: 0 });
+  // Only as far as the rug goes: walking off it would be testing the boards.
+  const strides = Math.max(10, Math.floor((rug.w - TUNING.player.boxWidth * 2) / 2));
+  for (let i = 0; i < strides; i++) tick(onRug, { x: 1, y: 0 });
   assert.equal(onRug.sim.noise, 0, 'a rug should swallow footsteps');
   assert.equal(onRug.sim.onSoftFloor, true);
 
   const onBoards = createRun(level.id);
   const b = playerOf(onBoards.sim);
-  b.x = 120;
-  b.y = 560;                                   // open boards near the spawn
+  const boards = clearStretch(level, { onRug: false });
+  b.x = boards.x + TUNING.player.boxWidth;
+  b.y = boards.y;
   for (let i = 0; i < 60; i++) tick(onBoards, { x: 1, y: 0 });
   assert.ok(onBoards.sim.noise > 0, 'bare boards should carry');
   assert.ok(onBoards.sim.noise < 2, `a second of walking cost ${onBoards.sim.noise}`);
@@ -567,8 +650,10 @@ test('the walk cycle advances with distance, not with time', () => {
   for (let i = 0; i < 90; i++) tick(fast, { x: 1, y: 0 });
   const slowPlayer = playerOf(slow.sim);
   const fastPlayer = playerOf(fast.sim);
-  const slowPerUnit = slowPlayer.walkPhase / (slowPlayer.x - 120);
-  const fastPerUnit = fastPlayer.walkPhase / (fastPlayer.x - 120);
+  const start = openRun();
+  const startX = playerOf(start.sim).x;
+  const slowPerUnit = slowPlayer.walkPhase / (slowPlayer.x - startX);
+  const fastPerUnit = fastPlayer.walkPhase / (fastPlayer.x - startX);
   // Same phase per unit travelled at any speed: that is what stops feet skating.
   assert.ok(Math.abs(slowPerUnit - fastPerUnit) < 0.01,
     `${slowPerUnit.toFixed(4)} vs ${fastPerUnit.toFixed(4)} phase per unit`);
@@ -644,40 +729,83 @@ test('you can always walk away from furniture — never stuck, never jittering',
 
 // --- who is in the room -----------------------------------------------------
 
-const guardLevel = () => LEVELS.find((l) => watcherConfig(l.watcher.kind).sees > 0);
+// The most watchful level in the game — the clearest case to test sight on.
+const guardLevel = () => LEVELS.filter((l) => watcherConfig(l.watcher.kind).sees > 0)
+  .sort((a, b) => b.watcher.sees - a.watcher.sees)[0];
 
-test('every level declares who is in it, and old levels default to the sleeper', () => {
+// Somewhere the player can stand, well inside a watcher's range, with room to
+// move. Hunted for rather than assumed: the guard's range and the furniture
+// round him differ from level to level.
+const spotInSight = (level) => {
+  const { boxWidth: PW, boxHeight: PH } = TUNING.player;
+  const range = level.watcher.sees || watcherConfig(level.watcher.kind).sees;
+  let best = null;
+  for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 24) {
+    for (let d = range * 0.3; d < range * 0.8; d += 8) {
+      const x = level.watcher.x + Math.cos(angle) * d;
+      const y = level.watcher.y + Math.sin(angle) * d;
+      if (blocked(x, y, PW + 30, PH, level.colliders)) continue;
+      if (!best || d < best.d) best = { x, y, d };
+    }
+  }
+  return best;
+};
+
+test('every level declares who is in it, and a location keeps the same person', () => {
   for (const level of LEVELS) {
     assert.ok(level.watcher && level.watcher.kind, `level ${level.id} has no watcher`);
     assert.ok(TUNING.watchers[level.watcher.kind], `unknown watcher on level ${level.id}`);
   }
-  // The levels that existed before this system was built are untouched.
-  for (const level of LEVELS.slice(0, 40)) {
-    assert.equal(level.watcher.kind, 'sleeper');
+  // The five levels of a location are the same building and the same person:
+  // that is what makes them a chapter rather than five unrelated rooms.
+  const byLocation = {};
+  for (const level of LEVELS) (byLocation[level.location] ||= []).push(level);
+  for (const [location, levels] of Object.entries(byLocation)) {
+    const kinds = new Set(levels.map((l) => l.watcher.kind));
+    assert.equal(kinds.size, 1, `${location} has ${kinds.size} different people in it`);
   }
 });
 
+test('a guard pays more attention as a location goes on', () => {
+  const byLocation = {};
+  for (const level of LEVELS) (byLocation[level.location] ||= []).push(level);
+  let checked = 0;
+  for (const levels of Object.values(byLocation)) {
+    if (watcherConfig(levels[0].watcher.kind).sees === 0) continue;
+    const ranges = levels.map((l) => l.watcher.sees);
+    for (let i = 1; i < ranges.length; i++) {
+      assert.ok(ranges[i] > ranges[i - 1],
+        `${levels[i].location} level ${i + 1} sees ${ranges[i]}, no further than level ${i}`);
+    }
+    checked++;
+  }
+  assert.ok(checked >= 3, `expected several watched locations, checked ${checked}`);
+});
+
 test('a guard raises ALERT, a sleeper raises NOISE — one meter, two names', () => {
-  assert.equal(watcherConfig('sleeper').meter, 'NOISE');
-  assert.equal(watcherConfig('guest').meter, 'NOISE');
-  assert.equal(watcherConfig('guard').meter, 'ALERT');
-  assert.equal(watcherConfig('security').meter, 'ALERT');
-  assert.equal(watcherConfig('caretaker').meter, 'NOISE');
-  // A sleeper cannot see; a guard can.
-  assert.equal(watcherConfig('sleeper').sees, 0);
-  assert.equal(watcherConfig('caretaker').sees, 0);
-  assert.ok(watcherConfig('guard').sees > 0);
-  assert.ok(watcherConfig('security').sees > 0);
+  // The people who are asleep raise NOISE; the ones who are awake raise ALERT.
+  for (const kind of ['sleeper', 'dad', 'grandpa', 'caretaker', 'doctor', 'worker',
+    'porter', 'owner', 'shopkeeper']) {
+    assert.equal(watcherConfig(kind).meter, 'NOISE', `${kind} should raise NOISE`);
+    assert.equal(watcherConfig(kind).sees, 0, `${kind} should not be watching`);
+  }
+  for (const kind of ['nightguard', 'security', 'vaultguard']) {
+    assert.equal(watcherConfig(kind).meter, 'ALERT', `${kind} should raise ALERT`);
+    assert.ok(watcherConfig(kind).sees > 0, `${kind} should be watching`);
+  }
 });
 
 test('the campaign actually visits every kind of watcher there is', () => {
   const used = new Set(LEVELS.map((l) => l.watcher.kind));
   for (const kind of Object.keys(TUNING.watchers)) {
+    // `sleeper` is the fallback the config returns for an unknown kind, so it
+    // is allowed to exist without a level of its own.
+    if (kind === 'sleeper') continue;
     assert.ok(used.has(kind), `no level uses the ${kind} watcher`);
   }
-  // ...and every location a level claims has its own art to draw it with.
+  // Eleven locations, each with its own palette and furniture.
   const themes = new Set(LEVELS.map((l) => l.theme));
-  assert.ok(themes.size >= 14, `expected many locations, found ${themes.size}`);
+  assert.equal(themes.size, 11, `expected eleven locations, found ${themes.size}`);
 });
 
 test('moving in a guard’s line of sight raises the meter in silence', () => {
@@ -687,8 +815,10 @@ test('moving in a guard’s line of sight raises the meter in silence', () => {
   const player = playerOf(sim);
   // Well inside his range, and clear of furniture. Oscillating keeps the
   // player from simply walking out of range.
-  player.x = level.watcher.x - 50;
-  player.y = level.watcher.y - 65;
+  const spot = spotInSight(level);
+  assert.ok(spot, 'expected somewhere to stand inside his range');
+  player.x = spot.x;
+  player.y = spot.y;
   const before = sim.noise;
   for (let i = 0; i < 180; i++) {
     stepSim(sim, { x: (Math.floor(i / 20) % 2 ? 1 : -1) * 0.9, y: 0 });
@@ -708,7 +838,7 @@ test('freezing inside a guard’s sight is safe', () => {
 });
 
 test('a guard notices you more the closer and faster you are', () => {
-  const watcher = { kind: 'guard', x: 200, y: 200 };
+  const watcher = { kind: 'nightguard', x: 200, y: 200 };
   const near = detectionRate(watcher, { x: 230, y: 200 }, 1);
   const far = detectionRate(watcher, { x: 310, y: 200 }, 1);
   const creeping = detectionRate(watcher, { x: 230, y: 200 }, 0.3);

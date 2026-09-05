@@ -201,21 +201,9 @@ export const TUNING = {
       warnings: ["HE'S STIRRING…", "HE'S ALMOST AWAKE", "HE'S WAKING UP!"],
       lost: 'HE WOKE UP!', lostWhy: 'The noise reached 100 and he woke up.'
     },
-    // A hotel guest sleeps lighter and the clock is tighter, but the rules are
-    // the same: noise only.
-    guest: {
-      meter: 'NOISE', person: 'She', sees: 0, seeRate: 0,
-      warnings: ['SHE ROLLS OVER…', 'SHE IS ALMOST AWAKE', 'SHE IS WAKING UP!'],
-      lost: 'SHE WOKE UP!', lostWhy: 'The noise reached 100 and she woke up.'
-    },
     // A guard is not asleep. He is bored, and he can see: crossing his line of
     // sight while moving raises the meter even in complete silence. Standing
     // still inside it does not — freezing works.
-    guard: {
-      meter: 'ALERT', person: 'The guard', sees: 132, seeRate: 18,
-      warnings: ['THE GUARD LOOKS UP', 'THE GUARD IS SUSPICIOUS', 'THE GUARD IS RISING!'],
-      lost: 'SPOTTED!', lostWhy: 'The guard reached full alert and saw you.'
-    },
     security: {
       meter: 'ALERT', person: 'The guard', sees: 158, seeRate: 22,
       warnings: ['SECURITY LOOKS UP', 'SECURITY IS SUSPICIOUS', 'SECURITY IS RISING!'],
@@ -267,6 +255,26 @@ export const TUNING = {
       meter: 'NOISE', person: 'Grandpa', sees: 0, seeRate: 0, pose: 'chair',
       warnings: ['GRANDPA STIRS…', 'GRANDPA IS ALMOST AWAKE', 'GRANDPA IS WAKING!'],
       lost: 'GRANDPA WOKE UP!', lostWhy: 'The noise reached 100 and Grandpa woke up.'
+    },
+    // The penthouse's owner, asleep in the only bed on the floor.
+    owner: {
+      meter: 'NOISE', person: 'The owner', sees: 0, seeRate: 0, pose: 'bed',
+      warnings: ['THE OWNER STIRS…', 'THE OWNER IS ALMOST AWAKE', 'THE OWNER IS WAKING!'],
+      lost: 'HE WOKE UP!', lostWhy: 'The noise reached 100 and the owner woke up.'
+    },
+    // The night manager, dozing behind the counter.
+    shopkeeper: {
+      meter: 'NOISE', person: 'The manager', sees: 0, seeRate: 0, pose: 'desk',
+      warnings: ['THE MANAGER STIRS…', 'THE MANAGER IS ALMOST AWAKE',
+        'THE MANAGER IS WAKING!'],
+      lost: 'HE WOKE UP!', lostWhy: 'The noise reached 100 and the manager woke up.'
+    },
+    // The vault's guard is the most awake person in the game: the widest field
+    // of view, and the quickest to place a sound.
+    vaultguard: {
+      meter: 'ALERT', person: 'The guard', sees: 150, seeRate: 24, pose: 'guard',
+      warnings: ['THE GUARD LOOKS UP', 'THE GUARD IS ON HIS FEET', 'HE HAS SEEN SOMETHING!'],
+      lost: 'SPOTTED!', lostWhy: 'The vault guard reached full alert and saw you.'
     }
   },
 

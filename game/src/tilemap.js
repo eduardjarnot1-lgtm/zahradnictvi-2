@@ -171,7 +171,16 @@ export function tileLevel(spec) {
     height,
     theme: spec.theme || 'bedroom',
     name: spec.name || 'Bedroom',
+    // Which chapter this is, and where in it: the level-select groups by
+    // location, and the difficulty tests read the tier rather than guessing
+    // from the id.
+    location: spec.location || spec.name || 'Bedroom',
+    tier: spec.tier || 1,
     extraTime: spec.extraTime || 0,
+    // An explicit clock. With eleven locations the old campaign-wide shrink is
+    // no longer the design: pressure now rises inside a location, and a bigger
+    // map is allowed more seconds while still being tighter to play.
+    clock: spec.clock || 0,
     doors,
     windows,
     creaks,
@@ -185,7 +194,12 @@ export function tileLevel(spec) {
     watcher: {
       kind,
       x: bed.x + bed.w / 2,
-      y: bed.y + bed.h * (spec.seated ? 0.5 : 0.26)
+      y: bed.y + bed.h * (spec.seated ? 0.5 : 0.26),
+      // How far this particular guard is watching. The kind sets the ceiling;
+      // a level may dial it back, which is how the first level of a location
+      // is survivable and the fifth is not — the same man, paying more
+      // attention. Zero means "use the kind's own range".
+      sees: spec.sight || 0
     },
     colliders,
     items

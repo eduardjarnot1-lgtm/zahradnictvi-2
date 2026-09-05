@@ -6,10 +6,10 @@ import { play } from './harness.mjs';
 
 const golden = JSON.parse(fs.readFileSync(new URL('./fixtures/golden-l3.json', import.meta.url)));
 
-test('the golden level 3 run still pays out exactly $330', () => {
+test('the golden level 3 run still pays out exactly $225', () => {
   const result = replay(golden);
   assert.equal(result.status, 'won');
-  assert.equal(result.haul, 330);
+  assert.equal(result.haul, 225);
   assert.deepEqual(result.taken, ['L3-1', 'L3-3', 'L3-4']);
 });
 

@@ -69,6 +69,10 @@ export function bumpNoise(collider) {
 // Seconds on the clock for a level: a gentle slope with a floor, plus whatever
 // allowance a larger, partitioned map declares for itself.
 export function timeLimit(level) {
+  // A level may state its clock outright. That is how the location levels are
+  // balanced — against how long the map actually takes to work, not against a
+  // campaign-wide slope that stopped meaning anything at fifty-five levels.
+  if (level.clock) return level.clock;
   const { base, perLevel, floor } = TUNING.time;
   return Math.max(floor, base - Math.floor((level.id - 1) * perLevel)) + (level.extraTime || 0);
 }
@@ -146,12 +150,14 @@ export function watcherConfig(kind) {
 export function detectionRate(watcher, player, speedShare) {
   const config = watcherConfig(watcher.kind);
   if (config.sees <= 0 || speedShare <= 0.02) return 0;
+  // The level may hold this guard's range below his kind's ceiling.
+  const range = watcher.sees || config.sees;
   const distance = Math.hypot(player.x - watcher.x, player.y - watcher.y);
-  if (distance >= config.sees) return 0;
+  if (distance >= range) return 0;
   // Linear falloff. A squared one looked reasonable but made detection
   // irrelevant anywhere but point-blank — three seconds of running across the
   // edge of his vision raised the meter by one.
-  const closeness = 1 - distance / config.sees;
+  const closeness = 1 - distance / range;
   return config.seeRate * closeness * Math.min(1, speedShare);
 }
 

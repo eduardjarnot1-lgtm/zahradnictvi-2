@@ -135,14 +135,33 @@ asserts the allowance and the partitions go together in both directions.
 - `P` an office floor at night: desk banks and a meeting room upstairs, a
   conference room and the lounge security sits in below.
 
-### Two kinds of level
+### Eleven locations, five levels each
 
-Levels 1-56 are **generated rooms**: a layout template plus a list of items, all
-exactly one screen across. Levels 57-63 are **hand-drawn floorplans**, recreated
-tile for tile from reference drawings, larger than the screen and walked with a
-following camera. Both produce the same level object, so nothing downstream —
-the simulation, the validator, the save, the test harness — knows there is more
-than one kind.
+The campaign is eleven locations of five levels: Apartment, House, Hotel,
+Office, School, Hospital, Museum, Mansion, Penthouse, Shop, Vault. Level 1 of a
+location is a couple of rooms you can clear; level 5 is a floor of a building
+you cannot. Within a location the theme, the furniture vocabulary and the person
+stay the same — it is the same place, five times, harder each time.
+
+Every level is a character grid. `tools/build-locations.py` runs at authoring
+time and writes `src/maps.js`; the grids are committed, so level 27 is the same
+building every time anyone plays it and nothing is decided at runtime. The seven
+hand-drawn floorplans are not generated — they are recreations of reference
+drawings, and each is the fifth level of its location at exactly the size it was
+drawn.
+
+Difficulty climbs on five axes at once, all read off the tier:
+
+| | level 1 | level 5 |
+|---|---|---|
+| map | 30x26 tiles | 44x38, or the hand-drawn size |
+| items | 8 | 18 |
+| loot | coins and wallets | diamonds and gold |
+| the person watching | half his range | all of it |
+| clock | most slack | least |
+
+The most valuable thing on a map is promoted to whatever is furthest from the
+way out, so the best haul is always the longest walk back.
 
 ### Map size and the camera
 
@@ -165,6 +184,25 @@ several times the canvas budget, so it is painted at whatever scale fits and the
 small remainder is made up on the blit — and only the visible slice is blitted,
 so drawing the room costs the size of the screen, not the size of the map.
 Items outside the view are skipped entirely.
+
+### The clock
+
+Time is stated per level, not derived from a campaign-wide slope — with eleven
+locations there is no such slope to derive from. `tools/calibrate-clocks.mjs`
+plays every level with the harness, measures how long the map takes to *work*
+(the full efficient haul and the walk out, with the clock lifted so the
+measurement is not circular), and sets
+
+```
+clock = max(24s per window of map x slack[tier], measured run x 1.35)
+slack = 2.15, 1.88, 1.65, 1.45, 1.28
+```
+
+So difficulty is **pressure**, not raw seconds: the same building with less and
+less room to breathe. In practice every location runs 56s, 53s, 51s, 50s and
+then whatever its fifth map's size demands — a bigger building genuinely takes
+longer to cross, which is the one case where the seconds go back up. The floor
+term means no level can be tighter than a good run needs.
 
 ### Hand-drawn maps
 
@@ -226,17 +264,25 @@ game had to learn about any of this.
 Levels 1-40 predate the system and a test asserts all forty still default to
 `sleeper`; another asserts every kind that exists is actually used somewhere.
 
-### The seven floorplans
+### The eleven locations
 
-| # | Level | Size | Who |
-|---|---|---|---|
-| 57 | The Museum | 43x40 | Bruno, night guard dozing in the guard room |
-| 58 | Fourth Floor, After Hours | 44x33 | Mr. Halas, face down on the quarterly report |
-| 59 | The Flat, 02:14 | 36x57 | Dad |
-| 60 | St. Vitus, Third Floor | 45x32 | Dr. Marek, out on the staff couch |
-| 61 | Grand Hotel Bohemia | 49x34 | Otakar, asleep at the floor desk |
-| 62 | Komenský Primary | 49x36 | Mr. Vrána, the caretaker |
-| 63 | Grandpa's Cottage | 43x36 | Grandpa, by the fire |
+| # | Location | Levels | Who | Hand-drawn level 5 |
+|---|---|---|---|---|
+| 1 | Apartment | 1-5 | Dad, in bed | The Flat, 02:14 — 36x57 |
+| 2 | House | 6-10 | Grandpa, in the armchair | Grandpa's Cottage — 43x36 |
+| 3 | Hotel | 11-15 | Otakar, at the floor desk | Grand Hotel Bohemia — 49x34 |
+| 4 | Office | 16-20 | Mr. Halas, on the report | Fourth Floor — 44x33 |
+| 5 | School | 21-25 | Mr. Vrána, on the staff couch | Komenský Primary — 49x36 |
+| 6 | Hospital | 26-30 | Dr. Marek, on the staff couch | St. Vitus — 45x32 |
+| 7 | Museum | 31-35 | Bruno, night guard — **he can see you** | The Museum — 43x40 |
+| 8 | Mansion | 36-40 | Security — **he can see you** | — |
+| 9 | Penthouse | 41-45 | The owner, in bed | — |
+| 10 | Shop | 46-50 | The night manager, at the counter | — |
+| 11 | Vault | 51-55 | The vault guard — **the widest range in the game** | — |
+
+Eight of the eleven are asleep and raise NOISE; three are awake and raise ALERT,
+where moving inside their range costs you in complete silence and standing still
+costs nothing.
 
 Sizes are in tiles and are exactly as specified — the aspect ratios differ on
 purpose and are never rounded to fit the screen. Bruno is the only one of the

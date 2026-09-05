@@ -158,17 +158,36 @@ export function playEfficiently(levelId, { budget = 70, reserve = null, seed = 7
   // Leave a share of the clock for the walk out. Moving carefully near
   // furniture is slower, so the tighter the level the earlier you stop.
   const keepBack = reserve === null ? Math.max(9, run.sim.timeLimit * 0.45) : reserve;
-  // Best deals first: most value per point of noise.
-  const order = [...run.sim.items].sort((a, b) => b.value / b.noise - a.value / a.noise);
-  let planned = 0;
-  for (const item of order) {
-    if (run.sim.status !== 'running') break;
-    if (planned + item.noise > budget) continue;
+  // Best deals first — but a deal on the far side of the building is not the
+  // deal it looks like. Sorting purely by value per point of noise sends the
+  // player zig-zagging across a floorplan, which is not how anyone plays and
+  // makes a small map look slower to work than a big one. So the next target is
+  // whichever item is worth most per point of noise *and* per step of walking,
+  // recomputed after each steal.
+  // An item the bot cannot actually reach must not be chosen twice, or the
+  // loop never ends: unlike the old fixed-list version, this one re-picks its
+  // target every step.
+  const gaveUp = new Set();
+  while (run.sim.status === 'running') {
     // Leave enough clock to actually get out. Stealing until the timer dies is
     // the greed the game is supposed to punish, not efficient play.
     if (run.sim.timeLeft < keepBack) break;
-    planned += item.noise;
-    steal(run, item.id);
+    const player = playerOf(run.sim);
+    let best = null;
+    let bestScore = 0;
+    for (const item of run.sim.items) {
+      if (item.taken || gaveUp.has(item.id)) continue;
+      // Judge against the meter, not against a plan: walking across a
+      // floorplan costs real noise, so a budget counted from item values alone
+      // quietly overspends by the length of the walk.
+      if (run.sim.noise + item.noise > budget) continue;
+      const distance = Math.hypot(item.x - player.x, item.y - player.y);
+      const score = item.value / (item.noise * (1 + distance / 300));
+      if (score > bestScore) { bestScore = score; best = item; }
+    }
+    if (!best) break;
+    steal(run, best.id);
+    if (!best.taken) gaveUp.add(best.id);
   }
   if (run.sim.status === 'running') escape(run);
   return { run, result: snapshot(run.sim) };

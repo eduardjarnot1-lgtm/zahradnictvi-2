@@ -1,7 +1,7 @@
 // Versioned save with an explicit migration chain. Adding a field later means
 // appending one migration, not breaking every existing player's progress.
 export const SAVE_KEY = 'dwh_save';
-export const SAVE_VERSION = 4;
+export const SAVE_VERSION = 5;
 
 export function defaultSettings() {
   // unlockAll is a development switch: every level playable from the menu,
@@ -40,7 +40,13 @@ const MIGRATIONS = {
     // Only a real `true` means muted; a corrupt value must not silence the game.
     settings: { ...defaultSettings(), sound: save.muted !== true }
   }),
-  3: (save) => ({ ...save, v: 4, records: {} })
+  3: (save) => ({ ...save, v: 4, records: {} }),
+  // The campaign was rebuilt as eleven locations of five levels. Level 30 is not
+  // the level 30 anyone played, so a per-level record of it is not a record of
+  // anything — keeping it would show a best haul for a building that no longer
+  // exists. What was *earned* rather than achieved is kept: the bank, the
+  // collection, and the upgrades bought with it.
+  4: (save) => ({ ...save, v: 5, unlocked: 1, best: {}, stars: {}, records: {} })
 };
 
 const QUALITIES = ['low', 'medium', 'high'];
