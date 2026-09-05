@@ -4,7 +4,10 @@ export const SAVE_KEY = 'dwh_save';
 export const SAVE_VERSION = 4;
 
 export function defaultSettings() {
-  return { sound: true, music: true, vibration: true, quality: 'high' };
+  // unlockAll is a development switch: every level playable from the menu,
+  // without touching the progression itself. Turning it back off restores
+  // exactly the unlocks the player had actually earned.
+  return { sound: true, music: true, vibration: true, quality: 'high', unlockAll: true };
 }
 
 export function defaultSave() {
@@ -79,7 +82,10 @@ export function migrate(raw) {
       sound: typeof settings.sound === 'boolean' ? settings.sound : true,
       music: typeof settings.music === 'boolean' ? settings.music : true,
       vibration: typeof settings.vibration === 'boolean' ? settings.vibration : true,
-      quality: QUALITIES.includes(settings.quality) ? settings.quality : 'high'
+      quality: QUALITIES.includes(settings.quality) ? settings.quality : 'high',
+      // Defaults on, and an older save that predates it simply gains it — the
+      // stars and money it holds are untouched either way.
+      unlockAll: typeof settings.unlockAll === 'boolean' ? settings.unlockAll : true
     }
   };
 }

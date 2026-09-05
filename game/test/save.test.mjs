@@ -153,3 +153,16 @@ test('personal bests track separately and only ever improve', () => {
   store.recordWin(3, 900, { stars: 3, seconds: 25, noise: 95 });
   assert.deepEqual(store.data.records[3], { money: 900, time: 11.2, noise: 22 });
 });
+
+// The development switch: every level playable from the menu without the save
+// pretending the player earned them.
+test('unlock-all is a setting, not a rewrite of progress', () => {
+  const store = createSaveStore(fakeStorage(JSON.stringify({ v: 4, unlocked: 3, bank: 120, stars: { 1: 3 } })));
+  assert.equal(store.data.settings.unlockAll, true, 'defaults on while the game is in development');
+  // The thing it must never do is inflate what the player actually reached.
+  assert.equal(store.data.unlocked, 3);
+  assert.equal(store.data.stars[1], 3);
+  store.setSetting('unlockAll', false);
+  assert.equal(store.data.settings.unlockAll, false);
+  assert.equal(store.data.unlocked, 3, 'turning it off leaves progress where it was');
+});

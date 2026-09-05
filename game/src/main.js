@@ -180,7 +180,9 @@ export function boot() {
         heading.textContent = level.name;
         grid.appendChild(heading);
       }
-      const unlocked = level.id <= saveStore.data.unlocked;
+      // The unlock-all switch opens the grid without rewriting progress, so
+      // turning it off puts the player back exactly where they had got to.
+      const unlocked = setting('unlockAll') || level.id <= saveStore.data.unlocked;
       const stars = saveStore.data.stars[level.id] || 0;
       const button = document.createElement('button');
       button.className = `lv${unlocked ? '' : ' locked'}`;
@@ -254,6 +256,7 @@ export function boot() {
     paint('tSound', setting('sound'));
     paint('tMusic', setting('music'));
     paint('tVibe', setting('vibration'));
+    paint('tUnlock', setting('unlockAll'));
     for (const button of $('segQuality').children) {
       button.classList.toggle('on', button.dataset.q === setting('quality'));
     }
@@ -597,6 +600,11 @@ export function boot() {
   on('tSound', toggleSetting('sound'));
   on('tMusic', toggleSetting('music'));
   on('tVibe', () => { saveStore.setSetting('vibration', !setting('vibration')); buzz(20); paintSettings(); });
+  on('tUnlock', () => {
+    saveStore.setSetting('unlockAll', !setting('unlockAll'));
+    audio.ui();
+    paintSettings();
+  });
   for (const button of $('segQuality').children) {
     button.addEventListener('click', () => {
       saveStore.setSetting('quality', button.dataset.q);

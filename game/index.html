@@ -243,6 +243,7 @@
       <div class="row"><span>Sound</span><button class="toggle" id="tSound">ON</button></div>
       <div class="row"><span>Music</span><button class="toggle" id="tMusic">ON</button></div>
       <div class="row"><span>Vibration</span><button class="toggle" id="tVibe">ON</button></div>
+      <div class="row"><span>Unlock all levels</span><button class="toggle" id="tUnlock">ON</button></div>
       <div class="row"><span>Graphics</span>
         <div class="seg" id="segQuality">
           <button data-q="low">LOW</button><button data-q="medium">MED</button><button data-q="high">HIGH</button>
@@ -2956,7 +2957,10 @@ __mod.save = (function () {
   const SAVE_VERSION = 4;
 
   function defaultSettings() {
-    return { sound: true, music: true, vibration: true, quality: 'high' };
+    // unlockAll is a development switch: every level playable from the menu,
+    // without touching the progression itself. Turning it back off restores
+    // exactly the unlocks the player had actually earned.
+    return { sound: true, music: true, vibration: true, quality: 'high', unlockAll: true };
   }
 
   function defaultSave() {
@@ -3031,7 +3035,10 @@ __mod.save = (function () {
         sound: typeof settings.sound === 'boolean' ? settings.sound : true,
         music: typeof settings.music === 'boolean' ? settings.music : true,
         vibration: typeof settings.vibration === 'boolean' ? settings.vibration : true,
-        quality: QUALITIES.includes(settings.quality) ? settings.quality : 'high'
+        quality: QUALITIES.includes(settings.quality) ? settings.quality : 'high',
+        // Defaults on, and an older save that predates it simply gains it — the
+        // stars and money it holds are untouched either way.
+        unlockAll: typeof settings.unlockAll === 'boolean' ? settings.unlockAll : true
       }
     };
   }
@@ -5813,7 +5820,9 @@ __mod.main = (function () {
           heading.textContent = level.name;
           grid.appendChild(heading);
         }
-        const unlocked = level.id <= saveStore.data.unlocked;
+        // The unlock-all switch opens the grid without rewriting progress, so
+        // turning it off puts the player back exactly where they had got to.
+        const unlocked = setting('unlockAll') || level.id <= saveStore.data.unlocked;
         const stars = saveStore.data.stars[level.id] || 0;
         const button = document.createElement('button');
         button.className = `lv${unlocked ? '' : ' locked'}`;
@@ -5887,6 +5896,7 @@ __mod.main = (function () {
       paint('tSound', setting('sound'));
       paint('tMusic', setting('music'));
       paint('tVibe', setting('vibration'));
+      paint('tUnlock', setting('unlockAll'));
       for (const button of $('segQuality').children) {
         button.classList.toggle('on', button.dataset.q === setting('quality'));
       }
@@ -6230,6 +6240,11 @@ __mod.main = (function () {
     on('tSound', toggleSetting('sound'));
     on('tMusic', toggleSetting('music'));
     on('tVibe', () => { saveStore.setSetting('vibration', !setting('vibration')); buzz(20); paintSettings(); });
+    on('tUnlock', () => {
+      saveStore.setSetting('unlockAll', !setting('unlockAll'));
+      audio.ui();
+      paintSettings();
+    });
     for (const button of $('segQuality').children) {
       button.addEventListener('click', () => {
         saveStore.setSetting('quality', button.dataset.q);
