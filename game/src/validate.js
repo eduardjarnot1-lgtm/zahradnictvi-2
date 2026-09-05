@@ -98,7 +98,8 @@ export function validateLevel(level) {
       errors.push(`${item.id} sits on the spawn — it costs nothing to take`);
     }
     const exit = level.exit;
-    if (item.x > exit.x - 16 && item.x < exit.x + exit.w + 16 && item.y > exit.y - 26) {
+    if (item.x > exit.x - 22 && item.x < exit.x + exit.w + 22 &&
+        item.y > exit.y - 22 && item.y < exit.y + exit.h + 22) {
       errors.push(`${item.id} sits on the exit`);
     }
   }
@@ -143,12 +144,10 @@ export function validateLevel(level) {
   const exitReachable = points.some(
     (p) => p.x + PW / 2 > level.exit.x &&
            p.x - PW / 2 < level.exit.x + level.exit.w &&
-           p.y + PH / 2 > level.exit.y
+           p.y + PH / 2 > level.exit.y &&
+           p.y - PH / 2 < level.exit.y + level.exit.h
   );
   if (!exitReachable) errors.push('exit is unreachable from spawn');
-  if (level.exit.y + level.exit.h < H - TUNING.world.wallThickness) {
-    warnings.push('exit does not reach the room edge');
-  }
 
   const totals = levelTotals(level);
   if (totals.noise <= 0) errors.push('level totals no noise at all');

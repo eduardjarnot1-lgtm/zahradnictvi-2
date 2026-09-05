@@ -128,11 +128,55 @@ asserts the allowance and the partitions go together in both directions.
 - `K` rooms hanging off a shared hall, each with its own door.
 - `L` a long apartment: a closed storage spine down one side, an open living
   run down the other, bedroom behind a return wall at the far end.
+- `M` a museum: display plinths in an open hall, ticket and security wing below.
+- `N` a hotel floor: suites hanging off a corridor spine, exit at its far end.
+- `O` a school after hours: classrooms and a library across the top, a
+  locker-lined corridor, the gym and staff room below.
+- `P` an office floor at night: desk banks and a meeting room upstairs, a
+  conference room and the lounge security sits in below.
+
+### Side exits
+
+The way out is a doorway in the bottom wall unless a level says otherwise:
+`{ side: 'left', at: y }` puts it in a side wall instead, which is where the
+corridor floorplans want theirs. `boundary()` leaves the gap on whichever wall
+is named, the exit test is a plain box overlap so it works on any of them, and
+both the validator and the test harness read the side rather than assuming
+down.
+
+### Who is in the room
+
+Every level declares a `watcher`: `{ kind, x, y }`. The kind is the only thing
+that changes, and it drives everything — the art, what the HUD calls the meter,
+the warnings, the loss text, and whether being *seen* fills the meter at all.
+
+| kind | meter | threat |
+|---|---|---|
+| `sleeper` | NOISE | noise |
+| `guest` | NOISE | noise, on a tighter clock |
+| `caretaker` | NOISE | noise, across a much larger building |
+| `guard` | ALERT | noise **and** being seen |
+| `security` | ALERT | noise and a longer line of sight |
+
+A watcher with `sees > 0` is not asleep. Moving inside their radius raises the
+meter in complete silence, at a rate that falls off linearly with distance and
+scales with how fast you are going — so **freezing costs nothing**, and the
+answer to a guard is to stop rather than to run. That plays directly against
+the clock, which is what makes the guard levels feel different rather than just
+harder. Everything still feeds the same 0-100 meter, so nothing else in the
+game had to learn about any of this.
+
+Levels 1-40 predate the system and a test asserts all forty still default to
+`sleeper`; another asserts every kind that exists is actually used somewhere.
 
 ### Chapters
 
-Levels are grouped into themed chapters (Bedroom, Apartment, Hotel, Office,
-Luxury, Penthouse). Each chapter opens easier than the last one ended and then
+Levels are grouped into themed chapters — Bedroom, Apartment, Hotel Room,
+Office, Luxury Bedroom, Penthouse, Large House, Mansion, Private Gallery, Grand
+Suite, Museum, Hotel Floor, School, Office Floor. A chapter is a location: its
+palette, furniture flavour, loot and watcher all change together, so entering
+one should read as a different building rather than a re-skin. Each chapter
+opens easier than the last one ended and then
 climbs; tests assert both. Levels 1-10 are the original beta set and are
 deliberately unchanged.
 
@@ -206,6 +250,12 @@ silence them.
 Append to `LEVELS` in `src/levels.js`, then `npm run build`. The validator
 rejects a level whose spawn is inside a wall, whose exit or items cannot be
 reached, whose items sit inside furniture, or whose furniture overlaps.
+
+Two rules the validator learned the hard way and now enforces for you: leave a
+clear landing of at least a player-height inside every doorway (furniture
+parked 16-20px past a door mouth seals the room behind it, and the flood fill
+will say so), and never put an item on the spawn or on the exit — one is free
+money, the other hides the way out.
 
 ### Debug build
 

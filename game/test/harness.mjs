@@ -130,12 +130,19 @@ export function steal(run, itemId) {
 
 export function escape(run) {
   const exit = run.level.exit;
-  const doorX = exit.x + exit.w / 2;
-  walkTo(run, { x: doorX, y: exit.y + exit.h });
+  const centre = { x: exit.x + exit.w / 2, y: exit.y + exit.h / 2 };
+  // Push in whichever direction the way out actually lies. It is not always
+  // downward any more — the corridor floorplans put theirs in a side wall.
+  const push = exit.side === 'left' ? { x: -1, y: 0 }
+    : exit.side === 'right' ? { x: 1, y: 0 } : { x: 0, y: 1 };
+
+  walkTo(run, centre);
   for (let guard = 0; guard < 240 && run.sim.status === 'running'; guard++) {
     const p = playerOf(run.sim);
-    const dx = Math.max(-1, Math.min(1, (doorX - p.x) / 8));
-    tick(run, { x: dx, y: 1, take: false });
+    // Stay lined up with the doorway while pressing through it.
+    const driftX = push.x !== 0 ? push.x : Math.max(-1, Math.min(1, (centre.x - p.x) / 8));
+    const driftY = push.y !== 0 ? push.y : Math.max(-1, Math.min(1, (centre.y - p.y) / 8));
+    tick(run, { x: driftX, y: driftY, take: false });
   }
   return snapshot(run.sim);
 }

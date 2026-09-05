@@ -12,7 +12,7 @@ import { createInput } from './input.js';
 import { createRenderer } from './render.js';
 import {
   sleepStage, starsFor, starThresholds, levelTotals, upgradeCost, SLEEP_LABELS,
-  objectivesFor, isBigScore, rarityOf
+  objectivesFor, isBigScore, rarityOf, watcherConfig
 } from './rules.js';
 import { ITEM_ART, ITEM_NAMES } from './art.js';
 
@@ -140,8 +140,9 @@ export function boot() {
         `<div>BEST TIME<b>${record.time !== undefined ? record.time.toFixed(1) + 's' : '—'}</b></div>` +
         `<div>QUIETEST<b>${record.noise !== undefined ? record.noise : '—'}</b></div>`
       : '';
+    const watcher = level ? watcherConfig(level.watcher.kind) : watcherConfig('sleeper');
     $('endTitle').textContent = won ? 'LEVEL COMPLETE'
-      : ctx.reason === 'time' ? "TIME'S UP" : 'HE WOKE UP!';
+      : ctx.reason === 'time' ? "TIME'S UP" : watcher.lost;
     $('stars').innerHTML = won ? starRow(ctx.stars) : '';
     $('endTally').innerHTML = won
       ? `<div>HAUL<b>$${ctx.money.toLocaleString()}</b></div>` +
@@ -157,7 +158,9 @@ export function boot() {
     } else {
       const cause = ctx.reason === 'time'
         ? 'You were still in the room when the clock ran out.'
-        : 'The noise reached 100 and he woke up.';
+        : ctx.reason === 'seen'
+          ? 'You moved through his line of sight once too often.'
+          : watcher.lostWhy;
       $('endText').innerHTML =
         `${cause}<br>You lost <b style="color:#ffd34d">$${ctx.money.toLocaleString()}</b>.`;
     }
@@ -401,7 +404,10 @@ export function boot() {
     if (!urgent) lastTick = -1;
 
     const rounded = Math.round(sim.noise);
-    setText('noiseText', hudEls.noise, `${rounded} / ${TUNING.noise.max}`);
+    // The meter is the same meter; what it is called depends on who is in the
+    // room. A sleeper raises NOISE; a guard raises ALERT.
+    const meter = watcherConfig(sim.level.watcher.kind).meter;
+    setText('noiseText', hudEls.noise, `${meter} ${rounded} / ${TUNING.noise.max}`);
     setStyle('barWidth', hudEls.bar, 'width', `${(sim.noise / TUNING.noise.max) * 100}%`);
     setStyle('barColor', hudEls.bar, 'background',
       sim.noise >= TUNING.noise.almostAt ? '#ff4d4d'
@@ -419,10 +425,11 @@ export function boot() {
     }
     // He's stirring. The warning escalates rather than appearing all at once.
     const warnEl = hudEls.warn;
+    const warnings = watcherConfig(sim.level.watcher.kind).warnings;
     const warning = sim.status !== 'running' ? null
-      : sim.noise >= 95 ? { text: "HE'S WAKING UP!", cls: 'hard critical' }
-        : sim.noise >= 90 ? { text: "HE'S ALMOST AWAKE", cls: 'hard' }
-          : sim.noise >= 80 ? { text: "HE'S STIRRING…", cls: '' } : null;
+      : sim.noise >= 95 ? { text: warnings[2], cls: 'hard critical' }
+        : sim.noise >= 90 ? { text: warnings[1], cls: 'hard' }
+          : sim.noise >= 80 ? { text: warnings[0], cls: '' } : null;
     if (hudLast.warnText !== (warning ? warning.text : '')) {
       hudLast.warnText = warning ? warning.text : '';
       warnEl.hidden = !warning;
@@ -618,8 +625,11 @@ export function boot() {
 
   const resize = () => {
     renderer.resize(stage);
-    const hudHeight = $('hud').getBoundingClientRect().height;
-    $('banner').style.top = `${hudHeight + 8}px`;
+    // Derived from the same world constant the HUD strip is sized from, rather
+    // than measured: a measurement taken before layout settles sticks, and the
+    // banner ends up drawn over the HUD.
+    const fit = stage.clientWidth / TUNING.world.width;
+    $('banner').style.top = `${TUNING.world.hudStrip * fit + 8}px`;
   };
   addEventListener('resize', resize);
   addEventListener('orientationchange', () => setTimeout(resize, 200));
@@ -632,5 +642,11 @@ export function boot() {
   sim = createSim({ level: LEVELS[0], seed: 1 });
   requestAnimationFrame((t) => { lastTime = t; frame(t); });
 
-  if (debug) window.__dwhBoot = { machine, saveStore, startLevel, LEVELS, TUNING, SLEEP_LABELS, levelTotals };
+  // Debug-only, and a getter rather than the object: `sim` is replaced on every
+  // level start, so a captured reference would go stale. A browser check
+  // asserts none of this exists in the release build.
+  if (debug) {
+    window.__dwhBoot = { machine, saveStore, startLevel, LEVELS, TUNING, SLEEP_LABELS, levelTotals };
+    Object.defineProperty(window.__dwhBoot, 'sim', { get: () => sim });
+  }
 }

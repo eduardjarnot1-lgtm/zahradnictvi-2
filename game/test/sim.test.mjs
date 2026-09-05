@@ -7,7 +7,7 @@ import { TUNING } from '../src/tuning.js';
 import { play, createRun, tick, walkTo, steal, escape } from './harness.mjs';
 import {
   addNoise, sleepStage, SLEEP_AWAKE, SLEEP_ASLEEP, starsFor, levelTotals, timeLimit,
-  rarityOf, starThresholds, shapeStick
+  rarityOf, starThresholds, shapeStick, watcherConfig, detectionRate
 } from '../src/rules.js';
 
 test('a scripted run wins with exactly the money it stole', () => {
@@ -640,4 +640,98 @@ test('you can always walk away from furniture — never stuck, never jittering',
   assert.ok(!blocked(playerOf(run.sim).x, playerOf(run.sim).y,
     TUNING.player.boxWidth, TUNING.player.boxHeight, level.colliders),
     'must never end up inside a collider');
+});
+
+// --- who is in the room -----------------------------------------------------
+
+const guardLevel = () => LEVELS.find((l) => watcherConfig(l.watcher.kind).sees > 0);
+
+test('every level declares who is in it, and old levels default to the sleeper', () => {
+  for (const level of LEVELS) {
+    assert.ok(level.watcher && level.watcher.kind, `level ${level.id} has no watcher`);
+    assert.ok(TUNING.watchers[level.watcher.kind], `unknown watcher on level ${level.id}`);
+  }
+  // The levels that existed before this system was built are untouched.
+  for (const level of LEVELS.slice(0, 40)) {
+    assert.equal(level.watcher.kind, 'sleeper');
+  }
+});
+
+test('a guard raises ALERT, a sleeper raises NOISE — one meter, two names', () => {
+  assert.equal(watcherConfig('sleeper').meter, 'NOISE');
+  assert.equal(watcherConfig('guest').meter, 'NOISE');
+  assert.equal(watcherConfig('guard').meter, 'ALERT');
+  assert.equal(watcherConfig('security').meter, 'ALERT');
+  assert.equal(watcherConfig('caretaker').meter, 'NOISE');
+  // A sleeper cannot see; a guard can.
+  assert.equal(watcherConfig('sleeper').sees, 0);
+  assert.equal(watcherConfig('caretaker').sees, 0);
+  assert.ok(watcherConfig('guard').sees > 0);
+  assert.ok(watcherConfig('security').sees > 0);
+});
+
+test('the campaign actually visits every kind of watcher there is', () => {
+  const used = new Set(LEVELS.map((l) => l.watcher.kind));
+  for (const kind of Object.keys(TUNING.watchers)) {
+    assert.ok(used.has(kind), `no level uses the ${kind} watcher`);
+  }
+  // ...and every location a level claims has its own art to draw it with.
+  const themes = new Set(LEVELS.map((l) => l.theme));
+  assert.ok(themes.size >= 14, `expected many locations, found ${themes.size}`);
+});
+
+test('moving in a guard’s line of sight raises the meter in silence', () => {
+  const level = guardLevel();
+  assert.ok(level, 'expected a level with a guard');
+  const sim = createSim({ level, seed: 3 });
+  const player = playerOf(sim);
+  // Well inside his range, and clear of furniture. Oscillating keeps the
+  // player from simply walking out of range.
+  player.x = level.watcher.x - 50;
+  player.y = level.watcher.y - 65;
+  const before = sim.noise;
+  for (let i = 0; i < 180; i++) {
+    stepSim(sim, { x: (Math.floor(i / 20) % 2 ? 1 : -1) * 0.9, y: 0 });
+  }
+  assert.ok(sim.noise > before + 6, `only rose to ${sim.noise.toFixed(1)}`);
+  assert.equal(sim.items.filter((i) => i.taken).length, 0, 'nothing was stolen — this is pure sight');
+});
+
+test('freezing inside a guard’s sight is safe', () => {
+  const level = guardLevel();
+  const sim = createSim({ level, seed: 3 });
+  const player = playerOf(sim);
+  player.x = level.watcher.x - 40;
+  player.y = level.watcher.y - 50;
+  for (let i = 0; i < 180; i++) stepSim(sim, { x: 0, y: 0 });
+  assert.equal(sim.noise, 0, `standing still cost ${sim.noise.toFixed(1)}`);
+});
+
+test('a guard notices you more the closer and faster you are', () => {
+  const watcher = { kind: 'guard', x: 200, y: 200 };
+  const near = detectionRate(watcher, { x: 230, y: 200 }, 1);
+  const far = detectionRate(watcher, { x: 310, y: 200 }, 1);
+  const creeping = detectionRate(watcher, { x: 230, y: 200 }, 0.3);
+  const outside = detectionRate(watcher, { x: 400, y: 200 }, 1);
+  assert.ok(near > far && far > 0);
+  assert.ok(creeping < near && creeping > 0);
+  assert.equal(outside, 0);
+  assert.equal(detectionRate({ kind: 'sleeper', x: 200, y: 200 }, { x: 205, y: 200 }, 1), 0,
+    'a sleeper never sees anything');
+});
+
+test('a side exit works exactly like a bottom one', () => {
+  const level = LEVELS.find((l) => l.exit.side === 'left');
+  assert.ok(level, 'expected a level with a side exit');
+  const run = createRun(level.id);
+  escape(run);
+  assert.equal(run.sim.status, 'won');
+});
+
+test('every level has a reachable way out, whichever wall it is in', () => {
+  const sides = new Set(LEVELS.map((l) => l.exit.side));
+  assert.ok(sides.has('bottom') && sides.size > 1, `only found ${[...sides]}`);
+  for (const level of LEVELS) {
+    assert.ok(level.exit.w > 0 && level.exit.h > 0, `level ${level.id} has no exit`);
+  }
 });

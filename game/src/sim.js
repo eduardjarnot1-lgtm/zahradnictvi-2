@@ -6,7 +6,7 @@ import { createRng } from './rng.js';
 import { solveMove, clampToWorld } from './physics.js';
 import {
   addNoise, isAwake, itemStats, canBank, sleepStage, resolveUpgrades, bumpNoise, timeLimit,
-  rarityOf, comboBonus, gradeEscape, isBigScore
+  rarityOf, comboBonus, gradeEscape, isBigScore, detectionRate, watcherConfig
 } from './rules.js';
 
 export const STEP_SECONDS = 1 / TUNING.sim.hz;
@@ -157,6 +157,10 @@ export function createSim({ level, seed = 1, upgrades = {} }) {
     streak: 0,        // steals in quick succession
     streakTimer: 0,   // ...and how long is left to keep it
     onSoftFloor: false,
+    // Whether this room's watcher can see at all, and how strongly they are
+    // registering you right now (presentation only — the meter is the truth).
+    watches: watcherConfig(level.watcher.kind).sees > 0,
+    seen: 0,
     // Creaky boards: plain trigger zones, each with its own cooldown so
     // standing on one does not drain the meter.
     creaks: level.creaks.map((zone) => ({ ...zone, cooldown: 0, active: false })),
@@ -297,6 +301,21 @@ export function stepSim(sim, input = EMPTY_INPUT) {
     }
   }
 
+  // Being seen. A watcher who can see raises the meter when you move inside
+  // their range — in complete silence. Standing still inside it costs nothing,
+  // so freezing is a real answer, and it plays against the clock.
+  if (sim.watches && sim.status === 'running') {
+    const speedShare = player.speed / TUNING.player.speed;
+    const rate = detectionRate(sim.level.watcher, player, speedShare);
+    if (rate > 0) {
+      sim.seen = Math.min(1, sim.seen + STEP_SECONDS * 3);
+      sim.noise = addNoise(sim.noise, rate * STEP_SECONDS);
+      if (isAwake(sim.noise)) finish(sim, 'lost', 'seen');
+    } else {
+      sim.seen = Math.max(0, sim.seen - STEP_SECONDS * 2);
+    }
+  }
+
   if (sim.streakTimer > 0) {
     sim.streakTimer = Math.max(0, sim.streakTimer - STEP_SECONDS);
     if (sim.streakTimer === 0) sim.streak = 0;
@@ -391,10 +410,13 @@ export function stepSim(sim, input = EMPTY_INPUT) {
 
   if (sim.status === 'running') {
     const exit = sim.level.exit;
+    // A plain box overlap, so the same check works for a doorway in the bottom
+    // wall or in either side wall.
     const atExit =
       player.x + player.w / 2 > exit.x &&
       player.x - player.w / 2 < exit.x + exit.w &&
-      player.y + player.h / 2 > exit.y;
+      player.y + player.h / 2 > exit.y &&
+      player.y - player.h / 2 < exit.y + exit.h;
     if (atExit && canBank(sim.noise)) {
       const grade = gradeEscape({
         noise: sim.noise,

@@ -9,7 +9,7 @@
 import { TUNING } from './tuning.js';
 import {
   SLEEP_DEEP, SLEEP_LIGHT, SLEEP_DISTURBED, SLEEP_ALMOST, SLEEP_CRITICAL, SLEEP_AWAKE,
-  furnitureStyle, hash
+  furnitureStyle, hash, watcherConfig
 } from './rules.js';
 
 const { width: W, height: H, wallThickness: WT } = TUNING.world;
@@ -66,6 +66,27 @@ export const PALETTE = {
   thiefBelt: '#1d2138'
 };
 
+// Who is asleep. Different people, not the same model in a different shirt:
+// hair shape and colour, skin, and what they are sleeping under all change,
+// so a hotel guest is recognisably not the man from the bedroom.
+const SLEEPER_LOOKS = {
+  sleeper:   { hair: '#3a2a20', style: 'short', skin: '#f2c9a0', skinShade: '#dcae86',
+               duvet: '#8fcfc9', duvetTop: '#a9e0da', fold: 'rgba(46,112,110,0.35)',
+               sheet: '#f3f7fb', pillow: '#fffdf7', shoulder: '#eef2f8' },
+  // The hotel guest: longer auburn hair spread on the pillow, and the deep
+  // red-gold bedding the corridor floor is decorated in.
+  guest:     { hair: '#8c4a2f', style: 'long', skin: '#f7d6b4', skinShade: '#e2bb96',
+               duvet: '#b8564f', duvetTop: '#d0736a', fold: 'rgba(96,32,28,0.35)',
+               sheet: '#fbeee4', pillow: '#fff8ee', shoulder: '#f6e6da' },
+  // The school caretaker: older, grey at the sides and thin on top, asleep in
+  // the staff room under a worn olive blanket rather than a duvet.
+  caretaker: { hair: '#9aa0a6', style: 'balding', skin: '#e8bb92', skinShade: '#cfa079',
+               duvet: '#6f7c4e', duvetTop: '#899763', fold: 'rgba(40,52,26,0.35)',
+               sheet: '#e6e2d2', pillow: '#f2ecdc', shoulder: '#dfe0cf' }
+};
+
+export const sleeperLook = (kind) => SLEEPER_LOOKS[kind] || SLEEPER_LOOKS.sleeper;
+
 // Each room theme repaints the shell only — walls, floor, light. Furniture and
 // props stay the same code, so a new theme costs six colours, not a new module.
 const THEMES = {
@@ -100,7 +121,23 @@ const THEMES = {
   // Warm cream floors and white walls, after the apartment reference.
   suite:     { wall: '#6e6455', lip: '#8a7e6c', shade: '#544c40', skirt: '#f0e7d6',
                floor: '#c3a985', alt: '#b99f7c', seam: 'rgba(150,124,90,0.5)',
-               grain: 'rgba(216,194,160,0.26)', light: '255,238,204', vignette: '38,32,26' }
+               grain: 'rgba(216,194,160,0.26)', light: '255,238,204', vignette: '38,32,26' },
+  // Marble and cool stone, after the great-hall reference.
+  museum:    { wall: '#4a4f5e', lip: '#616779', shade: '#383c48', skirt: '#cdd3dc',
+               floor: '#a6a8ac', alt: '#9d9fa4', seam: 'rgba(120,122,128,0.5)',
+               grain: 'rgba(200,203,210,0.22)', light: '226,238,255', vignette: '20,22,30' },
+  // Deep carpet and warm lamps, after the hotel-corridor reference.
+  hotelfloor:{ wall: '#4c3a3f', lip: '#63494f', shade: '#3a2c30', skirt: '#c9a98f',
+               floor: '#8f5c52', alt: '#86554c', seam: 'rgba(102,62,54,0.55)',
+               grain: 'rgba(180,120,104,0.24)', light: '255,222,178', vignette: '30,18,20' },
+  // Varnished boards and green board-paint, after the classroom reference.
+  school:    { wall: '#3f5a4a', lip: '#527461', shade: '#2f4437', skirt: '#a9c4ae',
+               floor: '#b07a3c', alt: '#a67236', seam: 'rgba(132,88,42,0.6)',
+               grain: 'rgba(206,152,88,0.30)', light: '236,246,214', vignette: '20,32,26' },
+  // Grey contract carpet and a dark ceiling, after the open-plan reference.
+  officefloor:{ wall: '#333a44', lip: '#464e5b', shade: '#242a32', skirt: '#7f8b9c',
+               floor: '#7f8a7c', alt: '#778274', seam: 'rgba(92,100,90,0.55)',
+               grain: 'rgba(160,170,158,0.24)', light: '214,236,255', vignette: '16,20,26' }
 };
 
 let T = THEMES.bedroom;   // set once per room paint; drawing is synchronous
@@ -759,7 +796,9 @@ export function paintStaticRoom(ctx, level) {
   for (const c of level.colliders) {
     if (c.type === 'furniture') drawFurniture(ctx, c);
   }
-  drawBedBase(ctx, level);
+  // A guard's room gets a desk instead of a bed; the desk itself is drawn with
+  // the guard each frame, since his monitors flicker.
+  if (watcherConfig(level.watcher.kind).sees === 0) drawBedBase(ctx, level);
 
   const vignette = ctx.createRadialGradient(W / 2, H / 2, H * 0.30, W / 2, H / 2, H * 0.74);
   vignette.addColorStop(0, 'rgba(0,0,0,0)');
@@ -769,7 +808,8 @@ export function paintStaticRoom(ctx, level) {
 }
 
 // ---------------------------------------------------------------- sleeper
-export function drawSleeper(ctx, level, stage, clock, wake = 0, startle = 0) {
+export function drawSleeper(ctx, level, stage, clock, wake = 0, startle = 0, kind = 'sleeper') {
+  const look = sleeperLook(kind);
   const bed = level.bed;
   const hx = level.sleeper.x;
   const hy = level.sleeper.y;
@@ -795,10 +835,10 @@ export function drawSleeper(ctx, level, stage, clock, wake = 0, startle = 0) {
 
   const duvetY = bed.y + bed.h * 0.40 - breath * 1.4 + ease * 16 - joltLift;
   const duvetH = Math.max(6, bed.y + bed.h - 6 - duvetY);
-  fillRound(ctx, bed.x + 5, duvetY, bed.w - 10, duvetH, 7, PALETTE.duvet);
+  fillRound(ctx, bed.x + 5, duvetY, bed.w - 10, duvetH, 7, look.duvet);
   // A turned-down sheet along the top edge of the covers.
-  fillRound(ctx, bed.x + 5, duvetY, bed.w - 10, Math.min(duvetH, 10 + breath * 1.2), 5, '#f3f7fb');
-  fillRound(ctx, bed.x + 6, duvetY + 2, bed.w - 12, Math.min(duvetH - 3, 6 + breath), 4, PALETTE.duvetTop);
+  fillRound(ctx, bed.x + 5, duvetY, bed.w - 10, Math.min(duvetH, 10 + breath * 1.2), 5, look.sheet);
+  fillRound(ctx, bed.x + 6, duvetY + 2, bed.w - 12, Math.min(duvetH - 3, 6 + breath), 4, look.duvetTop);
   // Faint quilting, so the duvet has a fabric rather than a flat fill.
   ctx.save();
   ctx.globalAlpha = 0.16;
@@ -814,20 +854,20 @@ export function drawSleeper(ctx, level, stage, clock, wake = 0, startle = 0) {
 
   // An arm lying on top of the covers, rising and falling with him.
   if (stage !== SLEEP_AWAKE) {
-    ctx.strokeStyle = '#eef2f8';
+    ctx.strokeStyle = look.shoulder;
     ctx.lineCap = 'round';
     ctx.lineWidth = 7;
     ctx.beginPath();
     ctx.moveTo(hx + 13, duvetY + 4);
     ctx.quadraticCurveTo(hx + 24, duvetY + 12 + breath, hx + 19, duvetY + 22 + breath * 1.4);
     ctx.stroke();
-    ctx.fillStyle = PALETTE.skin;
+    ctx.fillStyle = look.skin;
     ctx.beginPath();
     ctx.arc(hx + 19, duvetY + 23 + breath * 1.4, 3.4, 0, TAU);
     ctx.fill();
   }
 
-  ctx.strokeStyle = PALETTE.duvetFold;                      // duvet folds
+  ctx.strokeStyle = look.fold;                              // duvet folds
   ctx.lineWidth = 1.5;
   for (let i = 1; i <= 2; i++) {
     const y = duvetY + (duvetH / 3) * i + breath * 0.5;
@@ -839,7 +879,7 @@ export function drawSleeper(ctx, level, stage, clock, wake = 0, startle = 0) {
 
   // Two pillows, with the near one creased under his head.
   fillRound(ctx, hx - 29, hy - 18, 58, 33, 10, '#ece3d3');
-  fillRound(ctx, hx - 27, hy - 17, 54, 30, 9, PALETTE.pillow);
+  fillRound(ctx, hx - 27, hy - 17, 54, 30, 9, look.pillow);
   ctx.strokeStyle = 'rgba(206,194,174,0.75)';
   ctx.lineWidth = 1.4;
   ctx.beginPath();
@@ -852,41 +892,66 @@ export function drawSleeper(ctx, level, stage, clock, wake = 0, startle = 0) {
 
   // Shoulders, just above the duvet line, so he is lying *in* the bed rather
   // than floating on top of it.
-  fillRound(ctx, hx - 17, hy + 6, 34, 14, 7, '#dfe6f0');
-  fillRound(ctx, hx - 15, hy + 7, 30, 10, 5, '#eef2f8');
+  fillRound(ctx, hx - 17, hy + 6, 34, 14, 7, look.duvetTop);
+  fillRound(ctx, hx - 15, hy + 7, 30, 10, 5, look.shoulder);
 
-  // Torso appears as he sits up.
+  // Torso appears as they sit up.
   if (ease > 0.05) {
-    fillRound(ctx, hx - 16, hy + 2, 32, 28 * ease, 8, '#e7ebf2');
+    fillRound(ctx, hx - 16, hy + 2, 32, 28 * ease, 8, look.shoulder);
   }
 
   const headX = hx + settle * 0.9 + fidget * (stage >= SLEEP_DISTURBED ? 1 : 0.4) + jolt;
   const headY = hy + breath * 0.5 - ease * 9 - joltLift * 0.6;
-  ctx.fillStyle = PALETTE.skinShade;
+  // Long hair lies on the pillow around the head, so it has to go down first.
+  if (look.style === 'long') {
+    ctx.fillStyle = look.hair;
+    ctx.beginPath();
+    ctx.ellipse(headX, headY + 1, 21, 18, 0, 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(0,0,0,0.14)';
+    ctx.beginPath();
+    ctx.ellipse(headX - 13, headY + 8, 8, 5.5, -0.5, 0, TAU);
+    ctx.ellipse(headX + 13, headY + 8, 8, 5.5, 0.5, 0, TAU);
+    ctx.fill();
+  }
+  ctx.fillStyle = look.skinShade;
   ctx.beginPath();
   ctx.arc(headX, headY + 1.5, 15, 0, TAU);
   ctx.fill();
-  ctx.fillStyle = PALETTE.skin;
+  ctx.fillStyle = look.skin;
   ctx.beginPath();
   ctx.arc(headX, headY, 15, 0, TAU);
   ctx.fill();
-  ctx.fillStyle = PALETTE.hair;                          // hair, with a fringe
-  ctx.beginPath();
-  ctx.arc(headX, headY - 6, 14.5, Math.PI, TAU);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse(headX - 5, headY - 4, 7, 4.5, -0.35, 0, TAU);
-  ctx.fill();
+  ctx.fillStyle = look.hair;
+  if (look.style === 'balding') {
+    // Thin on top: hair only around the sides, and a bare crown.
+    ctx.beginPath();
+    ctx.arc(headX, headY - 3, 14.5, Math.PI * 0.94, Math.PI * 1.32);
+    ctx.arc(headX, headY - 3, 9, Math.PI * 1.32, Math.PI * 0.94, true);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(headX, headY - 3, 14.5, Math.PI * 1.68, Math.PI * 2.06);
+    ctx.arc(headX, headY - 3, 9, Math.PI * 2.06, Math.PI * 1.68, true);
+    ctx.fill();
+  } else {
+    ctx.beginPath();                                     // hair, with a fringe
+    ctx.arc(headX, headY - 6, 14.5, Math.PI, TAU);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(headX - 5, headY - 4, 7, 4.5, -0.35, 0, TAU);
+    ctx.fill();
+  }
   ctx.fillStyle = 'rgba(255,255,255,0.10)';
   ctx.beginPath();
   ctx.ellipse(headX + 4, headY - 9, 5, 2.6, 0.3, 0, TAU);
   ctx.fill();
 
   const ey = headY + 1;
-  ctx.strokeStyle = PALETTE.hair;
+  const ink = look.style === 'balding' ? '#4a4038' : look.hair;
+  ctx.strokeStyle = ink;
   ctx.lineWidth = 1.7;
   ctx.lineCap = 'round';
-  ctx.fillStyle = PALETTE.hair;
+  ctx.fillStyle = ink;
 
   const closedEyes = () => {
     ctx.beginPath();
@@ -919,8 +984,17 @@ export function drawSleeper(ctx, level, stage, clock, wake = 0, startle = 0) {
     ctx.arc(headX - 6, ey, 4.4, 0, TAU);
     ctx.arc(headX + 6, ey, 4.4, 0, TAU);
     ctx.fill();
-    ctx.fillStyle = PALETTE.hair;
+    ctx.fillStyle = ink;
     openEyes(2.2);
+  }
+
+  if (look.style === 'balding') {                           // a grey moustache
+    ctx.fillStyle = look.hair;
+    ctx.beginPath();
+    ctx.ellipse(headX, ey + 6, 6, 2.2, 0, 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = ink;
+    ctx.strokeStyle = ink;
   }
 
   ctx.beginPath();                                          // mouth
@@ -968,6 +1042,183 @@ export function drawSleeper(ctx, level, stage, clock, wake = 0, startle = 0) {
     ctx.font = 'bold 17px system-ui';
     ctx.fillStyle = '#ffd0d0';
     ctx.fillText('!', hx + 26, floor(bed.y + 2));
+    ctx.globalAlpha = 1;
+  }
+}
+
+// ---------------------------------------------------------------- the guard
+// Not asleep — bored, and looking. A desk, a chair, and a man who gets
+// progressively less willing to ignore you.
+// Two of them: the museum's day guard in navy at a monitor desk, and the
+// night-shift security officer in black with a torch on the desk beside him.
+const GUARD_LOOKS = {
+  guard:    { coat: '#2f3a52', yoke: '#3e4a66', cap: '#232c40', peak: '#1b2233',
+              belt: '#1f2738', flash: '#c8a24a', chair: '#3a3f52', chairTop: '#4a5064',
+              torch: false },
+  security: { coat: '#22242c', yoke: '#31343f', cap: '#15171c', peak: '#0f1115',
+              belt: '#0e0f13', flash: '#7f8b9c', chair: '#2b2d36', chairTop: '#3a3d48',
+              torch: true }
+};
+
+let glowKey = '';
+let glowCache = null;
+
+export function drawGuard(ctx, level, stage, clock, wake = 0, startle = 0, seen = 0, sees = 0,
+                          kind = 'guard') {
+  const look = GUARD_LOOKS[kind] || GUARD_LOOKS.guard;
+  const desk = level.bed;
+  const cx = level.watcher.x;
+  const cy = level.watcher.y;
+
+  // What he can see. Drawn under everything, and only bright enough to read
+  // when he is actually registering you.
+  if (sees > 0) {
+    // The filled glow is a gradient disc three hundred pixels across, and at
+    // rest its alpha is 0.017 — invisible, and the most expensive thing on the
+    // frame. Paint it only once he is actually registering you; the ring below
+    // is what tells you where his range ends the rest of the time.
+    if (seen > 0.02) {
+      // Rebuilt only when the look changes, not once a frame.
+      const heat = 0.05 + Math.round(seen * 20) / 20 * 0.16;
+      const key = `${cx}|${cy}|${sees}|${heat}`;
+      if (key !== glowKey) {
+        glowKey = key;
+        glowCache = ctx.createRadialGradient(cx, cy, sees * 0.35, cx, cy, sees);
+        glowCache.addColorStop(0, `rgba(255,120,90,${(heat * 0.35).toFixed(3)})`);
+        glowCache.addColorStop(1, 'rgba(255,120,90,0)');
+      }
+      ctx.fillStyle = glowCache;
+      ctx.beginPath();
+      ctx.arc(cx, cy, sees, 0, TAU);
+      ctx.fill();
+    }
+    ctx.strokeStyle = `rgba(255,150,110,${(0.10 + seen * 0.35).toFixed(3)})`;
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([6, 7]);
+    ctx.beginPath();
+    ctx.arc(cx, cy, sees, 0, TAU);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Desk.
+  ctx.fillStyle = SHADOW;
+  roundRect(ctx, desk.x + 3, desk.y + 8, desk.w, desk.h, 7);
+  ctx.fill();
+  fillRound(ctx, desk.x, desk.y, desk.w, desk.h, 7, PALETTE.woods[0].dark);
+  fillRound(ctx, desk.x, desk.y, desk.w, desk.h - 8, 7, PALETTE.woods[0].base);
+  fillRound(ctx, desk.x + 4, desk.y + 4, desk.w - 8, desk.h - 18, 5, PALETTE.woods[0].top);
+
+  // A bank of monitors, still on.
+  const flicker = 0.75 + 0.25 * Math.sin(clock * 7.3);
+  for (let i = 0; i < 2; i++) {
+    const mx = desk.x + desk.w * (0.24 + i * 0.42);
+    fillRound(ctx, mx - 15, desk.y + 6, 30, 20, 3, '#20242e');
+    ctx.globalAlpha = flicker;
+    fillRound(ctx, mx - 12, desk.y + 9, 24, 14, 2, i ? '#3e6f86' : '#4a7f6a');
+    ctx.globalAlpha = 1;
+  }
+
+  // The man himself, seated at the near edge.
+  const rise = stage >= 5 ? Math.min(1, wake / 0.5) : 0;
+  const ease = rise * rise * (3 - 2 * rise);
+  const fidget = [0.1, 0.2, 0.45, 0.8, 1.3, 0][stage] || 0;
+  const sway = Math.sin(clock * fidget * TAU) * (stage >= 2 ? 2.6 : 1.1);
+  const jolt = startle > 0 ? Math.sin(clock * 24) * startle * 3.5 : 0;
+  // He looks around as he gets suspicious, and stands at the end.
+  const lookX = stage >= 2 ? Math.sin(clock * (0.8 + stage * 0.4)) * (2 + stage) : 0;
+  const bodyX = cx + sway * 0.4 + jolt;
+  const bodyY = cy + 16 - ease * 13;
+
+  ctx.fillStyle = 'rgba(20,10,26,0.28)';
+  ctx.beginPath();
+  ctx.ellipse(bodyX, bodyY + 17, 13, 4.5, 0, 0, TAU);
+  ctx.fill();
+
+  // Chair back, behind him until he stands.
+  if (ease < 0.5) {
+    fillRound(ctx, bodyX - 13, bodyY + 2, 26, 16, 5, look.chair);
+    fillRound(ctx, bodyX - 11, bodyY + 4, 22, 11, 4, look.chairTop);
+  }
+
+  // Uniform: darker and squarer than the thief, with a shoulder flash.
+  fillRound(ctx, bodyX - 11, bodyY - 10, 22, 22, 7, look.coat);
+  fillRound(ctx, bodyX - 11, bodyY - 10, 22, 9, 6, look.yoke);
+  ctx.fillStyle = look.flash;
+  ctx.fillRect(bodyX - 11, bodyY - 6, 5, 3);
+  ctx.fillRect(bodyX + 6, bodyY - 6, 5, 3);
+  ctx.fillStyle = look.belt;
+  ctx.fillRect(bodyX - 11, bodyY + 4, 22, 3.4);
+
+  // Head, with a peaked cap.
+  const headY = bodyY - 19;
+  const gaze = lookX * 0.4;
+  ctx.fillStyle = PALETTE.skin;
+  ctx.beginPath();
+  ctx.arc(bodyX + gaze * 0.3, headY, 9, 0, TAU);
+  ctx.fill();
+  ctx.fillStyle = look.cap;
+  ctx.beginPath();
+  ctx.arc(bodyX + gaze * 0.3, headY - 1, 9, Math.PI, TAU);
+  ctx.fill();
+  fillRound(ctx, bodyX + gaze * 0.3 - 10, headY - 3, 20, 4, 2, look.peak);   // peak
+
+  if (look.torch) {                                   // a torch on the desk
+    const tx = desk.x + desk.w - 22;
+    const ty = desk.y + desk.h * 0.5;
+    fillRound(ctx, tx, ty - 3, 16, 6, 3, '#4a4d57');
+    fillRound(ctx, tx + 13, ty - 4, 5, 8, 2, '#d9c98a');
+    if (stage >= 2) {
+      ctx.save();
+      ctx.globalAlpha = 0.10 + stage * 0.04;
+      ctx.fillStyle = '#ffe6a8';
+      ctx.beginPath();
+      ctx.moveTo(tx + 17, ty);
+      ctx.lineTo(tx + 52, ty - 16);
+      ctx.lineTo(tx + 52, ty + 16);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  ctx.strokeStyle = '#33291f';
+  ctx.lineWidth = 1.8;
+  ctx.lineCap = 'round';
+  ctx.fillStyle = '#33291f';
+  if (stage <= 1) {                                   // dozing off
+    ctx.beginPath();
+    ctx.moveTo(bodyX - 8, headY + 2);
+    ctx.quadraticCurveTo(bodyX - 5, headY + 5, bodyX - 2, headY + 2);
+    ctx.moveTo(bodyX + 2, headY + 2);
+    ctx.quadraticCurveTo(bodyX + 5, headY + 5, bodyX + 8, headY + 2);
+    ctx.stroke();
+  } else {                                            // eyes open, and moving
+    const r = stage >= 4 ? 2.8 : 2.1;
+    ctx.beginPath();
+    ctx.arc(bodyX - 4 + gaze, headY + 2, r, 0, TAU);
+    ctx.arc(bodyX + 4 + gaze, headY + 2, r, 0, TAU);
+    ctx.fill();
+  }
+
+  const floor = (value) => Math.max(WT + 6, value);
+  if (stage <= 1) {
+    const f = (clock * 0.5) % 1;
+    ctx.textAlign = 'left';
+    ctx.globalAlpha = Math.max(0, 1 - f);
+    ctx.fillStyle = '#ffffffcc';
+    ctx.font = 'bold 12px system-ui';
+    ctx.fillText('z', bodyX + 14, floor(headY - 12 - f * 12));
+    ctx.globalAlpha = 1;
+  } else {
+    const marks = ['', '', '?', '!', '!!', '!!!'][stage];
+    const colors = ['', '', '#ffe08a', '#ffc24d', '#ff8c42', '#ff5252'];
+    const pulse = stage >= 4 ? 0.6 + 0.4 * Math.sin(clock * 9) : 1;
+    ctx.textAlign = 'center';
+    ctx.globalAlpha = pulse;
+    ctx.font = `bold ${16 + stage * 2}px system-ui`;
+    ctx.fillStyle = colors[stage];
+    ctx.fillText(marks, cx, floor(desk.y - 10));
     ctx.globalAlpha = 1;
   }
 }

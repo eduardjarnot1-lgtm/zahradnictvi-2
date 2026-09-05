@@ -452,6 +452,45 @@ __mod.tuning = (function () {
       softFloorScale: 0     // ...and on a rug
     },
 
+    // Who you are trying not to disturb. Every kind feeds the same 0-100 meter,
+    // so nothing about the existing game changes — but what fills that meter,
+    // and what it is called on screen, depends on who is in the room.
+    watchers: {
+      sleeper: {
+        meter: 'NOISE', person: 'He', sees: 0, seeRate: 0,
+        warnings: ["HE'S STIRRING…", "HE'S ALMOST AWAKE", "HE'S WAKING UP!"],
+        lost: 'HE WOKE UP!', lostWhy: 'The noise reached 100 and he woke up.'
+      },
+      // A hotel guest sleeps lighter and the clock is tighter, but the rules are
+      // the same: noise only.
+      guest: {
+        meter: 'NOISE', person: 'She', sees: 0, seeRate: 0,
+        warnings: ['SHE ROLLS OVER…', 'SHE IS ALMOST AWAKE', 'SHE IS WAKING UP!'],
+        lost: 'SHE WOKE UP!', lostWhy: 'The noise reached 100 and she woke up.'
+      },
+      // A guard is not asleep. He is bored, and he can see: crossing his line of
+      // sight while moving raises the meter even in complete silence. Standing
+      // still inside it does not — freezing works.
+      guard: {
+        meter: 'ALERT', person: 'The guard', sees: 132, seeRate: 18,
+        warnings: ['THE GUARD LOOKS UP', 'THE GUARD IS SUSPICIOUS', 'THE GUARD IS RISING!'],
+        lost: 'SPOTTED!', lostWhy: 'The guard reached full alert and saw you.'
+      },
+      security: {
+        meter: 'ALERT', person: 'The guard', sees: 158, seeRate: 22,
+        warnings: ['SECURITY LOOKS UP', 'SECURITY IS SUSPICIOUS', 'SECURITY IS RISING!'],
+        lost: 'SPOTTED!', lostWhy: 'Security reached full alert and saw you.'
+      },
+      // The school caretaker, asleep in the staff room. Noise only, like the
+      // bedroom sleeper — an older man dozing in a chair is not watching for you.
+      caretaker: {
+        meter: 'NOISE', person: 'The caretaker', sees: 0, seeRate: 0,
+        warnings: ['THE CARETAKER STIRS…', 'THE CARETAKER IS ALMOST AWAKE',
+          'THE CARETAKER IS WAKING!'],
+        lost: 'HE WOKE UP!', lostWhy: 'The noise reached 100 and the caretaker woke up.'
+      }
+    },
+
     // A hard bang makes him flinch visibly, on top of what it does to the meter.
     startle: {
       fromImpact: 1,       // scale of the flinch, 0..1, from collision strength
@@ -558,16 +597,26 @@ __mod.rules = (function () {
     small: ['nightstand', 'table']
   };
 
+  // A workplace has no sofas in its desk rows. Only the themes introduced with
+  // these locations override anything, so no existing level's furniture — or the
+  // noise it costs to walk into — moves.
+  const THEME_GROUPS = {
+    officefloor: { wide: ['tvBench', 'table'] },
+    school:      { wide: ['tvBench', 'table'] }
+  };
+
   // What a piece of furniture *is*, derived from its shape and position. The
   // renderer draws it and the simulation charges for bumping it from this same
   // answer, so a sofa is always soft and a bookshelf is always loud.
   function furnitureStyle(c) {
     if (c.type === 'bed') return 'bed';
     const ratio = c.w / c.h;
-    // A gallery's small squares are plinths, not nightstands.
-    if (c.theme === 'gallery' && c.w <= 52 && ratio > 0.75 && ratio < 1.35) return 'plinth';
+    // A gallery's small squares are plinths, not nightstands. The museum reads the
+    // same way — without this its display blocks drew as brown bedroom furniture.
+    if ((c.theme === 'gallery' || c.theme === 'museum') && c.w <= 52
+        && ratio > 0.75 && ratio < 1.35) return 'plinth';
     const group = c.h >= 100 ? 'tall' : ratio >= 2.3 ? 'wide' : ratio >= 1.35 ? 'mid' : 'small';
-    const options = STYLE_GROUPS[group];
+    const options = (THEME_GROUPS[c.theme] || {})[group] || STYLE_GROUPS[group];
     return options[Math.floor(hash(c.x + 7, c.y + 13) * options.length) % options.length];
   }
 
@@ -644,6 +693,27 @@ __mod.rules = (function () {
     if (length < deadZone) return { x: 0, y: 0 };
     const ramp = Math.min(1, (length - deadZone) / 0.06);
     return { x: x * ramp, y: y * ramp };
+  }
+
+  // Who is in this room and how they behave. One lookup, so nothing else in the
+  // game has to branch on the kind.
+  function watcherConfig(kind) {
+    return TUNING.watchers[kind] || TUNING.watchers.sleeper;
+  }
+
+  // How much a watcher who can see notices you this instant: nothing if they
+  // cannot see, nothing if you are outside their range, and nothing if you are
+  // standing still. Falls off with distance, and scales with how fast you move.
+  function detectionRate(watcher, player, speedShare) {
+    const config = watcherConfig(watcher.kind);
+    if (config.sees <= 0 || speedShare <= 0.02) return 0;
+    const distance = Math.hypot(player.x - watcher.x, player.y - watcher.y);
+    if (distance >= config.sees) return 0;
+    // Linear falloff. A squared one looked reasonable but made detection
+    // irrelevant anywhere but point-blank — three seconds of running across the
+    // edge of his vision raised the meter by one.
+    const closeness = 1 - distance / config.sees;
+    return config.seeRate * closeness * Math.min(1, speedShare);
   }
 
   function rarityOf(type) {
@@ -734,7 +804,7 @@ __mod.rules = (function () {
     const costs = TUNING.upgrades[key].costs;
     return ownedLevel >= costs.length ? null : costs[ownedLevel];
   }
-  return { SLEEP_DEEP, SLEEP_LIGHT, SLEEP_DISTURBED, SLEEP_ALMOST, SLEEP_CRITICAL, SLEEP_AWAKE, SLEEP_ASLEEP, SLEEP_STIRRING, SLEEP_LABELS, hash, furnitureStyle, bumpNoise, timeLimit, itemStats, addNoise, isAwake, sleepStage, canBank, levelTotals, forcesChoice, shapeStick, rarityOf, isBigScore, bestHaul, starThresholds, starsFor, objectivesFor, gradeEscape, comboBonus, resolveUpgrades, upgradeCost };
+  return { SLEEP_DEEP, SLEEP_LIGHT, SLEEP_DISTURBED, SLEEP_ALMOST, SLEEP_CRITICAL, SLEEP_AWAKE, SLEEP_ASLEEP, SLEEP_STIRRING, SLEEP_LABELS, hash, furnitureStyle, bumpNoise, timeLimit, itemStats, addNoise, isAwake, sleepStage, canBank, levelTotals, forcesChoice, shapeStick, watcherConfig, detectionRate, rarityOf, isBigScore, bestHaul, starThresholds, starsFor, objectivesFor, gradeEscape, comboBonus, resolveUpgrades, upgradeCost };
 })();
 __mod.physics = (function () {
   // One mover for every moving thing. Sub-stepped so nothing can tunnel through a
@@ -814,15 +884,35 @@ __mod.levels = (function () {
 
   const collider = (type, x, y, w, h) => ({ type, x, y, w, h });
 
-  // The four room edges, with a gap left for the doorway.
-  function boundary(exitX) {
-    return [
-      collider('wall', 0, 0, W, WT),
-      collider('wall', 0, 0, WT, H),
-      collider('wall', W - WT, 0, WT, H),
-      collider('wall', 0, H - WT, exitX, WT),
-      collider('wall', exitX + EXIT_W, H - WT, W - exitX - EXIT_W, WT)
-    ];
+  // The way out. A number is a doorway in the bottom wall (every level built so
+  // far); {side:'left', at} puts it in a side wall instead, which is where the
+  // corridor floorplans put theirs.
+  function resolveExit(spec) {
+    if (typeof spec === 'number') {
+      return { side: 'bottom', x: spec, y: H - WT - 10, w: EXIT_W, h: WT + 18 };
+    }
+    const at = spec.at;
+    if (spec.side === 'left') return { side: 'left', x: 0, y: at, w: WT + 18, h: EXIT_W };
+    return { side: 'right', x: W - WT - 18, y: at, w: WT + 18, h: EXIT_W };
+  }
+
+  // The four room edges, with a gap left for the way out.
+  function boundary(exit) {
+    const walls = [];
+    if (exit.side === 'bottom') {
+      walls.push(collider('wall', 0, 0, W, WT), collider('wall', 0, 0, WT, H),
+        collider('wall', W - WT, 0, WT, H),
+        collider('wall', 0, H - WT, exit.x, WT),
+        collider('wall', exit.x + EXIT_W, H - WT, W - exit.x - EXIT_W, WT));
+    } else {
+      const gapX = exit.side === 'left' ? 0 : W - WT;
+      const other = exit.side === 'left' ? W - WT : 0;
+      walls.push(collider('wall', 0, 0, W, WT), collider('wall', 0, H - WT, W, WT),
+        collider('wall', other, 0, WT, H),
+        collider('wall', gapX, 0, WT, exit.y),
+        collider('wall', gapX, exit.y + EXIT_W, WT, H - exit.y - EXIT_W));
+    }
+    return walls;
   }
 
   // Three room templates. Levels vary items, not architecture.
@@ -965,6 +1055,119 @@ __mod.levels = (function () {
         [40, 520, 90, 44]
       ]
     },
+    // A museum after the great-hall reference: display cases and plinths in an
+    // open hall upstairs, ticket hall and security wing below. The guard sits in
+    // the security wing, which is the half of the building you would rather not
+    // cross — and the way out is on the other side.
+    M: {
+      bed: [250, 470, 110, 70],
+      partitions: [
+        [14, 270, 96, 14], [176, 270, 40, 14], [282, 270, 104, 14]
+      ],
+      doors: [[110, 270, 66, 14], [216, 270, 66, 14]],
+      furniture: [
+        [30, 34, 70, 44], [160, 30, 80, 40], [300, 34, 70, 44],
+        [30, 150, 44, 44], [110, 120, 44, 44], [190, 120, 44, 44],
+        [270, 120, 44, 44], [340, 150, 44, 44],
+        [30, 320, 130, 40], [30, 430, 120, 40],
+        [230, 320, 130, 42], [300, 560, 70, 40]
+      ]
+    },
+    // A hotel floor after the corridor reference: suites hanging off a spine,
+    // and the way out at the end of the corridor rather than through a wall.
+    N: {
+      bed: [150, 36, 68, 74],
+      partitions: [
+        [130, 14, 14, 236], [256, 14, 14, 236],
+        [14, 236, 40, 14], [100, 236, 30, 14],
+        [144, 236, 30, 14], [216, 236, 40, 14],
+        [270, 236, 30, 14], [346, 236, 40, 14],
+        [130, 344, 14, 262], [256, 344, 14, 262],
+        [14, 330, 40, 14], [100, 330, 30, 14],
+        [270, 330, 30, 14], [346, 330, 40, 14]
+      ],
+      doors: [
+        [54, 236, 46, 14], [174, 236, 42, 14], [300, 236, 46, 14],
+        [54, 330, 46, 14], [300, 330, 46, 14]
+      ],
+      // Each suite is only ~116 wide, so its furniture sits against one wall and
+      // leaves a channel to walk down. At 84 wide it left 16px and sealed the
+      // room — the validator caught every one of them.
+      furniture: [
+        [30, 40, 64, 70], [30, 150, 64, 50],
+        [150, 150, 68, 50],
+        [286, 40, 64, 70], [286, 150, 64, 50],
+        [30, 380, 64, 70], [30, 500, 64, 50],
+        [286, 380, 64, 70], [286, 500, 64, 50],
+        [156, 400, 64, 60]
+      ]
+    },
+    // A school after hours, from the classroom-floor reference: two classrooms and
+    // a library along the top, a locker-lined corridor across the middle, and the
+    // gym and staff room below. The caretaker is asleep in the staff room, which
+    // is the far corner from the way out — so the deepest loot costs the longest
+    // walk back.
+    O: {
+      bed: [246, 486, 120, 74],
+      partitions: [
+        [134, 14, 14, 214], [268, 14, 14, 214],
+        [14, 228, 50, 14], [120, 228, 60, 14], [236, 228, 66, 14], [358, 228, 28, 14],
+        [14, 326, 60, 14], [130, 326, 86, 14], [272, 326, 114, 14],
+        [196, 340, 14, 266]
+      ],
+      doors: [
+        [64, 228, 56, 14], [180, 228, 56, 14], [302, 228, 56, 14],
+        [74, 326, 56, 14], [216, 326, 56, 14]
+      ],
+      furniture: [
+        // Classroom 1A and 1B: rows of desks with an aisle either side.
+        [44, 50, 60, 32], [44, 108, 60, 32], [44, 166, 60, 32],
+        [178, 50, 60, 32], [178, 108, 60, 32], [178, 166, 60, 32],
+        // The library: a run of shelving along the top wall and one stack on the
+        // right, leaving a clear column up from the doorway.
+        [292, 34, 84, 32], [330, 110, 46, 90],
+        // Corridor lockers, on the top edge and clear of every doorway mouth:
+        // the corridor is meant to be the safe road.
+        [126, 246, 48, 26], [242, 246, 54, 26],
+        // The gym: benches and vaulting boxes down one side, set back far enough
+        // from the door that you can turn once you are through it.
+        [46, 384, 104, 30], [46, 460, 104, 30], [46, 536, 104, 30],
+        // The staff room, around the sleeping caretaker: everything hugs the right
+        // wall so the walk down to him stays open.
+        [300, 352, 76, 40], [318, 420, 50, 56], [246, 420, 56, 44]
+      ]
+    },
+    // An office floor at night, from the open-plan reference: desk banks and a
+    // meeting room upstairs, a corridor, and a conference room and lounge below.
+    // Security sits in the lounge, so the whole bottom half is watched and the
+    // corridor is the seam you have to keep crossing.
+    P: {
+      bed: [268, 380, 100, 64],
+      partitions: [
+        [250, 14, 14, 232],
+        [14, 246, 56, 14], [126, 246, 70, 14], [248, 246, 66, 14], [370, 246, 16, 14],
+        [14, 344, 50, 14], [120, 344, 80, 14], [200, 344, 50, 14], [306, 344, 80, 14],
+        [210, 358, 14, 248]
+      ],
+      doors: [
+        [70, 246, 56, 14], [196, 246, 52, 14], [314, 246, 56, 14],
+        [64, 344, 56, 14], [250, 344, 56, 14]
+      ],
+      furniture: [
+        // Two banks of desks in the open plan — dense, and every one of them hard.
+        [40, 40, 90, 36], [150, 40, 90, 36],
+        [40, 110, 90, 36], [150, 110, 90, 36],
+        [40, 180, 90, 36], [150, 180, 90, 36],
+        // The meeting room off the side.
+        [296, 60, 80, 88], [296, 170, 80, 40],
+        // Corridor units, tucked into the wall between the doorways.
+        [132, 264, 58, 24], [252, 264, 58, 24],
+        // The conference room: one long table you have to walk around.
+        [46, 400, 150, 58], [40, 520, 120, 30],
+        // The lounge, in front of the security desk.
+        [250, 480, 110, 44], [250, 560, 110, 40]
+      ]
+    },
     F: {
       bed: [230, 20, 140, 96],
       furniture: [
@@ -989,14 +1192,19 @@ __mod.levels = (function () {
     I: { x: 140, y: 300, w: 150, h: 110 },
     J: { x: 150, y: 360, w: 160, h: 90 },
     K: { x: 150, y: 340, w: 160, h: 90 },
-    L: { x: 150, y: 260, w: 130, h: 110 }
+    L: { x: 150, y: 260, w: 130, h: 110 },
+    M: { x: 120, y: 340, w: 150, h: 90 },
+    N: { x: 20, y: 256, w: 360, h: 68 },
+    O: { x: 150, y: 280, w: 200, h: 42 },
+    P: { x: 130, y: 296, w: 210, h: 44 }
   };
 
-  function makeLevel(id, layoutKey, spawn, exitX, items, options = {}) {
+  function makeLevel(id, layoutKey, spawn, exitSpec, items, options = {}) {
     const layout = LAYOUTS[layoutKey];
     const bed = collider('bed', ...layout.bed);
+    const exit = resolveExit(exitSpec);
     const colliders = [
-      ...boundary(exitX),
+      ...boundary(exit),
       // Interior walls. These are what turn one rectangle into connected areas,
       // and they are structural rather than furniture: like the outer walls they
       // are part of the building, so brushing one costs no noise.
@@ -1028,10 +1236,17 @@ __mod.levels = (function () {
       // them from this same data, so what looks soft is soft.
       rugs: RUGS[layoutKey] ? [RUGS[layoutKey]] : [],
       spawn: { x: spawn[0], y: spawn[1] },
-      exit: { x: exitX, y: H - WT - 10, w: EXIT_W, h: WT + 18 },
+      exit,
       bed,
       // Where his head sits on the pillow — the renderer draws the face here.
       sleeper: { x: bed.x + bed.w / 2, y: bed.y + bed.h * 0.26 },
+      // Who is in the room. Defaults to the sleeper on the bed, so every level
+      // built before this existed keeps working untouched.
+      watcher: {
+        kind: options.watcher || 'sleeper',
+        x: bed.x + bed.w / 2,
+        y: bed.y + bed.h * (options.watcher === 'guard' || options.watcher === 'security' ? 0.5 : 0.26)
+      },
       colliders,
       items: items.map((it, i) => ({
         id: `L${id}-${i}`,
@@ -1268,7 +1483,113 @@ __mod.levels = (function () {
       [190, 120, 'necklace'], [200, 330, 'diamond'], [330, 330, 'goldbar'],
       [110, 470, 'mirror'], [286, 560, 'vase'], [330, 470, 'ring']
     ], { theme: 'suite', name: 'Grand Suite', extraTime: 12,
-         creaks: [[150, 240, 70, 44], [90, 470, 60, 44]] })
+         creaks: [[150, 240, 70, 44], [90, 470, 60, 44]] }),
+
+    // ---- Museum: he is not asleep, and he can see -------------------------
+    makeLevel(41, 'M', [100, 548], 60, [
+      [65, 100, 'vase'], [140, 90, 'painting'], [232, 90, 'mirror'],
+      [318, 100, 'vase'], [200, 190, 'necklace'], [110, 200, 'ring'],
+      [180, 400, 'wallet'], [70, 380, 'camera']
+    ], { theme: 'museum', name: 'Museum', watcher: 'guard', extraTime: 13,
+         creaks: [[110, 284, 66, 44]] }),
+    makeLevel(42, 'M', [100, 548], 60, [
+      [65, 100, 'painting'], [140, 90, 'diamond'], [232, 90, 'painting'],
+      [318, 100, 'vase'], [200, 190, 'goldbar'], [110, 200, 'necklace'],
+      [180, 400, 'camera'], [70, 380, 'jewel'], [190, 560, 'coin']
+    ], { theme: 'museum', name: 'Museum', watcher: 'guard', extraTime: 13,
+         creaks: [[110, 284, 66, 44], [216, 284, 66, 44]] }),
+    makeLevel(43, 'M', [100, 548], 60, [
+      [65, 100, 'goldbar'], [140, 90, 'painting', 'bonus'], [232, 90, 'diamond'],
+      [318, 100, 'painting'], [200, 190, 'diamond'], [110, 200, 'goldbar'],
+      [180, 400, 'necklace'], [70, 380, 'mirror']
+    ], { theme: 'museum', name: 'Museum', watcher: 'guard', extraTime: 14,
+         creaks: [[110, 284, 66, 44], [216, 284, 66, 44]] }),
+    makeLevel(44, 'M', [100, 548], 60, [
+      [65, 100, 'goldbar'], [140, 90, 'goldbar'], [232, 90, 'diamond', 'bonus'],
+      [318, 100, 'painting'], [200, 190, 'goldbar'], [110, 200, 'diamond'],
+      [180, 400, 'painting'], [70, 380, 'necklace'], [190, 560, 'ring']
+    ], { theme: 'museum', name: 'Museum', watcher: 'security', extraTime: 14,
+         creaks: [[110, 284, 66, 44], [216, 284, 66, 44]] }),
+
+    // ---- Hotel floor: a light sleeper, and a long corridor to cross --------
+    makeLevel(45, 'N', [200, 290], { side: 'left', at: 258 }, [
+      [72, 130, 'wallet'], [200, 120, 'watch'], [330, 130, 'camera'],
+      [72, 470, 'ring'], [330, 470, 'tablet'], [200, 520, 'headphones'],
+      [235, 190, 'coin'], [340, 300, 'cash']
+    ], { theme: 'hotelfloor', name: 'Hotel Floor', watcher: 'guest', extraTime: 12 }),
+    makeLevel(46, 'N', [200, 290], { side: 'left', at: 258 }, [
+      [72, 130, 'necklace'], [200, 120, 'jewel'], [330, 130, 'console'],
+      [72, 470, 'camera'], [330, 470, 'mirror'], [200, 520, 'ring'],
+      [235, 190, 'wallet'], [340, 300, 'speaker'], [60, 300, 'coin']
+    ], { theme: 'hotelfloor', name: 'Hotel Floor', watcher: 'guest', extraTime: 12 }),
+    makeLevel(47, 'N', [200, 290], { side: 'left', at: 258 }, [
+      [72, 130, 'diamond'], [200, 120, 'necklace'], [330, 130, 'painting'],
+      [72, 470, 'mirror'], [330, 470, 'jewel'], [200, 520, 'console'],
+      [235, 190, 'ring'], [340, 300, 'camera']
+    ], { theme: 'hotelfloor', name: 'Hotel Floor', watcher: 'guest', extraTime: 13 }),
+    makeLevel(48, 'N', [200, 290], { side: 'left', at: 258 }, [
+      [72, 130, 'goldbar'], [200, 120, 'diamond', 'bonus'], [330, 130, 'painting'],
+      [72, 470, 'diamond'], [330, 470, 'goldbar'], [200, 520, 'necklace'],
+      [235, 190, 'jewel'], [340, 300, 'mirror'], [60, 300, 'wallet']
+    ], { theme: 'hotelfloor', name: 'Hotel Floor', watcher: 'guest', extraTime: 13 }),
+
+    // ---- School after hours: the caretaker is asleep in the staff room -----
+    makeLevel(49, 'O', [340, 284], { side: 'left', at: 250 }, [
+      [24, 90, 'tablet'], [116, 150, 'wallet'], [158, 90, 'laptop'],
+      [252, 150, 'phone'], [300, 90, 'camera'], [300, 160, 'console'],
+      [170, 284, 'coin'], [170, 400, 'speaker'], [24, 400, 'headphones']
+    ], { theme: 'school', name: 'School', watcher: 'caretaker', extraTime: 14,
+         creaks: [[150, 246, 66, 44]] }),
+    makeLevel(50, 'O', [340, 284], { side: 'left', at: 250 }, [
+      [24, 90, 'laptop'], [116, 150, 'tablet'], [158, 90, 'console'],
+      [252, 150, 'ring'], [300, 90, 'necklace'], [300, 160, 'camera'],
+      [170, 284, 'wallet'], [170, 400, 'tv'], [24, 400, 'speaker'],
+      [300, 592, 'coin']
+    ], { theme: 'school', name: 'School', watcher: 'caretaker', extraTime: 15,
+         creaks: [[150, 246, 66, 44], [230, 560, 60, 44]] }),
+    makeLevel(51, 'O', [340, 284], { side: 'left', at: 250 }, [
+      [24, 90, 'console'], [116, 150, 'laptop'], [158, 90, 'tv'],
+      [252, 150, 'necklace'], [300, 90, 'painting'], [300, 160, 'jewel'],
+      [170, 284, 'tablet'], [170, 400, 'mirror'], [24, 400, 'camera'],
+      [300, 592, 'wallet']
+    ], { theme: 'school', name: 'School', watcher: 'caretaker', extraTime: 15,
+         creaks: [[150, 246, 66, 44], [230, 560, 60, 44]] }),
+    makeLevel(52, 'O', [340, 284], { side: 'left', at: 250 }, [
+      [24, 90, 'tv'], [116, 150, 'console'], [158, 90, 'painting', 'bonus'],
+      [252, 150, 'diamond'], [300, 90, 'goldbar'], [300, 160, 'necklace'],
+      [170, 284, 'laptop'], [170, 400, 'jewel'], [24, 400, 'mirror'],
+      [300, 592, 'ring']
+    ], { theme: 'school', name: 'School', watcher: 'caretaker', extraTime: 16,
+         creaks: [[150, 246, 66, 44], [230, 560, 60, 44]] }),
+
+    // ---- Office floor at night: security is awake, and the lounge is his -----
+    makeLevel(53, 'P', [340, 302], { side: 'left', at: 268 }, [
+      [24, 80, 'laptop'], [140, 80, 'tablet'], [24, 150, 'console'],
+      [140, 150, 'laptop'], [24, 220, 'speaker'], [140, 220, 'camera'],
+      [276, 30, 'tv'], [276, 220, 'phone'], [180, 302, 'wallet']
+    ], { theme: 'officefloor', name: 'Office Floor', watcher: 'security', extraTime: 14,
+         creaks: [[150, 264, 66, 44]] }),
+    makeLevel(54, 'P', [340, 302], { side: 'left', at: 268 }, [
+      [24, 80, 'tablet'], [140, 80, 'console'], [24, 150, 'laptop'],
+      [140, 150, 'speaker'], [24, 220, 'camera'], [140, 220, 'tv'],
+      [276, 30, 'painting'], [276, 220, 'necklace'], [180, 302, 'coin'],
+      [180, 380, 'mirror']
+    ], { theme: 'officefloor', name: 'Office Floor', watcher: 'security', extraTime: 14,
+         creaks: [[150, 264, 66, 44], [170, 380, 60, 44]] }),
+    makeLevel(55, 'P', [340, 302], { side: 'left', at: 268 }, [
+      [24, 80, 'console'], [140, 80, 'tv'], [24, 150, 'speaker'],
+      [140, 150, 'painting'], [24, 220, 'tv'], [140, 220, 'necklace'],
+      [276, 30, 'diamond'], [276, 220, 'painting'], [180, 302, 'tablet'],
+      [180, 380, 'jewel']
+    ], { theme: 'officefloor', name: 'Office Floor', watcher: 'security', extraTime: 15,
+         creaks: [[150, 264, 66, 44], [170, 380, 60, 44]] }),
+    makeLevel(56, 'P', [340, 302], { side: 'left', at: 268 }, [
+      [24, 80, 'tv'], [140, 80, 'painting'], [24, 150, 'diamond'],
+      [140, 150, 'goldbar'], [24, 220, 'painting'], [140, 220, 'diamond'],
+      [276, 30, 'goldbar', 'bonus'], [276, 220, 'diamond'], [180, 302, 'necklace'],
+      [180, 380, 'mirror']
+    ], { theme: 'officefloor', name: 'Office Floor', watcher: 'security', extraTime: 15,
+         creaks: [[150, 264, 66, 44], [170, 380, 60, 44]] })
   ];
 
   const collidersOfType = (level, type) =>
@@ -1376,7 +1697,8 @@ __mod.validate = (function () {
         errors.push(`${item.id} sits on the spawn — it costs nothing to take`);
       }
       const exit = level.exit;
-      if (item.x > exit.x - 16 && item.x < exit.x + exit.w + 16 && item.y > exit.y - 26) {
+      if (item.x > exit.x - 22 && item.x < exit.x + exit.w + 22 &&
+          item.y > exit.y - 22 && item.y < exit.y + exit.h + 22) {
         errors.push(`${item.id} sits on the exit`);
       }
     }
@@ -1421,12 +1743,10 @@ __mod.validate = (function () {
     const exitReachable = points.some(
       (p) => p.x + PW / 2 > level.exit.x &&
              p.x - PW / 2 < level.exit.x + level.exit.w &&
-             p.y + PH / 2 > level.exit.y
+             p.y + PH / 2 > level.exit.y &&
+             p.y - PH / 2 < level.exit.y + level.exit.h
     );
     if (!exitReachable) errors.push('exit is unreachable from spawn');
-    if (level.exit.y + level.exit.h < H - TUNING.world.wallThickness) {
-      warnings.push('exit does not reach the room edge');
-    }
 
     const totals = levelTotals(level);
     if (totals.noise <= 0) errors.push('level totals no noise at all');
@@ -1463,7 +1783,7 @@ __mod.sim = (function () {
   const { TUNING } = __mod.tuning;
   const { createRng } = __mod.rng;
   const { solveMove, clampToWorld } = __mod.physics;
-  const { addNoise, isAwake, itemStats, canBank, sleepStage, resolveUpgrades, bumpNoise, timeLimit, rarityOf, comboBonus, gradeEscape, isBigScore } = __mod.rules;
+  const { addNoise, isAwake, itemStats, canBank, sleepStage, resolveUpgrades, bumpNoise, timeLimit, rarityOf, comboBonus, gradeEscape, isBigScore, detectionRate, watcherConfig } = __mod.rules;
 
   const STEP_SECONDS = 1 / TUNING.sim.hz;
 
@@ -1613,6 +1933,10 @@ __mod.sim = (function () {
       streak: 0,        // steals in quick succession
       streakTimer: 0,   // ...and how long is left to keep it
       onSoftFloor: false,
+      // Whether this room's watcher can see at all, and how strongly they are
+      // registering you right now (presentation only — the meter is the truth).
+      watches: watcherConfig(level.watcher.kind).sees > 0,
+      seen: 0,
       // Creaky boards: plain trigger zones, each with its own cooldown so
       // standing on one does not drain the meter.
       creaks: level.creaks.map((zone) => ({ ...zone, cooldown: 0, active: false })),
@@ -1753,6 +2077,21 @@ __mod.sim = (function () {
       }
     }
 
+    // Being seen. A watcher who can see raises the meter when you move inside
+    // their range — in complete silence. Standing still inside it costs nothing,
+    // so freezing is a real answer, and it plays against the clock.
+    if (sim.watches && sim.status === 'running') {
+      const speedShare = player.speed / TUNING.player.speed;
+      const rate = detectionRate(sim.level.watcher, player, speedShare);
+      if (rate > 0) {
+        sim.seen = Math.min(1, sim.seen + STEP_SECONDS * 3);
+        sim.noise = addNoise(sim.noise, rate * STEP_SECONDS);
+        if (isAwake(sim.noise)) finish(sim, 'lost', 'seen');
+      } else {
+        sim.seen = Math.max(0, sim.seen - STEP_SECONDS * 2);
+      }
+    }
+
     if (sim.streakTimer > 0) {
       sim.streakTimer = Math.max(0, sim.streakTimer - STEP_SECONDS);
       if (sim.streakTimer === 0) sim.streak = 0;
@@ -1847,10 +2186,13 @@ __mod.sim = (function () {
 
     if (sim.status === 'running') {
       const exit = sim.level.exit;
+      // A plain box overlap, so the same check works for a doorway in the bottom
+      // wall or in either side wall.
       const atExit =
         player.x + player.w / 2 > exit.x &&
         player.x - player.w / 2 < exit.x + exit.w &&
-        player.y + player.h / 2 > exit.y;
+        player.y + player.h / 2 > exit.y &&
+        player.y - player.h / 2 < exit.y + exit.h;
       if (atExit && canBank(sim.noise)) {
         const grade = gradeEscape({
           noise: sim.noise,
@@ -2509,7 +2851,7 @@ __mod.art = (function () {
   // top of real colliders (plants on a chest, a lamp on a nightstand), never loose
   // on the floor where they would fake a wall the player collides with.
   const { TUNING } = __mod.tuning;
-  const { SLEEP_DEEP, SLEEP_LIGHT, SLEEP_DISTURBED, SLEEP_ALMOST, SLEEP_CRITICAL, SLEEP_AWAKE, furnitureStyle, hash } = __mod.rules;
+  const { SLEEP_DEEP, SLEEP_LIGHT, SLEEP_DISTURBED, SLEEP_ALMOST, SLEEP_CRITICAL, SLEEP_AWAKE, furnitureStyle, hash, watcherConfig } = __mod.rules;
 
   const { width: W, height: H, wallThickness: WT } = TUNING.world;
   const TAU = Math.PI * 2;
@@ -2565,6 +2907,27 @@ __mod.art = (function () {
     thiefBelt: '#1d2138'
   };
 
+  // Who is asleep. Different people, not the same model in a different shirt:
+  // hair shape and colour, skin, and what they are sleeping under all change,
+  // so a hotel guest is recognisably not the man from the bedroom.
+  const SLEEPER_LOOKS = {
+    sleeper:   { hair: '#3a2a20', style: 'short', skin: '#f2c9a0', skinShade: '#dcae86',
+                 duvet: '#8fcfc9', duvetTop: '#a9e0da', fold: 'rgba(46,112,110,0.35)',
+                 sheet: '#f3f7fb', pillow: '#fffdf7', shoulder: '#eef2f8' },
+    // The hotel guest: longer auburn hair spread on the pillow, and the deep
+    // red-gold bedding the corridor floor is decorated in.
+    guest:     { hair: '#8c4a2f', style: 'long', skin: '#f7d6b4', skinShade: '#e2bb96',
+                 duvet: '#b8564f', duvetTop: '#d0736a', fold: 'rgba(96,32,28,0.35)',
+                 sheet: '#fbeee4', pillow: '#fff8ee', shoulder: '#f6e6da' },
+    // The school caretaker: older, grey at the sides and thin on top, asleep in
+    // the staff room under a worn olive blanket rather than a duvet.
+    caretaker: { hair: '#9aa0a6', style: 'balding', skin: '#e8bb92', skinShade: '#cfa079',
+                 duvet: '#6f7c4e', duvetTop: '#899763', fold: 'rgba(40,52,26,0.35)',
+                 sheet: '#e6e2d2', pillow: '#f2ecdc', shoulder: '#dfe0cf' }
+  };
+
+  const sleeperLook = (kind) => SLEEPER_LOOKS[kind] || SLEEPER_LOOKS.sleeper;
+
   // Each room theme repaints the shell only — walls, floor, light. Furniture and
   // props stay the same code, so a new theme costs six colours, not a new module.
   const THEMES = {
@@ -2599,7 +2962,23 @@ __mod.art = (function () {
     // Warm cream floors and white walls, after the apartment reference.
     suite:     { wall: '#6e6455', lip: '#8a7e6c', shade: '#544c40', skirt: '#f0e7d6',
                  floor: '#c3a985', alt: '#b99f7c', seam: 'rgba(150,124,90,0.5)',
-                 grain: 'rgba(216,194,160,0.26)', light: '255,238,204', vignette: '38,32,26' }
+                 grain: 'rgba(216,194,160,0.26)', light: '255,238,204', vignette: '38,32,26' },
+    // Marble and cool stone, after the great-hall reference.
+    museum:    { wall: '#4a4f5e', lip: '#616779', shade: '#383c48', skirt: '#cdd3dc',
+                 floor: '#a6a8ac', alt: '#9d9fa4', seam: 'rgba(120,122,128,0.5)',
+                 grain: 'rgba(200,203,210,0.22)', light: '226,238,255', vignette: '20,22,30' },
+    // Deep carpet and warm lamps, after the hotel-corridor reference.
+    hotelfloor:{ wall: '#4c3a3f', lip: '#63494f', shade: '#3a2c30', skirt: '#c9a98f',
+                 floor: '#8f5c52', alt: '#86554c', seam: 'rgba(102,62,54,0.55)',
+                 grain: 'rgba(180,120,104,0.24)', light: '255,222,178', vignette: '30,18,20' },
+    // Varnished boards and green board-paint, after the classroom reference.
+    school:    { wall: '#3f5a4a', lip: '#527461', shade: '#2f4437', skirt: '#a9c4ae',
+                 floor: '#b07a3c', alt: '#a67236', seam: 'rgba(132,88,42,0.6)',
+                 grain: 'rgba(206,152,88,0.30)', light: '236,246,214', vignette: '20,32,26' },
+    // Grey contract carpet and a dark ceiling, after the open-plan reference.
+    officefloor:{ wall: '#333a44', lip: '#464e5b', shade: '#242a32', skirt: '#7f8b9c',
+                 floor: '#7f8a7c', alt: '#778274', seam: 'rgba(92,100,90,0.55)',
+                 grain: 'rgba(160,170,158,0.24)', light: '214,236,255', vignette: '16,20,26' }
   };
 
   let T = THEMES.bedroom;   // set once per room paint; drawing is synchronous
@@ -3258,7 +3637,9 @@ __mod.art = (function () {
     for (const c of level.colliders) {
       if (c.type === 'furniture') drawFurniture(ctx, c);
     }
-    drawBedBase(ctx, level);
+    // A guard's room gets a desk instead of a bed; the desk itself is drawn with
+    // the guard each frame, since his monitors flicker.
+    if (watcherConfig(level.watcher.kind).sees === 0) drawBedBase(ctx, level);
 
     const vignette = ctx.createRadialGradient(W / 2, H / 2, H * 0.30, W / 2, H / 2, H * 0.74);
     vignette.addColorStop(0, 'rgba(0,0,0,0)');
@@ -3268,7 +3649,8 @@ __mod.art = (function () {
   }
 
   // ---------------------------------------------------------------- sleeper
-  function drawSleeper(ctx, level, stage, clock, wake = 0, startle = 0) {
+  function drawSleeper(ctx, level, stage, clock, wake = 0, startle = 0, kind = 'sleeper') {
+    const look = sleeperLook(kind);
     const bed = level.bed;
     const hx = level.sleeper.x;
     const hy = level.sleeper.y;
@@ -3294,10 +3676,10 @@ __mod.art = (function () {
 
     const duvetY = bed.y + bed.h * 0.40 - breath * 1.4 + ease * 16 - joltLift;
     const duvetH = Math.max(6, bed.y + bed.h - 6 - duvetY);
-    fillRound(ctx, bed.x + 5, duvetY, bed.w - 10, duvetH, 7, PALETTE.duvet);
+    fillRound(ctx, bed.x + 5, duvetY, bed.w - 10, duvetH, 7, look.duvet);
     // A turned-down sheet along the top edge of the covers.
-    fillRound(ctx, bed.x + 5, duvetY, bed.w - 10, Math.min(duvetH, 10 + breath * 1.2), 5, '#f3f7fb');
-    fillRound(ctx, bed.x + 6, duvetY + 2, bed.w - 12, Math.min(duvetH - 3, 6 + breath), 4, PALETTE.duvetTop);
+    fillRound(ctx, bed.x + 5, duvetY, bed.w - 10, Math.min(duvetH, 10 + breath * 1.2), 5, look.sheet);
+    fillRound(ctx, bed.x + 6, duvetY + 2, bed.w - 12, Math.min(duvetH - 3, 6 + breath), 4, look.duvetTop);
     // Faint quilting, so the duvet has a fabric rather than a flat fill.
     ctx.save();
     ctx.globalAlpha = 0.16;
@@ -3313,20 +3695,20 @@ __mod.art = (function () {
 
     // An arm lying on top of the covers, rising and falling with him.
     if (stage !== SLEEP_AWAKE) {
-      ctx.strokeStyle = '#eef2f8';
+      ctx.strokeStyle = look.shoulder;
       ctx.lineCap = 'round';
       ctx.lineWidth = 7;
       ctx.beginPath();
       ctx.moveTo(hx + 13, duvetY + 4);
       ctx.quadraticCurveTo(hx + 24, duvetY + 12 + breath, hx + 19, duvetY + 22 + breath * 1.4);
       ctx.stroke();
-      ctx.fillStyle = PALETTE.skin;
+      ctx.fillStyle = look.skin;
       ctx.beginPath();
       ctx.arc(hx + 19, duvetY + 23 + breath * 1.4, 3.4, 0, TAU);
       ctx.fill();
     }
 
-    ctx.strokeStyle = PALETTE.duvetFold;                      // duvet folds
+    ctx.strokeStyle = look.fold;                              // duvet folds
     ctx.lineWidth = 1.5;
     for (let i = 1; i <= 2; i++) {
       const y = duvetY + (duvetH / 3) * i + breath * 0.5;
@@ -3338,7 +3720,7 @@ __mod.art = (function () {
 
     // Two pillows, with the near one creased under his head.
     fillRound(ctx, hx - 29, hy - 18, 58, 33, 10, '#ece3d3');
-    fillRound(ctx, hx - 27, hy - 17, 54, 30, 9, PALETTE.pillow);
+    fillRound(ctx, hx - 27, hy - 17, 54, 30, 9, look.pillow);
     ctx.strokeStyle = 'rgba(206,194,174,0.75)';
     ctx.lineWidth = 1.4;
     ctx.beginPath();
@@ -3351,41 +3733,66 @@ __mod.art = (function () {
 
     // Shoulders, just above the duvet line, so he is lying *in* the bed rather
     // than floating on top of it.
-    fillRound(ctx, hx - 17, hy + 6, 34, 14, 7, '#dfe6f0');
-    fillRound(ctx, hx - 15, hy + 7, 30, 10, 5, '#eef2f8');
+    fillRound(ctx, hx - 17, hy + 6, 34, 14, 7, look.duvetTop);
+    fillRound(ctx, hx - 15, hy + 7, 30, 10, 5, look.shoulder);
 
-    // Torso appears as he sits up.
+    // Torso appears as they sit up.
     if (ease > 0.05) {
-      fillRound(ctx, hx - 16, hy + 2, 32, 28 * ease, 8, '#e7ebf2');
+      fillRound(ctx, hx - 16, hy + 2, 32, 28 * ease, 8, look.shoulder);
     }
 
     const headX = hx + settle * 0.9 + fidget * (stage >= SLEEP_DISTURBED ? 1 : 0.4) + jolt;
     const headY = hy + breath * 0.5 - ease * 9 - joltLift * 0.6;
-    ctx.fillStyle = PALETTE.skinShade;
+    // Long hair lies on the pillow around the head, so it has to go down first.
+    if (look.style === 'long') {
+      ctx.fillStyle = look.hair;
+      ctx.beginPath();
+      ctx.ellipse(headX, headY + 1, 21, 18, 0, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(0,0,0,0.14)';
+      ctx.beginPath();
+      ctx.ellipse(headX - 13, headY + 8, 8, 5.5, -0.5, 0, TAU);
+      ctx.ellipse(headX + 13, headY + 8, 8, 5.5, 0.5, 0, TAU);
+      ctx.fill();
+    }
+    ctx.fillStyle = look.skinShade;
     ctx.beginPath();
     ctx.arc(headX, headY + 1.5, 15, 0, TAU);
     ctx.fill();
-    ctx.fillStyle = PALETTE.skin;
+    ctx.fillStyle = look.skin;
     ctx.beginPath();
     ctx.arc(headX, headY, 15, 0, TAU);
     ctx.fill();
-    ctx.fillStyle = PALETTE.hair;                          // hair, with a fringe
-    ctx.beginPath();
-    ctx.arc(headX, headY - 6, 14.5, Math.PI, TAU);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(headX - 5, headY - 4, 7, 4.5, -0.35, 0, TAU);
-    ctx.fill();
+    ctx.fillStyle = look.hair;
+    if (look.style === 'balding') {
+      // Thin on top: hair only around the sides, and a bare crown.
+      ctx.beginPath();
+      ctx.arc(headX, headY - 3, 14.5, Math.PI * 0.94, Math.PI * 1.32);
+      ctx.arc(headX, headY - 3, 9, Math.PI * 1.32, Math.PI * 0.94, true);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(headX, headY - 3, 14.5, Math.PI * 1.68, Math.PI * 2.06);
+      ctx.arc(headX, headY - 3, 9, Math.PI * 2.06, Math.PI * 1.68, true);
+      ctx.fill();
+    } else {
+      ctx.beginPath();                                     // hair, with a fringe
+      ctx.arc(headX, headY - 6, 14.5, Math.PI, TAU);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(headX - 5, headY - 4, 7, 4.5, -0.35, 0, TAU);
+      ctx.fill();
+    }
     ctx.fillStyle = 'rgba(255,255,255,0.10)';
     ctx.beginPath();
     ctx.ellipse(headX + 4, headY - 9, 5, 2.6, 0.3, 0, TAU);
     ctx.fill();
 
     const ey = headY + 1;
-    ctx.strokeStyle = PALETTE.hair;
+    const ink = look.style === 'balding' ? '#4a4038' : look.hair;
+    ctx.strokeStyle = ink;
     ctx.lineWidth = 1.7;
     ctx.lineCap = 'round';
-    ctx.fillStyle = PALETTE.hair;
+    ctx.fillStyle = ink;
 
     const closedEyes = () => {
       ctx.beginPath();
@@ -3418,8 +3825,17 @@ __mod.art = (function () {
       ctx.arc(headX - 6, ey, 4.4, 0, TAU);
       ctx.arc(headX + 6, ey, 4.4, 0, TAU);
       ctx.fill();
-      ctx.fillStyle = PALETTE.hair;
+      ctx.fillStyle = ink;
       openEyes(2.2);
+    }
+
+    if (look.style === 'balding') {                           // a grey moustache
+      ctx.fillStyle = look.hair;
+      ctx.beginPath();
+      ctx.ellipse(headX, ey + 6, 6, 2.2, 0, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = ink;
+      ctx.strokeStyle = ink;
     }
 
     ctx.beginPath();                                          // mouth
@@ -3467,6 +3883,183 @@ __mod.art = (function () {
       ctx.font = 'bold 17px system-ui';
       ctx.fillStyle = '#ffd0d0';
       ctx.fillText('!', hx + 26, floor(bed.y + 2));
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // ---------------------------------------------------------------- the guard
+  // Not asleep — bored, and looking. A desk, a chair, and a man who gets
+  // progressively less willing to ignore you.
+  // Two of them: the museum's day guard in navy at a monitor desk, and the
+  // night-shift security officer in black with a torch on the desk beside him.
+  const GUARD_LOOKS = {
+    guard:    { coat: '#2f3a52', yoke: '#3e4a66', cap: '#232c40', peak: '#1b2233',
+                belt: '#1f2738', flash: '#c8a24a', chair: '#3a3f52', chairTop: '#4a5064',
+                torch: false },
+    security: { coat: '#22242c', yoke: '#31343f', cap: '#15171c', peak: '#0f1115',
+                belt: '#0e0f13', flash: '#7f8b9c', chair: '#2b2d36', chairTop: '#3a3d48',
+                torch: true }
+  };
+
+  let glowKey = '';
+  let glowCache = null;
+
+  function drawGuard(ctx, level, stage, clock, wake = 0, startle = 0, seen = 0, sees = 0,
+                            kind = 'guard') {
+    const look = GUARD_LOOKS[kind] || GUARD_LOOKS.guard;
+    const desk = level.bed;
+    const cx = level.watcher.x;
+    const cy = level.watcher.y;
+
+    // What he can see. Drawn under everything, and only bright enough to read
+    // when he is actually registering you.
+    if (sees > 0) {
+      // The filled glow is a gradient disc three hundred pixels across, and at
+      // rest its alpha is 0.017 — invisible, and the most expensive thing on the
+      // frame. Paint it only once he is actually registering you; the ring below
+      // is what tells you where his range ends the rest of the time.
+      if (seen > 0.02) {
+        // Rebuilt only when the look changes, not once a frame.
+        const heat = 0.05 + Math.round(seen * 20) / 20 * 0.16;
+        const key = `${cx}|${cy}|${sees}|${heat}`;
+        if (key !== glowKey) {
+          glowKey = key;
+          glowCache = ctx.createRadialGradient(cx, cy, sees * 0.35, cx, cy, sees);
+          glowCache.addColorStop(0, `rgba(255,120,90,${(heat * 0.35).toFixed(3)})`);
+          glowCache.addColorStop(1, 'rgba(255,120,90,0)');
+        }
+        ctx.fillStyle = glowCache;
+        ctx.beginPath();
+        ctx.arc(cx, cy, sees, 0, TAU);
+        ctx.fill();
+      }
+      ctx.strokeStyle = `rgba(255,150,110,${(0.10 + seen * 0.35).toFixed(3)})`;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([6, 7]);
+      ctx.beginPath();
+      ctx.arc(cx, cy, sees, 0, TAU);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // Desk.
+    ctx.fillStyle = SHADOW;
+    roundRect(ctx, desk.x + 3, desk.y + 8, desk.w, desk.h, 7);
+    ctx.fill();
+    fillRound(ctx, desk.x, desk.y, desk.w, desk.h, 7, PALETTE.woods[0].dark);
+    fillRound(ctx, desk.x, desk.y, desk.w, desk.h - 8, 7, PALETTE.woods[0].base);
+    fillRound(ctx, desk.x + 4, desk.y + 4, desk.w - 8, desk.h - 18, 5, PALETTE.woods[0].top);
+
+    // A bank of monitors, still on.
+    const flicker = 0.75 + 0.25 * Math.sin(clock * 7.3);
+    for (let i = 0; i < 2; i++) {
+      const mx = desk.x + desk.w * (0.24 + i * 0.42);
+      fillRound(ctx, mx - 15, desk.y + 6, 30, 20, 3, '#20242e');
+      ctx.globalAlpha = flicker;
+      fillRound(ctx, mx - 12, desk.y + 9, 24, 14, 2, i ? '#3e6f86' : '#4a7f6a');
+      ctx.globalAlpha = 1;
+    }
+
+    // The man himself, seated at the near edge.
+    const rise = stage >= 5 ? Math.min(1, wake / 0.5) : 0;
+    const ease = rise * rise * (3 - 2 * rise);
+    const fidget = [0.1, 0.2, 0.45, 0.8, 1.3, 0][stage] || 0;
+    const sway = Math.sin(clock * fidget * TAU) * (stage >= 2 ? 2.6 : 1.1);
+    const jolt = startle > 0 ? Math.sin(clock * 24) * startle * 3.5 : 0;
+    // He looks around as he gets suspicious, and stands at the end.
+    const lookX = stage >= 2 ? Math.sin(clock * (0.8 + stage * 0.4)) * (2 + stage) : 0;
+    const bodyX = cx + sway * 0.4 + jolt;
+    const bodyY = cy + 16 - ease * 13;
+
+    ctx.fillStyle = 'rgba(20,10,26,0.28)';
+    ctx.beginPath();
+    ctx.ellipse(bodyX, bodyY + 17, 13, 4.5, 0, 0, TAU);
+    ctx.fill();
+
+    // Chair back, behind him until he stands.
+    if (ease < 0.5) {
+      fillRound(ctx, bodyX - 13, bodyY + 2, 26, 16, 5, look.chair);
+      fillRound(ctx, bodyX - 11, bodyY + 4, 22, 11, 4, look.chairTop);
+    }
+
+    // Uniform: darker and squarer than the thief, with a shoulder flash.
+    fillRound(ctx, bodyX - 11, bodyY - 10, 22, 22, 7, look.coat);
+    fillRound(ctx, bodyX - 11, bodyY - 10, 22, 9, 6, look.yoke);
+    ctx.fillStyle = look.flash;
+    ctx.fillRect(bodyX - 11, bodyY - 6, 5, 3);
+    ctx.fillRect(bodyX + 6, bodyY - 6, 5, 3);
+    ctx.fillStyle = look.belt;
+    ctx.fillRect(bodyX - 11, bodyY + 4, 22, 3.4);
+
+    // Head, with a peaked cap.
+    const headY = bodyY - 19;
+    const gaze = lookX * 0.4;
+    ctx.fillStyle = PALETTE.skin;
+    ctx.beginPath();
+    ctx.arc(bodyX + gaze * 0.3, headY, 9, 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = look.cap;
+    ctx.beginPath();
+    ctx.arc(bodyX + gaze * 0.3, headY - 1, 9, Math.PI, TAU);
+    ctx.fill();
+    fillRound(ctx, bodyX + gaze * 0.3 - 10, headY - 3, 20, 4, 2, look.peak);   // peak
+
+    if (look.torch) {                                   // a torch on the desk
+      const tx = desk.x + desk.w - 22;
+      const ty = desk.y + desk.h * 0.5;
+      fillRound(ctx, tx, ty - 3, 16, 6, 3, '#4a4d57');
+      fillRound(ctx, tx + 13, ty - 4, 5, 8, 2, '#d9c98a');
+      if (stage >= 2) {
+        ctx.save();
+        ctx.globalAlpha = 0.10 + stage * 0.04;
+        ctx.fillStyle = '#ffe6a8';
+        ctx.beginPath();
+        ctx.moveTo(tx + 17, ty);
+        ctx.lineTo(tx + 52, ty - 16);
+        ctx.lineTo(tx + 52, ty + 16);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    ctx.strokeStyle = '#33291f';
+    ctx.lineWidth = 1.8;
+    ctx.lineCap = 'round';
+    ctx.fillStyle = '#33291f';
+    if (stage <= 1) {                                   // dozing off
+      ctx.beginPath();
+      ctx.moveTo(bodyX - 8, headY + 2);
+      ctx.quadraticCurveTo(bodyX - 5, headY + 5, bodyX - 2, headY + 2);
+      ctx.moveTo(bodyX + 2, headY + 2);
+      ctx.quadraticCurveTo(bodyX + 5, headY + 5, bodyX + 8, headY + 2);
+      ctx.stroke();
+    } else {                                            // eyes open, and moving
+      const r = stage >= 4 ? 2.8 : 2.1;
+      ctx.beginPath();
+      ctx.arc(bodyX - 4 + gaze, headY + 2, r, 0, TAU);
+      ctx.arc(bodyX + 4 + gaze, headY + 2, r, 0, TAU);
+      ctx.fill();
+    }
+
+    const floor = (value) => Math.max(WT + 6, value);
+    if (stage <= 1) {
+      const f = (clock * 0.5) % 1;
+      ctx.textAlign = 'left';
+      ctx.globalAlpha = Math.max(0, 1 - f);
+      ctx.fillStyle = '#ffffffcc';
+      ctx.font = 'bold 12px system-ui';
+      ctx.fillText('z', bodyX + 14, floor(headY - 12 - f * 12));
+      ctx.globalAlpha = 1;
+    } else {
+      const marks = ['', '', '?', '!', '!!', '!!!'][stage];
+      const colors = ['', '', '#ffe08a', '#ffc24d', '#ff8c42', '#ff5252'];
+      const pulse = stage >= 4 ? 0.6 + 0.4 * Math.sin(clock * 9) : 1;
+      ctx.textAlign = 'center';
+      ctx.globalAlpha = pulse;
+      ctx.font = `bold ${16 + stage * 2}px system-ui`;
+      ctx.fillStyle = colors[stage];
+      ctx.fillText(marks, cx, floor(desk.y - 10));
       ctx.globalAlpha = 1;
     }
   }
@@ -3639,16 +4232,16 @@ __mod.art = (function () {
     ctx.fillText(art, 0, 8);
     ctx.restore();
   }
-  return { PALETTE, ITEM_ART, ITEM_NAMES, roundRect, lampPositions, drawFurniture, paintStaticRoom, drawSleeper, drawThief, drawGrabbedItem };
+  return { PALETTE, sleeperLook, ITEM_ART, ITEM_NAMES, roundRect, lampPositions, drawFurniture, paintStaticRoom, drawSleeper, drawGuard, drawThief, drawGrabbedItem };
 })();
 __mod.render = (function () {
   // Draws a simulation snapshot. Knows nothing about rules — it reads state and
   // paints it, interpolating between the last two fixed steps so 60Hz sim motion
   // stays smooth on any refresh rate.
   const { TUNING } = __mod.tuning;
-  const { sleepStage, rarityOf, isBigScore } = __mod.rules;
+  const { sleepStage, rarityOf, isBigScore, watcherConfig } = __mod.rules;
   const { playerOf } = __mod.sim;
-  const { paintStaticRoom, drawSleeper, drawThief, drawGrabbedItem, roundRect, ITEM_ART, lampPositions } = __mod.art;
+  const { paintStaticRoom, drawSleeper, drawGuard, drawThief, drawGrabbedItem, roundRect, ITEM_ART, lampPositions } = __mod.art;
 
   const { width: W, height: H, wallThickness: WT, hudStrip: HUD_H } = TUNING.world;
   const TAU = Math.PI * 2;
@@ -3901,7 +4494,17 @@ __mod.render = (function () {
 
         ctx.drawImage(roomCache, 0, 0, W, H);
         drawExit(sim, time);
-        drawSleeper(ctx, sim.level, sleepStage(sim.noise), time, sim.wakeSeconds || 0, sim.startle || 0);
+        // Who is in this room decides what gets drawn here — and nothing else in
+        // the renderer has to care.
+        const stage = sleepStage(sim.noise);
+        const config = watcherConfig(sim.level.watcher.kind);
+        const kind = sim.level.watcher.kind;
+        if (config.sees > 0) {
+          drawGuard(ctx, sim.level, stage, time, sim.wakeSeconds || 0, sim.startle || 0,
+            sim.seen || 0, config.sees, kind);
+        } else {
+          drawSleeper(ctx, sim.level, stage, time, sim.wakeSeconds || 0, sim.startle || 0, kind);
+        }
         drawItems(sim, time);
 
         // The thief is drawn between the last two simulation steps.
@@ -3971,7 +4574,7 @@ __mod.main = (function () {
   const { createAudio } = __mod.audio;
   const { createInput } = __mod.input;
   const { createRenderer } = __mod.render;
-  const { sleepStage, starsFor, starThresholds, levelTotals, upgradeCost, SLEEP_LABELS, objectivesFor, isBigScore, rarityOf } = __mod.rules;
+  const { sleepStage, starsFor, starThresholds, levelTotals, upgradeCost, SLEEP_LABELS, objectivesFor, isBigScore, rarityOf, watcherConfig } = __mod.rules;
   const { ITEM_ART, ITEM_NAMES } = __mod.art;
 
   const $ = (id) => document.getElementById(id);
@@ -4098,8 +4701,9 @@ __mod.main = (function () {
           `<div>BEST TIME<b>${record.time !== undefined ? record.time.toFixed(1) + 's' : '—'}</b></div>` +
           `<div>QUIETEST<b>${record.noise !== undefined ? record.noise : '—'}</b></div>`
         : '';
+      const watcher = level ? watcherConfig(level.watcher.kind) : watcherConfig('sleeper');
       $('endTitle').textContent = won ? 'LEVEL COMPLETE'
-        : ctx.reason === 'time' ? "TIME'S UP" : 'HE WOKE UP!';
+        : ctx.reason === 'time' ? "TIME'S UP" : watcher.lost;
       $('stars').innerHTML = won ? starRow(ctx.stars) : '';
       $('endTally').innerHTML = won
         ? `<div>HAUL<b>$${ctx.money.toLocaleString()}</b></div>` +
@@ -4115,7 +4719,9 @@ __mod.main = (function () {
       } else {
         const cause = ctx.reason === 'time'
           ? 'You were still in the room when the clock ran out.'
-          : 'The noise reached 100 and he woke up.';
+          : ctx.reason === 'seen'
+            ? 'You moved through his line of sight once too often.'
+            : watcher.lostWhy;
         $('endText').innerHTML =
           `${cause}<br>You lost <b style="color:#ffd34d">$${ctx.money.toLocaleString()}</b>.`;
       }
@@ -4359,7 +4965,10 @@ __mod.main = (function () {
       if (!urgent) lastTick = -1;
 
       const rounded = Math.round(sim.noise);
-      setText('noiseText', hudEls.noise, `${rounded} / ${TUNING.noise.max}`);
+      // The meter is the same meter; what it is called depends on who is in the
+      // room. A sleeper raises NOISE; a guard raises ALERT.
+      const meter = watcherConfig(sim.level.watcher.kind).meter;
+      setText('noiseText', hudEls.noise, `${meter} ${rounded} / ${TUNING.noise.max}`);
       setStyle('barWidth', hudEls.bar, 'width', `${(sim.noise / TUNING.noise.max) * 100}%`);
       setStyle('barColor', hudEls.bar, 'background',
         sim.noise >= TUNING.noise.almostAt ? '#ff4d4d'
@@ -4377,10 +4986,11 @@ __mod.main = (function () {
       }
       // He's stirring. The warning escalates rather than appearing all at once.
       const warnEl = hudEls.warn;
+      const warnings = watcherConfig(sim.level.watcher.kind).warnings;
       const warning = sim.status !== 'running' ? null
-        : sim.noise >= 95 ? { text: "HE'S WAKING UP!", cls: 'hard critical' }
-          : sim.noise >= 90 ? { text: "HE'S ALMOST AWAKE", cls: 'hard' }
-            : sim.noise >= 80 ? { text: "HE'S STIRRING…", cls: '' } : null;
+        : sim.noise >= 95 ? { text: warnings[2], cls: 'hard critical' }
+          : sim.noise >= 90 ? { text: warnings[1], cls: 'hard' }
+            : sim.noise >= 80 ? { text: warnings[0], cls: '' } : null;
       if (hudLast.warnText !== (warning ? warning.text : '')) {
         hudLast.warnText = warning ? warning.text : '';
         warnEl.hidden = !warning;
@@ -4576,8 +5186,11 @@ __mod.main = (function () {
 
     const resize = () => {
       renderer.resize(stage);
-      const hudHeight = $('hud').getBoundingClientRect().height;
-      $('banner').style.top = `${hudHeight + 8}px`;
+      // Derived from the same world constant the HUD strip is sized from, rather
+      // than measured: a measurement taken before layout settles sticks, and the
+      // banner ends up drawn over the HUD.
+      const fit = stage.clientWidth / TUNING.world.width;
+      $('banner').style.top = `${TUNING.world.hudStrip * fit + 8}px`;
     };
     addEventListener('resize', resize);
     addEventListener('orientationchange', () => setTimeout(resize, 200));
@@ -4590,7 +5203,13 @@ __mod.main = (function () {
     sim = createSim({ level: LEVELS[0], seed: 1 });
     requestAnimationFrame((t) => { lastTime = t; frame(t); });
 
-    if (debug) window.__dwhBoot = { machine, saveStore, startLevel, LEVELS, TUNING, SLEEP_LABELS, levelTotals };
+    // Debug-only, and a getter rather than the object: `sim` is replaced on every
+    // level start, so a captured reference would go stale. A browser check
+    // asserts none of this exists in the release build.
+    if (debug) {
+      window.__dwhBoot = { machine, saveStore, startLevel, LEVELS, TUNING, SLEEP_LABELS, levelTotals };
+      Object.defineProperty(window.__dwhBoot, 'sim', { get: () => sim });
+    }
   }
   return { boot };
 })();

@@ -7,15 +7,35 @@ const { width: W, height: H, wallThickness: WT, exitWidth: EXIT_W } = TUNING.wor
 
 const collider = (type, x, y, w, h) => ({ type, x, y, w, h });
 
-// The four room edges, with a gap left for the doorway.
-function boundary(exitX) {
-  return [
-    collider('wall', 0, 0, W, WT),
-    collider('wall', 0, 0, WT, H),
-    collider('wall', W - WT, 0, WT, H),
-    collider('wall', 0, H - WT, exitX, WT),
-    collider('wall', exitX + EXIT_W, H - WT, W - exitX - EXIT_W, WT)
-  ];
+// The way out. A number is a doorway in the bottom wall (every level built so
+// far); {side:'left', at} puts it in a side wall instead, which is where the
+// corridor floorplans put theirs.
+function resolveExit(spec) {
+  if (typeof spec === 'number') {
+    return { side: 'bottom', x: spec, y: H - WT - 10, w: EXIT_W, h: WT + 18 };
+  }
+  const at = spec.at;
+  if (spec.side === 'left') return { side: 'left', x: 0, y: at, w: WT + 18, h: EXIT_W };
+  return { side: 'right', x: W - WT - 18, y: at, w: WT + 18, h: EXIT_W };
+}
+
+// The four room edges, with a gap left for the way out.
+function boundary(exit) {
+  const walls = [];
+  if (exit.side === 'bottom') {
+    walls.push(collider('wall', 0, 0, W, WT), collider('wall', 0, 0, WT, H),
+      collider('wall', W - WT, 0, WT, H),
+      collider('wall', 0, H - WT, exit.x, WT),
+      collider('wall', exit.x + EXIT_W, H - WT, W - exit.x - EXIT_W, WT));
+  } else {
+    const gapX = exit.side === 'left' ? 0 : W - WT;
+    const other = exit.side === 'left' ? W - WT : 0;
+    walls.push(collider('wall', 0, 0, W, WT), collider('wall', 0, H - WT, W, WT),
+      collider('wall', other, 0, WT, H),
+      collider('wall', gapX, 0, WT, exit.y),
+      collider('wall', gapX, exit.y + EXIT_W, WT, H - exit.y - EXIT_W));
+  }
+  return walls;
 }
 
 // Three room templates. Levels vary items, not architecture.
@@ -158,6 +178,119 @@ const LAYOUTS = {
       [40, 520, 90, 44]
     ]
   },
+  // A museum after the great-hall reference: display cases and plinths in an
+  // open hall upstairs, ticket hall and security wing below. The guard sits in
+  // the security wing, which is the half of the building you would rather not
+  // cross — and the way out is on the other side.
+  M: {
+    bed: [250, 470, 110, 70],
+    partitions: [
+      [14, 270, 96, 14], [176, 270, 40, 14], [282, 270, 104, 14]
+    ],
+    doors: [[110, 270, 66, 14], [216, 270, 66, 14]],
+    furniture: [
+      [30, 34, 70, 44], [160, 30, 80, 40], [300, 34, 70, 44],
+      [30, 150, 44, 44], [110, 120, 44, 44], [190, 120, 44, 44],
+      [270, 120, 44, 44], [340, 150, 44, 44],
+      [30, 320, 130, 40], [30, 430, 120, 40],
+      [230, 320, 130, 42], [300, 560, 70, 40]
+    ]
+  },
+  // A hotel floor after the corridor reference: suites hanging off a spine,
+  // and the way out at the end of the corridor rather than through a wall.
+  N: {
+    bed: [150, 36, 68, 74],
+    partitions: [
+      [130, 14, 14, 236], [256, 14, 14, 236],
+      [14, 236, 40, 14], [100, 236, 30, 14],
+      [144, 236, 30, 14], [216, 236, 40, 14],
+      [270, 236, 30, 14], [346, 236, 40, 14],
+      [130, 344, 14, 262], [256, 344, 14, 262],
+      [14, 330, 40, 14], [100, 330, 30, 14],
+      [270, 330, 30, 14], [346, 330, 40, 14]
+    ],
+    doors: [
+      [54, 236, 46, 14], [174, 236, 42, 14], [300, 236, 46, 14],
+      [54, 330, 46, 14], [300, 330, 46, 14]
+    ],
+    // Each suite is only ~116 wide, so its furniture sits against one wall and
+    // leaves a channel to walk down. At 84 wide it left 16px and sealed the
+    // room — the validator caught every one of them.
+    furniture: [
+      [30, 40, 64, 70], [30, 150, 64, 50],
+      [150, 150, 68, 50],
+      [286, 40, 64, 70], [286, 150, 64, 50],
+      [30, 380, 64, 70], [30, 500, 64, 50],
+      [286, 380, 64, 70], [286, 500, 64, 50],
+      [156, 400, 64, 60]
+    ]
+  },
+  // A school after hours, from the classroom-floor reference: two classrooms and
+  // a library along the top, a locker-lined corridor across the middle, and the
+  // gym and staff room below. The caretaker is asleep in the staff room, which
+  // is the far corner from the way out — so the deepest loot costs the longest
+  // walk back.
+  O: {
+    bed: [246, 486, 120, 74],
+    partitions: [
+      [134, 14, 14, 214], [268, 14, 14, 214],
+      [14, 228, 50, 14], [120, 228, 60, 14], [236, 228, 66, 14], [358, 228, 28, 14],
+      [14, 326, 60, 14], [130, 326, 86, 14], [272, 326, 114, 14],
+      [196, 340, 14, 266]
+    ],
+    doors: [
+      [64, 228, 56, 14], [180, 228, 56, 14], [302, 228, 56, 14],
+      [74, 326, 56, 14], [216, 326, 56, 14]
+    ],
+    furniture: [
+      // Classroom 1A and 1B: rows of desks with an aisle either side.
+      [44, 50, 60, 32], [44, 108, 60, 32], [44, 166, 60, 32],
+      [178, 50, 60, 32], [178, 108, 60, 32], [178, 166, 60, 32],
+      // The library: a run of shelving along the top wall and one stack on the
+      // right, leaving a clear column up from the doorway.
+      [292, 34, 84, 32], [330, 110, 46, 90],
+      // Corridor lockers, on the top edge and clear of every doorway mouth:
+      // the corridor is meant to be the safe road.
+      [126, 246, 48, 26], [242, 246, 54, 26],
+      // The gym: benches and vaulting boxes down one side, set back far enough
+      // from the door that you can turn once you are through it.
+      [46, 384, 104, 30], [46, 460, 104, 30], [46, 536, 104, 30],
+      // The staff room, around the sleeping caretaker: everything hugs the right
+      // wall so the walk down to him stays open.
+      [300, 352, 76, 40], [318, 420, 50, 56], [246, 420, 56, 44]
+    ]
+  },
+  // An office floor at night, from the open-plan reference: desk banks and a
+  // meeting room upstairs, a corridor, and a conference room and lounge below.
+  // Security sits in the lounge, so the whole bottom half is watched and the
+  // corridor is the seam you have to keep crossing.
+  P: {
+    bed: [268, 380, 100, 64],
+    partitions: [
+      [250, 14, 14, 232],
+      [14, 246, 56, 14], [126, 246, 70, 14], [248, 246, 66, 14], [370, 246, 16, 14],
+      [14, 344, 50, 14], [120, 344, 80, 14], [200, 344, 50, 14], [306, 344, 80, 14],
+      [210, 358, 14, 248]
+    ],
+    doors: [
+      [70, 246, 56, 14], [196, 246, 52, 14], [314, 246, 56, 14],
+      [64, 344, 56, 14], [250, 344, 56, 14]
+    ],
+    furniture: [
+      // Two banks of desks in the open plan — dense, and every one of them hard.
+      [40, 40, 90, 36], [150, 40, 90, 36],
+      [40, 110, 90, 36], [150, 110, 90, 36],
+      [40, 180, 90, 36], [150, 180, 90, 36],
+      // The meeting room off the side.
+      [296, 60, 80, 88], [296, 170, 80, 40],
+      // Corridor units, tucked into the wall between the doorways.
+      [132, 264, 58, 24], [252, 264, 58, 24],
+      // The conference room: one long table you have to walk around.
+      [46, 400, 150, 58], [40, 520, 120, 30],
+      // The lounge, in front of the security desk.
+      [250, 480, 110, 44], [250, 560, 110, 40]
+    ]
+  },
   F: {
     bed: [230, 20, 140, 96],
     furniture: [
@@ -182,14 +315,19 @@ const RUGS = {
   I: { x: 140, y: 300, w: 150, h: 110 },
   J: { x: 150, y: 360, w: 160, h: 90 },
   K: { x: 150, y: 340, w: 160, h: 90 },
-  L: { x: 150, y: 260, w: 130, h: 110 }
+  L: { x: 150, y: 260, w: 130, h: 110 },
+  M: { x: 120, y: 340, w: 150, h: 90 },
+  N: { x: 20, y: 256, w: 360, h: 68 },
+  O: { x: 150, y: 280, w: 200, h: 42 },
+  P: { x: 130, y: 296, w: 210, h: 44 }
 };
 
-function makeLevel(id, layoutKey, spawn, exitX, items, options = {}) {
+function makeLevel(id, layoutKey, spawn, exitSpec, items, options = {}) {
   const layout = LAYOUTS[layoutKey];
   const bed = collider('bed', ...layout.bed);
+  const exit = resolveExit(exitSpec);
   const colliders = [
-    ...boundary(exitX),
+    ...boundary(exit),
     // Interior walls. These are what turn one rectangle into connected areas,
     // and they are structural rather than furniture: like the outer walls they
     // are part of the building, so brushing one costs no noise.
@@ -221,10 +359,17 @@ function makeLevel(id, layoutKey, spawn, exitX, items, options = {}) {
     // them from this same data, so what looks soft is soft.
     rugs: RUGS[layoutKey] ? [RUGS[layoutKey]] : [],
     spawn: { x: spawn[0], y: spawn[1] },
-    exit: { x: exitX, y: H - WT - 10, w: EXIT_W, h: WT + 18 },
+    exit,
     bed,
     // Where his head sits on the pillow — the renderer draws the face here.
     sleeper: { x: bed.x + bed.w / 2, y: bed.y + bed.h * 0.26 },
+    // Who is in the room. Defaults to the sleeper on the bed, so every level
+    // built before this existed keeps working untouched.
+    watcher: {
+      kind: options.watcher || 'sleeper',
+      x: bed.x + bed.w / 2,
+      y: bed.y + bed.h * (options.watcher === 'guard' || options.watcher === 'security' ? 0.5 : 0.26)
+    },
     colliders,
     items: items.map((it, i) => ({
       id: `L${id}-${i}`,
@@ -461,7 +606,113 @@ export const LEVELS = [
     [190, 120, 'necklace'], [200, 330, 'diamond'], [330, 330, 'goldbar'],
     [110, 470, 'mirror'], [286, 560, 'vase'], [330, 470, 'ring']
   ], { theme: 'suite', name: 'Grand Suite', extraTime: 12,
-       creaks: [[150, 240, 70, 44], [90, 470, 60, 44]] })
+       creaks: [[150, 240, 70, 44], [90, 470, 60, 44]] }),
+
+  // ---- Museum: he is not asleep, and he can see -------------------------
+  makeLevel(41, 'M', [100, 548], 60, [
+    [65, 100, 'vase'], [140, 90, 'painting'], [232, 90, 'mirror'],
+    [318, 100, 'vase'], [200, 190, 'necklace'], [110, 200, 'ring'],
+    [180, 400, 'wallet'], [70, 380, 'camera']
+  ], { theme: 'museum', name: 'Museum', watcher: 'guard', extraTime: 13,
+       creaks: [[110, 284, 66, 44]] }),
+  makeLevel(42, 'M', [100, 548], 60, [
+    [65, 100, 'painting'], [140, 90, 'diamond'], [232, 90, 'painting'],
+    [318, 100, 'vase'], [200, 190, 'goldbar'], [110, 200, 'necklace'],
+    [180, 400, 'camera'], [70, 380, 'jewel'], [190, 560, 'coin']
+  ], { theme: 'museum', name: 'Museum', watcher: 'guard', extraTime: 13,
+       creaks: [[110, 284, 66, 44], [216, 284, 66, 44]] }),
+  makeLevel(43, 'M', [100, 548], 60, [
+    [65, 100, 'goldbar'], [140, 90, 'painting', 'bonus'], [232, 90, 'diamond'],
+    [318, 100, 'painting'], [200, 190, 'diamond'], [110, 200, 'goldbar'],
+    [180, 400, 'necklace'], [70, 380, 'mirror']
+  ], { theme: 'museum', name: 'Museum', watcher: 'guard', extraTime: 14,
+       creaks: [[110, 284, 66, 44], [216, 284, 66, 44]] }),
+  makeLevel(44, 'M', [100, 548], 60, [
+    [65, 100, 'goldbar'], [140, 90, 'goldbar'], [232, 90, 'diamond', 'bonus'],
+    [318, 100, 'painting'], [200, 190, 'goldbar'], [110, 200, 'diamond'],
+    [180, 400, 'painting'], [70, 380, 'necklace'], [190, 560, 'ring']
+  ], { theme: 'museum', name: 'Museum', watcher: 'security', extraTime: 14,
+       creaks: [[110, 284, 66, 44], [216, 284, 66, 44]] }),
+
+  // ---- Hotel floor: a light sleeper, and a long corridor to cross --------
+  makeLevel(45, 'N', [200, 290], { side: 'left', at: 258 }, [
+    [72, 130, 'wallet'], [200, 120, 'watch'], [330, 130, 'camera'],
+    [72, 470, 'ring'], [330, 470, 'tablet'], [200, 520, 'headphones'],
+    [235, 190, 'coin'], [340, 300, 'cash']
+  ], { theme: 'hotelfloor', name: 'Hotel Floor', watcher: 'guest', extraTime: 12 }),
+  makeLevel(46, 'N', [200, 290], { side: 'left', at: 258 }, [
+    [72, 130, 'necklace'], [200, 120, 'jewel'], [330, 130, 'console'],
+    [72, 470, 'camera'], [330, 470, 'mirror'], [200, 520, 'ring'],
+    [235, 190, 'wallet'], [340, 300, 'speaker'], [60, 300, 'coin']
+  ], { theme: 'hotelfloor', name: 'Hotel Floor', watcher: 'guest', extraTime: 12 }),
+  makeLevel(47, 'N', [200, 290], { side: 'left', at: 258 }, [
+    [72, 130, 'diamond'], [200, 120, 'necklace'], [330, 130, 'painting'],
+    [72, 470, 'mirror'], [330, 470, 'jewel'], [200, 520, 'console'],
+    [235, 190, 'ring'], [340, 300, 'camera']
+  ], { theme: 'hotelfloor', name: 'Hotel Floor', watcher: 'guest', extraTime: 13 }),
+  makeLevel(48, 'N', [200, 290], { side: 'left', at: 258 }, [
+    [72, 130, 'goldbar'], [200, 120, 'diamond', 'bonus'], [330, 130, 'painting'],
+    [72, 470, 'diamond'], [330, 470, 'goldbar'], [200, 520, 'necklace'],
+    [235, 190, 'jewel'], [340, 300, 'mirror'], [60, 300, 'wallet']
+  ], { theme: 'hotelfloor', name: 'Hotel Floor', watcher: 'guest', extraTime: 13 }),
+
+  // ---- School after hours: the caretaker is asleep in the staff room -----
+  makeLevel(49, 'O', [340, 284], { side: 'left', at: 250 }, [
+    [24, 90, 'tablet'], [116, 150, 'wallet'], [158, 90, 'laptop'],
+    [252, 150, 'phone'], [300, 90, 'camera'], [300, 160, 'console'],
+    [170, 284, 'coin'], [170, 400, 'speaker'], [24, 400, 'headphones']
+  ], { theme: 'school', name: 'School', watcher: 'caretaker', extraTime: 14,
+       creaks: [[150, 246, 66, 44]] }),
+  makeLevel(50, 'O', [340, 284], { side: 'left', at: 250 }, [
+    [24, 90, 'laptop'], [116, 150, 'tablet'], [158, 90, 'console'],
+    [252, 150, 'ring'], [300, 90, 'necklace'], [300, 160, 'camera'],
+    [170, 284, 'wallet'], [170, 400, 'tv'], [24, 400, 'speaker'],
+    [300, 592, 'coin']
+  ], { theme: 'school', name: 'School', watcher: 'caretaker', extraTime: 15,
+       creaks: [[150, 246, 66, 44], [230, 560, 60, 44]] }),
+  makeLevel(51, 'O', [340, 284], { side: 'left', at: 250 }, [
+    [24, 90, 'console'], [116, 150, 'laptop'], [158, 90, 'tv'],
+    [252, 150, 'necklace'], [300, 90, 'painting'], [300, 160, 'jewel'],
+    [170, 284, 'tablet'], [170, 400, 'mirror'], [24, 400, 'camera'],
+    [300, 592, 'wallet']
+  ], { theme: 'school', name: 'School', watcher: 'caretaker', extraTime: 15,
+       creaks: [[150, 246, 66, 44], [230, 560, 60, 44]] }),
+  makeLevel(52, 'O', [340, 284], { side: 'left', at: 250 }, [
+    [24, 90, 'tv'], [116, 150, 'console'], [158, 90, 'painting', 'bonus'],
+    [252, 150, 'diamond'], [300, 90, 'goldbar'], [300, 160, 'necklace'],
+    [170, 284, 'laptop'], [170, 400, 'jewel'], [24, 400, 'mirror'],
+    [300, 592, 'ring']
+  ], { theme: 'school', name: 'School', watcher: 'caretaker', extraTime: 16,
+       creaks: [[150, 246, 66, 44], [230, 560, 60, 44]] }),
+
+  // ---- Office floor at night: security is awake, and the lounge is his -----
+  makeLevel(53, 'P', [340, 302], { side: 'left', at: 268 }, [
+    [24, 80, 'laptop'], [140, 80, 'tablet'], [24, 150, 'console'],
+    [140, 150, 'laptop'], [24, 220, 'speaker'], [140, 220, 'camera'],
+    [276, 30, 'tv'], [276, 220, 'phone'], [180, 302, 'wallet']
+  ], { theme: 'officefloor', name: 'Office Floor', watcher: 'security', extraTime: 14,
+       creaks: [[150, 264, 66, 44]] }),
+  makeLevel(54, 'P', [340, 302], { side: 'left', at: 268 }, [
+    [24, 80, 'tablet'], [140, 80, 'console'], [24, 150, 'laptop'],
+    [140, 150, 'speaker'], [24, 220, 'camera'], [140, 220, 'tv'],
+    [276, 30, 'painting'], [276, 220, 'necklace'], [180, 302, 'coin'],
+    [180, 380, 'mirror']
+  ], { theme: 'officefloor', name: 'Office Floor', watcher: 'security', extraTime: 14,
+       creaks: [[150, 264, 66, 44], [170, 380, 60, 44]] }),
+  makeLevel(55, 'P', [340, 302], { side: 'left', at: 268 }, [
+    [24, 80, 'console'], [140, 80, 'tv'], [24, 150, 'speaker'],
+    [140, 150, 'painting'], [24, 220, 'tv'], [140, 220, 'necklace'],
+    [276, 30, 'diamond'], [276, 220, 'painting'], [180, 302, 'tablet'],
+    [180, 380, 'jewel']
+  ], { theme: 'officefloor', name: 'Office Floor', watcher: 'security', extraTime: 15,
+       creaks: [[150, 264, 66, 44], [170, 380, 60, 44]] }),
+  makeLevel(56, 'P', [340, 302], { side: 'left', at: 268 }, [
+    [24, 80, 'tv'], [140, 80, 'painting'], [24, 150, 'diamond'],
+    [140, 150, 'goldbar'], [24, 220, 'painting'], [140, 220, 'diamond'],
+    [276, 30, 'goldbar', 'bonus'], [276, 220, 'diamond'], [180, 302, 'necklace'],
+    [180, 380, 'mirror']
+  ], { theme: 'officefloor', name: 'Office Floor', watcher: 'security', extraTime: 15,
+       creaks: [[150, 264, 66, 44], [170, 380, 60, 44]] })
 ];
 
 export const collidersOfType = (level, type) =>

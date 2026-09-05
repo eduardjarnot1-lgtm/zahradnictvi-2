@@ -171,6 +171,45 @@ export const TUNING = {
     softFloorScale: 0     // ...and on a rug
   },
 
+  // Who you are trying not to disturb. Every kind feeds the same 0-100 meter,
+  // so nothing about the existing game changes — but what fills that meter,
+  // and what it is called on screen, depends on who is in the room.
+  watchers: {
+    sleeper: {
+      meter: 'NOISE', person: 'He', sees: 0, seeRate: 0,
+      warnings: ["HE'S STIRRING…", "HE'S ALMOST AWAKE", "HE'S WAKING UP!"],
+      lost: 'HE WOKE UP!', lostWhy: 'The noise reached 100 and he woke up.'
+    },
+    // A hotel guest sleeps lighter and the clock is tighter, but the rules are
+    // the same: noise only.
+    guest: {
+      meter: 'NOISE', person: 'She', sees: 0, seeRate: 0,
+      warnings: ['SHE ROLLS OVER…', 'SHE IS ALMOST AWAKE', 'SHE IS WAKING UP!'],
+      lost: 'SHE WOKE UP!', lostWhy: 'The noise reached 100 and she woke up.'
+    },
+    // A guard is not asleep. He is bored, and he can see: crossing his line of
+    // sight while moving raises the meter even in complete silence. Standing
+    // still inside it does not — freezing works.
+    guard: {
+      meter: 'ALERT', person: 'The guard', sees: 132, seeRate: 18,
+      warnings: ['THE GUARD LOOKS UP', 'THE GUARD IS SUSPICIOUS', 'THE GUARD IS RISING!'],
+      lost: 'SPOTTED!', lostWhy: 'The guard reached full alert and saw you.'
+    },
+    security: {
+      meter: 'ALERT', person: 'The guard', sees: 158, seeRate: 22,
+      warnings: ['SECURITY LOOKS UP', 'SECURITY IS SUSPICIOUS', 'SECURITY IS RISING!'],
+      lost: 'SPOTTED!', lostWhy: 'Security reached full alert and saw you.'
+    },
+    // The school caretaker, asleep in the staff room. Noise only, like the
+    // bedroom sleeper — an older man dozing in a chair is not watching for you.
+    caretaker: {
+      meter: 'NOISE', person: 'The caretaker', sees: 0, seeRate: 0,
+      warnings: ['THE CARETAKER STIRS…', 'THE CARETAKER IS ALMOST AWAKE',
+        'THE CARETAKER IS WAKING!'],
+      lost: 'HE WOKE UP!', lostWhy: 'The noise reached 100 and the caretaker woke up.'
+    }
+  },
+
   // A hard bang makes him flinch visibly, on top of what it does to the meter.
   startle: {
     fromImpact: 1,       // scale of the flinch, 0..1, from collision strength

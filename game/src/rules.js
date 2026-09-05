@@ -33,16 +33,26 @@ const STYLE_GROUPS = {
   small: ['nightstand', 'table']
 };
 
+// A workplace has no sofas in its desk rows. Only the themes introduced with
+// these locations override anything, so no existing level's furniture — or the
+// noise it costs to walk into — moves.
+const THEME_GROUPS = {
+  officefloor: { wide: ['tvBench', 'table'] },
+  school:      { wide: ['tvBench', 'table'] }
+};
+
 // What a piece of furniture *is*, derived from its shape and position. The
 // renderer draws it and the simulation charges for bumping it from this same
 // answer, so a sofa is always soft and a bookshelf is always loud.
 export function furnitureStyle(c) {
   if (c.type === 'bed') return 'bed';
   const ratio = c.w / c.h;
-  // A gallery's small squares are plinths, not nightstands.
-  if (c.theme === 'gallery' && c.w <= 52 && ratio > 0.75 && ratio < 1.35) return 'plinth';
+  // A gallery's small squares are plinths, not nightstands. The museum reads the
+  // same way — without this its display blocks drew as brown bedroom furniture.
+  if ((c.theme === 'gallery' || c.theme === 'museum') && c.w <= 52
+      && ratio > 0.75 && ratio < 1.35) return 'plinth';
   const group = c.h >= 100 ? 'tall' : ratio >= 2.3 ? 'wide' : ratio >= 1.35 ? 'mid' : 'small';
-  const options = STYLE_GROUPS[group];
+  const options = (THEME_GROUPS[c.theme] || {})[group] || STYLE_GROUPS[group];
   return options[Math.floor(hash(c.x + 7, c.y + 13) * options.length) % options.length];
 }
 
@@ -119,6 +129,27 @@ export function shapeStick(x, y, deadZone = TUNING.player.deadZone) {
   if (length < deadZone) return { x: 0, y: 0 };
   const ramp = Math.min(1, (length - deadZone) / 0.06);
   return { x: x * ramp, y: y * ramp };
+}
+
+// Who is in this room and how they behave. One lookup, so nothing else in the
+// game has to branch on the kind.
+export function watcherConfig(kind) {
+  return TUNING.watchers[kind] || TUNING.watchers.sleeper;
+}
+
+// How much a watcher who can see notices you this instant: nothing if they
+// cannot see, nothing if you are outside their range, and nothing if you are
+// standing still. Falls off with distance, and scales with how fast you move.
+export function detectionRate(watcher, player, speedShare) {
+  const config = watcherConfig(watcher.kind);
+  if (config.sees <= 0 || speedShare <= 0.02) return 0;
+  const distance = Math.hypot(player.x - watcher.x, player.y - watcher.y);
+  if (distance >= config.sees) return 0;
+  // Linear falloff. A squared one looked reasonable but made detection
+  // irrelevant anywhere but point-blank — three seconds of running across the
+  // edge of his vision raised the meter by one.
+  const closeness = 1 - distance / config.sees;
+  return config.seeRate * closeness * Math.min(1, speedShare);
 }
 
 export function rarityOf(type) {

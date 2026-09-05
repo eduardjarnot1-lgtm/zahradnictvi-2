@@ -2,10 +2,11 @@
 // paints it, interpolating between the last two fixed steps so 60Hz sim motion
 // stays smooth on any refresh rate.
 import { TUNING } from './tuning.js';
-import { sleepStage, rarityOf, isBigScore } from './rules.js';
+import { sleepStage, rarityOf, isBigScore, watcherConfig } from './rules.js';
 import { playerOf } from './sim.js';
 import {
-  paintStaticRoom, drawSleeper, drawThief, drawGrabbedItem, roundRect, ITEM_ART, lampPositions
+  paintStaticRoom, drawSleeper, drawGuard, drawThief, drawGrabbedItem, roundRect,
+  ITEM_ART, lampPositions
 } from './art.js';
 
 const { width: W, height: H, wallThickness: WT, hudStrip: HUD_H } = TUNING.world;
@@ -259,7 +260,17 @@ export function createRenderer(canvas, options = {}) {
 
       ctx.drawImage(roomCache, 0, 0, W, H);
       drawExit(sim, time);
-      drawSleeper(ctx, sim.level, sleepStage(sim.noise), time, sim.wakeSeconds || 0, sim.startle || 0);
+      // Who is in this room decides what gets drawn here — and nothing else in
+      // the renderer has to care.
+      const stage = sleepStage(sim.noise);
+      const config = watcherConfig(sim.level.watcher.kind);
+      const kind = sim.level.watcher.kind;
+      if (config.sees > 0) {
+        drawGuard(ctx, sim.level, stage, time, sim.wakeSeconds || 0, sim.startle || 0,
+          sim.seen || 0, config.sees, kind);
+      } else {
+        drawSleeper(ctx, sim.level, stage, time, sim.wakeSeconds || 0, sim.startle || 0, kind);
+      }
       drawItems(sim, time);
 
       // The thief is drawn between the last two simulation steps.
