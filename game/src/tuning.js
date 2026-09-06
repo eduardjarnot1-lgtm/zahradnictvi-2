@@ -385,6 +385,76 @@ export const TUNING = {
           sofa: 2, wardrobe: 5, bookshelf: 5, plinth: 6
         }
       },
+      // How the school's two people walk.
+      //
+      // The bands are §4's: idle, tiptoe, walk, power walk, run, blended rather
+      // than switched so nothing ever snaps. Everything is in world units, and
+      // `step` is the load-bearing one: it is how much ground one step covers,
+      // which fixes the cadence (speed divided by step) *and* the drawn foot
+      // travel at the same time. Those two agreeing is what stops the feet
+      // sliding, so `step` is the number to change when a gait looks wrong and
+      // the rest will follow it.
+      //
+      // The steps are short for the height of these characters, because the
+      // characters are cartoons: their legs are under a third of the body where
+      // a person's are about half, so the same ground has to be covered in more,
+      // quicker steps. Hiding that with long strides only makes a figure doing
+      // the splits.
+      gait: {
+        legLen: 13,       // hip to ankle, fully extended
+        seg: 6.6,         // thigh and shin: a shade over half, so never quite straight
+        bands: [
+          // Tiptoe. Knees bent the whole way, weight low, torso pitched forward
+          // over short careful steps, arms held in front.
+          { at: 0.00, step: 7.0,  duty: 0.70, lift: 1.3, absorb: 0.30, flight: 0,
+            crouch: 3.1, lean: 1.6, armSwing: 0.28, armBend: 0.62, sway: 0.55,
+            headSteady: 0.8 },
+          // Walk. Near upright, heel strike to toe-off, arms hanging and
+          // swinging from the shoulder.
+          { at: 0.32, step: 12.5, duty: 0.62, lift: 2.4, absorb: 0.70, flight: 0,
+            crouch: 0.3, lean: 0.4, armSwing: 1.00, armBend: 0.20, sway: 1.00,
+            headSteady: 0.5 },
+          // Power walk: longer, quicker, leaning in, arms working.
+          { at: 0.68, step: 17.0, duty: 0.50, lift: 3.4, absorb: 1.00, flight: 0,
+            crouch: 0.0, lean: 1.5, armSwing: 1.40, armBend: 0.44, sway: 1.05,
+            headSteady: 0.45 },
+          // Run. The duty factor drops under a half, which is what makes it a
+          // run rather than a fast walk: there is a moment with neither foot
+          // down, and the body is a projectile through it.
+          { at: 0.93, step: 24.0, duty: 0.30, lift: 6.2, absorb: 1.50, flight: 1.3,
+            crouch: 0.0, lean: 3.6, armSwing: 1.90, armBend: 0.98, sway: 0.75,
+            headSteady: 0.35 }
+        ]
+      },
+      // Mr. Vrána walks the same way and is not the same walker. He is older and
+      // heavier: shorter steps, less lift, more roll from side to side, and no
+      // run in him at all. His share is measured against the *player's* top
+      // speed rather than his own, which is the whole trick — at his 78 against
+      // the thief's 132 he sits at 0.59, a purposeful walk, where measuring him
+      // against himself put him at 1.0 and made him sprint every time he moved.
+      caretakerGait: {
+        legLen: 13.6, seg: 6.95,
+        bands: [
+          { at: 0.00, step: 7.5,  duty: 0.74, lift: 1.1, absorb: 0.30, flight: 0,
+            crouch: 1.0, lean: 0.5, armSwing: 0.45, armBend: 0.30, sway: 1.10,
+            headSteady: 0.55 },
+          { at: 0.30, step: 12.0, duty: 0.66, lift: 1.9, absorb: 0.65, flight: 0,
+            crouch: 0.2, lean: 0.5, armSwing: 0.90, armBend: 0.26, sway: 1.35,
+            headSteady: 0.5 },
+          { at: 0.62, step: 15.0, duty: 0.58, lift: 2.6, absorb: 0.90, flight: 0,
+            crouch: 0.0, lean: 1.1, armSwing: 1.20, armBend: 0.40, sway: 1.45,
+            headSteady: 0.45 },
+          // Following. Urgent for a man of his age, which is a brisk stride and
+          // not a sprint: the duty factor stays over a half, so both his feet
+          // never leave the floor at once. He hurries; he does not fly.
+          { at: 0.88, step: 17.5, duty: 0.53, lift: 3.2, absorb: 1.10, flight: 0,
+            crouch: 0.0, lean: 1.7, armSwing: 1.45, armBend: 0.55, sway: 1.35,
+            headSteady: 0.4 }
+        ],
+        // What being on his feet does to his apparent pace, over and above how
+        // fast he is actually moving. Following is the only urgent one.
+        urgency: { investigating: 0, searching: 0, returning: -0.04, following: 0.14 }
+      },
       // The school's two characters are drawn by src/figure.js rather than by
       // the older art.js walker. One flag, so making it the whole game's look
       // is a one-line change rather than a rewrite.

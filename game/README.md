@@ -52,6 +52,7 @@ new state, so the whole game runs in node with no browser.
 | `input.js` | keyboard + multi-touch into one `read()` |
 | `audio.js` | master gain, persisted mute, context revival |
 | `art.js` | room, furniture and character painting |
+| `gait.js` | the mechanics of a step: planted feet, solved hips, knees by IK |
 | `figure.js` | the drawn people: one function, any heading, any speed |
 | `render.js` | canvas drawing with interpolation + debug overlay |
 | `main.js` | wiring and the fixed-timestep loop |
@@ -494,8 +495,7 @@ read off the speed the character is *actually* travelling at:
 Cadence and stride length multiply to speed, so once the cadence is fixed the
 drawn step length is not a matter of taste: it is the reciprocal, and `gaitBlend`
 derives it rather than guessing. A test asserts the two agree to nine decimal
-places at every speed — that identity is exactly the promise that the legs are
-never lying about how far they carried him.
+places at every speed.
 
 The body turns to face where it is going, not just the feet: the torso narrows
 and leads with the near shoulder, the face slides towards the direction of
@@ -505,6 +505,90 @@ once he is properly side-on. Walking away shows the back of his head.
 Arms oppose legs — left arm forward with the right leg. That is one sign in the
 source and it is the whole difference between a person walking and a toy
 marching; it was the wrong way round until it was drawn out large enough to see.
+
+### The school walks differently
+
+The table above is the whole game's walk. The school has its own, in
+`src/gait.js` and `TUNING.locations.School.gait`, and it is a different model
+rather than different numbers.
+
+**The old one slid.** A foot's offset was `sin(phase) * stride`, which never
+stops moving — so at every instant the foot was travelling at the body's speed
+*plus* whatever the sine was doing, and it was doing something at all times.
+Standing on it did not help; there was no standing on it. A test measures the
+old curve at a walking pace and finds a planted foot travelling **over five
+world units** while it was supposed to be still.
+
+**The new one cannot slide.** A stance foot moves backwards through the body's
+frame at exactly the body's speed, which is a straight line whose slope is that
+speed with the sign flipped, which means it does not move across the floor at
+all. Not less; none. A test walks a character at eight speeds and asserts the
+planted foot stays put to within a fiftieth of a shoe.
+
+That one decision pays for everything else:
+
+- **The hips are derived, not tuned.** With a foot planted and a leg of known
+  length there is exactly one height the hip can be at, so `pelvisRise` solves
+  for it and takes the lower answer when both feet are down. The body dips as
+  the legs splay and rises over the support leg — two dips a cycle, in the right
+  phase. The hand-tuned sine it replaces was **upside down**: it lifted the body
+  at contact, which is the moment a person sinks.
+- **The knees are inverse kinematics.** Given a hip and an ankle, the knee is
+  the third corner of a triangle with two known sides. One square root, and the
+  leg is straight when it reaches out at contact and folded when the foot is up
+  under the hip. The ad-hoc bend it replaces was *also* upside down — it bent
+  the knee hardest when the leg was reaching forward.
+- **The crouch is one number.** Shortening the legs lowers the body and folds
+  the knees together, so the whole tiptoe posture falls out of `crouch`.
+- **The heel comes off before the toe does.** The last part of the stance rides
+  up on the ball of the foot. Without it the trailing leg goes on reaching
+  backwards flat-footed and drags the hips into a second, smaller dip: a limp.
+
+The bands are §4's, and `step` — how much ground one step covers — is the one
+that matters, because it fixes the cadence (speed ÷ step) and the drawn foot
+travel at the same time:
+
+| | ground per step | duty | at that speed |
+|---|---|---|---|
+| tiptoe | 7.0 | 0.70 | 2.3 steps/sec, crouched, arms in, heel never down |
+| walk | 12.5 | 0.62 | 4.3 steps/sec, near upright, heel-to-toe |
+| power walk | 17.0 | 0.50 | 5.4 steps/sec, leaning in, arms working |
+| run | 24.0 | 0.30 | 5.5 steps/sec, **airborne 40% of the cycle** |
+
+The duty factor is what makes the run a run rather than a fast walk: under a
+half means there is a moment with neither foot down, and through it the body is
+a projectile rather than a constraint. A test asserts a walk never leaves the
+ground and a run always does.
+
+The steps are short for these characters' height on purpose. Their legs are
+under a third of the body where a person's are about half, so the same ground
+has to be covered in more, quicker steps; trying to hide that with long strides
+only produces a figure doing the splits. There is a test for each failure mode —
+one capping the cadence at what a person could plausibly do, one capping the
+reach at what the legs are actually long enough for.
+
+**Mr. Vrána is not the thief with different numbers.** His share is measured
+against the *player's* top speed rather than his own, which is the whole trick:
+at his 78 against the thief's 132 he sits at 0.59, a purposeful walk. Measured
+against himself, walking at all put him at 1.0 and drew him sprinting to the
+staff room every time he stood up. He gets shorter steps, less lift, more roll
+from side to side, and no run in him at all — a test asserts he never leaves the
+ground however urgently he is following you. Catching sight of you adds a little
+urgency, eased in over about half a second rather than switched, so his stride
+opens up instead of changing between one frame and the next.
+
+Two more things the speed alone does not say. `drive` is the only part of the
+pose that is not a function of how fast he is going: it is positive while
+getting up to speed and negative while shedding it, so he tips forward off the
+mark and settles back as he stops instead of arriving upright at both ends. And
+the head keeps most of the bob out of itself — a neck spends the whole cycle
+giving back what the legs put in, and a head that rides the hips is the
+difference between a walk and a bobblehead.
+
+All of this is school-only, and tested as such: no other location declares a
+gait, and `stridePerUnit` called the way everywhere else calls it returns the
+original table's own numbers.
+
 
 ### The drawn people
 
@@ -519,11 +603,18 @@ shading is flat: a base tone, a lit tone for the top of each mass, a dark tone
 underneath. Three fills rather than a gradient, because a gradient is rasterised
 per pixel per frame and these are not.
 
-The cycle underneath is a proper walk. Two dips per stride, hips shifting onto
-the planted foot, shoulders counter-rotating against them, the knee leading the
-ankle through the swing, the shoe rolling heel-to-toe and pointing where he is
-going. Creeping crouches, shortens the step, holds the arms in and keeps the
-heel up; running leans in, lengthens the stride and bends the arms.
+The cycle underneath is a proper walk, and in the school it is the derived one
+described above: planted feet, hips solved for rather than tuned, knees by
+inverse kinematics, shoulders counter-rotating against the hips, the shoe
+rolling heel-to-toe and pointing where he is going. Creeping crouches, shortens
+the step, holds the arms in and keeps the heel up; running leans in, lengthens
+the stride and bends the arms.
+
+One drawing note that is not obvious until you see it fail: an arm crosses a
+torso painted the same colour as itself, so the near arm carries a heavier dark
+rim than the legs ever need. The legs are out in clear air below the hem and
+separate on their own; without the extra edge the arms simply vanish into the
+sweater.
 
 Two things worth knowing before editing it:
 

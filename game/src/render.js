@@ -2,7 +2,7 @@
 // paints it, interpolating between the last two fixed steps so 60Hz sim motion
 // stays smooth on any refresh rate.
 import { TUNING } from './tuning.js';
-import { sleepStage, rarityOf, isBigScore, watcherConfig, gaitBlend } from './rules.js';
+import { sleepStage, rarityOf, isBigScore, watcherConfig, gaitBlend, gaitOf } from './rules.js';
 import { drawFigure, THIEF_LOOK, CARETAKER_LOOK } from './figure.js';
 import { playerOf } from './sim.js';
 import {
@@ -431,6 +431,26 @@ export function createRenderer(canvas, options = {}) {
     ctx.restore();
   }
 
+  // --- getting up to speed, and coming off it --------------------------------
+  // How hard a character is accelerating, as a signed share of its top speed
+  // per second, smoothed. Presentation only: it lives out here in the renderer
+  // and never touches the simulation, so a recorded run replays identically
+  // whether or not anybody is watching it.
+  //
+  // Kept per character rather than globally — the thief and Mr. Vrána are
+  // rarely doing the same thing.
+  const paces = new Map();
+
+  function drive(entity) {
+    const share = entity.gaitShare === undefined ? 0 : entity.gaitShare;
+    const was = paces.get(entity);
+    if (was === undefined) { paces.set(entity, share); return 0; }
+    // A first-order filter, so a single frame's noise cannot make him lurch.
+    const eased = was + (share - was) * 0.18;
+    paces.set(entity, eased);
+    return Math.max(-1, Math.min(1, (share - eased) * 3.4));
+  }
+
   function drawInvestigation(sim, time, alpha) {
     const w = sim.investigator;
     drawInvestigationMark(w, time);
@@ -442,6 +462,9 @@ export function createRenderer(canvas, options = {}) {
     // The same speed-driven gait the thief uses, against his own top speed —
     // he is slower, so a brisk walk for him is not a run.
     const gait = gaitBlend(w.speed / rules.speed);
+    const band = sim.rules.caretakerGait
+      ? gaitOf(w.gaitShare === undefined ? 0 : w.gaitShare, sim.rules.caretakerGait)
+      : null;
     const stance = {
       facing: w.facing,
       walkPhase: w.walkPhase,
@@ -452,7 +475,9 @@ export function createRenderer(canvas, options = {}) {
       stride: gait.stride,
       clock: time,
       stand,
-      glance
+      glance,
+      gait: band,
+      drive: drive(w)
     };
     if (sim.rules.figures) drawFigure(ctx, wx, wy, stance, CARETAKER_LOOK);
     else drawCaretakerWalking(ctx, wx, wy, stance);
@@ -564,6 +589,12 @@ export function createRenderer(canvas, options = {}) {
       // rather than off whether the stick is being touched. Blends, not modes:
       // halfway between a creep and a walk should look halfway between them.
       const gait = gaitBlend(player.speed / TUNING.player.speed);
+      // The school's own gait, read at the very share the simulation advanced
+      // the walk phase with, so the drawn step and the ground covered are the
+      // same number seen twice rather than two numbers that have to agree.
+      const band = sim.rules.gait
+        ? gaitOf(player.gaitShare === undefined ? 0 : player.gaitShare, sim.rules.gait)
+        : null;
       const reachProgress = sim.reach ? sim.reach.t / sim.reach.duration : 0;
 
       // While he is rummaging he faces what he is opening, whatever direction
@@ -590,7 +621,13 @@ export function createRenderer(canvas, options = {}) {
         stride: gait.stride,
         clock: time,
         reach: reachProgress,
-        search: rummage
+        search: rummage,
+        gait: band,
+        // Positive while getting up to speed, negative while shedding it. This
+        // is the only thing in the pose that is not a function of how fast he
+        // is going, and it is what makes him tip forward off the mark and
+        // settle back as he stops rather than arriving upright at both ends.
+        drive: drive(player)
       };
       // Locations that ask for the drawn figures get them; everywhere else
       // keeps the character it has always had.

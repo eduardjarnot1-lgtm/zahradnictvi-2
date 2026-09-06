@@ -112,11 +112,49 @@ export function proximityScale(rules, distance, awake = false) {
   return base * (a.boost + (1 - a.boost) * (t * t * (3 - 2 * t)));
 }
 
+// --- the school's gait -------------------------------------------------------
+// Every field of a band, blended between the two bands this speed falls
+// between. Blended rather than switched, so a character easing off the stick
+// passes through the power walk on the way down instead of dropping out of a
+// run into a stroll on one frame.
+const GAIT_FIELDS = ['step', 'duty', 'lift', 'absorb', 'flight', 'crouch',
+  'lean', 'armSwing', 'armBend', 'sway', 'headSteady'];
+
+export function gaitOf(share, config) {
+  const bands = config.bands;
+  const s = Math.max(0, Math.min(1, share));
+  let i = 0;
+  while (i < bands.length - 2 && s >= bands[i + 1].at) i++;
+  const a = bands[i];
+  const b = bands[i + 1];
+  const span = b.at - a.at;
+  const raw = span <= 0 ? 0 : Math.max(0, Math.min(1, (s - a.at) / span));
+  // Smoothstep, so a band boundary has no corner in it.
+  const t = raw * raw * (3 - 2 * raw);
+  const out = { legLen: config.legLen, seg: config.seg };
+  for (const key of GAIT_FIELDS) out[key] = a[key] + (b[key] - a[key]) * t;
+  // Which of §4's gaits this is, for anything that wants to know rather than to
+  // interpolate — the run weight drives the lean and the arm carriage, and the
+  // creep weight is what the tiptoe posture is built on.
+  out.creep = Math.max(0, 1 - s / bands[1].at);
+  out.run = bands.length > 3 && s > bands[2].at
+    ? Math.min(1, (s - bands[2].at) / (1 - bands[2].at)) : 0;
+  // Whether the legs are cycling at all. Short ramp: a slow creep is a small
+  // step, not a barely-visible twitch.
+  out.moving = Math.min(1, s / 0.06);
+  return out;
+}
+
 // How long a step is at this speed, expressed as walk-cycle phase per unit of
 // ground covered. Short steps when creeping means more of them; long strides
 // when running means fewer. Driving the animation from distance rather than
 // from time is what keeps the feet on the floor at every speed.
-export function stridePerUnit(share) {
+export function stridePerUnit(share, config) {
+  // A location may bring its own gait. When it does, the cadence is not a
+  // number anybody picked: one step covers `step` units of ground, and half a
+  // cycle is one step, so this is the only rate at which the drawn foot and the
+  // floor agree. Everywhere without one keeps the original table exactly.
+  if (config && config.bands) return Math.PI / gaitOf(share, config).step;
   const g = TUNING.player.gait;
   if (share <= g.creepAt) return g.strideCreep;
   if (share >= g.walkAt) {

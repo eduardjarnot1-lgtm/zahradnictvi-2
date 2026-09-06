@@ -95,7 +95,12 @@ const UPDATERS = {
     // and how much phase a unit of ground is worth depends on how long his
     // stride is at this speed, so a creep is short quick steps and a run is
     // long ones rather than the same stride at two rates.
-    entity.walkPhase += travelled * stridePerUnit(entity.speed / TUNING.player.speed);
+    // How fast he is going as a share of his top speed, kept on the entity so
+    // the renderer reads the very same number the phase was advanced with. If
+    // those two ever disagreed the feet would slide by exactly the difference,
+    // so they are not allowed to be computed twice.
+    entity.gaitShare = entity.speed / TUNING.player.speed;
+    entity.walkPhase += travelled * stridePerUnit(entity.gaitShare, sim.rules.gait);
     entity.idleSeconds = entity.moving ? 0 : entity.idleSeconds + STEP_SECONDS;
   },
 
@@ -176,7 +181,21 @@ const UPDATERS = {
       while (turn < -Math.PI) turn += Math.PI * 2;
       entity.facing += turn * Math.min(1, TUNING.player.turnRate * STEP_SECONDS);
     }
-    entity.walkPhase += travelled * stridePerUnit(entity.speed / rules.speed);
+    // Measured against the *player's* top speed, not his own. Against his own,
+    // walking at all put him at full share and drew him sprinting — which is
+    // both wrong for a man of his age and wrong for what he is doing. The state
+    // adds a little on top: hurrying after someone is not the same walk as
+    // going back to bed.
+    const gait = sim.rules.caretakerGait;
+    const urgency = gait && gait.urgency ? gait.urgency[entity.state] || 0 : 0;
+    // Eased rather than switched. Catching sight of you changes how he carries
+    // himself, and a man does not change his stride between one frame and the
+    // next — half a second of gathering himself, which is also long enough for
+    // the player to read that something just changed.
+    entity.urge += (urgency - entity.urge) * Math.min(1, STEP_SECONDS * 2.2);
+    entity.gaitShare = Math.max(0, Math.min(1,
+      entity.speed / TUNING.player.speed + (entity.moving ? entity.urge : 0)));
+    entity.walkPhase += travelled * stridePerUnit(entity.gaitShare, gait);
   }
 };
 
@@ -215,6 +234,8 @@ function makeInvestigator(level, rules) {
     moving: false,
     facing: Math.PI / 2,
     walkPhase: 0,
+    gaitShare: 0,
+    urge: 0,           // how hurried he is, eased rather than switched
     // Following: how long you have been far enough away to be losing him, and
     // when he last re-read where you were.
     lostFor: 0,
@@ -391,6 +412,7 @@ export function createSim({ level, seed = 1, upgrades = {} }) {
     speed: 0,
     facing: Math.PI / 2,   // facing "down" into the room
     walkPhase: 0,
+    gaitShare: 0,
     idleSeconds: 0
   };
 

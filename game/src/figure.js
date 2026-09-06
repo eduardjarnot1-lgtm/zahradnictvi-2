@@ -17,6 +17,7 @@
 //      single difference between "a person walking" and "a toy marching", and
 //      it is one sign in the code.
 import { TUNING } from './tuning.js';
+import { legCycle, footStep, pelvisRise, kneeOf } from './gait.js';
 
 const TAU = Math.PI * 2;
 
@@ -82,7 +83,7 @@ export const CARETAKER_LOOK = {
 // copy of itself. That rim is the whole reason an arm reads as being in front
 // of a body the same colour as it — at this size, value contrast is the only
 // separation there is room for.
-function limb(ctx, ax, ay, bx, by, cx, cy, wide, narrow, colour, rim) {
+function limb(ctx, ax, ay, bx, by, cx, cy, wide, narrow, colour, rim, edge = 1.7) {
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   // Both segments in one path, and one path per pass. A stroke is the most
@@ -95,7 +96,7 @@ function limb(ctx, ax, ay, bx, by, cx, cy, wide, narrow, colour, rim) {
   ctx.lineTo(cx, cy);
   if (rim) {
     ctx.strokeStyle = rim;
-    ctx.lineWidth = wide + 1.7;
+    ctx.lineWidth = wide + edge;
     ctx.stroke();
   }
   ctx.strokeStyle = colour;
@@ -127,11 +128,13 @@ function blob(ctx, x, y, rx, ry, rot, colour) {
  */
 export function drawFigure(ctx, x, y, pose, look) {
   const { facing, walkPhase, clock } = pose;
-  const creep = pose.creep || 0;
-  const run = pose.run || 0;
-  const cycling = pose.moving === undefined ? 0 : pose.moving;
-  const strideScale = pose.stride === undefined ? 1 : pose.stride;
-  const reach = pose.reach || 0;
+  // The blended band for the speed he is actually travelling at: step length,
+  // how much of the cycle each foot is down for, how high it lifts, how far he
+  // leans. Every pose below is read out of this rather than guessed at.
+  const g = pose.gait;
+  const creep = g.creep;
+  const run = g.run;
+  const cycling = g.moving;
   const stand = pose.stand === undefined ? 1 : pose.stand;
   // A turn of the head on its own, without the body following. This is what
   // "having a look round" is: you do not rotate on the spot to do it.
@@ -166,100 +169,146 @@ export function drawFigure(ctx, x, y, pose, look) {
   }
 
   // --- the cycle -------------------------------------------------------------
-  const swing = Math.sin(walkPhase) * cycling;
-  // Two dips per cycle: the body is lowest as a foot lands and rises over the
-  // planted leg. Running exaggerates it; creeping flattens it, because keeping
-  // your head level is most of what being quiet looks like.
-  const bob = -Math.abs(Math.sin(walkPhase)) * (1.4 + run * 2.2) * cycling * (1 - creep * 0.65);
-  const breathe = Math.sin(clock * 1.9) * (1 - cycling) * 0.55;
-  // Hips shift towards the leg carrying the weight; shoulders counter-rotate
-  // against them. Small numbers, but this is what stops the torso being a board.
-  const hipSway = -swing * (1.1 + run * 0.7);
-  const twist = swing * (1.4 + run * 1.1) * (1 - creep * 0.4);
-  // Leaning into the run, crouching into the creep.
-  const lean = run * 2.2;
+  // Each leg's own place in its own cycle, half a turn apart. Everything below
+  // is a function of these two numbers and the band; nothing is a function of
+  // time, which is why the feet cannot drift out of step with the floor.
+  const uA = legCycle(walkPhase);
+  const uB = legCycle(walkPhase, 0.5);
   // The rummage bobs: he leans in, roots about, leans in again.
   const dig = rummage > 0 ? 0.5 - 0.5 * Math.cos(rummage * Math.PI * 4) : 0;
-  const crouch = creep * cycling * 2.6 + rummage * (3.4 + dig * 1.6);
+  // Crouching shortens the legs, which lowers the body and folds the knees in
+  // one move — the whole tiptoe posture out of a single number.
+  const crouch = g.crouch * cycling + rummage * (3.4 + dig * 1.2);
+  const step = {
+    step: g.step, duty: g.duty, lift: g.lift * cycling, absorb: g.absorb,
+    flight: g.flight, legLen: g.legLen - crouch
+  };
+  const footA = footStep(uA, step);
+  const footB = footStep(uB, step);
 
-  const centreX = x + acrossX * hipSway * 0.5 + faceX * (lean + rummage * 2.2);
-  const centreY = y + bob + breathe + crouch + acrossY * hipSway * 0.5
-    + faceY * (lean + rummage * 2.2) * FORESHORTEN;
+  // How far the hips sit above the ankles, worked out from whichever planted
+  // leg allows least. Eased back to a full stand as the legs stop cycling.
+  const rise = step.legLen + (pelvisRise(uA, step) - step.legLen) * cycling;
+  const bobbed = g.legLen - rise;      // how far down from a full stand he is
 
-  const stride = 5.9 * strideScale * build;
+  // Weight. Peaks over whichever foot is carrying him, which is what makes the
+  // hips roll and the shoulders answer. Zero through the swing, so it crosses
+  // over during double support rather than snapping.
+  const carry = (u) => (u < g.duty ? Math.sin((u / g.duty) * Math.PI) : 0);
+  const weight = (carry(uA) - carry(uB)) * cycling;
+  // The legs' split, which the hips turn with and the shoulders turn against.
+  const reach = g.step * g.duty || 1;
+  const split = (footA.along - footB.along) / (reach * 2);
+
+  const breathe = Math.sin(clock * 1.9) * (1 - cycling) * 0.55;
+  // Leaning in. Partly the gait — you lean into a run — and partly what the
+  // body is doing right now: `drive` is positive while getting up to speed and
+  // negative while shedding it, so he tips forward off the mark and settles
+  // back as he stops instead of arriving upright at both ends.
+  const drive = pose.drive || 0;
+  const lean = (g.lean + drive * 2.6) * cycling + rummage * 2.4;
+
+  const hipSway = weight * g.sway * 1.25;
+  const twist = -split * (2.0 + run * 1.3) * cycling;
+
+  // The hips: the one thing the legs are hung from, and the one thing the legs
+  // decide the height of.
+  const centreX = x + acrossX * hipSway;
+  const centreY = y + ANKLE_Y - rise - HIP_Y + breathe + acrossY * hipSway;
+  // The chest rides over the hips and leans; the shoulders lead the turn.
+  const chestX = centreX + faceX * lean;
+  const chestY = centreY + faceY * lean * FORESHORTEN;
+
   const along = (amount) => ({ x: faceX * amount, y: faceY * amount * FORESHORTEN });
 
   // --- shadow ----------------------------------------------------------------
+  // Tied to the body's height, so it tightens as he rises over the planted leg
+  // and spreads as he sinks onto both feet. Cheap, and it is most of what sells
+  // the feet being on the floor rather than above it.
+  const low = 1 - Math.min(1, bobbed / 3);
   ctx.fillStyle = 'rgba(16,8,22,0.28)';
   ctx.beginPath();
-  ctx.ellipse(x, y + 18, 11 * build, 4, 0, 0, TAU);
+  ctx.ellipse(x, y + 18, (10.4 + low * 1.4) * build, 3.7 + low * 0.6, 0, 0, TAU);
   ctx.fill();
 
   // --- legs ------------------------------------------------------------------
-  // side is the character's own left/right; phase is where that leg is in the
-  // cycle. The lifted foot is the one swinging forward.
-  const drawLeg = (side, phase, far) => {
-    const lift = Math.max(0, phase) ** 1.25 * cycling * (2.4 + run * 2.6);
-    const step = along(phase * stride);
+  const drawLeg = (side, foot, far) => {
     const hipX = centreX + acrossX * HIP_W * side * build;
     const hipY = centreY + HIP_Y + acrossY * HIP_W * side * build;
-    const ankleX = x + acrossX * FOOT_W * side * build + step.x;
-    const ankleY = y + ANKLE_Y + acrossY * FOOT_W * side * build + step.y - lift;
-    // The knee leads the ankle through the swing, which is what a bent leg
-    // looks like from the side, and is bent further the lower the crouch.
-    const bend = (Math.max(0, phase) * 2.6 + creep * 2.2 + run * 1.4) * cycling
-      + rummage * 2.4;
-    const kneeX = (hipX + ankleX) / 2 + faceX * bend;
-    const kneeY = (hipY + ankleY) / 2 + faceY * bend * FORESHORTEN - 0.4;
+    const travel = along(foot.along);
+    // A narrow walking base: the feet land close to the line the body travels
+    // along, not out on the hips. Straight from the reference — a wide stance
+    // reads as a toddler.
+    const ankleX = x + acrossX * FOOT_W * side * build + travel.x;
+    const ankleY = y + ANKLE_Y + acrossY * FOOT_W * side * build + travel.y - foot.lift;
+    // The knee is wherever a leg of this length has to put it. Straight when he
+    // is reaching out at contact, folded when the foot is up under him — both
+    // for free, and both the opposite of what the hand-fitted curve used to do.
+    const knee = kneeOf(hipX, hipY, ankleX, ankleY, g.seg * build,
+      faceX, faceY * FORESHORTEN);
 
     if (far) ctx.globalAlpha = 1 - sideOn * 0.28;
-    limb(ctx, hipX, hipY, kneeX, kneeY, ankleX, ankleY,
+    limb(ctx, hipX, hipY, knee.x, knee.y, ankleX, ankleY,
       5.6 * build, 4.8 * build, look.trouser, look.rim);
-    drawShoe(ctx, ankleX, ankleY, phase, look, build, faceX, faceY, cycling, creep);
+    drawShoe(ctx, ankleX, ankleY, foot, g, look, build, faceX, faceY, cycling, creep);
     ctx.globalAlpha = 1;
   };
 
   // The far leg is the one on the far side of the body from the camera, which
   // depends on which way he has turned and whether he is coming or going.
   const farLeg = away ? turn : -turn;
-  drawLeg(farLeg, farLeg === -1 ? swing : -swing, true);
-  drawLeg(-farLeg, -farLeg === -1 ? swing : -swing, false);
+  drawLeg(farLeg, farLeg === -1 ? footA : footB, true);
+  drawLeg(-farLeg, -farLeg === -1 ? footA : footB, false);
 
   // --- the far arm, behind the body ------------------------------------------
+  const ARM_LEN = 11.4;
   const armOf = (side, far) => {
-    // Arms oppose legs: the arm on a side swings against that side's leg.
-    const legPhase = side === -1 ? swing : -swing;
-    const phase = -legPhase;
-    const reachOut = reach > 0 && !far ? Math.sin(Math.min(1, reach) * Math.PI) * 12
-      : rummage > 0 ? 7.5 + dig * 3.5 : 0;
-    // Held in and barely swinging while creeping; pumped and bent while running.
-    const amplitude = (3.9 + run * 3.0) * (1 - creep * 0.62);
-    const swingAt = phase * amplitude + reachOut;
-    const shoulderX = centreX + acrossX * SHOULDER_W * side * build * 0.92
-      + faceX * twist * side * 0.35;
-    const shoulderY = centreY + SHOULDER_Y + 3 + acrossY * SHOULDER_W * side * build * 0.92
-      + faceY * twist * side * 0.35 * FORESHORTEN;
-    // A running arm is bent at the elbow and rides high; a creeping one is
-    // tucked; a walking one hangs and swings from the shoulder.
-    const raise = run * 4.4 + creep * 2.2 - rummage * 3.2;
-    const step = along(swingAt);
-    const wristX = shoulderX + step.x + acrossX * side * 0.6;
-    const wristY = shoulderY + step.y + acrossY * side * 0.6 + 11 - raise;
-    const elbowStep = along(swingAt * 0.45);
-    const elbowX = shoulderX + elbowStep.x + acrossX * side * 1.1;
-    const elbowY = shoulderY + elbowStep.y + acrossY * side * 1.1 + 5.8 - raise * 0.35;
+    // Arms oppose legs. One sign, and it is the whole difference between a
+    // person walking and a toy marching.
+    const mine = side === -1 ? footA : footB;
+    const swing = -(mine.along / reach);
+    const grab = pose.reach > 0 && !far ? Math.sin(Math.min(1, pose.reach) * Math.PI) : 0;
+    const bend = Math.min(0.95, g.armBend + rummage * 0.5);
+    const shoulderX = chestX + acrossX * SHOULDER_W * side * build * 0.92
+      + faceX * twist * side * 0.42;
+    const shoulderY = chestY + SHOULDER_Y + 3 + acrossY * SHOULDER_W * side * build * 0.92
+      + faceY * twist * side * 0.42 * FORESHORTEN;
+    // Where the hand wants to be: swung along the travel line, and drawn up
+    // towards the chest the more the elbow is bent. Bending an arm shortens it,
+    // which is exactly what the inverse kinematics below needs to see.
+    // The far arm swings less on screen than the near one. That is honest
+    // perspective — it is further away — and it also keeps its hand from
+    // wandering out past a torso that is hiding the arm it belongs to, which
+    // reads as a detached blob rather than as a hand.
+    const armAlong = swing * (6.4 * g.armSwing) * cycling * (far ? 0.66 : 1)
+      + grab * 12 + rummage * (7.5 + dig * 3.5);
+    const drop = ARM_LEN * build * (1 - 0.40 * bend) - grab * 2 - rummage * 3.4;
+    const outward = acrossX * side * 0.9;
+    const outwardY = acrossY * side * 0.9;
+    const travel = along(armAlong);
+    const wristX = shoulderX + travel.x + outward;
+    const wristY = shoulderY + travel.y + outwardY + drop;
+    // The elbow points back and out, which is where a bent elbow goes.
+    const elbow = kneeOf(shoulderX, shoulderY, wristX, wristY, ARM_LEN * build * 0.52,
+      -faceX * 0.75 + acrossX * side * 0.6, (-faceY * 0.75) * FORESHORTEN + acrossY * side * 0.6);
 
     if (far) ctx.globalAlpha = 1 - sideOn * 0.30;
-    limb(ctx, shoulderX, shoulderY, elbowX, elbowY, wristX, wristY,
-      5.0 * build, 4.2 * build, far ? look.coatDark : look.coat, look.rim);
+    // A heavier edge than the legs get. An arm crosses a torso painted the same
+    // colour as itself, and at this size the dark rim is the only thing telling
+    // the eye where one ends and the other starts — the legs never need it,
+    // because they are out in clear air below the hem.
+    limb(ctx, shoulderX, shoulderY, elbow.x, elbow.y, wristX, wristY,
+      5.0 * build, 4.2 * build, far ? look.coatDark : look.coat, look.rim,
+      far ? 1.7 : 2.7);
     // Cuff, then the hand: the sleeve has to end somewhere or the arm reads as
     // a bare tube the same colour as the sweater.
     blob(ctx, wristX, wristY, 2.2 * build, 2.0 * build, 0, look.coatDark);
-    const reachOutX = wristX - elbowX;
-    const reachOutY = wristY - elbowY;
-    const len = Math.hypot(reachOutX, reachOutY) || 1;
-    blob(ctx, wristX + (reachOutX / len) * 1.9, wristY + (reachOutY / len) * 1.9,
-      1.9 * build, 1.8 * build, 0, far ? look.skinDark : look.skin);
+    const outX = wristX - elbow.x;
+    const outY = wristY - elbow.y;
+    const len = Math.hypot(outX, outY) || 1;
+    const hand = far ? 1.85 : 2.2;
+    blob(ctx, wristX + (outX / len) * 2.0, wristY + (outY / len) * 2.0,
+      hand * build, (hand - 0.1) * build, 0, far ? look.skinDark : look.skin);
     ctx.globalAlpha = 1;
     return { x: wristX, y: wristY };
   };
@@ -268,18 +317,22 @@ export function drawFigure(ctx, x, y, pose, look) {
   armOf(farArm, true);
 
   // --- torso -----------------------------------------------------------------
-  drawTorso(ctx, centreX, centreY, {
+  // Drawn at the chest rather than at the hips, so the lean is a body pitching
+  // forward over its legs instead of a whole character sliding along the floor.
+  drawTorso(ctx, chestX, chestY, {
     acrossX, acrossY, faceX, faceY, sideOn, twist, build, look
   });
 
   const hand = armOf(-farArm, false);
 
   // --- head ------------------------------------------------------------------
-  // The head lags the body a touch and bobs at half the leg rate, which is the
-  // difference between a head riding on shoulders and a head bolted to them.
-  const headX = centreX + acrossX * twist * 0.22 + faceX * (creep * cycling * 1.6);
-  const headY = centreY + HEAD_Y + Math.sin(walkPhase * 2) * 0.5 * cycling
-    + creep * cycling * 0.8;
+  // A head does not ride the hips. It is the steadiest thing on a walking
+  // person — the neck spends the whole cycle giving back most of what the legs
+  // put in — so it keeps `headSteady` of the bob out of the head, and the
+  // little that gets through is what reads as a walk rather than a glide.
+  const headX = chestX + acrossX * twist * 0.22 + faceX * (creep * cycling * 1.7);
+  const headY = chestY + HEAD_Y + bobbed * g.headSteady * cycling
+    + creep * cycling * 0.9;
   const look2 = facing + glance;
   const gX = Math.cos(look2);
   const gY = Math.sin(look2);
@@ -296,16 +349,34 @@ export function drawFigure(ctx, x, y, pose, look) {
 }
 
 // A shoe, pointing where he is going, rolling heel-to-toe through the step.
-function drawShoe(ctx, ax, ay, phase, look, build, faceX, faceY, cycling, creep) {
+//
+// The roll is most of what makes a foot look like it is on the floor rather
+// than near it. Off the reference: the heel lands first with the toe up, the
+// foot flattens as the weight arrives, the heel lifts again for the push, and
+// the toe stays pointed through the first half of the swing before coming up
+// to meet the ground for the next landing.
+function drawShoe(ctx, ax, ay, foot, g, look, build, faceX, faceY, cycling, creep) {
   // Its heading, foreshortened the same way every other length is, so a shoe
   // seen from behind is a short stub and one seen side-on is a full profile.
   const heading = Math.atan2(faceY * FORESHORTEN, faceX);
-  // Heel strike at the front of the stride, toe-off at the back. Creeping keeps
-  // the heel up the whole time — he is on the balls of his feet.
-  const roll = (-phase * 0.30 + creep * cycling * 0.22) * cycling;
+  const u = foot.u;
+  let roll;
+  if (foot.planted) {
+    const p = u / g.duty;
+    // Toe up at the landing, flat almost at once, then rising onto the toe for
+    // the push-off. The flat part is short: a foot is only flat in passing.
+    roll = p < 0.26 ? -0.36 * (1 - p / 0.26) : 0.52 * ((p - 0.26) / 0.74) ** 1.4;
+  } else {
+    const t = (u - g.duty) / (1 - g.duty);
+    // Still pointed as it leaves, levelling out, toe up again to land.
+    roll = 0.52 * (1 - t) ** 1.6 - 0.36 * t ** 2.2;
+  }
+  // Creeping, the heel never comes down at all: he is on the balls of his feet
+  // the whole way, which is both what tiptoeing looks like and why it is quiet.
+  roll = (roll + creep * 0.34) * cycling;
   ctx.save();
   ctx.translate(ax, ay + 3.4);
-  ctx.rotate(heading + roll);
+  ctx.rotate(heading + roll * (faceX >= 0 ? 1 : -1));
   const long = 4.3 * build;
   const tall = 2.5 * build;
   ctx.fillStyle = look.shoe;
