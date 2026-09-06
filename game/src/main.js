@@ -26,6 +26,7 @@ export function boot() {
   const stage = $('stage');
   const canvas = $('cv');
   const takeButton = $('take');
+  const searchButton = $('search');
 
   const saveStore = createSaveStore(window.localStorage);
   const audio = createAudio(saveStore);
@@ -72,6 +73,7 @@ export function boot() {
     joystick: $('joy'),
     knob: $('knob'),
     takeButton,
+    searchButton,
     onBlur: () => { if (machine.is('playing')) machine.set('paused'); }
   });
 
@@ -323,6 +325,31 @@ export function boot() {
           warnedAt = stageNow;
           audio.warn();
         }
+      } else if (event.type === 'searching') {
+        // The drawer coming open, before anyone knows what is in it.
+        audio.bump('soft', event.noise, 0.5);
+        buzz(8);
+      } else if (event.type === 'found') {
+        if (event.empty) {
+          // An empty cupboard is information, not a failure. It gets a word
+          // and nothing else — no sound, no shake, no punishment for looking.
+          pops.push({ x: event.x, y: event.y - 8, value: null, text: 'EMPTY', life: 1 });
+        } else {
+          pops.push({
+            x: event.x, y: event.y - 8, value: event.value, life: 1,
+            big: event.big, color: event.big ? '#ffe9a8' : rarityOf(event.itemType).tint
+          });
+          spawnSparks(event.x, event.y, event.big ? 14 : 8,
+            event.big ? '#ffd98a' : '#9fe0ff');
+          audio.take(event.noise, false);
+          if (event.big) { flash = 1; audio.jackpot(); buzz([18, 40, 24]); }
+          else buzz(14);
+          const stageNow = sleepStage(sim.noise);
+          if (stageNow > warnedAt && stageNow > 0 && sim.status === 'running') {
+            warnedAt = stageNow;
+            audio.warn();
+          }
+        }
       } else if (event.type === 'creak') {
         pops.push({ x: event.x, y: event.y - 6, value: null, text: 'CREAK', life: 1 });
         audio.creak();
@@ -500,6 +527,30 @@ export function boot() {
       hudLast.targeted = targeted;
       takeButton.classList.toggle('on', targeted);
     }
+
+    // SEARCH exists only where there is furniture to open. It appears when one
+    // is in reach, fills like a progress ring while his hands are in it, and
+    // goes away again — so a location without the mechanic never shows it and
+    // a player who has never met it is never asked about it.
+    const busy = !!sim.searching;
+    const here = busy || !!sim.searchTargetId;
+    if (hudLast.searchHere !== here) {
+      hudLast.searchHere = here;
+      searchButton.classList.toggle('here', here);
+      searchButton.classList.toggle('on', here);
+    }
+    if (hudLast.searchBusy !== busy) {
+      hudLast.searchBusy = busy;
+      searchButton.classList.toggle('busy', busy);
+      searchButton.textContent = busy ? '' : 'SEARCH';
+    }
+    if (busy) {
+      const share = Math.round((sim.searching.t / sim.searching.duration) * 20) / 20;
+      if (hudLast.searchShare !== share) {
+        hudLast.searchShare = share;
+        searchButton.style.setProperty('--p', share);
+      }
+    }
   }
 
   // ---------------------------------------------------------------- loop
@@ -659,6 +710,12 @@ export function boot() {
   takeButton.addEventListener('pointerup', releaseTake);
   takeButton.addEventListener('pointercancel', releaseTake);
   takeButton.addEventListener('pointerleave', releaseTake);
+
+  searchButton.addEventListener('pointerdown', (e) => { e.preventDefault(); input.pressSearch(true); });
+  const releaseSearch = () => input.pressSearch(false);
+  searchButton.addEventListener('pointerup', releaseSearch);
+  searchButton.addEventListener('pointercancel', releaseSearch);
+  searchButton.addEventListener('pointerleave', releaseSearch);
 
   addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && machine.is('playing')) machine.set('paused');

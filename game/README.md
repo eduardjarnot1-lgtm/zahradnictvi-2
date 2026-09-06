@@ -222,6 +222,8 @@ drawn at.
 E  the sleeper's own furniture      @  spawn     X  the way out
 T table   S sofa/bed   W wardrobe   N nightstand   V tv bench
 C cabinet   B shelving   P display plinth        anything else: loot
+1-9 0  a searchable piece — the level's `search` block says which style
+       it is and what, if anything, is inside it
 ```
 
 Two rules the grids have to respect, both learned by watching rooms seal
@@ -315,6 +317,52 @@ seconds the player can use, which is the point of showing it at all instead of
 cutting to a man already walking. A test asserts he does not move an inch until
 he is upright: a sleeping figure sliding towards you is the exact bug the
 sequence exists to prevent.
+
+**And some of the furniture opens.** Certain cabinets, desks, lockers and
+shelves in the school are searchable: stand beside one, press SEARCH, and after
+a second and a quarter you find out whether there was anything in it. Roughly
+half of them are empty, which is the entire point — a level where every drawer
+pays out is a chore, not a decision.
+
+Opening one costs noise before you know the answer, so you cannot learn a
+cupboard is empty for free; lifting something out costs the same as lifting the
+same item off a shelf. Both go through the proximity curve, so the cupboard
+beside his couch is a very different proposition from the one at the far end of
+the corridor. Searching does not settle the meter either — rummaging is not
+holding your breath — and it barely lets you move, so it is a real second and a
+quarter of standing in one place.
+
+Crossing 80 while your hands are in a drawer wakes him exactly as any other
+noise does, and the spot he walks to is the cupboard you were opening. There is
+no separate reaction; a search is just another way to make noise.
+
+Which cupboards hold what is decided at authoring time, by cost:
+
+    (search noise + item noise) x proximity at that distance  <=  60
+
+Every item is placed in the riskiest cupboard it fits that ceiling in. Big
+prizes therefore land at middle distance, small change can sit right beside his
+couch, and the cupboards nearest him mostly hold nothing. That shape is what
+makes it a gamble rather than a trap — a diamond in the cabinet by his head
+costs more meter than the game has to give, so taking it would not be a
+decision, it would be a loss with extra steps. A test re-derives the ceiling
+from the game's own numbers, which is also what keeps the generator's copy of
+the proximity curve honest.
+
+| level | searchable | holding something | hidden value |
+|---|---|---|---|
+| 21 | 3 | 2 | $35 |
+| 22 | 5 | 3 | $85 |
+| 23 | 7 | 4 | $170 |
+| 24 | 9 | 5 | $335 |
+| 25 | 10 | 6 | $775 |
+
+Searchable furniture wears two brass handles on a dark plate, and stays open
+once you have been through it — no counter, no checklist, just a drawer hanging
+out. A test asserts every school level keeps at least one empty and at least one
+full, and another asserts each of the five is still winnable while ignoring the
+furniture completely: option A has to stay open, or the mechanic is a tax rather
+than a choice.
 
 He walks on a coarse breadth-first distance field over the building
 (`src/nav.js`), flooded from wherever he is going and followed downhill with a

@@ -77,7 +77,22 @@
     box-shadow:0 0 0 4px #ffd34d1a}
   #take.down{transform:scale(.94);background:#ffd34d55}
   #take:focus-visible{outline:2px solid #ffd34d;outline-offset:3px}
+  /* The second action, and it only exists where there is something to open.
+     Sits above TAKE rather than beside it: a thumb reaching the corner of a
+     phone should not have to choose between two buttons on the same arc. */
+  #search{position:absolute;right:18px;bottom:104px;width:64px;height:64px;border-radius:50%;
+    background:#6cc8e810;border:2px solid #6cc8e855;color:#a8e2f4cc;font-size:11px;
+    font-weight:800;letter-spacing:.5px;display:none;align-items:center;justify-content:center;
+    pointer-events:auto}
+  #search.on{background:#6cc8e838;border-color:#6cc8e8;color:#e2f6ff;
+    box-shadow:0 0 0 4px #6cc8e81a}
+  #search.down{transform:scale(.94);background:#6cc8e855}
+  #search:focus-visible{outline:2px solid #6cc8e8;outline-offset:3px}
+  /* A ring that fills while his hands are in the drawer. */
+  #search.busy{background:conic-gradient(#6cc8e8cc calc(var(--p) * 1turn),#6cc8e820 0);
+    border-color:#6cc8e8;color:#e2f6ff}
   body[data-screen="playing"] #take{display:flex}
+  body[data-screen="playing"] #search.here{display:flex}
   /* the HUD belongs to the room, not to the menus */
   body[data-screen="menu"] #hud, body[data-screen="levels"] #hud{display:none}
   body:not([data-screen="playing"]) #danger{opacity:0!important}
@@ -202,6 +217,7 @@
 
   <div id="danger"></div>
   <div id="joy"><div id="knob"></div></div>
+  <button id="search" aria-label="Search furniture">SEARCH</button>
   <button id="take" aria-label="Take item">TAKE</button>
 
   <div class="screen on" id="scMenu">

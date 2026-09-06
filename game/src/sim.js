@@ -13,7 +13,7 @@ import {
 
 export const STEP_SECONDS = 1 / TUNING.sim.hz;
 
-export const EMPTY_INPUT = Object.freeze({ x: 0, y: 0, take: false });
+export const EMPTY_INPUT = Object.freeze({ x: 0, y: 0, take: false, search: false });
 
 // Per-kind update functions. A guard, a dog or a rolling can is a new entry
 // here plus a spawn — it does not touch the loop.
@@ -24,7 +24,9 @@ const UPDATERS = {
     if (length > 1) { ix /= length; iy /= length; }
 
     // Reaching for an item is a hesitation, not a stop: you keep steering.
-    const slowed = sim.reach ? TUNING.pickup.reachSlow : 1;
+    // Having both hands in a cupboard is closer to a stop.
+    const slowed = sim.searching ? sim.rules.search.moveScale
+      : sim.reach ? TUNING.pickup.reachSlow : 1;
     const top = TUNING.player.speed * sim.mods.speed;
     const targetVx = ix * top * slowed;
     const targetVy = iy * top * slowed;
@@ -396,6 +398,12 @@ export function createSim({ level, seed = 1, upgrades = {} }) {
     }),
     targetId: null,   // the in-range item a TAKE would consume
     reach: null,      // the in-progress grab animation, if any
+    // Furniture you can look inside. Empty everywhere but the school, where
+    // the map says which pieces are searchable and what is in them.
+    stashes: (level.stashes || []).map((stash) => ({ ...stash, searched: false })),
+    searchTargetId: null,  // the nearest unsearched piece within reach
+    searching: null,       // { id, t, duration } while his hands are in it
+    prevSearch: false,
     streak: 0,        // steals in quick succession
     streakTimer: 0,   // ...and how long is left to keep it
     onSoftFloor: false,
@@ -471,6 +479,76 @@ function takeItem(sim, item) {
     x: item.x,
     y: item.y,
     stage: sleepStage(sim.noise)
+  });
+  if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
+}
+
+// Which piece of furniture a SEARCH would open: the nearest unsearched one
+// within reach, measured to the edge of the box rather than its centre, so a
+// long bank of lockers offers itself along its whole length.
+function nearestStash(sim, player, reach) {
+  let best = null;
+  let bestDistance = Infinity;
+  for (const stash of sim.stashes) {
+    if (stash.searched) continue;
+    const dx = Math.max(stash.x - player.x, 0, player.x - (stash.x + stash.w));
+    const dy = Math.max(stash.y - player.y, 0, player.y - (stash.y + stash.h));
+    const distance = Math.hypot(dx, dy);
+    if (distance <= reach && distance < bestDistance) {
+      best = stash;
+      bestDistance = distance;
+    }
+  }
+  return best;
+}
+
+// Opening it. The noise lands here, at the start, not when you find out what is
+// inside: the drawer rattles whether or not there is anything in it, and
+// charging on the result would let you learn a cabinet was empty for free.
+function beginSearch(sim, stash, rules) {
+  const amount = Math.max(1, Math.round(
+    (rules.noise[stash.style] || 3) * sim.mods.hazardNoise * sim.proximity));
+  sim.noise = addNoise(sim.noise, amount);
+  // Nothing else is on offer from the moment his hands are in this one, not
+  // from the frame after: a button that lingers for a tick is a button that
+  // can be pressed twice.
+  sim.searchTargetId = null;
+  sim.searching = {
+    id: stash.id, t: 0, duration: rules.duration,
+    x: stash.x + stash.w / 2, y: stash.y + stash.h / 2, style: stash.style
+  };
+  sim.events.push({
+    type: 'searching', id: stash.id, noise: amount, style: stash.style,
+    x: sim.searching.x, y: sim.searching.y
+  });
+  if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
+}
+
+// ...and finding out. An item lifted out of a cupboard costs exactly what the
+// same item costs off a shelf, because it is the same item and the same arm.
+function finishSearch(sim) {
+  const stash = sim.stashes.find((entry) => entry.id === sim.searching.id);
+  const { x, y } = sim.searching;
+  sim.searching = null;
+  if (!stash || stash.searched) return;
+  stash.searched = true;
+
+  if (!stash.item) {
+    sim.events.push({ type: 'found', id: stash.id, empty: true, x, y });
+    return;
+  }
+  const stats = itemStats(stash.item);
+  const paid = Math.round(stats.value * sim.mods.payout);
+  sim.money += paid;
+  sim.haul += stats.value;
+  const lifted = stats.noise * sim.proximity;
+  sim.noise = addNoise(sim.noise, lifted);
+  sim.shake = Math.min(TUNING.feedback.shakeMax, stats.noise * TUNING.feedback.shakePerNoise);
+  sim.shakePhase = 0;
+  sim.events.push({
+    type: 'found', id: stash.id, empty: false, itemType: stash.item,
+    value: paid, noise: Math.round(lifted), rarity: rarityOf(stash.item).name,
+    big: isBigScore(stats.value), x, y
   });
   if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
 }
@@ -624,7 +702,11 @@ export function stepSim(sim, input = EMPTY_INPUT) {
 
   // Standing perfectly still lets the room settle — slowly, and only after a
   // beat, so it is a decision against the clock rather than a reset button.
-  if (!player.moving && !sim.reach && sim.status === 'running') {
+  // Rummaging in a drawer is not standing still holding your breath, so it does
+  // not settle the room. Without this the meter falls back through the whole
+  // cost of opening the thing while you are still opening it, and searching is
+  // free — which is the one outcome the mechanic cannot survive.
+  if (!player.moving && !sim.reach && !sim.searching && sim.status === 'running') {
     // A location may settle at its own pace. The school comes down fast enough
     // that standing still is a tactic — it is how you send Mr. Vrána back to
     // bed — and waits longer before it starts, so it is never a reflex.
@@ -645,6 +727,24 @@ export function stepSim(sim, input = EMPTY_INPUT) {
     sim.reach.t += STEP_SECONDS;
     if (sim.reach.t >= sim.reach.duration) sim.reach = null;
   }
+
+  // Looking inside the furniture. Only where a location asks for it, which is
+  // the school and nowhere else — everywhere else `sim.stashes` is empty and
+  // none of this runs.
+  const searchRules = sim.rules.search;
+  if (searchRules && sim.status === 'running') {
+    if (sim.searching) {
+      sim.searchTargetId = null;
+      sim.searching.t += STEP_SECONDS;
+      if (sim.searching.t >= sim.searching.duration) finishSearch(sim);
+    } else {
+      const stash = nearestStash(sim, player, searchRules.reach);
+      sim.searchTargetId = stash ? stash.id : null;
+      const pressed = input.search && !sim.prevSearch;
+      if (stash && pressed) beginSearch(sim, stash, searchRules);
+    }
+  }
+  sim.prevSearch = !!input.search;
 
   // Last, so that the meter he reacts to is this tick's meter: lifting
   // something off a shelf and crossing the line by doing it should send him to

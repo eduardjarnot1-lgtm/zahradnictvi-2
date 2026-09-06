@@ -345,6 +345,25 @@ export const TUNING = {
       // back to the staff room, so it has to actually work inside the clock —
       // but the delay is longer than elsewhere, so it is never a reflex.
       recovery: { delay: 0.9, rate: 7 },
+      // Looking inside the furniture.
+      //
+      // The decision this exists to create: a cabinet might hold a diamond or
+      // it might hold nothing, and finding out costs you noise, a second and a
+      // half of the clock, and standing still while the meter is read off how
+      // close you are to Mr. Vrána. The whole mechanic falls apart in one
+      // direction if searching is free and in the other if it is deafening, so
+      // the numbers here are small and the multiplier does the work.
+      search: {
+        reach: 34,          // how close a piece has to be to offer itself
+        duration: 1.25,     // seconds spent with your hands in the drawer
+        moveScale: 0.12,    // you can shuffle, not walk, while you are at it
+        // Opening the thing, before you have any idea what is inside. Hard,
+        // hollow furniture carries; a desk drawer barely does.
+        noise: {
+          table: 3, nightstand: 3, chest: 4, tvBench: 4,
+          sofa: 2, wardrobe: 5, bookshelf: 5, plinth: 6
+        }
+      },
       // The school's two characters are drawn by src/figure.js rather than by
       // the older art.js walker. One flag, so making it the whole game's look
       // is a one-line change rather than a rewrite.

@@ -8,15 +8,17 @@ const KEY_MAP = {
   arrowright: 'right', d: 'right',
   arrowup: 'up', w: 'up',
   arrowdown: 'down', s: 'down',
-  ' ': 'take', e: 'take', enter: 'take'
+  ' ': 'take', e: 'take', enter: 'take',
+  f: 'search', q: 'search'
 };
 
-export function createInput({ stage, joystick, knob, takeButton, onBlur }) {
-  const held = { left: false, right: false, up: false, down: false, take: false };
+export function createInput({ stage, joystick, knob, takeButton, searchButton, onBlur }) {
+  const held = { left: false, right: false, up: false, down: false, take: false, search: false };
   // A tap can begin and end between two frames. Buffer the press so a quick TAKE
   // is never silently dropped; the buffered frame is what gets recorded too.
   let takeBuffered = false;
-  const pointers = new Map(); // id -> { role: 'stick' | 'take', ... }
+  let searchBuffered = false;
+  const pointers = new Map(); // id -> { role: 'stick' | 'take' | 'search', ... }
   let stickId = null;
   const RADIUS = 46;
   let stick = { x: 0, y: 0 };
@@ -24,6 +26,7 @@ export function createInput({ stage, joystick, knob, takeButton, onBlur }) {
   function clearAll() {
     for (const key of Object.keys(held)) held[key] = false;
     takeBuffered = false;
+    searchBuffered = false;
     pointers.clear();
     stickId = null;
     stick = { x: 0, y: 0 };
@@ -35,6 +38,7 @@ export function createInput({ stage, joystick, knob, takeButton, onBlur }) {
     const action = KEY_MAP[e.key.toLowerCase()];
     if (!action) return;
     if (action === 'take' && !held.take) takeBuffered = true;
+    if (action === 'search' && !held.search) searchBuffered = true;
     held[action] = true;
     if (e.key === ' ' || e.key.startsWith('Arrow')) e.preventDefault();
   };
@@ -63,6 +67,13 @@ export function createInput({ stage, joystick, knob, takeButton, onBlur }) {
       if (!held.take) takeBuffered = true;
       held.take = true;
       takeButton.classList.add('down');
+      return;
+    }
+    if (searchButton && e.target.closest('#search')) {
+      pointers.set(e.pointerId, { role: 'search' });
+      if (!held.search) searchBuffered = true;
+      held.search = true;
+      searchButton.classList.add('down');
       return;
     }
     if (stickId !== null) return; // the stick already has a finger; ignore extras
@@ -96,9 +107,12 @@ export function createInput({ stage, joystick, knob, takeButton, onBlur }) {
       stick = { x: 0, y: 0 };
       joystick.style.display = 'none';
     } else {
-      // only drop TAKE when no other finger is still holding it
-      held.take = [...pointers.values()].some((p) => p.role === 'take');
+      // only drop a button when no other finger is still holding it
+      const stillOn = (role) => [...pointers.values()].some((p) => p.role === role);
+      held.take = stillOn('take');
       if (!held.take) takeButton.classList.remove('down');
+      held.search = stillOn('search');
+      if (!held.search && searchButton) searchButton.classList.remove('down');
     }
   }
   addEventListener('pointerup', releasePointer);
@@ -126,12 +140,18 @@ export function createInput({ stage, joystick, knob, takeButton, onBlur }) {
       y = shaped.y;
       const take = held.take || takeBuffered;
       takeBuffered = false;
-      return quantise({ x, y, take });
+      const search = held.search || searchBuffered;
+      searchBuffered = false;
+      return quantise({ x, y, take, search });
     },
     clearAll,
     pressTake(down) {           // for the on-screen button used by pointer role
       if (down && !held.take) takeBuffered = true;
       held.take = !!down;
+    },
+    pressSearch(down) {
+      if (down && !held.search) searchBuffered = true;
+      held.search = !!down;
     },
     get pointerCount() { return pointers.size; }
   };

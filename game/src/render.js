@@ -204,6 +204,65 @@ export function createRenderer(canvas, options = {}) {
 
   // Items get their own contrast treatment so a richer room can never bury
   // them: a dark pool underneath, a bright disc behind, outlined labels.
+  // Furniture you can look inside, and furniture you already have.
+  //
+  // Both marks are small on purpose. An unsearched piece gets a pair of handles
+  // — enough that "these ones open" is something you learn by looking rather
+  // than by being told — and a searched one gets its drawer left hanging out,
+  // which is how you remember you have been here without a tick-box on screen.
+  function drawStashes(sim, time) {
+    if (!sim.stashes.length) return;
+    const left = camera.x - 40;
+    const right = camera.x + W + 40;
+    const top = camera.y - 40;
+    const bottom = camera.y + H + 40;
+    const busy = sim.searching ? sim.searching.id : null;
+    for (const stash of sim.stashes) {
+      if (stash.x > right || stash.x + stash.w < left) continue;
+      if (stash.y > bottom || stash.y + stash.h < top) continue;
+      const cx = stash.x + stash.w / 2;
+      const cy = stash.y + stash.h / 2;
+      if (stash.searched) {
+        // The drawer, left open. Drawn as a slab pulled out of the front face,
+        // dark inside, so it reads as emptied from across the room.
+        const w = Math.min(stash.w - 6, 26);
+        ctx.fillStyle = 'rgba(12,8,16,0.55)';
+        roundRect(ctx, cx - w / 2, stash.y + stash.h - 5, w, 9, 2);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.16)';
+        ctx.fillRect(cx - w / 2 + 1, stash.y + stash.h - 4, w - 2, 1.6);
+        continue;
+      }
+      // Two brass handles on a dark plate. The plate is what makes them read
+      // against any furniture colour — brass on orange wood at this size is
+      // otherwise a smudge, and "which of these can I open?" has to be a
+      // question the room answers rather than one the player has to guess.
+      const near = stash.id === sim.searchTargetId || stash.id === busy;
+      const gap = Math.min(stash.w * 0.26, 9);
+      const handle = (hx) => {
+        ctx.fillStyle = 'rgba(24,14,10,0.45)';
+        roundRect(ctx, hx - 4.6, cy - 3.2, 9.2, 6.4, 2);
+        ctx.fill();
+        ctx.fillStyle = near ? '#cdeeff' : '#e6c983';
+        ctx.fillRect(hx - 3.2, cy - 1.1, 6.4, 2.4);
+        ctx.fillStyle = 'rgba(255,255,255,0.35)';
+        ctx.fillRect(hx - 3.2, cy - 1.1, 6.4, 0.9);
+      };
+      ctx.globalAlpha = near ? 0.72 + 0.28 * Math.sin(time * 5) : 0.9;
+      handle(cx - gap);
+      handle(cx + gap);
+      ctx.globalAlpha = 1;
+      if (near) {
+        ctx.strokeStyle = '#6cc8e8';
+        ctx.globalAlpha = 0.30 + 0.30 * Math.sin(time * 5);
+        ctx.lineWidth = 1.4;
+        roundRect(ctx, stash.x + 1, stash.y + 1, stash.w - 2, stash.h - 2, 3);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+    }
+  }
+
   function drawItems(sim, time) {
     ctx.textAlign = 'center';
     // On a floorplan most of the loot is off screen every frame, and each one
@@ -498,6 +557,7 @@ export function createRenderer(canvas, options = {}) {
         drawSleeper(ctx, sim.level, stage, time, sim.wakeSeconds || 0,
           Math.max(sim.startle || 0, jolt), kind, pose);
       }
+      drawStashes(sim, time);
       drawItems(sim, time);
 
       // Tiptoe, walk or run, read off the speed he is actually travelling at
@@ -506,8 +566,22 @@ export function createRenderer(canvas, options = {}) {
       const gait = gaitBlend(player.speed / TUNING.player.speed);
       const reachProgress = sim.reach ? sim.reach.t / sim.reach.duration : 0;
 
+      // While he is rummaging he faces what he is opening, whatever direction
+      // he happened to arrive from. Presentation only — the simulation's own
+      // heading is untouched, so nothing about movement changes.
+      let facing = player.facing;
+      let rummage = 0;
+      if (sim.searching) {
+        rummage = Math.min(1, sim.searching.t / sim.searching.duration);
+        const toward = Math.atan2(sim.searching.y - py, sim.searching.x - px);
+        let turn = toward - facing;
+        while (turn > Math.PI) turn -= Math.PI * 2;
+        while (turn < -Math.PI) turn += Math.PI * 2;
+        facing += turn * Math.min(1, rummage * 4);
+      }
+
       const stance = {
-        facing: player.facing,
+        facing,
         walkPhase: player.walkPhase,
         walk: gait.walk,
         creep: gait.creep,
@@ -515,7 +589,8 @@ export function createRenderer(canvas, options = {}) {
         moving: gait.moving,
         stride: gait.stride,
         clock: time,
-        reach: reachProgress
+        reach: reachProgress,
+        search: rummage
       };
       // Locations that ask for the drawn figures get them; everywhere else
       // keeps the character it has always had.

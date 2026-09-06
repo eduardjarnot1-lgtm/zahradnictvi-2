@@ -136,6 +136,10 @@ export function drawFigure(ctx, x, y, pose, look) {
   // A turn of the head on its own, without the body following. This is what
   // "having a look round" is: you do not rotate on the spot to do it.
   const glance = pose.glance || 0;
+  // Hands in a drawer: he folds down over whatever he is opening. Separate
+  // from `reach`, which is the quick snatch of something off a shelf — this is
+  // a man crouched and rummaging, and it should look like work.
+  const rummage = pose.search || 0;
   const build = look.build || 1;
 
   // Travel frame: "along" is where he is going, "across" is his own left-right.
@@ -174,10 +178,13 @@ export function drawFigure(ctx, x, y, pose, look) {
   const twist = swing * (1.4 + run * 1.1) * (1 - creep * 0.4);
   // Leaning into the run, crouching into the creep.
   const lean = run * 2.2;
-  const crouch = creep * cycling * 2.6;
+  // The rummage bobs: he leans in, roots about, leans in again.
+  const dig = rummage > 0 ? 0.5 - 0.5 * Math.cos(rummage * Math.PI * 4) : 0;
+  const crouch = creep * cycling * 2.6 + rummage * (3.4 + dig * 1.6);
 
-  const centreX = x + acrossX * hipSway * 0.5 + faceX * lean;
-  const centreY = y + bob + breathe + crouch + acrossY * hipSway * 0.5 + faceY * lean * FORESHORTEN;
+  const centreX = x + acrossX * hipSway * 0.5 + faceX * (lean + rummage * 2.2);
+  const centreY = y + bob + breathe + crouch + acrossY * hipSway * 0.5
+    + faceY * (lean + rummage * 2.2) * FORESHORTEN;
 
   const stride = 5.9 * strideScale * build;
   const along = (amount) => ({ x: faceX * amount, y: faceY * amount * FORESHORTEN });
@@ -200,7 +207,8 @@ export function drawFigure(ctx, x, y, pose, look) {
     const ankleY = y + ANKLE_Y + acrossY * FOOT_W * side * build + step.y - lift;
     // The knee leads the ankle through the swing, which is what a bent leg
     // looks like from the side, and is bent further the lower the crouch.
-    const bend = (Math.max(0, phase) * 2.6 + creep * 2.2 + run * 1.4) * cycling;
+    const bend = (Math.max(0, phase) * 2.6 + creep * 2.2 + run * 1.4) * cycling
+      + rummage * 2.4;
     const kneeX = (hipX + ankleX) / 2 + faceX * bend;
     const kneeY = (hipY + ankleY) / 2 + faceY * bend * FORESHORTEN - 0.4;
 
@@ -222,7 +230,8 @@ export function drawFigure(ctx, x, y, pose, look) {
     // Arms oppose legs: the arm on a side swings against that side's leg.
     const legPhase = side === -1 ? swing : -swing;
     const phase = -legPhase;
-    const reachOut = reach > 0 && !far ? Math.sin(Math.min(1, reach) * Math.PI) * 12 : 0;
+    const reachOut = reach > 0 && !far ? Math.sin(Math.min(1, reach) * Math.PI) * 12
+      : rummage > 0 ? 7.5 + dig * 3.5 : 0;
     // Held in and barely swinging while creeping; pumped and bent while running.
     const amplitude = (3.9 + run * 3.0) * (1 - creep * 0.62);
     const swingAt = phase * amplitude + reachOut;
@@ -232,7 +241,7 @@ export function drawFigure(ctx, x, y, pose, look) {
       + faceY * twist * side * 0.35 * FORESHORTEN;
     // A running arm is bent at the elbow and rides high; a creeping one is
     // tucked; a walking one hangs and swings from the shoulder.
-    const raise = run * 4.4 + creep * 2.2;
+    const raise = run * 4.4 + creep * 2.2 - rummage * 3.2;
     const step = along(swingAt);
     const wristX = shoulderX + step.x + acrossX * side * 0.6;
     const wristY = shoulderY + step.y + acrossY * side * 0.6 + 11 - raise;
@@ -274,7 +283,7 @@ export function drawFigure(ctx, x, y, pose, look) {
   const look2 = facing + glance;
   const gX = Math.cos(look2);
   const gY = Math.sin(look2);
-  drawHead(ctx, headX, headY, {
+  drawHead(ctx, headX, headY + rummage * 1.8, {
     sideOn: Math.abs(gX),
     turn: gX >= 0 ? 1 : -1,
     away: gY < -0.3,

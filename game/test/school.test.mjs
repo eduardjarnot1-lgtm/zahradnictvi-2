@@ -11,10 +11,10 @@ import assert from 'node:assert/strict';
 import { LEVELS } from '../src/levels.js';
 import { TUNING } from '../src/tuning.js';
 import { createSim, stepSim, playerOf, STEP_SECONDS } from '../src/sim.js';
-import { locationRules, proximityScale } from '../src/rules.js';
+import { locationRules, proximityScale, itemStats } from '../src/rules.js';
 import { navGrid, flowField, cellOf } from '../src/nav.js';
 import { blocked } from '../src/physics.js';
-import { createRun, tick, walkTo } from './harness.mjs';
+import { createRun, tick, walkTo, escape, waitOut, playEfficiently } from './harness.mjs';
 
 const SCHOOL = LEVELS.filter((l) => l.location === 'School');
 const ELSEWHERE = LEVELS.filter((l) => l.location !== 'School');
@@ -549,5 +549,288 @@ test('the navigation grid never claims a spot the physics would refuse', () => {
       checked++;
     }
     assert.ok(checked > 500, `L${level.id}: only ${checked} free cells`);
+  }
+});
+
+// --- looking inside the furniture -------------------------------------------
+
+const SEARCH = RULES.search;
+
+// Stand next to a piece and open it, returning what happened.
+function openStash(run, stash) {
+  const p = playerOf(run.sim);
+  p.x = stash.x + stash.w / 2;
+  p.y = stash.y + stash.h + 16;
+  p.prevX = p.x;
+  p.prevY = p.y;
+  tick(run);
+  const before = { noise: run.sim.noise, money: run.sim.money };
+  tick(run, { x: 0, y: 0, take: false, search: true });
+  const opened = !!run.sim.searching;
+  let frames = 0;
+  while (run.sim.searching && run.sim.status === 'running' && frames < 600) {
+    tick(run, { x: 0, y: 0, take: false, search: false });
+    frames++;
+  }
+  return {
+    opened,
+    seconds: frames / 60,
+    noise: run.sim.noise - before.noise,
+    money: run.sim.money - before.money,
+    event: run.sim.events.find((e) => e.type === 'found')
+  };
+}
+
+test('only the school has furniture worth opening', () => {
+  for (const level of SCHOOL) {
+    assert.ok(level.stashes.length >= 3, `L${level.id} has ${level.stashes.length} searchable`);
+  }
+  for (const level of ELSEWHERE) {
+    assert.equal(level.stashes.length, 0,
+      `L${level.id} (${level.location}) grew searchable furniture`);
+  }
+});
+
+test('pressing SEARCH does nothing at all anywhere else', () => {
+  for (const level of ELSEWHERE.slice(0, 10)) {
+    const sim = createSim({ level });
+    assert.equal(sim.stashes.length, 0);
+    for (let i = 0; i < 30; i++) stepSim(sim, { x: 0, y: 0, take: false, search: true });
+    assert.equal(sim.searchTargetId, null, `L${level.id} offered something to search`);
+    assert.equal(sim.searching, null);
+    assert.equal(sim.money, 0, `L${level.id} paid out for a search`);
+    assert.equal(sim.noise, 0, `L${level.id} made noise for a search`);
+  }
+});
+
+test('every school level has some empty furniture, or there is no decision', () => {
+  for (const level of SCHOOL) {
+    const empty = level.stashes.filter((s) => !s.item).length;
+    const full = level.stashes.filter((s) => s.item).length;
+    assert.ok(empty > 0, `L${level.id}: every cabinet pays out, so opening them is a chore`);
+    assert.ok(full > 0, `L${level.id}: nothing to find`);
+    assert.ok(full < level.stashes.length,
+      `L${level.id}: ${full}/${level.stashes.length} is not a gamble`);
+  }
+});
+
+test('the mechanic grows across the five levels', () => {
+  const counts = SCHOOL.map((l) => l.stashes.length);
+  const filled = SCHOOL.map((l) => l.stashes.filter((s) => s.item).length);
+  for (let i = 1; i < counts.length; i++) {
+    assert.ok(counts[i] > counts[i - 1], `searchable count fell at tier ${i + 1}: ${counts}`);
+    assert.ok(filled[i] > filled[i - 1], `loot count fell at tier ${i + 1}: ${filled}`);
+  }
+  // ...and so does what is hidden in it.
+  const worth = SCHOOL.map((l) => l.stashes.reduce(
+    (sum, s) => sum + (s.item ? itemStats(s.item).value : 0), 0));
+  for (let i = 1; i < worth.length; i++) {
+    assert.ok(worth[i] > worth[i - 1], `hidden value fell at tier ${i + 1}: ${worth}`);
+  }
+});
+
+test('opening something costs noise, time, and your ability to walk', () => {
+  const run = openSchool();
+  const { sim } = run;
+  const stash = sim.stashes[sim.stashes.length - 1];   // furthest from him
+  const p = playerOf(sim);
+  p.x = stash.x + stash.w / 2;
+  p.y = stash.y + stash.h + 16;
+  p.prevX = p.x;
+  p.prevY = p.y;
+  tick(run);
+  assert.equal(sim.searchTargetId, stash.id, 'it should offer itself when you are beside it');
+
+  const before = { noise: sim.noise, clock: sim.timeLeft, x: p.x };
+  tick(run, { x: 0, y: 0, take: false, search: true });
+  assert.ok(sim.searching, 'the press should open it');
+  assert.ok(sim.noise > before.noise, 'opening a drawer is not silent');
+  assert.equal(sim.searchTargetId, null, 'nothing else is offered while his hands are busy');
+
+  // Trying to run away mid-search barely moves him.
+  for (let i = 0; i < 30; i++) tick(run, { x: 1, y: 0, take: false, search: false });
+  assert.ok(Math.abs(p.x - before.x) < 14,
+    `he covered ${Math.abs(p.x - before.x).toFixed(0)} units while rummaging`);
+
+  let frames = 30;
+  while (sim.searching && frames < 600) { tick(run); frames++; }
+  assert.ok(Math.abs(frames / 60 - SEARCH.duration) < 0.1,
+    `the search took ${(frames / 60).toFixed(2)}s, not ${SEARCH.duration}s`);
+  assert.ok(before.clock - sim.timeLeft > SEARCH.duration, 'and it came off the clock');
+
+  // ...and afterwards he moves normally again.
+  const resumed = p.x;
+  for (let i = 0; i < 30; i++) tick(run, { x: 1, y: 0, take: false, search: false });
+  assert.ok(p.x - resumed > 20, 'normal movement should resume the moment it is over');
+});
+
+test('the same cupboard cannot be opened twice', () => {
+  const run = openSchool();
+  const stash = run.sim.stashes.find((s) => s.item);
+  const first = openStash(run, stash);
+  assert.ok(first.opened);
+  assert.ok(first.money > 0);
+  assert.ok(stash.searched);
+  const again = openStash(run, stash);
+  assert.equal(again.opened, false, 'it should not open again');
+  assert.equal(again.money, 0);
+  assert.equal(run.sim.searchTargetId, null, 'and it should stop offering itself');
+});
+
+test('an empty cupboard says so and costs you the noise anyway', () => {
+  const run = openSchool();
+  const stash = run.sim.stashes.find((s) => !s.item);
+  const result = openStash(run, stash);
+  assert.ok(result.opened);
+  assert.equal(result.money, 0, 'nothing in it');
+  assert.ok(result.noise > 0, 'you still opened it — that is the gamble');
+  assert.ok(result.event && result.event.empty, 'the player has to be told it was empty');
+  assert.ok(stash.searched, 'and it stays open');
+});
+
+test('finding something pays exactly what the same item pays off a shelf', () => {
+  const run = openSchool();
+  const stash = run.sim.stashes.find((s) => s.item);
+  const result = openStash(run, stash);
+  assert.equal(result.money, itemStats(stash.item).value);
+  assert.equal(result.event.itemType, stash.item);
+  assert.equal(result.event.empty, false);
+});
+
+test('opening something near Mr. Vrána is far louder than opening it across the school', () => {
+  // The same cupboard, twice, with only the caretaker's position changed.
+  const level = SCHOOL[0];
+  const cost = (distance) => {
+    const sim = createSim({ level });
+    sim.timeLeft = 9999;
+    const stash = sim.stashes[0];
+    const p = playerOf(sim);
+    p.x = stash.x + stash.w / 2;
+    p.y = stash.y + stash.h + 16;
+    p.prevX = p.x;
+    p.prevY = p.y;
+    const park = () => {
+      sim.investigator.x = p.x;
+      sim.investigator.y = p.y + distance;
+    };
+    park();
+    stepSim(sim);
+    park();
+    stepSim(sim, { x: 0, y: 0, take: false, search: true });
+    return sim.noise;
+  };
+  const near = cost(RULES.proximity.near - 30);
+  const far = cost(RULES.proximity.far + 60);
+  assert.ok(near > far * 4, `opening it beside him costs ${near}, across the school ${far}`);
+});
+
+// What opening a given cupboard actually costs, in meter, at its own distance
+// from the caretaker: the search plus whatever has to be lifted out of it.
+function costOfOpening(level, stash) {
+  const rules = locationRules(level);
+  const distance = Math.hypot(
+    stash.x + stash.w / 2 - level.watcher.x,
+    stash.y + stash.h / 2 - level.watcher.y);
+  const base = rules.search.noise[stash.style] + (stash.item ? itemStats(stash.item).noise : 0);
+  return base * proximityScale(rules, distance);
+}
+
+const dearest = (level) => level.stashes
+  .reduce((a, b) => (costOfOpening(level, a) >= costOfOpening(level, b) ? a : b));
+
+test('no single cupboard can cost more meter than the player can absorb', () => {
+  // The ceiling is the whole balance of the mechanic. A search that can run to
+  // eighty on its own is not a risk, it is a trap: you cannot arrive with any
+  // noise, and you cannot walk away afterwards. The generator places loot
+  // against this same number, so this test is also what keeps the two in step.
+  for (const level of SCHOOL) {
+    for (const stash of level.stashes) {
+      const cost = costOfOpening(level, stash);
+      assert.ok(cost <= 60,
+        `L${level.id}: opening the ${stash.style} for ${stash.item || 'nothing'} ` +
+        `costs ${cost.toFixed(0)} — nothing survives that`);
+    }
+  }
+});
+
+test('the school hides its best things where they are worth thinking about', () => {
+  // Not next to the exit, and not in the one cupboard beside his couch either.
+  // Somewhere the meter notices.
+  for (const level of SCHOOL) {
+    const best = level.stashes.filter((s) => s.item)
+      .reduce((a, b) => (itemStats(a.item).value >= itemStats(b.item).value ? a : b));
+    const cost = costOfOpening(level, best);
+    assert.ok(cost > level.tier * 4,
+      `L${level.id}: the best hidden thing costs ${cost.toFixed(0)} — no decision in that`);
+  }
+  // ...and the top two levels have at least one that is genuinely expensive.
+  for (const level of SCHOOL.slice(3)) {
+    // A third of the meter in one press is a decision worth making twice.
+    assert.ok(costOfOpening(level, dearest(level)) > 30,
+      `L${level.id} has nothing worth hesitating over`);
+  }
+});
+
+test('a search that crosses 80 wakes him through the ordinary door', () => {
+  // No separate guard reaction: the same threshold, the same stored spot, the
+  // same walk. A search is just another way to make noise.
+  const run = openSchool(25);
+  const { sim } = run;
+  const w = sim.investigator;
+  const stash = dearest(sim.level);
+  const cost = costOfOpening(sim.level, stash);
+  // Start where opening it lands him over eighty but under a hundred: this is
+  // about who reacts, not about losing the level to the meter.
+  sim.noise = RULES.investigate.wakeAt - cost + 8;
+  const p = playerOf(sim);
+  p.x = stash.x + stash.w / 2;
+  p.y = stash.y + stash.h + 16;
+  p.prevX = p.x;
+  p.prevY = p.y;
+  tick(run);
+  assert.equal(w.state, 'asleep');
+  tick(run, { x: 0, y: 0, take: false, search: true });
+  while (sim.searching && sim.status === 'running') tick(run);
+  assert.ok(sim.noise > RULES.investigate.wakeAt,
+    `opening it only reached ${sim.noise.toFixed(0)}`);
+  assert.notEqual(w.state, 'asleep', 'he should be getting up');
+  assert.ok(w.target, 'and he should have somewhere to go');
+  assert.ok(Math.hypot(w.target.x - p.x, w.target.y - p.y) < 40,
+    'which is where the cupboard was opened');
+});
+
+test('the dearest cupboard on the map is worth it, and survivable', () => {
+  // Level five keeps something expensive well inside his hearing. That has to
+  // be a decision rather than a trap: taking it costs real meter, and it must
+  // still be possible to get out afterwards by playing the loop properly.
+  const run = createRun(25);
+  const { sim } = run;
+  const stash = dearest(sim.level);
+  assert.ok(stash.item, 'the dearest thing to open should have something in it');
+  const cost = costOfOpening(sim.level, stash);
+  assert.ok(cost > 30, `the riskiest cupboard only costs ${cost.toFixed(0)}`);
+
+  walkTo(run, { x: stash.x + stash.w / 2, y: stash.y + stash.h + 20 }, 60 * 30);
+  tick(run, { x: 0, y: 0, take: false, search: true });
+  while (sim.searching && sim.status === 'running') tick(run);
+  assert.equal(sim.status, 'running', 'taking it must not simply lose the level');
+  assert.equal(sim.money, itemStats(stash.item).value);
+
+  // Whether or not that woke him, the loop has to close: get off the spot,
+  // go quiet, walk out.
+  walkTo(run, sim.level.spawn, 60 * 15);
+  assert.ok(waitOut(run, 60 * 30), 'standing still should settle it');
+  const result = escape(run);
+  assert.equal(result.status, 'won', `could not get out: ${result.reason}`);
+  assert.ok(result.money >= itemStats(stash.item).value);
+});
+
+test('you can still ignore every cupboard and win', () => {
+  // Option A has to stay open, or the mechanic is a tax rather than a choice.
+  for (const level of SCHOOL) {
+    const { run, result } = playEfficiently(level.id);
+    assert.equal(result.status, 'won', `L${level.id} not winnable without searching`);
+    assert.ok(run.sim.stashes.every((s) => !s.searched),
+      `L${level.id}: the efficient run searched something, so this proves nothing`);
   }
 });

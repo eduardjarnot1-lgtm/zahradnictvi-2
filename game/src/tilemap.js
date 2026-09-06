@@ -113,6 +113,34 @@ export function tileLevel(spec) {
     }
   }
 
+  // --- furniture you can look inside ---------------------------------------
+  // A searchable cabinet is an ordinary cabinet that happens to know what is in
+  // it. It blocks the same route and costs the same to walk into; the only
+  // difference is that the map wrote down whether opening it is worth the
+  // noise. `null` means it is empty, which is the point of the mechanic — a
+  // level where every drawer pays out is a chore, not a decision.
+  const search = spec.search || {};
+  const stashes = [];
+  for (const [ch, entry] of Object.entries(search)) {
+    for (const r of mergeRects(grid, rows, cols, ch)) {
+      // What is inside is written in the same one-letter vocabulary as the
+      // loot on the floor, and resolved through the same legend — a `w` in a
+      // drawer is the same wallet as a `w` on a desk.
+      const inside = entry.item ? (legend[entry.item] || entry.item) : null;
+      const stash = {
+        id: `L${spec.id}-s${stashes.length}`,
+        style: entry.style,
+        item: typeof inside === 'string' ? inside : inside && inside.type,
+        ...r
+      };
+      stashes.push(stash);
+      colliders.push({
+        type: 'furniture', style: entry.style, theme: spec.theme,
+        searchable: stash.id, ...r
+      });
+    }
+  }
+
   // --- floor markings -------------------------------------------------------
   const rugs = mergeRects(grid, rows, cols, ',');
   const creaks = mergeRects(grid, rows, cols, '~')
@@ -153,7 +181,8 @@ export function tileLevel(spec) {
     });
 
   // --- anything left over is a typo, and a typo is a broken level ------------
-  const known = new Set([...FLOOR, '#', '%', 'O', 'E', ...Object.keys(FURNITURE), ...Object.keys(legend)]);
+  const known = new Set([...FLOOR, '#', '%', 'O', 'E',
+    ...Object.keys(FURNITURE), ...Object.keys(legend), ...Object.keys(search)]);
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
       if (!known.has(grid[y][x])) {
@@ -182,6 +211,7 @@ export function tileLevel(spec) {
     // map is allowed more seconds while still being tighter to play.
     clock: spec.clock || 0,
     doors,
+    stashes,
     windows,
     creaks,
     rugs,

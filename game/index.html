@@ -77,7 +77,22 @@
     box-shadow:0 0 0 4px #ffd34d1a}
   #take.down{transform:scale(.94);background:#ffd34d55}
   #take:focus-visible{outline:2px solid #ffd34d;outline-offset:3px}
+  /* The second action, and it only exists where there is something to open.
+     Sits above TAKE rather than beside it: a thumb reaching the corner of a
+     phone should not have to choose between two buttons on the same arc. */
+  #search{position:absolute;right:18px;bottom:104px;width:64px;height:64px;border-radius:50%;
+    background:#6cc8e810;border:2px solid #6cc8e855;color:#a8e2f4cc;font-size:11px;
+    font-weight:800;letter-spacing:.5px;display:none;align-items:center;justify-content:center;
+    pointer-events:auto}
+  #search.on{background:#6cc8e838;border-color:#6cc8e8;color:#e2f6ff;
+    box-shadow:0 0 0 4px #6cc8e81a}
+  #search.down{transform:scale(.94);background:#6cc8e855}
+  #search:focus-visible{outline:2px solid #6cc8e8;outline-offset:3px}
+  /* A ring that fills while his hands are in the drawer. */
+  #search.busy{background:conic-gradient(#6cc8e8cc calc(var(--p) * 1turn),#6cc8e820 0);
+    border-color:#6cc8e8;color:#e2f6ff}
   body[data-screen="playing"] #take{display:flex}
+  body[data-screen="playing"] #search.here{display:flex}
   /* the HUD belongs to the room, not to the menus */
   body[data-screen="menu"] #hud, body[data-screen="levels"] #hud{display:none}
   body:not([data-screen="playing"]) #danger{opacity:0!important}
@@ -202,6 +217,7 @@
 
   <div id="danger"></div>
   <div id="joy"><div id="knob"></div></div>
+  <button id="search" aria-label="Search furniture">SEARCH</button>
   <button id="take" aria-label="Take item">TAKE</button>
 
   <div class="screen on" id="scMenu">
@@ -645,6 +661,25 @@ __mod.tuning = (function () {
         // back to the staff room, so it has to actually work inside the clock —
         // but the delay is longer than elsewhere, so it is never a reflex.
         recovery: { delay: 0.9, rate: 7 },
+        // Looking inside the furniture.
+        //
+        // The decision this exists to create: a cabinet might hold a diamond or
+        // it might hold nothing, and finding out costs you noise, a second and a
+        // half of the clock, and standing still while the meter is read off how
+        // close you are to Mr. Vrána. The whole mechanic falls apart in one
+        // direction if searching is free and in the other if it is deafening, so
+        // the numbers here are small and the multiplier does the work.
+        search: {
+          reach: 34,          // how close a piece has to be to offer itself
+          duration: 1.25,     // seconds spent with your hands in the drawer
+          moveScale: 0.12,    // you can shuffle, not walk, while you are at it
+          // Opening the thing, before you have any idea what is inside. Hard,
+          // hollow furniture carries; a desk drawer barely does.
+          noise: {
+            table: 3, nightstand: 3, chest: 4, tvBench: 4,
+            sofa: 2, wardrobe: 5, bookshelf: 5, plinth: 6
+          }
+        },
         // The school's two characters are drawn by src/figure.js rather than by
         // the older art.js walker. One flag, so making it the whole game's look
         // is a one-line change rather than a rewrite.
@@ -1441,6 +1476,34 @@ __mod.tilemap = (function () {
       }
     }
 
+    // --- furniture you can look inside ---------------------------------------
+    // A searchable cabinet is an ordinary cabinet that happens to know what is in
+    // it. It blocks the same route and costs the same to walk into; the only
+    // difference is that the map wrote down whether opening it is worth the
+    // noise. `null` means it is empty, which is the point of the mechanic — a
+    // level where every drawer pays out is a chore, not a decision.
+    const search = spec.search || {};
+    const stashes = [];
+    for (const [ch, entry] of Object.entries(search)) {
+      for (const r of mergeRects(grid, rows, cols, ch)) {
+        // What is inside is written in the same one-letter vocabulary as the
+        // loot on the floor, and resolved through the same legend — a `w` in a
+        // drawer is the same wallet as a `w` on a desk.
+        const inside = entry.item ? (legend[entry.item] || entry.item) : null;
+        const stash = {
+          id: `L${spec.id}-s${stashes.length}`,
+          style: entry.style,
+          item: typeof inside === 'string' ? inside : inside && inside.type,
+          ...r
+        };
+        stashes.push(stash);
+        colliders.push({
+          type: 'furniture', style: entry.style, theme: spec.theme,
+          searchable: stash.id, ...r
+        });
+      }
+    }
+
     // --- floor markings -------------------------------------------------------
     const rugs = mergeRects(grid, rows, cols, ',');
     const creaks = mergeRects(grid, rows, cols, '~')
@@ -1481,7 +1544,8 @@ __mod.tilemap = (function () {
       });
 
     // --- anything left over is a typo, and a typo is a broken level ------------
-    const known = new Set([...FLOOR, '#', '%', 'O', 'E', ...Object.keys(FURNITURE), ...Object.keys(legend)]);
+    const known = new Set([...FLOOR, '#', '%', 'O', 'E',
+      ...Object.keys(FURNITURE), ...Object.keys(legend), ...Object.keys(search)]);
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
         if (!known.has(grid[y][x])) {
@@ -1510,6 +1574,7 @@ __mod.tilemap = (function () {
       // map is allowed more seconds while still being tighter to play.
       clock: spec.clock || 0,
       doors,
+      stashes,
       windows,
       creaks,
       rugs,
@@ -2491,13 +2556,18 @@ __mod.maps = (function () {
       watcher: 'caretaker',
       seated: false,
       clock: 56,
+      search: {
+        '1': { style: 'chest', item: 'w' },
+        '2': { style: 'table', item: 'c' },
+        '3': { style: 'table', item: null },
+      },
       legend: LOOT,
       tiles: [
         '##############################',
         '#.............%..............#',
         '#......c......%.......k......#',
-        '#.TTTT....TTTT%.TTTT....TTTT.#',
-        '#.TTTT....TTTT%.TTTT....TTTT.#',
+        '#.3333....2222%.TTTT....TTTT.#',
+        '#.3333....2222%.TTTT....TTTT.#',
         '#.............%..............#',
         '#.............%..............#',
         '#.p.....c...k.%..c....w......#',
@@ -2505,8 +2575,8 @@ __mod.maps = (function () {
         '#%%%%%%DDD%%%%%%%%%%%DDD%%%%%#',
         '#............................#',
         'X............................#',
-        'X...........CCC............@.#',
-        'X...........CCC..............#',
+        'X...........111............@.#',
+        'X...........111..............#',
         '#............................#',
         '#............................#',
         '#%%%%%%%%%%%%%DDD%%%%%%%%%%%%#',
@@ -2531,23 +2601,30 @@ __mod.maps = (function () {
       watcher: 'caretaker',
       seated: false,
       clock: 53,
+      search: {
+        '1': { style: 'chest', item: 'k' },
+        '2': { style: 'bookshelf', item: 'w' },
+        '3': { style: 'table', item: 'c' },
+        '4': { style: 'table', item: null },
+        '5': { style: 'table', item: null },
+      },
       legend: LOOT,
       tiles: [
         '#################################',
         '#..............%................#',
         '#..............%................#',
-        '#.TTTTT...TTTTT%.TTTTT....TTTTT.#',
-        '#.TTTTT...TTTTT%.TTTTT....TTTTT.#',
+        '#.TTTTT...44444%.TTTTT....TTTTT.#',
+        '#.TTTTT...44444%.TTTTT....TTTTT.#',
         '#..............%................#',
         '#..............%................#',
-        '#.TTTTT...TTTTT%.TTTTT....TTTTT.#',
-        '#.TTTTT.w.TTTTT%.TTTTT..m.TTTTT.#',
+        '#.55555...TTTTT%.TTTTT....33333.#',
+        '#.55555.w.TTTTT%.TTTTT..m.33333.#',
         '#..............%................#',
         '#%%%%%%DDD%%%%%%%%%%%%%DDD%%%%%%#',
         '#...............................#',
         'X......w.........p....k.........#',
-        'X............CCC..............@.#',
-        'X.........m..CCC..........w.....#',
+        'X............111..............@.#',
+        'X.........m..111..........w.....#',
         '#...............................#',
         '#...............................#',
         '#%%%%%%DDD%%%%%%%%%%%%%DDD%%%%%%#',
@@ -2556,8 +2633,8 @@ __mod.maps = (function () {
         '#..............%....EEEEEEE.....#',
         '#..............%....EEEEEEE.....#',
         '#.......k...r..%....EEEEEEE.....#',
-        '#.BBBBBBBBB....%................#',
-        '#.BBBBBBBBB....%..r.............#',
+        '#.222222222....%................#',
+        '#.222222222....%..r.............#',
         '#..............%................#',
         '#..............%................#',
         '#################################',
@@ -2573,24 +2650,33 @@ __mod.maps = (function () {
       watcher: 'caretaker',
       seated: false,
       clock: 51,
+      search: {
+        '1': { style: 'chest', item: 'r' },
+        '2': { style: 'table', item: 'k' },
+        '3': { style: 'table', item: 'p' },
+        '4': { style: 'bookshelf', item: 'w' },
+        '5': { style: 'table', item: null },
+        '6': { style: 'table', item: null },
+        '7': { style: 'table', item: null },
+      },
       legend: LOOT,
       tiles: [
         '####################################',
         '#..........%..........%............#',
         '#......r...%.....m....%............#',
-        '#.TTT......%.TTT......%.TTTT..TTTT.#',
-        '#.TTT......%.TTT......%.TTTT..TTTT.#',
+        '#.TTT......%.666......%.TTTT..5555.#',
+        '#.TTT......%.666......%.TTTT..5555.#',
         '#..........%..........%............#',
         '#.....m....%..........%............#',
-        '#.TTT......%.TTT......%.TTTT.......#',
-        '#.TTT......%.TTT......%.TTTT.......#',
+        '#.777......%.333......%.2222.......#',
+        '#.777......%.333......%.2222.......#',
         '#.....r....%.....m....%......t.....#',
         '#..........%..........%............#',
         '#%%%%DDD%%%%%%%%DDD%%%%%%%%%DDD%%%%#',
         '#................t.................#',
         'X..................................#',
-        'X...................CCC..........@.#',
-        'X...................CCC............#',
+        'X...................111..........@.#',
+        'X...................111............#',
         '#..................................#',
         '#..................................#',
         '#%%%%%%%DDD%%%%%%%%%%%%%%DDD%%%%%%%#',
@@ -2601,8 +2687,8 @@ __mod.maps = (function () {
         '#................%.....EEEEEEE.....#',
         '#........n.......%.................#',
         '#................%.................#',
-        '#.BBBBBBBBBBB....%.................#',
-        '#.BBBBBBBBBBB....%..l......l....l..#',
+        '#.44444444444....%.................#',
+        '#.44444444444....%..l......l....l..#',
         '#................%.................#',
         '#................%.................#',
         '####################################',
@@ -2618,17 +2704,28 @@ __mod.maps = (function () {
       watcher: 'caretaker',
       seated: false,
       clock: 50,
+      search: {
+        '1': { style: 'chest', item: 'n' },
+        '2': { style: 'table', item: 'j' },
+        '3': { style: 'table', item: 'r' },
+        '4': { style: 'table', item: 'k' },
+        '5': { style: 'table', item: 'p' },
+        '6': { style: 'table', item: null },
+        '7': { style: 'table', item: null },
+        '8': { style: 'table', item: null },
+        '9': { style: 'table', item: null },
+      },
       legend: LOOT,
       tiles: [
         '########################################',
         '#...........%...........%..............#',
         '#...........%...........%.......v......#',
-        '#.TTTT..TTTT%.TTTT..TTTT%.TTTT....TTTT.#',
-        '#.TTTT..TTTT%.TTTT..TTTT%.TTTT....TTTT.#',
+        '#.TTTT..8888%.7777..TTTT%.5555....6666.#',
+        '#.TTTT..8888%.7777..TTTT%.5555....6666.#',
         '#...........%...........%..............#',
         '#...........%...........%..............#',
-        '#.TTTT..TTTT%.TTTT..TTTT%.TTTT..l.TTTT.#',
-        '#.TTTT..TTTT%.TTTT..TTTT%.TTTT....TTTT.#',
+        '#.9999..TTTT%.4444..3333%.2222..l.TTTT.#',
+        '#.9999..TTTT%.4444..3333%.2222....TTTT.#',
         '#...........%...........%..............#',
         '#...........%...........%..............#',
         '#......n....%......l....%.......v......#',
@@ -2636,8 +2733,8 @@ __mod.maps = (function () {
         '#%%%%%DDD%%%%%%%%%DDD%%%%%%%%%%DDD%%%%%#',
         '#......................................#',
         'X......................................#',
-        'X.....................CCC............@.#',
-        'X......v.........j....CCC..m....n......#',
+        'X.....................111............@.#',
+        'X......v.........j....111..m....n......#',
         '#......................................#',
         '#......................................#',
         '#%%%%%%%%DDD%%%%%%%%%%%%%%%%DDD%%%%%%%%#',
@@ -2666,21 +2763,33 @@ __mod.maps = (function () {
       watcher: 'caretaker',
       seated: false,
       clock: 51,
+      search: {
+        '1': { style: 'chest', item: 'n' },
+        '2': { style: 'chest', item: 'd' },
+        '3': { style: 'table', item: 'v' },
+        '4': { style: 'chest', item: 'l' },
+        '5': { style: 'table', item: 'j' },
+        '6': { style: 'table', item: 'r' },
+        '7': { style: 'table', item: null },
+        '8': { style: 'table', item: null },
+        '9': { style: 'bookshelf', item: null },
+        '0': { style: 'bookshelf', item: null },
+      },
       legend: LOOT,
       tiles: [
         '###OOOOOOOO#########OOOOOOOO########OOOOOOOO#####',
         '#BBBBBB.........%BBBBBB.........%...............#',
-        '#...............%...............%BBB..BBB..BBBB.#',
-        '#TTT..TTT..TTT..%TTT..TTT..TTT..%BBB..BBB..BBBB.#',
-        'OTTT..TTT..TTT..%TTT..TTT..TTT..%BBB..BBB..BBBB.O',
-        'O....t..........%....l..........%BBB..BBB..BBBB.O',
-        'O...............%...............%BBB..BBB..BBBB.O',
-        'OTTT..TTT..TTT..%TTT..TTT..TTT..%...............O',
-        'OTTT..TTT..TTT..%TTT..TTT..TTT..%....p........g.O',
+        '#...............%...............%BBB..999..0000.#',
+        '#TTT..TTT..TTT..%TTT..666..777..%BBB..999..0000.#',
+        'OTTT..TTT..TTT..%TTT..666..777..%BBB..999..0000.O',
+        'O....t..........%....l..........%BBB..999..0000.O',
+        'O...............%...............%BBB..999..0000.O',
+        'OTTT..TTT..TTT..%TTT..TTT..555..%...............O',
+        'OTTT..TTT..TTT..%TTT..TTT..555..%....p........g.O',
         'O...........k...%...........t...%...........SSS.O',
         '#...............%...............%...........SSS.#',
-        '#TTT.......TTT..%TTT.......TTT..%...........SSS.#',
-        '#TTT.......TTT..%TTT.......TTT..%...............#',
+        '#888.......TTT..%333.......TTT..%...........SSS.#',
+        '#888.......TTT..%333.......TTT..%...............#',
         '#...............%...............%.w.............#',
         '#%%%%%%DDD%%%%%%%%%%%%%DDD%%%%%%%%%%%%%DDD%%%%%%#',
         '#CCCCC......CCCCCCCCC.......CCCCCCCCC......CCCCC#',
@@ -2694,13 +2803,13 @@ __mod.maps = (function () {
         '#...................%........CCCC.%.............#',
         '#...................%........CCCC.%.............#',
         '#...................%.............%.............#',
-        '#..................k%.CCCC........%.............#',
-        '#...................%.CCCC.....r................#',
+        '#..................k%.1111........%.............#',
+        '#...................%.1111.....r................#',
         '#.SSSSSSSSSSSSSSSS..%...................m.......#',
         '#.SSSSSSSSSSSSSSSS..%..EEEEEEE..................#',
-        '#...................%..EEEEEEE....%CCCC...CCCCC.#',
-        '#...................%..EEEEEEE....%CCCC...CCCCC.#',
-        '#.SSSSSSSSSS........%.............%CCCC...CCCCC.#',
+        '#...................%..EEEEEEE....%2222...44444.#',
+        '#...................%..EEEEEEE....%2222...44444.#',
+        '#.SSSSSSSSSS........%.............%2222...44444.#',
         '#.SSSSSSSSSS..v.....%...,,,,,.....%.............#',
         '#...................%.............%.............#',
         '####OOOOOOOOOO########OOOOOOOO###################',
@@ -4804,6 +4913,10 @@ __mod.figure = (function () {
     // A turn of the head on its own, without the body following. This is what
     // "having a look round" is: you do not rotate on the spot to do it.
     const glance = pose.glance || 0;
+    // Hands in a drawer: he folds down over whatever he is opening. Separate
+    // from `reach`, which is the quick snatch of something off a shelf — this is
+    // a man crouched and rummaging, and it should look like work.
+    const rummage = pose.search || 0;
     const build = look.build || 1;
 
     // Travel frame: "along" is where he is going, "across" is his own left-right.
@@ -4842,10 +4955,13 @@ __mod.figure = (function () {
     const twist = swing * (1.4 + run * 1.1) * (1 - creep * 0.4);
     // Leaning into the run, crouching into the creep.
     const lean = run * 2.2;
-    const crouch = creep * cycling * 2.6;
+    // The rummage bobs: he leans in, roots about, leans in again.
+    const dig = rummage > 0 ? 0.5 - 0.5 * Math.cos(rummage * Math.PI * 4) : 0;
+    const crouch = creep * cycling * 2.6 + rummage * (3.4 + dig * 1.6);
 
-    const centreX = x + acrossX * hipSway * 0.5 + faceX * lean;
-    const centreY = y + bob + breathe + crouch + acrossY * hipSway * 0.5 + faceY * lean * FORESHORTEN;
+    const centreX = x + acrossX * hipSway * 0.5 + faceX * (lean + rummage * 2.2);
+    const centreY = y + bob + breathe + crouch + acrossY * hipSway * 0.5
+      + faceY * (lean + rummage * 2.2) * FORESHORTEN;
 
     const stride = 5.9 * strideScale * build;
     const along = (amount) => ({ x: faceX * amount, y: faceY * amount * FORESHORTEN });
@@ -4868,7 +4984,8 @@ __mod.figure = (function () {
       const ankleY = y + ANKLE_Y + acrossY * FOOT_W * side * build + step.y - lift;
       // The knee leads the ankle through the swing, which is what a bent leg
       // looks like from the side, and is bent further the lower the crouch.
-      const bend = (Math.max(0, phase) * 2.6 + creep * 2.2 + run * 1.4) * cycling;
+      const bend = (Math.max(0, phase) * 2.6 + creep * 2.2 + run * 1.4) * cycling
+        + rummage * 2.4;
       const kneeX = (hipX + ankleX) / 2 + faceX * bend;
       const kneeY = (hipY + ankleY) / 2 + faceY * bend * FORESHORTEN - 0.4;
 
@@ -4890,7 +5007,8 @@ __mod.figure = (function () {
       // Arms oppose legs: the arm on a side swings against that side's leg.
       const legPhase = side === -1 ? swing : -swing;
       const phase = -legPhase;
-      const reachOut = reach > 0 && !far ? Math.sin(Math.min(1, reach) * Math.PI) * 12 : 0;
+      const reachOut = reach > 0 && !far ? Math.sin(Math.min(1, reach) * Math.PI) * 12
+        : rummage > 0 ? 7.5 + dig * 3.5 : 0;
       // Held in and barely swinging while creeping; pumped and bent while running.
       const amplitude = (3.9 + run * 3.0) * (1 - creep * 0.62);
       const swingAt = phase * amplitude + reachOut;
@@ -4900,7 +5018,7 @@ __mod.figure = (function () {
         + faceY * twist * side * 0.35 * FORESHORTEN;
       // A running arm is bent at the elbow and rides high; a creeping one is
       // tucked; a walking one hangs and swings from the shoulder.
-      const raise = run * 4.4 + creep * 2.2;
+      const raise = run * 4.4 + creep * 2.2 - rummage * 3.2;
       const step = along(swingAt);
       const wristX = shoulderX + step.x + acrossX * side * 0.6;
       const wristY = shoulderY + step.y + acrossY * side * 0.6 + 11 - raise;
@@ -4942,7 +5060,7 @@ __mod.figure = (function () {
     const look2 = facing + glance;
     const gX = Math.cos(look2);
     const gY = Math.sin(look2);
-    drawHead(ctx, headX, headY, {
+    drawHead(ctx, headX, headY + rummage * 1.8, {
       sideOn: Math.abs(gX),
       turn: gX >= 0 ? 1 : -1,
       away: gY < -0.3,
@@ -5204,7 +5322,7 @@ __mod.sim = (function () {
 
   const STEP_SECONDS = 1 / TUNING.sim.hz;
 
-  const EMPTY_INPUT = Object.freeze({ x: 0, y: 0, take: false });
+  const EMPTY_INPUT = Object.freeze({ x: 0, y: 0, take: false, search: false });
 
   // Per-kind update functions. A guard, a dog or a rolling can is a new entry
   // here plus a spawn — it does not touch the loop.
@@ -5215,7 +5333,9 @@ __mod.sim = (function () {
       if (length > 1) { ix /= length; iy /= length; }
 
       // Reaching for an item is a hesitation, not a stop: you keep steering.
-      const slowed = sim.reach ? TUNING.pickup.reachSlow : 1;
+      // Having both hands in a cupboard is closer to a stop.
+      const slowed = sim.searching ? sim.rules.search.moveScale
+        : sim.reach ? TUNING.pickup.reachSlow : 1;
       const top = TUNING.player.speed * sim.mods.speed;
       const targetVx = ix * top * slowed;
       const targetVy = iy * top * slowed;
@@ -5587,6 +5707,12 @@ __mod.sim = (function () {
       }),
       targetId: null,   // the in-range item a TAKE would consume
       reach: null,      // the in-progress grab animation, if any
+      // Furniture you can look inside. Empty everywhere but the school, where
+      // the map says which pieces are searchable and what is in them.
+      stashes: (level.stashes || []).map((stash) => ({ ...stash, searched: false })),
+      searchTargetId: null,  // the nearest unsearched piece within reach
+      searching: null,       // { id, t, duration } while his hands are in it
+      prevSearch: false,
       streak: 0,        // steals in quick succession
       streakTimer: 0,   // ...and how long is left to keep it
       onSoftFloor: false,
@@ -5662,6 +5788,76 @@ __mod.sim = (function () {
       x: item.x,
       y: item.y,
       stage: sleepStage(sim.noise)
+    });
+    if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
+  }
+
+  // Which piece of furniture a SEARCH would open: the nearest unsearched one
+  // within reach, measured to the edge of the box rather than its centre, so a
+  // long bank of lockers offers itself along its whole length.
+  function nearestStash(sim, player, reach) {
+    let best = null;
+    let bestDistance = Infinity;
+    for (const stash of sim.stashes) {
+      if (stash.searched) continue;
+      const dx = Math.max(stash.x - player.x, 0, player.x - (stash.x + stash.w));
+      const dy = Math.max(stash.y - player.y, 0, player.y - (stash.y + stash.h));
+      const distance = Math.hypot(dx, dy);
+      if (distance <= reach && distance < bestDistance) {
+        best = stash;
+        bestDistance = distance;
+      }
+    }
+    return best;
+  }
+
+  // Opening it. The noise lands here, at the start, not when you find out what is
+  // inside: the drawer rattles whether or not there is anything in it, and
+  // charging on the result would let you learn a cabinet was empty for free.
+  function beginSearch(sim, stash, rules) {
+    const amount = Math.max(1, Math.round(
+      (rules.noise[stash.style] || 3) * sim.mods.hazardNoise * sim.proximity));
+    sim.noise = addNoise(sim.noise, amount);
+    // Nothing else is on offer from the moment his hands are in this one, not
+    // from the frame after: a button that lingers for a tick is a button that
+    // can be pressed twice.
+    sim.searchTargetId = null;
+    sim.searching = {
+      id: stash.id, t: 0, duration: rules.duration,
+      x: stash.x + stash.w / 2, y: stash.y + stash.h / 2, style: stash.style
+    };
+    sim.events.push({
+      type: 'searching', id: stash.id, noise: amount, style: stash.style,
+      x: sim.searching.x, y: sim.searching.y
+    });
+    if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
+  }
+
+  // ...and finding out. An item lifted out of a cupboard costs exactly what the
+  // same item costs off a shelf, because it is the same item and the same arm.
+  function finishSearch(sim) {
+    const stash = sim.stashes.find((entry) => entry.id === sim.searching.id);
+    const { x, y } = sim.searching;
+    sim.searching = null;
+    if (!stash || stash.searched) return;
+    stash.searched = true;
+
+    if (!stash.item) {
+      sim.events.push({ type: 'found', id: stash.id, empty: true, x, y });
+      return;
+    }
+    const stats = itemStats(stash.item);
+    const paid = Math.round(stats.value * sim.mods.payout);
+    sim.money += paid;
+    sim.haul += stats.value;
+    const lifted = stats.noise * sim.proximity;
+    sim.noise = addNoise(sim.noise, lifted);
+    sim.shake = Math.min(TUNING.feedback.shakeMax, stats.noise * TUNING.feedback.shakePerNoise);
+    sim.shakePhase = 0;
+    sim.events.push({
+      type: 'found', id: stash.id, empty: false, itemType: stash.item,
+      value: paid, noise: Math.round(lifted), rarity: rarityOf(stash.item).name,
+      big: isBigScore(stats.value), x, y
     });
     if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
   }
@@ -5815,7 +6011,11 @@ __mod.sim = (function () {
 
     // Standing perfectly still lets the room settle — slowly, and only after a
     // beat, so it is a decision against the clock rather than a reset button.
-    if (!player.moving && !sim.reach && sim.status === 'running') {
+    // Rummaging in a drawer is not standing still holding your breath, so it does
+    // not settle the room. Without this the meter falls back through the whole
+    // cost of opening the thing while you are still opening it, and searching is
+    // free — which is the one outcome the mechanic cannot survive.
+    if (!player.moving && !sim.reach && !sim.searching && sim.status === 'running') {
       // A location may settle at its own pace. The school comes down fast enough
       // that standing still is a tactic — it is how you send Mr. Vrána back to
       // bed — and waits longer before it starts, so it is never a reflex.
@@ -5836,6 +6036,24 @@ __mod.sim = (function () {
       sim.reach.t += STEP_SECONDS;
       if (sim.reach.t >= sim.reach.duration) sim.reach = null;
     }
+
+    // Looking inside the furniture. Only where a location asks for it, which is
+    // the school and nowhere else — everywhere else `sim.stashes` is empty and
+    // none of this runs.
+    const searchRules = sim.rules.search;
+    if (searchRules && sim.status === 'running') {
+      if (sim.searching) {
+        sim.searchTargetId = null;
+        sim.searching.t += STEP_SECONDS;
+        if (sim.searching.t >= sim.searching.duration) finishSearch(sim);
+      } else {
+        const stash = nearestStash(sim, player, searchRules.reach);
+        sim.searchTargetId = stash ? stash.id : null;
+        const pressed = input.search && !sim.prevSearch;
+        if (stash && pressed) beginSearch(sim, stash, searchRules);
+      }
+    }
+    sim.prevSearch = !!input.search;
 
     // Last, so that the meter he reacts to is this tick's meter: lifting
     // something off a shelf and crossing the line by doing it should send him to
@@ -5918,23 +6136,29 @@ __mod.replay = (function () {
     return {
       x: Math.round(Math.max(-1, Math.min(1, input.x)) * Q) / Q,
       y: Math.round(Math.max(-1, Math.min(1, input.y)) * Q) / Q,
-      take: !!input.take
+      take: !!input.take,
+      // A second action, added after the school got furniture to look inside.
+      // Older recordings have no fifth column and unpack to `false`, so they
+      // still replay exactly as they did.
+      search: !!input.search
     };
   }
 
-  const pack = (input) => [Math.round(input.x * Q), Math.round(input.y * Q), input.take ? 1 : 0];
-  const unpack = ([x, y, take]) => ({ x: x / Q, y: y / Q, take: take === 1 });
+  const pack = (input) => [Math.round(input.x * Q), Math.round(input.y * Q),
+    input.take ? 1 : 0, input.search ? 1 : 0];
+  const unpack = ([x, y, take, search]) => ({ x: x / Q, y: y / Q, take: take === 1, search: search === 1 });
 
   function createRecorder(levelId, seed) {
-    return { v: 1, levelId, seed, frames: [] }; // frames: [count, x, y, take] runs
+    return { v: 1, levelId, seed, frames: [] }; // frames: [count, x, y, take, search] runs
   }
 
   // Run-length encoded: a held direction costs one entry, not one per frame.
   function recordFrame(recording, input) {
-    const [x, y, take] = pack(input);
+    const [x, y, take, search] = pack(input);
     const last = recording.frames[recording.frames.length - 1];
-    if (last && last[1] === x && last[2] === y && last[3] === take) last[0]++;
-    else recording.frames.push([1, x, y, take]);
+    if (last && last[1] === x && last[2] === y && last[3] === take && (last[4] || 0) === search) {
+      last[0]++;
+    } else recording.frames.push([1, x, y, take, search]);
   }
 
   function expand(recording) {
@@ -6403,15 +6627,17 @@ __mod.input = (function () {
     arrowright: 'right', d: 'right',
     arrowup: 'up', w: 'up',
     arrowdown: 'down', s: 'down',
-    ' ': 'take', e: 'take', enter: 'take'
+    ' ': 'take', e: 'take', enter: 'take',
+    f: 'search', q: 'search'
   };
 
-  function createInput({ stage, joystick, knob, takeButton, onBlur }) {
-    const held = { left: false, right: false, up: false, down: false, take: false };
+  function createInput({ stage, joystick, knob, takeButton, searchButton, onBlur }) {
+    const held = { left: false, right: false, up: false, down: false, take: false, search: false };
     // A tap can begin and end between two frames. Buffer the press so a quick TAKE
     // is never silently dropped; the buffered frame is what gets recorded too.
     let takeBuffered = false;
-    const pointers = new Map(); // id -> { role: 'stick' | 'take', ... }
+    let searchBuffered = false;
+    const pointers = new Map(); // id -> { role: 'stick' | 'take' | 'search', ... }
     let stickId = null;
     const RADIUS = 46;
     let stick = { x: 0, y: 0 };
@@ -6419,6 +6645,7 @@ __mod.input = (function () {
     function clearAll() {
       for (const key of Object.keys(held)) held[key] = false;
       takeBuffered = false;
+      searchBuffered = false;
       pointers.clear();
       stickId = null;
       stick = { x: 0, y: 0 };
@@ -6430,6 +6657,7 @@ __mod.input = (function () {
       const action = KEY_MAP[e.key.toLowerCase()];
       if (!action) return;
       if (action === 'take' && !held.take) takeBuffered = true;
+      if (action === 'search' && !held.search) searchBuffered = true;
       held[action] = true;
       if (e.key === ' ' || e.key.startsWith('Arrow')) e.preventDefault();
     };
@@ -6458,6 +6686,13 @@ __mod.input = (function () {
         if (!held.take) takeBuffered = true;
         held.take = true;
         takeButton.classList.add('down');
+        return;
+      }
+      if (searchButton && e.target.closest('#search')) {
+        pointers.set(e.pointerId, { role: 'search' });
+        if (!held.search) searchBuffered = true;
+        held.search = true;
+        searchButton.classList.add('down');
         return;
       }
       if (stickId !== null) return; // the stick already has a finger; ignore extras
@@ -6491,9 +6726,12 @@ __mod.input = (function () {
         stick = { x: 0, y: 0 };
         joystick.style.display = 'none';
       } else {
-        // only drop TAKE when no other finger is still holding it
-        held.take = [...pointers.values()].some((p) => p.role === 'take');
+        // only drop a button when no other finger is still holding it
+        const stillOn = (role) => [...pointers.values()].some((p) => p.role === role);
+        held.take = stillOn('take');
         if (!held.take) takeButton.classList.remove('down');
+        held.search = stillOn('search');
+        if (!held.search && searchButton) searchButton.classList.remove('down');
       }
     }
     addEventListener('pointerup', releasePointer);
@@ -6521,12 +6759,18 @@ __mod.input = (function () {
         y = shaped.y;
         const take = held.take || takeBuffered;
         takeBuffered = false;
-        return quantise({ x, y, take });
+        const search = held.search || searchBuffered;
+        searchBuffered = false;
+        return quantise({ x, y, take, search });
       },
       clearAll,
       pressTake(down) {           // for the on-screen button used by pointer role
         if (down && !held.take) takeBuffered = true;
         held.take = !!down;
+      },
+      pressSearch(down) {
+        if (down && !held.search) searchBuffered = true;
+        held.search = !!down;
       },
       get pointerCount() { return pointers.size; }
     };
@@ -8594,6 +8838,65 @@ __mod.render = (function () {
 
     // Items get their own contrast treatment so a richer room can never bury
     // them: a dark pool underneath, a bright disc behind, outlined labels.
+    // Furniture you can look inside, and furniture you already have.
+    //
+    // Both marks are small on purpose. An unsearched piece gets a pair of handles
+    // — enough that "these ones open" is something you learn by looking rather
+    // than by being told — and a searched one gets its drawer left hanging out,
+    // which is how you remember you have been here without a tick-box on screen.
+    function drawStashes(sim, time) {
+      if (!sim.stashes.length) return;
+      const left = camera.x - 40;
+      const right = camera.x + W + 40;
+      const top = camera.y - 40;
+      const bottom = camera.y + H + 40;
+      const busy = sim.searching ? sim.searching.id : null;
+      for (const stash of sim.stashes) {
+        if (stash.x > right || stash.x + stash.w < left) continue;
+        if (stash.y > bottom || stash.y + stash.h < top) continue;
+        const cx = stash.x + stash.w / 2;
+        const cy = stash.y + stash.h / 2;
+        if (stash.searched) {
+          // The drawer, left open. Drawn as a slab pulled out of the front face,
+          // dark inside, so it reads as emptied from across the room.
+          const w = Math.min(stash.w - 6, 26);
+          ctx.fillStyle = 'rgba(12,8,16,0.55)';
+          roundRect(ctx, cx - w / 2, stash.y + stash.h - 5, w, 9, 2);
+          ctx.fill();
+          ctx.fillStyle = 'rgba(255,255,255,0.16)';
+          ctx.fillRect(cx - w / 2 + 1, stash.y + stash.h - 4, w - 2, 1.6);
+          continue;
+        }
+        // Two brass handles on a dark plate. The plate is what makes them read
+        // against any furniture colour — brass on orange wood at this size is
+        // otherwise a smudge, and "which of these can I open?" has to be a
+        // question the room answers rather than one the player has to guess.
+        const near = stash.id === sim.searchTargetId || stash.id === busy;
+        const gap = Math.min(stash.w * 0.26, 9);
+        const handle = (hx) => {
+          ctx.fillStyle = 'rgba(24,14,10,0.45)';
+          roundRect(ctx, hx - 4.6, cy - 3.2, 9.2, 6.4, 2);
+          ctx.fill();
+          ctx.fillStyle = near ? '#cdeeff' : '#e6c983';
+          ctx.fillRect(hx - 3.2, cy - 1.1, 6.4, 2.4);
+          ctx.fillStyle = 'rgba(255,255,255,0.35)';
+          ctx.fillRect(hx - 3.2, cy - 1.1, 6.4, 0.9);
+        };
+        ctx.globalAlpha = near ? 0.72 + 0.28 * Math.sin(time * 5) : 0.9;
+        handle(cx - gap);
+        handle(cx + gap);
+        ctx.globalAlpha = 1;
+        if (near) {
+          ctx.strokeStyle = '#6cc8e8';
+          ctx.globalAlpha = 0.30 + 0.30 * Math.sin(time * 5);
+          ctx.lineWidth = 1.4;
+          roundRect(ctx, stash.x + 1, stash.y + 1, stash.w - 2, stash.h - 2, 3);
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+      }
+    }
+
     function drawItems(sim, time) {
       ctx.textAlign = 'center';
       // On a floorplan most of the loot is off screen every frame, and each one
@@ -8888,6 +9191,7 @@ __mod.render = (function () {
           drawSleeper(ctx, sim.level, stage, time, sim.wakeSeconds || 0,
             Math.max(sim.startle || 0, jolt), kind, pose);
         }
+        drawStashes(sim, time);
         drawItems(sim, time);
 
         // Tiptoe, walk or run, read off the speed he is actually travelling at
@@ -8896,8 +9200,22 @@ __mod.render = (function () {
         const gait = gaitBlend(player.speed / TUNING.player.speed);
         const reachProgress = sim.reach ? sim.reach.t / sim.reach.duration : 0;
 
+        // While he is rummaging he faces what he is opening, whatever direction
+        // he happened to arrive from. Presentation only — the simulation's own
+        // heading is untouched, so nothing about movement changes.
+        let facing = player.facing;
+        let rummage = 0;
+        if (sim.searching) {
+          rummage = Math.min(1, sim.searching.t / sim.searching.duration);
+          const toward = Math.atan2(sim.searching.y - py, sim.searching.x - px);
+          let turn = toward - facing;
+          while (turn > Math.PI) turn -= Math.PI * 2;
+          while (turn < -Math.PI) turn += Math.PI * 2;
+          facing += turn * Math.min(1, rummage * 4);
+        }
+
         const stance = {
-          facing: player.facing,
+          facing,
           walkPhase: player.walkPhase,
           walk: gait.walk,
           creep: gait.creep,
@@ -8905,7 +9223,8 @@ __mod.render = (function () {
           moving: gait.moving,
           stride: gait.stride,
           clock: time,
-          reach: reachProgress
+          reach: reachProgress,
+          search: rummage
         };
         // Locations that ask for the drawn figures get them; everywhere else
         // keeps the character it has always had.
@@ -8970,6 +9289,7 @@ __mod.main = (function () {
     const stage = $('stage');
     const canvas = $('cv');
     const takeButton = $('take');
+    const searchButton = $('search');
 
     const saveStore = createSaveStore(window.localStorage);
     const audio = createAudio(saveStore);
@@ -9016,6 +9336,7 @@ __mod.main = (function () {
       joystick: $('joy'),
       knob: $('knob'),
       takeButton,
+      searchButton,
       onBlur: () => { if (machine.is('playing')) machine.set('paused'); }
     });
 
@@ -9267,6 +9588,31 @@ __mod.main = (function () {
             warnedAt = stageNow;
             audio.warn();
           }
+        } else if (event.type === 'searching') {
+          // The drawer coming open, before anyone knows what is in it.
+          audio.bump('soft', event.noise, 0.5);
+          buzz(8);
+        } else if (event.type === 'found') {
+          if (event.empty) {
+            // An empty cupboard is information, not a failure. It gets a word
+            // and nothing else — no sound, no shake, no punishment for looking.
+            pops.push({ x: event.x, y: event.y - 8, value: null, text: 'EMPTY', life: 1 });
+          } else {
+            pops.push({
+              x: event.x, y: event.y - 8, value: event.value, life: 1,
+              big: event.big, color: event.big ? '#ffe9a8' : rarityOf(event.itemType).tint
+            });
+            spawnSparks(event.x, event.y, event.big ? 14 : 8,
+              event.big ? '#ffd98a' : '#9fe0ff');
+            audio.take(event.noise, false);
+            if (event.big) { flash = 1; audio.jackpot(); buzz([18, 40, 24]); }
+            else buzz(14);
+            const stageNow = sleepStage(sim.noise);
+            if (stageNow > warnedAt && stageNow > 0 && sim.status === 'running') {
+              warnedAt = stageNow;
+              audio.warn();
+            }
+          }
         } else if (event.type === 'creak') {
           pops.push({ x: event.x, y: event.y - 6, value: null, text: 'CREAK', life: 1 });
           audio.creak();
@@ -9444,6 +9790,30 @@ __mod.main = (function () {
         hudLast.targeted = targeted;
         takeButton.classList.toggle('on', targeted);
       }
+
+      // SEARCH exists only where there is furniture to open. It appears when one
+      // is in reach, fills like a progress ring while his hands are in it, and
+      // goes away again — so a location without the mechanic never shows it and
+      // a player who has never met it is never asked about it.
+      const busy = !!sim.searching;
+      const here = busy || !!sim.searchTargetId;
+      if (hudLast.searchHere !== here) {
+        hudLast.searchHere = here;
+        searchButton.classList.toggle('here', here);
+        searchButton.classList.toggle('on', here);
+      }
+      if (hudLast.searchBusy !== busy) {
+        hudLast.searchBusy = busy;
+        searchButton.classList.toggle('busy', busy);
+        searchButton.textContent = busy ? '' : 'SEARCH';
+      }
+      if (busy) {
+        const share = Math.round((sim.searching.t / sim.searching.duration) * 20) / 20;
+        if (hudLast.searchShare !== share) {
+          hudLast.searchShare = share;
+          searchButton.style.setProperty('--p', share);
+        }
+      }
     }
 
     // ---------------------------------------------------------------- loop
@@ -9603,6 +9973,12 @@ __mod.main = (function () {
     takeButton.addEventListener('pointerup', releaseTake);
     takeButton.addEventListener('pointercancel', releaseTake);
     takeButton.addEventListener('pointerleave', releaseTake);
+
+    searchButton.addEventListener('pointerdown', (e) => { e.preventDefault(); input.pressSearch(true); });
+    const releaseSearch = () => input.pressSearch(false);
+    searchButton.addEventListener('pointerup', releaseSearch);
+    searchButton.addEventListener('pointercancel', releaseSearch);
+    searchButton.addEventListener('pointerleave', releaseSearch);
 
     addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && machine.is('playing')) machine.set('paused');

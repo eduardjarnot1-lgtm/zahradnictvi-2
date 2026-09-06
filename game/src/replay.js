@@ -9,23 +9,29 @@ export function quantise(input) {
   return {
     x: Math.round(Math.max(-1, Math.min(1, input.x)) * Q) / Q,
     y: Math.round(Math.max(-1, Math.min(1, input.y)) * Q) / Q,
-    take: !!input.take
+    take: !!input.take,
+    // A second action, added after the school got furniture to look inside.
+    // Older recordings have no fifth column and unpack to `false`, so they
+    // still replay exactly as they did.
+    search: !!input.search
   };
 }
 
-const pack = (input) => [Math.round(input.x * Q), Math.round(input.y * Q), input.take ? 1 : 0];
-const unpack = ([x, y, take]) => ({ x: x / Q, y: y / Q, take: take === 1 });
+const pack = (input) => [Math.round(input.x * Q), Math.round(input.y * Q),
+  input.take ? 1 : 0, input.search ? 1 : 0];
+const unpack = ([x, y, take, search]) => ({ x: x / Q, y: y / Q, take: take === 1, search: search === 1 });
 
 export function createRecorder(levelId, seed) {
-  return { v: 1, levelId, seed, frames: [] }; // frames: [count, x, y, take] runs
+  return { v: 1, levelId, seed, frames: [] }; // frames: [count, x, y, take, search] runs
 }
 
 // Run-length encoded: a held direction costs one entry, not one per frame.
 export function recordFrame(recording, input) {
-  const [x, y, take] = pack(input);
+  const [x, y, take, search] = pack(input);
   const last = recording.frames[recording.frames.length - 1];
-  if (last && last[1] === x && last[2] === y && last[3] === take) last[0]++;
-  else recording.frames.push([1, x, y, take]);
+  if (last && last[1] === x && last[2] === y && last[3] === take && (last[4] || 0) === search) {
+    last[0]++;
+  } else recording.frames.push([1, x, y, take, search]);
 }
 
 export function expand(recording) {

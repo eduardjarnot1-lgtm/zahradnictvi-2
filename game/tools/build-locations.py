@@ -316,6 +316,166 @@ def vault_plan(g, tier, layers, furnish):
 # Each entry says what the building is made of, who is in it, and how it grows
 # across the five levels.
 
+# --- searchable furniture (the school, and nowhere else yet) ------------------
+# How many pieces a tier makes searchable, and how many of those hold anything.
+# The gap between the two is the mechanic: if every cabinet paid out there would
+# be no decision to make, only a chore to finish.
+TILE = 20                # world units per grid tile, mirrored from tuning.js
+
+# The school's proximity curve and the noise numbers, mirrored from tuning.js so
+# this tool can work out what a given cupboard would actually cost to open. It is
+# the one duplication in here, and a test asserts the two still agree.
+PROX_NEAR, PROX_FAR = 92.0, 320.0
+PROX_NEAR_SCALE, PROX_FAR_SCALE = 2.5, 0.45
+SEARCH_NOISE = {'table': 3, 'nightstand': 3, 'chest': 4, 'tvBench': 4,
+                'sofa': 2, 'wardrobe': 5, 'bookshelf': 5, 'plinth': 6}
+ITEM_NOISE = {'c': 3, 'w': 6, 'p': 8, 'k': 11, 'r': 13, 'm': 14, 't': 15,
+              'n': 18, 'l': 22, 'v': 30, 'j': 16, 'd': 32, 'g': 38}
+
+# The most one cupboard may cost. The meter holds 100, you arrive with some of it
+# already spent, and you still have to walk away afterwards — so a single search
+# that can run to eighty is not a risk, it is a trap. Sixty leaves somewhere to go.
+COST_CEILING = 60
+
+
+# What the school multiplies noise by at this range. Same curve as rules.js.
+def proximity(distance):
+    if distance <= PROX_NEAR:
+        return PROX_NEAR_SCALE
+    if distance >= PROX_FAR:
+        return PROX_FAR_SCALE
+    t = (distance - PROX_NEAR) / (PROX_FAR - PROX_NEAR)
+    return PROX_NEAR_SCALE + (PROX_FAR_SCALE - PROX_NEAR_SCALE) * (t * t * (3 - 2 * t))
+
+
+TIER_STASHES = [3, 5, 7, 9, 10]
+TIER_FILLED = [2, 3, 4, 5, 6]
+
+# What turns up inside, worst first. A tier draws from the front of its own list
+# and the best of them goes in the piece nearest Mr. Vrána — which is the whole
+# point of level five: the good stuff is where you least want to be standing.
+# Best first: the front of each list lands in the piece nearest Mr. Vrána.
+TIER_STASH_LOOT = [
+    ['w', 'c'],                          # a wallet, then coins
+    ['k', 'w', 'c'],                     # headphones
+    ['r', 'k', 'p', 'w'],                # a ring
+    ['n', 'j', 'r', 'k', 'p'],           # a games console, jewellery
+    ['d', 'v', 'l', 'n', 'j', 'r'],      # a diamond, in the worst place on the map
+]
+
+# Furniture a person would actually open. Desks and cabinets yes; the couch the
+# caretaker is asleep on, obviously not.
+SEARCHABLE_STYLES = {'C': 'chest', 'B': 'bookshelf', 'W': 'wardrobe',
+                     'T': 'table', 'V': 'tvBench'}
+STASH_CHARS = '1234567890'
+
+
+def _blobs(g, chars):
+    """Every connected run of one searchable character, as (char, cells)."""
+    seen = set()
+    out = []
+    for y in range(g.rows):
+        for x in range(g.cols):
+            ch = g.g[y][x]
+            if ch not in chars or (x, y) in seen:
+                continue
+            stack = [(x, y)]
+            seen.add((x, y))
+            cells = []
+            while stack:
+                cx, cy = stack.pop()
+                cells.append((cx, cy))
+                for nx, ny in ((cx + 1, cy), (cx - 1, cy), (cx, cy + 1), (cx, cy - 1)):
+                    if (nx, ny) in seen or not (0 <= nx < g.cols and 0 <= ny < g.rows):
+                        continue
+                    if g.g[ny][nx] == ch:
+                        seen.add((nx, ny))
+                        stack.append((nx, ny))
+            out.append((ch, cells))
+    return out
+
+
+def make_searchable(g, tier):
+    """Turn some of the school's furniture into things you can look inside.
+
+    Returns the legend the level needs: digit -> {style, item}. Nothing else
+    about the map changes — a searchable cabinet is the same cabinet, in the
+    same place, blocking the same route.
+    """
+    watcher = None
+    for y in range(g.rows):
+        for x in range(g.cols):
+            if g.g[y][x] == 'E':
+                watcher = (x, y)
+                break
+        if watcher:
+            break
+
+    blobs = [b for b in _blobs(g, SEARCHABLE_STYLES) if 2 <= len(b[1]) <= 24]
+    if not blobs:
+        return {}
+
+    def key(blob):
+        cells = blob[1]
+        cx = sum(c[0] for c in cells) / len(cells)
+        cy = sum(c[1] for c in cells) / len(cells)
+        far = ((cx - watcher[0]) ** 2 + (cy - watcher[1]) ** 2) ** 0.5 if watcher else 0
+        return (far, cx, cy)
+
+    def spread(blob):
+        cells = blob[1]
+        cx = sum(c[0] for c in cells) / len(cells)
+        cy = sum(c[1] for c in cells) / len(cells)
+        if not watcher:
+            return 0.0
+        return (((cx - watcher[0]) ** 2 + (cy - watcher[1]) ** 2) ** 0.5) * TILE
+
+    blobs.sort(key=key)                   # nearest the caretaker first
+    wanted = min(TIER_STASHES[tier], len(blobs), len(STASH_CHARS))
+    # Spread the choices across the range rather than taking the nearest few:
+    # a level where every searchable thing is in one room is not an exploration.
+    step = len(blobs) / wanted
+    chosen = [blobs[min(len(blobs) - 1, int(i * step))] for i in range(wanted)]
+
+    loot = TIER_STASH_LOOT[tier]
+    filled = min(TIER_FILLED[tier], wanted)
+    distances = [spread(b) for b in chosen]
+
+    # Where the best thing on the map goes. Not the very nearest piece: at the
+    # top of the school's proximity curve a diamond costs more noise to lift
+    # than the meter has room for, so it stops being a decision and becomes a
+    # trap. PRIZE_AT is the distance where the curve has eased off enough that
+    # taking it wakes him but does not lose the level outright — measured
+    # against the same numbers the game reads, not picked by eye.
+    contents = [None] * wanted
+    # Each item goes in the riskiest cupboard it can go in without the search
+    # costing more than the meter can absorb. Big prizes end up at middle
+    # distance, small ones can sit right beside him, and the cupboards nearest
+    # his couch mostly hold nothing — which is exactly the shape the mechanic
+    # wants, and it falls out of the numbers rather than being placed by hand.
+    free = sorted(range(wanted), key=lambda i: distances[i])   # nearest first
+    for item in loot[:filled]:
+        placed = None
+        for i in free:
+            style = SEARCHABLE_STYLES[chosen[i][0]]
+            cost = (SEARCH_NOISE[style] + ITEM_NOISE[item]) * proximity(distances[i])
+            if cost <= COST_CEILING:
+                placed = i
+                break
+        if placed is None:
+            placed = free[-1]        # nowhere safe: the furthest is the least bad
+        contents[placed] = item
+        free.remove(placed)
+
+    legend = {}
+    for i, (ch, cells) in enumerate(chosen):
+        digit = STASH_CHARS[i]
+        for (x, y) in cells:
+            g.put(x, y, digit)
+        legend[digit] = (SEARCHABLE_STYLES[ch], contents[i])
+    return legend
+
+
 def place_watcher(g, x, y, w, h, wide=6, tall=3):
     """The bed, desk or couch the level's person is on, centred in its room with
     room to walk round it. This is the one piece of furniture that can never be
@@ -693,12 +853,17 @@ def build():
                 depth = g.open_until_connected()
                 if depth is None and not g.open_by_removal():
                     problems.append(f'{name} L{tier + 1}: no route to everything')
+            # Searchable furniture is the school's alone for now, and it runs
+            # last: it only rewrites characters in place, so nothing it does can
+            # move a wall or close a route that the passes above just opened.
+            stashes = make_searchable(g, tier) if name == 'School' else {}
             if g.bad:
                 problems.append(f'{name} L{tier + 1}: {g.bad}')
             base = SIGHT_BASE.get(watcher, 0)
             out.append(dict(id=lid, name=name, theme=theme, watcher=watcher,
                             seated=seated, tier=tier + 1, location=name,
                             sight=round(base * TIER_SIGHT[tier]) if base else 0,
+                            stashes=stashes,
                             rows=[''.join(r) for r in g.g]))
             lid += 1
     for p in problems:
@@ -734,6 +899,22 @@ import { tileLevel } from './tilemap.js';
 '''
 
 
+def stash_legend(stashes):
+    """The `search` block for a level: which digit is which cabinet, and what
+    is inside it. Written out in full rather than as a count, so the map file
+    stays the one place that says what a level contains."""
+    if not stashes:
+        return ''
+    lines = []
+    for digit in STASH_CHARS:
+        if digit not in stashes:
+            continue
+        style, item = stashes[digit]
+        lines.append("      '%s': { style: '%s', item: %s }," %
+                     (digit, style, ("'%s'" % item) if item else 'null'))
+    return '    search: {\n' + '\n'.join(lines) + '\n    },\n'
+
+
 def emit(levels, clocks=None):
     parts = []
     for lv in levels:
@@ -753,13 +934,15 @@ def emit(levels, clocks=None):
             "    seated: %s,\n"
             "%s"
             "%s"
+            "%s"
             "    legend: LOOT,\n"
             "    tiles: [\n%s\n    ]\n"
             "  }),"
             % (lv['id'], title, lv['tier'], '-' * 20, lv['id'], quoted, quoted,
                lv['tier'], lv['theme'], lv['watcher'], str(lv['seated']).lower(),
                ('    sight: %d,\n' % lv['sight']) if lv['sight'] else '',
-               ('    clock: %d,\n' % clock) if clock else '', rows))
+               ('    clock: %d,\n' % clock) if clock else '',
+               stash_legend(lv.get('stashes')), rows))
     return HEADER + LOOT_LEGEND + '\n\nexport const FLOORPLANS = [\n' + '\n'.join(parts).rstrip(',') + '\n];\n'
 
 
