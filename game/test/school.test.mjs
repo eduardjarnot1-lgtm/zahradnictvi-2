@@ -11,7 +11,9 @@ import assert from 'node:assert/strict';
 import { LEVELS } from '../src/levels.js';
 import { TUNING } from '../src/tuning.js';
 import { createSim, stepSim, playerOf, STEP_SECONDS } from '../src/sim.js';
-import { locationRules, proximityScale, itemStats } from '../src/rules.js';
+import {
+  locationRules, proximityScale, itemStats, lootOf, starThresholds
+} from '../src/rules.js';
 import { navGrid, flowField, cellOf } from '../src/nav.js';
 import { blocked } from '../src/physics.js';
 import { createRun, tick, walkTo, escape, waitOut, playEfficiently } from './harness.mjs';
@@ -144,13 +146,21 @@ test('the same item is far louder taken next to him than across the school', () 
     stepSim(sim, { x: 0, y: 0, take: true });
     return sim.noise;
   };
+  // Compared against the sensitivity the map can actually reach: level 21 is
+  // 600 units tall, so an item cannot be put far enough away to reach the
+  // bottom of the curve. What matters is that the cost tracks the curve.
+  const rules = locationRules(level);
+  const at = (d) => Math.min(d, level.watcher.y - 30);
+  const nearAt = at(RULES.proximity.near - 30);
+  const farAt = at(RULES.proximity.far + 40);
   const near = cost(RULES.proximity.near - 30);
   const middle = cost((RULES.proximity.near + RULES.proximity.far) / 2);
   const far = cost(RULES.proximity.far + 40);
   assert.ok(near > middle && middle > far, `${near} / ${middle} / ${far} should fall away`);
-  assert.ok(near > far * 4, `near ${near.toFixed(1)} should dwarf far ${far.toFixed(1)}`);
-  assert.ok(Math.abs(near / far - RULES.proximity.nearScale / RULES.proximity.farScale) < 0.05,
-    `the ratio ${(near / far).toFixed(2)} should be the one the tuning declares`);
+  const expected = proximityScale(rules, nearAt) / proximityScale(rules, farAt);
+  assert.ok(expected > 1.6, 'the probe should span a real part of the curve');
+  assert.ok(Math.abs(near / far - expected) < 0.08,
+    `the ratio ${(near / far).toFixed(2)} should track the curve's ${expected.toFixed(2)}`);
 });
 
 test('the sensitivity curve is smooth, so there is no line to be caught out by', () => {
@@ -191,9 +201,14 @@ test('footsteps are scaled by distance too, not just what you pick up', () => {
 
   const near = perUnit(openRunOfFloor(level, RULES.proximity.near - 30, 70, 'x'));
   const far = perUnit(openRunOfFloor(level, RULES.proximity.far + 40, 70, 'x'));
-  assert.ok(near.proximity > 2 && far.proximity < 0.6, 'the probes should sit at the two ends');
-  assert.ok(near.rate > far.rate * 2,
+  assert.ok(near.proximity > 2.4, `the near probe only reached ${near.proximity}`);
+  assert.ok(far.proximity < near.proximity * 0.7,
+    `the probes are too close together: ${near.proximity} and ${far.proximity}`);
+  assert.ok(near.rate > far.rate * 1.6,
     `each step near him (${near.rate.toFixed(5)}/unit) should cost far more than far off (${far.rate.toFixed(5)}/unit)`);
+  // ...and the far end is still most of the price. Being at the other end of
+  // the school is quieter, never free.
+  assert.ok(far.proximity >= 0.8, `the far end fell to ${far.proximity}`);
   // ...and by the amount the curve says, not merely more.
   assert.ok(Math.abs(near.rate / far.rate - near.proximity / far.proximity) < 0.6,
     `the ratio ${(near.rate / far.rate).toFixed(2)} should track the curve ${(near.proximity / far.proximity).toFixed(2)}`);
@@ -518,14 +533,24 @@ test('every school level supports the full loop, from anywhere on the map', () =
       sim.noise = 81;
       stepSim(sim);
       if (sim.status !== 'running') continue;   // the sample landed on the exit
-      place(sim, 5000, 5000);                   // and then the thief is gone
 
+      // Park the thief in whichever corner is furthest from where the guard is
+      // headed, and keep him there. Clamping means there is no "off the map"
+      // any more — and now that Mr. Vrána follows anyone who gets close, a
+      // thief left standing beside the target simply gets caught, which would
+      // prove nothing about whether he can walk a route.
+      const away = {
+        x: w.target.x < level.width / 2 ? level.width - 40 : 40,
+        y: w.target.y < level.height / 2 ? level.height - 40 : 40
+      };
       let arrived = false;
       for (let i = 0; i < 60 * 90; i++) {
+        place(sim, away.x, away.y);
         if (!arrived) sim.noise = Math.max(sim.noise, 85);
         stepSim(sim);
         if (!arrived && (w.state === 'searching' || w.state === 'returning')) arrived = true;
         if (arrived && w.state === 'asleep') break;
+        if (sim.status !== 'running') break;
       }
       assert.ok(arrived, `L${level.id}: he never reached ${spot.x},${spot.y}`);
       assert.equal(w.state, 'asleep', `L${level.id}: he never got home from ${spot.x},${spot.y}`);
@@ -721,7 +746,8 @@ test('opening something near Mr. Vrána is far louder than opening it across the
   };
   const near = cost(RULES.proximity.near - 30);
   const far = cost(RULES.proximity.far + 60);
-  assert.ok(near > far * 4, `opening it beside him costs ${near}, across the school ${far}`);
+  assert.ok(near > far * 2.5, `opening it beside him costs ${near}, across the school ${far}`);
+  assert.ok(far > 2, `opening it across the school costs ${far} — that is silent, not safer`);
 });
 
 // What opening a given cupboard actually costs, in meter, at its own distance
@@ -833,4 +859,329 @@ test('you can still ignore every cupboard and win', () => {
     assert.ok(run.sim.stashes.every((s) => !s.searched),
       `L${level.id}: the efficient run searched something, so this proves nothing`);
   }
+});
+
+// --- most of the loot is hidden (section 1) ---------------------------------
+
+test('most of what a school level is worth is inside the furniture', () => {
+  for (const level of SCHOOL) {
+    const onFloor = level.items.reduce((sum, i) => sum + itemStats(i.type).value, 0);
+    const hidden = level.stashes.reduce(
+      (sum, s) => sum + (s.item ? itemStats(s.item).value : 0), 0);
+    const share = hidden / (hidden + onFloor);
+    assert.ok(share >= 0.70 && share <= 0.85,
+      `L${level.id}: ${(share * 100).toFixed(0)}% hidden ($${hidden} of $${hidden + onFloor})`);
+    // ...and there is still something on the floor to get you moving.
+    assert.ok(level.items.length >= 3, `L${level.id} has nothing visible at all`);
+    assert.ok(level.items.length <= 6,
+      `L${level.id} still has ${level.items.length} things lying about`);
+  }
+  // Nowhere else changed: every other location keeps all of its loot in view.
+  for (const level of ELSEWHERE) {
+    assert.equal(level.stashes.length, 0, `L${level.id} (${level.location}) grew cupboards`);
+    assert.ok(level.items.length >= 7, `L${level.id} lost floor loot`);
+  }
+});
+
+test('the star targets count what is hidden, or a school level looks empty', () => {
+  for (const level of SCHOOL) {
+    assert.ok(lootOf(level).length > level.items.length,
+      `L${level.id}: the totals are ignoring the cupboards`);
+    // Three stars must be out of reach of the floor alone — otherwise the
+    // mechanic is optional decoration.
+    const onFloor = level.items.reduce((sum, i) => sum + itemStats(i.type).value, 0);
+    assert.ok(starThresholds(level).three > onFloor,
+      `L${level.id}: three stars without opening anything`);
+  }
+});
+
+// --- the sensitivity curve (sections 4 and 5, tests A and B) ----------------
+
+test('A and B: the same noise costs much more near him, and never nothing far off', () => {
+  const rules = locationRules(SCHOOL[0]);
+  const at = (d) => proximityScale(rules, d);
+  // Continuous, monotonic, and never collapsing to zero — five conceptual
+  // bands rather than three switched zones.
+  const bands = [0, 60, 140, 260, 420, 700].map(at);
+  for (let i = 1; i < bands.length; i++) {
+    assert.ok(bands[i] <= bands[i - 1] + 1e-9, `sensitivity rose again: ${bands}`);
+  }
+  assert.ok(bands[0] >= 2.5, `standing over him is only ${bands[0]}x`);
+  assert.ok(bands[bands.length - 1] >= 0.8,
+    `the far corner is ${bands[bands.length - 1]}x — that is silence, not distance`);
+  assert.ok(bands[0] / bands[bands.length - 1] >= 2.5, 'the two ends are too close together');
+  // Middle distance still hurts.
+  assert.ok(at(260) >= 1.4, `a corridor away is only ${at(260)}x`);
+});
+
+test('most of a school map sits on the slope, not at the bottom of the curve', () => {
+  // The claim worth testing is not how big the number is, it is that the
+  // building is inside the part of the curve that still changes. If half the
+  // cupboards sat at the floor value, distance would have stopped being a
+  // decision everywhere except beside his couch.
+  for (const level of SCHOOL) {
+    const rules = locationRules(level);
+    const scales = level.stashes.map((s) => proximityScale(rules, Math.hypot(
+      s.x + s.w / 2 - level.watcher.x, s.y + s.h / 2 - level.watcher.y)));
+    const sloping = scales.filter((v) => v > rules.proximity.farScale + 0.05).length;
+    assert.ok(sloping >= scales.length * 0.5,
+      `L${level.id}: only ${sloping} of ${scales.length} cupboards are on the slope`);
+  }
+});
+
+// --- the moving zone (sections 7 and 8, tests C and D) ----------------------
+
+test('C and D: waking him makes the ground around him louder, and it moves with him', () => {
+  const rules = locationRules(SCHOOL[0]);
+  const beside = 40;
+  assert.ok(proximityScale(rules, beside, true) > proximityScale(rules, beside, false) * 1.5,
+    'being awake should sharpen his hearing considerably');
+  // The boost eases off across his radius rather than switching at its edge.
+  const inside = [20, 70, 130, 190].map((d) =>
+    proximityScale(rules, d, true) / proximityScale(rules, d, false));
+  for (let i = 1; i < inside.length; i++) {
+    assert.ok(inside[i] < inside[i - 1], `the awake boost is not continuous: ${inside}`);
+  }
+  assert.ok(inside[0] > 1.5 && inside[inside.length - 1] < 1.15,
+    `the boost should fall from strong to nothing: ${inside}`);
+  // ...and past his attention it is exactly the sleeping curve again.
+  const out = rules.awake.radius + 60;
+  assert.equal(proximityScale(rules, out, true), proximityScale(rules, out, false));
+});
+
+test('C: the meter really does read louder once he is up, at the same spot', () => {
+  const level = SCHOOL[0];
+  const cost = (wake) => {
+    const sim = createSim({ level });
+    sim.timeLeft = 9999;
+    const p = playerOf(sim);
+    // Two tiles from wherever he is, asleep or up.
+    p.x = sim.investigator.x + 44;
+    p.y = sim.investigator.y;
+    p.prevX = p.x;
+    p.prevY = p.y;
+    if (wake) sim.investigator.state = 'searching';
+    stepSim(sim);
+    return sim.proximity;
+  };
+  assert.ok(cost(true) > cost(false) * 1.5,
+    `asleep ${cost(false).toFixed(2)} vs awake ${cost(true).toFixed(2)}`);
+});
+
+// --- following (sections 9 to 13, tests E and F) ----------------------------
+
+// Wake him and get him on his feet, with the thief parked out of reach.
+function rouse(run, parkAt) {
+  const { sim } = run;
+  const w = sim.investigator;
+  place(sim, parkAt.x, parkAt.y);
+  sim.noise = 85;
+  for (let i = 0; i < 60 * 8 && w.state !== 'investigating'; i++) {
+    place(sim, parkAt.x, parkAt.y);
+    sim.noise = Math.max(sim.noise, 85);
+    tick(run);
+  }
+  return w.state === 'investigating';
+}
+
+test('E: he stops guessing and comes after you once you are close enough', () => {
+  const run = openSchool();
+  const { sim } = run;
+  const w = sim.investigator;
+  const far = { x: sim.level.width - 60, y: 60 };
+  assert.ok(rouse(run, far), 'he should be up and investigating');
+  assert.equal(w.state, 'investigating');
+  const memory = { ...w.target };
+
+  // Walk into him. Well inside followAt, still outside catchAt.
+  for (let i = 0; i < 20; i++) {
+    place(sim, w.x + RULES.investigate.followAt - 20, w.y);
+    sim.noise = Math.max(sim.noise, 85);
+    tick(run);
+    if (w.state === 'following') break;
+  }
+  assert.equal(w.state, 'following', 'he should have picked you out');
+  // Following is not investigating: his goal is you, not the old noise.
+  const p = playerOf(sim);
+  assert.ok(Math.hypot(w.goal.x - p.x, w.goal.y - p.y)
+    < Math.hypot(w.goal.x - memory.x, w.goal.y - memory.y),
+    'he should be walking at you, not at where the noise was');
+});
+
+test('E: he does not pick you out from across the room — only up close', () => {
+  const run = openSchool();
+  const { sim } = run;
+  const w = sim.investigator;
+  assert.ok(rouse(run, { x: sim.level.width - 60, y: 60 }));
+  // Just outside the range, for a long time, with the meter high.
+  for (let i = 0; i < 60 * 6; i++) {
+    place(sim, w.x + RULES.investigate.followAt + 60, w.y);
+    sim.noise = Math.max(sim.noise, 85);
+    tick(run);
+    assert.notEqual(w.state, 'following',
+      `he started following from ${(RULES.investigate.followAt + 60)} away`);
+  }
+});
+
+test('F: he loses you again, but only after real distance held for real time', () => {
+  const run = openSchool();
+  const { sim } = run;
+  const w = sim.investigator;
+  assert.ok(rouse(run, { x: sim.level.width - 60, y: 60 }));
+  for (let i = 0; i < 40 && w.state !== 'following'; i++) {
+    place(sim, w.x + RULES.investigate.followAt - 20, w.y);
+    tick(run);
+  }
+  assert.equal(w.state, 'following');
+
+  // Stepping back a little must not shake him off: that is the hysteresis.
+  for (let i = 0; i < 60 * 3; i++) {
+    place(sim, w.x + RULES.investigate.followAt + 40, w.y);
+    tick(run);
+    assert.equal(w.state, 'following', 'a step backwards should not lose him');
+  }
+
+  // Real distance, held. He should give up — but not instantly.
+  let gaveUpAfter = null;
+  for (let i = 0; i < 60 * 12; i++) {
+    place(sim, 40, 40);
+    tick(run);
+    if (w.state !== 'following') { gaveUpAfter = i / 60; break; }
+  }
+  assert.ok(gaveUpAfter !== null, 'he should eventually give up');
+  assert.ok(gaveUpAfter >= RULES.investigate.unfollowFor - 0.1,
+    `he gave up after ${gaveUpAfter}s, sooner than the ${RULES.investigate.unfollowFor}s configured`);
+  assert.ok(['searching', 'returning', 'settling', 'asleep'].includes(w.state),
+    `he ended up ${w.state}`);
+});
+
+test('F: losing you sends him back through the ordinary states, not to a dead end', () => {
+  const run = openSchool();
+  const { sim } = run;
+  const w = sim.investigator;
+  assert.ok(rouse(run, { x: sim.level.width - 60, y: 60 }));
+  for (let i = 0; i < 40 && w.state !== 'following'; i++) {
+    place(sim, w.x + 40, w.y);
+    tick(run);
+  }
+  assert.equal(w.state, 'following');
+  sim.noise = 10;
+  for (let i = 0; i < 60 * 60 && w.state !== 'asleep'; i++) {
+    place(sim, 40, 40);
+    tick(run);
+  }
+  assert.equal(w.state, 'asleep', 'he should end up back on his couch');
+  assert.equal(w.x, w.home.x);
+  assert.equal(w.y, w.home.y);
+});
+
+test('following never walks him through the building', () => {
+  const run = openSchool(25);
+  const { sim } = run;
+  const w = sim.investigator;
+  assert.ok(rouse(run, { x: sim.level.width - 60, y: 60 }));
+  // Lead him a dance around the map and check every frame of it.
+  const laps = [{ x: 80, y: 80 }, { x: sim.level.width - 80, y: 80 },
+    { x: sim.level.width - 80, y: sim.level.height - 80 }, { x: 80, y: sim.level.height - 80 }];
+  for (const corner of laps) {
+    for (let i = 0; i < 60 * 6; i++) {
+      // Stay just close enough to keep him interested.
+      const p = playerOf(sim);
+      const dx = corner.x - p.x;
+      const dy = corner.y - p.y;
+      const d = Math.hypot(dx, dy) || 1;
+      tick(run, { x: dx / d, y: dy / d, take: false, search: false });
+      sim.noise = Math.min(90, Math.max(sim.noise, 60));
+      if (w.state === 'investigating' || w.state === 'following') {
+        assert.ok(!blocked(w.x, w.y, w.w, w.h, sim.level.colliders),
+          `he is inside the building at ${w.x.toFixed(0)},${w.y.toFixed(0)} (${w.state})`);
+      }
+      assert.ok(w.speed <= RULES.investigate.speed + 1,
+        `he moved at ${w.speed.toFixed(0)} — that is not a walk`);
+      if (sim.status !== 'running') break;
+    }
+    if (sim.status !== 'running') break;
+  }
+});
+
+// --- searching under the new curve (tests G and H) --------------------------
+
+test('G and H: searching near him is far riskier, and searching far off is not free', () => {
+  const level = SCHOOL[4];
+  const cost = (distance) => {
+    const sim = createSim({ level });
+    sim.timeLeft = 9999;
+    const stash = sim.stashes[0];
+    const p = playerOf(sim);
+    p.x = stash.x + stash.w / 2;
+    p.y = stash.y + stash.h + 16;
+    p.prevX = p.x;
+    p.prevY = p.y;
+    const park = () => {
+      sim.investigator.x = p.x;
+      sim.investigator.y = p.y + distance;
+    };
+    park();
+    stepSim(sim);
+    park();
+    stepSim(sim, { x: 0, y: 0, take: false, search: true });
+    return sim.noise;
+  };
+  const near = cost(RULES.proximity.near - 30);
+  const far = cost(RULES.proximity.far + 100);
+  assert.ok(near > far * 2.5, `beside him ${near}, across the school ${far}`);
+  assert.ok(far >= 2, `${far} is silent — searching should never be free`);
+});
+
+test('F: running opens a gap, and holding it loses him', () => {
+  // Tested on a stretch of clear floor rather than on a particular route
+  // through a particular map: what has to be true is that he is the slower
+  // one and that distance held is what sheds him. Whether a given corner of a
+  // given school gives you room to do it is level design, not this mechanic.
+  const run = openSchool(23);
+  const { sim } = run;
+  const w = sim.investigator;
+  const p = playerOf(sim);
+  sim.timeLeft = 9999;
+  const lane = openRunOfFloor(sim.level, 260, 240, 'x');
+
+  // Put them both on it, him just behind you, and wake him where he stands.
+  place(sim, lane.x - 90, lane.y);
+  w.state = 'investigating';
+  w.stand = { x: lane.x - 130, y: lane.y };
+  w.x = lane.x - 130;
+  w.y = lane.y;
+  w.prevX = w.x;
+  w.prevY = w.y;
+  w.target = { x: p.x, y: p.y };
+  sim.noise = 85;
+  tick(run);
+  assert.equal(w.state, 'following', 'forty units away is well inside his range');
+
+  const gaps = [];
+  let shaken = null;
+  for (let i = 0; i < 60 * 14 && sim.status === 'running'; i++) {
+    sim.noise = Math.max(sim.noise, 70);   // he must not simply calm down
+    tick(run, { x: 1, y: 0, take: false, search: false });
+    gaps.push(Math.hypot(p.x - w.x, p.y - w.y));
+    if (w.state !== 'following') { shaken = i / 60; break; }
+  }
+  assert.equal(sim.status, 'running', `he caught you on open floor: ${sim.failReason}`);
+  assert.ok(Math.max(...gaps) > RULES.investigate.unfollowAt,
+    `running only ever opened ${Math.max(...gaps).toFixed(0)} — he is not slow enough`);
+  assert.ok(shaken !== null, 'holding the gap should lose him');
+  assert.ok(shaken >= RULES.investigate.unfollowFor,
+    `he gave up after ${shaken}s, faster than the ${RULES.investigate.unfollowFor}s configured`);
+  assert.ok(shaken < 10, `it took ${shaken}s to shake him off`);
+  assert.ok(RULES.investigate.speed < TUNING.player.speed,
+    'he must be slower than you, or none of this is escapable');
+});
+
+test('the follow range and the give-up range are far enough apart to be stable', () => {
+  const f = RULES.investigate;
+  assert.ok(f.unfollowAt > f.followAt * 2.5,
+    `${f.followAt} to ${f.unfollowAt} is not enough hysteresis to stop him flickering`);
+  assert.ok(f.unfollowFor >= 1.5, 'losing him should take seconds, not a frame');
+  assert.ok(f.followAt > f.catchAt * 2,
+    'you should get a moment between being spotted and being caught');
 });

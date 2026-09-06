@@ -280,12 +280,23 @@ decay, and charges exactly the printed noise for an item.
 Today the School is the only entry, and it changes three things.
 
 **Noise depends on how close you are to Mr. Vrána.** Everything you do — a step,
-a knock, lifting something off a shelf — is multiplied by a curve that runs from
-2.5x within about four tiles of him to 0.45x beyond sixteen, smoothly, with no
-line to be caught out by. The meter says which end you are at (`‼ LOUD HERE`,
-`▲`, `▼ MUFFLED`), because a hidden multiplier is a trap rather than a mechanic.
+a knock, opening a drawer, lifting something out of it — is multiplied by one
+continuous curve: **3.0x** standing over him, easing to **0.85x** at the far end
+of the building. Both ends are deliberate. The near end is what makes his room
+frightening; the far end is what stops there being a safe corner — the quietest
+place in the school is quieter, never silent, and the whole of even the largest
+map sits on the sloping part of the curve rather than pinned at the bottom.
+
+The meter says which end you are at (`‼‼ HE IS RIGHT THERE`, `‼ LOUD HERE`, `▲`,
+`▼ MUFFLED`), because a hidden multiplier is a trap rather than a mechanic.
 Distance is measured to where he actually *is*, so once he is up and walking the
 quiet end of the corridor moves with him.
+
+**And once he is awake, he is listening.** A second, tighter curve rides on top
+of the first, centred on wherever he is standing: up to **1.7x** again at his
+feet, easing to nothing at 220 units. It travels with him, so waking him does
+not just send a man to one place — it drags a loud circle around the building
+behind him. Asleep, that boost is not applied at all.
 
 **The school settles faster.** 7/second after 0.9s of standing perfectly still,
 against 2/second after 0.6s everywhere else — fast enough that going still is a
@@ -304,6 +315,28 @@ He is investigating a **place, not a person**, which is the whole mechanic: move
 away quietly and he walks past you to an empty corridor. A pulsing marker shows
 the spot he is heading for, so "can I be gone before he gets there?" is a
 question the player can actually answer.
+
+**Until you let him get close enough to see you.** Inside 58 units he stops
+guessing: he switches to following, and his target becomes wherever you are,
+re-read every 0.3 seconds or whenever you have moved 28 units. This is the one
+place he knows where you actually are, and he only earns it by nearly touching
+you — everywhere else he is still walking towards a memory.
+
+Losing him takes ground, held. He gives up after **2 seconds beyond 150 units**,
+and that timer *decays* rather than resetting, because snapping it to zero the
+instant you clipped the edge of his range threw away four seconds of running and
+made being followed permanent. He walks at 78 against your 132, so you gain
+about fifty units a second in the open — a second and a half of clear running to
+break contact, two more to keep it. The two distances are far apart on purpose:
+one number and he would flicker between chasing and not chasing on every step.
+
+That gives the school three stages rather than two:
+
+| | Mr. Vrána | what the player is managing |
+|---|---|---|
+| 1 | asleep on the couch | distance, and how much noise each thing is worth |
+| 2 | up and investigating | the same, plus a loud circle walking around the building |
+| 3 | following | getting away, and only then getting out |
 
     make noise → he wakes → he walks to the spot → go still → the meter falls
       → under 50 he gives up → he walks home → he goes back to sleep
@@ -336,6 +369,22 @@ Crossing 80 while your hands are in a drawer wakes him exactly as any other
 noise does, and the spot he walks to is the cupboard you were opening. There is
 no separate reaction; a search is just another way to make noise.
 
+Most of what a school level is worth is now behind those doors. The floors keep
+three to five things: a couple of coins to get you moving, and one thing worth
+crossing the map for. Everything else has to be found.
+
+| level | on the floor | searchable | holding something | hidden share |
+|---|---|---|---|---|
+| 21 | 3 | 5 | 4 | 76% |
+| 22 | 3 | 8 | 6 | 78% |
+| 23 | 4 | 9 | 8 | 80% |
+| 24 | 4 | 12 | 9 | 84% |
+| 25 | 5 | 14 | 11 | 82% |
+
+The star targets count what is hidden as well as what is lying about — otherwise
+three stars would be reachable without opening anything, and the mechanic would
+be decoration. A test asserts three stars is out of reach of the floor alone.
+
 Which cupboards hold what is decided at authoring time, by cost:
 
     (search noise + item noise) x proximity at that distance  <=  60
@@ -348,14 +397,6 @@ costs more meter than the game has to give, so taking it would not be a
 decision, it would be a loss with extra steps. A test re-derives the ceiling
 from the game's own numbers, which is also what keeps the generator's copy of
 the proximity curve honest.
-
-| level | searchable | holding something | hidden value |
-|---|---|---|---|
-| 21 | 3 | 2 | $35 |
-| 22 | 5 | 3 | $85 |
-| 23 | 7 | 4 | $170 |
-| 24 | 9 | 5 | $335 |
-| 25 | 10 | 6 | $775 |
 
 Searchable furniture wears two brass handles on a dark plate, and stays open
 once you have been through it — no counter, no checklist, just a drawer hanging

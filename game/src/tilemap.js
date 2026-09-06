@@ -122,11 +122,18 @@ export function tileLevel(spec) {
   const search = spec.search || {};
   const stashes = [];
   for (const [ch, entry] of Object.entries(search)) {
-    for (const r of mergeRects(grid, rows, cols, ch)) {
+    // One character can merge into more than one rectangle — an L-shaped bank
+    // of lockers, say. Each piece is searchable, but only the largest holds
+    // what the map said was in there; the others are empty. Otherwise a single
+    // awkwardly-shaped cupboard would quietly pay out twice.
+    const parts = mergeRects(grid, rows, cols, ch);
+    const holder = parts.length
+      ? parts.reduce((a, b) => (a.w * a.h >= b.w * b.h ? a : b)) : null;
+    for (const r of parts) {
       // What is inside is written in the same one-letter vocabulary as the
       // loot on the floor, and resolved through the same legend — a `w` in a
       // drawer is the same wallet as a `w` on a desk.
-      const inside = entry.item ? (legend[entry.item] || entry.item) : null;
+      const inside = entry.item && r === holder ? (legend[entry.item] || entry.item) : null;
       const stash = {
         id: `L${spec.id}-s${stashes.length}`,
         style: entry.style,

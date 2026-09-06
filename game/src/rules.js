@@ -88,16 +88,28 @@ export function locationRules(level) {
 }
 
 // How much louder a noise is for being made near the person listening to it.
-// Smooth between the two distances on purpose: a threshold you can step across
+//
+// One continuous curve, not a set of bands: a threshold you can step across
 // without noticing is a trap, and this has to be something the player learns to
-// feel rather than something that catches them out.
-export function proximityScale(rules, distance) {
+// feel rather than something that catches them out. The far end is deliberately
+// close to 1 — being at the other end of the school is quieter, never silent.
+//
+// `awake` multiplies a second, tighter curve on top, centred on the same
+// person. A man on his feet is listening, and he takes that with him: it is
+// what stops "he woke up" being answered by carrying on in the next room.
+export function proximityScale(rules, distance, awake = false) {
   const p = rules.proximity;
   if (!p) return 1;
-  if (distance <= p.near) return p.nearScale;
-  if (distance >= p.far) return p.farScale;
-  const t = (distance - p.near) / (p.far - p.near);
-  return p.nearScale + (p.farScale - p.nearScale) * (t * t * (3 - 2 * t));
+  const base = distance <= p.near ? p.nearScale
+    : distance >= p.far ? p.farScale
+      : (() => {
+        const t = (distance - p.near) / (p.far - p.near);
+        return p.nearScale + (p.farScale - p.nearScale) * (t * t * (3 - 2 * t));
+      })();
+  const a = rules.awake;
+  if (!awake || !a || distance >= a.radius) return base;
+  const t = distance / a.radius;
+  return base * (a.boost + (1 - a.boost) * (t * t * (3 - 2 * t)));
 }
 
 // How long a step is at this speed, expressed as walk-cycle phase per unit of
@@ -172,8 +184,16 @@ export function canBank(noise) {
 
 // What a level is worth if you somehow took everything (used by the validator
 // and by balance reporting, never by the running game).
+// Everything a level holds, floor and furniture alike. Where most of the loot
+// is inside the furniture — which is the school now — counting only what is
+// lying about would set the star targets against a fraction of the level.
+export function lootOf(level) {
+  const hidden = (level.stashes || []).filter((s) => s.item).map((s) => ({ type: s.item }));
+  return hidden.length ? level.items.concat(hidden) : level.items;
+}
+
 export function levelTotals(level) {
-  return level.items.reduce(
+  return lootOf(level).reduce(
     (acc, item) => {
       const stats = itemStats(item.type);
       acc.value += stats.value;
@@ -240,7 +260,7 @@ export const isBigScore = (value) => value >= TUNING.rarity.bigScoreAt;
 // because the star targets are read off it. Setting targets against the room's
 // raw total would demand hauls that wake him every time.
 export function bestHaul(level, budget = TUNING.stars.budget) {
-  const items = level.items.map((item) => itemStats(item.type));
+  const items = lootOf(level).map((item) => itemStats(item.type));
   let best = 0;
   const walk = (index, noise, value) => {
     if (noise > budget) return;

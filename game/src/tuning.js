@@ -240,8 +240,17 @@ export const TUNING = {
       caughtWhy: 'Mr. Vrána walked in on you while he was investigating the noise.',
       // Shown while he is on his feet, in place of the noise-threshold
       // warnings: what he is doing matters more than the number by then.
-      onFoot: ['MR. VRÁNA IS GETTING UP', 'HE IS COMING TO LOOK',
-        'HE IS LOOKING AROUND', 'HE IS GOING BACK']
+      // Keyed by what he is doing rather than by position in a list: there are
+      // more states than there were, and an index is the sort of thing that
+      // quietly stops matching the state machine.
+      onFoot: {
+        rising: 'MR. VRÁNA IS GETTING UP',
+        investigating: 'HE IS COMING TO LOOK',
+        searching: 'HE IS LOOKING AROUND',
+        following: 'HE HAS SEEN YOU — RUN',
+        returning: 'HE IS GOING BACK',
+        settling: 'HE IS GOING BACK'
+      }
     },
 
     // --- the seven named people of the floorplan levels ---------------------
@@ -335,10 +344,22 @@ export const TUNING = {
       // towards him. Both ends are deliberately far from 1.0: if the far end
       // were 0.9 the whole mechanic would be a rounding error.
       proximity: {
-        near: 92,          // world units — about four tiles, i.e. the same room
-        far: 320,          // ...and beyond this he is most of a corridor away
-        nearScale: 2.5,    // everything is two and a half times as loud
-        farScale: 0.45     // ...against under half out at the far end
+        near: 90,          // world units — about four tiles, i.e. the same room
+        // Far enough that the whole of even the biggest school map sits inside
+        // the falloff. There is no "outside his hearing" any more: the curve
+        // runs continuously from his elbow to the far corner, and the quietest
+        // corner of the building is still only a shade under full price.
+        far: 560,
+        nearScale: 3.0,    // three times as loud, standing over him
+        farScale: 0.85     // ...and barely muffled at the other end of the school
+      },
+      // What changes once he is on his feet. A man awake is listening, and he
+      // carries that with him — a second, smaller curve centred on wherever he
+      // happens to be standing, multiplied on top of the first. It is what
+      // stops the answer to "he woke up" being "carry on somewhere else".
+      awake: {
+        radius: 220,       // how far his attention reaches while he is up
+        boost: 1.7         // at his feet; easing back to 1 at the edge of it
       },
       // The school is the one place noise comes back down fast enough to be a
       // tactic rather than a consolation. Standing still is how you send him
@@ -387,7 +408,33 @@ export const TUNING = {
         catchAt: 22,       // this close to you and the level is over
         // He gets one look at where the sound came from. If you are still
         // there when he arrives, that is on you.
-        forget: true
+        forget: true,
+
+        // --- and if you let him get close enough to actually see you --------
+        // Up to here he has been walking towards a memory. Inside this range
+        // he stops guessing and comes after you: his target becomes wherever
+        // you are, updated as you move.
+        //
+        // The two distances are deliberately far apart. One number would make
+        // him flicker between chasing and not chasing every time you stepped
+        // over the line, so losing him takes real ground and real seconds
+        // rather than a step backwards.
+        followAt: 58,      // he picks you out at under three tiles
+        // Far enough that a step backwards will not do it, close enough that
+        // it is reachable on a floorplan. You gain about fifty units a second
+        // on him in the open, so this is a second and a half of clear running
+        // and then two more of keeping it — but it is measured through rooms
+        // and doorways, where every corner hands some of it back. Set against
+        // rooms two to three hundred units across: at 250 the only escape was
+        // a straight corridor longer than any of these maps has, and being
+        // followed became permanent, which is the one thing it must not be.
+        unfollowAt: 150,
+        unfollowFor: 2.0,  // held for this long, not merely touched once
+        // Re-reading where you are every frame would be wasteful, and would
+        // also make him uncannily precise. He looks again when you have moved
+        // this far, or this often, whichever comes first.
+        repathEvery: 0.3,
+        repathAfter: 28
       }
     }
   },

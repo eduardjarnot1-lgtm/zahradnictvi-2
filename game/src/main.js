@@ -448,9 +448,14 @@ export function boot() {
     // Where a location makes noise depend on where you are standing, say so on
     // the meter. A hidden multiplier is not a mechanic, it is a trap: the whole
     // point is that the player can tell how much a mistake is about to cost.
-    const loudness = sim.proximity >= 1.6 ? '  ‼ LOUD HERE'
-      : sim.proximity >= 1.15 ? '  ▲'
-        : sim.proximity <= 0.7 ? '  ▼ MUFFLED' : '';
+    // Banded against the curve as it actually runs — 0.85 at the far end of the
+    // building up to about five standing over a caretaker who is awake. The old
+    // thresholds were set for a much flatter curve and now read LOUD almost
+    // everywhere, which tells the player nothing.
+    const loudness = sim.proximity >= 3.6 ? '  ‼‼ HE IS RIGHT THERE'
+      : sim.proximity >= 2.4 ? '  ‼ LOUD HERE'
+        : sim.proximity >= 1.5 ? '  ▲'
+          : sim.proximity <= 1.05 ? '  ▼ MUFFLED' : '';
     setText('noiseText', hudEls.noise, `${meter} ${rounded} / ${TUNING.noise.max}${loudness}`);
     setStyle('barWidth', hudEls.bar, 'width', `${(sim.noise / TUNING.noise.max) * 100}%`);
     setStyle('barColor', hudEls.bar, 'background',
@@ -486,15 +491,15 @@ export function boot() {
     // number that got him there — the player's next decision depends on
     // whether he is coming, looking, or already on his way back.
     const up = sim.investigator && sim.investigator.state !== 'asleep' && config.onFoot;
-    const onFootText = up
-      ? sim.investigator.state === 'rising' ? config.onFoot[0]
-        : sim.investigator.state === 'investigating' ? config.onFoot[1]
-          : sim.investigator.state === 'searching' ? config.onFoot[2]
-            : config.onFoot[3]
-      : null;
+    const onFootText = up ? config.onFoot[sim.investigator.state] || null : null;
     const warning = sim.status !== 'running' ? null
       : onFootText
-        ? { text: onFootText, cls: sim.investigator.state === 'returning' ? '' : 'hard' }
+        ? {
+          text: onFootText,
+          cls: sim.investigator.state === 'following' ? 'hard critical'
+            : sim.investigator.state === 'returning' || sim.investigator.state === 'settling'
+              ? '' : 'hard'
+        }
         : sim.noise >= 95 ? { text: warnings[2], cls: 'hard critical' }
           : sim.noise >= 90 ? { text: warnings[1], cls: 'hard' }
             : sim.noise >= 80 ? { text: warnings[0], cls: '' } : null;

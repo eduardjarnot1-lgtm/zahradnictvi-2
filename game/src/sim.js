@@ -106,7 +106,8 @@ const UPDATERS = {
   // from: a flow field over the building instead of a thumb.
   watcher(entity, sim) {
     const rules = sim.investigateRules;
-    const walking = entity.state === 'investigating' || entity.state === 'returning';
+    const walking = entity.state === 'investigating' || entity.state === 'returning'
+      || entity.state === 'following';
     const scripted = entity.state === 'rising' || entity.state === 'settling';
 
     if (!walking) {
@@ -186,7 +187,8 @@ const UPDATERS = {
 // That is the whole mechanic — he is walking towards a memory, so moving away
 // quietly works, and it is the one thing here that must not be "improved" into
 // tracking the player.
-const WATCHER_STATES = ['asleep', 'rising', 'investigating', 'searching', 'returning', 'settling'];
+const WATCHER_STATES = ['asleep', 'rising', 'investigating', 'searching',
+  'following', 'returning', 'settling'];
 
 function makeInvestigator(level, rules) {
   return {
@@ -212,7 +214,11 @@ function makeInvestigator(level, rules) {
     speed: 0,
     moving: false,
     facing: Math.PI / 2,
-    walkPhase: 0
+    walkPhase: 0,
+    // Following: how long you have been far enough away to be losing him, and
+    // when he last re-read where you were.
+    lostFor: 0,
+    repathAt: 0
   };
 }
 
@@ -267,6 +273,52 @@ function updateInvestigation(sim, player) {
     if (entity.state === 'investigating') routeTo(entity, sim.level, entity.target.x, entity.target.y);
   }
 
+  // --- picking you out, and losing you again ---------------------------------
+  // Everything above this point is him walking towards a memory. This is the
+  // one place he knows where you actually are, and he only earns that by
+  // getting close enough to see you.
+  //
+  // The two distances are far apart on purpose: with one number he would
+  // flicker between chasing and not chasing on every step across the line.
+  // Losing him costs real ground held for real seconds.
+  const onFootNow = entity.state === 'investigating' || entity.state === 'searching'
+    || entity.state === 'returning' || entity.state === 'following';
+  const gap = Math.hypot(player.x - entity.x, player.y - entity.y);
+  if (onFootNow && sim.status === 'running') {
+    if (entity.state !== 'following') {
+      if (gap <= rules.followAt) {
+        entity.lostFor = 0;
+        entity.repathAt = 0;
+        setState(sim, entity, 'following');
+        routeTo(entity, sim.level, player.x, player.y);
+      }
+    } else {
+      // He loses track of you gradually. Snapping this back to zero the
+      // instant you clip the edge of his range meant one unlucky corner threw
+      // away four seconds of running, and following became permanent.
+      entity.lostFor = gap >= rules.unfollowAt
+        ? entity.lostFor + STEP_SECONDS
+        : Math.max(0, entity.lostFor - STEP_SECONDS * 1.6);
+      if (entity.lostFor >= rules.unfollowFor) {
+        // He gives up on you, not on the noise: the last place he saw you is
+        // now the place worth looking at, and the ordinary rules take over.
+        entity.target = { x: entity.goal ? entity.goal.x : player.x,
+          y: entity.goal ? entity.goal.y : player.y };
+        setState(sim, entity, 'searching');
+      } else {
+        // Re-read where you are when you have moved, or every so often —
+        // never every frame, which would be both wasteful and uncanny.
+        entity.repathAt += STEP_SECONDS;
+        const drifted = !entity.goal
+          || Math.hypot(entity.goal.x - player.x, entity.goal.y - player.y) > rules.repathAfter;
+        if (drifted || entity.repathAt >= rules.repathEvery) {
+          entity.repathAt = 0;
+          routeTo(entity, sim.level, player.x, player.y);
+        }
+      }
+    }
+  }
+
   switch (entity.state) {
     case 'rising':
       if (entity.stateFor >= rules.rising) {
@@ -317,10 +369,7 @@ function updateInvestigation(sim, player) {
   // Walking into you ends the level through the same door everything else
   // does. Not while he is getting up or lying down: standing over him as he
   // stirs deserves a moment to back away, not an instant loss.
-  const onFoot = entity.state === 'investigating' || entity.state === 'searching'
-    || entity.state === 'returning';
-  if (onFoot && sim.status === 'running'
-      && Math.hypot(player.x - entity.x, player.y - entity.y) <= rules.catchAt) {
+  if (onFootNow && sim.status === 'running' && gap <= rules.catchAt) {
     finish(sim, 'lost', 'caught');
   }
 }
@@ -578,8 +627,9 @@ export function stepSim(sim, input = EMPTY_INPUT) {
   // corridor moves with him — which is the point.
   if (sim.rules.proximity) {
     const listener = sim.investigator || sim.level.watcher;
+    const awake = !!(sim.investigator && sim.investigator.state !== 'asleep');
     sim.proximity = proximityScale(
-      sim.rules, Math.hypot(player.x - listener.x, player.y - listener.y)
+      sim.rules, Math.hypot(player.x - listener.x, player.y - listener.y), awake
     );
   }
 

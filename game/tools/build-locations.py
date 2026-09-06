@@ -325,8 +325,8 @@ TILE = 20                # world units per grid tile, mirrored from tuning.js
 # The school's proximity curve and the noise numbers, mirrored from tuning.js so
 # this tool can work out what a given cupboard would actually cost to open. It is
 # the one duplication in here, and a test asserts the two still agree.
-PROX_NEAR, PROX_FAR = 92.0, 320.0
-PROX_NEAR_SCALE, PROX_FAR_SCALE = 2.5, 0.45
+PROX_NEAR, PROX_FAR = 90.0, 560.0
+PROX_NEAR_SCALE, PROX_FAR_SCALE = 3.0, 0.85
 SEARCH_NOISE = {'table': 3, 'nightstand': 3, 'chest': 4, 'tvBench': 4,
                 'sofa': 2, 'wardrobe': 5, 'bookshelf': 5, 'plinth': 6}
 ITEM_NOISE = {'c': 3, 'w': 6, 'p': 8, 'k': 11, 'r': 13, 'm': 14, 't': 15,
@@ -348,26 +348,34 @@ def proximity(distance):
     return PROX_NEAR_SCALE + (PROX_FAR_SCALE - PROX_NEAR_SCALE) * (t * t * (3 - 2 * t))
 
 
-TIER_STASHES = [3, 5, 7, 9, 10]
-TIER_FILLED = [2, 3, 4, 5, 6]
+TIER_STASHES = [6, 8, 10, 12, 14]
+TIER_FILLED = [4, 6, 8, 9, 11]
+# How much loot the school leaves lying about. The rest of what a level is worth
+# is inside the furniture, which is the point: the school should not be a floor
+# to be swept, it should be a building to be searched.
+TIER_FLOOR = [3, 3, 4, 4, 5]
+# (the one tempting thing, everything else) for each tier's floor
+FLOOR_LOOT = [('p', 'c'), ('k', 'c'), ('r', 'w'), ('m', 'w'), ('v', 'w')]
 
 # What turns up inside, worst first. A tier draws from the front of its own list
 # and the best of them goes in the piece nearest Mr. Vrána — which is the whole
 # point of level five: the good stuff is where you least want to be standing.
-# Best first: the front of each list lands in the piece nearest Mr. Vrána.
+# Best first. Most of what a school level is worth is in here now, so these are
+# the lists that decide what the place is actually worth turning over.
 TIER_STASH_LOOT = [
-    ['w', 'c'],                          # a wallet, then coins
-    ['k', 'w', 'c'],                     # headphones
-    ['r', 'k', 'p', 'w'],                # a ring
-    ['n', 'j', 'r', 'k', 'p'],           # a games console, jewellery
-    ['d', 'v', 'l', 'n', 'j', 'r'],      # a diamond, in the worst place on the map
+    ['r', 'k', 'p', 'c'],
+    ['m', 'r', 'k', 'p', 'w', 'c'],
+    ['l', 'n', 't', 'm', 'r', 'k', 'p', 'w'],
+    ['v', 'j', 'l', 'n', 't', 'm', 'r', 'k', 'p'],
+    ['g', 'd', 'v', 'l', 'n', 'j', 't', 'm', 'r', 'k', 'p'],
 ]
 
 # Furniture a person would actually open. Desks and cabinets yes; the couch the
 # caretaker is asleep on, obviously not.
 SEARCHABLE_STYLES = {'C': 'chest', 'B': 'bookshelf', 'W': 'wardrobe',
                      'T': 'table', 'V': 'tvBench'}
-STASH_CHARS = '1234567890'
+# Digits first, then the uppercase letters no other tile uses.
+STASH_CHARS = '1234567890AFGHIJKLMQRUYZ'
 
 
 def _blobs(g, chars):
@@ -395,6 +403,41 @@ def _blobs(g, chars):
     return out
 
 
+def thin_floor_loot(g, tier):
+    """Take most of the loot off the school's floors.
+
+    What is left is what section three of the brief asks visible loot to be:
+    a few easy rewards to get you moving, and one thing worth crossing the map
+    for. Everything else is now behind a cupboard door.
+    """
+    keep = TIER_FLOOR[tier]
+    found = [(x, y, g.g[y][x]) for y in range(g.rows) for x in range(g.cols)
+             if g.g[y][x] in LOOT_CHARS]
+    if len(found) <= keep:
+        return
+    value = {'c': 10, 'w': 25, 'p': 30, 'k': 50, 'r': 65, 'm': 75, 't': 85,
+             'n': 100, 'l': 120, 'v': 180, 'j': 90, 'd': 220, 'g': 300}
+    # What the survivors become. One thing worth crossing the map for, and
+    # small change everywhere else — visible loot is there to start you moving
+    # and to point at rooms, not to be the level.
+    tempting, petty = FLOOR_LOOT[tier]
+    # Keep the single best one — the tempting thing out in the open — and then
+    # spread the rest of the survivors across the map rather than leaving a
+    # cluster in whichever room happened to come first.
+    best = max(range(len(found)), key=lambda i: value.get(found[i][2], 0))
+    kept = {best}
+    rest = [i for i in range(len(found)) if i != best]
+    rest.sort(key=lambda i: (found[i][1], found[i][0]))
+    step = len(rest) / max(1, keep - 1)
+    for k in range(keep - 1):
+        kept.add(rest[min(len(rest) - 1, int(k * step))])
+    for i, (x, y, _) in enumerate(found):
+        if i not in kept:
+            g.g[y][x] = '.'
+        else:
+            g.g[y][x] = tempting if i == best else petty
+
+
 def make_searchable(g, tier):
     """Turn some of the school's furniture into things you can look inside.
 
@@ -402,32 +445,53 @@ def make_searchable(g, tier):
     about the map changes — a searchable cabinet is the same cabinet, in the
     same place, blocking the same route.
     """
+    # Where the game thinks he is: the centre of his couch across, and a
+    # quarter of the way down it — tilemap.js puts a sleeper's head there, and
+    # every distance in the school is measured from that point. Measuring from
+    # the first 'E' tile instead put this tool seventy units out, which is
+    # enough to slip a gold bar past the noise ceiling.
+    cells = [(x, y) for y in range(g.rows) for x in range(g.cols) if g.g[y][x] == 'E']
     watcher = None
-    for y in range(g.rows):
-        for x in range(g.cols):
-            if g.g[y][x] == 'E':
-                watcher = (x, y)
-                break
-        if watcher:
-            break
+    if cells:
+        xs = [c[0] for c in cells]
+        ys = [c[1] for c in cells]
+        watcher = ((min(xs) + (max(xs) - min(xs) + 1) / 2),
+                   (min(ys) + (max(ys) - min(ys) + 1) * 0.26))
 
-    blobs = [b for b in _blobs(g, SEARCHABLE_STYLES) if 2 <= len(b[1]) <= 24]
+    # Only rectangular pieces. The game merges a character into maximal
+    # rectangles and hangs the contents on the largest of them, so an L-shaped
+    # bank of lockers would sit somewhere other than where this tool measured
+    # its distance from — and the whole placement is built on that distance.
+    # Requiring a rectangle makes the two agree by construction.
+    def rectangular(blob):
+        cells = blob[1]
+        xs = [c[0] for c in cells]
+        ys = [c[1] for c in cells]
+        return len(cells) == (max(xs) - min(xs) + 1) * (max(ys) - min(ys) + 1)
+
+    blobs = [b for b in _blobs(g, SEARCHABLE_STYLES)
+             if 2 <= len(b[1]) <= 24 and rectangular(b)]
     if not blobs:
         return {}
 
+    # Measured the way the game measures it: from the centre of the piece, not
+    # from the average of its tiles, which sit half a tile in.
+    def centre(blob):
+        cs = blob[1]
+        xs = [c[0] for c in cs]
+        ys = [c[1] for c in cs]
+        return (min(xs) + (max(xs) - min(xs) + 1) / 2,
+                min(ys) + (max(ys) - min(ys) + 1) / 2)
+
     def key(blob):
-        cells = blob[1]
-        cx = sum(c[0] for c in cells) / len(cells)
-        cy = sum(c[1] for c in cells) / len(cells)
+        cx, cy = centre(blob)
         far = ((cx - watcher[0]) ** 2 + (cy - watcher[1]) ** 2) ** 0.5 if watcher else 0
         return (far, cx, cy)
 
     def spread(blob):
-        cells = blob[1]
-        cx = sum(c[0] for c in cells) / len(cells)
-        cy = sum(c[1] for c in cells) / len(cells)
         if not watcher:
             return 0.0
+        cx, cy = centre(blob)
         return (((cx - watcher[0]) ** 2 + (cy - watcher[1]) ** 2) ** 0.5) * TILE
 
     blobs.sort(key=key)                   # nearest the caretaker first
@@ -463,7 +527,10 @@ def make_searchable(g, tier):
                 placed = i
                 break
         if placed is None:
-            placed = free[-1]        # nowhere safe: the furthest is the least bad
+            # Nowhere on this map is far enough from him to open that quietly.
+            # Better to leave it out than to hide something nobody can take.
+            g.bad.append('no room for a %s within the noise ceiling' % item)
+            continue
         contents[placed] = item
         free.remove(placed)
 
@@ -856,6 +923,8 @@ def build():
             # Searchable furniture is the school's alone for now, and it runs
             # last: it only rewrites characters in place, so nothing it does can
             # move a wall or close a route that the passes above just opened.
+            if name == 'School':
+                thin_floor_loot(g, tier)
             stashes = make_searchable(g, tier) if name == 'School' else {}
             if g.bad:
                 problems.append(f'{name} L{tier + 1}: {g.bad}')

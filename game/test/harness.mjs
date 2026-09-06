@@ -83,14 +83,15 @@ export function tick(run, input = { x: 0, y: 0, take: false }) {
 }
 
 // Walk to a world position. Returns false if the sim ended or we gave up.
-export function walkTo(run, target, maxFrames = null) {
+export function walkTo(run, target, maxFrames = null, pace = 1) {
   const player = playerOf(run.sim);
   // Follow every cell of the path: skipping cells lets a straight line between
   // two waypoints clip a furniture corner, and the bot stalls against it.
   const waypoints = pathTo(run.level, { x: player.x, y: player.y }, target);
   const perFrame = TUNING.player.speed / TUNING.sim.hz;
   const budget =
-    maxFrames === null ? Math.ceil((waypoints.length * 4) / perFrame) * 3 + 240 : maxFrames;
+    maxFrames === null
+      ? Math.ceil((waypoints.length * 4) / (perFrame * pace)) * 3 + 240 : maxFrames;
   let frames = 0;
 
   for (let index = 0; index < waypoints.length; index++) {
@@ -111,7 +112,7 @@ export function walkTo(run, target, maxFrames = null) {
       const arriving = isLast ? Math.max(0.35, Math.min(1, distance / 14)) : 1;
       // ...and ease off near furniture, which is what a careful player does now
       // that a full-speed collision costs several times what a brush does.
-      const throttle = Math.min(arriving, nearFurniture(run.level, p) ? 0.7 : 1);
+      const throttle = Math.min(arriving, nearFurniture(run.level, p) ? 0.7 : 1) * pace;
       tick(run, { x: (dx / distance) * throttle, y: (dy / distance) * throttle, take: false });
       // Wedged against geometry: give up on this cell rather than burn the budget.
       if (Math.abs(p.x - wasX) < 0.05 && Math.abs(p.y - wasY) < 0.05 && ++stalled > 6) break;
@@ -221,14 +222,121 @@ export function playEfficiently(levelId, { budget = 70, reserve = null, seed = 7
   return { run, result: snapshot(run.sim) };
 }
 
+// Open every cupboard on the map, wherever they can be reached. "Take
+// everything" has to mean everything now that most of a school level is behind
+// a door — a greedy run that only sweeps the floor is not greedy any more.
+export function ransack(run) {
+  if (!run.sim.rules.search) return;
+  for (const stash of run.sim.stashes) {
+    if (run.sim.status !== 'running' || stash.searched) continue;
+    const target = { x: stash.x + stash.w / 2, y: stash.y + stash.h + 18 };
+    if (!walkTo(run, target, 60 * 12)) continue;
+    tick(run, { x: 0, y: 0, take: false, search: true });
+    let guard = 0;
+    while (run.sim.searching && run.sim.status === 'running' && guard++ < 300) tick(run);
+  }
+}
+
+// Play the way the school is meant to be played: explore, open the cupboards
+// that look worth the noise, back off when the meter climbs, run if he spots
+// you, and leave with something. This is the shape of run the school promises
+// is possible, so it is what the payoff tests drive.
+export function playSearching(levelId, { seed = 7, pace = 0.6, budget = 64 } = {}) {
+  const run = createRun(levelId, seed);
+  const { sim } = run;
+  const p = playerOf(sim);
+  const keepBack = Math.max(11, sim.timeLimit * 0.34);
+  const gaveUp = new Set();
+  const him = () => sim.investigator || sim.level.watcher;
+
+  // Hold still and let it settle — but keep one eye open. Standing there while
+  // he walks past is how you get caught.
+  const settle = (until) => {
+    for (let i = 0; i < 60 * 12 && sim.status === 'running' && sim.noise > until; i++) {
+      if (sim.investigator && sim.investigator.state === 'following') return false;
+      if (sim.investigator && sim.investigator.state !== 'asleep'
+          && Math.hypot(p.x - him().x, p.y - him().y) < 170) return false;
+      tick(run);
+    }
+    return true;
+  };
+
+  // Spotted. Standing still is the one thing that does not work.
+  const bolt = () => {
+    for (let i = 0; i < 60 * 6 && sim.status === 'running'
+         && sim.investigator.state === 'following'; i++) {
+      const dx = p.x - him().x;
+      const dy = p.y - him().y;
+      const d = Math.hypot(dx, dy) || 1;
+      tick(run, { x: dx / d, y: dy / d, take: false, search: false });
+    }
+  };
+
+  // Every branch below can decline to act — settle can bail the moment he
+  // stirs, bolt can end with him still on your heels. Bound the loop so a
+  // stand-off cannot spin forever.
+  for (let turns = 0; turns < 400 && sim.status === 'running'
+       && sim.timeLeft > keepBack; turns++) {
+    if (sim.investigator && sim.investigator.state === 'following') { bolt(); continue; }
+    if (sim.noise > budget) {
+      if (!settle(budget * 0.5)) tick(run);
+      continue;
+    }
+
+    // The nearest thing worth doing: something on the floor right here, or the
+    // cupboard with the best ratio of quiet to walking.
+    const loose = sim.items.filter((i) => !i.taken && !gaveUp.has(i.id))
+      .sort((a, b) => Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(b.x - p.x, b.y - p.y))[0];
+    let stash = null;
+    let bestScore = 0;
+    for (const s of sim.stashes) {
+      if (s.searched || gaveUp.has(s.id)) continue;
+      const cx = s.x + s.w / 2;
+      const cy = s.y + s.h / 2;
+      const quiet = Math.hypot(cx - him().x, cy - him().y);
+      const walk = Math.hypot(cx - p.x, cy - p.y);
+      // What it would cost from here, guessing at what is inside. A player
+      // reads this off the meter and the distance; a bot that ignores it opens
+      // one cupboard too many and wakes him, every time.
+      const scale = proximityScale(sim.rules, quiet, !!(sim.investigator
+        && sim.investigator.state !== 'asleep'));
+      if (sim.noise + (sim.rules.search.noise[s.style] + 14) * scale > budget + 22) continue;
+      const score = (quiet + 80) / (1 + walk / 220);
+      if (score > bestScore) { bestScore = score; stash = s; }
+    }
+    if (!loose && !stash) break;
+
+    if (loose && (!stash || Math.hypot(loose.x - p.x, loose.y - p.y) < 100)) {
+      if (!walkTo(run, loose, 60 * 12, pace)) { gaveUp.add(loose.id); continue; }
+      for (let i = 0; i < 40 && !loose.taken && sim.status === 'running'; i++) {
+        tick(run, { x: 0, y: 0, take: true, search: false });
+        tick(run, { x: 0, y: 0, take: false, search: false });
+      }
+      if (!loose.taken) gaveUp.add(loose.id);
+      continue;
+    }
+    const at = { x: stash.x + stash.w / 2, y: stash.y + stash.h + 18 };
+    if (!walkTo(run, at, 60 * 16, pace)) { gaveUp.add(stash.id); continue; }
+    tick(run, { x: 0, y: 0, take: false, search: true });
+    for (let i = 0; i < 300 && sim.searching && sim.status === 'running'; i++) tick(run);
+    if (!stash.searched) gaveUp.add(stash.id);
+  }
+  if (sim.status === 'running' && sim.noise > 88) settle(70);
+  if (sim.status === 'running') escape(run);
+  return { run, result: snapshot(run.sim) };
+}
+
 // Steal the listed items (or all of them) then run for the door.
-export function play(levelId, { take = null, seed = 7 } = {}) {
+export function play(levelId, { take = null, seed = 7, everything = false } = {}) {
   const run = createRun(levelId, seed);
   const ids = take || run.sim.items.map((i) => i.id);
   for (const id of ids) {
     if (run.sim.status !== 'running') break;
     steal(run, id);
   }
+  // "Take everything" has to mean everything now that most of a school level is
+  // behind a cupboard door. Sweeping only the floor is not greed any more.
+  if (everything) ransack(run);
   if (run.sim.status === 'running') escape(run);
   return { run, result: snapshot(run.sim) };
 }

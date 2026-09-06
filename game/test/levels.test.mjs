@@ -2,7 +2,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { LEVELS } from '../src/levels.js';
 import { validateAll, validateLevel } from '../src/validate.js';
-import { levelTotals, forcesChoice, itemStats, timeLimit, furnitureStyle } from '../src/rules.js';
+import {
+  levelTotals, forcesChoice, itemStats, timeLimit, furnitureStyle, lootOf
+} from '../src/rules.js';
 import { play, playEfficiently } from './harness.mjs';
 
 // Eleven locations of five levels each; within a location the difficulty climbs.
@@ -226,7 +228,11 @@ test('every level is a building, not one open room', () => {
     assert.ok(level.colliders.filter((c) => c.type === 'partition').length >= 2,
       `level ${level.id} has no interior walls`);
     assert.ok(level.doors.length >= 1, `level ${level.id} has no doorways`);
-    assert.ok(level.items.length >= 7, `level ${level.id} has only ${level.items.length} items`);
+    // Counted across the floor *and* the furniture: the school keeps most of
+    // what it is worth inside cupboards now, so counting only what is lying
+    // about would say a full level was nearly empty.
+    const loot = lootOf(level);
+    assert.ok(loot.length >= 7, `level ${level.id} has only ${loot.length} things worth taking`);
   }
 });
 
@@ -243,11 +249,12 @@ test('the validator notices a doorway bricked up', () => {
 
 test('greed never pays: taking everything loses, one way or another', () => {
   for (const level of LEVELS.filter(forcesChoice)) {
-    const { result } = play(level.id, { seed: 5 });
+    const { result } = play(level.id, { seed: 5, everything: true });
     assert.equal(result.status, 'lost', `level ${level.id} should be unsurvivable if greedy`);
-    // On the bigger rooms the clock can run out before the meter fills — both
-    // are legitimate ways for greed to fail.
-    if (result.reason !== 'time') {
+    // On the bigger rooms the clock can run out before the meter fills, and in
+    // the school a greedy run is loud enough that Mr. Vrána gets up and walks
+    // into you. All three are legitimate ways for greed to fail.
+    if (result.reason !== 'time' && result.reason !== 'caught') {
       assert.equal(result.noise, 100, `level ${level.id} lost for '${result.reason}' at ${result.noise}`);
     }
   }

@@ -556,8 +556,17 @@ __mod.tuning = (function () {
         caughtWhy: 'Mr. Vrána walked in on you while he was investigating the noise.',
         // Shown while he is on his feet, in place of the noise-threshold
         // warnings: what he is doing matters more than the number by then.
-        onFoot: ['MR. VRÁNA IS GETTING UP', 'HE IS COMING TO LOOK',
-          'HE IS LOOKING AROUND', 'HE IS GOING BACK']
+        // Keyed by what he is doing rather than by position in a list: there are
+        // more states than there were, and an index is the sort of thing that
+        // quietly stops matching the state machine.
+        onFoot: {
+          rising: 'MR. VRÁNA IS GETTING UP',
+          investigating: 'HE IS COMING TO LOOK',
+          searching: 'HE IS LOOKING AROUND',
+          following: 'HE HAS SEEN YOU — RUN',
+          returning: 'HE IS GOING BACK',
+          settling: 'HE IS GOING BACK'
+        }
       },
 
       // --- the seven named people of the floorplan levels ---------------------
@@ -651,10 +660,22 @@ __mod.tuning = (function () {
         // towards him. Both ends are deliberately far from 1.0: if the far end
         // were 0.9 the whole mechanic would be a rounding error.
         proximity: {
-          near: 92,          // world units — about four tiles, i.e. the same room
-          far: 320,          // ...and beyond this he is most of a corridor away
-          nearScale: 2.5,    // everything is two and a half times as loud
-          farScale: 0.45     // ...against under half out at the far end
+          near: 90,          // world units — about four tiles, i.e. the same room
+          // Far enough that the whole of even the biggest school map sits inside
+          // the falloff. There is no "outside his hearing" any more: the curve
+          // runs continuously from his elbow to the far corner, and the quietest
+          // corner of the building is still only a shade under full price.
+          far: 560,
+          nearScale: 3.0,    // three times as loud, standing over him
+          farScale: 0.85     // ...and barely muffled at the other end of the school
+        },
+        // What changes once he is on his feet. A man awake is listening, and he
+        // carries that with him — a second, smaller curve centred on wherever he
+        // happens to be standing, multiplied on top of the first. It is what
+        // stops the answer to "he woke up" being "carry on somewhere else".
+        awake: {
+          radius: 220,       // how far his attention reaches while he is up
+          boost: 1.7         // at his feet; easing back to 1 at the edge of it
         },
         // The school is the one place noise comes back down fast enough to be a
         // tactic rather than a consolation. Standing still is how you send him
@@ -703,7 +724,33 @@ __mod.tuning = (function () {
           catchAt: 22,       // this close to you and the level is over
           // He gets one look at where the sound came from. If you are still
           // there when he arrives, that is on you.
-          forget: true
+          forget: true,
+
+          // --- and if you let him get close enough to actually see you --------
+          // Up to here he has been walking towards a memory. Inside this range
+          // he stops guessing and comes after you: his target becomes wherever
+          // you are, updated as you move.
+          //
+          // The two distances are deliberately far apart. One number would make
+          // him flicker between chasing and not chasing every time you stepped
+          // over the line, so losing him takes real ground and real seconds
+          // rather than a step backwards.
+          followAt: 58,      // he picks you out at under three tiles
+          // Far enough that a step backwards will not do it, close enough that
+          // it is reachable on a floorplan. You gain about fifty units a second
+          // on him in the open, so this is a second and a half of clear running
+          // and then two more of keeping it — but it is measured through rooms
+          // and doorways, where every corner hands some of it back. Set against
+          // rooms two to three hundred units across: at 250 the only escape was
+          // a straight corridor longer than any of these maps has, and being
+          // followed became permanent, which is the one thing it must not be.
+          unfollowAt: 150,
+          unfollowFor: 2.0,  // held for this long, not merely touched once
+          // Re-reading where you are every frame would be wasteful, and would
+          // also make him uncannily precise. He looks again when you have moved
+          // this far, or this often, whichever comes first.
+          repathEvery: 0.3,
+          repathAfter: 28
         }
       }
     },
@@ -856,16 +903,28 @@ __mod.rules = (function () {
   }
 
   // How much louder a noise is for being made near the person listening to it.
-  // Smooth between the two distances on purpose: a threshold you can step across
+  //
+  // One continuous curve, not a set of bands: a threshold you can step across
   // without noticing is a trap, and this has to be something the player learns to
-  // feel rather than something that catches them out.
-  function proximityScale(rules, distance) {
+  // feel rather than something that catches them out. The far end is deliberately
+  // close to 1 — being at the other end of the school is quieter, never silent.
+  //
+  // `awake` multiplies a second, tighter curve on top, centred on the same
+  // person. A man on his feet is listening, and he takes that with him: it is
+  // what stops "he woke up" being answered by carrying on in the next room.
+  function proximityScale(rules, distance, awake = false) {
     const p = rules.proximity;
     if (!p) return 1;
-    if (distance <= p.near) return p.nearScale;
-    if (distance >= p.far) return p.farScale;
-    const t = (distance - p.near) / (p.far - p.near);
-    return p.nearScale + (p.farScale - p.nearScale) * (t * t * (3 - 2 * t));
+    const base = distance <= p.near ? p.nearScale
+      : distance >= p.far ? p.farScale
+        : (() => {
+          const t = (distance - p.near) / (p.far - p.near);
+          return p.nearScale + (p.farScale - p.nearScale) * (t * t * (3 - 2 * t));
+        })();
+    const a = rules.awake;
+    if (!awake || !a || distance >= a.radius) return base;
+    const t = distance / a.radius;
+    return base * (a.boost + (1 - a.boost) * (t * t * (3 - 2 * t)));
   }
 
   // How long a step is at this speed, expressed as walk-cycle phase per unit of
@@ -940,8 +999,16 @@ __mod.rules = (function () {
 
   // What a level is worth if you somehow took everything (used by the validator
   // and by balance reporting, never by the running game).
+  // Everything a level holds, floor and furniture alike. Where most of the loot
+  // is inside the furniture — which is the school now — counting only what is
+  // lying about would set the star targets against a fraction of the level.
+  function lootOf(level) {
+    const hidden = (level.stashes || []).filter((s) => s.item).map((s) => ({ type: s.item }));
+    return hidden.length ? level.items.concat(hidden) : level.items;
+  }
+
   function levelTotals(level) {
-    return level.items.reduce(
+    return lootOf(level).reduce(
       (acc, item) => {
         const stats = itemStats(item.type);
         acc.value += stats.value;
@@ -1008,7 +1075,7 @@ __mod.rules = (function () {
   // because the star targets are read off it. Setting targets against the room's
   // raw total would demand hauls that wake him every time.
   function bestHaul(level, budget = TUNING.stars.budget) {
-    const items = level.items.map((item) => itemStats(item.type));
+    const items = lootOf(level).map((item) => itemStats(item.type));
     let best = 0;
     const walk = (index, noise, value) => {
       if (noise > budget) return;
@@ -1084,7 +1151,7 @@ __mod.rules = (function () {
     const costs = TUNING.upgrades[key].costs;
     return ownedLevel >= costs.length ? null : costs[ownedLevel];
   }
-  return { SLEEP_DEEP, SLEEP_LIGHT, SLEEP_DISTURBED, SLEEP_ALMOST, SLEEP_CRITICAL, SLEEP_AWAKE, SLEEP_ASLEEP, SLEEP_STIRRING, SLEEP_LABELS, hash, furnitureStyle, bumpNoise, timeLimit, locationRules, proximityScale, stridePerUnit, gaitBlend, itemStats, addNoise, isAwake, sleepStage, canBank, levelTotals, forcesChoice, shapeStick, watcherConfig, detectionRate, rarityOf, isBigScore, bestHaul, starThresholds, starsFor, objectivesFor, gradeEscape, comboBonus, resolveUpgrades, upgradeCost };
+  return { SLEEP_DEEP, SLEEP_LIGHT, SLEEP_DISTURBED, SLEEP_ALMOST, SLEEP_CRITICAL, SLEEP_AWAKE, SLEEP_ASLEEP, SLEEP_STIRRING, SLEEP_LABELS, hash, furnitureStyle, bumpNoise, timeLimit, locationRules, proximityScale, stridePerUnit, gaitBlend, itemStats, addNoise, isAwake, sleepStage, canBank, lootOf, levelTotals, forcesChoice, shapeStick, watcherConfig, detectionRate, rarityOf, isBigScore, bestHaul, starThresholds, starsFor, objectivesFor, gradeEscape, comboBonus, resolveUpgrades, upgradeCost };
 })();
 __mod.physics = (function () {
   // One mover for every moving thing. Sub-stepped so nothing can tunnel through a
@@ -1485,11 +1552,18 @@ __mod.tilemap = (function () {
     const search = spec.search || {};
     const stashes = [];
     for (const [ch, entry] of Object.entries(search)) {
-      for (const r of mergeRects(grid, rows, cols, ch)) {
+      // One character can merge into more than one rectangle — an L-shaped bank
+      // of lockers, say. Each piece is searchable, but only the largest holds
+      // what the map said was in there; the others are empty. Otherwise a single
+      // awkwardly-shaped cupboard would quietly pay out twice.
+      const parts = mergeRects(grid, rows, cols, ch);
+      const holder = parts.length
+        ? parts.reduce((a, b) => (a.w * a.h >= b.w * b.h ? a : b)) : null;
+      for (const r of parts) {
         // What is inside is written in the same one-letter vocabulary as the
         // loot on the floor, and resolved through the same legend — a `w` in a
         // drawer is the same wallet as a `w` on a desk.
-        const inside = entry.item ? (legend[entry.item] || entry.item) : null;
+        const inside = entry.item && r === holder ? (legend[entry.item] || entry.item) : null;
         const stash = {
           id: `L${spec.id}-s${stashes.length}`,
           style: entry.style,
@@ -2557,20 +2631,22 @@ __mod.maps = (function () {
       seated: false,
       clock: 56,
       search: {
-        '1': { style: 'chest', item: 'w' },
-        '2': { style: 'table', item: 'c' },
-        '3': { style: 'table', item: null },
+        '1': { style: 'chest', item: 'r' },
+        '2': { style: 'table', item: 'k' },
+        '3': { style: 'table', item: 'p' },
+        '4': { style: 'table', item: 'c' },
+        '5': { style: 'table', item: null },
       },
       legend: LOOT,
       tiles: [
         '##############################',
         '#.............%..............#',
-        '#......c......%.......k......#',
-        '#.3333....2222%.TTTT....TTTT.#',
-        '#.3333....2222%.TTTT....TTTT.#',
+        '#......c......%.......p......#',
+        '#.4444....2222%.3333....5555.#',
+        '#.4444....2222%.3333....5555.#',
         '#.............%..............#',
         '#.............%..............#',
-        '#.p.....c...k.%..c....w......#',
+        '#...........c.%..............#',
         '#.............%..............#',
         '#%%%%%%DDD%%%%%%%%%%%DDD%%%%%#',
         '#............................#',
@@ -2585,7 +2661,7 @@ __mod.maps = (function () {
         '#..........EEEEEEE...........#',
         '#..........EEEEEEE...........#',
         '#............................#',
-        '#..p.........................#',
+        '#............................#',
         '#............................#',
         '#............................#',
         '##############################',
@@ -2602,29 +2678,32 @@ __mod.maps = (function () {
       seated: false,
       clock: 53,
       search: {
-        '1': { style: 'chest', item: 'k' },
-        '2': { style: 'bookshelf', item: 'w' },
-        '3': { style: 'table', item: 'c' },
-        '4': { style: 'table', item: null },
-        '5': { style: 'table', item: null },
+        '1': { style: 'chest', item: 'm' },
+        '2': { style: 'table', item: 'r' },
+        '3': { style: 'table', item: 'k' },
+        '4': { style: 'table', item: 'p' },
+        '5': { style: 'bookshelf', item: 'w' },
+        '6': { style: 'table', item: 'c' },
+        '7': { style: 'table', item: null },
+        '8': { style: 'table', item: null },
       },
       legend: LOOT,
       tiles: [
         '#################################',
         '#..............%................#',
         '#..............%................#',
-        '#.TTTTT...44444%.TTTTT....TTTTT.#',
-        '#.TTTTT...44444%.TTTTT....TTTTT.#',
+        '#.TTTTT...77777%.TTTTT....66666.#',
+        '#.TTTTT...77777%.TTTTT....66666.#',
         '#..............%................#',
         '#..............%................#',
-        '#.55555...TTTTT%.TTTTT....33333.#',
-        '#.55555.w.TTTTT%.TTTTT..m.33333.#',
+        '#.88888...44444%.22222....33333.#',
+        '#.88888.c.44444%.22222..k.33333.#',
         '#..............%................#',
         '#%%%%%%DDD%%%%%%%%%%%%%DDD%%%%%%#',
         '#...............................#',
-        'X......w.........p....k.........#',
+        'X...............................#',
         'X............111..............@.#',
-        'X.........m..111..........w.....#',
+        'X.........c..111................#',
         '#...............................#',
         '#...............................#',
         '#%%%%%%DDD%%%%%%%%%%%%%DDD%%%%%%#',
@@ -2632,9 +2711,9 @@ __mod.maps = (function () {
         '#..............%................#',
         '#..............%....EEEEEEE.....#',
         '#..............%....EEEEEEE.....#',
-        '#.......k...r..%....EEEEEEE.....#',
-        '#.222222222....%................#',
-        '#.222222222....%..r.............#',
+        '#..............%....EEEEEEE.....#',
+        '#.555555555....%................#',
+        '#.555555555....%................#',
         '#..............%................#',
         '#..............%................#',
         '#################################',
@@ -2651,29 +2730,31 @@ __mod.maps = (function () {
       seated: false,
       clock: 51,
       search: {
-        '1': { style: 'chest', item: 'r' },
-        '2': { style: 'table', item: 'k' },
-        '3': { style: 'table', item: 'p' },
-        '4': { style: 'bookshelf', item: 'w' },
-        '5': { style: 'table', item: null },
-        '6': { style: 'table', item: null },
-        '7': { style: 'table', item: null },
+        '1': { style: 'chest', item: 't' },
+        '2': { style: 'table', item: 'l' },
+        '3': { style: 'table', item: 'n' },
+        '4': { style: 'table', item: 'm' },
+        '5': { style: 'table', item: 'r' },
+        '6': { style: 'bookshelf', item: 'k' },
+        '7': { style: 'table', item: 'p' },
+        '8': { style: 'table', item: 'w' },
+        '9': { style: 'table', item: null },
       },
       legend: LOOT,
       tiles: [
         '####################################',
         '#..........%..........%............#',
-        '#......r...%.....m....%............#',
-        '#.TTT......%.666......%.TTTT..5555.#',
-        '#.TTT......%.666......%.TTTT..5555.#',
+        '#......w...%..........%............#',
+        '#.999......%.777......%.3333..5555.#',
+        '#.999......%.777......%.3333..5555.#',
         '#..........%..........%............#',
-        '#.....m....%..........%............#',
-        '#.777......%.333......%.2222.......#',
-        '#.777......%.333......%.2222.......#',
-        '#.....r....%.....m....%......t.....#',
+        '#..........%..........%............#',
+        '#.888......%.444......%.2222.......#',
+        '#.888......%.444......%.2222.......#',
+        '#.....w....%..........%............#',
         '#..........%..........%............#',
         '#%%%%DDD%%%%%%%%DDD%%%%%%%%%DDD%%%%#',
-        '#................t.................#',
+        '#..................................#',
         'X..................................#',
         'X...................111..........@.#',
         'X...................111............#',
@@ -2683,12 +2764,12 @@ __mod.maps = (function () {
         '#................%.................#',
         '#................%.................#',
         '#................%.....EEEEEEE.....#',
-        '#................%.....EEEEEEE..n..#',
+        '#................%.....EEEEEEE..w..#',
         '#................%.....EEEEEEE.....#',
-        '#........n.......%.................#',
         '#................%.................#',
-        '#.44444444444....%.................#',
-        '#.44444444444....%..l......l....l..#',
+        '#................%.................#',
+        '#.66666666666....%.................#',
+        '#.66666666666....%..r..............#',
         '#................%.................#',
         '#................%.................#',
         '####################################',
@@ -2705,49 +2786,52 @@ __mod.maps = (function () {
       seated: false,
       clock: 50,
       search: {
-        '1': { style: 'chest', item: 'n' },
-        '2': { style: 'table', item: 'j' },
-        '3': { style: 'table', item: 'r' },
-        '4': { style: 'table', item: 'k' },
-        '5': { style: 'table', item: 'p' },
-        '6': { style: 'table', item: null },
-        '7': { style: 'table', item: null },
-        '8': { style: 'table', item: null },
-        '9': { style: 'table', item: null },
+        '1': { style: 'chest', item: 'j' },
+        '2': { style: 'table', item: 'l' },
+        '3': { style: 'table', item: 'v' },
+        '4': { style: 'table', item: 'n' },
+        '5': { style: 'table', item: 't' },
+        '6': { style: 'table', item: 'm' },
+        '7': { style: 'table', item: 'r' },
+        '8': { style: 'table', item: 'k' },
+        '9': { style: 'table', item: 'p' },
+        '0': { style: 'table', item: null },
+        'A': { style: 'table', item: null },
+        'F': { style: 'table', item: null },
       },
       legend: LOOT,
       tiles: [
         '########################################',
         '#...........%...........%..............#',
-        '#...........%...........%.......v......#',
-        '#.TTTT..8888%.7777..TTTT%.5555....6666.#',
-        '#.TTTT..8888%.7777..TTTT%.5555....6666.#',
+        '#...........%...........%.......m......#',
+        '#.TTTT..AAAA%.9999..8888%.5555....7777.#',
+        '#.TTTT..AAAA%.9999..8888%.5555....7777.#',
         '#...........%...........%..............#',
         '#...........%...........%..............#',
-        '#.9999..TTTT%.4444..3333%.2222..l.TTTT.#',
-        '#.9999..TTTT%.4444..3333%.2222....TTTT.#',
+        '#.FFFF..0000%.6666..4444%.2222..w.3333.#',
+        '#.FFFF..0000%.6666..4444%.2222....3333.#',
         '#...........%...........%..............#',
         '#...........%...........%..............#',
-        '#......n....%......l....%.......v......#',
+        '#...........%...........%..............#',
         '#...........%...........%..............#',
         '#%%%%%DDD%%%%%%%%%DDD%%%%%%%%%%DDD%%%%%#',
         '#......................................#',
         'X......................................#',
         'X.....................111............@.#',
-        'X......v.........j....111..m....n......#',
+        'X......w..............111..............#',
         '#......................................#',
         '#......................................#',
         '#%%%%%%%%DDD%%%%%%%%%%%%%%%%DDD%%%%%%%%#',
         '#..................%...................#',
-        '#..................%..l..............v.#',
+        '#..................%.................w.#',
         '#..................%......EEEEEEE......#',
         '#..................%......EEEEEEE......#',
         '#..................%......EEEEEEE......#',
         '#..................%...................#',
-        '#.j....m..j........%...................#',
+        '#..................%...................#',
         '#..................%...................#',
         '#.BBBBBBBBBBBBB....%...................#',
-        '#.BBBBBBBBBBBBB....%..m................#',
+        '#.BBBBBBBBBBBBB....%...................#',
         '#..................%...................#',
         '#..................%...................#',
         '########################################',
@@ -2764,53 +2848,57 @@ __mod.maps = (function () {
       seated: false,
       clock: 51,
       search: {
-        '1': { style: 'chest', item: 'n' },
-        '2': { style: 'chest', item: 'd' },
-        '3': { style: 'table', item: 'v' },
-        '4': { style: 'chest', item: 'l' },
-        '5': { style: 'table', item: 'j' },
-        '6': { style: 'table', item: 'r' },
-        '7': { style: 'table', item: null },
-        '8': { style: 'table', item: null },
-        '9': { style: 'bookshelf', item: null },
-        '0': { style: 'bookshelf', item: null },
+        '1': { style: 'chest', item: 'j' },
+        '2': { style: 'chest', item: 'n' },
+        '3': { style: 'chest', item: 'l' },
+        '4': { style: 'chest', item: 'v' },
+        '5': { style: 'table', item: 'g' },
+        '6': { style: 'table', item: 'd' },
+        '7': { style: 'chest', item: 't' },
+        '8': { style: 'table', item: 'm' },
+        '9': { style: 'bookshelf', item: 'r' },
+        '0': { style: 'bookshelf', item: 'k' },
+        'A': { style: 'bookshelf', item: 'p' },
+        'F': { style: 'table', item: null },
+        'G': { style: 'table', item: null },
+        'H': { style: 'table', item: null },
       },
       legend: LOOT,
       tiles: [
         '###OOOOOOOO#########OOOOOOOO########OOOOOOOO#####',
-        '#BBBBBB.........%BBBBBB.........%...............#',
-        '#...............%...............%BBB..999..0000.#',
-        '#TTT..TTT..TTT..%TTT..666..777..%BBB..999..0000.#',
-        'OTTT..TTT..TTT..%TTT..666..777..%BBB..999..0000.O',
-        'O....t..........%....l..........%BBB..999..0000.O',
-        'O...............%...............%BBB..999..0000.O',
-        'OTTT..TTT..TTT..%TTT..TTT..555..%...............O',
-        'OTTT..TTT..TTT..%TTT..TTT..555..%....p........g.O',
-        'O...........k...%...........t...%...........SSS.O',
+        '#BBBBBB.........%AAAAAA.........%...............#',
+        '#...............%...............%999..000..BBBB.#',
+        '#HHH..GGG..TTT..%TTT..TTT..TTT..%999..000..BBBB.#',
+        'OHHH..GGG..TTT..%TTT..TTT..TTT..%999..000..BBBB.O',
+        'O....w..........%...............%999..000..BBBB.O',
+        'O...............%...............%999..000..BBBB.O',
+        'OTTT..TTT..888..%TTT..TTT..555..%...............O',
+        'OTTT..TTT..888..%TTT..TTT..555..%.............v.O',
+        'O...........w...%...............%...........SSS.O',
         '#...............%...............%...........SSS.#',
-        '#888.......TTT..%333.......TTT..%...........SSS.#',
-        '#888.......TTT..%333.......TTT..%...............#',
-        '#...............%...............%.w.............#',
+        '#FFF.......666..%TTT.......TTT..%...........SSS.#',
+        '#FFF.......666..%TTT.......TTT..%...............#',
+        '#...............%...............%...............#',
         '#%%%%%%DDD%%%%%%%%%%%%%DDD%%%%%%%%%%%%%DDD%%%%%%#',
-        '#CCCCC......CCCCCCCCC.......CCCCCCCCC......CCCCC#',
-        'X...CC......CCCCCCCCC..~~~..CCCCCCCCC......CCCCC#',
+        '#CCCCC......333333333.......CCCCCCCCC......77777#',
+        'X...CC......333333333..~~~..CCCCCCCCC......77777#',
         'X......................~~~......................#',
         'X.,,,,,,,,...................................@..#',
-        '#.,,,,,,,,.c.............w..............p.......#',
+        '#.,,,,,,,,.w....................................#',
         '#...............................................#',
         '#%%%%%%%%DDD%%%%%%%%%%%%%DDD%%%%%%%%%%%DDD%%%%%%#',
         '#...................%.............%.............#',
         '#...................%........CCCC.%.............#',
         '#...................%........CCCC.%.............#',
         '#...................%.............%.............#',
-        '#..................k%.1111........%.............#',
-        '#...................%.1111.....r................#',
-        '#.SSSSSSSSSSSSSSSS..%...................m.......#',
+        '#..................w%.1111........%.............#',
+        '#...................%.1111......................#',
+        '#.SSSSSSSSSSSSSSSS..%...........................#',
         '#.SSSSSSSSSSSSSSSS..%..EEEEEEE..................#',
         '#...................%..EEEEEEE....%2222...44444.#',
         '#...................%..EEEEEEE....%2222...44444.#',
         '#.SSSSSSSSSS........%.............%2222...44444.#',
-        '#.SSSSSSSSSS..v.....%...,,,,,.....%.............#',
+        '#.SSSSSSSSSS........%...,,,,,.....%.............#',
         '#...................%.............%.............#',
         '####OOOOOOOOOO########OOOOOOOO###################',
       ]
@@ -5415,7 +5503,8 @@ __mod.sim = (function () {
     // from: a flow field over the building instead of a thumb.
     watcher(entity, sim) {
       const rules = sim.investigateRules;
-      const walking = entity.state === 'investigating' || entity.state === 'returning';
+      const walking = entity.state === 'investigating' || entity.state === 'returning'
+        || entity.state === 'following';
       const scripted = entity.state === 'rising' || entity.state === 'settling';
 
       if (!walking) {
@@ -5495,7 +5584,8 @@ __mod.sim = (function () {
   // That is the whole mechanic — he is walking towards a memory, so moving away
   // quietly works, and it is the one thing here that must not be "improved" into
   // tracking the player.
-  const WATCHER_STATES = ['asleep', 'rising', 'investigating', 'searching', 'returning', 'settling'];
+  const WATCHER_STATES = ['asleep', 'rising', 'investigating', 'searching',
+    'following', 'returning', 'settling'];
 
   function makeInvestigator(level, rules) {
     return {
@@ -5521,7 +5611,11 @@ __mod.sim = (function () {
       speed: 0,
       moving: false,
       facing: Math.PI / 2,
-      walkPhase: 0
+      walkPhase: 0,
+      // Following: how long you have been far enough away to be losing him, and
+      // when he last re-read where you were.
+      lostFor: 0,
+      repathAt: 0
     };
   }
 
@@ -5576,6 +5670,52 @@ __mod.sim = (function () {
       if (entity.state === 'investigating') routeTo(entity, sim.level, entity.target.x, entity.target.y);
     }
 
+    // --- picking you out, and losing you again ---------------------------------
+    // Everything above this point is him walking towards a memory. This is the
+    // one place he knows where you actually are, and he only earns that by
+    // getting close enough to see you.
+    //
+    // The two distances are far apart on purpose: with one number he would
+    // flicker between chasing and not chasing on every step across the line.
+    // Losing him costs real ground held for real seconds.
+    const onFootNow = entity.state === 'investigating' || entity.state === 'searching'
+      || entity.state === 'returning' || entity.state === 'following';
+    const gap = Math.hypot(player.x - entity.x, player.y - entity.y);
+    if (onFootNow && sim.status === 'running') {
+      if (entity.state !== 'following') {
+        if (gap <= rules.followAt) {
+          entity.lostFor = 0;
+          entity.repathAt = 0;
+          setState(sim, entity, 'following');
+          routeTo(entity, sim.level, player.x, player.y);
+        }
+      } else {
+        // He loses track of you gradually. Snapping this back to zero the
+        // instant you clip the edge of his range meant one unlucky corner threw
+        // away four seconds of running, and following became permanent.
+        entity.lostFor = gap >= rules.unfollowAt
+          ? entity.lostFor + STEP_SECONDS
+          : Math.max(0, entity.lostFor - STEP_SECONDS * 1.6);
+        if (entity.lostFor >= rules.unfollowFor) {
+          // He gives up on you, not on the noise: the last place he saw you is
+          // now the place worth looking at, and the ordinary rules take over.
+          entity.target = { x: entity.goal ? entity.goal.x : player.x,
+            y: entity.goal ? entity.goal.y : player.y };
+          setState(sim, entity, 'searching');
+        } else {
+          // Re-read where you are when you have moved, or every so often —
+          // never every frame, which would be both wasteful and uncanny.
+          entity.repathAt += STEP_SECONDS;
+          const drifted = !entity.goal
+            || Math.hypot(entity.goal.x - player.x, entity.goal.y - player.y) > rules.repathAfter;
+          if (drifted || entity.repathAt >= rules.repathEvery) {
+            entity.repathAt = 0;
+            routeTo(entity, sim.level, player.x, player.y);
+          }
+        }
+      }
+    }
+
     switch (entity.state) {
       case 'rising':
         if (entity.stateFor >= rules.rising) {
@@ -5626,10 +5766,7 @@ __mod.sim = (function () {
     // Walking into you ends the level through the same door everything else
     // does. Not while he is getting up or lying down: standing over him as he
     // stirs deserves a moment to back away, not an instant loss.
-    const onFoot = entity.state === 'investigating' || entity.state === 'searching'
-      || entity.state === 'returning';
-    if (onFoot && sim.status === 'running'
-        && Math.hypot(player.x - entity.x, player.y - entity.y) <= rules.catchAt) {
+    if (onFootNow && sim.status === 'running' && gap <= rules.catchAt) {
       finish(sim, 'lost', 'caught');
     }
   }
@@ -5887,8 +6024,9 @@ __mod.sim = (function () {
     // corridor moves with him — which is the point.
     if (sim.rules.proximity) {
       const listener = sim.investigator || sim.level.watcher;
+      const awake = !!(sim.investigator && sim.investigator.state !== 'asleep');
       sim.proximity = proximityScale(
-        sim.rules, Math.hypot(player.x - listener.x, player.y - listener.y)
+        sim.rules, Math.hypot(player.x - listener.x, player.y - listener.y), awake
       );
     }
 
@@ -9711,9 +9849,14 @@ __mod.main = (function () {
       // Where a location makes noise depend on where you are standing, say so on
       // the meter. A hidden multiplier is not a mechanic, it is a trap: the whole
       // point is that the player can tell how much a mistake is about to cost.
-      const loudness = sim.proximity >= 1.6 ? '  ‼ LOUD HERE'
-        : sim.proximity >= 1.15 ? '  ▲'
-          : sim.proximity <= 0.7 ? '  ▼ MUFFLED' : '';
+      // Banded against the curve as it actually runs — 0.85 at the far end of the
+      // building up to about five standing over a caretaker who is awake. The old
+      // thresholds were set for a much flatter curve and now read LOUD almost
+      // everywhere, which tells the player nothing.
+      const loudness = sim.proximity >= 3.6 ? '  ‼‼ HE IS RIGHT THERE'
+        : sim.proximity >= 2.4 ? '  ‼ LOUD HERE'
+          : sim.proximity >= 1.5 ? '  ▲'
+            : sim.proximity <= 1.05 ? '  ▼ MUFFLED' : '';
       setText('noiseText', hudEls.noise, `${meter} ${rounded} / ${TUNING.noise.max}${loudness}`);
       setStyle('barWidth', hudEls.bar, 'width', `${(sim.noise / TUNING.noise.max) * 100}%`);
       setStyle('barColor', hudEls.bar, 'background',
@@ -9749,15 +9892,15 @@ __mod.main = (function () {
       // number that got him there — the player's next decision depends on
       // whether he is coming, looking, or already on his way back.
       const up = sim.investigator && sim.investigator.state !== 'asleep' && config.onFoot;
-      const onFootText = up
-        ? sim.investigator.state === 'rising' ? config.onFoot[0]
-          : sim.investigator.state === 'investigating' ? config.onFoot[1]
-            : sim.investigator.state === 'searching' ? config.onFoot[2]
-              : config.onFoot[3]
-        : null;
+      const onFootText = up ? config.onFoot[sim.investigator.state] || null : null;
       const warning = sim.status !== 'running' ? null
         : onFootText
-          ? { text: onFootText, cls: sim.investigator.state === 'returning' ? '' : 'hard' }
+          ? {
+            text: onFootText,
+            cls: sim.investigator.state === 'following' ? 'hard critical'
+              : sim.investigator.state === 'returning' || sim.investigator.state === 'settling'
+                ? '' : 'hard'
+          }
           : sim.noise >= 95 ? { text: warnings[2], cls: 'hard critical' }
             : sim.noise >= 90 ? { text: warnings[1], cls: 'hard' }
               : sim.noise >= 80 ? { text: warnings[0], cls: '' } : null;
