@@ -1318,6 +1318,13 @@ function drawChairBase(ctx, level) {
 }
 
 export function drawWatcherFurniture(ctx, level, pose) {
+  // A school's caretaker fell asleep at his desk, and the desk is part of the
+  // building: it goes into the room cache so it survives him standing up.
+  if (pose === 'desk' && level.theme === 'school') {
+    drawDeskset(ctx, level, level.watcher.kind);
+    level.deskPainted = true;
+    return;
+  }
   if (pose === 'couch') drawCouchBase(ctx, level);
   else if (pose === 'chair') drawChairBase(ctx, level);
   else if (pose === 'bed') drawBedBase(ctx, level);
@@ -1575,6 +1582,45 @@ export function drawSleeper(ctx, level, stage, clock, wake = 0, startle = 0, kin
 // Asleep at a desk: Mr. Halas face down on the quarterly report, Otakar at the
 // hotel's floor desk. Nothing about them is a bed, so this is its own drawing —
 // the desk, the papers, and a man folded over both.
+// The workstation somebody fell asleep at: the desk, the paperwork, the lamp,
+// and — for a caretaker who was doing the rota when he nodded off — a monitor
+// and a mug. Split out from the sleeper so a location can paint it once into
+// the room and keep it there after he leaves.
+export function drawDeskset(ctx, level, kind = 'worker') {
+  const desk = level.bed;
+  ctx.fillStyle = SHADOW;
+  roundRect(ctx, desk.x + 3, desk.y + 8, desk.w, desk.h, 6);
+  ctx.fill();
+  fillRound(ctx, desk.x, desk.y, desk.w, desk.h, 6, PALETTE.woods[1].dark);
+  fillRound(ctx, desk.x, desk.y, desk.w, desk.h - 7, 6, PALETTE.woods[1].base);
+  fillRound(ctx, desk.x + 4, desk.y + 3, desk.w - 8, desk.h - 15, 4, PALETTE.woods[1].top);
+
+  drawPapers(ctx, desk.x + desk.w - 18, desk.y + desk.h * 0.34);
+  drawLamp(ctx, desk.x + 14, desk.y + desk.h * 0.30);
+
+  if (kind !== 'caretaker' || desk.w < 90) return;
+  // A monitor at the far end, its back to the room, and the mug that went cold
+  // hours ago. Small things, but they are what say "somebody works here" rather
+  // than "a table with a man on it".
+  const mx = desk.x + desk.w * 0.63;
+  const my = desk.y + desk.h * 0.28;
+  fillRound(ctx, mx - 13, my - 9, 26, 15, 2, '#2b3038');
+  fillRound(ctx, mx - 11, my - 7, 22, 11, 1.5, '#3d4654');
+  fillRound(ctx, mx - 11, my - 7, 22, 4, 1.5, '#4d5a6c');
+  fillRound(ctx, mx - 4, my + 6, 8, 3, 1, '#2b3038');
+  // A keyboard, pushed aside to make room for his head.
+  fillRound(ctx, desk.x + desk.w * 0.32, desk.y + desk.h * 0.60, 30, 9, 2, '#cfd4dc');
+  ctx.fillStyle = 'rgba(70,78,90,0.45)';
+  for (let r = 0; r < 2; r++) {
+    for (let c = 0; c < 7; c++) {
+      ctx.fillRect(desk.x + desk.w * 0.32 + 3 + c * 3.6, desk.y + desk.h * 0.60 + 2 + r * 3, 2.4, 2);
+    }
+  }
+  // The mug.
+  fillRound(ctx, desk.x + desk.w - 34, desk.y + desk.h * 0.62, 9, 9, 3, '#d8dde4');
+  fillRound(ctx, desk.x + desk.w - 32, desk.y + desk.h * 0.64, 5, 5, 2, '#6b4a30');
+}
+
 export function drawSlumped(ctx, level, stage, clock, wake = 0, startle = 0, kind = 'worker') {
   const look = sleeperLook(kind);
   const desk = level.bed;
@@ -1593,17 +1639,11 @@ export function drawSlumped(ctx, level, stage, clock, wake = 0, startle = 0, kin
   const rise = stage === SLEEP_AWAKE ? Math.min(1, wake / 0.45) : 0;
   const ease = rise * rise * (3 - 2 * rise);
 
-  // The desk.
-  ctx.fillStyle = SHADOW;
-  roundRect(ctx, desk.x + 3, desk.y + 8, desk.w, desk.h, 6);
-  ctx.fill();
-  fillRound(ctx, desk.x, desk.y, desk.w, desk.h, 6, PALETTE.woods[1].dark);
-  fillRound(ctx, desk.x, desk.y, desk.w, desk.h - 7, 6, PALETTE.woods[1].base);
-  fillRound(ctx, desk.x + 4, desk.y + 3, desk.w - 8, desk.h - 15, 4, PALETTE.woods[1].top);
-
-  // The quarterly report, and a lamp at the end of the desk.
-  drawPapers(ctx, desk.x + desk.w - 18, desk.y + desk.h * 0.34);
-  drawLamp(ctx, desk.x + 14, desk.y + desk.h * 0.30);
+  // The desk and everything on it. Painted into the room rather than here in
+  // the schools, so that it is still standing there once he has got up and
+  // walked off — the place he sleeps is a landmark the player navigates by, and
+  // having it wink out of existence the moment he leaves it was daft.
+  if (!level.deskPainted) drawDeskset(ctx, level, kind);
 
   // The chair, behind him.
   fillRound(ctx, cx - 14, cy + desk.h * 0.36, 28, 15, 5, '#3a3f52');

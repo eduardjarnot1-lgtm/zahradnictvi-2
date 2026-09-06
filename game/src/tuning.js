@@ -230,7 +230,10 @@ export const TUNING = {
     // The school caretaker, asleep in the staff room. Noise only, like the
     // bedroom sleeper — an older man dozing in a chair is not watching for you.
     caretaker: {
-      meter: 'NOISE', person: 'Mr. Vrána', sees: 0, seeRate: 0, pose: 'couch',
+      meter: 'NOISE', person: 'Mr. Vrána', sees: 0, seeRate: 0,
+        // At his desk, not on a couch and certainly not in a bed: he is the
+        // caretaker, he was doing the rota, and he nodded off over it.
+        pose: 'desk',
       warnings: ['MR. VRÁNA STIRS…', 'MR. VRÁNA IS ALMOST AWAKE',
         'MR. VRÁNA IS WAKING!'],
       lost: 'HE WOKE UP!', lostWhy: 'The noise reached 100 and the caretaker woke up.',
@@ -385,6 +388,57 @@ export const TUNING = {
           sofa: 2, wardrobe: 5, bookshelf: 5, plinth: 6
         }
       },
+      // What the meter means here.
+      //
+      // Everywhere else in the game the meter is called NOISE and a hundred is
+      // the end of the level: he woke up, you lost. In the school it is how
+      // alert one man is, and filling it ends nothing. It makes him quick and
+      // it makes him right — and being walked into, or running out of clock, is
+      // what actually loses you the level.
+      //
+      // That is not a softer game, it is a different one: instead of watching a
+      // bar and stopping before it fills, you are being hunted by someone who
+      // gets better at it the more you give him, and worse at it if you go
+      // quiet and let him lose the thread.
+      //
+      // Everything here is continuous in the meter — no bands, nothing steps.
+      // `alertnessOf` smoothsteps 0..100 onto 0..1, so the middle of the meter
+      // is where his behaviour changes fastest:
+      //
+      //   meter   10    30    50    70    85    95
+      //   alert  0.03  0.22  0.50  0.78  0.94  0.99
+      alertness: {
+        // Measured from well below the line he gets up at, so that by the time
+        // he is on his feet there is still most of the curve left to climb.
+        // Spanning the whole meter looked right and was not: he only ever wakes
+        // above wakeAt, so every waking moment sat at the top of the curve and
+        // he was always at his sharpest.
+        from: 55, to: 100,
+        // How far out his guess at where you are can be. Barely disturbed he is
+        // off by most of a classroom and will search the wrong corner of the
+        // wrong room; at the top of the meter he walks more or less to you.
+        blur: 230,
+        sharp: 16,
+        // How fast he walks, as a multiplier on his own speed.
+        speedLow: 0.70,
+        speedHigh: 1.28,
+        // How long he takes to get out of the chair.
+        riseLow: 2.1, riseHigh: 0.8,
+        // How long he casts about once he gets there. Quiet is a long vague
+        // sweep of the wrong area; loud is a short sharp look at the right one.
+        sweepLow: 4.2, sweepHigh: 1.8,
+        // A fresh noise while he is already up pulls his estimate this far
+        // towards the new guess. This is what makes a thief who keeps making
+        // noise get found: each fix is closer than the last, so they close in
+        // rather than averaging out.
+        narrow: 0.62,
+        // ...but only for a noise worth turning towards, and only for an actual
+        // *event*: this is how far the meter has to jump in a single step, which
+        // lifting something, walking into something or opening something does
+        // and which walking across a room does not.
+        refixAt: 0.55,
+        refix: 5
+      },
       // How the school's two people walk.
       //
       // The bands are §4's: idle, tiptoe, walk, power walk, run, blended rather
@@ -461,8 +515,13 @@ export const TUNING = {
       figures: true,
       // Mr. Vrána, once he is awake.
       investigate: {
-        wakeAt: 80,        // he gets up when the meter passes this
-        calmAt: 50,        // ...and gives up when it falls back under this
+        // Where he gets up, and where he gives up. Both lower than they were,
+        // because filling the meter no longer ends the level: the stretch from
+        // here to a hundred used to be twenty points of imminent death and is
+        // now the part of the game where he is actually hunting you. It has to
+        // be wide enough to have a shape in it.
+        wakeAt: 62,
+        calmAt: 40,
         // Getting off a couch is four beats, not a fade: he stirs, sits up,
         // gets to his feet, then has a look round before he sets off. Long
         // enough to read as a person waking up, and it is time the player can

@@ -179,8 +179,49 @@ export function waitOut(run, maxFrames = 60 * 25) {
 // Play the way an efficient player would: take the quietest items first while
 // staying under a noise budget, then leave. This is the shape of run the game
 // promises is always possible, so it is what the fairness test drives.
+// Get off the spot he is walking towards, then go quiet.
+//
+// Freezing where you stand used to be enough, because his target was wherever
+// you were when the meter crossed and you had usually moved on by the time he
+// arrived. Now that he takes a fix on the noise and narrows it as you keep
+// making more, standing still *at the place he is heading for* is the one thing
+// that cannot work — which is the point. So: put ground between yourself and
+// his guess, then stop, and let the meter come down.
+export function slipAway(run, maxFrames = 60 * 8) {
+  const { sim } = run;
+  const w = sim.investigator;
+  if (!w || w.state === 'asleep') return true;
+  const p = playerOf(sim);
+  for (let i = 0; i < maxFrames && sim.status === 'running'; i++) {
+    const spot = w.target || w;
+    const dx = p.x - spot.x;
+    const dy = p.y - spot.y;
+    const far = Math.hypot(dx, dy);
+    const gap = Math.hypot(p.x - w.x, p.y - w.y);
+    // Distance alone is not the condition while he is actually following you:
+    // he has your position, not a guess at it, so standing still the moment you
+    // are nominally far enough just lets him close it again. Keep going until
+    // he has lost the thread.
+    if (w.state !== 'following' && far > 190 && gap > 190) break;
+    if (w.state === 'following' && gap > 210 && far > 210) {
+      // Far enough to start holding it — but keep drifting, not standing.
+      tick(run, { x: dx / (far || 1) * 0.35, y: dy / (far || 1) * 0.35, take: false, search: false });
+      continue;
+    }
+    const d = far || 1;
+    tick(run, { x: dx / d, y: dy / d, take: false, search: false });
+  }
+  return waitOut(run);
+}
+
 export function playEfficiently(levelId, { budget = 70, reserve = null, seed = 7 } = {}) {
   const run = createRun(levelId, seed);
+  // Never spend past the point where he gets up. In a building where the meter
+  // is how alert one man is rather than a fuse, "efficient" means taking what
+  // you can take without him ever standing up — spending into his waking and
+  // then hoping is not efficiency, it is the greed the level is testing for.
+  const wakes = run.sim.rules.investigate && run.sim.rules.investigate.wakeAt;
+  if (wakes) budget = Math.min(budget, wakes - 8);
   // Leave a share of the clock for the walk out. Moving carefully near
   // furniture is slower, so the tighter the level the earlier you stop.
   const keepBack = reserve === null ? Math.max(9, run.sim.timeLimit * 0.45) : reserve;
@@ -212,11 +253,30 @@ export function playEfficiently(levelId, { budget = 70, reserve = null, seed = 7
       if (score > bestScore) { bestScore = score; best = item; }
     }
     if (!best) break;
+    // Let it settle before it crosses the line he gets up at. Walking costs
+    // meter too, so a budget that only gates what you *pick up* still creeps
+    // over the top on a long floor — and the answer a player reaches for is to
+    // stand still for a moment, not to press on and hope.
+    if (wakes && run.sim.noise > wakes - 26) {
+      for (let i = 0; i < 60 * 10 && run.sim.status === 'running'; i++) {
+        if (run.sim.noise <= wakes - 38) break;
+        tick(run);
+      }
+    }
     steal(run, best.id);
+    // ...and again straight afterwards, before setting off across the floor:
+    // the walk is where most of the meter goes, so arriving at the next item
+    // already near the line is how a run ends up being hunted.
+    if (wakes && run.sim.noise > wakes - 14 && run.sim.status === 'running') {
+      for (let i = 0; i < 60 * 10 && run.sim.status === 'running'; i++) {
+        if (run.sim.noise <= wakes - 30) break;
+        tick(run);
+      }
+    }
     if (!best.taken) gaveUp.add(best.id);
-    // Woke him anyway? Then freeze until he gives up, exactly as a player
-    // would, rather than walking on and into him.
-    if (run.sim.investigator && run.sim.investigator.state !== 'asleep') waitOut(run);
+    // Woke him anyway? Then get off the spot he is heading for and go quiet,
+    // exactly as a player would, rather than walking on and into him.
+    if (run.sim.investigator && run.sim.investigator.state !== 'asleep') slipAway(run);
   }
   if (run.sim.status === 'running') escape(run);
   return { run, result: snapshot(run.sim) };

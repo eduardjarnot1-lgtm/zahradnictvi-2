@@ -456,7 +456,19 @@ export function boot() {
       : sim.proximity >= 2.4 ? '  ‼ LOUD HERE'
         : sim.proximity >= 1.5 ? '  ▲'
           : sim.proximity <= 1.05 ? '  ▼ MUFFLED' : '';
-    setText('noiseText', hudEls.noise, `${meter} ${rounded} / ${TUNING.noise.max}${loudness}`);
+    // In a building where the meter is how alert one man is rather than a fuse,
+    // the number is not a countdown to anything and saying "/ 100" invites the
+    // player to treat it as one. What matters is how sharp he is, so that is
+    // what it says.
+    const hunted = !!sim.rules.alertness;
+    const sharpness = !hunted ? ''
+      : rounded >= 90 ? '  HE HAS YOUR NUMBER'
+        : rounded >= 75 ? '  HE IS CLOSING IN'
+          : rounded >= 62 ? '  HE IS LISTENING'
+            : rounded >= 45 ? '  HE IS STIRRING' : '  ASLEEP';
+    setText('noiseText', hudEls.noise, hunted
+      ? `${meter} ${rounded}${sharpness}${loudness}`
+      : `${meter} ${rounded} / ${TUNING.noise.max}${loudness}`);
     setStyle('barWidth', hudEls.bar, 'width', `${(sim.noise / TUNING.noise.max) * 100}%`);
     setStyle('barColor', hudEls.bar, 'background',
       sim.noise >= TUNING.noise.almostAt ? '#ff4d4d'

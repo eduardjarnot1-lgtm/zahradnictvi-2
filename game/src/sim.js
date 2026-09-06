@@ -148,7 +148,12 @@ const UPDATERS = {
       if (direction) { dirX = direction.x; dirY = direction.y; }
     }
 
-    const top = rules.speed;
+    // He walks faster the more alert he is. A man who half heard something
+    // wanders over; a man who heard a window go covers the ground.
+    const tune = sim.rules.alertness;
+    const top = tune
+      ? rules.speed * (tune.speedLow + (tune.speedHigh - tune.speedLow) * (entity.alert || 0))
+      : rules.speed;
     const wanted = Math.hypot(dirX, dirY) > 0.01;
     const rate = (wanted ? rules.accel : rules.decel) * STEP_SECONDS;
     const dvx = dirX * top - entity.vx;
@@ -274,6 +279,79 @@ function arrived(entity, rules) {
   return distance >= 0 && distance <= 1;
 }
 
+// How alert he is, from nought to one, read straight off the meter.
+//
+// Continuous by construction: there are no bands, no thresholds, and nothing
+// that steps. Smoothstepped so the middle of the meter is where his behaviour
+// changes fastest — at 10 he is barely disturbed, at 50 he is properly awake to
+// it, at 95 he has your number.
+//
+//   meter   10    30    50    70    85    95
+//   alert  0.03  0.22  0.50  0.78  0.94  0.99
+export function alertnessOf(sim) {
+  const a = sim.rules.alertness;
+  if (!a) return 0;
+  const t = Math.max(0, Math.min(1, (sim.noise - a.from) / (a.to - a.from)));
+  return t * t * (3 - 2 * t);
+}
+
+const mix = (lo, hi, t) => lo + (hi - lo) * t;
+
+// Whether filling the meter ends the level there and then.
+//
+// Everywhere but the school it does, and always has: the meter is called NOISE,
+// a hundred means he woke up, and that is the game. The school reads the same
+// meter as how alert one man is, so filling it does not end anything — it makes
+// him fast and accurate, and what ends the level is him walking into you or the
+// clock running out. That is the whole difference between "keep the bar down"
+// and being hunted.
+function endsAtCap(sim) {
+  return !sim.rules.alertness && isAwake(sim.noise);
+}
+
+// Where he thinks the noise came from.
+//
+// Not where it came from. He heard something through a wall, in a building he
+// knows, half asleep — so his guess is off by an amount that shrinks as the
+// meter rises, and he walks to *that*, which is what makes a quiet thief able
+// to stand still twenty feet from where he is looking. Snapped onto floor he
+// can actually stand on, so he never sets off towards the inside of a cupboard.
+function guessAt(sim, entity, truth, alert) {
+  const a = sim.rules.alertness;
+  if (!a) return { x: truth.x, y: truth.y };
+  const err = mix(a.blur, a.sharp, alert);
+  const angle = sim.rng.next() * Math.PI * 2;
+  // Square-rooted so the error is spread over the disc rather than bunched at
+  // its edge: most guesses are near enough, a few are properly wrong.
+  const r = Math.sqrt(sim.rng.next()) * err;
+  const at = { x: truth.x + Math.cos(angle) * r, y: truth.y + Math.sin(angle) * r };
+  if (!entity.nav) entity.nav = navGrid(sim.level, entity.w, entity.h);
+  return nearestStand(entity.nav, at.x, at.y) || { x: truth.x, y: truth.y };
+}
+
+// A fresh fix on the noise. Each one pulls his idea of where you are towards
+// this one's guess rather than replacing it, so a thief who keeps making noise
+// is progressively narrowed down and one who goes quiet is not.
+function takeFix(sim, entity, player, alert) {
+  const a = sim.rules.alertness;
+  const guess = guessAt(sim, entity, player, alert);
+  if (!entity.target || !a) {
+    entity.target = guess;
+  } else {
+    const k = a.narrow * (0.4 + 0.6 * alert);
+    const blended = {
+      x: entity.target.x + (guess.x - entity.target.x) * k,
+      y: entity.target.y + (guess.y - entity.target.y) * k
+    };
+    // Snapped again after blending. Two points he could walk to have a midpoint
+    // he cannot — through a wall, or inside a cupboard — and he would then walk
+    // as close as the building allows and stand there, never arriving.
+    entity.target = nearestStand(entity.nav, blended.x, blended.y) || guess;
+  }
+  entity.heard = sim.noise;
+  return entity.target;
+}
+
 function updateInvestigation(sim, player) {
   const entity = sim.investigator;
   const rules = sim.investigateRules;
@@ -281,17 +359,58 @@ function updateInvestigation(sim, player) {
 
   entity.stateFor += STEP_SECONDS;
 
-  // Crossing the line wakes him — and where you were standing when you crossed
-  // it is the only thing he will ever know about you.
-  if (sim.noise > rules.wakeAt && sim.status === 'running'
-      && (entity.state === 'asleep' || entity.state === 'returning' || entity.state === 'settling')) {
-    entity.target = { x: player.x, y: player.y };
+  // How alert he is right now. Everything below reads off this rather than off
+  // a state: how well he places you, how fast he gets up, how fast he walks,
+  // how long he casts about once he arrives.
+  const alert = alertnessOf(sim);
+  const tune = sim.rules.alertness;
+  entity.alert = alert;
+  // How far the meter moved in this one step. An event — something lifted,
+  // knocked into or opened — moves it several points at once; walking across a
+  // room moves it a fiftieth of one. That difference is what separates "he
+  // heard something" from "the room is still a bit noisy".
+  const jump = sim.noise - (entity.lastNoise === undefined ? sim.noise : entity.lastNoise);
+  entity.lastNoise = sim.noise;
+
+  // Crossing the line gets him up, and his idea of where you are is a guess
+  // whose error depends on how loud it was.
+  //
+  // A man on his way back to his desk is a different case from a man asleep at
+  // it. Asleep, the *level* of the noise wakes him. Already up and walking
+  // home, it takes a fresh bang to turn him round — otherwise a meter still
+  // sitting above the line re-fixes him on you the instant he gives up, over
+  // and over, and a thief who has done everything right can never shake him.
+  const turning = entity.state === 'returning' || entity.state === 'settling';
+  const stirred = sim.noise > rules.wakeAt
+    && (!turning || !tune || jump >= tune.refix);
+  if (stirred && sim.status === 'running'
+      && (entity.state === 'asleep' || turning)) {
     if (!entity.nav) entity.nav = navGrid(sim.level, entity.w, entity.h);
     if (!entity.stand) entity.stand = nearestStand(entity.nav, entity.home.x, entity.home.y);
-    // Already on his feet? Then he simply turns round; only a man lying down
+    entity.target = null;
+    takeFix(sim, entity, player, alert);
+    // Already on his feet? Then he simply turns round; only a man sitting down
     // has to get up first.
     setState(sim, entity, entity.state === 'returning' ? 'investigating' : 'rising');
     if (entity.state === 'investigating') routeTo(entity, sim.level, entity.target.x, entity.target.y);
+  }
+
+  // A second bang while he is already up. He works from the newest thing he
+  // heard, and each fix narrows the last one — which is what turns "keep making
+  // noise" into "he is closing in" rather than into a fixed penalty.
+  //
+  // A *bang*, though, not a drift: this triggers on the meter jumping in one
+  // step, the way it does when something is lifted, knocked into or opened, and
+  // not on the slow climb of walking. Comparing against the meter at the last
+  // fix instead meant a player running for their life fed him a fresh fix every
+  // few seconds — the one thing that made escaping impossible.
+  if (tune && sim.status === 'running' && entity.state !== 'asleep'
+      && entity.state !== 'following'
+      && sim.noise >= rules.wakeAt * tune.refixAt
+      && jump >= tune.refix) {
+    takeFix(sim, entity, player, alert);
+    if (entity.state === 'searching') setState(sim, entity, 'investigating');
+    routeTo(entity, sim.level, entity.target.x, entity.target.y);
   }
 
   // --- picking you out, and losing you again ---------------------------------
@@ -340,9 +459,14 @@ function updateInvestigation(sim, player) {
     }
   }
 
+  // A man half woken by a distant clatter takes his time; one woken by a
+  // bookcase going over is on his feet at once.
+  const risingFor = tune ? mix(tune.riseLow, tune.riseHigh, alert) : rules.rising;
+  const searchFor = tune ? mix(tune.sweepLow, tune.sweepHigh, alert) : rules.searchFor;
+
   switch (entity.state) {
     case 'rising':
-      if (entity.stateFor >= rules.rising) {
+      if (entity.stateFor >= risingFor) {
         entity.x = entity.stand.x;
         entity.y = entity.stand.y;
         setState(sim, entity, 'investigating');
@@ -355,7 +479,7 @@ function updateInvestigation(sim, player) {
       else if (arrived(entity, rules)) setState(sim, entity, 'searching');
       break;
     case 'searching':
-      if (sim.noise < rules.calmAt || entity.stateFor >= rules.searchFor) {
+      if (sim.noise < rules.calmAt || entity.stateFor >= searchFor) {
         setState(sim, entity, 'returning');
       }
       break;
@@ -551,7 +675,7 @@ function takeItem(sim, item) {
     y: item.y,
     stage: sleepStage(sim.noise)
   });
-  if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
+  if (endsAtCap(sim)) finish(sim, 'lost', 'awake');
 }
 
 // Which piece of furniture a SEARCH would open: the nearest unsearched one
@@ -592,7 +716,7 @@ function beginSearch(sim, stash, rules) {
     type: 'searching', id: stash.id, noise: amount, style: stash.style,
     x: sim.searching.x, y: sim.searching.y
   });
-  if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
+  if (endsAtCap(sim)) finish(sim, 'lost', 'awake');
 }
 
 // ...and finding out. An item lifted out of a cupboard costs exactly what the
@@ -621,7 +745,7 @@ function finishSearch(sim) {
     value: paid, noise: Math.round(lifted), rarity: rarityOf(stash.item).name,
     big: isBigScore(stats.value), x, y
   });
-  if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
+  if (endsAtCap(sim)) finish(sim, 'lost', 'awake');
 }
 
 // Exactly one fixed simulation tick.
@@ -683,7 +807,7 @@ export function stepSim(sim, input = EMPTY_INPUT) {
       if (amount > 0) {
         sim.noise = addNoise(sim.noise, amount);
         sim.events.push({ type: 'creak', x: player.x, y: player.y, noise: amount });
-        if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
+        if (endsAtCap(sim)) finish(sim, 'lost', 'awake');
       }
       zone.cooldown = TUNING.hazards.creakCooldown;
     }
@@ -702,7 +826,7 @@ export function stepSim(sim, input = EMPTY_INPUT) {
       * sim.mods.hazardNoise * sim.proximity;
     if (amount > 0) {
       sim.noise = addNoise(sim.noise, amount);
-      if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
+      if (endsAtCap(sim)) finish(sim, 'lost', 'awake');
     }
   }
 
@@ -715,7 +839,7 @@ export function stepSim(sim, input = EMPTY_INPUT) {
     if (rate > 0) {
       sim.seen = Math.min(1, sim.seen + STEP_SECONDS * 3);
       sim.noise = addNoise(sim.noise, rate * STEP_SECONDS);
-      if (isAwake(sim.noise)) finish(sim, 'lost', 'seen');
+      if (endsAtCap(sim)) finish(sim, 'lost', 'seen');
     } else {
       sim.seen = Math.max(0, sim.seen - STEP_SECONDS * 2);
     }
@@ -765,7 +889,7 @@ export function stepSim(sim, input = EMPTY_INPUT) {
       force,
       what: player.bumped.type
     });
-    if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
+    if (endsAtCap(sim)) finish(sim, 'lost', 'awake');
     sim.bumpCooldown = TUNING.hazards.bumpCooldown;
   }
 
@@ -854,7 +978,10 @@ export function stepSim(sim, input = EMPTY_INPUT) {
       player.x - player.w / 2 < exit.x + exit.w &&
       player.y + player.h / 2 > exit.y &&
       player.y - player.h / 2 < exit.y + exit.h;
-    if (atExit && canBank(sim.noise)) {
+    // Getting out counts wherever the meter is, in a building where the meter
+    // is how alert he is rather than whether he is awake. Everywhere else a
+    // full meter still means he is up and the haul is forfeit.
+    if (atExit && (sim.rules.alertness || canBank(sim.noise))) {
       const grade = gradeEscape({
         noise: sim.noise,
         timeLeft: sim.timeLeft,

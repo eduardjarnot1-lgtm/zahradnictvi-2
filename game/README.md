@@ -506,7 +506,93 @@ Arms oppose legs — left arm forward with the right leg. That is one sign in th
 source and it is the whole difference between a person walking and a toy
 marching; it was the wrong way round until it was drawn out large enough to see.
 
+### The school's meter is not a fuse
+
+Everywhere else in the game the meter is called NOISE, a hundred means he woke
+up, and that is the level over. **In the school, filling it ends nothing.** It
+makes one man quick and it makes him right, and what actually loses you the
+level is him walking into you or the clock running out.
+
+That is not a softer game. It is a different one: instead of watching a bar and
+stopping before it fills, you are being hunted by someone who gets better at it
+the more you give him — and worse at it if you go quiet and let him lose the
+thread. `alertnessOf` smoothsteps the meter onto nought-to-one and *everything*
+about him reads off it, continuously, with no bands and nothing that steps:
+
+| meter | alert | how far out his guess is | his pace | out of the chair in | time spent searching |
+|---|---|---|---|---|---|
+| 62 (just up) | 0.07 | 216 units — the wrong end of the wrong room | 58 | 2.0s | 4.0s |
+| 70 | 0.26 | 175 | 66 | 1.8s | 3.6s |
+| 80 | 0.58 | 105 | 81 | 1.3s | 2.8s |
+| 90 | 0.87 | 43 | 94 | 1.0s | 2.1s |
+| 100 | 1.00 | 16 — near enough on top of you | 100 | 0.8s | 1.8s |
+
+He does not know where you are. He knows roughly where a sound came from, and
+"roughly" is a number: a random point inside a disc of that radius, square-rooted
+so the error spreads over the disc rather than bunching at its edge, then snapped
+onto floor he can actually stand on. Forty wakes at the bottom of the curve
+scatter his guesses across most of a wing; forty at the top put him on you.
+
+**Each fresh bang narrows the last guess** rather than replacing it, so a thief
+who keeps making noise is closed in on and one who goes quiet is not. Two things
+about that were learned the hard way and are the reason it works at all:
+
+- **A refix needs an event, not a drift.** It triggers on the meter jumping in a
+  single step — something lifted, knocked into or opened moves it several points
+  at once; walking across a room moves it a fiftieth of one. Comparing against
+  the meter at the last fix instead meant a player *running for their life* fed
+  him a fresh fix every few seconds, which made escaping impossible.
+- **A man walking back to his desk is not a man asleep at it.** Asleep, the level
+  of the noise wakes him. Already up and heading home, it takes a fresh bang to
+  turn him round — otherwise a meter still sitting above the line re-fixed him on
+  you the instant he gave up, over and over, and a thief who had done everything
+  right could never shake him.
+
+The line he gets up at came down from 80 to 62, and the line he gives up at from
+50 to 40. The stretch from there to a hundred used to be twenty points of
+imminent death; it is now the part of the game where he is hunting you, and it
+needs to be wide enough to have a shape in it.
+
+The loop this creates, and the one the tests drive:
+
+    make a noise → he takes a fix on it and gets up → get off the spot he has
+      a fix on → go quiet → the meter falls → he loses the thread → he goes home
+
+Note the order. **Standing still on the spot he has a fix on is not hiding, it is
+waiting to be found** — the test that tried it got caught in two seconds flat.
+
+**And he sleeps at a desk.** Not a couch and certainly not a bed: he is the
+caretaker, he was doing the rota, and he nodded off over it. The desk carries the
+lamp, the paperwork, a monitor with its back to the room and a mug that went cold
+hours ago, and it is painted into the room cache rather than drawn with him — so
+it is still standing there after he gets up and walks off. The place he sleeps is
+a landmark you plan routes around and the place he eventually returns to; having
+it wink out of existence the moment he left it was daft.
+
+### Five buildings, not one building five times
+
 ### The school is a building, not a floorplan
+
+The five levels are five different plans, and the difference is in the walls
+rather than in the furniture. Read them with every stick of furniture removed and
+they are still a rectangle, an L, a T, a U round a courtyard, and one irregular
+floor with wings:
+
+| | shape | what that does to the play |
+|---|---|---|
+| 1 | rectangle | one corridor, three rooms, the office at the end — the level that teaches the building |
+| 2 | **L** | a teaching corridor with a wing turning down at the far end; the hall and stores are a dead end off it |
+| 3 | **T** | a stem drops out of the middle of the corridor, so most things have two ways round and the bottom is a dead end |
+| 4 | **U** | two wings either side of a courtyard you cannot cross, so the ends of the building are a long walk apart |
+| 5 | irregular | wings, recesses, a library, a hall, a staff end, and the caretaker's store |
+
+The grid stays rectangular because everything downstream assumes it is; the
+*building* becomes an L or a U by walling off what is outside it. Two walls
+running one row too far turned the teaching corridor into three sealed pieces on
+the T and the U at once — invisible in the source, impossible to miss on a
+reachability map, and the reason there is now a test that floods every school
+level from the spawn and insists every item, every cupboard, every doorway and
+the way out are all reachable.
 
 The school's five levels are furnished from what each room is *for*. A classroom
 is rows of paired desks either side of a centre aisle, with the teacher's desk at

@@ -598,6 +598,291 @@ def hotel():
 
 
 # ============================================== 6 KOMENSKY PRIMARY
+# --------------------------------------------------------- the school's rooms
+# Five authored floorplans share these, so a classroom is furnished the same way
+# whichever wing of the building it is in and each layout can be read as
+# architecture rather than as a list of fills.
+
+def solid(g, x, y, w, h):
+    """Mark a block as not part of the building. This is how the silhouettes are
+    cut: the grid stays rectangular because everything downstream assumes it is,
+    and the *building* becomes an L or a U or a courtyard by walling off what is
+    outside it. Read off the walls alone, the five levels are five shapes."""
+    g.fill(x, y, w, h, '#')
+
+
+def pack(a, b, wide, gap=1):
+    """Fill the run of columns a..b with pieces `wide` across, one clear tile
+    between them, centred."""
+    span = b - a + 1
+    n = (span + gap) // (wide + gap)
+    if n <= 0:
+        return []
+    used = n * wide + (n - 1) * gap
+    start = a + (span - used) // 2
+    return [start + i * (wide + gap) for i in range(n)]
+
+
+def sch_classroom(g, x, y, w, h, door, name, board_above=True):
+    """Paired desks either side of an aisle running back to the door, the
+    teacher's desk at the front and cupboards along the back wall."""
+    lane = (door - 1, door + 3)
+    # Two-tall desks need two-tall gaps between them, so the pitch is four; the
+    # range starts as high in the room as the front row allows.
+    rows = [r for r in range(y + 3, y + h, 4) if r + 1 <= y + h - 1]
+    for r in rows:
+        for xx in pack(x, lane[0] - 1, 2) + pack(lane[1] + 1, x + w - 1, 2):
+            g.fill(xx, r, 2, 2, 'T')
+    front = y if board_above else y + h - 2
+    spots = pack(x, lane[0] - 1, 4) + pack(lane[1] + 1, x + w - 1, 4)
+    for i, xx in enumerate(spots):
+        g.fill(xx, front, 4, 2, 'T' if i == 0 else 'C')
+    g.deco('board', x, y - 1 if board_above else y + h, w, 1)
+    g.deco('bin', x + w - 1, front + 1)
+    g.deco('desklamp', x + 1, front + 1)
+    g.deco('floor', x, y, w, h, 'boards')
+    g.deco('sign', door, y + h if board_above else y - 1, 3, 1, name)
+
+
+def sch_library(g, x, y, w, h, door):
+    """Stacks with aisles you can walk down and a table to read at."""
+    lane = (door - 1, door + 3)
+    tall = max(2, min(h - 5, h // 2))
+    for xx in pack(x, lane[0] - 1, 2, 2) + pack(lane[1] + 1, x + w - 1, 2, 2):
+        g.fill(xx, y, 2, tall, 'B')
+    for xx in pack(x, x + w - 1, 5)[:1]:
+        g.fill(xx, y + tall + 2, 5, 2, 'T')
+    g.deco('floor', x, y, w, h, 'carpet')
+    g.deco('lamp', x + w // 2, y + h // 2)
+    g.deco('plant', x + w - 1, y + h - 1)
+    g.deco('sign', door, y + h, 3, 1, 'Library')
+
+
+def sch_store(g, x, y, w, h, door, name='Store'):
+    """Shelving, cupboards under it, boxes wherever they will go."""
+    lane = (door - 1, door + 3)
+    band = pack(x, lane[0] - 1, 3) + pack(lane[1] + 1, x + w - 1, 3)
+    for i, xx in enumerate(band):
+        g.fill(xx, y, 3, min(3, h - 2), 'B' if i % 2 == 0 else 'C')
+    if h >= 7:
+        for i, xx in enumerate(band):
+            g.fill(xx, y + h - 2, 3, 2, 'C' if i % 2 == 0 else 'W')
+    g.deco('floor', x, y, w, h, 'concrete')
+    if band:
+        g.deco('tools', band[0], y + h // 2, 3, 1)
+    g.deco('sign', door, y - 1, 3, 1, name)
+
+
+def sch_gym(g, x, y, w, h, door, above=True):
+    """Benching round the edges, floor clear in the middle."""
+    g.fill(x, y + 1, 2, max(2, h - 3), 'S')
+    g.fill(x + w - 2, y + 1, 2, max(2, h - 3), 'S')
+    for xx in pack(x + 3, x + w - 4, 5)[:2]:
+        g.fill(xx, y + h - 2, 5, 2, 'S')
+    g.deco('floor', x, y, w, h, 'parquet')
+    g.deco('court', x + 3, y + 1, max(3, w - 6), max(3, h - 4))
+    g.deco('hoop', x + w // 2 - 1, y, 3, 1)
+    g.deco('sign', door, y - 1 if above else y + h, 3, 1, 'Gymnasium')
+
+
+def sch_office(g, x, y, w, h, door, name='Caretaker'):
+    """Mr. Vrána's room: his desk, the cabinets behind it, a place to sit.
+
+    The desk is the level's landmark — it is where he starts, where he goes back
+    to, and the thing the player plans routes around — so it is placed rather
+    than dropped wherever there was room."""
+    # Against one wall, with a lane beside it. Centred in the room it left a
+    # single tile down each side, and a single tile is not a gap — the player is
+    # wider than one — so everything past the desk was sealed off behind it.
+    dw = max(4, min(7, w - 4))
+    dx = x
+    dy = y + max(1, h // 2 - 1)
+    g.fill(dx, dy, dw, 3, 'E')
+    lane = (door - 1, door + 3)
+    for i, xx in enumerate(pack(x, lane[0] - 1, 3) + pack(lane[1] + 1, x + w - 1, 3)):
+        g.fill(xx, y, 3, 2, 'C' if i % 2 == 0 else 'B')
+    if h >= 9:
+        g.fill(x, y + h - 2, 2, 2, 'W')
+    g.deco('floor', x, y, w, h, 'carpet')
+    g.deco('lamp', dx + dw // 2, dy + 1)
+    g.deco('kettle', x, y + h - 3)
+    g.deco('sign', door, y - 1, 3, 1, name)
+
+
+def sch_lockers(g, x, y, w, doors, deep=2):
+    """Lockers along a corridor wall, into the runs between the doorways."""
+    blocked = sorted(doors)
+    run, at = [], x
+    for d in blocked:
+        if d - 2 > at:
+            run.append((at, d - 2 - at))
+        at = d + 5
+    if x + w - 1 > at:
+        run.append((at, x + w - 1 - at))
+    for (rx, rw) in run:
+        if rw >= 3:
+            g.fill(rx, y, rw, deep, 'C')
+
+
+def school_1():
+    """Level one: one straight corridor, three rooms off it, the caretaker's
+    office at the end. Rectangular on purpose — it is the level that teaches
+    the building, and it should be the one you can hold in your head."""
+    g = shell(30, 26)
+    g.hwall(1, 9, 28); g.hwall(1, 16, 28)
+    g.vwall(14, 1, 8)
+    g.vwall(11, 17, 8); g.vwall(21, 17, 8)
+    for x in (4, 20): g.fill(x, 9, 3, 1, 'D')
+    for x in (5, 15, 24): g.fill(x, 16, 3, 1, 'D')
+    g.fill(3, 0, 7, 1, 'O'); g.fill(18, 0, 8, 1, 'O')
+    g.fill(0, 3, 1, 4, 'O'); g.fill(29, 3, 1, 4, 'O')
+    g.fill(6, 25, 8, 1, 'O')
+
+    sch_classroom(g, 1, 1, 13, 8, 4, '1A')
+    sch_classroom(g, 15, 1, 14, 8, 20, '1B')
+    sch_lockers(g, 1, 10, 28, [4, 20])
+    sch_lockers(g, 1, 14, 28, [5, 15, 24], deep=1)
+    g.deco('floor', 1, 10, 28, 6, 'tiles')
+    g.deco('notice', 12, 10, 4, 1)
+    g.deco('clock', 25, 10)
+    g.deco('sign', 1, 12, 3, 1, 'EXIT')
+
+    sch_store(g, 1, 17, 10, 8, 5)
+    sch_gym(g, 12, 17, 9, 8, 15, above=True)
+    sch_office(g, 22, 17, 7, 8, 24)
+
+    for (x, y, ch) in [(2, 2, 'c'), (7, 2, 'p'), (4, 5, 'w'), (7, 7, 'k'), (12, 7, 'c'),
+                       (20, 2, 'p'), (2, 11, 'w'), (6, 12, 'c'), (6, 17, 'r')]:
+        g.drop(x, y, ch, box=True)
+    g.drop(27, 12, '@', box=True)
+    g.fill(0, 11, 1, 3, 'X')
+    g.fill(9, 12, 3, 2, '~')
+    return g
+
+
+def school_2():
+    """Level two: an L. A long teaching corridor along the top, and a wing that
+    turns down at the far end for the hall and the stores. The bottom-left
+    quarter of the plot is not part of the building at all."""
+    g = shell(34, 29)
+    solid(g, 0, 17, 18, 12)              # the corner the building does not fill
+    g.hwall(1, 9, 32); g.hwall(18, 16, 15)
+    g.vwall(11, 1, 8); g.vwall(22, 1, 8)
+    g.vwall(26, 17, 11)
+    for x in (5, 15, 27): g.fill(x, 9, 3, 1, 'D')
+    for x in (21, 29): g.fill(x, 16, 3, 1, 'D')
+    g.fill(3, 0, 6, 1, 'O'); g.fill(14, 0, 6, 1, 'O'); g.fill(25, 0, 7, 1, 'O')
+    g.fill(0, 3, 1, 4, 'O'); g.fill(33, 4, 1, 8, 'O')
+    g.fill(20, 28, 10, 1, 'O')
+
+    sch_classroom(g, 1, 1, 10, 8, 5, '1A')
+    sch_classroom(g, 12, 1, 10, 8, 15, '1B')
+    sch_library(g, 23, 1, 10, 8, 27)
+    sch_lockers(g, 1, 10, 32, [5, 15, 27])
+    sch_lockers(g, 18, 14, 15, [21, 29], deep=1)
+    g.deco('floor', 1, 10, 32, 6, 'tiles')
+    g.deco('notice', 9, 10, 4, 1)
+    g.deco('clock', 20, 10)
+    g.deco('sign', 1, 12, 3, 1, 'EXIT')
+
+    sch_gym(g, 19, 17, 7, 11, 21)
+    sch_office(g, 27, 17, 6, 11, 29)
+
+    for (x, y, ch) in [(2, 2, 'w'), (7, 2, 'k'), (4, 5, 'p'), (7, 7, 'c'), (13, 2, 'm'),
+                       (18, 2, 'w'), (15, 5, 'k'), (2, 11, 'c'), (6, 12, 'p'),
+                       (10, 13, 'w'), (3, 15, 'r')]:
+        g.drop(x, y, ch, box=True)
+    g.drop(31, 12, '@', box=True)
+    g.fill(0, 11, 1, 3, 'X')
+    g.fill(12, 12, 3, 2, '~')
+    return g
+
+
+def school_3():
+    """Level three: a T. The teaching corridor runs the width of the building
+    and a stem drops out of the middle of it to the hall and the offices, so
+    there are two ways round to most things and a dead end at the bottom."""
+    g = shell(38, 32)
+    solid(g, 0, 18, 12, 14)              # left of the stem
+    solid(g, 27, 18, 11, 14)             # ...and right of it
+    g.hwall(1, 10, 36); g.hwall(12, 17, 15)
+    # The stem's walls start *below* the corridor. Running them up through it
+    # cut the teaching corridor into three sealed pieces, which is the kind of
+    # thing you cannot see in the source and cannot miss on a reachability map.
+    g.vwall(12, 18, 14); g.vwall(26, 18, 14)
+    g.vwall(13, 1, 9); g.vwall(25, 1, 9)
+    for x in (6, 18, 30): g.fill(x, 10, 3, 1, 'D')
+    for x in (14, 22): g.fill(x, 17, 3, 1, 'D')
+    g.fill(3, 0, 8, 1, 'O'); g.fill(15, 0, 8, 1, 'O'); g.fill(27, 0, 8, 1, 'O')
+    g.fill(0, 4, 1, 5, 'O'); g.fill(37, 4, 1, 5, 'O')
+    g.fill(15, 31, 8, 1, 'O')
+
+    sch_classroom(g, 1, 1, 12, 9, 6, '1A')
+    sch_classroom(g, 14, 1, 11, 9, 18, '1B')
+    sch_library(g, 26, 1, 11, 9, 30)
+    sch_lockers(g, 1, 11, 36, [6, 18, 30])
+    sch_lockers(g, 1, 15, 36, [14, 22], deep=1)
+    g.deco('floor', 1, 11, 36, 6, 'tiles')
+    g.deco('notice', 10, 11, 4, 1)
+    g.deco('clock', 26, 11)
+    g.deco('sign', 1, 13, 3, 1, 'EXIT')
+
+    sch_gym(g, 13, 18, 6, 13, 14)
+    sch_office(g, 20, 18, 6, 13, 22)
+    g.deco('floor', 13, 18, 13, 13, 'tiles')
+
+    for (x, y, ch) in [(6, 2, 'm'), (5, 6, 'k'), (11, 2, 'r'), (16, 2, 'p'), (19, 4, 'l'),
+                       (23, 2, 'w'), (29, 4, 'k'), (32, 2, 'm'), (35, 6, 'p'),
+                       (8, 8, 'c'), (5, 12, 'w'), (9, 13, 'c'), (32, 8, 't')]:
+        g.drop(x, y, ch, box=True)
+    g.drop(35, 13, '@', box=True)
+    g.fill(0, 12, 1, 3, 'X')
+    g.fill(20, 13, 3, 2, '~')
+    return g
+
+
+def school_4():
+    """Level four: a U round a courtyard. Two wings down either side joined by
+    the teaching corridor along the top; the middle of the plot is open ground
+    you cannot cross, so the two wings are a long walk apart."""
+    g = shell(42, 35)
+    solid(g, 11, 19, 20, 16)             # the courtyard
+    g.hwall(1, 10, 40)
+    g.hwall(1, 18, 10); g.hwall(31, 18, 10)
+    # ...and the wings' walls start below the corridor too, for the same reason.
+    g.vwall(10, 19, 16); g.vwall(31, 19, 16)
+    g.vwall(14, 1, 9); g.vwall(28, 1, 9)
+    for x in (5, 19, 34): g.fill(x, 10, 3, 1, 'D')
+    g.fill(4, 18, 3, 1, 'D'); g.fill(34, 18, 3, 1, 'D')
+    g.fill(3, 0, 8, 1, 'O'); g.fill(17, 0, 8, 1, 'O'); g.fill(31, 0, 8, 1, 'O')
+    g.fill(0, 4, 1, 6, 'O'); g.fill(41, 4, 1, 6, 'O')
+    g.fill(0, 24, 1, 6, 'O'); g.fill(41, 24, 1, 6, 'O')
+
+    sch_classroom(g, 1, 1, 13, 9, 5, '1A')
+    sch_classroom(g, 15, 1, 13, 9, 19, '1B')
+    sch_library(g, 29, 1, 12, 9, 34)
+    sch_lockers(g, 1, 11, 40, [5, 19, 34])
+    sch_lockers(g, 1, 15, 40, [5, 19, 34], deep=1)
+    g.deco('floor', 1, 11, 40, 6, 'tiles')
+    g.deco('notice', 12, 11, 4, 1)
+    g.deco('clock', 27, 11)
+    g.deco('sign', 1, 13, 3, 1, 'EXIT')
+
+    sch_store(g, 1, 19, 9, 15, 4, 'Stores')
+    sch_office(g, 32, 19, 9, 15, 34)
+    g.deco('floor', 11, 19, 20, 16, 'concrete')
+
+    for (x, y, ch) in [(2, 2, 'n'), (7, 2, 'l'), (4, 5, 'k'), (7, 7, 'v'), (16, 2, 'v'),
+                       (18, 5, 'j'), (21, 2, 'l'), (2, 12, 'c'), (6, 11, 'w'),
+                       (4, 15, 'm'), (8, 14, 'n'), (2, 20, 'r'), (7, 20, 'v'),
+                       (4, 23, 'm'), (2, 27, 'k'), (2, 32, 'l')]:
+        g.drop(x, y, ch, box=True)
+    g.drop(38, 13, '@', box=True)
+    g.fill(0, 12, 1, 3, 'X')
+    g.fill(15, 13, 3, 2, '~')
+    return g
+
+
 def school():
     """A real school, laid out the way one actually is: two teaching rooms and a
     library off the top of a spine, the hall and the staff end off the bottom,

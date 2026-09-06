@@ -1085,6 +1085,17 @@ LOCATIONS = [
     ('Vault',     'vault',      'vaultguard', True,  vault,     None),
 ]
 
+# A location may hand-draw all five of its levels rather than only its last.
+# The school does, because the point of its five levels is that they are five
+# different shapes of building — a rectangle, an L, a T, a U round a courtyard,
+# and one irregular floor with wings — and a room grammar that fills a rectangle
+# can only ever produce rectangles. Read off the walls alone, with every stick of
+# furniture removed, these are five plans.
+SHAPED = {
+    'School': [draft.school_1, draft.school_2, draft.school_3,
+               draft.school_4, draft.school],
+}
+
 HANDDRAWN = {
     'flat': draft.flat, 'cottage': draft.cottage, 'hotel': draft.hotel,
     'office': draft.office, 'school': draft.school, 'hospital': draft.hospital,
@@ -1098,7 +1109,15 @@ def build():
     problems = []
     for (name, theme, watcher, seated, grammar, handdrawn) in LOCATIONS:
         for tier in range(5):
-            if tier == 4 and handdrawn:
+            if name in SHAPED:
+                g = SHAPED[name][tier]()
+                g.clear_landings(); draft.clear_exit(g)
+                top_up_loot(g, tier)
+                promote_prize(g, tier)
+                g.clear_freebies()
+                if g.open_until_connected() is None:
+                    g.open_by_removal()
+            elif tier == 4 and handdrawn:
                 g = HANDDRAWN[handdrawn]()
                 g.clear_landings(); draft.clear_exit(g)
                 promote_prize(g, tier)

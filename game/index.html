@@ -546,7 +546,10 @@ __mod.tuning = (function () {
       // The school caretaker, asleep in the staff room. Noise only, like the
       // bedroom sleeper — an older man dozing in a chair is not watching for you.
       caretaker: {
-        meter: 'NOISE', person: 'Mr. Vrána', sees: 0, seeRate: 0, pose: 'couch',
+        meter: 'NOISE', person: 'Mr. Vrána', sees: 0, seeRate: 0,
+          // At his desk, not on a couch and certainly not in a bed: he is the
+          // caretaker, he was doing the rota, and he nodded off over it.
+          pose: 'desk',
         warnings: ['MR. VRÁNA STIRS…', 'MR. VRÁNA IS ALMOST AWAKE',
           'MR. VRÁNA IS WAKING!'],
         lost: 'HE WOKE UP!', lostWhy: 'The noise reached 100 and the caretaker woke up.',
@@ -701,6 +704,57 @@ __mod.tuning = (function () {
             sofa: 2, wardrobe: 5, bookshelf: 5, plinth: 6
           }
         },
+        // What the meter means here.
+        //
+        // Everywhere else in the game the meter is called NOISE and a hundred is
+        // the end of the level: he woke up, you lost. In the school it is how
+        // alert one man is, and filling it ends nothing. It makes him quick and
+        // it makes him right — and being walked into, or running out of clock, is
+        // what actually loses you the level.
+        //
+        // That is not a softer game, it is a different one: instead of watching a
+        // bar and stopping before it fills, you are being hunted by someone who
+        // gets better at it the more you give him, and worse at it if you go
+        // quiet and let him lose the thread.
+        //
+        // Everything here is continuous in the meter — no bands, nothing steps.
+        // `alertnessOf` smoothsteps 0..100 onto 0..1, so the middle of the meter
+        // is where his behaviour changes fastest:
+        //
+        //   meter   10    30    50    70    85    95
+        //   alert  0.03  0.22  0.50  0.78  0.94  0.99
+        alertness: {
+          // Measured from well below the line he gets up at, so that by the time
+          // he is on his feet there is still most of the curve left to climb.
+          // Spanning the whole meter looked right and was not: he only ever wakes
+          // above wakeAt, so every waking moment sat at the top of the curve and
+          // he was always at his sharpest.
+          from: 55, to: 100,
+          // How far out his guess at where you are can be. Barely disturbed he is
+          // off by most of a classroom and will search the wrong corner of the
+          // wrong room; at the top of the meter he walks more or less to you.
+          blur: 230,
+          sharp: 16,
+          // How fast he walks, as a multiplier on his own speed.
+          speedLow: 0.70,
+          speedHigh: 1.28,
+          // How long he takes to get out of the chair.
+          riseLow: 2.1, riseHigh: 0.8,
+          // How long he casts about once he gets there. Quiet is a long vague
+          // sweep of the wrong area; loud is a short sharp look at the right one.
+          sweepLow: 4.2, sweepHigh: 1.8,
+          // A fresh noise while he is already up pulls his estimate this far
+          // towards the new guess. This is what makes a thief who keeps making
+          // noise get found: each fix is closer than the last, so they close in
+          // rather than averaging out.
+          narrow: 0.62,
+          // ...but only for a noise worth turning towards, and only for an actual
+          // *event*: this is how far the meter has to jump in a single step, which
+          // lifting something, walking into something or opening something does
+          // and which walking across a room does not.
+          refixAt: 0.55,
+          refix: 5
+        },
         // How the school's two people walk.
         //
         // The bands are §4's: idle, tiptoe, walk, power walk, run, blended rather
@@ -777,8 +831,13 @@ __mod.tuning = (function () {
         figures: true,
         // Mr. Vrána, once he is awake.
         investigate: {
-          wakeAt: 80,        // he gets up when the meter passes this
-          calmAt: 50,        // ...and gives up when it falls back under this
+          // Where he gets up, and where he gives up. Both lower than they were,
+          // because filling the meter no longer ends the level: the stretch from
+          // here to a hundred used to be twenty points of imminent death and is
+          // now the part of the game where he is actually hunting you. It has to
+          // be wide enough to have a shape in it.
+          wakeAt: 62,
+          calmAt: 40,
           // Getting off a couch is four beats, not a fade: he stirs, sits up,
           // gets to his feet, then has a look round before he sets off. Long
           // enough to read as a person waking up, and it is time the player can
@@ -2755,62 +2814,68 @@ __mod.maps = (function () {
       seated: false,
       clock: 56,
       search: {
-        '1': { style: 'table', item: 'r' },
+        '1': { style: 'chest', item: 'r' },
         '2': { style: 'chest', item: 'k' },
-        '3': { style: 'chest', item: 'p' },
-        '4': { style: 'chest', item: 'c' },
+        '3': { style: 'table', item: 'p' },
+        '4': { style: 'table', item: 'c' },
         '5': { style: 'bookshelf', item: null },
         '6': { style: 'table', item: null },
       },
       decor: [
-        { kind: 'board', x: 2, y: 0, w: 12 },
+        { kind: 'board', x: 1, y: 0, w: 13 },
         { kind: 'bin', x: 13, y: 2 },
-        { kind: 'desklamp', x: 3, y: 3 },
-        { kind: 'floor', x: 1, y: 1, w: 14, h: 8, tag: 'boards' },
-        { kind: 'sign', x: 7, y: 9, w: 3, tag: 'A' },
-        { kind: 'floor', x: 15, y: 1, w: 14, h: 8, tag: 'carpet' },
-        { kind: 'lamp', x: 22, y: 5 },
-        { kind: 'plant', x: 27, y: 7 },
-        { kind: 'sign', x: 21, y: 9, w: 3, tag: 'Library' },
-        { kind: 'floor', x: 1, y: 17, w: 14, h: 8, tag: 'parquet' },
-        { kind: 'court', x: 4, y: 18, w: 8, h: 5 },
-        { kind: 'sign', x: 7, y: 16, w: 3, tag: 'Gymnasium' },
-        { kind: 'floor', x: 15, y: 17, w: 14, h: 8, tag: 'carpet' },
-        { kind: 'kettle', x: 26, y: 20 },
-        { kind: 'lamp', x: 22, y: 21 },
-        { kind: 'sign', x: 21, y: 16, w: 3, tag: 'Staff Room' },
+        { kind: 'desklamp', x: 2, y: 2 },
+        { kind: 'floor', x: 1, y: 1, w: 13, h: 8, tag: 'boards' },
+        { kind: 'sign', x: 4, y: 9, w: 3, tag: '1A' },
+        { kind: 'board', x: 15, y: 0, w: 14 },
+        { kind: 'bin', x: 28, y: 2 },
+        { kind: 'desklamp', x: 16, y: 2 },
+        { kind: 'floor', x: 15, y: 1, w: 14, h: 8, tag: 'boards' },
+        { kind: 'sign', x: 20, y: 9, w: 3, tag: '1B' },
         { kind: 'floor', x: 1, y: 10, w: 28, h: 6, tag: 'tiles' },
-        { kind: 'notice', x: 13, y: 10, w: 4 },
-        { kind: 'clock', x: 23, y: 10 },
+        { kind: 'notice', x: 12, y: 10, w: 4 },
+        { kind: 'clock', x: 25, y: 10 },
+        { kind: 'sign', x: 1, y: 12, w: 3, tag: 'EXIT' },
+        { kind: 'floor', x: 1, y: 17, w: 10, h: 8, tag: 'concrete' },
+        { kind: 'tools', x: 1, y: 21, w: 3 },
+        { kind: 'sign', x: 5, y: 16, w: 3, tag: 'Store' },
+        { kind: 'floor', x: 12, y: 17, w: 9, h: 8, tag: 'parquet' },
+        { kind: 'court', x: 15, y: 18, w: 3, h: 4 },
+        { kind: 'hoop', x: 15, y: 17, w: 3 },
+        { kind: 'sign', x: 15, y: 16, w: 3, tag: 'Gymnasium' },
+        { kind: 'floor', x: 22, y: 17, w: 7, h: 8, tag: 'carpet' },
+        { kind: 'lamp', x: 24, y: 21 },
+        { kind: 'kettle', x: 22, y: 22 },
+        { kind: 'sign', x: 24, y: 16, w: 3, tag: 'Caretaker' },
       ],
       legend: LOOT,
       tiles: [
-        '##############################',
+        '###OOOOOOO########OOOOOOOO####',
+        '#........TTTT.%TTTT.....CCCC.#',
+        '#.c......TTTT.%TTTT.....CCCC.#',
+        'O.............%..............O',
+        'OTT.....66.44.%.TT......TT.33O',
+        'OTT.c...66.44.%.TT......TT.33O',
+        'O.............%..............O',
         '#.............%..............#',
-        '#.c.....TTTT..%......55..BB..#',
-        '#.......TTTT..%......55..BB..#',
         '#.............%..............#',
-        '#.......66.TT.%...c..........#',
-        '#.......66.TT.%.......TTTTT..#',
-        '#.............%.......TTTTT..#',
-        '#.............%..............#',
-        '#%%DDD%%%%%%%%%%%DDD%%%%%%%%%#',
-        '#.......4444..........CCCC...#',
-        'X.......4444..........CCCC...#',
-        'X..........................@.#',
-        'X............................#',
+        '#%%%DDD%%%%%%%%%%%%%DDD%%%%%%#',
+        '#........222222222.......111.#',
+        'X........222222222.......111.#',
+        'X........~~~.................#',
+        'X........~~~..............@..#',
+        '#.........CCC................#',
         '#............................#',
-        '#.......3333..........CCCC...#',
-        '#%%DDD%%%%%%%%%%%DDD%%%%%%%%%#',
-        '#.............%..............#',
-        '#.............%......111.222.#',
-        '#.SS........SS%...EEE111E222.#',
-        '#.SS........SS%...EEEEEEE....#',
-        '#.SS........SS%..............#',
-        '#.SS....SSSSSS%..p...........#',
-        '#.......SSSS..%..............#',
-        '#.............%..............#',
-        '##############################',
+        '#%%%%DDD%%%%%%%DDD%%%%%%DDD%%#',
+        '#555..p....%.........%.......#',
+        '#555.......%SS.....SS%.......#',
+        '#555.......%SS.....SS%.......#',
+        '#..........%SS.....SS%EEEE...#',
+        '#..........%SS.....SS%EEEE...#',
+        '#..........%SS.....SS%EEEE...#',
+        '#CCC.......%.........%.......#',
+        '#CCC.......%.........%.......#',
+        '######OOOOOOOO################',
       ]
     }),
     // ---- 22. School 2/5 --------------------
@@ -2824,66 +2889,74 @@ __mod.maps = (function () {
       seated: false,
       clock: 53,
       search: {
-        '1': { style: 'table', item: 'm' },
-        '2': { style: 'wardrobe', item: 'k' },
-        '3': { style: 'chest', item: 'r' },
-        '4': { style: 'chest', item: 'p' },
-        '5': { style: 'chest', item: 'w' },
-        '6': { style: 'bookshelf', item: 'c' },
-        '7': { style: 'bookshelf', item: null },
+        '1': { style: 'wardrobe', item: 'k' },
+        '2': { style: 'chest', item: 'm' },
+        '3': { style: 'table', item: 'r' },
+        '4': { style: 'bookshelf', item: 'p' },
+        '5': { style: 'bookshelf', item: 'w' },
+        '6': { style: 'chest', item: 'c' },
+        '7': { style: 'table', item: null },
         '8': { style: 'table', item: null },
       },
       decor: [
-        { kind: 'board', x: 2, y: 0, w: 13 },
-        { kind: 'bin', x: 14, y: 2 },
-        { kind: 'desklamp', x: 3, y: 3 },
-        { kind: 'floor', x: 1, y: 1, w: 15, h: 9, tag: 'boards' },
-        { kind: 'sign', x: 7, y: 10, w: 3, tag: 'A' },
-        { kind: 'floor', x: 16, y: 1, w: 16, h: 9, tag: 'carpet' },
-        { kind: 'lamp', x: 24, y: 5 },
-        { kind: 'plant', x: 30, y: 8 },
-        { kind: 'sign', x: 23, y: 10, w: 3, tag: 'Library' },
-        { kind: 'floor', x: 1, y: 18, w: 15, h: 9, tag: 'parquet' },
-        { kind: 'court', x: 4, y: 19, w: 9, h: 6 },
-        { kind: 'sign', x: 7, y: 17, w: 3, tag: 'Gymnasium' },
-        { kind: 'floor', x: 16, y: 18, w: 16, h: 9, tag: 'carpet' },
-        { kind: 'kettle', x: 29, y: 21 },
-        { kind: 'lamp', x: 24, y: 23 },
-        { kind: 'sign', x: 23, y: 17, w: 3, tag: 'Staff Room' },
-        { kind: 'floor', x: 1, y: 11, w: 31, h: 6, tag: 'tiles' },
-        { kind: 'notice', x: 14, y: 11, w: 4 },
-        { kind: 'clock', x: 26, y: 11 },
+        { kind: 'board', x: 1, y: 0, w: 10 },
+        { kind: 'bin', x: 10, y: 2 },
+        { kind: 'desklamp', x: 2, y: 2 },
+        { kind: 'floor', x: 1, y: 1, w: 10, h: 8, tag: 'boards' },
+        { kind: 'sign', x: 5, y: 9, w: 3, tag: '1A' },
+        { kind: 'board', x: 12, y: 0, w: 10 },
+        { kind: 'bin', x: 21, y: 2 },
+        { kind: 'desklamp', x: 13, y: 2 },
+        { kind: 'floor', x: 12, y: 1, w: 10, h: 8, tag: 'boards' },
+        { kind: 'sign', x: 15, y: 9, w: 3, tag: '1B' },
+        { kind: 'floor', x: 23, y: 1, w: 10, h: 8, tag: 'carpet' },
+        { kind: 'lamp', x: 28, y: 5 },
+        { kind: 'plant', x: 32, y: 8 },
+        { kind: 'sign', x: 27, y: 9, w: 3, tag: 'Library' },
+        { kind: 'floor', x: 1, y: 10, w: 32, h: 6, tag: 'tiles' },
+        { kind: 'notice', x: 9, y: 10, w: 4 },
+        { kind: 'clock', x: 20, y: 10 },
+        { kind: 'sign', x: 1, y: 12, w: 3, tag: 'EXIT' },
+        { kind: 'floor', x: 19, y: 17, w: 7, h: 11, tag: 'parquet' },
+        { kind: 'court', x: 22, y: 18, w: 3, h: 7 },
+        { kind: 'hoop', x: 21, y: 17, w: 3 },
+        { kind: 'sign', x: 21, y: 16, w: 3, tag: 'Gymnasium' },
+        { kind: 'floor', x: 27, y: 17, w: 6, h: 11, tag: 'carpet' },
+        { kind: 'lamp', x: 29, y: 22 },
+        { kind: 'kettle', x: 27, y: 25 },
+        { kind: 'sign', x: 29, y: 16, w: 3, tag: 'Caretaker' },
       ],
       legend: LOOT,
       tiles: [
-        '#################################',
-        '#..............%................#',
-        '#.c......TTTT..%.k.....66..77...#',
-        '#........TTTT..%.......66..77...#',
-        '#..............%.......66..77...#',
-        '#......88.TT.TT%................#',
-        '#......88.TT.TT%................#',
-        '#..............%......c.TTTTT...#',
-        '#..............%........TTTTT...#',
-        '#..............%................#',
-        '#%%DDD%%%%%%%%%%%%DDD%%%%%%%%%%%#',
-        '#........CCCC.........CCCC.4444.#',
-        'X........CCCC.........CCCC.4444.#',
-        'X...............................#',
-        'X............................@..#',
-        '#...............................#',
-        '#........5555.........CCCC.3333.#',
-        '#%%DDD%%%%%%%%%%%%DDD%%%%%%%%%%%#',
-        '#..............%................#',
-        '#..............%.......111.CCC..#',
-        '#.SS.........SS%....EEE111ECCC..#',
-        '#.SS.........SS%....EEEEEEE.....#',
-        '#.SS.........SS%....EEEEEEE.....#',
-        '#.SS.........SS%................#',
-        '#.SS.....SSSSSS%.......22..CCC..#',
-        '#........SSSS..%.......22..CCC..#',
-        '#..............%................#',
-        '#################################',
+        '###OOOOOO#####OOOOOO#####OOOOOOO##',
+        '#..........%..........%55......44#',
+        '#.c........%.k........%55......44#',
+        'O..........%..........%55......44#',
+        'OTT......88%77.....33.%..........O',
+        'OTT......88%77.c...33.%..........O',
+        'O..........%..........%..TTTTT...O',
+        '#..........%..........%..TT......O',
+        '#..........%..........%..........O',
+        '#%%%%DDD%%%%%%%DDD%%%%%%%%%DDD%%%O',
+        '#.........666.......22222........O',
+        'X.........666.......22222........O',
+        'X...........~~~................@.#',
+        'X...........~~~..................#',
+        '#................................#',
+        '#................................#',
+        '#.................%%%DDD%%%%%DDD%#',
+        '##################........%......#',
+        '##################.SS...SS%......#',
+        '##################.SS...SS%......#',
+        '##################.SS...SS%......#',
+        '##################.SS...SS%EEEE..#',
+        '##################.SS...SS%EEEE..#',
+        '##################.SS...SS%EEEE..#',
+        '##################.SS...SS%......#',
+        '##################.SS...SS%......#',
+        '##################........%11....#',
+        '##################........%11....#',
+        '####################OOOOOOOOOO####',
       ]
     }),
     // ---- 23. School 3/5 --------------------
@@ -2897,74 +2970,80 @@ __mod.maps = (function () {
       seated: false,
       clock: 51,
       search: {
-        '1': { style: 'table', item: 'm' },
-        '2': { style: 'wardrobe', item: 'k' },
-        '3': { style: 'chest', item: 'r' },
-        '4': { style: 'bookshelf', item: 'n' },
-        '5': { style: 'bookshelf', item: 't' },
-        '6': { style: 'bookshelf', item: 'l' },
+        '1': { style: 'wardrobe', item: 'k' },
+        '2': { style: 'chest', item: 't' },
+        '3': { style: 'chest', item: 'n' },
+        '4': { style: 'table', item: 'l' },
+        '5': { style: 'chest', item: 'm' },
+        '6': { style: 'table', item: 'r' },
         '7': { style: 'bookshelf', item: 'p' },
-        '8': { style: 'chest', item: 'w' },
-        '9': { style: 'chest', item: null },
+        '8': { style: 'table', item: 'w' },
+        '9': { style: 'table', item: null },
         '0': { style: 'table', item: null },
       },
       decor: [
-        { kind: 'board', x: 2, y: 0, w: 15 },
-        { kind: 'bin', x: 16, y: 2 },
-        { kind: 'desklamp', x: 3, y: 3 },
-        { kind: 'floor', x: 1, y: 1, w: 17, h: 10, tag: 'boards' },
-        { kind: 'sign', x: 8, y: 11, w: 3, tag: 'A' },
-        { kind: 'floor', x: 18, y: 1, w: 17, h: 10, tag: 'carpet' },
-        { kind: 'lamp', x: 26, y: 6 },
-        { kind: 'plant', x: 33, y: 9 },
-        { kind: 'sign', x: 25, y: 11, w: 3, tag: 'Library' },
-        { kind: 'floor', x: 1, y: 19, w: 11, h: 11, tag: 'parquet' },
-        { kind: 'court', x: 4, y: 20, w: 5, h: 8 },
-        { kind: 'sign', x: 5, y: 18, w: 3, tag: 'Gymnasium' },
-        { kind: 'floor', x: 12, y: 19, w: 11, h: 11, tag: 'concrete' },
-        { kind: 'tools', x: 13, y: 24, w: 2 },
-        { kind: 'sign', x: 16, y: 18, w: 3, tag: 'Store' },
-        { kind: 'floor', x: 23, y: 19, w: 12, h: 11, tag: 'carpet' },
-        { kind: 'kettle', x: 32, y: 22 },
-        { kind: 'lamp', x: 29, y: 26 },
-        { kind: 'sign', x: 28, y: 18, w: 3, tag: 'Staff Room' },
-        { kind: 'floor', x: 1, y: 12, w: 34, h: 6, tag: 'tiles' },
-        { kind: 'notice', x: 16, y: 12, w: 4 },
-        { kind: 'clock', x: 29, y: 12 },
+        { kind: 'board', x: 1, y: 0, w: 12 },
+        { kind: 'bin', x: 12, y: 2 },
+        { kind: 'desklamp', x: 2, y: 2 },
+        { kind: 'floor', x: 1, y: 1, w: 12, h: 9, tag: 'boards' },
+        { kind: 'sign', x: 6, y: 10, w: 3, tag: '1A' },
+        { kind: 'board', x: 14, y: 0, w: 11 },
+        { kind: 'bin', x: 24, y: 2 },
+        { kind: 'desklamp', x: 15, y: 2 },
+        { kind: 'floor', x: 14, y: 1, w: 11, h: 9, tag: 'boards' },
+        { kind: 'sign', x: 18, y: 10, w: 3, tag: '1B' },
+        { kind: 'floor', x: 26, y: 1, w: 11, h: 9, tag: 'carpet' },
+        { kind: 'lamp', x: 31, y: 5 },
+        { kind: 'plant', x: 36, y: 9 },
+        { kind: 'sign', x: 30, y: 10, w: 3, tag: 'Library' },
+        { kind: 'floor', x: 1, y: 11, w: 36, h: 6, tag: 'tiles' },
+        { kind: 'notice', x: 10, y: 11, w: 4 },
+        { kind: 'clock', x: 26, y: 11 },
+        { kind: 'sign', x: 1, y: 13, w: 3, tag: 'EXIT' },
+        { kind: 'floor', x: 13, y: 18, w: 6, h: 13, tag: 'parquet' },
+        { kind: 'court', x: 16, y: 19, w: 3, h: 9 },
+        { kind: 'hoop', x: 15, y: 18, w: 3 },
+        { kind: 'sign', x: 14, y: 17, w: 3, tag: 'Gymnasium' },
+        { kind: 'floor', x: 20, y: 18, w: 6, h: 13, tag: 'carpet' },
+        { kind: 'lamp', x: 22, y: 24 },
+        { kind: 'kettle', x: 20, y: 28 },
+        { kind: 'sign', x: 22, y: 17, w: 3, tag: 'Caretaker' },
+        { kind: 'floor', x: 13, y: 18, w: 13, h: 13, tag: 'tiles' },
       ],
       legend: LOOT,
       tiles: [
-        '####################################',
-        '#................%.................#',
-        '#.w....TTTT.CCCC.%......BB..66..77.#',
-        '#......TTTT.CCCC.%......BB..66..77.#',
-        '#................%......BB..66..77.#',
-        '#.......TT.TT.TT.%......BB..66..77.#',
-        '#...w...TT.TT.TT.%.................#',
-        '#................%.................#',
-        '#................%........TTTCCC...#',
-        '#.......00.TT.TT.%........TTTCCC...#',
-        '#.......00.TT.TT.%.................#',
-        '#%%DDD%%%%%%%%%%%%%%DDD%%%%%%%%%%%%#',
-        '#......9999.CCCC........3333.CCCC..#',
-        'X......9999.CCCC........3333.CCCC..#',
-        'X.................r................#',
-        'X...............................@..#',
-        '#..................................#',
-        '#......8888..CCCC.......CCCC.......#',
-        '#%%DDD%%%%%%%%%%%%DDD%%%%%%%%%DDD%%#',
-        '#..........%..........%............#',
-        '#..........%.444......%..111.......#',
-        '#.SS.....SS%.444......%..111EEEE...#',
-        '#.SS.....SS%.444......%...EEEEEE...#',
-        '#.SS.....SS%..........%...EEEEEE...#',
-        '#.SS.....SS%.555...w..%............#',
-        '#.SS.....SS%.555......%............#',
-        '#.SS.....SS%..........%............#',
-        '#.SS.....SS%.CCC......%..22........#',
-        '#..........%.CCC......%..22........#',
-        '#..........%..........%............#',
-        '####################################',
+        '###OOOOOOOO####OOOOOOOO####OOOOOOOO###',
+        '#TTTT........%...........%77......BB.#',
+        '#TTTT.w......%...........%77....r.BB.#',
+        '#............%...........%77......BB.#',
+        'O.00......88.%TT...w..66.%77......BB.O',
+        'O.00......88.%TT......66.%...........O',
+        'O............%...........%...........O',
+        'O............%...........%TTTTT......O',
+        'O.99....w.TT.%44......TT.%TTTT.......O',
+        '#.99......TT.%44......TT.%...........#',
+        '#%%%%%DDD%%%%%%%%%DDD%%%%%%%%%DDD%%%%#',
+        '#CCC.......33333.......22222.........#',
+        'X..........33333.......22222.........#',
+        'X...................~~~............@.#',
+        'X...................~~~..............#',
+        '#55555555555...............CCCCCCCCC.#',
+        '#....................................#',
+        '#...........%%DDD%%%%%DDD%%..........#',
+        '############%.............%###########',
+        '############%S...SS.......%###########',
+        '############%SS..SS.......%###########',
+        '############%SS..SS.......%###########',
+        '############%SS..SS.......%###########',
+        '############%SS..SS.EEEE..%###########',
+        '############%SS..SS.EEEE..%###########',
+        '############%SS..SS.EEEE..%###########',
+        '############%SS..SS.......%###########',
+        '############%SS..SS.......%###########',
+        '############%SS..SS.......%###########',
+        '############%.......11....%###########',
+        '############%.......11....%###########',
+        '############%##OOOOOOOO###%###########',
       ]
     }),
     // ---- 24. School 4/5 --------------------
@@ -2978,84 +3057,83 @@ __mod.maps = (function () {
       seated: false,
       clock: 50,
       search: {
-        '1': { style: 'chest', item: 'r' },
-        '2': { style: 'table', item: 'm' },
-        '3': { style: 'chest', item: 'k' },
-        '4': { style: 'chest', item: 'j' },
-        '5': { style: 'bookshelf', item: 'n' },
-        '6': { style: 'chest', item: 'l' },
-        '7': { style: 'bookshelf', item: 't' },
-        '8': { style: 'bookshelf', item: 'p' },
-        '9': { style: 'table', item: 'v' },
+        '1': { style: 'wardrobe', item: 'k' },
+        '2': { style: 'chest', item: 'r' },
+        '3': { style: 'chest', item: 'j' },
+        '4': { style: 'table', item: 'l' },
+        '5': { style: 'table', item: 'v' },
+        '6': { style: 'bookshelf', item: 'n' },
+        '7': { style: 'chest', item: 't' },
+        '8': { style: 'chest', item: 'm' },
+        '9': { style: 'table', item: 'p' },
         '0': { style: 'table', item: null },
         'A': { style: 'table', item: null },
         'F': { style: 'table', item: null },
       },
       decor: [
-        { kind: 'board', x: 2, y: 0, w: 10 },
-        { kind: 'bin', x: 11, y: 2 },
-        { kind: 'desklamp', x: 3, y: 3 },
-        { kind: 'floor', x: 1, y: 1, w: 12, h: 12, tag: 'boards' },
-        { kind: 'sign', x: 6, y: 13, w: 3, tag: 'A' },
-        { kind: 'board', x: 14, y: 0, w: 10 },
-        { kind: 'bin', x: 23, y: 2 },
-        { kind: 'desklamp', x: 15, y: 3 },
-        { kind: 'floor', x: 13, y: 1, w: 12, h: 12, tag: 'boards' },
-        { kind: 'sign', x: 18, y: 13, w: 3, tag: 'B' },
-        { kind: 'floor', x: 25, y: 1, w: 14, h: 12, tag: 'carpet' },
-        { kind: 'lamp', x: 32, y: 7 },
-        { kind: 'plant', x: 37, y: 11 },
-        { kind: 'sign', x: 31, y: 13, w: 3, tag: 'Library' },
-        { kind: 'floor', x: 1, y: 21, w: 12, h: 12, tag: 'parquet' },
-        { kind: 'court', x: 4, y: 22, w: 6, h: 9 },
-        { kind: 'sign', x: 6, y: 20, w: 3, tag: 'Gymnasium' },
-        { kind: 'floor', x: 13, y: 21, w: 12, h: 12, tag: 'concrete' },
-        { kind: 'tools', x: 14, y: 27, w: 2 },
-        { kind: 'sign', x: 18, y: 20, w: 3, tag: 'Store' },
-        { kind: 'floor', x: 25, y: 21, w: 14, h: 12, tag: 'carpet' },
-        { kind: 'kettle', x: 36, y: 24 },
-        { kind: 'lamp', x: 32, y: 29 },
-        { kind: 'sign', x: 31, y: 20, w: 3, tag: 'Staff Room' },
-        { kind: 'floor', x: 1, y: 14, w: 38, h: 6, tag: 'tiles' },
-        { kind: 'notice', x: 18, y: 14, w: 4 },
-        { kind: 'clock', x: 33, y: 14 },
+        { kind: 'board', x: 1, y: 0, w: 13 },
+        { kind: 'bin', x: 13, y: 2 },
+        { kind: 'desklamp', x: 2, y: 2 },
+        { kind: 'floor', x: 1, y: 1, w: 13, h: 9, tag: 'boards' },
+        { kind: 'sign', x: 5, y: 10, w: 3, tag: '1A' },
+        { kind: 'board', x: 15, y: 0, w: 13 },
+        { kind: 'bin', x: 27, y: 2 },
+        { kind: 'desklamp', x: 16, y: 2 },
+        { kind: 'floor', x: 15, y: 1, w: 13, h: 9, tag: 'boards' },
+        { kind: 'sign', x: 19, y: 10, w: 3, tag: '1B' },
+        { kind: 'floor', x: 29, y: 1, w: 12, h: 9, tag: 'carpet' },
+        { kind: 'lamp', x: 35, y: 5 },
+        { kind: 'plant', x: 40, y: 9 },
+        { kind: 'sign', x: 34, y: 10, w: 3, tag: 'Library' },
+        { kind: 'floor', x: 1, y: 11, w: 40, h: 6, tag: 'tiles' },
+        { kind: 'notice', x: 12, y: 11, w: 4 },
+        { kind: 'clock', x: 27, y: 11 },
+        { kind: 'sign', x: 1, y: 13, w: 3, tag: 'EXIT' },
+        { kind: 'floor', x: 1, y: 19, w: 9, h: 15, tag: 'concrete' },
+        { kind: 'sign', x: 4, y: 18, w: 3, tag: 'Stores' },
+        { kind: 'floor', x: 32, y: 19, w: 9, h: 15, tag: 'carpet' },
+        { kind: 'lamp', x: 34, y: 26 },
+        { kind: 'kettle', x: 32, y: 31 },
+        { kind: 'sign', x: 34, y: 18, w: 3, tag: 'Caretaker' },
+        { kind: 'floor', x: 11, y: 19, w: 20, h: 16, tag: 'concrete' },
       ],
       legend: LOOT,
       tiles: [
-        '########################################',
-        '#...........%...........%..............#',
-        '#.w....TTTT.%.AAAA......%.88..77.....m.#',
-        '#......TTTT.%.AAAA......%.88..77.......#',
-        '#...........%...........%.88..77.......#',
-        '#......TT.TT%.00.99.....%.88..77.......#',
-        '#......TT.TT%.00.99.....%.88..77.......#',
-        '#...........%...........%.88..77...w...#',
-        '#...........%...........%..............#',
-        '#......FF.TT%.TT.TT.....%..............#',
-        '#......FF.TT%.TT.TT.....%..TTT444......#',
-        '#...........%...........%..TTT444......#',
-        '#...........%...........%..............#',
-        '#%%DDD%%%%%%%%%%%%%%DDD%%%%%%%%%%%DDD%%#',
-        '#......CCCC...CCCC.........CCCC........#',
-        'X......CCCC...CCCC.........CCCC........#',
-        'X....................................@.#',
-        'X..........................w...........#',
-        '#......................................#',
-        '#......CCCC...6666.........CCCC........#',
-        '#%%DDD%%%%%%%%%%%%%%DDD%%%%%%%%%%%DDD%%#',
-        '#...........%...........%..............#',
-        '#...........%..555......%.TTT.111......#',
-        '#.SS......SS%..555......%.TTTE111EE....#',
-        '#.SS......SS%..555......%...EEEEEEE....#',
-        '#.SS......SS%...........%...EEEEEEE....#',
-        '#.SS......SS%..BBB......%..2222........#',
-        '#.SS......SS%..BBB......%..2222........#',
-        '#.SS......SS%...........%..............#',
-        '#.SS......SS%...........%..............#',
-        '#.SS......SS%..CCC......%.WW..333......#',
-        '#...........%..CCC......%.WW..333......#',
-        '#...........%...........%..............#',
-        '########################################',
+        '###OOOOOOOO######OOOOOOOO######OOOOOOOO###',
+        '#........TTTT.%........TTTT.%.BB......66.#',
+        '#.w......TTTT.%.m......TTTT.%.BB......66.#',
+        '#.............%.............%.BB......66.#',
+        'OTT......AA.TT%TT......TT.55%.BB......66.O',
+        'OTT......AA.TT%TT.w....TT.55%............O',
+        'O.............%.............%............O',
+        'O.............%.............%TTTTT.......O',
+        'OFF......00.99%TT......TT.44%TTTTT.......O',
+        'OFF......00.99%TT......TT.44%............O',
+        '#%%%%DDD%%%%%%%%%%%DDD%%%%%%%%%%%%DDD%%%%#',
+        '#.........8888888.......33333333.........#',
+        'X.........8888888.......33333333.........#',
+        'X..............~~~....................@..#',
+        'X..............~~~.......................#',
+        '#.........7777777.......CCCCCCCC.........#',
+        '#........................................#',
+        '#........................................#',
+        '#%%%DDD%%%%....................%%%DDD%%%%#',
+        '#.........%####################%......222#',
+        '#.w.......%####################%......222#',
+        '#.........%####################%.........#',
+        '#.........%####################%.........#',
+        '#.........%####################%.........#',
+        'O.........%####################%.........O',
+        'O.........%####################%EEEEE....O',
+        'O.........%####################%EEEEE....O',
+        'O.........%####################%EEEEE....O',
+        'O.........%####################%.........O',
+        'O.........%####################%.........O',
+        '#.........%####################%.........#',
+        '#.........%####################%.........#',
+        '#.........%####################%11.......#',
+        '#.........%####################%11.......#',
+        '##########%####################%##########',
       ]
     }),
     // ---- 25. School 5/5 --------------------
@@ -3132,15 +3210,15 @@ __mod.maps = (function () {
         'O...............%...............%BB.BB.BB..BBBB.O',
         'O...............%...............%BB.BB.BB.......O',
         'OTT.GG.....00.TT%TT.TT.....77.TT%...............O',
-        'OTT.GG.....00.TT%TT.TT.....77.TT%.......w..SSSS.O',
-        '#...............%...............%.TTTTT.w..SSSS.#',
+        'OTT.GG.....00.TT%TT.TT.....77.TT%..........SSSS.O',
+        '#...............%.......w.......%.TTTTT....SSSS.#',
         '#...............%...............%.TTTTT....SSSS.#',
         '#TT.AA.....TT.TT%66.TT.....TT.TT%CCC............#',
         '#TT.AA.....TT.TT%66.TT.....TT.TT%...............#',
         '#%%%%%%DDD%%%%%%%%%%%%%DDD%%%%%%%%%%%%%DDD%%%%%%#',
         '#CCCC.......555555555.......CCCCCCCCC.......9999#',
         'X...C.......555555555.......CCCCCCCCC.......9999#',
-        'X......................~~~......................#',
+        'X.....................w~~~......................#',
         'X......................~~~...................@..#',
         '#..............SS..............SS...............#',
         '#CCCCCC.......444444444.......CCCCCCC.......8888#',
@@ -6032,7 +6110,12 @@ __mod.sim = (function () {
         if (direction) { dirX = direction.x; dirY = direction.y; }
       }
 
-      const top = rules.speed;
+      // He walks faster the more alert he is. A man who half heard something
+      // wanders over; a man who heard a window go covers the ground.
+      const tune = sim.rules.alertness;
+      const top = tune
+        ? rules.speed * (tune.speedLow + (tune.speedHigh - tune.speedLow) * (entity.alert || 0))
+        : rules.speed;
       const wanted = Math.hypot(dirX, dirY) > 0.01;
       const rate = (wanted ? rules.accel : rules.decel) * STEP_SECONDS;
       const dvx = dirX * top - entity.vx;
@@ -6158,6 +6241,79 @@ __mod.sim = (function () {
     return distance >= 0 && distance <= 1;
   }
 
+  // How alert he is, from nought to one, read straight off the meter.
+  //
+  // Continuous by construction: there are no bands, no thresholds, and nothing
+  // that steps. Smoothstepped so the middle of the meter is where his behaviour
+  // changes fastest — at 10 he is barely disturbed, at 50 he is properly awake to
+  // it, at 95 he has your number.
+  //
+  //   meter   10    30    50    70    85    95
+  //   alert  0.03  0.22  0.50  0.78  0.94  0.99
+  function alertnessOf(sim) {
+    const a = sim.rules.alertness;
+    if (!a) return 0;
+    const t = Math.max(0, Math.min(1, (sim.noise - a.from) / (a.to - a.from)));
+    return t * t * (3 - 2 * t);
+  }
+
+  const mix = (lo, hi, t) => lo + (hi - lo) * t;
+
+  // Whether filling the meter ends the level there and then.
+  //
+  // Everywhere but the school it does, and always has: the meter is called NOISE,
+  // a hundred means he woke up, and that is the game. The school reads the same
+  // meter as how alert one man is, so filling it does not end anything — it makes
+  // him fast and accurate, and what ends the level is him walking into you or the
+  // clock running out. That is the whole difference between "keep the bar down"
+  // and being hunted.
+  function endsAtCap(sim) {
+    return !sim.rules.alertness && isAwake(sim.noise);
+  }
+
+  // Where he thinks the noise came from.
+  //
+  // Not where it came from. He heard something through a wall, in a building he
+  // knows, half asleep — so his guess is off by an amount that shrinks as the
+  // meter rises, and he walks to *that*, which is what makes a quiet thief able
+  // to stand still twenty feet from where he is looking. Snapped onto floor he
+  // can actually stand on, so he never sets off towards the inside of a cupboard.
+  function guessAt(sim, entity, truth, alert) {
+    const a = sim.rules.alertness;
+    if (!a) return { x: truth.x, y: truth.y };
+    const err = mix(a.blur, a.sharp, alert);
+    const angle = sim.rng.next() * Math.PI * 2;
+    // Square-rooted so the error is spread over the disc rather than bunched at
+    // its edge: most guesses are near enough, a few are properly wrong.
+    const r = Math.sqrt(sim.rng.next()) * err;
+    const at = { x: truth.x + Math.cos(angle) * r, y: truth.y + Math.sin(angle) * r };
+    if (!entity.nav) entity.nav = navGrid(sim.level, entity.w, entity.h);
+    return nearestStand(entity.nav, at.x, at.y) || { x: truth.x, y: truth.y };
+  }
+
+  // A fresh fix on the noise. Each one pulls his idea of where you are towards
+  // this one's guess rather than replacing it, so a thief who keeps making noise
+  // is progressively narrowed down and one who goes quiet is not.
+  function takeFix(sim, entity, player, alert) {
+    const a = sim.rules.alertness;
+    const guess = guessAt(sim, entity, player, alert);
+    if (!entity.target || !a) {
+      entity.target = guess;
+    } else {
+      const k = a.narrow * (0.4 + 0.6 * alert);
+      const blended = {
+        x: entity.target.x + (guess.x - entity.target.x) * k,
+        y: entity.target.y + (guess.y - entity.target.y) * k
+      };
+      // Snapped again after blending. Two points he could walk to have a midpoint
+      // he cannot — through a wall, or inside a cupboard — and he would then walk
+      // as close as the building allows and stand there, never arriving.
+      entity.target = nearestStand(entity.nav, blended.x, blended.y) || guess;
+    }
+    entity.heard = sim.noise;
+    return entity.target;
+  }
+
   function updateInvestigation(sim, player) {
     const entity = sim.investigator;
     const rules = sim.investigateRules;
@@ -6165,17 +6321,58 @@ __mod.sim = (function () {
 
     entity.stateFor += STEP_SECONDS;
 
-    // Crossing the line wakes him — and where you were standing when you crossed
-    // it is the only thing he will ever know about you.
-    if (sim.noise > rules.wakeAt && sim.status === 'running'
-        && (entity.state === 'asleep' || entity.state === 'returning' || entity.state === 'settling')) {
-      entity.target = { x: player.x, y: player.y };
+    // How alert he is right now. Everything below reads off this rather than off
+    // a state: how well he places you, how fast he gets up, how fast he walks,
+    // how long he casts about once he arrives.
+    const alert = alertnessOf(sim);
+    const tune = sim.rules.alertness;
+    entity.alert = alert;
+    // How far the meter moved in this one step. An event — something lifted,
+    // knocked into or opened — moves it several points at once; walking across a
+    // room moves it a fiftieth of one. That difference is what separates "he
+    // heard something" from "the room is still a bit noisy".
+    const jump = sim.noise - (entity.lastNoise === undefined ? sim.noise : entity.lastNoise);
+    entity.lastNoise = sim.noise;
+
+    // Crossing the line gets him up, and his idea of where you are is a guess
+    // whose error depends on how loud it was.
+    //
+    // A man on his way back to his desk is a different case from a man asleep at
+    // it. Asleep, the *level* of the noise wakes him. Already up and walking
+    // home, it takes a fresh bang to turn him round — otherwise a meter still
+    // sitting above the line re-fixes him on you the instant he gives up, over
+    // and over, and a thief who has done everything right can never shake him.
+    const turning = entity.state === 'returning' || entity.state === 'settling';
+    const stirred = sim.noise > rules.wakeAt
+      && (!turning || !tune || jump >= tune.refix);
+    if (stirred && sim.status === 'running'
+        && (entity.state === 'asleep' || turning)) {
       if (!entity.nav) entity.nav = navGrid(sim.level, entity.w, entity.h);
       if (!entity.stand) entity.stand = nearestStand(entity.nav, entity.home.x, entity.home.y);
-      // Already on his feet? Then he simply turns round; only a man lying down
+      entity.target = null;
+      takeFix(sim, entity, player, alert);
+      // Already on his feet? Then he simply turns round; only a man sitting down
       // has to get up first.
       setState(sim, entity, entity.state === 'returning' ? 'investigating' : 'rising');
       if (entity.state === 'investigating') routeTo(entity, sim.level, entity.target.x, entity.target.y);
+    }
+
+    // A second bang while he is already up. He works from the newest thing he
+    // heard, and each fix narrows the last one — which is what turns "keep making
+    // noise" into "he is closing in" rather than into a fixed penalty.
+    //
+    // A *bang*, though, not a drift: this triggers on the meter jumping in one
+    // step, the way it does when something is lifted, knocked into or opened, and
+    // not on the slow climb of walking. Comparing against the meter at the last
+    // fix instead meant a player running for their life fed him a fresh fix every
+    // few seconds — the one thing that made escaping impossible.
+    if (tune && sim.status === 'running' && entity.state !== 'asleep'
+        && entity.state !== 'following'
+        && sim.noise >= rules.wakeAt * tune.refixAt
+        && jump >= tune.refix) {
+      takeFix(sim, entity, player, alert);
+      if (entity.state === 'searching') setState(sim, entity, 'investigating');
+      routeTo(entity, sim.level, entity.target.x, entity.target.y);
     }
 
     // --- picking you out, and losing you again ---------------------------------
@@ -6224,9 +6421,14 @@ __mod.sim = (function () {
       }
     }
 
+    // A man half woken by a distant clatter takes his time; one woken by a
+    // bookcase going over is on his feet at once.
+    const risingFor = tune ? mix(tune.riseLow, tune.riseHigh, alert) : rules.rising;
+    const searchFor = tune ? mix(tune.sweepLow, tune.sweepHigh, alert) : rules.searchFor;
+
     switch (entity.state) {
       case 'rising':
-        if (entity.stateFor >= rules.rising) {
+        if (entity.stateFor >= risingFor) {
           entity.x = entity.stand.x;
           entity.y = entity.stand.y;
           setState(sim, entity, 'investigating');
@@ -6239,7 +6441,7 @@ __mod.sim = (function () {
         else if (arrived(entity, rules)) setState(sim, entity, 'searching');
         break;
       case 'searching':
-        if (sim.noise < rules.calmAt || entity.stateFor >= rules.searchFor) {
+        if (sim.noise < rules.calmAt || entity.stateFor >= searchFor) {
           setState(sim, entity, 'returning');
         }
         break;
@@ -6435,7 +6637,7 @@ __mod.sim = (function () {
       y: item.y,
       stage: sleepStage(sim.noise)
     });
-    if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
+    if (endsAtCap(sim)) finish(sim, 'lost', 'awake');
   }
 
   // Which piece of furniture a SEARCH would open: the nearest unsearched one
@@ -6476,7 +6678,7 @@ __mod.sim = (function () {
       type: 'searching', id: stash.id, noise: amount, style: stash.style,
       x: sim.searching.x, y: sim.searching.y
     });
-    if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
+    if (endsAtCap(sim)) finish(sim, 'lost', 'awake');
   }
 
   // ...and finding out. An item lifted out of a cupboard costs exactly what the
@@ -6505,7 +6707,7 @@ __mod.sim = (function () {
       value: paid, noise: Math.round(lifted), rarity: rarityOf(stash.item).name,
       big: isBigScore(stats.value), x, y
     });
-    if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
+    if (endsAtCap(sim)) finish(sim, 'lost', 'awake');
   }
 
   // Exactly one fixed simulation tick.
@@ -6567,7 +6769,7 @@ __mod.sim = (function () {
         if (amount > 0) {
           sim.noise = addNoise(sim.noise, amount);
           sim.events.push({ type: 'creak', x: player.x, y: player.y, noise: amount });
-          if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
+          if (endsAtCap(sim)) finish(sim, 'lost', 'awake');
         }
         zone.cooldown = TUNING.hazards.creakCooldown;
       }
@@ -6586,7 +6788,7 @@ __mod.sim = (function () {
         * sim.mods.hazardNoise * sim.proximity;
       if (amount > 0) {
         sim.noise = addNoise(sim.noise, amount);
-        if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
+        if (endsAtCap(sim)) finish(sim, 'lost', 'awake');
       }
     }
 
@@ -6599,7 +6801,7 @@ __mod.sim = (function () {
       if (rate > 0) {
         sim.seen = Math.min(1, sim.seen + STEP_SECONDS * 3);
         sim.noise = addNoise(sim.noise, rate * STEP_SECONDS);
-        if (isAwake(sim.noise)) finish(sim, 'lost', 'seen');
+        if (endsAtCap(sim)) finish(sim, 'lost', 'seen');
       } else {
         sim.seen = Math.max(0, sim.seen - STEP_SECONDS * 2);
       }
@@ -6649,7 +6851,7 @@ __mod.sim = (function () {
         force,
         what: player.bumped.type
       });
-      if (isAwake(sim.noise)) finish(sim, 'lost', 'awake');
+      if (endsAtCap(sim)) finish(sim, 'lost', 'awake');
       sim.bumpCooldown = TUNING.hazards.bumpCooldown;
     }
 
@@ -6738,7 +6940,10 @@ __mod.sim = (function () {
         player.x - player.w / 2 < exit.x + exit.w &&
         player.y + player.h / 2 > exit.y &&
         player.y - player.h / 2 < exit.y + exit.h;
-      if (atExit && canBank(sim.noise)) {
+      // Getting out counts wherever the meter is, in a building where the meter
+      // is how alert he is rather than whether he is awake. Everywhere else a
+      // full meter still means he is up and the haul is forfeit.
+      if (atExit && (sim.rules.alertness || canBank(sim.noise))) {
         const grade = gradeEscape({
           noise: sim.noise,
           timeLeft: sim.timeLeft,
@@ -6769,7 +6974,7 @@ __mod.sim = (function () {
       y: Math.round(player.y * 100) / 100
     };
   }
-  return { STEP_SECONDS, EMPTY_INPUT, createSim, playerOf, stepSim, snapshot };
+  return { STEP_SECONDS, EMPTY_INPUT, alertnessOf, createSim, playerOf, stepSim, snapshot };
 })();
 __mod.replay = (function () {
   // A run is (level id, seed, input log). Input is quantised before it ever
@@ -8742,6 +8947,13 @@ __mod.art = (function () {
   }
 
   function drawWatcherFurniture(ctx, level, pose) {
+    // A school's caretaker fell asleep at his desk, and the desk is part of the
+    // building: it goes into the room cache so it survives him standing up.
+    if (pose === 'desk' && level.theme === 'school') {
+      drawDeskset(ctx, level, level.watcher.kind);
+      level.deskPainted = true;
+      return;
+    }
     if (pose === 'couch') drawCouchBase(ctx, level);
     else if (pose === 'chair') drawChairBase(ctx, level);
     else if (pose === 'bed') drawBedBase(ctx, level);
@@ -8999,6 +9211,45 @@ __mod.art = (function () {
   // Asleep at a desk: Mr. Halas face down on the quarterly report, Otakar at the
   // hotel's floor desk. Nothing about them is a bed, so this is its own drawing —
   // the desk, the papers, and a man folded over both.
+  // The workstation somebody fell asleep at: the desk, the paperwork, the lamp,
+  // and — for a caretaker who was doing the rota when he nodded off — a monitor
+  // and a mug. Split out from the sleeper so a location can paint it once into
+  // the room and keep it there after he leaves.
+  function drawDeskset(ctx, level, kind = 'worker') {
+    const desk = level.bed;
+    ctx.fillStyle = SHADOW;
+    roundRect(ctx, desk.x + 3, desk.y + 8, desk.w, desk.h, 6);
+    ctx.fill();
+    fillRound(ctx, desk.x, desk.y, desk.w, desk.h, 6, PALETTE.woods[1].dark);
+    fillRound(ctx, desk.x, desk.y, desk.w, desk.h - 7, 6, PALETTE.woods[1].base);
+    fillRound(ctx, desk.x + 4, desk.y + 3, desk.w - 8, desk.h - 15, 4, PALETTE.woods[1].top);
+
+    drawPapers(ctx, desk.x + desk.w - 18, desk.y + desk.h * 0.34);
+    drawLamp(ctx, desk.x + 14, desk.y + desk.h * 0.30);
+
+    if (kind !== 'caretaker' || desk.w < 90) return;
+    // A monitor at the far end, its back to the room, and the mug that went cold
+    // hours ago. Small things, but they are what say "somebody works here" rather
+    // than "a table with a man on it".
+    const mx = desk.x + desk.w * 0.63;
+    const my = desk.y + desk.h * 0.28;
+    fillRound(ctx, mx - 13, my - 9, 26, 15, 2, '#2b3038');
+    fillRound(ctx, mx - 11, my - 7, 22, 11, 1.5, '#3d4654');
+    fillRound(ctx, mx - 11, my - 7, 22, 4, 1.5, '#4d5a6c');
+    fillRound(ctx, mx - 4, my + 6, 8, 3, 1, '#2b3038');
+    // A keyboard, pushed aside to make room for his head.
+    fillRound(ctx, desk.x + desk.w * 0.32, desk.y + desk.h * 0.60, 30, 9, 2, '#cfd4dc');
+    ctx.fillStyle = 'rgba(70,78,90,0.45)';
+    for (let r = 0; r < 2; r++) {
+      for (let c = 0; c < 7; c++) {
+        ctx.fillRect(desk.x + desk.w * 0.32 + 3 + c * 3.6, desk.y + desk.h * 0.60 + 2 + r * 3, 2.4, 2);
+      }
+    }
+    // The mug.
+    fillRound(ctx, desk.x + desk.w - 34, desk.y + desk.h * 0.62, 9, 9, 3, '#d8dde4');
+    fillRound(ctx, desk.x + desk.w - 32, desk.y + desk.h * 0.64, 5, 5, 2, '#6b4a30');
+  }
+
   function drawSlumped(ctx, level, stage, clock, wake = 0, startle = 0, kind = 'worker') {
     const look = sleeperLook(kind);
     const desk = level.bed;
@@ -9017,17 +9268,11 @@ __mod.art = (function () {
     const rise = stage === SLEEP_AWAKE ? Math.min(1, wake / 0.45) : 0;
     const ease = rise * rise * (3 - 2 * rise);
 
-    // The desk.
-    ctx.fillStyle = SHADOW;
-    roundRect(ctx, desk.x + 3, desk.y + 8, desk.w, desk.h, 6);
-    ctx.fill();
-    fillRound(ctx, desk.x, desk.y, desk.w, desk.h, 6, PALETTE.woods[1].dark);
-    fillRound(ctx, desk.x, desk.y, desk.w, desk.h - 7, 6, PALETTE.woods[1].base);
-    fillRound(ctx, desk.x + 4, desk.y + 3, desk.w - 8, desk.h - 15, 4, PALETTE.woods[1].top);
-
-    // The quarterly report, and a lamp at the end of the desk.
-    drawPapers(ctx, desk.x + desk.w - 18, desk.y + desk.h * 0.34);
-    drawLamp(ctx, desk.x + 14, desk.y + desk.h * 0.30);
+    // The desk and everything on it. Painted into the room rather than here in
+    // the schools, so that it is still standing there once he has got up and
+    // walked off — the place he sleeps is a landmark the player navigates by, and
+    // having it wink out of existence the moment he leaves it was daft.
+    if (!level.deskPainted) drawDeskset(ctx, level, kind);
 
     // The chair, behind him.
     fillRound(ctx, cx - 14, cy + desk.h * 0.36, 28, 15, 5, '#3a3f52');
@@ -9644,7 +9889,7 @@ __mod.art = (function () {
     ctx.fillText(art, 0, 8);
     ctx.restore();
   }
-  return { PALETTE, sleeperLook, ITEM_ART, ITEM_NAMES, roundRect, lampPositions, drawFurniture, paintStaticRoom, drawWatcherFurniture, drawSleeper, drawSlumped, drawGuard, drawWalker, drawThief, drawCaretakerWalking, drawGrabbedItem };
+  return { PALETTE, sleeperLook, ITEM_ART, ITEM_NAMES, roundRect, lampPositions, drawFurniture, paintStaticRoom, drawWatcherFurniture, drawSleeper, drawDeskset, drawSlumped, drawGuard, drawWalker, drawThief, drawCaretakerWalking, drawGrabbedItem };
 })();
 __mod.render = (function () {
   // Draws a simulation snapshot. Knows nothing about rules — it reads state and
@@ -10767,7 +11012,19 @@ __mod.main = (function () {
         : sim.proximity >= 2.4 ? '  ‼ LOUD HERE'
           : sim.proximity >= 1.5 ? '  ▲'
             : sim.proximity <= 1.05 ? '  ▼ MUFFLED' : '';
-      setText('noiseText', hudEls.noise, `${meter} ${rounded} / ${TUNING.noise.max}${loudness}`);
+      // In a building where the meter is how alert one man is rather than a fuse,
+      // the number is not a countdown to anything and saying "/ 100" invites the
+      // player to treat it as one. What matters is how sharp he is, so that is
+      // what it says.
+      const hunted = !!sim.rules.alertness;
+      const sharpness = !hunted ? ''
+        : rounded >= 90 ? '  HE HAS YOUR NUMBER'
+          : rounded >= 75 ? '  HE IS CLOSING IN'
+            : rounded >= 62 ? '  HE IS LISTENING'
+              : rounded >= 45 ? '  HE IS STIRRING' : '  ASLEEP';
+      setText('noiseText', hudEls.noise, hunted
+        ? `${meter} ${rounded}${sharpness}${loudness}`
+        : `${meter} ${rounded} / ${TUNING.noise.max}${loudness}`);
       setStyle('barWidth', hudEls.bar, 'width', `${(sim.noise / TUNING.noise.max) * 100}%`);
       setStyle('barColor', hudEls.bar, 'background',
         sim.noise >= TUNING.noise.almostAt ? '#ff4d4d'

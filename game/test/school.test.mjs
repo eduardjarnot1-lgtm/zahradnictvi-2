@@ -16,7 +16,7 @@ import {
 } from '../src/rules.js';
 import { navGrid, flowField, cellOf } from '../src/nav.js';
 import { blocked } from '../src/physics.js';
-import { createRun, tick, walkTo, escape, waitOut, playEfficiently } from './harness.mjs';
+import { createRun, tick, walkTo, escape, waitOut, playEfficiently, slipAway } from './harness.mjs';
 
 const SCHOOL = LEVELS.filter((l) => l.location === 'School');
 const ELSEWHERE = LEVELS.filter((l) => l.location !== 'School');
@@ -39,6 +39,22 @@ function untilWalking(run, hold = 85, limit = 60 * 10) {
     tick(run);
   }
   return false;
+}
+
+const ALERT = TUNING.locations.School.alertness;
+
+// How far out his guess at a noise is allowed to be, at a given meter reading.
+// He does not know where you are — he knows roughly where the sound came from,
+// and "roughly" is a number that shrinks as the meter rises.
+function guessError(noise) {
+  const t = Math.max(0, Math.min(1, (noise - ALERT.from) / (ALERT.to - ALERT.from)));
+  const alert = t * t * (3 - 2 * t);
+  return ALERT.blur + (ALERT.sharp - ALERT.blur) * alert;
+}
+
+// The fastest he is allowed to move, which now depends on how alert he is.
+function topSpeed() {
+  return RULES.investigate.speed * ALERT.speedHigh;
 }
 
 // Put the player somewhere, without walking there — and somewhere he could
@@ -357,13 +373,17 @@ test('the school settles faster than the rest of the game, but not instantly', (
   assert.ok(RULES.recovery.rate > TUNING.recovery.rate, 'the school should come down faster');
   assert.ok(RULES.recovery.delay > TUNING.recovery.delay, '...and make you wait longer to start');
   const run = openSchool();
-  run.sim.noise = 90;
-  const before = run.sim.noise;
+  // Below the line he gets up at, so this measures the meter and nothing else.
+  // Start it above and he is on his feet and walking at a player who is holding
+  // perfectly still, which tests something quite different and rather final.
+  const before = RULES.investigate.wakeAt - 4;
+  run.sim.noise = before;
   for (let i = 0; i < Math.floor(RULES.recovery.delay * 60) - 2; i++) tick(run);
   assert.equal(run.sim.noise, before, 'nothing should happen during the delay');
   for (let i = 0; i < 60 * 3; i++) tick(run);
-  assert.ok(run.sim.noise < 90 - 3 * RULES.recovery.rate + 2, 'it should be coming down by now');
-  assert.ok(run.sim.noise > 40, 'but nowhere near a reset');
+  assert.ok(run.sim.noise < before - 3 * RULES.recovery.rate + 2,
+    'it should be coming down by now');
+  assert.ok(run.sim.noise > 12, 'but nowhere near a reset');
 });
 
 test('moving stops it settling', () => {
@@ -395,14 +415,21 @@ test('crossing 80 wakes him and stores where you were, not where you go', () => 
   sim.noise = RULES.investigate.wakeAt + 1;
   tick(run);
   assert.equal(w.state, 'rising');
-  assert.ok(Math.hypot(w.target.x - at.x, w.target.y - at.y) < 3,
-    'the stored spot must be where the meter was crossed');
+  // Not the exact spot any more — he heard something through a wall, and his
+  // guess is off by an amount that shrinks as the meter rises. What must hold
+  // is that it is a guess at where the noise *was*, and that it is inside the
+  // error the tuning says he is capable of.
+  assert.ok(Math.hypot(w.target.x - at.x, w.target.y - at.y) <= ALERT.blur + 30,
+    'his guess should at least be in the right part of the building');
 
   // Now leave, along the lane we were put on. The target must not follow.
+  // The meter is *pinned* rather than floored: a rising meter is a fresh noise,
+  // and a fresh noise is allowed to narrow his guess. What must never happen is
+  // his guess tracking a player who is not making any.
   const stored = { ...w.target };
   const away = lane.x > sim.level.width / 2 ? -1 : 1;
   for (let i = 0; i < 60 * 3; i++) {
-    sim.noise = Math.max(sim.noise, 85);
+    sim.noise = RULES.investigate.wakeAt + 1;
     tick(run, { x: away, y: 0, take: false });
   }
   assert.deepEqual(w.target, stored, 'he must investigate the place, not track the person');
@@ -411,38 +438,51 @@ test('crossing 80 wakes him and stores where you were, not where you go', () => 
 });
 
 test('getting up takes long enough to be a warning rather than a cut', () => {
-  // Four beats — stirs, sits up, stands, looks round — need room to read. If
-  // this ever drops back to a fraction of a second the animation is still
-  // "correct" and the moment is gone, so the duration is asserted rather than
-  // left to whoever last touched the tuning.
-  assert.ok(RULES.investigate.rising >= 1.2,
-    `${RULES.investigate.rising}s is too quick to read as waking up`);
-  const run = openSchool();
-  const { sim } = run;
-  const w = sim.investigator;
-  place(sim, sim.level.spawn.x, sim.level.spawn.y);
-  sim.noise = 81;
-  tick(run);
-  // He must not move an inch until he is on his feet: a man still on the couch
-  // sliding towards you is the exact bug this sequence exists to prevent.
-  const from = { x: w.x, y: w.y };
-  let frames = 0;
-  while (w.state === 'rising' && frames < 60 * 5) {
-    place(sim, 5000, 5000);
-    sim.noise = Math.max(sim.noise, 85);
+  // Four beats — stirs, lifts his head, stands, looks round — need room to
+  // read. How much room now depends on what woke him: a distant clatter gets a
+  // slow, confused start, a bookcase going over gets him up sharply. Both ends
+  // are asserted, because the slow end is the warning and the quick end is the
+  // thing that makes a loud mistake feel loud.
+  assert.ok(ALERT.riseLow >= 1.6, `${ALERT.riseLow}s is not a confused start`);
+  assert.ok(ALERT.riseHigh >= 0.6, `${ALERT.riseHigh}s is a cut, not a wake-up`);
+  assert.ok(ALERT.riseHigh < ALERT.riseLow, 'a louder noise should get him up quicker');
+
+  const upIn = (noise) => {
+    const run = openSchool();
+    const { sim } = run;
+    const w = sim.investigator;
+    place(sim, sim.level.spawn.x, sim.level.spawn.y);
+    sim.noise = noise;
     tick(run);
-    frames++;
-    assert.ok(Math.hypot(w.x - from.x, w.y - from.y) < 40,
-      'he should get off the couch, not set off from it');
-  }
-  assert.ok(frames >= 60 * 1.2, `he was up after ${(frames / 60).toFixed(2)}s`);
-  assert.equal(w.state, 'investigating');
+    // He must not move an inch until he is on his feet: a man still in the
+    // chair sliding towards you is the exact bug this sequence prevents.
+    const from = { x: w.x, y: w.y };
+    let frames = 0;
+    while (w.state === 'rising' && frames < 60 * 6) {
+      place(sim, 5000, 5000);
+      sim.noise = noise;
+      tick(run);
+      frames++;
+      assert.ok(Math.hypot(w.x - from.x, w.y - from.y) < 40,
+        'he should get out of the chair, not set off from it');
+    }
+    assert.equal(w.state, 'investigating');
+    return frames / 60;
+  };
+
+  const quiet = upIn(RULES.investigate.wakeAt + 1);
+  const loud = upIn(99);
+  assert.ok(quiet >= 1.6, `barely disturbed, he was up after ${quiet.toFixed(2)}s`);
+  assert.ok(loud >= 0.6, `even at full alert, ${loud.toFixed(2)}s is a cut`);
+  assert.ok(loud < quiet - 0.4,
+    `${loud.toFixed(2)}s against ${quiet.toFixed(2)}s is not a reaction to how loud it was`);
 });
 
 test('he walks there — through the doorways, never through the walls', () => {
   const run = openSchool();
   const { sim } = run;
   const w = sim.investigator;
+  let arrivedAt = null;
   place(sim, sim.level.spawn.x, sim.level.spawn.y);
   sim.noise = 81;
   tick(run);
@@ -461,12 +501,14 @@ test('he walks there — through the doorways, never through the walls', () => {
       assert.ok(!blocked(w.x, w.y, w.w, w.h, sim.level.colliders),
         `he is inside geometry at ${w.x.toFixed(0)},${w.y.toFixed(0)} (${w.state})`);
     }
-    if (w.state === 'searching') break;
+    if (w.state === 'searching') { arrivedAt = Math.hypot(w.x - w.target.x, w.y - w.target.y); break; }
   }
   assert.equal(w.state, 'searching', 'he should have arrived');
-  assert.ok(Math.hypot(w.x - w.target.x, w.y - w.target.y) <= RULES.investigate.arriveAt + 4,
-    'and arrived at the spot, not near it');
-  assert.ok(peak > 0 && peak <= RULES.investigate.speed + 1, `he moved at ${peak.toFixed(0)}, a walk`);
+  // Measured the instant he arrives, not afterwards: a fresh noise while he is
+  // standing there moves his target, which is the refix doing its job.
+  assert.ok(arrivedAt !== null && arrivedAt <= RULES.investigate.arriveAt + 4,
+    `he stopped ${arrivedAt === null ? '?' : arrivedAt.toFixed(0)} from the spot he was heading for`);
+  assert.ok(peak > 0 && peak <= topSpeed() + 1, `he moved at ${peak.toFixed(0)}, a walk`);
 });
 
 test('he accelerates and decelerates rather than snapping to speed', () => {
@@ -488,7 +530,7 @@ test('he accelerates and decelerates rather than snapping to speed', () => {
   const top = Math.max(...speeds);
   assert.ok(top > RULES.investigate.speed * 0.9, 'he does get up to speed');
   // No teleporting: no single frame moves him further than his top speed allows.
-  for (const s of speeds) assert.ok(s <= RULES.investigate.speed + 1, `${s} is faster than he can walk`);
+  for (const s of speeds) assert.ok(s <= topSpeed() + 1, `${s} is faster than he can walk`);
 });
 
 // --- and he gives up ---------------------------------------------------------
@@ -553,8 +595,15 @@ test('noise going back over 80 sends him out again, to the new spot', () => {
   const elsewhere = place(sim, sim.level.width - 60, 60);
   sim.noise = 90;
   tick(run);
-  assert.ok(Math.hypot(w.target.x - elsewhere.x, w.target.y - elsewhere.y) < 3,
-    'the new noise should replace the old one');
+  // Within the error he is capable of at this reading, not on the nose: he
+  // heard it, he did not see it. What matters is that the *new* noise is what
+  // he is working from now.
+  // He works from the new noise now, but his estimate is blended from the old
+  // one rather than replacing it — so what must be true is that it *moved
+  // towards* the new spot, not that it landed on it.
+  const off = Math.hypot(w.target.x - elsewhere.x, w.target.y - elsewhere.y);
+  const was = Math.hypot(first.x - elsewhere.x, first.y - elsewhere.y);
+  assert.ok(off < was, `the new noise should pull him towards it: ${was.toFixed(0)} -> ${off.toFixed(0)}`);
   assert.notDeepEqual(w.target, first);
   assert.ok(w.state === 'investigating' || w.state === 'rising',
     `a second noise must put him back to work, not leave him ${w.state}`);
@@ -631,16 +680,22 @@ test('every school level supports the full loop, from anywhere on the map', () =
       // right beside the man walking towards him.
       let away = null;
       let far = -1;
+      const door = { x: level.exit.x + level.exit.w / 2, y: level.exit.y + level.exit.h / 2 };
       for (let i = 0; i < reachable.length; i += 7) {
         if (reachable[i] < 0) continue;
         const cx = i % grid.cols;
         const px = cx * grid.cell + grid.cell / 2;
         const py = ((i - cx) / grid.cols) * grid.cell + grid.cell / 2;
+        // Not the way out. On an L-shaped floor the point furthest from him is
+        // very often the exit, and parking the thief on it wins the level
+        // instantly — which proves nothing about whether he can walk a route.
+        if (Math.hypot(px - door.x, py - door.y) < 110) continue;
         const d = Math.hypot(px - w.target.x, py - w.target.y);
         if (d > far) { far = d; away = { x: px, y: py }; }
       }
+      assert.ok(away, `L${level.id}: nowhere to park the thief`);
       let arrived = false;
-      for (let i = 0; i < 60 * 90; i++) {
+      for (let i = 0; i < 60 * 140; i++) {
         place(sim, away.x, away.y);
         if (!arrived) sim.noise = Math.max(sim.noise, 85);
         stepSim(sim);
@@ -917,8 +972,9 @@ test('a search that crosses 80 wakes him through the ordinary door', () => {
     `opening it only reached ${sim.noise.toFixed(0)}`);
   assert.notEqual(w.state, 'asleep', 'he should be getting up');
   assert.ok(w.target, 'and he should have somewhere to go');
-  assert.ok(Math.hypot(w.target.x - p.x, w.target.y - p.y) < 40,
-    'which is where the cupboard was opened');
+  const off = Math.hypot(w.target.x - p.x, w.target.y - p.y);
+  assert.ok(off <= guessError(sim.noise) + 40,
+    `he should be heading for roughly the cupboard, not ${off.toFixed(0)} away`);
 });
 
 test('the dearest cupboard on the map is worth it, and survivable', () => {
@@ -938,10 +994,11 @@ test('the dearest cupboard on the map is worth it, and survivable', () => {
   assert.equal(sim.status, 'running', 'taking it must not simply lose the level');
   assert.equal(sim.money, itemStats(stash.item).value);
 
-  // Whether or not that woke him, the loop has to close: get off the spot,
-  // go quiet, walk out.
-  walkTo(run, sim.level.spawn, 60 * 15);
-  assert.ok(waitOut(run, 60 * 30), 'standing still should settle it');
+  // Whether or not that woke him, the loop has to close — but in that order.
+  // Get off the spot he has a fix on, go quiet, let him lose it, *then* leave.
+  // Marching across the building to the far side while he is up and hunting is
+  // how you get walked into, and it is supposed to be.
+  assert.ok(slipAway(run, 60 * 10), 'getting off the spot and going quiet should settle it');
   const result = escape(run);
   assert.equal(result.status, 'won', `could not get out: ${result.reason}`);
   assert.ok(result.money >= itemStats(stash.item).value);
@@ -1196,7 +1253,7 @@ test('following never walks him through the building', () => {
         assert.ok(!blocked(w.x, w.y, w.w, w.h, sim.level.colliders),
           `he is inside the building at ${w.x.toFixed(0)},${w.y.toFixed(0)} (${w.state})`);
       }
-      assert.ok(w.speed <= RULES.investigate.speed + 1,
+      assert.ok(w.speed <= topSpeed() + 1,
         `he moved at ${w.speed.toFixed(0)} — that is not a walk`);
       if (sim.status !== 'running') break;
     }
