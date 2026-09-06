@@ -148,6 +148,21 @@ export function tileLevel(spec) {
     }
   }
 
+  // --- room dressing --------------------------------------------------------
+  // Blackboards, notice boards, signs, floor treatments. None of it collides
+  // and none of it is in the grid — the grid is the building, and every
+  // character in it is something you can walk into. This is what the building
+  // has on its walls, and only the map knows a room is a classroom rather than
+  // a store cupboard, so only the map can say a blackboard belongs there.
+  const decor = (spec.decor || []).map((d) => ({
+    kind: d.kind,
+    tag: d.tag || null,
+    x: d.x * TILE,
+    y: d.y * TILE,
+    w: (d.w || 1) * TILE,
+    h: (d.h || 1) * TILE
+  }));
+
   // --- floor markings -------------------------------------------------------
   const rugs = mergeRects(grid, rows, cols, ',');
   const creaks = mergeRects(grid, rows, cols, '~')
@@ -219,6 +234,7 @@ export function tileLevel(spec) {
     clock: spec.clock || 0,
     doors,
     stashes,
+    decor,
     windows,
     creaks,
     rugs,

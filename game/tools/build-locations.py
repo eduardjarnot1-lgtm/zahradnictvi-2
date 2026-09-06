@@ -121,11 +121,16 @@ def promote_prize(g, tier):
         g.g[best[1]][best[0]] = TIER_PRIZE[tier]
 
 
-def scatter(g, tier, spots):
-    """Drop loot at roughly these tiles, snapping each onto real floor."""
+def scatter(g, tier, spots, box=False):
+    """Drop loot at roughly these tiles, snapping each onto real floor.
+
+    `box` asks for floor the player can actually stand on rather than merely a
+    free tile. It matters wherever furniture is packed tightly enough to leave
+    one-tile gaps: a gap that narrow looks like floor and is not, and a coin
+    dropped into one is a level that cannot be finished."""
     loot = Loot(tier)
     for (x, y) in spots:
-        g.drop(x, y, loot.next())
+        g.drop(x, y, loot.next(), box=box)
 
 
 # --------------------------------------------------------------- room grammars
@@ -134,7 +139,8 @@ def scatter(g, tier, spots):
 # the same things behind: an outer wall, interior walls with doorways, one
 # watcher, one spawn, one way out.
 
-def corridor_plan(g, tier, top, bottom, furnish, corridor_rows=6, exit_side='left'):
+def corridor_plan(g, tier, top, bottom, furnish, corridor_rows=6, exit_side='left',
+                  door_at=None):
     """A spine with rooms hanging off both sides. Hotels, schools, wards,
     offices — anywhere the building is organised around a route rather than a
     room."""
@@ -160,11 +166,16 @@ def corridor_plan(g, tier, top, bottom, furnish, corridor_rows=6, exit_side='lef
 
     tops = split(1, y1 - 1, top)
     bots = split(y2 + 1, rows - y2 - 2, bottom)
-    # One doorway per room, centred, three tiles wide.
+    # One doorway per room, three tiles wide. Centred unless the caller says
+    # otherwise: a door in the middle of a wall cuts the room into two slivers
+    # either side of the lane it needs, which is fine in a hotel room and ruins
+    # a classroom. Every location that does not ask keeps the centred door it
+    # has always had.
+    place = door_at or (lambda x, w, top_side: x + w // 2 - 1)
     for (x, w) in tops:
-        g.fill(x + w // 2 - 1, y1, 3, 1, 'D')
+        g.fill(place(x, w, True), y1, 3, 1, 'D')
     for (x, w) in bots:
-        g.fill(x + w // 2 - 1, y2, 3, 1, 'D')
+        g.fill(place(x, w, False), y2, 3, 1, 'D')
 
     furnish(tops, 1, y1 - 1, bots, y2 + 1, rows - y2 - 2, y1 + 1, corridor_rows)
 
@@ -334,8 +345,12 @@ ITEM_NOISE = {'c': 3, 'w': 6, 'p': 8, 'k': 11, 'r': 13, 'm': 14, 't': 15,
 
 # The most one cupboard may cost. The meter holds 100, you arrive with some of it
 # already spent, and you still have to walk away afterwards — so a single search
-# that can run to eighty is not a risk, it is a trap. Sixty leaves somewhere to go.
-COST_CEILING = 60
+# that can run to eighty is not a risk, it is a trap. Sixty was the figure until
+# the school got properly furnished and put a shelf within four tiles of the
+# couch: at that range sixty is survivable on paper and not in play, and the
+# test that opens the dearest cupboard on level five and then tries to leave is
+# what caught it.
+COST_CEILING = 52
 
 
 # What the school multiplies noise by at this range. Same curve as rules.js.
@@ -469,8 +484,35 @@ def make_searchable(g, tier):
         ys = [c[1] for c in cells]
         return len(cells) == (max(xs) - min(xs) + 1) * (max(ys) - min(ys) + 1)
 
+    # ...and only pieces you can actually get to. A cupboard walled in behind
+    # other furniture is a cupboard the player can see, walk around, and never
+    # open, which reads as a bug rather than as a locked door. On a sparse map
+    # this never came up; on a properly furnished one it comes up immediately.
+    TILE = 20
+    REACH = 34          # TUNING.locations.School.search.reach
+    # Reachable from the spawn, at the resolution the game moves at — not
+    # merely "there is floor beside it". A pocket of floor walled in behind
+    # other furniture passes the second test and fails the first, and a
+    # cupboard you can see but never open reads as a bug, not as a locked door.
+    reached = [(gx * 4 + 2, gy * 4 + 2) for (gx, gy) in g._reached()]
+
+    def openable(blob):
+        cs = blob[1]
+        x0 = min(c[0] for c in cs) * TILE
+        y0 = min(c[1] for c in cs) * TILE
+        x1 = (max(c[0] for c in cs) + 1) * TILE
+        y1 = (max(c[1] for c in cs) + 1) * TILE
+        for (px, py) in reached:
+            if px < x0 - REACH or px > x1 + REACH: continue
+            if py < y0 - REACH or py > y1 + REACH: continue
+            dx = max(x0 - px, 0, px - x1)
+            dy = max(y0 - py, 0, py - y1)
+            if dx * dx + dy * dy <= REACH * REACH:
+                return True
+        return False
+
     blobs = [b for b in _blobs(g, SEARCHABLE_STYLES)
-             if 2 <= len(b[1]) <= 24 and rectangular(b)]
+             if 2 <= len(b[1]) <= 24 and rectangular(b) and openable(b)]
     if not blobs:
         return {}
 
@@ -645,36 +687,191 @@ def hotel(g, tier):
 
 
 def school(g, tier):
-    top = [2, 2, 3, 3, 3][tier]
-    bottom = [1, 2, 2, 2, 3][tier]
+    """Classrooms and a library off the top of a corridor, the hall and the
+    staff end off the bottom — the same building as the hand-drawn fifth level,
+    at whatever size the tier can carry.
+
+    Every room is furnished from what it is *for*, and every piece is laid into
+    the runs of floor left over once the doorway has been given a lane. Placing
+    furniture first and carving the lane back out afterwards is what the earlier
+    version did, and it is why whole rooms came back empty: the connectivity
+    pass could only restore the route by deleting everything in it."""
+    # Fewer, larger rooms than the other corridor buildings get. A classroom
+    # has to hold rows of desks with aisles between them and still leave a lane
+    # from the door; split the same width into four and every room becomes a
+    # cupboard with a desk in it. The references are the same shape — a school
+    # is a handful of big rooms, not a hotel's worth of small ones.
+    top = [2, 2, 2, 3, 3][tier]
+    bottom = [2, 2, 3, 3, 3][tier]
+
+    def door_x(x, w, top_side):
+        """Two tiles in from the room's near corner, alternating sides so the
+        building does not read as a row of identical boxes. A door in a corner
+        leaves the rest of the room as one block to furnish instead of two
+        slivers either side of the lane."""
+        return x + 2 if (x // 7) % 2 == 0 else x + w - 5
+
+    def lane(x, w, top_side=True):
+        """The columns kept clear for the room's doorway."""
+        d = door_x(x, w, top_side)
+        return (d - 1, d + 3)
+
+    def pack(a, b, wide, gap=1):
+        """Fill the run of columns a..b with pieces `wide` across, one clear
+        tile between them, centred. Packing a block rather than stepping a
+        uniform pitch across the whole room is the difference between four desks
+        in a row and one: a pitch that has to clear the doorway loses every slot
+        that straddles it, and in a room this size that is most of them."""
+        span = b - a + 1
+        n = (span + gap) // (wide + gap)
+        if n <= 0:
+            return []
+        used = n * wide + (n - 1) * gap
+        start = a + (span - used) // 2
+        return [start + i * (wide + gap) for i in range(n)]
+
+    def bands(x, w, keep, wide=2, gap=1):
+        """Both runs of floor either side of the doorway's lane, each packed
+        with pieces of its own."""
+        # x + w - 2, not x + w - 1: the last column of a room is the partition
+        # its neighbour is walled off by, and a cupboard written over it makes
+        # the two rooms one.
+        return (pack(x + 1, keep[0] - 1, wide, gap)
+                + pack(keep[1] + 1, x + w - 2, wide, gap))
+
+    def drop_spot(x, w, y, h):
+        """Somewhere in this room to leave a coin. The doorway's lane, a few
+        tiles in — the one strip of every room that is guaranteed clear, now
+        that the rooms are furnished densely enough that the middle of one is
+        usually a cupboard."""
+        return (door_x(x, w, True) + 1, y + h // 2)
+
+    def classroom(x, w, y, h, name, door_below):
+        """Paired desks either side of a centre aisle, the teacher's desk at
+        the front, cupboards along the back wall, a board on the front one."""
+        keep = lane(x, w)
+        # Leave the two rows nearest the corridor clear, so the aisle from the
+        # door reaches the room rather than the back of a desk.
+        rows = [r for r in range(y + 4, y + h, 4) if r + 1 <= y + h - 1]
+        for r in rows:
+            for xx in bands(x, w, keep):
+                g.fill(xx, r, 2, 2, 'T')
+        front = y + 1 if door_below else y + h - 2
+        for i, xx in enumerate(bands(x, w, keep, wide=4)):
+            g.fill(xx, front, 4, min(2, h - 2), 'T' if i == 0 else 'C')
+        g.deco('board', x + 1, (y - 1) if door_below else (y + h), w - 2, 1)
+        g.deco('bin', x + w - 2, front)
+        g.deco('desklamp', x + 2, front + 1)
+        g.deco('floor', x, y, w, h, 'boards')
+        g.deco('sign', x + w // 2 - 1, y + h if door_below else y - 1, 3, 1, name)
+        return drop_spot(x, w, y, h)
+
+    def library(x, w, y, h, door_below):
+        """Stacks with aisles you can walk down and a table to read at."""
+        keep = lane(x, w)
+        tall = max(2, min(h - 6, h // 2))
+        for xx in bands(x, w, keep, wide=2, gap=2):
+            g.fill(xx, y + 1, 2, tall, 'B')
+        # A table to read at, and a counter by the door. Stacks alone leave a
+        # library reading as a warehouse.
+        for xx in bands(x, w, keep, wide=5)[:1]:
+            g.fill(xx, y + tall + 3, 5, 2, 'T')
+        for xx in bands(x, w, keep, wide=3)[-1:]:
+            if h > 9:
+                g.fill(xx, y + h - 3, 3, 2, 'C')
+        g.deco('floor', x, y, w, h, 'carpet')
+        g.deco('lamp', x + w // 2, y + h // 2)
+        g.deco('plant', x + w - 2, y + h - 2)
+        g.deco('sign', x + w // 2 - 1, y + h if door_below else y - 1, 3, 1, 'Library')
+        return drop_spot(x, w, y, h)
+
+    def gym(x, w, y, h, door_above):
+        """Benching round the edges and a floor left clear in the middle. A
+        hall is mostly nothing, and filling it would make it a store room."""
+        g.fill(x + 1, y + 2, 2, max(2, h - 4), 'S')
+        g.fill(x + w - 3, y + 2, 2, max(2, h - 4), 'S')
+        keep = lane(x, w)
+        for xx in bands(x, w, keep, wide=4):
+            if xx > x + 2 and xx + 4 < x + w - 2:
+                g.fill(xx, y + h - 3, 4, 2, 'S')
+        # Floor before court: the list is painted in order, and a floor laid
+        # after its markings covers them up.
+        g.deco('floor', x, y, w, h, 'parquet')
+        g.deco('court', x + 3, y + 1, max(3, w - 6), max(3, h - 3))
+        g.deco('sign', x + w // 2 - 1, y - 1 if door_above else y + h, 3, 1, 'Gymnasium')
+        return drop_spot(x, w, y, h)
+
+    def store(x, w, y, h):
+        """The densest room on the map, because a caretaker's store is:
+        shelving, cupboards under it, and boxes wherever they will go."""
+        keep = lane(x, w)
+        for i, xx in enumerate(bands(x, w, keep, wide=3)):
+            g.fill(xx, y + 1, 3, min(3, h - 4), 'B' if i % 2 == 0 else 'C')
+        if h > 9:
+            for i, xx in enumerate(bands(x, w, keep, wide=3)):
+                g.fill(xx, y + 5, 3, 2, 'C' if i % 2 else 'B')
+        for i, xx in enumerate(bands(x, w, keep, wide=3)):
+            if y + h - 3 > y + 7:
+                g.fill(xx, y + h - 3, 3, 2, 'C' if i % 2 == 0 else 'W')
+        g.deco('floor', x, y, w, h, 'concrete')
+        g.deco('tools', x + 1, y + h // 2, 2, 1)
+        g.deco('sign', x + w // 2 - 1, y - 1, 3, 1, 'Store')
+        return drop_spot(x, w, y, h)
+
+    def staff(x, w, y, h):
+        """Mr. Vrána's couch, a table people sit at, a fridge, pigeonholes."""
+        place_watcher(g, x, y, w, h, 7, 3)
+        keep = lane(x, w)
+        spots = bands(x, w, keep, wide=3)
+        for i, xx in enumerate(spots):
+            g.fill(xx, y + 1, 3, 2, 'T' if i == 0 else 'C')
+        if h > 8 and spots:
+            g.fill(spots[0], y + h - 3, 2, 2, 'W')          # the fridge
+            for xx in spots[1:]:
+                g.fill(xx, y + h - 3, 3, 2, 'C')            # pigeonholes
+        if h > 11:
+            for xx in bands(x, w, keep, wide=4)[:1]:
+                g.fill(xx, y + 5, 4, 2, 'T')                # the table they sit at
+        g.deco('floor', x, y, w, h, 'carpet')
+        g.deco('kettle', x + w - 3, y + 3)
+        g.deco('lamp', x + w // 2, y + h - 4)
+        g.deco('sign', x + w // 2 - 1, y - 1, 3, 1, 'Staff Room')
+        return drop_spot(x, w, y, h)
 
     def furnish(tops, ty, th, bots, by, bh, cy, ch):
         placed = []
-        for i, (x, w) in enumerate(tops):     # classrooms: rows of desks
-            for r in range(max(2, th // 5)):
-                yy = ty + 2 + r * 4
-                if yy + 2 >= ty + th:
-                    break
-                g.fill(x + 1, yy, max(3, w // 3), 2, 'T')
-                if w > 11:
-                    g.fill(x + w - max(3, w // 3) - 1, yy, max(3, w // 3), 2, 'T')
-            placed.append((x + w // 2, ty + th - 2))
-        for i, (x, w) in enumerate(bots):     # gym, staff room, stores
+        for i, (x, w) in enumerate(tops):
+            if i == len(tops) - 1 and w >= 10 and th >= 7:
+                placed.append(library(x, w, ty, th, True))
+            else:
+                placed.append(classroom(x, w, ty, th, chr(ord('A') + i), True))
+        for i, (x, w) in enumerate(bots):
             if i == len(bots) - 1:
-                # The staff room: Mr. Vrána's couch and nothing else in the way.
-                place_watcher(g, x, by, w, bh, 7, 3)
-                placed.append((x + 2, by + bh - 3))
-                continue
-            g.fill(x + 1, by + 1, max(4, w - 4), 2, 'S')
-            if bh > 7:
-                g.fill(x + 1, by + bh - 4, max(4, w - 6), 2, 'B')
-            placed.append((x + w // 2, by + bh // 2))
-        # Lockers along the corridor, away from the doorways.
-        for (x, w) in tops[:-1]:
-            g.fill(x + w - 3, cy + 2, 3, max(1, ch - 4), 'C')
-        scatter(g, tier, placed)
+                placed.append(staff(x, w, by, bh))
+            elif i == 0 and w >= 10:
+                placed.append(gym(x, w, by, bh, True))
+            else:
+                placed.append(store(x, w, by, bh))
+        # Lockers down both corridor walls, into the runs between the doorways.
+        for (x, w) in tops:
+            keep = lane(x, w)
+            for xx in bands(x, w, keep, wide=4):
+                g.fill(xx, cy, 4, 2, 'C')
+        # Along the lower wall, one bank deep and hard against it. Anything
+        # further out leaves a single tile between the lockers and the wall,
+        # and a single tile is not a gap — the player is taller than one — so
+        # the whole bottom half of the building stops being reachable.
+        for (x, w) in bots:
+            if ch >= 5:
+                keep = lane(x, w)
+                for xx in bands(x, w, keep, wide=4):
+                    g.fill(xx, cy + ch - 1, 4, 1, 'C')
+        g.deco('floor', 1, cy, g.cols - 2, ch, 'tiles')
+        g.deco('notice', g.cols // 2 - 2, cy, 4, 1)
+        g.deco('clock', g.cols - 7, cy)
+        scatter(g, tier, placed, box=True)
 
-    corridor_plan(g, tier, top, bottom, furnish)
+    corridor_plan(g, tier, top, bottom, furnish, door_at=door_x)
 
 
 def hospital(g, tier):
@@ -933,6 +1130,7 @@ def build():
                             seated=seated, tier=tier + 1, location=name,
                             sight=round(base * TIER_SIGHT[tier]) if base else 0,
                             stashes=stashes,
+                            decor=list(getattr(g, 'decor', [])),
                             rows=[''.join(r) for r in g.g]))
             lid += 1
     for p in problems:
@@ -984,6 +1182,25 @@ def stash_legend(stashes):
     return '    search: {\n' + '\n'.join(lines) + '\n    },\n'
 
 
+def decor_block(decor):
+    """The room dressing: blackboards, notice boards, floor treatments, signs.
+    None of it is collidable and none of it is in the grid, because the grid is
+    the building and everything in it is something you can walk into."""
+    if not decor:
+        return ''
+    lines = []
+    for (kind, x, y, w, h, tag) in decor:
+        parts = ["kind: '%s'" % kind, 'x: %d' % x, 'y: %d' % y]
+        if w != 1:
+            parts.append('w: %d' % w)
+        if h != 1:
+            parts.append('h: %d' % h)
+        if tag:
+            parts.append("tag: '%s'" % tag)
+        lines.append('      { %s },' % ', '.join(parts))
+    return '    decor: [\n' + '\n'.join(lines) + '\n    ],\n'
+
+
 def emit(levels, clocks=None):
     parts = []
     for lv in levels:
@@ -1004,6 +1221,7 @@ def emit(levels, clocks=None):
             "%s"
             "%s"
             "%s"
+            "%s"
             "    legend: LOOT,\n"
             "    tiles: [\n%s\n    ]\n"
             "  }),"
@@ -1011,7 +1229,8 @@ def emit(levels, clocks=None):
                lv['tier'], lv['theme'], lv['watcher'], str(lv['seated']).lower(),
                ('    sight: %d,\n' % lv['sight']) if lv['sight'] else '',
                ('    clock: %d,\n' % clock) if clock else '',
-               stash_legend(lv.get('stashes')), rows))
+               stash_legend(lv.get('stashes')),
+               decor_block(lv.get('decor')), rows))
     return HEADER + LOOT_LEGEND + '\n\nexport const FLOORPLANS = [\n' + '\n'.join(parts).rstrip(',') + '\n];\n'
 
 

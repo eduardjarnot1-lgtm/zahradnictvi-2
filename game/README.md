@@ -506,6 +506,72 @@ Arms oppose legs — left arm forward with the right leg. That is one sign in th
 source and it is the whole difference between a person walking and a toy
 marching; it was the wrong way round until it was drawn out large enough to see.
 
+### The school is a building, not a floorplan
+
+The school's five levels are furnished from what each room is *for*. A classroom
+is rows of paired desks either side of a centre aisle, with the teacher's desk at
+the front, cupboards along the back and a board on the wall; a corridor is
+lockers down both sides with benches between them; a store is shelving with
+cupboards under it. That is what makes the map readable — you know which room you
+are in from the furniture, before you read the sign over the door.
+
+| | pieces of furniture | kinds | searchable | room dressing |
+|---|---|---|---|---|
+| level 1 | 5 → **17** | 2 → **4** | 6 | 0 → **19** |
+| level 2 | 10 → **22** | 3 → **5** | 8 | 0 → **19** |
+| level 3 | 9 → **28** | 3 → **5** | 10 | 0 → **22** |
+| level 4 | 14 → **33** | 3 → **5** | 12 | 0 → **27** |
+| level 5 | 33 → **69** | 4 → **5** | 14 | 0 → **35** |
+
+**Room dressing is a separate channel.** Blackboards, notice boards, posters,
+signs, floor treatments, bins, plants, the gym's court markings — none of it is
+in the tile grid, because every character in that grid is something you can walk
+into and a poster is not. The generator emits a `decor` list beside the grid,
+because only the generator knows a room is a classroom rather than a store
+cupboard; the renderer just draws what it is told. All of it is painted into the
+room cache, which is built once per level and blitted a slice at a time, so the
+entire dressing costs **nothing per frame** however dense it gets. That is the
+whole reason it can be this dense on a phone.
+
+**Five floor surfaces**, one per kind of room: boards in the classrooms, carpet
+in the library and staff room, tile in the corridors and changing room, sprung
+parquet in the hall, bare concrete in the caretaker's store. A school is not one
+surface, and telling the rooms apart underfoot is most of what makes a floorplan
+scan at a glance.
+
+**The school gets its own furniture painters** for the two pieces the shared ones
+get wrong: `sofa` becomes a bench and `chest` becomes a bank of lockers with
+doors, vents and handles. A sports hall does not contain three-cushion settees,
+and drawing its benching as one was the single thing most stopping the building
+from reading as a school. Desks get their own painter too — the shared table
+scatters whatever a table in a house might have on it, and a classroom full of
+pot plants growing out of the desks is the sort of thing you only see once you
+look at the whole map at once. Chairs are drawn rather than placed: a chair is
+not something you collide with here, and giving each one a tile would wall the
+room in.
+
+Four things were learned the hard way and are worth keeping in mind before
+touching the generator again:
+
+- **A door needs a lane, and the lane comes first.** Furniture laid down and
+  then carved back out is how whole classrooms came back empty: the connectivity
+  pass can only restore a blocked route by deleting what is in it. Every piece
+  is now placed *into* the runs left over once the doorways have their lanes.
+- **A door in the middle of a wall ruins a classroom.** It cuts the room into
+  two slivers either side of the lane it needs. The school puts its doors two
+  tiles in from a corner, which leaves one block to furnish; `corridor_plan`
+  takes an optional `door_at` and every other location keeps the centred door it
+  has always had.
+- **A one-tile gap is not a gap.** The player is 22 by 24 units and a tile is 20,
+  so a single tile between two pieces looks like floor and is not. It is fine as
+  the visual separation between desks — it is not somewhere to drop a coin, and
+  it is not a corridor. Lockers one bank deep against the lower corridor wall
+  rather than one tile off it, for the same reason.
+- **A cupboard you cannot reach is a bug, not a locked door.** Furniture is only
+  made searchable if the reachability flood puts standable floor within the
+  search reach of it. On a sparse map this never came up; on a furnished one it
+  came up immediately.
+
 ### The school walks differently
 
 The table above is the whole game's walk. The school has its own, in

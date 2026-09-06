@@ -16,6 +16,19 @@ class Grid:
         self.g = [['.'] * cols for _ in range(rows)]
         self.bad = []
         self.moved = []
+        # Things that are drawn but not walked into: blackboards, notice
+        # boards, posters, bins, plants, floor markings. They live beside the
+        # grid rather than in it because the grid is the *building* — every
+        # character in it is something you can collide with — and a poster on a
+        # wall is not. Kept in tile coordinates; tilemap.js scales them.
+        self.decor = []
+
+    def deco(self, kind, x, y, w=1, h=1, tag=None):
+        """Mark a rectangle of tiles as carrying a piece of decoration. The
+        generator is the only thing that knows a room is a classroom rather
+        than a store cupboard, so it is the only thing that can say a
+        blackboard goes here — the renderer just draws what it is told."""
+        self.decor.append((kind, x, y, w, h, tag))
 
     def fill(self, x, y, w, h, ch):
         for yy in range(y, y + h):
@@ -586,49 +599,146 @@ def hotel():
 
 # ============================================== 6 KOMENSKY PRIMARY
 def school():
+    """A real school, laid out the way one actually is: two teaching rooms and a
+    library off the top of a spine, the hall and the staff end off the bottom,
+    and a corridor lined with lockers running between them.
+
+    The density is the point. A classroom is not a room with three desks in it —
+    it is rows of paired desks either side of a centre aisle, a teacher's desk
+    facing them, cupboards down the back wall and a board on the front one.
+    Every room is furnished from what it is *for*, which is what makes the map
+    readable: you know where you are from the furniture before you read a sign.
+
+    The one hard constraint the density has to respect is that a door is only a
+    door if you can walk through it. Every doorway here has a lane kept clear in
+    front of it and driven into the room behind, and the furniture is laid out
+    around those lanes rather than dropped on top of them and carved back out."""
     g = shell(49, 36)
     g.hwall(1, 14, 47); g.hwall(1, 21, 47)
     g.vwall(16, 1, 13); g.vwall(32, 1, 13)
     g.vwall(20, 22, 13); g.vwall(34, 22, 13)
-    for x in (7, 23, 39): g.fill(x, 14, 3, 1, 'D')
-    for x in (9, 25, 39): g.fill(x, 21, 3, 1, 'D')
-    g.fill(34, 27, 1, 3, '.')
+    top_doors = (7, 23, 39)
+    bot_doors = (9, 25, 39)
+    for x in top_doors: g.fill(x, 14, 3, 1, 'D')
+    for x in bot_doors: g.fill(x, 21, 3, 1, 'D')
+    g.fill(34, 27, 1, 3, '.')            # staff room through to the store
     # windows
     g.fill(3, 0, 8, 1, 'O'); g.fill(20, 0, 8, 1, 'O'); g.fill(36, 0, 8, 1, 'O')
     g.fill(0, 4, 1, 6, 'O'); g.fill(48, 4, 1, 6, 'O')
     g.fill(4, 35, 10, 1, 'O'); g.fill(22, 35, 8, 1, 'O')
-    # classrooms 1A and 1B: rows of desks
-    def classroom(x0):
-        for r in (3, 7, 11):
-            g.fill(x0 + 1, r, 3, 2, 'T'); g.fill(x0 + 6, r, 3, 2, 'T')
-            g.fill(x0 + 11, r, 3, 2, 'T')
-        g.fill(x0 + 1, 1, 6, 1, 'B')
-    classroom(0); classroom(16)
-    # library
-    g.fill(33, 2, 3, 5, 'B'); g.fill(38, 2, 3, 5, 'B'); g.fill(43, 2, 4, 5, 'B')
-    g.fill(34, 9, 8, 3, 'T'); g.fill(44, 9, 3, 3, 'S')
-    # corridor: lockers between the doorways
-    g.fill(1, 15, 5, 2, 'C'); g.fill(12, 15, 9, 2, 'C')
-    g.fill(28, 15, 9, 2, 'C'); g.fill(43, 15, 5, 2, 'C')
-    g.fill(2, 18, 8, 2, ',')
-    # gymnasium
-    g.fill(2, 24, 16, 2, 'S'); g.fill(2, 28, 16, 2, 'S'); g.fill(2, 32, 10, 2, 'S')
-    # staff room — Mr Vrana asleep on the couch
+
+    def spans(width, blocked, pad=2):
+        """The runs of wall left over once every doorway has been given room to
+        breathe. Everything that lines a wall is placed into these rather than
+        laid down and cut back, so no piece of furniture ever half-blocks a door."""
+        free, x = [], 1
+        for d in sorted(blocked):
+            if d - pad > x:
+                free.append((x, d - pad - x))
+            x = d + 3 + pad
+        if width - 1 > x:
+            free.append((x, width - 1 - x))
+        return free
+
+    # --- classrooms 1A and 1B ------------------------------------------------
+    # Four pairs of desks a side, a centre aisle running back to the door, the
+    # teacher's desk at the front and cupboards along the back wall.
+    def classroom(x0, name):
+        for r in (4, 8, 12):
+            for dx in (1, 4, 11, 14):
+                g.fill(x0 + dx, r, 2, 2, 'T')
+        g.fill(x0 + 1, 1, 4, 2, 'T')            # the teacher's desk
+        g.fill(x0 + 11, 1, 4, 2, 'C')           # cupboards behind it
+        g.fill(x0 + 6, 1, 2, 1, 'B')            # a shelf of textbooks
+        g.deco('board', x0 + 1, 0, 14, 1)
+        g.deco('bin', x0 + 15, 3)
+        g.deco('poster', x0 + 15, 7, 1, 3)
+        g.deco('desklamp', x0 + 2, 2)
+        g.deco('sign', x0 + 6, 14, 3, 1, name)
+        g.deco('floor', x0 + 1, 1, 15, 13, 'boards')
+    classroom(0, '1A'); classroom(16, '1B')
+
+    # --- library -------------------------------------------------------------
+    # Stacks with aisles you can walk down, a reading table under the window, a
+    # counter by the door — and the lane in from the corridor kept clear.
+    for x in (33, 36, 39):
+        g.fill(x, 2, 2, 6, 'B')
+    g.fill(43, 2, 4, 2, 'B'); g.fill(43, 5, 4, 2, 'B')
+    g.fill(34, 10, 5, 2, 'T'); g.fill(43, 9, 4, 3, 'S')
+    g.fill(33, 12, 3, 1, 'C')                   # the counter
+    g.deco('sign', 38, 14, 3, 1, 'Library')
+    g.deco('plant', 47, 8)
+    g.deco('lamp', 41, 10)
+    g.deco('floor', 33, 1, 15, 13, 'carpet')
+
+    # --- the corridor --------------------------------------------------------
+    # Lockers along both walls, but only into the runs between the doorways, and
+    # only one bank deep on the lower wall — the middle of the corridor has to
+    # stay walkable from end to end or the whole floor stops connecting.
+    for (x, w) in spans(49, top_doors):
+        g.fill(x, 15, w, 2, 'C')
+    for (x, w) in spans(49, bot_doors):
+        g.fill(x, 20, w, 1, 'C')
+    g.fill(15, 19, 2, 1, 'S'); g.fill(31, 19, 2, 1, 'S')     # benches
+    g.deco('notice', 21, 15, 4, 1)
+    g.deco('clock', 36, 15)
+    g.deco('poster', 12, 15, 2, 1)
+    g.deco('floor', 1, 15, 47, 6, 'tiles')
+    g.deco('sign', 1, 17, 3, 1, 'EXIT')
+
+    # --- gymnasium -----------------------------------------------------------
+    # Benching and apparatus round the edges and a floor left deliberately clear
+    # in the middle: a hall is the one room in a school that is mostly nothing,
+    # and filling it in would make it read as a store.
+    g.fill(2, 23, 2, 3, 'S'); g.fill(2, 27, 2, 3, 'S'); g.fill(2, 31, 2, 3, 'S')
+    g.fill(16, 23, 3, 2, 'C'); g.fill(16, 26, 3, 2, 'C'); g.fill(16, 30, 3, 2, 'B')
+    g.fill(5, 33, 5, 2, 'S'); g.fill(13, 33, 5, 2, 'S')
+    # Floor before court: the decoration list is painted in order, and a floor
+    # laid after its markings simply covers them up.
+    g.deco('floor', 1, 22, 19, 13, 'parquet')
+    g.deco('court', 5, 23, 11, 9)
+    g.deco('hoop', 9, 22, 3, 1)
+    g.deco('sign', 9, 21, 3, 1, 'Gymnasium')
+
+    # --- staff room ----------------------------------------------------------
+    # Mr. Vrána on the couch, a table people sit at, a fridge and pigeonholes,
+    # and a clear lane from the door down to him.
     g.fill(23, 29, 7, 3, 'E')
-    g.fill(22, 23, 6, 2, 'T'); g.fill(29, 23, 4, 2, 'C')
-    g.fill(22, 26, 4, 2, 'C')
-    g.fill(24, 33, 5, 1, ',')
-    # caretaker's room + toilets
-    g.fill(35, 23, 5, 3, 'B'); g.fill(41, 23, 6, 3, 'C')
-    g.fill(35, 30, 4, 3, 'C'); g.fill(42, 30, 5, 3, 'C')
-    for (x, y, ch) in [(5, 5, 't'), (12, 9, 'k'), (21, 5, 'l'), (28, 9, 't'),
-                       (37, 8, 'p'), (46, 8, 'n'), (34, 13, 'w'),
-                       (11, 19, 'c'), (25, 19, 'w'), (40, 19, 'p'),
-                       (19, 26, 'k'), (14, 33, 'v'), (31, 27, 'r'), (40, 28, 'm')]:
-        g.drop(x, y, ch)
+    g.fill(21, 24, 4, 2, 'T'); g.fill(30, 23, 3, 2, 'C')
+    g.fill(21, 27, 2, 2, 'W')                   # the fridge
+    g.fill(32, 27, 2, 4, 'C')                   # pigeonholes
+    g.fill(22, 33, 4, 1, 'B')
+    g.deco('sign', 24, 21, 3, 1, 'Staff Room')
+    g.deco('kettle', 21, 26)
+    g.deco('plant', 33, 33)
+    g.deco('lamp', 26, 27)
+    g.deco('floor', 21, 22, 13, 13, 'carpet')
+
+    # --- caretaker's store and the changing room -----------------------------
+    # The densest rooms on the map, because a caretaker's store is: shelving to
+    # the ceiling, cupboards under it, boxes wherever they will go.
+    g.fill(35, 23, 3, 3, 'B'); g.fill(43, 23, 4, 3, 'B')
+    g.fill(35, 27, 3, 2, 'C'); g.fill(39, 27, 2, 2, 'W'); g.fill(43, 27, 4, 2, 'C')
+    g.deco('sign', 40, 21, 3, 1, 'Caretaker')
+    g.deco('tools', 39, 24, 3, 2)
+    g.deco('floor', 35, 22, 13, 7, 'concrete')
+
+    g.fill(35, 31, 4, 3, 'C'); g.fill(42, 31, 5, 3, 'C')
+    g.deco('sign', 40, 30, 3, 1, 'Changing')
+    g.deco('floor', 35, 29, 13, 6, 'tiles')
+
+    # In the aisles, not in the gaps between desks: a one-tile gap is not floor
+    # a player can stand on, however much it looks like it.
+    for (x, y, ch) in [(6, 6, 't'), (8, 10, 'k'), (22, 6, 'l'), (24, 10, 't'),
+                       (37, 9, 'p'), (41, 10, 'n'), (37, 13, 'w'),
+                       (11, 18, 'c'), (25, 18, 'w'), (43, 18, 'p'),
+                       (10, 28, 'k'), (12, 31, 'v'), (28, 27, 'r'), (41, 30, 'm')]:
+        # box=True: the desks are packed with one-tile gaps between them, and a
+        # one-tile gap is not somewhere a player can stand.
+        g.drop(x, y, ch, box=True)
     g.drop(45, 18, '@')
     g.fill(0, 16, 1, 3, 'X')
-    g.fill(23, 16, 3, 2, '~')
+    g.fill(23, 17, 3, 2, '~')
     return g
 
 

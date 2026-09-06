@@ -521,6 +521,128 @@ function drawPlinth(ctx, c) {
   ctx.stroke();
 }
 
+// --- the school's own furniture ----------------------------------------------
+// A sports hall does not contain sofas and a corridor is not lined with chests
+// of drawers. The shared painters are right for the eleven locations that are
+// somebody's home or a hotel; a school needs benches and lockers, and drawing
+// its 'S' as a three-cushion settee was the single thing most stopping the
+// building from reading as a school.
+
+// A gym bench, or the one bolted to a corridor wall: a plank, two ends, no
+// upholstery. Runs along its longer side whichever way the map drew it.
+function drawBench(ctx, c) {
+  const along = c.w >= c.h;
+  ctx.fillStyle = SHADOW;
+  roundRect(ctx, c.x + 2, c.y + 6, c.w, c.h, 4);
+  ctx.fill();
+  fillRound(ctx, c.x, c.y, c.w, c.h, 4, '#a97644');
+  fillRound(ctx, c.x + 1.5, c.y + 1.5, c.w - 3, (along ? c.h : c.h) * 0.42, 3, '#c08d55');
+  // The seam down the middle of the slats.
+  ctx.strokeStyle = 'rgba(96,60,28,0.5)';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  if (along) {
+    ctx.moveTo(c.x + 3, c.y + c.h * 0.62);
+    ctx.lineTo(c.x + c.w - 3, c.y + c.h * 0.62);
+  } else {
+    ctx.moveTo(c.x + c.w * 0.62, c.y + 3);
+    ctx.lineTo(c.x + c.w * 0.62, c.y + c.h - 3);
+  }
+  ctx.stroke();
+  // Legs, at the ends.
+  ctx.fillStyle = '#6d4a2a';
+  if (along) {
+    ctx.fillRect(c.x + 3, c.y + c.h - 2.5, 5, 3);
+    ctx.fillRect(c.x + c.w - 8, c.y + c.h - 2.5, 5, 3);
+  } else {
+    ctx.fillRect(c.x + c.w - 3, c.y + 3, 3, 5);
+    ctx.fillRect(c.x + c.w - 3, c.y + c.h - 8, 3, 5);
+  }
+}
+
+// A bank of lockers. Doors, handles, vents — the detail is what makes a long
+// grey run along a corridor read as lockers rather than as a wall.
+function drawLockers(ctx, c) {
+  const along = c.w >= c.h;
+  ctx.fillStyle = SHADOW;
+  roundRect(ctx, c.x + 2, c.y + 6, c.w, c.h, 3);
+  ctx.fill();
+  fillRound(ctx, c.x, c.y, c.w, c.h, 3, '#4d6b73');
+  fillRound(ctx, c.x + 1.5, c.y + 1.5, c.w - 3, c.h * 0.30, 2, '#628893');
+  const span = along ? c.w : c.h;
+  const doors = Math.max(1, Math.round(span / 20));
+  const pitch = span / doors;
+  for (let i = 0; i < doors; i++) {
+    const a = (along ? c.x : c.y) + i * pitch + 1.6;
+    const len = pitch - 3.2;
+    if (len <= 1) continue;
+    if (along) {
+      fillRound(ctx, a, c.y + 2.6, len, c.h - 5, 2, '#3f5a61');
+      fillRound(ctx, a + 1, c.y + 3.4, len - 2, 2, 1, '#6f959f');
+      // vents
+      ctx.fillStyle = 'rgba(20,34,38,0.55)';
+      for (let v = 0; v < 3; v++) ctx.fillRect(a + 2.5, c.y + 5.5 + v * 2, len - 5, 1);
+      // handle
+      ctx.fillStyle = '#c9d6d2';
+      ctx.fillRect(a + len - 4, c.y + c.h * 0.55, 2, 4);
+    } else {
+      fillRound(ctx, c.x + 2.6, a, c.w - 5, len, 2, '#3f5a61');
+      fillRound(ctx, c.x + 3.4, a + 1, 2, len - 2, 1, '#6f959f');
+      ctx.fillStyle = 'rgba(20,34,38,0.55)';
+      for (let v = 0; v < 3; v++) ctx.fillRect(c.x + 5.5 + v * 2, a + 2.5, 1, len - 5);
+      ctx.fillStyle = '#c9d6d2';
+      ctx.fillRect(c.x + c.w * 0.55, a + len - 4, 4, 2);
+    }
+  }
+}
+
+// A school desk. The shared table painter scatters whatever a table in a house
+// might have on it — a pot plant, a mug, a vase — and a classroom full of pot
+// plants growing out of the desks is the sort of thing you only notice once you
+// look at the whole map at once. What sits on a school desk is paper.
+function drawDesk(ctx, c) {
+  ctx.fillStyle = SHADOW;
+  roundRect(ctx, c.x + 3, c.y + 7, c.w, c.h, 4);
+  ctx.fill();
+  fillRound(ctx, c.x, c.y, c.w, c.h, 4, '#b9803f');
+  fillRound(ctx, c.x + 2, c.y + 2, c.w - 4, c.h * 0.44, 3, '#d09a56');
+  // The seam between two desks pushed together, which is how a classroom is
+  // actually laid out and what stops a pair reading as one slab.
+  if (c.w >= c.h) {
+    ctx.strokeStyle = 'rgba(110,68,28,0.45)';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(c.x + c.w / 2, c.y + 2);
+    ctx.lineTo(c.x + c.w / 2, c.y + c.h - 2);
+    ctx.stroke();
+  }
+  // Paper, and sometimes a book. Deterministic from the position, so the same
+  // desk carries the same clutter every time the level is drawn.
+  const r = hash(c.x + 11, c.y + 5);
+  if (r > 0.30) {
+    fillRound(ctx, c.x + 4, c.y + c.h * 0.30, 9, 7, 1, PALETTE.paper);
+    ctx.fillStyle = 'rgba(90,80,70,0.40)';
+    ctx.fillRect(c.x + 5.5, c.y + c.h * 0.30 + 2, 6, 1);
+    ctx.fillRect(c.x + 5.5, c.y + c.h * 0.30 + 4, 4, 1);
+  }
+  if (r > 0.68 && c.w > 26) {
+    const spines = ['#c2543f', '#3f7f88', '#6f5a94'];
+    fillRound(ctx, c.x + c.w - 14, c.y + c.h * 0.34, 9, 6, 1, spines[Math.floor(r * 3) % 3]);
+  }
+  // Chairs, tucked under the near edge. Drawn rather than placed: a chair is
+  // not something you collide with in a game where you walk over the floor of
+  // a classroom, and putting one in the tile grid would cost a tile each and
+  // wall the room in. Two to a desk, which is what a paired desk means.
+  const seats = c.w >= 34 ? 2 : 1;
+  for (let i = 0; i < seats; i++) {
+    const cx = c.x + c.w * ((i + 0.5) / seats);
+    fillRound(ctx, cx - 7, c.y + c.h - 1, 14, 9, 3, '#8a5a30');
+    fillRound(ctx, cx - 6, c.y + c.h, 12, 4, 2, '#a3703f');
+  }
+}
+
+const SCHOOL_PAINTERS = { sofa: drawBench, chest: drawLockers, table: drawDesk };
+
 const FURNITURE_PAINTERS = {
   table: drawTable,
   sofa: drawSofa,
@@ -533,7 +655,9 @@ const FURNITURE_PAINTERS = {
 };
 
 export function drawFurniture(ctx, c) {
-  FURNITURE_PAINTERS[furnitureStyle(c)](ctx, c);
+  const style = furnitureStyle(c);
+  const paint = (c.theme === 'school' && SCHOOL_PAINTERS[style]) || FURNITURE_PAINTERS[style];
+  paint(ctx, c);
 }
 
 // ---------------------------------------------------------------- room
@@ -876,12 +1000,247 @@ function drawWindowPane(ctx, c) {
   ctx.fill();
 }
 
+// --------------------------------------------------------------- room dressing
+// What a building has on its walls and floors, as opposed to what it is built
+// from. None of this collides with anything and none of it is in the tile grid:
+// it is a list the map carries, because only the map knows a room is a
+// classroom rather than a store cupboard.
+//
+// All of it is painted into the room cache, which is built once per level and
+// blitted a slice at a time — so the entire dressing costs nothing per frame,
+// however much of it there is. That is the whole reason it can be this dense.
+
+// Floor treatments, by what the room is for. A school is not one surface: a
+// gym is sprung boards, a corridor is tile, a store room is bare concrete, and
+// telling them apart at a glance is most of what makes a floorplan readable.
+const FLOORS = {
+  boards:   { base: '#a9773f', line: 'rgba(120,78,36,0.42)', pitch: 26, dir: 'h' },
+  carpet:   { base: '#7e7b63', line: 'rgba(56,54,42,0.30)', pitch: 0 },
+  tiles:    { base: '#8d8f86', line: 'rgba(58,60,54,0.34)', pitch: 30, dir: 'grid' },
+  parquet:  { base: '#c08f4c', line: 'rgba(126,86,38,0.34)', pitch: 22, dir: 'grid' },
+  concrete: { base: '#6f6a60', line: 'rgba(44,42,38,0.30)', pitch: 60, dir: 'grid' }
+};
+
+function drawFloorPatch(ctx, d) {
+  const f = FLOORS[d.tag] || FLOORS.tiles;
+  ctx.fillStyle = f.base;
+  ctx.fillRect(d.x, d.y, d.w, d.h);
+  if (f.pitch) {
+    ctx.strokeStyle = f.line;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let y = d.y + f.pitch; y < d.y + d.h; y += f.pitch) {
+      ctx.moveTo(d.x, Math.round(y) + 0.5);
+      ctx.lineTo(d.x + d.w, Math.round(y) + 0.5);
+    }
+    if (f.dir === 'grid') {
+      for (let x = d.x + f.pitch; x < d.x + d.w; x += f.pitch) {
+        ctx.moveTo(Math.round(x) + 0.5, d.y);
+        ctx.lineTo(Math.round(x) + 0.5, d.y + d.h);
+      }
+    }
+    ctx.stroke();
+  } else {
+    // Carpet: a scatter of flecks rather than a seam, so it reads as soft.
+    ctx.fillStyle = f.line;
+    for (let y = d.y + 6; y < d.y + d.h; y += 11) {
+      for (let x = d.x + ((y / 11) % 2 ? 9 : 3); x < d.x + d.w; x += 14) {
+        ctx.fillRect(x, y, 2, 2);
+      }
+    }
+  }
+}
+
+// The lines painted on a sports hall floor. A hall is mostly empty by design,
+// and this is what stops that reading as unfinished.
+function drawCourt(ctx, d) {
+  ctx.save();
+  ctx.strokeStyle = 'rgba(232,228,210,0.34)';
+  ctx.lineWidth = 2.4;
+  ctx.strokeRect(d.x + 4, d.y + 4, d.w - 8, d.h - 8);
+  ctx.beginPath();
+  ctx.moveTo(d.x + 4, d.y + d.h / 2);
+  ctx.lineTo(d.x + d.w - 4, d.y + d.h / 2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(d.x + d.w / 2, d.y + d.h / 2, Math.min(d.w, d.h) * 0.18, 0, TAU);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawBoard(ctx, d) {
+  // A blackboard: dark slate, a chalk tray along the bottom, and the ghost of
+  // whatever was last written on it.
+  fillRound(ctx, d.x, d.y + 3, d.w, d.h + 7, 2, '#2b3a33');
+  fillRound(ctx, d.x + 2, d.y + 5, d.w - 4, d.h + 2, 1, '#33463d');
+  ctx.strokeStyle = 'rgba(226,232,214,0.22)';
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  for (let i = 0; i < 3; i++) {
+    const y = d.y + 9 + i * 4;
+    ctx.moveTo(d.x + 8 + (i % 2) * 6, y);
+    ctx.lineTo(d.x + d.w * (0.45 + 0.16 * i), y);
+  }
+  ctx.stroke();
+  fillRound(ctx, d.x + 1, d.y + d.h + 8, d.w - 2, 3, 1, '#8a6a44');
+}
+
+function drawNotice(ctx, d) {
+  fillRound(ctx, d.x, d.y + 4, d.w, d.h + 6, 2, '#6b4a2e');
+  fillRound(ctx, d.x + 2, d.y + 6, d.w - 4, d.h + 2, 1, '#c2a377');
+  const tints = ['#f4ece0', '#f0d9a8', '#cfe0ef', '#efc9c0'];
+  for (let i = 0; i * 13 < d.w - 10; i++) {
+    ctx.fillStyle = tints[i % tints.length];
+    ctx.fillRect(d.x + 5 + i * 13, d.y + 8 + (i % 2) * 3, 9, 8);
+  }
+}
+
+function drawPoster(ctx, d) {
+  const tall = d.h >= d.w;
+  const w = tall ? Math.min(13, d.w) : d.w;
+  const h = tall ? d.h : Math.min(13, d.h);
+  fillRound(ctx, d.x, d.y + 2, w, h, 2, '#e8dcc4');
+  ctx.fillStyle = 'rgba(70,90,120,0.55)';
+  ctx.fillRect(d.x + 2, d.y + 4, w - 4, h * 0.42);
+  ctx.fillStyle = 'rgba(60,50,44,0.35)';
+  for (let i = 0; i < 3; i++) ctx.fillRect(d.x + 3, d.y + 6 + h * 0.5 + i * 4, w - 6 - i * 3, 1.6);
+}
+
+function drawSign(ctx, d) {
+  if (!d.tag) return;
+  const w = Math.max(26, d.tag.length * 5.2 + 10);
+  const x = d.x + d.w / 2 - w / 2;
+  fillRound(ctx, x, d.y + 4, w, 12, 3, 'rgba(22,28,24,0.72)');
+  ctx.fillStyle = 'rgba(226,236,220,0.86)';
+  ctx.font = 'bold 8px system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(d.tag.toUpperCase(), d.x + d.w / 2, d.y + 10.5);
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+}
+
+function drawClock(ctx, d) {
+  const cx = d.x + d.w / 2;
+  const cy = d.y + 10;
+  ctx.fillStyle = '#26302a';
+  ctx.beginPath(); ctx.arc(cx, cy, 8, 0, TAU); ctx.fill();
+  ctx.fillStyle = '#e6ecdd';
+  ctx.beginPath(); ctx.arc(cx, cy, 6.4, 0, TAU); ctx.fill();
+  ctx.strokeStyle = '#26302a';
+  ctx.lineWidth = 1.3;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy); ctx.lineTo(cx + 3.4, cy - 1.4);
+  ctx.moveTo(cx, cy); ctx.lineTo(cx - 0.6, cy - 4.2);
+  ctx.stroke();
+}
+
+function drawBin(ctx, d) {
+  const cx = d.x + d.w / 2;
+  ctx.fillStyle = SHADOW;
+  ctx.beginPath(); ctx.ellipse(cx + 1, d.y + 15, 6, 2.6, 0, 0, TAU); ctx.fill();
+  fillRound(ctx, cx - 5.5, d.y + 3, 11, 12, 2, '#5c6a5e');
+  fillRound(ctx, cx - 6.5, d.y + 2, 13, 3, 1.4, '#78876f');
+}
+
+function drawPotPlant(ctx, d) {
+  const cx = d.x + d.w / 2;
+  ctx.fillStyle = SHADOW;
+  ctx.beginPath(); ctx.ellipse(cx + 1, d.y + 16, 7, 3, 0, 0, TAU); ctx.fill();
+  fillRound(ctx, cx - 5, d.y + 9, 10, 8, 2, PALETTE.pot);
+  fillRound(ctx, cx - 5, d.y + 9, 10, 2.6, 1.2, PALETTE.potDark);
+  for (const [dx, dy, r] of [[-4, 2, 4.4], [4, 1, 4.0], [0, -2, 5.0]]) {
+    ctx.fillStyle = dy < 0 ? PALETTE.leaf : PALETTE.leafDark;
+    ctx.beginPath();
+    ctx.ellipse(cx + dx, d.y + 6 + dy, r, r * 0.72, dx * 0.12, 0, TAU);
+    ctx.fill();
+  }
+}
+
+function drawKettle(ctx, d) {
+  const cx = d.x + d.w / 2;
+  fillRound(ctx, cx - 5, d.y + 5, 9, 9, 2, '#c9ced6');
+  fillRound(ctx, cx - 4, d.y + 6, 7, 3, 1.2, '#e4e9ef');
+  ctx.fillStyle = '#8d95a0';
+  ctx.fillRect(cx + 3.5, d.y + 7, 3, 1.6);
+  fillRound(ctx, cx + 5, d.y + 10, 5, 5, 1.4, '#e8ddc8');
+}
+
+function drawTools(ctx, d) {
+  // A board of tools on a store-room wall, which is what says "caretaker".
+  fillRound(ctx, d.x, d.y + 3, d.w, d.h + 4, 2, '#5b4a34');
+  const marks = ['#c9ced6', '#9aa2ad', '#c08a4a', '#7d8b96'];
+  for (let i = 0; i * 9 < d.w - 6; i++) {
+    ctx.fillStyle = marks[i % marks.length];
+    ctx.fillRect(d.x + 4 + i * 9, d.y + 5, 3, d.h);
+    ctx.fillRect(d.x + 3 + i * 9, d.y + 5, 5, 2.4);
+  }
+}
+
+function drawHoop(ctx, d) {
+  const cx = d.x + d.w / 2;
+  fillRound(ctx, cx - 11, d.y + 4, 22, 9, 2, '#e6e2d2');
+  ctx.strokeStyle = '#c25a3a';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(cx - 5, d.y + 6, 10, 5);
+  ctx.beginPath();
+  ctx.arc(cx, d.y + 14, 5.5, 0, Math.PI);
+  ctx.stroke();
+}
+
+function drawDeskLamp(ctx, d) {
+  const cx = d.x + d.w / 2;
+  ctx.fillStyle = 'rgba(255,222,150,0.16)';
+  ctx.beginPath(); ctx.arc(cx, d.y + 10, 20, 0, TAU); ctx.fill();
+  fillRound(ctx, cx - 4, d.y + 6, 8, 5, 2, PALETTE.lampShade);
+  ctx.fillStyle = '#6a6156';
+  ctx.fillRect(cx - 0.8, d.y + 10, 1.6, 5);
+  fillRound(ctx, cx - 3.5, d.y + 14, 7, 2.4, 1, '#6a6156');
+}
+
+// A pool of warm light on the floor. Flat circles rather than a gradient: this
+// goes into the cache once, but gradients are rasterised per pixel and a big
+// one over a school corridor is not cheap even once.
+function drawLightPool(ctx, d) {
+  const cx = d.x + d.w / 2;
+  const cy = d.y + d.h / 2;
+  for (const [r, a] of [[46, 0.05], [32, 0.06], [19, 0.07]]) {
+    ctx.fillStyle = `rgba(255,226,158,${a})`;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, TAU); ctx.fill();
+  }
+  lampPositions.push({ x: cx, y: cy });
+}
+
+// Split by whether a thing is on the floor, on a wall, or standing in the room:
+// a blackboard has to go on before the furniture that stands in front of it,
+// and a bin has to go on after.
+const DECOR_FLOOR = { floor: drawFloorPatch, court: drawCourt };
+const DECOR_WALL = {
+  board: drawBoard, notice: drawNotice, poster: drawPoster,
+  sign: drawSign, clock: drawClock, tools: drawTools, hoop: drawHoop
+};
+const DECOR_PROPS = {
+  bin: drawBin, plant: drawPotPlant, kettle: drawKettle,
+  desklamp: drawDeskLamp, lamp: drawLightPool
+};
+
+function paintDecor(ctx, level, table) {
+  if (!level.decor) return;
+  for (const d of level.decor) {
+    const paint = table[d.kind];
+    if (paint) paint(ctx, d);
+  }
+}
+
 export function paintStaticRoom(ctx, level) {
   T = THEMES[level.theme] || THEMES.bedroom;
   W = level.width;
   H = level.height;
   lampPositions.length = 0;
   drawFloor(ctx);
+  // Floor treatments first: they are the floor, so everything below is drawn
+  // on top of them exactly as it was drawn on top of the plain one.
+  paintDecor(ctx, level, DECOR_FLOOR);
   for (const rug of level.rugs) drawRug(ctx, rug);
   for (const zone of level.creaks) drawCreakZone(ctx, zone);
 
@@ -908,9 +1267,14 @@ export function paintStaticRoom(ctx, level) {
     }
   }
   for (const door of level.doors) drawDoorway(ctx, door);
+  // Boards, notices, posters, signs: on the wall, and therefore behind whatever
+  // is standing in front of the wall.
+  paintDecor(ctx, level, DECOR_WALL);
   for (const c of level.colliders) {
     if (c.type === 'furniture') drawFurniture(ctx, c);
   }
+  // ...and the things standing on the floor go on last, in front of it all.
+  paintDecor(ctx, level, DECOR_PROPS);
   // Whatever this level's person is asleep on — a bed, a couch, an armchair —
   // or nothing, when they are at a desk that is drawn live each frame.
   drawWatcherFurniture(ctx, level, watcherConfig(level.watcher.kind).pose || 'bed');

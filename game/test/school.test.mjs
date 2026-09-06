@@ -41,10 +41,91 @@ function untilWalking(run, hold = 85, limit = 60 * 10) {
   return false;
 }
 
-// Put the player somewhere exactly, without walking there.
+// Put the player somewhere, without walking there — and somewhere he could
+// actually be standing. The school's rooms are packed tightly enough that an
+// arbitrary point is often inside a desk, and a test that sets up its situation
+// inside a cupboard is not testing the thing it says it is. Snaps outwards to
+// the nearest spot the player box fits, and returns where that turned out to be
+// so a caller that cares about the distance can measure it rather than assume.
 function place(sim, x, y) {
   const p = playerOf(sim);
-  p.x = x; p.y = y; p.prevX = x; p.prevY = y; p.vx = 0; p.vy = 0;
+  const w = TUNING.player.boxWidth;
+  const h = TUNING.player.boxHeight;
+  let best = null;
+  for (let r = 0; r <= 220 && !best; r += 4) {
+    for (let a = 0; a < 32 && !best; a++) {
+      const t = (a / 32) * Math.PI * 2;
+      const px = x + Math.cos(t) * r;
+      const py = y + Math.sin(t) * r;
+      if (!blocked(px, py, w, h, sim.level.colliders)) best = { x: px, y: py };
+    }
+  }
+  assert.ok(best, `nowhere to stand near ${Math.round(x)},${Math.round(y)}`);
+  p.x = best.x; p.y = best.y; p.prevX = best.x; p.prevY = best.y; p.vx = 0; p.vy = 0;
+  return best;
+}
+
+// Somewhere the player can stand, as close to `want` units from a point as the
+// building allows. Tests that used to write `w.x + 60` and teleport there were
+// relying on the school being mostly empty floor; now that it is furnished, a
+// point picked that way is usually inside a desk, and snapping out of one can
+// land you nearer the man you were trying to be far away from. Measured and
+// returned, so a caller asserts against the distance it actually got.
+function placeAway(sim, from, want) {
+  const bw = TUNING.player.boxWidth;
+  const bh = TUNING.player.boxHeight;
+  const level = sim.level;
+  let best = null;
+  for (let a = 0; a < 64; a++) {
+    const t = (a / 64) * Math.PI * 2;
+    for (let r = want; r <= want + 90; r += 5) {
+      const px = from.x + Math.cos(t) * r;
+      const py = from.y + Math.sin(t) * r;
+      if (px < 24 || py < 24 || px > level.width - 24 || py > level.height - 24) continue;
+      if (blocked(px, py, bw, bh, level.colliders)) continue;
+      const d = Math.hypot(px - from.x, py - from.y);
+      if (!best || Math.abs(d - want) < Math.abs(best.d - want)) best = { x: px, y: py, d };
+      break;
+    }
+  }
+  if (!best) return null;
+  const p = playerOf(sim);
+  p.x = best.x; p.y = best.y; p.prevX = best.x; p.prevY = best.y; p.vx = 0; p.vy = 0;
+  return best;
+}
+
+// The longest unbroken stretch of floor on the level along one axis, as
+// (from, to) along it. `openRunOfFloor` answers "somewhere with this much room
+// either side", which is the wrong question when the test needs to *run*: it
+// can hand back the middle of a stretch whose far end is a wall forty units on.
+function longestLane(level, axis = 'x') {
+  const grid = navGrid(level, TUNING.player.boxWidth, TUNING.player.boxHeight);
+  const cell = grid.cell;
+  let best = null;
+  const outer = axis === 'x' ? grid.rows : grid.cols;
+  const inner = axis === 'x' ? grid.cols : grid.rows;
+  for (let a = 0; a < outer; a++) {
+    let start = null;
+    for (let b = 0; b <= inner; b++) {
+      const i = axis === 'x' ? a * grid.cols + b : b * grid.cols + a;
+      const open = b < inner && !grid.blocked[i];
+      if (open && start === null) start = b;
+      if (!open && start !== null) {
+        const span = (b - start) * cell;
+        if (!best || span > best.span) {
+          best = {
+            span,
+            from: start * cell + cell / 2,
+            to: (b - 1) * cell + cell / 2,
+            across: a * cell + cell / 2
+          };
+        }
+        start = null;
+      }
+    }
+  }
+  assert.ok(best, 'the map should have an open stretch somewhere');
+  return best;
 }
 
 // Somewhere he can walk a straight line of `length` units without hitting
@@ -302,8 +383,10 @@ test('crossing 80 wakes him and stores where you were, not where you go', () => 
   const { sim } = run;
   const w = sim.investigator;
   assert.equal(w.state, 'asleep');
-  place(sim, sim.level.spawn.x, sim.level.spawn.y);
-  const at = { x: sim.level.spawn.x, y: sim.level.spawn.y };
+  // On a clear run rather than at the spawn: the point of the test is to walk
+  // away from where the meter was crossed, which needs somewhere to walk to.
+  const lane = openRunOfFloor(sim.level, 260, 150, 'x');
+  const at = place(sim, lane.x, lane.y);
 
   sim.noise = RULES.investigate.wakeAt - 1;
   tick(run);
@@ -315,11 +398,12 @@ test('crossing 80 wakes him and stores where you were, not where you go', () => 
   assert.ok(Math.hypot(w.target.x - at.x, w.target.y - at.y) < 3,
     'the stored spot must be where the meter was crossed');
 
-  // Now leave. The target must not follow.
+  // Now leave, along the lane we were put on. The target must not follow.
   const stored = { ...w.target };
+  const away = lane.x > sim.level.width / 2 ? -1 : 1;
   for (let i = 0; i < 60 * 3; i++) {
     sim.noise = Math.max(sim.noise, 85);
-    tick(run, { x: -1, y: 0, take: false });
+    tick(run, { x: away, y: 0, take: false });
   }
   assert.deepEqual(w.target, stored, 'he must investigate the place, not track the person');
   assert.ok(Math.hypot(playerOf(sim).x - stored.x, playerOf(sim).y - stored.y) > 60,
@@ -463,8 +547,10 @@ test('noise going back over 80 sends him out again, to the new spot', () => {
   assert.ok(w.state === 'returning' || w.state === 'settling', `he should be on his way back, not ${w.state}`);
 
   // A second crash, somewhere else entirely.
-  const elsewhere = { x: sim.level.width - 60, y: 60 };
-  place(sim, elsewhere.x, elsewhere.y);
+  // Wherever in that corner he can actually stand — the corner itself is a
+  // stack of lockers now, and what matters is that the target follows the
+  // player's real position rather than a point picked on paper.
+  const elsewhere = place(sim, sim.level.width - 60, 60);
   sim.noise = 90;
   tick(run);
   assert.ok(Math.hypot(w.target.x - elsewhere.x, w.target.y - elsewhere.y) < 3,
@@ -539,10 +625,20 @@ test('every school level supports the full loop, from anywhere on the map', () =
       // any more — and now that Mr. Vrána follows anyone who gets close, a
       // thief left standing beside the target simply gets caught, which would
       // prove nothing about whether he can walk a route.
-      const away = {
-        x: w.target.x < level.width / 2 ? level.width - 40 : 40,
-        y: w.target.y < level.height / 2 ? level.height - 40 : 40
-      };
+      // The furthest reachable cell from where the guard is heading, taken off
+      // the same nav grid rather than guessed at as a corner: the corners of a
+      // furnished school are lockers, and a thief snapped out of one can land
+      // right beside the man walking towards him.
+      let away = null;
+      let far = -1;
+      for (let i = 0; i < reachable.length; i += 7) {
+        if (reachable[i] < 0) continue;
+        const cx = i % grid.cols;
+        const px = cx * grid.cell + grid.cell / 2;
+        const py = ((i - cx) / grid.cols) * grid.cell + grid.cell / 2;
+        const d = Math.hypot(px - w.target.x, py - w.target.y);
+        if (d > far) { far = d; away = { x: px, y: py }; }
+      }
       let arrived = false;
       for (let i = 0; i < 60 * 90; i++) {
         place(sim, away.x, away.y);
@@ -1014,13 +1110,17 @@ test('E: he does not pick you out from across the room — only up close', () =>
   const w = sim.investigator;
   assert.ok(rouse(run, { x: sim.level.width - 60, y: 60 }));
   // Just outside the range, for a long time, with the meter high.
+  let held = 0;
   for (let i = 0; i < 60 * 6; i++) {
-    place(sim, w.x + RULES.investigate.followAt + 60, w.y);
+    const at = placeAway(sim, w, RULES.investigate.followAt + 60);
     sim.noise = Math.max(sim.noise, 85);
     tick(run);
+    if (!at || at.d <= RULES.investigate.followAt) continue;  // the room put us in range
+    held++;
     assert.notEqual(w.state, 'following',
-      `he started following from ${(RULES.investigate.followAt + 60)} away`);
+      `he started following from ${at.d.toFixed(0)} away`);
   }
+  assert.ok(held > 60, `only ${held} frames were actually spent out of range`);
 });
 
 test('F: he loses you again, but only after real distance held for real time', () => {
@@ -1143,14 +1243,17 @@ test('F: running opens a gap, and holding it loses him', () => {
   const w = sim.investigator;
   const p = playerOf(sim);
   sim.timeLeft = 9999;
-  const lane = openRunOfFloor(sim.level, 260, 240, 'x');
-
-  // Put them both on it, him just behind you, and wake him where he stands.
-  place(sim, lane.x - 90, lane.y);
+  // The longest straight on the map, run from one end towards the other. Asking
+  // only for clearance either side of a point can hand back the middle of a
+  // stretch that ends in a wall, and being cornered is not the same thing as
+  // being outrun.
+  const lane = longestLane(sim.level, 'x');
+  assert.ok(lane.span > 300, `the longest straight is only ${lane.span} units`);
+  place(sim, lane.from + 90, lane.across);
   w.state = 'investigating';
-  w.stand = { x: lane.x - 130, y: lane.y };
-  w.x = lane.x - 130;
-  w.y = lane.y;
+  w.stand = { x: lane.from + 50, y: lane.across };
+  w.x = lane.from + 50;
+  w.y = lane.across;
   w.prevX = w.x;
   w.prevY = w.y;
   w.target = { x: p.x, y: p.y };

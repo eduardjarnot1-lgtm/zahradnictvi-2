@@ -1,0 +1,175 @@
+// The school as a building: is there enough in it, is it all reachable, and is
+// every bit of it still the school's own?
+//
+// "Detailed" is not a thing you can assert, but the things that make a map feel
+// detailed are: how many separate pieces of furniture there are, how many kinds,
+// whether rooms differ from each other, and whether the dressing that says what
+// a room is for is actually present. Those are all countable, and counting them
+// is what stops the next change to the generator quietly hollowing the place out
+// again — which is exactly what happened twice while this was being written.
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { FLOORPLANS } from '../src/maps.js';
+import { TUNING } from '../src/tuning.js';
+import { navGrid, flowField } from '../src/nav.js';
+
+const SCHOOL = FLOORPLANS.filter((l) => l.location === 'School');
+const OTHERS = FLOORPLANS.filter((l) => l.location !== 'School');
+const pieces = (l) => l.colliders.filter((c) => c.type === 'furniture');
+const styles = (l) => new Set(pieces(l).map((c) => c.style));
+
+test('there are five school levels and they grow', () => {
+  assert.equal(SCHOOL.length, 5);
+  let last = 0;
+  for (const l of SCHOOL) {
+    assert.ok(l.width * l.height >= last, `L${l.id} is smaller than the level before it`);
+    last = l.width * l.height;
+  }
+});
+
+test('every school level is properly furnished', () => {
+  // A floor of a building with a dozen things in it reads as a warehouse. The
+  // figures here are a floor, not a target: they are roughly what the level had
+  // before this pass, so a regression is caught rather than a shortfall argued
+  // about.
+  const floor = { 21: 15, 22: 20, 23: 25, 24: 30, 25: 60 };
+  for (const l of SCHOOL) {
+    assert.ok(pieces(l).length >= floor[l.id],
+      `L${l.id} has only ${pieces(l).length} pieces of furniture`);
+  }
+});
+
+test('the furniture is varied rather than one thing repeated', () => {
+  for (const l of SCHOOL) {
+    assert.ok(styles(l).size >= 3,
+      `L${l.id} is built from only ${[...styles(l)].join(', ')}`);
+  }
+  // The biggest level should use most of the vocabulary the game has.
+  const five = SCHOOL[4];
+  assert.ok(styles(five).size >= 5,
+    `level five uses only ${[...styles(five)].join(', ')}`);
+});
+
+test('the density is real rather than a few enormous slabs', () => {
+  // The failure mode this guards against: merging every desk in a classroom
+  // into one rectangle counts as "furniture" and looks like a table tennis
+  // table. Most pieces should be the size of a piece of furniture.
+  for (const l of SCHOOL) {
+    const big = pieces(l).filter((c) => c.w * c.h > 140 * 140);
+    assert.ok(big.length <= 1, `L${l.id} has ${big.length} enormous slabs`);
+    const median = pieces(l).map((c) => c.w * c.h).sort((a, b) => a - b)[
+      Math.floor(pieces(l).length / 2)];
+    assert.ok(median < 90 * 90, `L${l.id}'s typical piece is ${Math.round(median)} sq units`);
+  }
+});
+
+test('every room says what it is', () => {
+  // Signs, boards, floor treatments: the dressing that makes a corridor read as
+  // a corridor and a store room as a store room.
+  for (const l of SCHOOL) {
+    const kinds = new Set((l.decor || []).map((d) => d.kind));
+    assert.ok(kinds.has('sign'), `L${l.id} has no room signs`);
+    assert.ok(kinds.has('floor'), `L${l.id} has one floor surface throughout`);
+    const floors = new Set((l.decor || []).filter((d) => d.kind === 'floor').map((d) => d.tag));
+    assert.ok(floors.size >= 3,
+      `L${l.id} uses only ${[...floors].join(', ')} underfoot`);
+    assert.ok((l.decor || []).length >= 12, `L${l.id} has only ${(l.decor || []).length} pieces of dressing`);
+  }
+});
+
+test('the dressing is decoration and never a wall', () => {
+  // Decor exists precisely because it is not in the tile grid. If a poster ever
+  // became something you could walk into, it would start closing routes.
+  for (const l of SCHOOL) {
+    for (const d of l.decor || []) {
+      assert.ok(!l.colliders.some((c) => c.x === d.x && c.y === d.y && c.w === d.w && c.h === d.h),
+        `L${l.id}: a ${d.kind} turned into a collider`);
+      assert.ok(d.x >= 0 && d.y >= 0 && d.x < l.width && d.y < l.height,
+        `L${l.id}: a ${d.kind} is off the map`);
+    }
+  }
+});
+
+test('everything on every school level can still be reached', () => {
+  // The whole point of a denser map is that it stays walkable. Every item, the
+  // way out and every doorway, from the spawn, at the resolution the game
+  // actually moves at.
+  for (const l of SCHOOL) {
+    const grid = navGrid(l, TUNING.player.boxWidth, TUNING.player.boxHeight);
+    const field = flowField(grid, l.spawn.x, l.spawn.y);
+    const reached = (x, y, slack = 24) => {
+      const cells = Math.ceil(slack / grid.cell);
+      const cx = Math.floor(x / grid.cell);
+      const cy = Math.floor(y / grid.cell);
+      for (let dy = -cells; dy <= cells; dy++) {
+        for (let dx = -cells; dx <= cells; dx++) {
+          const gx = cx + dx;
+          const gy = cy + dy;
+          if (gx < 0 || gy < 0 || gx >= grid.cols || gy >= grid.rows) continue;
+          if (field[gy * grid.cols + gx] >= 0) return true;
+        }
+      }
+      return false;
+    };
+    for (const item of l.items) {
+      assert.ok(reached(item.x, item.y), `L${l.id}: ${item.type} at ${item.x},${item.y} is cut off`);
+    }
+    // A cupboard is opened from beside it, not from on top of it, so this is
+    // the distance to the *piece* against the reach the rules actually use.
+    // Measuring from its centre instead marks every wide cupboard unreachable.
+    const reach = TUNING.locations.School.search.reach;
+    for (const s of l.stashes) {
+      let closest = Infinity;
+      for (let i = 0; i < field.length; i++) {
+        if (field[i] < 0) continue;
+        const cx = i % grid.cols;
+        const px = cx * grid.cell + grid.cell / 2;
+        const py = ((i - cx) / grid.cols) * grid.cell + grid.cell / 2;
+        const dx = Math.max(s.x - px, 0, px - (s.x + s.w));
+        const dy = Math.max(s.y - py, 0, py - (s.y + s.h));
+        closest = Math.min(closest, Math.hypot(dx, dy));
+      }
+      assert.ok(closest <= reach,
+        `L${l.id}: a ${s.style} at ${s.x},${s.y} is ${closest.toFixed(0)} from anywhere you could stand`);
+    }
+    for (const d of l.doors) {
+      assert.ok(reached(d.x + d.w / 2, d.y + d.h / 2, 30),
+        `L${l.id}: a doorway at ${d.x},${d.y} is blocked`);
+    }
+    assert.ok(reached(l.exit.x + l.exit.w / 2, l.exit.y + l.exit.h / 2, 40),
+      `L${l.id}: the way out is cut off`);
+  }
+});
+
+test('the rooms differ from one another', () => {
+  // Section 9: a classroom, a corridor and a store should not be the same room
+  // three times. Read off the floor treatments, which are per-room.
+  for (const l of SCHOOL) {
+    const tags = (l.decor || []).filter((d) => d.kind === 'floor').map((d) => d.tag);
+    const counts = {};
+    for (const t of tags) counts[t] = (counts[t] || 0) + 1;
+    const commonest = Math.max(...Object.values(counts));
+    assert.ok(commonest <= tags.length - 2,
+      `L${l.id} is ${commonest} of ${tags.length} rooms the same`);
+  }
+});
+
+test('the school is still the only location with any of this', () => {
+  for (const l of OTHERS) {
+    assert.equal((l.decor || []).length, 0, `${l.name} L${l.id} picked up room dressing`);
+    assert.equal(l.stashes.length, 0, `${l.name} L${l.id} picked up searchable furniture`);
+  }
+});
+
+test('a searchable piece is always furniture you would actually open', () => {
+  const openable = new Set(['chest', 'bookshelf', 'wardrobe', 'table', 'tvBench']);
+  for (const l of SCHOOL) {
+    for (const s of l.stashes) {
+      assert.ok(openable.has(s.style), `L${l.id}: a ${s.style} is not something you open`);
+    }
+    // ...and not all of it, or the mechanic is a chore rather than a choice.
+    const searchable = pieces(l).filter((c) => c.searchable).length;
+    assert.ok(searchable < pieces(l).length * 0.7,
+      `L${l.id}: ${searchable} of ${pieces(l).length} pieces are searchable`);
+  }
+});
