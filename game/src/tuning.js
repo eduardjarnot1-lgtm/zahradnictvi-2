@@ -470,6 +470,21 @@ const PEOPLE = {
     // far edge of his attention is somewhere you can cross if you are quick and
     // quiet, and his elbow is not.
     vision: VISION,
+    // Getting behind something, and coming back out.
+    //
+    // A hiding place is a piece of furniture with a gap behind it, not a square
+    // on the floor: you walk up to the lockers, the button says HIDE, and he
+    // tucks himself in over half a second. Coming out is quicker than going in,
+    // because coming out is usually urgent.
+    hide: {
+      reach: 44,        // how close the lockers have to be to offer themselves
+      enter: 0.5,       // seconds spent getting in...
+      leave: 0.34,      // ...and rather fewer getting out
+      // Pushing the stick while tucked in brings you out. The button is the
+      // signposted way and this is the one every player will find first, and a
+      // hiding place you can be stuck in is the one thing this must not be.
+      breakOut: 0.35
+    },
     // Getting out of a chair takes a beat longer than it did. There are now
     // eight of them between the head coming off the desk and the first step —
     // and a wake-up you can read is also a wake-up the player can use, which is
@@ -795,6 +810,23 @@ export const TUNING = {
   hazards: {
     creakNoise: 5,        // stepping onto a creaky board
     creakCooldown: 1.4,   // seconds before the same board can creak again
+
+    // ...and everything else a floor has on it. A school floor is not bare:
+    // there is paper under the desks, a crisp packet somebody dropped in the
+    // corridor, pencils, a bag left across a doorway. Standing on any of it is
+    // a noise, and how big a noise is the whole of the decision — paper is
+    // nearly free and worth walking over, a bag is not.
+    //
+    // Same machinery as a creaky board: enter it once, pay once, and it goes
+    // quiet for a while, so nothing can be milked and nothing drains you while
+    // you stand on it. What differs is the price and the word.
+    underfoot: {
+      boards:  { noise: 5, say: 'CREAK' },
+      paper:   { noise: 2, say: 'CRINKLE' },
+      plastic: { noise: 4, say: 'CRACKLE' },
+      clutter: { noise: 3, say: 'CLICK' },
+      bag:     { noise: 8, say: 'THUMP' }
+    },
 
     // Walking into furniture. Soft things barely register; hard, hollow things
     // carry across a room. Scaled back from the first pass, where collisions

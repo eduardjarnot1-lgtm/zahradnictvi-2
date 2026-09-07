@@ -48,6 +48,11 @@ LOOT_CHARS = 'cwpkrmtnlvjdg'
 # only: hiding is new, and trying a new mechanic in one building is how the
 # rest of this game was built.
 HIDES = {'School': 3}
+# ...and which have things on the floor to tread on. The school, for the same
+# reason: one building at a time.
+LITTER_AT = {'School'}
+# ...and which get their furniture pushed flush against the walls behind it.
+SNUG = {'School'}
 
 
 class Loot:
@@ -1865,13 +1870,28 @@ def add_grounds(inner, sides, deep, flavour, loot, bite=True, voids=(), plant_ya
 # the box always overlaps its neighbours' columns. A tile with a cabinet
 # immediately beside it is a tile nobody can stand on. Two out is where "behind
 # the cabinet" actually lives for this collision model.
-HIDE_MIN_COVER = 8        # of the sixteen cells two tiles out, how many are solid
+# Of the sixteen cells two tiles out, how many are solid. Eleven, not eight,
+# and the difference is what "behind" means: eight covers the gap between two
+# banks of lockers down opposite sides of a corridor, which is covered from the
+# north and the south and wide open along the corridor in both directions —
+# standing in the middle of a hallway with lockers either side. Eleven is an
+# alcove, a dead end, the back of a bank: somewhere the room does not see into.
+HIDE_MIN_COVER = 11
+HIDE_MIN_PIECES = 3       # ...and how many of those have to be furniture
 HIDE_APART = 9            # tiles between one hiding place and the next
 HIDE_CLEAR = 6            # ...and from the spawn and the way out
 
 
-def add_hides(g, want=3):
-    """Mark up to `want` hiding places. Returns how many it found."""
+def add_hides(g, want=3, least=2):
+    """Mark up to `want` hiding places. Returns how many it found.
+
+    Two passes, and the second one matters. Eleven-of-sixteen cover is a proper
+    alcove — the back of a bank of lockers, a dead end behind the shelving — and
+    on a floorplan with long straight corridors there may be only one of those.
+    Rather than ship a level with nowhere to hide, the requirement comes down a
+    notch at a time until the level has at least a couple. A shallower nook is a
+    worse hiding place than an alcove; it is a far better one than none.
+    """
     TILE = 20
     solid = set('#%OTSWNVCBPEYZ+')
     marker = {}
@@ -1882,15 +1902,29 @@ def add_hides(g, want=3):
     reached = {(gx * 4 // TILE, gy * 4 // TILE) for (gx, gy) in g._reached()}
 
     def cover(x, y):
+        """How covered this tile is, and how much of that cover is furniture.
+
+        Both, because they are different things. A corner of a room is covered
+        on two sides and is somewhere you can be missed, but it is architecture
+        — you are standing in the open and hoping. Behind a bank of lockers you
+        are behind an object, which is what a hiding place should read as, so
+        furniture is what the ranking is really on and walls only break ties."""
         n = 0
+        pieces = 0
         for dy in range(-2, 3):
             for dx in range(-2, 3):
                 if max(abs(dx), abs(dy)) != 2:
                     continue
                 nx, ny = x + dx, y + dy
-                if not (0 <= nx < g.cols and 0 <= ny < g.rows) or g.g[ny][nx] in solid:
+                if not (0 <= nx < g.cols and 0 <= ny < g.rows):
                     n += 1
-        return n
+                    continue
+                ch = g.g[ny][nx]
+                if ch in solid:
+                    n += 1
+                    if ch in 'TSWNVCBPEYZ':
+                        pieces += 1
+        return n, pieces
 
     def usable(x, y):
         if not (0 <= x < g.cols and 0 <= y < g.rows) or g.g[y][x] != '.':
@@ -1899,28 +1933,37 @@ def add_hides(g, want=3):
             return False
         return not g._blocked(x * TILE + TILE / 2, y * TILE + TILE / 2)
 
+    def gather(min_cover, apart):
+        found = []
+        spots = []
+        for y in range(1, g.rows - 1):
+            for x in range(1, g.cols - 1):
+                if not usable(x, y):
+                    continue
+                c, pieces = cover(x, y)
+                if c < min_cover or pieces < HIDE_MIN_PIECES:
+                    continue
+                if any(marker.get(m)
+                       and max(abs(x - marker[m][0]), abs(y - marker[m][1])) < HIDE_CLEAR
+                       for m in ('@', 'X')):
+                    continue
+                spots.append((pieces, c, x, y))
+        # Most furniture first, then most covered, then spread out: three hiding
+        # places in the same alcove is one hiding place.
+        spots.sort(key=lambda t: (-t[0], -t[1], t[3], t[2]))
+        for (pieces, c, x, y) in spots:
+            if len(found) >= want:
+                break
+            if any(max(abs(x - px), abs(y - py)) < apart for (px, py) in found):
+                continue
+            found.append((x, y))
+        return found
+
     picks = []
-    spots = []
-    for y in range(1, g.rows - 1):
-        for x in range(1, g.cols - 1):
-            if not usable(x, y):
-                continue
-            c = cover(x, y)
-            if c < HIDE_MIN_COVER:
-                continue
-            if any(marker.get(m) and max(abs(x - marker[m][0]), abs(y - marker[m][1])) < HIDE_CLEAR
-                   for m in ('@', 'X')):
-                continue
-            spots.append((c, x, y))
-    # The best-covered first, and then spread out: three hiding places in the
-    # same alcove is one hiding place.
-    spots.sort(key=lambda t: (-t[0], t[2], t[1]))
-    for (c, x, y) in spots:
-        if len(picks) >= want:
+    for step in range(4):
+        picks = gather(HIDE_MIN_COVER - step, HIDE_APART - step)
+        if len(picks) >= least:
             break
-        if any(max(abs(x - px), abs(y - py)) < HIDE_APART for (px, py) in picks):
-            continue
-        picks.append((x, y))
     for (x, y) in picks:
         cells = [(x, y)]
         # A neighbour if there is a sensible one, so the spot is a place to
@@ -1930,11 +1973,302 @@ def add_hides(g, want=3):
         for (nx, ny) in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
             if len(cells) >= 2:
                 break
-            if usable(nx, ny) and cover(nx, ny) >= HIDE_MIN_COVER - 2:
+            if usable(nx, ny) and cover(nx, ny)[0] >= HIDE_MIN_COVER - 2:
                 cells.append((nx, ny))
         for (cx, cy) in cells:
             g.g[cy][cx] = 'H'
     return len(picks)
+
+
+# ------------------------------------------------------- pushed against the wall
+# A tile is twenty units and the player is twenty-two wide, so a cabinet parked
+# one tile off the wall behind it leaves a channel nobody can walk down. From
+# above it reads as a mistake — the thing is obviously meant to be against the
+# wall and obviously is not — and it plays as a dead end you keep trying.
+#
+# So: find the blobs with exactly one clear tile between them and the building,
+# and slide them over. Only when the tiles they are moving into are free and
+# unreserved, and only by the one tile; a piece that has to travel further than
+# that was put where it is on purpose.
+def snug_to_walls(g):
+    """Push furniture flush against the wall it is standing a tile away from.
+
+    One piece at a time, and each move is checked before it is kept. Sliding a
+    bookcase back against the wall can take the last standable tile beside it
+    with it — or, worse, seal the approach to something else entirely — and a
+    cupboard nobody can walk up to is a worse outcome than a cupboard standing a
+    tile proud of the wall. So: move, look at the whole map, and put it back if
+    anything came off worse.
+    """
+    solid = set('#%O')
+    # Indoors only. A tree standing a tile from the fence is a tree on a lawn,
+    # not a cabinet somebody failed to push back.
+    pieces = 'TSWNVCBP'
+    TILE = 20
+
+    def blobs():
+        seen = set()
+        out = []
+        for y in range(g.rows):
+            for x in range(g.cols):
+                if (x, y) in seen or g.g[y][x] not in pieces:
+                    continue
+                ch = g.g[y][x]
+                blob, stack = set(), [(x, y)]
+                while stack:
+                    cx, cy = stack.pop()
+                    if (cx, cy) in blob:
+                        continue
+                    if not (0 <= cx < g.cols and 0 <= cy < g.rows) or g.g[cy][cx] != ch:
+                        continue
+                    blob.add((cx, cy))
+                    stack += [(cx + 1, cy), (cx - 1, cy), (cx, cy + 1), (cx, cy - 1)]
+                seen |= blob
+                out.append((ch, frozenset(blob)))
+        return out
+
+    def stranded():
+        """How many pieces of furniture nobody can get to.
+
+        Counted rather than asserted, and compared against what the map started
+        with. A big school has a piece or two the grounds pass walled in behind
+        a hedge before this ran; demanding perfection means every move is
+        rejected on those maps and nothing is ever pushed against a wall. What
+        matters is that a move does not make things worse.
+
+        Measured two tiles out, not one: the tile immediately beside a cabinet
+        is never standable, because the player is wider than a tile.
+        """
+        reached = {(gx * 4 // TILE, gy * 4 // TILE) for (gx, gy) in g._reached()}
+        count = 0
+        for (_, blob) in blobs():
+            ok = False
+            for (bx, by) in blob:
+                for dy in range(-2, 3):
+                    for dx in range(-2, 3):
+                        if max(abs(dx), abs(dy)) != 2:
+                            continue
+                        nx, ny = bx + dx, by + dy
+                        if not (0 <= nx < g.cols and 0 <= ny < g.rows):
+                            continue
+                        if (nx, ny) in reached and not g._blocked(nx * TILE + 10, ny * TILE + 10):
+                            ok = True
+                            break
+                    if ok:
+                        break
+                if ok:
+                    break
+            if not ok:
+                count += 1
+        return count
+
+    baseline = None
+
+    def shift(blob, ch, dx, dy):
+        """Slide a blob one tile, keep it if the map is no worse for it."""
+        to = [c for c in ((bx + dx, by + dy) for (bx, by) in blob) if c not in blob]
+        if not to or not all(0 <= cx < g.cols and 0 <= cy < g.rows for cx, cy in to):
+            return False
+        if any(g.g[cy][cx] != '.' or (cx, cy) in g.keep for cx, cy in to):
+            return False
+        for (bx, by) in blob:
+            g.g[by][bx] = '.'
+        for (bx, by) in blob:
+            g.g[by + dy][bx + dx] = ch
+        if stranded() <= baseline:
+            return True
+        for (bx, by) in blob:
+            g.g[by + dy][bx + dx] = '.'
+        for (bx, by) in blob:
+            g.g[by][bx] = ch
+        return False
+
+    baseline = stranded()
+    moved = 0
+    for (ch, blob) in blobs():
+        for (dx, dy) in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            near = [c for c in ((bx + dx, by + dy) for (bx, by) in blob) if c not in blob]
+            far = [c for c in ((bx + dx * 2, by + dy * 2) for (bx, by) in blob) if c not in blob]
+            if not near or not far:
+                continue
+            if not all(0 <= cx < g.cols and 0 <= cy < g.rows for cx, cy in near + far):
+                continue
+            # Clear next door, building the step after: that is the gap.
+            if any(g.g[cy][cx] != '.' for cx, cy in near):
+                continue
+            if not any(g.g[cy][cx] in solid for cx, cy in far):
+                continue
+            # Flush against the wall is the answer. Where it is not available —
+            # the tile between is a doorway's landing, or closing the gap would
+            # seal something off — the other way to stop a channel nobody fits
+            # through being a channel is to make it one they do, so the piece
+            # steps back instead and the dead tile becomes an aisle.
+            if shift(blob, ch, dx, dy) or shift(blob, ch, -dx, -dy):
+                moved += 1
+            break
+    return moved
+
+
+# ---------------------------------------------------- fittings and the lights
+# The things a building has that nobody chooses: radiators under the windows,
+# an extinguisher by the corridor doors, coat pegs along a wall, and the strip
+# lights overhead.
+#
+# All of it is decoration rather than geometry — nothing here collides — so it
+# costs a rectangle in the emitted map and one draw into the room cache, and
+# nothing per frame. That is what makes it affordable to have a lot of.
+def add_fittings(g, tier):
+    """Radiators, extinguishers, coat pegs, and the lights."""
+    put = 0
+    inside = set('.,~abeq')
+
+    def floor_at(x, y):
+        return 0 <= x < g.cols and 0 <= y < g.rows and g.g[y][x] in inside
+
+    # Radiators under the windows, on whichever side of the wall is indoors.
+    for y in range(g.rows):
+        for x in range(g.cols):
+            if g.g[y][x] != 'O':
+                continue
+            if g.g[y][max(0, x - 1)] == 'O' and x > 0:
+                continue                      # only the start of each run
+            run = 0
+            while x + run < g.cols and g.g[y][x + run] == 'O':
+                run += 1
+            if run >= 3:                      # a horizontal window: below or above
+                below = floor_at(x + 1, y + 1)
+                at = y + (1 if below else -1)
+                # Only where the room actually is. A window in the outer wall of
+                # a building with grounds round it has floor on one side and
+                # lawn on the other, and a radiator on the lawn is worse than no
+                # radiator; a window at the very edge of the map has neither.
+                if floor_at(x + 1, at):
+                    g.deco('radiator', x + 1, at, run - 2, 1)
+                    put += 1
+                continue
+            tall = 0
+            while y + tall < g.rows and g.g[y + tall][x] == 'O':
+                tall += 1
+            if tall >= 3 and (y == 0 or g.g[y - 1][x] != 'O'):
+                right = floor_at(x + 1, y + 1)
+                at = x + (1 if right else -1)
+                if floor_at(at, y + 1):
+                    g.deco('radiator', at, y + 1, 1, tall - 2)
+                    put += 1
+
+    # An extinguisher beside every other doorway, and coat pegs on the wall
+    # opposite the first of them: both are corridor things, and both go where
+    # there is wall to put them on.
+    doors = [(x, y) for y in range(g.rows) for x in range(g.cols)
+             if g.g[y][x] == 'D' and g.g[y][max(0, x - 1)] != 'D']
+    for i, (x, y) in enumerate(doors):
+        if i % 2:
+            continue
+        for (dx, dy) in ((-2, 0), (3, 0), (0, -2), (0, 3)):
+            wx, wy = x + dx, y + dy
+            if not (0 <= wx < g.cols and 0 <= wy < g.rows):
+                continue
+            if g.g[wy][wx] in '#%' and (floor_at(wx, wy + 1) or floor_at(wx, wy - 1)
+                                        or floor_at(wx + 1, wy) or floor_at(wx - 1, wy)):
+                g.deco('extinguisher', wx, wy)
+                put += 1
+                break
+
+    # The lights. On a lattice, wherever there is floor under them and no light
+    # already nearby — so a long corridor gets a row of them and a cupboard gets
+    # one, which is how a building is actually lit.
+    step = 7
+    lit = []
+    for y in range(2, g.rows - 2, step):
+        for x in range(2, g.cols - 2, step):
+            spot = None
+            for (ox, oy) in ((0, 0), (1, 0), (0, 1), (-1, 0), (0, -1), (1, 1)):
+                if floor_at(x + ox, y + oy):
+                    spot = (x + ox, y + oy)
+                    break
+            if not spot:
+                continue
+            if any(max(abs(spot[0] - lx), abs(spot[1] - ly)) < 5 for (lx, ly) in lit):
+                continue
+            lit.append(spot)
+            g.deco('ceiling', spot[0] - 1, spot[1] - 1, 3, 3)
+            put += 1
+    return put
+
+
+# ------------------------------------------------------------ things underfoot
+# What a school floor has on it, and what standing on it costs.
+#
+# Not scattered: placed where each thing would actually be. Paper and pencils
+# collect under desks and along the foot of the lockers; a crisp packet gets
+# dropped in the middle of a corridor where there is nothing to sweep it under;
+# a bag gets left near a doorway, because that is where people put bags down.
+#
+# The bag never goes *in* a doorway lane. A noise you cannot route around is not
+# a decision, it is a toll — and the whole point of these is that the cheap ones
+# are worth walking over and the expensive one is worth going round.
+LITTER = {
+    'paper':   ('a', 5),      # character, and how many per level per tier step
+    'clutter': ('e', 4),
+    'plastic': ('b', 3),
+    'bag':     ('q', 2),
+}
+LITTER_TIER = [0.6, 0.8, 1.0, 1.2, 1.4]
+
+
+def add_litter(g, tier):
+    """Drop paper, pencils, packets and bags where they would actually be."""
+    TILE = 20
+    solid = set('#%OTSWNVCBPEYZ+H')
+    reached = {(gx * 4 // TILE, gy * 4 // TILE) for (gx, gy) in g._reached()}
+    doors = [(x, y) for y in range(g.rows) for x in range(g.cols) if g.g[y][x] == 'D']
+
+    def free(x, y):
+        if not (1 <= x < g.cols - 1 and 1 <= y < g.rows - 1):
+            return False
+        if g.g[y][x] != '.' or (x, y) in g.keep or (x, y) not in reached:
+            return False
+        return not g._blocked(x * TILE + TILE / 2, y * TILE + TILE / 2)
+
+    def near_furniture(x, y):
+        return any(g.g[y + dy][x + dx] in 'TSWNVCBPE'
+                   for dy in range(-2, 3) for dx in range(-2, 3)
+                   if 0 <= x + dx < g.cols and 0 <= y + dy < g.rows)
+
+    def near_door(x, y):
+        return any(max(abs(x - dx), abs(y - dy)) <= 4 for (dx, dy) in doors)
+
+    # Where each kind belongs. A tile can serve more than one, and the order
+    # below is the order they get first refusal.
+    wants = {
+        'paper': lambda x, y: near_furniture(x, y),
+        'clutter': lambda x, y: near_furniture(x, y),
+        'bag': lambda x, y: near_door(x, y) and not near_furniture(x, y),
+        'plastic': lambda x, y: not near_furniture(x, y),
+    }
+    taken = []
+    for kind in ('bag', 'plastic', 'paper', 'clutter'):
+        ch, per = LITTER[kind]
+        want = max(1, int(round(per * LITTER_TIER[tier])))
+        fits = wants[kind]
+        placed = 0
+        # Walked on a coarse lattice so the litter is spread through the
+        # building rather than piled in whichever room comes first.
+        for step in (4, 3, 2):
+            if placed >= want:
+                break
+            for y in range(2, g.rows - 2, step):
+                for x in range(2, g.cols - 2, step):
+                    if placed >= want:
+                        break
+                    if not free(x, y) or not fits(x, y):
+                        continue
+                    if any(max(abs(x - px), abs(y - py)) < 4 for (px, py) in taken):
+                        continue
+                    g.g[y][x] = ch
+                    taken.append((x, y))
+                    placed += 1
+    return len(taken)
 
 
 # ============================================================== the silhouette
@@ -2465,8 +2799,17 @@ def build():
             # as thin air and turns out to be a locker. Only the school has
             # them: hiding is a beta mechanic and this is the building it is
             # being tried in.
+            if name in SNUG:
+                # Twice: pushing one bank of lockers flat frequently frees the
+                # tile the next one needed, and the second pass is cheap.
+                while snug_to_walls(g):
+                    pass
             if name in HIDES:
                 add_hides(g, HIDES[name])
+            if name in LITTER_AT:
+                add_litter(g, tier)
+            if name in SNUG:
+                add_fittings(g, tier)
             stashes = make_searchable(g, tier, name)
             if g.bad:
                 problems.append(f'{name} L{tier + 1}: {g.bad}')

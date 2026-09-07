@@ -30,7 +30,14 @@ const FURNITURE = {
   K: 'shed'
 };
 
-const FLOOR = new Set([' ', '.', 'D', ',', '~', '@', 'X', 'H']);
+// Floor you make a noise on. `~` is the creaky boards these started as; the
+// rest is what a school floor actually has on it.
+const UNDERFOOT = {
+  '~': 'boards', 'a': 'paper', 'b': 'plastic', 'e': 'clutter', 'q': 'bag'
+};
+
+const FLOOR = new Set([' ', '.', 'D', ',', '~', '@', 'X', 'H',
+  ...Object.keys(UNDERFOOT)]);
 
 // Maximal-rectangle merge over cells sharing a character. Fewer, larger
 // colliders than one box per tile: the physics loop is linear in collider
@@ -180,8 +187,15 @@ export function tileLevel(spec) {
 
   // --- floor markings -------------------------------------------------------
   const rugs = mergeRects(grid, rows, cols, ',');
-  const creaks = mergeRects(grid, rows, cols, '~')
-    .map((r, i) => ({ id: `L${spec.id}-c${i}`, ...r }));
+  // Everything underfoot that makes a noise when you step on it. The creaky
+  // boards were the first of these and are now one kind among several — same
+  // rects, same once-per-entry cooldown, different price and different word.
+  const creaks = [];
+  for (const [ch, kind] of Object.entries(UNDERFOOT)) {
+    for (const r of mergeRects(grid, rows, cols, ch)) {
+      creaks.push({ id: `L${spec.id}-c${creaks.length}`, kind, ...r });
+    }
+  }
   const doors = mergeRects(grid, rows, cols, 'D');
   // Somewhere to be out of sight. Floor like any other — you walk onto it, it
   // costs nothing, nothing collides — except that the map has written down that
@@ -232,6 +246,35 @@ export function tileLevel(spec) {
         throw new Error(`level ${spec.id}: unknown tile '${grid[y][x]}' at ${x},${y}`);
       }
     }
+  }
+
+  // What each hiding place is *behind*. A hiding place is not a spot on the
+  // floor, it is the far side of a piece of furniture — so the game needs to
+  // know which piece, to draw the thief tucked against it and to say what he is
+  // hiding behind. Nearest solid thing to the middle of the nook, which on a
+  // covered tile is the cabinet or the wall that makes it one.
+  for (const spot of hides) {
+    const cx = spot.x + spot.w / 2;
+    const cy = spot.y + spot.h / 2;
+    let best = null;
+    let nearest = Infinity;
+    for (const c of colliders) {
+      if (c.type !== 'furniture' && c.type !== 'wall' && c.type !== 'partition') continue;
+      // Distance to the box rather than to its middle: a long bank of lockers
+      // is close to everything along it and far from nothing.
+      const dx = Math.max(c.x - cx, 0, cx - (c.x + c.w));
+      const dy = Math.max(c.y - cy, 0, cy - (c.y + c.h));
+      // Furniture wins ties, and wins near-ties. Every one of these nooks has a
+      // wall in it — that is most of what makes it a nook — and the wall is
+      // usually a hair closer than the lockers, so nearest-wins named the
+      // building every time. What the player is hiding behind is the object.
+      const d = Math.hypot(dx, dy) + (c.type === 'furniture' ? 0 : TILE * 0.9);
+      if (d < nearest) { nearest = d; best = c; }
+    }
+    spot.anchor = best && nearest <= TILE * 2.6
+      ? { x: best.x, y: best.y, w: best.w, h: best.h,
+          style: best.style || (best.type === 'furniture' ? 'cabinet' : 'wall') }
+      : null;
   }
 
   const kind = spec.watcher || 'sleeper';

@@ -3,7 +3,7 @@
 // know about a tick comes back as events.
 import { TUNING } from './tuning.js';
 import { createRng } from './rng.js';
-import { solveMove, clampToWorld } from './physics.js';
+import { solveMove, clampToWorld, blocked } from './physics.js';
 import { navGrid, flowField, steer, nearestStand, cellOf } from './nav.js';
 import {
   addNoise, isAwake, itemStats, canBank, sleepStage, resolveUpgrades, bumpNoise, timeLimit,
@@ -371,6 +371,9 @@ export function alertnessOf(sim) {
 
 const mix = (lo, hi, t) => lo + (hi - lo) * t;
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+// How close to the gap counts as being in it rather than merely beside it.
+// Under half a tile: he has to have stepped in.
+const IN_THE_NOOK = 8;
 
 // How far, and how sharply, this level's person can see — the location's own
 // numbers, scaled by how far into the location you are. Resolved once per sim:
@@ -445,22 +448,6 @@ function takeFix(sim, entity, player, alert) {
   }
   entity.heard = sim.noise;
   return entity.target;
-}
-
-// Is the thief in one of the places the map says you can be out of sight?
-//
-// Read off his middle rather than his box: half in a doorway is not hidden, and
-// a hiding place you can benefit from by standing next to it is not a place, it
-// is a radius. Cheap enough to do every step — there are two or three of these
-// on a level and the test is a rectangle.
-function hidingIn(sim, player) {
-  const spots = sim.level.hides;
-  if (!spots || !spots.length) return null;
-  for (const spot of spots) {
-    if (player.x >= spot.x && player.x < spot.x + spot.w
-      && player.y >= spot.y && player.y < spot.y + spot.h) return spot;
-  }
-  return null;
 }
 
 function updateInvestigation(sim, player) {
@@ -630,12 +617,20 @@ function updateInvestigation(sim, player) {
       } else {
         // Re-read where you are when you have moved, or every so often —
         // never every frame, which would be both wasteful and uncanny.
-        entity.repathAt += STEP_SECONDS;
-        const drifted = !entity.goal
-          || Math.hypot(entity.goal.x - player.x, entity.goal.y - player.y) > rules.repathAfter;
-        if (drifted || entity.repathAt >= rules.repathEvery) {
-          entity.repathAt = 0;
-          routeTo(entity, sim.level, player.x, player.y);
+        // ...but only while he can actually see you. Behind the lockers you
+        // are not somewhere he knows about, and a man who keeps walking to your
+        // live position for two more seconds does know — he would arrive at the
+        // furniture you are behind every single time, which makes hiding while
+        // chased worthless and makes him a cheat. So the goal freezes at the
+        // last place he saw you, he goes there, and he looks around.
+        if (!sim.hidden) {
+          entity.repathAt += STEP_SECONDS;
+          const drifted = !entity.goal
+            || Math.hypot(entity.goal.x - player.x, entity.goal.y - player.y) > rules.repathAfter;
+          if (drifted || entity.repathAt >= rules.repathEvery) {
+            entity.repathAt = 0;
+            routeTo(entity, sim.level, player.x, player.y);
+          }
         }
       }
     }
@@ -827,6 +822,13 @@ export function createSim({ level, seed = 1, upgrades = {} }) {
     vision: visionOf(rules, level),
     hidden: false,
     hideIn: null,
+    // Getting in and out of one: null, or an animation in progress.
+    hiding: null,
+    hideTargetId: null,
+    // What the one interaction button is offering right now, if anything:
+    // 'leave' while tucked in, 'hide' beside somewhere to tuck into, 'search'
+    // beside something to look inside. One button, whatever is to hand.
+    action: null,
     investigator,
     // How loud this spot is, as a multiplier on everything you do. Always 1
     // where a location has no proximity rule, which is everywhere but here.
@@ -959,6 +961,80 @@ function takeItem(sim, item) {
 // Which piece of furniture a SEARCH would open: the nearest unsearched one
 // within reach, measured to the edge of the box rather than its centre, so a
 // long bank of lockers offers itself along its whole length.
+// The nearest hiding place within arm's reach, measured to the edge of the nook
+// rather than its middle — the same rule the cupboards use, so walking up to a
+// bank of lockers offers itself at the same distance as walking up to a desk.
+// Behind the furniture: he crosses the last few units rather than appearing
+// there. The target is the middle of the nook, which the map already guaranteed
+// is somewhere a person fits — so nothing here can push him into a wall.
+function enterHiding(sim, player, spot, rules) {
+  sim.hiding = {
+    t: 0,
+    duration: rules.enter,
+    into: spot,
+    from: { x: player.x, y: player.y },
+    to: { x: spot.x + spot.w / 2, y: spot.y + spot.h / 2 }
+  };
+  sim.hideTargetId = null;
+  sim.events.push({ type: 'hiding', x: player.x, y: player.y, spot: spot.id });
+}
+
+// ...and back out, to the side the room is on. Worked out from the thing he is
+// hiding behind: step out away from it, not through it.
+function leaveHiding(sim, player, rules) {
+  const spot = sim.hideIn || (sim.hiding && sim.hiding.into);
+  const anchor = spot && spot.anchor;
+  let ax = 0;
+  let ay = 0;
+  if (anchor) {
+    const cx = spot.x + spot.w / 2;
+    const cy = spot.y + spot.h / 2;
+    ax = cx - (anchor.x + anchor.w / 2);
+    ay = cy - (anchor.y + anchor.h / 2);
+    const len = Math.hypot(ax, ay) || 1;
+    ax /= len;
+    ay /= len;
+  }
+  const out = { x: player.x + ax * 22, y: player.y + ay * 22 };
+  sim.hidden = false;
+  sim.hideIn = null;
+  sim.hiding = {
+    t: 0,
+    duration: rules.leave,
+    into: null,
+    from: { x: player.x, y: player.y },
+    // Never through the furniture, and never into a wall: if the step out is
+    // blocked he simply stands up where he is, which is still out of hiding.
+    to: blocked(out.x, out.y, player.w, player.h, sim.level.colliders)
+      ? { x: player.x, y: player.y } : out
+  };
+  sim.events.push({ type: 'hiding', x: player.x, y: player.y, spot: null });
+}
+
+function nearestHide(sim, player, reach) {
+  let best = null;
+  let bestDistance = Infinity;
+  for (const spot of sim.level.hides || []) {
+    const dx = Math.max(spot.x - player.x, 0, player.x - (spot.x + spot.w));
+    const dy = Math.max(spot.y - player.y, 0, player.y - (spot.y + spot.h));
+    const distance = Math.hypot(dx, dy);
+    if (distance <= reach && distance < bestDistance) {
+      bestDistance = distance;
+      best = spot;
+    }
+  }
+  return best ? { spot: best, distance: bestDistance } : null;
+}
+
+// How far the player is from a piece of furniture, measured to its edge rather
+// than its middle — the rule the search has always used, lifted out so the
+// hiding places can be compared against cupboards on the same terms.
+function stashGap(player, stash) {
+  const dx = Math.max(stash.x - player.x, 0, player.x - (stash.x + stash.w));
+  const dy = Math.max(stash.y - player.y, 0, player.y - (stash.y + stash.h));
+  return Math.hypot(dx, dy);
+}
+
 function nearestStash(sim, player, reach) {
   let best = null;
   let bestDistance = Infinity;
@@ -1041,19 +1117,15 @@ export function stepSim(sim, input = EMPTY_INPUT) {
   }
 
   const player = playerOf(sim);
+  // Nothing the stick says counts while he is climbing in behind the lockers or
+  // straightening up out of them: the animation owns his position for those few
+  // tenths, and a thief who can walk out of the middle of it is not hiding, he
+  // is sliding.
+  const busy = !!sim.hiding;
   for (const entity of sim.entities) {
     const update = UPDATERS[entity.kind];
-    if (update) update(entity, sim, entity.kind === 'player' ? input : EMPTY_INPUT);
-  }
-
-  // Out of sight, if the map offers anywhere to be. Resolved before anyone
-  // looks for you and after you have moved, so stepping into a doorway is worth
-  // exactly the frame you are in it for.
-  const wasHidden = sim.hidden;
-  sim.hideIn = hidingIn(sim, player);
-  sim.hidden = !!sim.hideIn;
-  if (sim.hidden !== wasHidden) {
-    sim.events.push({ type: 'hide', hidden: sim.hidden, x: player.x, y: player.y });
+    if (!update) continue;
+    update(entity, sim, entity.kind === 'player' && !busy ? input : EMPTY_INPUT);
   }
 
   // How sensitive this spot is. Distance is measured to where the person
@@ -1090,11 +1162,17 @@ export function stepSim(sim, input = EMPTY_INPUT) {
       player.x > zone.x && player.x < zone.x + zone.w &&
       player.y > zone.y && player.y < zone.y + zone.h;
     if (inside && !zone.active && zone.cooldown === 0 && sim.status === 'running') {
-      const amount = Math.round(
-        TUNING.hazards.creakNoise * sim.mods.hazardNoise * sim.proximity);
+      // What it costs depends on what it is. Paper is nearly free; a bag left
+      // across a doorway is most of a dropped phone. Everything else about it —
+      // the cooldown, the proximity multiplier, the soft-shoe upgrade — is the
+      // same for all of them, because they are all the same mechanic.
+      const kind = zone.kind || 'boards';
+      const sound = TUNING.hazards.underfoot[kind] || TUNING.hazards.underfoot.boards;
+      const amount = Math.round(sound.noise * sim.mods.hazardNoise * sim.proximity);
       if (amount > 0) {
         sim.noise = addNoise(sim.noise, amount);
-        sim.events.push({ type: 'creak', x: player.x, y: player.y, noise: amount });
+        sim.events.push({ type: 'creak', kind, say: sound.say,
+          x: player.x, y: player.y, noise: amount });
         if (endsAtCap(sim)) finish(sim, 'lost', 'awake');
       }
       zone.cooldown = TUNING.hazards.creakCooldown;
@@ -1226,6 +1304,39 @@ export function stepSim(sim, input = EMPTY_INPUT) {
     if (sim.reach.t >= sim.reach.duration) sim.reach = null;
   }
 
+  // Getting behind the lockers, and coming back out. Only where a location asks
+  // for it, which is the school; everywhere else `sim.level.hides` is empty and
+  // none of this runs.
+  const hideRules = sim.rules.hide;
+  if (hideRules && sim.status === 'running') {
+    if (sim.hiding) {
+      // Mid-animation. He is carried between the two positions rather than
+      // teleported, and nothing he does with the stick counts until he arrives.
+      sim.hiding.t += STEP_SECONDS;
+      const k = Math.min(1, sim.hiding.t / sim.hiding.duration);
+      const eased = k * k * (3 - 2 * k);
+      player.x = sim.hiding.from.x + (sim.hiding.to.x - sim.hiding.from.x) * eased;
+      player.y = sim.hiding.from.y + (sim.hiding.to.y - sim.hiding.from.y) * eased;
+      player.speed = 0;
+      player.vx = 0;
+      player.vy = 0;
+      player.moving = false;
+      if (k >= 1) {
+        const going = sim.hiding.into;
+        sim.hidden = !!going;
+        sim.hideIn = going || null;
+        sim.hiding = null;
+        sim.events.push({ type: 'hide', hidden: sim.hidden, x: player.x, y: player.y });
+      }
+    } else if (sim.hidden) {
+      // Tucked in. The button says LEAVE; so does pushing the stick, because a
+      // player who wants out will push the stick before they read anything.
+      const shoved = Math.hypot(input.x || 0, input.y || 0) >= hideRules.breakOut;
+      const pressed = input.search && !sim.prevSearch;
+      if (shoved || pressed) leaveHiding(sim, player, hideRules);
+    }
+  }
+
   // Looking inside the furniture. Only where a location asks for it, which is
   // the school and nowhere else — everywhere else `sim.stashes` is empty and
   // none of this runs.
@@ -1235,13 +1346,36 @@ export function stepSim(sim, input = EMPTY_INPUT) {
       sim.searchTargetId = null;
       sim.searching.t += STEP_SECONDS;
       if (sim.searching.t >= sim.searching.duration) finishSearch(sim);
+    } else if (sim.hidden || sim.hiding) {
+      // Tucked in behind the lockers, the button says LEAVE and nothing else.
+      sim.searchTargetId = null;
+      sim.hideTargetId = null;
     } else {
+      // Both mechanics share one button, and the locker you would hide behind
+      // is frequently the locker you would search — so which is on offer has to
+      // be a rule the player can feel rather than a comparison of two distances
+      // that are nearly equal.
+      //
+      // The rule is where he is standing. In the gap, it is HIDE; anywhere else
+      // with a cupboard in reach, it is SEARCH. So walking up to the lockers
+      // offers to open them and stepping into the alcove beside them offers to
+      // get behind them, and one step chooses.
       const stash = nearestStash(sim, player, searchRules.reach);
-      sim.searchTargetId = stash ? stash.id : null;
+      const nook = hideRules ? nearestHide(sim, player, hideRules.reach) : null;
+      const hiding = nook && (nook.distance <= IN_THE_NOOK || !stash);
+      sim.searchTargetId = hiding ? null : (stash ? stash.id : null);
+      sim.hideTargetId = hiding ? nook.spot.id : null;
       const pressed = input.search && !sim.prevSearch;
-      if (stash && pressed) beginSearch(sim, stash, searchRules);
+      if (pressed && hiding) enterHiding(sim, player, nook.spot, hideRules);
+      else if (pressed && stash) beginSearch(sim, stash, searchRules);
     }
   }
+  // One button, and what it is offering. Leaving beats hiding beats searching:
+  // the thing you are already doing comes first, and a cupboard you could open
+  // is never more urgent than getting out from behind it.
+  sim.action = sim.hidden || (sim.hiding && sim.hiding.into) ? 'leave'
+    : sim.hideTargetId ? 'hide'
+      : sim.searchTargetId || sim.searching ? 'search' : null;
   sim.prevSearch = !!input.search;
 
   // Last, so that the meter he reacts to is this tick's meter: lifting

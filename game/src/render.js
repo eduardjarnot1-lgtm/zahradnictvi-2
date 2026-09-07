@@ -266,6 +266,17 @@ export function createRenderer(canvas, options = {}) {
     }
   }
 
+  // How far into a hiding place he is, 0 out to 1 tucked in — the animation
+  // while it runs, and flat 1 once he is there.
+  function hidingShare(sim) {
+    if (sim.hiding) {
+      const k = Math.min(1, sim.hiding.t / sim.hiding.duration);
+      const eased = k * k * (3 - 2 * k);
+      return sim.hiding.into ? eased : 1 - eased;
+    }
+    return sim.hidden ? 1 : 0;
+  }
+
   // The beta's markers over the hiding places. Culled like everything else,
   // and skipped entirely — not merely drawn transparent — when the flag is off,
   // so turning it off before release costs nothing per frame.
@@ -668,9 +679,36 @@ export function createRenderer(canvas, options = {}) {
       };
       // Locations that ask for the drawn figures get them; everywhere else
       // keeps the character it has always had.
+      // Tucked in behind something. He is drawn a little smaller and a little
+      // way into the furniture he is hiding behind, which is the whole of the
+      // read: standing on the tile at full size beside a bank of lockers looks
+      // like standing beside a bank of lockers.
+      const tuck = hidingShare(sim);
+      let hx = px;
+      let hy = py;
+      if (tuck > 0) {
+        const spot = sim.hideIn || (sim.hiding && sim.hiding.into);
+        const anchor = spot && spot.anchor;
+        if (anchor) {
+          const ax = anchor.x + anchor.w / 2;
+          const ay = anchor.y + anchor.h / 2;
+          const len = Math.hypot(ax - px, ay - py) || 1;
+          hx += ((ax - px) / len) * 7 * tuck;
+          hy += ((ay - py) / len) * 7 * tuck;
+        }
+        ctx.save();
+        ctx.translate(hx, hy);
+        ctx.scale(1 - tuck * 0.16, 1 - tuck * 0.16);
+        ctx.translate(-hx, -hy);
+        ctx.globalAlpha = 1 - tuck * 0.25;
+      }
       const hand = sim.rules.figures
-        ? drawFigure(ctx, px, py, stance, THIEF_LOOK)
-        : drawThief(ctx, px, py, stance);
+        ? drawFigure(ctx, hx, hy, stance, THIEF_LOOK)
+        : drawThief(ctx, hx, hy, stance);
+      if (tuck > 0) {
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      }
 
       if (sim.reach) {
         drawGrabbedItem(ctx, ITEM_ART[sim.reach.type] || '?', sim.reach, hand, reachProgress);

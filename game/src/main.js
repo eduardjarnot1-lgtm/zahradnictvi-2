@@ -18,6 +18,8 @@ import { ITEM_ART, ITEM_NAMES } from './art.js';
 
 const $ = (id) => document.getElementById(id);
 const WAKE_BEAT = 0.9;         // seconds of wake-up animation before the fail screen
+// What the one interaction button says, per action the simulation is offering.
+const ACTION_LABEL = { search: 'SEARCH', hide: 'HIDE', leave: 'LEAVE' };
 
 export function boot() {
   const params = new URLSearchParams(location.search);
@@ -351,9 +353,13 @@ export function boot() {
           }
         }
       } else if (event.type === 'creak') {
-        pops.push({ x: event.x, y: event.y - 6, value: null, text: 'CREAK', life: 1 });
-        audio.creak();
-        buzz(18);
+        // What it was, in the player's own words. A CRINKLE and a THUMP cost
+        // different amounts and the player has to be able to tell which they
+        // just paid without reading the meter.
+        pops.push({ x: event.x, y: event.y - 6, value: null,
+          text: event.say || 'CREAK', life: 1 });
+        audio.creak(event.noise);
+        buzz(Math.min(30, 8 + event.noise * 2.5));
       } else if (event.type === 'bump') {
         pops.push({
           x: event.x, y: event.y - 6, value: null, text: `+${event.noise}`,

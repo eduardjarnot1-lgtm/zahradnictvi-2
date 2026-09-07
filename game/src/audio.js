@@ -148,9 +148,16 @@ export function createAudio(saveStore) {
     },
 
     // A dry knock under the foot.
-    creak() {
-      tone(220, 0.11, 'sawtooth', 0.05);
-      tone(140, 0.20, 'sawtooth', 0.04, 0.05);
+    // Something underfoot. Pitched and voiced by how much noise it cost, so a
+    // crinkle of paper and a bag going over are not the same sound played at
+    // the same volume: quiet things are brief and bright, heavy ones are low
+    // and have a tail.
+    creak(noise = 5) {
+      const heavy = Math.max(0, Math.min(1, (noise - 2) / 6));
+      const top = 340 - heavy * 150;
+      tone(top, 0.06 + heavy * 0.07, heavy > 0.55 ? 'sawtooth' : 'triangle',
+        0.028 + heavy * 0.03);
+      tone(top * 0.62, 0.10 + heavy * 0.14, 'sawtooth', 0.02 + heavy * 0.026, 0.04);
     },
 
     // Barely-there footfall, alternating so a walk cycle has two feet. Louder

@@ -89,6 +89,11 @@
   #search.down{transform:scale(.94);background:#6cc8e855}
   #search:focus-visible{outline:2px solid #6cc8e8;outline-offset:3px}
   /* A ring that fills while his hands are in the drawer. */
+  /* Getting out from behind the lockers is the urgent one, and should not look
+     like opening a drawer. */
+  #search.leave{background:#ffb02026;border-color:#ffb020aa;color:#ffe3a8}
+  #search.leave.on{background:#ffb02040;border-color:#ffb020;color:#fff3d6;
+    box-shadow:0 0 0 4px #ffb0201f}
   #search.busy{background:conic-gradient(#6cc8e8cc calc(var(--p) * 1turn),#6cc8e820 0);
     border-color:#6cc8e8;color:#e2f6ff}
   body[data-screen="playing"] #take{display:flex}

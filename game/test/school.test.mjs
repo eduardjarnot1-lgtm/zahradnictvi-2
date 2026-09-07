@@ -451,13 +451,20 @@ test('crossing 80 wakes him and stores where you were, not where you go', () => 
   // The meter is *pinned* rather than floored: a rising meter is a fresh noise,
   // and a fresh noise is allowed to narrow his guess. What must never happen is
   // his guess tracking a player who is not making any.
-  const stored = { ...w.target };
+  let stored = { ...w.target };
   const away = lane.x > sim.level.width / 2 ? -1 : 1;
   for (let i = 0; i < 60 * 3; i++) {
     sim.noise = RULES.investigate.wakeAt + 1;
     tick(run, { x: away, y: 0, take: false });
+    // Treading on something is a fresh noise, and a fresh noise is allowed to
+    // move his guess — that is the mechanic working, not it failing. What must
+    // never happen is the guess drifting after a player who is walking quietly.
+    if (sim.events.some((e) => e.type === 'creak' || e.type === 'bump')) {
+      stored = { ...w.target };
+      continue;
+    }
+    assert.deepEqual(w.target, stored, 'he must investigate the place, not track the person');
   }
-  assert.deepEqual(w.target, stored, 'he must investigate the place, not track the person');
   assert.ok(Math.hypot(playerOf(sim).x - stored.x, playerOf(sim).y - stored.y) > 60,
     'the player really did move away');
 });
@@ -782,10 +789,24 @@ const SEARCH = RULES.search;
 // Stand next to a piece and open it, returning what happened.
 function openStash(run, stash) {
   const p = playerOf(run.sim);
-  p.x = stash.x + stash.w / 2;
-  p.y = stash.y + stash.h + 16;
-  p.prevX = p.x;
-  p.prevY = p.y;
+  // From whichever side the game actually offers to open it. One button serves
+  // both mechanics now, and the spot below a bank of lockers is quite often the
+  // gap you would hide in — where the button says HIDE, on purpose. Standing
+  // there and pressing it is a test of the hiding place, not of the cupboard.
+  const sides = [
+    { x: stash.x + stash.w / 2, y: stash.y + stash.h + 16 },
+    { x: stash.x + stash.w / 2, y: stash.y - 16 },
+    { x: stash.x + stash.w + 16, y: stash.y + stash.h / 2 },
+    { x: stash.x - 16, y: stash.y + stash.h / 2 }
+  ];
+  for (const at of sides) {
+    p.x = at.x;
+    p.y = at.y;
+    p.prevX = p.x;
+    p.prevY = p.y;
+    tick(run);
+    if (run.sim.searchTargetId === stash.id) break;
+  }
   tick(run);
   const before = { noise: run.sim.noise, money: run.sim.money };
   tick(run, { x: 0, y: 0, take: false, search: true });
@@ -1612,6 +1633,193 @@ test('every school level offers a few places to be out of sight, and only the sc
   }
 });
 
+// Walk him to a hiding place and press the button. Returns once he is tucked
+// in, which takes a few tenths — going behind something is an animation now,
+// not a tile you stand on.
+function tuckInto(run, spot) {
+  const { sim } = run;
+  const p = playerOf(sim);
+  p.x = spot.x + spot.w / 2;
+  p.y = spot.y + spot.h / 2;
+  p.prevX = p.x;
+  p.prevY = p.y;
+  tick(run);
+  assert.equal(sim.action, 'hide', 'the button should be offering HIDE');
+  for (let i = 0; i < 60 * 3 && !sim.hidden; i++) {
+    tick(run, { x: 0, y: 0, take: false, search: i === 0 });
+  }
+  assert.ok(sim.hidden, 'he should end up hidden');
+}
+
+// One piece on level 22 sits a tile proud of the wall behind it and stays
+// there: the tile between them is a doorway's landing, so pushing it flush
+// blocks the door, and stepping it back the other way strands the furniture
+// behind it. The generator tries both, twice, and keeps the map walkable
+// instead — the right trade. Any *second* one is a regression.
+const GAPS_ALLOWED = 1;
+
+test('nothing in the school stands one tile off a wall', () => {
+  // The gap that is not a gap. A tile is 20 units and the player is 22 wide, so
+  // a locker parked one tile off the wall behind it leaves a channel nobody can
+  // walk down — it reads as a mistake from above and plays as a dead end. Zero
+  // tiles (flush) is right and two is a corridor; one is neither.
+  const TILE = TUNING.world.tile;
+  let total = 0;
+  const found = [];
+  for (const level of SCHOOL) {
+    const solid = level.colliders.filter(
+      (c) => c.type === 'wall' || c.type === 'partition' || c.type === 'furniture');
+    const walls = level.colliders.filter(
+      (c) => (c.type === 'wall' && !c.fence) || c.type === 'partition');
+    const offenders = [];
+    // Indoors only: a tree a tile from the fence is a tree on a lawn.
+    const outdoor = new Set(['tree', 'hedge', 'shed']);
+    for (const piece of level.colliders) {
+      if (piece.type !== 'furniture' || outdoor.has(piece.style)) continue;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        // The strip exactly one tile beyond this face, and the same strip two
+        // tiles beyond. Something in the first is flush; something in the
+        // second with the first clear is the gap nobody fits through.
+        const at = (n) => ({
+          x: piece.x + (dx > 0 ? piece.w + (n - 1) * TILE : dx < 0 ? -n * TILE : 0),
+          y: piece.y + (dy > 0 ? piece.h + (n - 1) * TILE : dy < 0 ? -n * TILE : 0),
+          w: dx ? TILE : piece.w,
+          h: dy ? TILE : piece.h
+        });
+        const overlaps = (box, list) => list.some((c) => c !== piece
+          && c.x < box.x + box.w - 0.5 && c.x + c.w > box.x + 0.5
+          && c.y < box.y + box.h - 0.5 && c.y + c.h > box.y + 0.5);
+        // Against the *building*. Two desks with a tile between them is a
+        // classroom; a bank of lockers with a tile between it and the wall
+        // behind it is a mistake, and only the second one is what this is for.
+        if (!overlaps(at(1), solid) && overlaps(at(2), walls)) {
+          offenders.push(`${piece.style || piece.type} at ${piece.x},${piece.y}`);
+          break;
+        }
+      }
+    }
+    total += offenders.length;
+    found.push(...offenders.map((o) => `L${level.id} ${o}`));
+  }
+  assert.ok(total <= GAPS_ALLOWED,
+    `${total} pieces stand one tile off a wall: ${found.slice(0, 6).join('; ')}`);
+});
+
+test('the button offers what is to hand, and nothing when nothing is', () => {
+  const run = openSchool(25);
+  const { sim } = run;
+  const p = playerOf(sim);
+  const spot = sim.level.hides[0];
+
+  // Out in the middle of the floor, well clear of anything to open or hide
+  // behind — the spawn will not do, it is frequently right beside a cupboard.
+  let clear = null;
+  for (let ty = 2; ty < sim.level.tiles.rows - 2 && !clear; ty++) {
+    for (let tx = 2; tx < sim.level.tiles.cols - 2 && !clear; tx++) {
+      const cx = tx * 20 + 10;
+      const cy = ty * 20 + 10;
+      if (blocked(cx, cy, TUNING.player.boxWidth, TUNING.player.boxHeight,
+        sim.level.colliders)) continue;
+      const far = (r) => Math.hypot(Math.max(r.x - cx, 0, cx - (r.x + r.w)),
+        Math.max(r.y - cy, 0, cy - (r.y + r.h))) > 70;
+      if (sim.stashes.every(far) && sim.level.hides.every(far)) clear = { x: cx, y: cy };
+    }
+  }
+  assert.ok(clear, 'the level should have some open floor in it');
+  p.x = clear.x;
+  p.y = clear.y;
+  p.prevX = p.x; p.prevY = p.y;
+  tick(run);
+  assert.equal(sim.action, null, 'the button should not be offering anything on open floor');
+
+  // In the gap behind the furniture: HIDE.
+  p.x = spot.x + spot.w / 2;
+  p.y = spot.y + spot.h / 2;
+  p.prevX = p.x; p.prevY = p.y;
+  tick(run);
+  assert.equal(sim.action, 'hide');
+
+  // ...and once tucked in: LEAVE.
+  tick(run, { x: 0, y: 0, take: false, search: true });
+  for (let i = 0; i < 60 && !sim.hidden; i++) tick(run);
+  assert.ok(sim.hidden);
+  assert.equal(sim.action, 'leave');
+});
+
+test('getting in and out is a move, not a teleport', () => {
+  const run = openSchool(25);
+  const { sim } = run;
+  const p = playerOf(sim);
+  const spot = sim.level.hides[0];
+  // Start a stride away, so there is ground to cover.
+  p.x = spot.x + spot.w / 2 + 26;
+  p.y = spot.y + spot.h / 2;
+  p.prevX = p.x; p.prevY = p.y;
+  tick(run);
+  assert.equal(sim.action, 'hide', 'it should offer itself from a stride away');
+
+  const path = [];
+  tick(run, { x: 0, y: 0, take: false, search: true });
+  for (let i = 0; i < 60 && !sim.hidden; i++) {
+    path.push({ x: p.x, y: p.y });
+    tick(run);
+  }
+  assert.ok(sim.hidden);
+  assert.ok(path.length >= 8, `he was in there in ${path.length} frames — that is a teleport`);
+  // ...and every step of it is a step: no frame moves him more than a walk would.
+  for (let i = 1; i < path.length; i++) {
+    const step = Math.hypot(path[i].x - path[i - 1].x, path[i].y - path[i - 1].y);
+    assert.ok(step < TUNING.player.speed * (1 / 60) * 2.5,
+      `he jumped ${step.toFixed(1)} units in one frame`);
+  }
+});
+
+test('you can always get out of a hiding place', () => {
+  for (const level of SCHOOL) {
+    for (const spot of level.hides) {
+      // By the button...
+      let run = createRun(level.id);
+      let p = playerOf(run.sim);
+      const at = { x: spot.x + spot.w / 2, y: spot.y + spot.h / 2 };
+      p.x = at.x; p.y = at.y; p.prevX = p.x; p.prevY = p.y;
+      tick(run, { x: 0, y: 0, take: false, search: true });
+      for (let i = 0; i < 60 && !run.sim.hidden; i++) tick(run);
+      assert.ok(run.sim.hidden, `L${level.id}: could not get into ${spot.id}`);
+      tick(run, { x: 0, y: 0, take: false, search: true });
+      for (let i = 0; i < 60 && run.sim.hiding; i++) tick(run);
+      assert.ok(!run.sim.hidden, `L${level.id}: the button did not get him out of ${spot.id}`);
+
+      // ...and by simply pushing the stick, which is what everyone will try.
+      run = createRun(level.id);
+      p = playerOf(run.sim);
+      p.x = at.x; p.y = at.y; p.prevX = p.x; p.prevY = p.y;
+      tick(run, { x: 0, y: 0, take: false, search: true });
+      for (let i = 0; i < 60 && !run.sim.hidden; i++) tick(run);
+      for (let i = 0; i < 90 && run.sim.hidden; i++) {
+        tick(run, { x: 1, y: 0, take: false, search: false });
+      }
+      assert.ok(!run.sim.hidden, `L${level.id}: walking out of ${spot.id} did nothing`);
+    }
+  }
+});
+
+test('every hiding place is behind something you can see', () => {
+  for (const level of SCHOOL) {
+    for (const spot of level.hides) {
+      assert.ok(spot.anchor,
+        `L${level.id}: ${spot.id} is a patch of floor with nothing to hide behind`);
+      // Close enough to be the thing you are behind rather than scenery.
+      const cx = spot.x + spot.w / 2;
+      const cy = spot.y + spot.h / 2;
+      const a = spot.anchor;
+      const dx = Math.max(a.x - cx, 0, cx - (a.x + a.w));
+      const dy = Math.max(a.y - cy, 0, cy - (a.y + a.h));
+      assert.ok(Math.hypot(dx, dy) <= 52,
+        `L${level.id}: ${spot.id} is ${Math.hypot(dx, dy).toFixed(0)} from the thing it is behind`);
+    }
+  }
+});
+
 test('standing in a hiding place makes him far slower to pick you out', () => {
   const run = openSchool(25);
   const { sim } = run;
@@ -1620,8 +1828,8 @@ test('standing in a hiding place makes him far slower to pick you out', () => {
   const spot = sim.level.hides[0];
   const at = { x: spot.x + spot.w / 2, y: spot.y + spot.h / 2 };
   // Put him a fixed, generous distance away and hold him there, so the only
-  // thing that differs between the two readings is whether the thief is in the
-  // hiding place or a stride outside it.
+  // thing that differs between the two readings is whether the thief is tucked
+  // in behind the furniture or standing a stride outside it.
   const readFrom = (px, py) => {
     w.state = 'investigating';
     w.notice = 0;
@@ -1642,6 +1850,7 @@ test('standing in a hiding place makes him far slower to pick you out', () => {
     return seconds;
   };
   const exposed = readFrom(at.x + 30, at.y);
+  tuckInto(run, spot);
   const hidden = readFrom(at.x, at.y);
   assert.ok(exposed !== null, 'he should pick out a thief standing in the open');
   assert.ok(hidden === null || hidden > exposed * 4,
@@ -1654,11 +1863,7 @@ test('hiding is not invulnerability', () => {
   const w = sim.investigator;
   const p = playerOf(sim);
   const spot = sim.level.hides[0];
-  p.x = spot.x + spot.w / 2;
-  p.y = spot.y + spot.h / 2;
-  p.prevX = p.x; p.prevY = p.y;
-  tick(run);
-  assert.ok(sim.hidden, 'standing in it should count as hidden');
+  tuckInto(run, spot);
 
   // Noise still carries. Hiding is about being seen, not about being silent.
   const before = sim.noise;
@@ -1689,14 +1894,31 @@ test('he does not know which hiding place you went into', () => {
   // Seen, out in the open, a good way from the hiding place.
   w.state = 'following';
   w.notice = 1;
-  w.x = at.x + 150;
+  w.x = at.x + 260;
   w.y = at.y;
   w.prevX = w.x; w.prevY = w.y;
-  p.x = at.x + 90; p.y = at.y; p.prevX = p.x; p.prevY = p.y;
+  p.x = at.x + 150; p.y = at.y; p.prevX = p.x; p.prevY = p.y;
   tick(run);
-  // ...and then into the hiding place, and gone.
-  for (let i = 0; i < 60 * 8 && w.state === 'following'; i++) {
-    p.x = at.x; p.y = at.y; p.prevX = p.x; p.prevY = p.y;
+  // ...and then behind the lockers, and gone.
+  tuckInto(run, spot);
+  // Out of sight is out of mind: from here his idea of where the thief is must
+  // stop moving with the thief. Watching him climb in is fair — he can see that
+  // — but once he cannot, following a live position for two more seconds is him
+  // knowing something he has no way of knowing.
+  const goal = w.goal ? { ...w.goal } : null;
+  assert.ok(goal, 'he should be walking somewhere');
+  for (let i = 0; i < 30; i++) {
+    p.x = at.x - 140;
+    p.y = at.y;
+    p.prevX = p.x;
+    p.prevY = p.y;
+    tick(run);
+  }
+  assert.ok(sim.hidden, 'still hidden');
+  assert.ok(Math.hypot(w.goal.x - goal.x, w.goal.y - goal.y) < 1,
+    'his goal followed the thief he cannot see');
+
+  for (let i = 0; i < 60 * 10 && w.state === 'following'; i++) {
     sim.noise = Math.max(sim.noise, 70);
     tick(run);
   }

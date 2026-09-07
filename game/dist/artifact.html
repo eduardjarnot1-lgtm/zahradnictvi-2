@@ -82,6 +82,11 @@
   #search.down{transform:scale(.94);background:#6cc8e855}
   #search:focus-visible{outline:2px solid #6cc8e8;outline-offset:3px}
   /* A ring that fills while his hands are in the drawer. */
+  /* Getting out from behind the lockers is the urgent one, and should not look
+     like opening a drawer. */
+  #search.leave{background:#ffb02026;border-color:#ffb020aa;color:#ffe3a8}
+  #search.leave.on{background:#ffb02040;border-color:#ffb020;color:#fff3d6;
+    box-shadow:0 0 0 4px #ffb0201f}
   #search.busy{background:conic-gradient(#6cc8e8cc calc(var(--p) * 1turn),#6cc8e820 0);
     border-color:#6cc8e8;color:#e2f6ff}
   body[data-screen="playing"] #take{display:flex}
@@ -778,6 +783,21 @@ __mod.tuning = (function () {
       // far edge of his attention is somewhere you can cross if you are quick and
       // quiet, and his elbow is not.
       vision: VISION,
+      // Getting behind something, and coming back out.
+      //
+      // A hiding place is a piece of furniture with a gap behind it, not a square
+      // on the floor: you walk up to the lockers, the button says HIDE, and he
+      // tucks himself in over half a second. Coming out is quicker than going in,
+      // because coming out is usually urgent.
+      hide: {
+        reach: 44,        // how close the lockers have to be to offer themselves
+        enter: 0.5,       // seconds spent getting in...
+        leave: 0.34,      // ...and rather fewer getting out
+        // Pushing the stick while tucked in brings you out. The button is the
+        // signposted way and this is the one every player will find first, and a
+        // hiding place you can be stuck in is the one thing this must not be.
+        breakOut: 0.35
+      },
       // Getting out of a chair takes a beat longer than it did. There are now
       // eight of them between the head coming off the desk and the first step —
       // and a wake-up you can read is also a wake-up the player can use, which is
@@ -1103,6 +1123,23 @@ __mod.tuning = (function () {
     hazards: {
       creakNoise: 5,        // stepping onto a creaky board
       creakCooldown: 1.4,   // seconds before the same board can creak again
+
+      // ...and everything else a floor has on it. A school floor is not bare:
+      // there is paper under the desks, a crisp packet somebody dropped in the
+      // corridor, pencils, a bag left across a doorway. Standing on any of it is
+      // a noise, and how big a noise is the whole of the decision — paper is
+      // nearly free and worth walking over, a bag is not.
+      //
+      // Same machinery as a creaky board: enter it once, pay once, and it goes
+      // quiet for a while, so nothing can be milked and nothing drains you while
+      // you stand on it. What differs is the price and the word.
+      underfoot: {
+        boards:  { noise: 5, say: 'CREAK' },
+        paper:   { noise: 2, say: 'CRINKLE' },
+        plastic: { noise: 4, say: 'CRACKLE' },
+        clutter: { noise: 3, say: 'CLICK' },
+        bag:     { noise: 8, say: 'THUMP' }
+      },
 
       // Walking into furniture. Soft things barely register; hard, hollow things
       // carry across a room. Scaled back from the first pass, where collisions
@@ -2058,7 +2095,14 @@ __mod.tilemap = (function () {
     K: 'shed'
   };
 
-  const FLOOR = new Set([' ', '.', 'D', ',', '~', '@', 'X', 'H']);
+  // Floor you make a noise on. `~` is the creaky boards these started as; the
+  // rest is what a school floor actually has on it.
+  const UNDERFOOT = {
+    '~': 'boards', 'a': 'paper', 'b': 'plastic', 'e': 'clutter', 'q': 'bag'
+  };
+
+  const FLOOR = new Set([' ', '.', 'D', ',', '~', '@', 'X', 'H',
+    ...Object.keys(UNDERFOOT)]);
 
   // Maximal-rectangle merge over cells sharing a character. Fewer, larger
   // colliders than one box per tile: the physics loop is linear in collider
@@ -2208,8 +2252,15 @@ __mod.tilemap = (function () {
 
     // --- floor markings -------------------------------------------------------
     const rugs = mergeRects(grid, rows, cols, ',');
-    const creaks = mergeRects(grid, rows, cols, '~')
-      .map((r, i) => ({ id: `L${spec.id}-c${i}`, ...r }));
+    // Everything underfoot that makes a noise when you step on it. The creaky
+    // boards were the first of these and are now one kind among several — same
+    // rects, same once-per-entry cooldown, different price and different word.
+    const creaks = [];
+    for (const [ch, kind] of Object.entries(UNDERFOOT)) {
+      for (const r of mergeRects(grid, rows, cols, ch)) {
+        creaks.push({ id: `L${spec.id}-c${creaks.length}`, kind, ...r });
+      }
+    }
     const doors = mergeRects(grid, rows, cols, 'D');
     // Somewhere to be out of sight. Floor like any other — you walk onto it, it
     // costs nothing, nothing collides — except that the map has written down that
@@ -2260,6 +2311,35 @@ __mod.tilemap = (function () {
           throw new Error(`level ${spec.id}: unknown tile '${grid[y][x]}' at ${x},${y}`);
         }
       }
+    }
+
+    // What each hiding place is *behind*. A hiding place is not a spot on the
+    // floor, it is the far side of a piece of furniture — so the game needs to
+    // know which piece, to draw the thief tucked against it and to say what he is
+    // hiding behind. Nearest solid thing to the middle of the nook, which on a
+    // covered tile is the cabinet or the wall that makes it one.
+    for (const spot of hides) {
+      const cx = spot.x + spot.w / 2;
+      const cy = spot.y + spot.h / 2;
+      let best = null;
+      let nearest = Infinity;
+      for (const c of colliders) {
+        if (c.type !== 'furniture' && c.type !== 'wall' && c.type !== 'partition') continue;
+        // Distance to the box rather than to its middle: a long bank of lockers
+        // is close to everything along it and far from nothing.
+        const dx = Math.max(c.x - cx, 0, cx - (c.x + c.w));
+        const dy = Math.max(c.y - cy, 0, cy - (c.y + c.h));
+        // Furniture wins ties, and wins near-ties. Every one of these nooks has a
+        // wall in it — that is most of what makes it a nook — and the wall is
+        // usually a hair closer than the lockers, so nearest-wins named the
+        // building every time. What the player is hiding behind is the object.
+        const d = Math.hypot(dx, dy) + (c.type === 'furniture' ? 0 : TILE * 0.9);
+        if (d < nearest) { nearest = d; best = c; }
+      }
+      spot.anchor = best && nearest <= TILE * 2.6
+        ? { x: best.x, y: best.y, w: best.w, h: best.h,
+            style: best.style || (best.type === 'furniture' ? 'cabinet' : 'wall') }
+        : null;
     }
 
     const kind = spec.watcher || 'sleeper';
@@ -4178,32 +4258,54 @@ __mod.maps = (function () {
         { kind: 'lamp', x: 24, y: 21 },
         { kind: 'kettle', x: 22, y: 22 },
         { kind: 'sign', x: 24, y: 16, w: 3, tag: 'Caretaker' },
+        { kind: 'radiator', x: 4, y: 1, w: 5 },
+        { kind: 'radiator', x: 19, y: 1, w: 6 },
+        { kind: 'radiator', x: 7, y: 24, w: 6 },
+        { kind: 'extinguisher', x: 2, y: 9 },
+        { kind: 'extinguisher', x: 3, y: 16 },
+        { kind: 'extinguisher', x: 22, y: 16 },
+        { kind: 'ceiling', x: 2, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 8, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 15, y: 2, w: 3, h: 3 },
+        { kind: 'ceiling', x: 22, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 1, y: 9, w: 3, h: 3 },
+        { kind: 'ceiling', x: 8, y: 7, w: 3, h: 3 },
+        { kind: 'ceiling', x: 15, y: 7, w: 3, h: 3 },
+        { kind: 'ceiling', x: 22, y: 9, w: 3, h: 3 },
+        { kind: 'ceiling', x: 1, y: 14, w: 3, h: 3 },
+        { kind: 'ceiling', x: 8, y: 16, w: 3, h: 3 },
+        { kind: 'ceiling', x: 15, y: 16, w: 3, h: 3 },
+        { kind: 'ceiling', x: 22, y: 16, w: 3, h: 3 },
+        { kind: 'ceiling', x: 1, y: 21, w: 3, h: 3 },
+        { kind: 'ceiling', x: 8, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 15, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 22, y: 22, w: 3, h: 3 },
       ],
       legend: LOOT,
       tiles: [
         '###OOOOOOO########OOOOOOOO####',
-        '#........TTTT.%TTTT.....CCCC.#',
-        '#.c......TTTT.%TTTT.....CCCC.#',
+        '#.........TTTT%TTTT......CCCC#',
+        '#.c...a...TTTT%TTTT...a..CCCC#',
         'O.............%..............O',
-        'OTT.....66.44.%.TT......TT.33O',
-        'OTT.c...66.44.%.TT......TT.33O',
-        'O.............%..............O',
-        '#..........HH.%...........HH.#',
+        'OTT.....66..44%TT.......TT.33O',
+        'OTT.c...66..44%TT.......TT.33O',
+        'O.....a.......%...e...e......O',
+        '#.............%...........HH.#',
         '#.............%..............#',
         '#%%%DDD%%%%%%%%%%%%%DDD%%%%%%#',
-        '#........222222222.......111.#',
-        'X........222222222.......111.#',
+        '#........222222222........111#',
+        'X........222222222........111#',
         'X........~~~.................#',
         'X........~~~..............@..#',
+        '#.q...b...........b..........#',
         '#.........CCC................#',
-        '#............................#',
         '#%%%%DDD%%%%%%%DDD%%%%%%DDD%%#',
-        '#555..p....%.........%.......#',
+        '#555..p....%SS.....SS%.......#',
         '#555.......%SS.....SS%.......#',
         '#555.......%SS.....SS%.......#',
         '#..........%SS.....SS%EEEE...#',
-        '#.HH.......%SS.....SS%EEEE...#',
-        '#..........%SS.....SS%EEEE...#',
+        '#.H........%SS.....SS%EEEE...#',
+        '#..........%.........%EEEE...#',
         '#CCC.......%.........%.......#',
         '#CCC.......%.........%.......#',
         '######OOOOOOOO################',
@@ -4264,16 +4366,44 @@ __mod.maps = (function () {
         { kind: 'bike', x: 2, y: 26, w: 4, h: 2 },
         { kind: 'bin', x: 7, y: 26, w: 4, h: 2 },
         { kind: 'lamp', x: 3, y: 14 },
+        { kind: 'radiator', x: 6, y: 4, h: 2 },
+        { kind: 'extinguisher', x: 10, y: 9 },
+        { kind: 'extinguisher', x: 32, y: 9 },
+        { kind: 'extinguisher', x: 7, y: 10 },
+        { kind: 'extinguisher', x: 26, y: 16 },
+        { kind: 'ceiling', x: 2, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 9, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 15, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 22, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 36, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 1, y: 8, w: 3, h: 3 },
+        { kind: 'ceiling', x: 8, y: 9, w: 3, h: 3 },
+        { kind: 'ceiling', x: 15, y: 9, w: 3, h: 3 },
+        { kind: 'ceiling', x: 22, y: 9, w: 3, h: 3 },
+        { kind: 'ceiling', x: 29, y: 7, w: 3, h: 3 },
+        { kind: 'ceiling', x: 36, y: 9, w: 3, h: 3 },
+        { kind: 'ceiling', x: 1, y: 15, w: 3, h: 3 },
+        { kind: 'ceiling', x: 8, y: 15, w: 3, h: 3 },
+        { kind: 'ceiling', x: 15, y: 15, w: 3, h: 3 },
+        { kind: 'ceiling', x: 22, y: 15, w: 3, h: 3 },
+        { kind: 'ceiling', x: 29, y: 16, w: 3, h: 3 },
+        { kind: 'ceiling', x: 36, y: 16, w: 3, h: 3 },
+        { kind: 'ceiling', x: 2, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 8, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 15, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 22, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 29, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 37, y: 22, w: 3, h: 3 },
       ],
       legend: LOOT,
       tiles: [
         '+++++++++++++++++++++++++++++++++++++++++',
         '+......#..........%..........%55......44+',
-        '+YY....#.c.....HH.%.k.....HH.%55......44+',
+        '+YY....#.ca...a...%.k.a...a..%55..b...44+',
         '+YY....O..........%..........%55......44+',
-        '+......OTT......88%77.....33.%..........+',
-        '+......OTT......88%77.....33.%..........+',
-        '+......O..........%..........%..TTTTT...+',
+        '+......OTT......88%77......33%..........+',
+        '+......OTT......88%77......33%..........+',
+        '+......O......e...%...e......%..TTTTT.e.+',
         '+YY....#......c...%..........%..TT......+',
         '+YY....#..........%..........%..........+',
         '+......#%%%%DDD%%%%%%%DDD%%%%%%%%%DDD%%%+',
@@ -4281,18 +4411,18 @@ __mod.maps = (function () {
         'X......D.........666.......22222........+',
         'X......D...........~~~................@.+',
         '+......D...........~~~..................+',
-        '+KKK...#................................+',
+        '+KKK...#..q...b...........q.............+',
         '+KKK...#................................+',
         '+......#.................%%%DDD%%%%%DDD%+',
-        '+YY.....#################........%......+',
-        '+YY.....................#.SS...SS%......+',
-        '+..S.....YY..........YY.#.SS...SS%......+',
-        '+..S.....YY..........YY.#.SS.H.SS%......+',
-        '+..S....................#.SS.H.SS%EEEE..+',
-        '+YYS..........SSSS......#.SS...SS%EEEE..+',
-        '+YY.....................#.SS...SS%EEEE..+',
-        '+........YY..........YY.#.SS...SS%......+',
-        '+........YY..........YY.#.SS...SS%......+',
+        '+YY.....#################SS....SS%......+',
+        '+YY.....................#SS....SS%......+',
+        '+..S.....YY..........YY.#SS....SS%.H....+',
+        '+..S.....YY..........YY.#SS....SS%......+',
+        '+..S....................#SS....SS%EEEE..+',
+        '+YYS..........SSSS....H.#SS....SS%EEEE..+',
+        '+YY.....................#SS....SS%EEEE..+',
+        '+........YY..........YY.#SS....SS%......+',
+        '+........YY..........YY.#........%......+',
         '+.......................#........%11....+',
         '+.......................#........%11....+',
         '+++++++++++++++++++++++++++++++++++++++++',
@@ -4316,8 +4446,8 @@ __mod.maps = (function () {
         '5': { style: 'chest', item: 'l' },
         '6': { style: 'table', item: 'r' },
         '7': { style: 'table', item: 'p' },
-        '8': { style: 'table', item: 'w' },
-        '9': { style: 'table', item: null },
+        '8': { style: 'bookshelf', item: 'w' },
+        '9': { style: 'bookshelf', item: null },
         '0': { style: 'table', item: null },
       },
       decor: [
@@ -4359,29 +4489,65 @@ __mod.maps = (function () {
         { kind: 'bike', x: 2, y: 36, w: 4, h: 2 },
         { kind: 'bin', x: 7, y: 36, w: 4, h: 2 },
         { kind: 'lamp', x: 3, y: 19 },
+        { kind: 'radiator', x: 6, y: 5, h: 3 },
+        { kind: 'radiator', x: 23, y: 32, w: 6 },
+        { kind: 'extinguisher', x: 11, y: 10 },
+        { kind: 'extinguisher', x: 35, y: 10 },
+        { kind: 'extinguisher', x: 7, y: 11 },
+        { kind: 'extinguisher', x: 19, y: 17 },
+        { kind: 'ceiling', x: 2, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 8, y: 2, w: 3, h: 3 },
+        { kind: 'ceiling', x: 15, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 22, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 29, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 36, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 1, y: 8, w: 3, h: 3 },
+        { kind: 'ceiling', x: 9, y: 8, w: 3, h: 3 },
+        { kind: 'ceiling', x: 15, y: 8, w: 3, h: 3 },
+        { kind: 'ceiling', x: 22, y: 8, w: 3, h: 3 },
+        { kind: 'ceiling', x: 28, y: 8, w: 3, h: 3 },
+        { kind: 'ceiling', x: 36, y: 8, w: 3, h: 3 },
+        { kind: 'ceiling', x: 1, y: 15, w: 3, h: 3 },
+        { kind: 'ceiling', x: 8, y: 15, w: 3, h: 3 },
+        { kind: 'ceiling', x: 15, y: 15, w: 3, h: 3 },
+        { kind: 'ceiling', x: 22, y: 15, w: 3, h: 3 },
+        { kind: 'ceiling', x: 29, y: 15, w: 3, h: 3 },
+        { kind: 'ceiling', x: 36, y: 15, w: 3, h: 3 },
+        { kind: 'ceiling', x: 2, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 8, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 15, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 22, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 30, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 36, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 1, y: 29, w: 3, h: 3 },
+        { kind: 'ceiling', x: 8, y: 29, w: 3, h: 3 },
+        { kind: 'ceiling', x: 15, y: 29, w: 3, h: 3 },
+        { kind: 'ceiling', x: 22, y: 29, w: 3, h: 3 },
+        { kind: 'ceiling', x: 29, y: 29, w: 3, h: 3 },
+        { kind: 'ceiling', x: 36, y: 29, w: 3, h: 3 },
       ],
       legend: LOOT,
       tiles: [
         '+++++++++++++++++++++++++++++++++++++++++++++',
-        '+......#TTTT........%...........%BB......BB.+',
-        '+YY....#TTTT.w...HH.%........HH.%BB....r.BB.+',
-        '+YY....#............%...........%BB......BB.+',
-        '+......O.00......88.%77......66.%BB.w....BB.+',
-        '+......O.00......88.%77......66.%...........+',
-        '+......O............%...........%...........+',
-        '+YY....O............%...........%TTTTT......+',
-        '+YY....O.99......TT.%TT......44.%TTTT.......+',
-        '+......#.99......TT.%TT......44.%...........+',
+        '+......#TTTT........%...........%88......99.+',
+        '+YY....#TTTT.wb...a.%.a...b...a.%88...br.99.+',
+        '+YY....#............%...........%88......99.+',
+        '+......O00........TT%77.......66%88.w....99.+',
+        '+.H....O00........TT%77.......66%...........+',
+        '+......O......q.....%.....q.....%.H...a...a.+',
+        '+YY....O............%...........%...........+',
+        '+YY....OTT........TT%TT.......44%TTTTT......+',
+        '+......#TT........TT%TT.......44%TTTT.......+',
         '+......#%%%%%DDD%%%%%%%%%DDD%%%%%%%%%DDD%%%%+',
-        'X......#CCC.......33333.......22222.........+',
+        'X......#CCC.......33333.......22222...e.....+',
         'X......D..C.w.....33333.......22222.........+',
         'X......D...................~~~............@.+',
-        '+......D...................~~~..............+',
+        '+......D..............e....~~~e.............+',
         '+..S...#55555555555...............CCCCCCCCC.+',
         '+..S...#....................................+',
-        '+YYS...#...........%%DDD%%%%%DDD%%..........+',
-        '+YYS....###########%.............%##########+',
-        '+KKK..............#%S...SS.......%#.........+',
+        '+YYS.e.#...........%%DDD%%%%%DDD%%..........+',
+        '+YYS....###########%S...SS.......%##########+',
+        '+KKK..............#%SS..SS.......%#.........+',
         '+KKK.....YY....YY.#%SS..SS.......%#.YY..YY..+',
         '+........YY....YY.#%SS..SS.......%#.YY..YY..+',
         '+YY...............#%SS..SS.......%#.........+',
@@ -4390,15 +4556,15 @@ __mod.maps = (function () {
         '+............S....#%SS..SS.EEEE..%#....S....+',
         '+..S.........S....#%SS..SS.......%#....S....+',
         '+YYS..............#%SS..SS.......%#.........+',
-        '+YYS.....YY....YY.#%SS..SS.......%#.YY..YY..+',
-        '+..S.....YY....YY.#%.......11....%#.YY..YY..+',
+        '+YYS.....YY....YY.#%.............%#.YY..YY..+',
+        '+..S.....YY....YY.#%.....H.11....%#.YY..YY..+',
         '+.................#%.......11....%#.........+',
         '+.................#%##OOOOOOOO###%#.........+',
         '+YY.........................................+',
         '+YY.........................................+',
         '+...........................................+',
-        '+.........................................H.+',
-        '+........YY...YY...YY...YY...YY...YY...YY.H.+',
+        '+...........................................+',
+        '+........YY...YY...YY...YY...YY...YY...YY...+',
         '+........YY...YY...YY...YY...YY...YY...YY...+',
         '+++++++++++++++++++++++++++++++++++++++++++++',
       ]
@@ -4421,7 +4587,7 @@ __mod.maps = (function () {
         '5': { style: 'bookshelf', item: 'n' },
         '6': { style: 'chest', item: 't' },
         '7': { style: 'chest', item: 'm' },
-        '8': { style: 'table', item: 'r' },
+        '8': { style: 'bookshelf', item: 'r' },
         '9': { style: 'table', item: 'p' },
         '0': { style: 'table', item: null },
         'A': { style: 'chest', item: null },
@@ -4464,44 +4630,100 @@ __mod.maps = (function () {
         { kind: 'bike', x: 2, y: 44, w: 4, h: 2 },
         { kind: 'bin', x: 7, y: 44, w: 4, h: 2 },
         { kind: 'lamp', x: 3, y: 23 },
+        { kind: 'radiator', x: 10, y: 7, w: 6 },
+        { kind: 'radiator', x: 24, y: 7, w: 6 },
+        { kind: 'radiator', x: 38, y: 7, w: 6 },
+        { kind: 'radiator', x: 5, y: 11, h: 4 },
+        { kind: 'radiator', x: 7, y: 31, h: 4 },
+        { kind: 'extinguisher', x: 9, y: 16 },
+        { kind: 'extinguisher', x: 38, y: 16 },
+        { kind: 'extinguisher', x: 6, y: 17 },
+        { kind: 'extinguisher', x: 8, y: 24 },
+        { kind: 'ceiling', x: 2, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 9, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 15, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 22, y: 2, w: 3, h: 3 },
+        { kind: 'ceiling', x: 29, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 36, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 44, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 1, y: 8, w: 3, h: 3 },
+        { kind: 'ceiling', x: 8, y: 8, w: 3, h: 3 },
+        { kind: 'ceiling', x: 15, y: 8, w: 3, h: 3 },
+        { kind: 'ceiling', x: 22, y: 8, w: 3, h: 3 },
+        { kind: 'ceiling', x: 29, y: 8, w: 3, h: 3 },
+        { kind: 'ceiling', x: 36, y: 8, w: 3, h: 3 },
+        { kind: 'ceiling', x: 42, y: 8, w: 3, h: 3 },
+        { kind: 'ceiling', x: 1, y: 15, w: 3, h: 3 },
+        { kind: 'ceiling', x: 8, y: 16, w: 3, h: 3 },
+        { kind: 'ceiling', x: 22, y: 16, w: 3, h: 3 },
+        { kind: 'ceiling', x: 37, y: 16, w: 3, h: 3 },
+        { kind: 'ceiling', x: 43, y: 16, w: 3, h: 3 },
+        { kind: 'ceiling', x: 2, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 8, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 15, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 22, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 29, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 36, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 43, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 1, y: 29, w: 3, h: 3 },
+        { kind: 'ceiling', x: 8, y: 29, w: 3, h: 3 },
+        { kind: 'ceiling', x: 14, y: 29, w: 3, h: 3 },
+        { kind: 'ceiling', x: 22, y: 29, w: 3, h: 3 },
+        { kind: 'ceiling', x: 29, y: 29, w: 3, h: 3 },
+        { kind: 'ceiling', x: 37, y: 29, w: 3, h: 3 },
+        { kind: 'ceiling', x: 43, y: 29, w: 3, h: 3 },
+        { kind: 'ceiling', x: 2, y: 36, w: 3, h: 3 },
+        { kind: 'ceiling', x: 8, y: 36, w: 3, h: 3 },
+        { kind: 'ceiling', x: 14, y: 36, w: 3, h: 3 },
+        { kind: 'ceiling', x: 22, y: 36, w: 3, h: 3 },
+        { kind: 'ceiling', x: 29, y: 36, w: 3, h: 3 },
+        { kind: 'ceiling', x: 37, y: 36, w: 3, h: 3 },
+        { kind: 'ceiling', x: 43, y: 36, w: 3, h: 3 },
+        { kind: 'ceiling', x: 1, y: 43, w: 3, h: 3 },
+        { kind: 'ceiling', x: 9, y: 43, w: 3, h: 3 },
+        { kind: 'ceiling', x: 15, y: 43, w: 3, h: 3 },
+        { kind: 'ceiling', x: 21, y: 43, w: 3, h: 3 },
+        { kind: 'ceiling', x: 29, y: 43, w: 3, h: 3 },
+        { kind: 'ceiling', x: 36, y: 43, w: 3, h: 3 },
+        { kind: 'ceiling', x: 44, y: 43, w: 3, h: 3 },
       ],
       legend: LOOT,
       tiles: [
         '++++++++++++++++++++++++++++++++++++++++++++++++',
         '+.......YY...YY...YY...YY...YY...YY...YY...YY..+',
-        '+YY.....YY...YY...YY...YY.m.YY...YY...YY...YY..+',
+        '+YY...b.YY...YY...YY...YY.m.YY...YY...YY...YY..+',
         '+YY............................................+',
-        '+...........................................HH.+',
+        '+..............................................+',
         '+..............................................+',
         '+.....###OOOOOOOO######OOOOOOOO######OOOOOOOO##+',
-        '+YY...#........FFFF.%........8888.%.BB......55.+',
-        '+YY...#.w......FFFF.%.HH.....8888.%.BB......55.+',
-        '+.....#.............%.............%.BB......55.+',
-        '+.....OTT......TT.00%99......TT.TT%.BB......55.+',
+        '+YY...#.........FFFF%.........TTTT%BB.......55.+',
+        '+YY...#.w.....e.FFFF%.........TTTT%BB.......55.+',
+        '+.....#.............%.............%BB.......55.+',
+        '+.b...OTT.a....TT.00%99...b..TT.TT%BB.a...a.55.+',
         '+.....OTT......TT.00%99......TT.TT%............+',
-        '+YY...O.............%.............%............+',
-        '+YY...O......w......%.............%33333.......+',
+        '+YY...O.............%.............%.H..........+',
+        '+YY...O......w......%.............%............+',
+        '+.....OTT.a....TT.TT%TT...q..44.TT%33333..q....+',
         '+.....OTT......TT.TT%TT......44.TT%33333.......+',
-        '+.....OTT......TT.TT%TT......44.TT%............+',
         '+.....#%%%%DDD%%%%%%%%%%%DDD%%%%%%%%%%%%DDD%%%%+',
         'X.....#.........7777777.......CCCCCCCC.........+',
-        'X.....D.........7777777.......CCCCCCCC.........+',
+        'X.....D...b...a.7777777.......CCCCCCCC.........+',
         'X.....D..............~~~....................@..+',
         '+.....D..............~~~.......................+',
         '+..KKK#.........6666666.......22222222.........+',
-        '+YYKKK#........................................+',
-        '+YY...#...........HH...........................+',
+        '+YYKKK#.......a................................+',
+        '+YY...#...........HH..............HH...........+',
         '+.....#%%%DDD%%%%....................%%%DDD%%%%+',
         '+.....#.........%####################%......CCC+',
-        '+.....#...w.....%#..................#%......CCC+',
+        '+.....#...w.....%#..................#%....e.CCC+',
         '+YY...#BB.....CC%#.YY............YY.#%.........+',
         '+YY...#BB.....CC%#.YY............YY.#%.........+',
         '+.....#BB.....CC%#..................#%.........+',
-        '+.....O.........%#..................#%.........+',
+        '+.....O...e.....%#..................#%.........+',
         '+..S..O.........%#..................#%EEEEE....+',
-        '+YYS..OAA.....BB%#..................#%EEEEE....+',
-        '+YYS..OAA.....BB%#.......SSSS.......#%EEEEE....+',
-        '+..S..OAA.....BB%#..................#%.........+',
+        '+YYS..OAA.....88%#..................#%EEEEE....+',
+        '+YYS..OAA.....88%#.......SSSS.......#%EEEEE....+',
+        '+..S..OAA.e...88%#............e.....#%.........+',
         '+.....O.........%#..................#%.........+',
         '+.....#.........%#..................#%.........+',
         '+YY...#.........%#.YY............YY.#%.........+',
@@ -4527,20 +4749,20 @@ __mod.maps = (function () {
       seated: false,
       clock: 84,
       search: {
-        '1': { style: 'bookshelf', item: 'k' },
-        '2': { style: 'chest', item: 'r' },
+        '1': { style: 'wardrobe', item: 'k' },
+        '2': { style: 'bookshelf', item: 'r' },
         '3': { style: 'chest', item: 't' },
         '4': { style: 'chest', item: 'j' },
         '5': { style: 'chest', item: 'l' },
-        '6': { style: 'table', item: 'n' },
+        '6': { style: 'chest', item: 'v' },
         '7': { style: 'table', item: 'd' },
-        '8': { style: 'chest', item: 'v' },
+        '8': { style: 'chest', item: 'n' },
         '9': { style: 'chest', item: 'g' },
         '0': { style: 'table', item: 'm' },
         'A': { style: 'table', item: 'p' },
-        'F': { style: 'bookshelf', item: null },
+        'F': { style: 'table', item: null },
         'G': { style: 'table', item: null },
-        'I': { style: 'bookshelf', item: null },
+        'I': { style: 'table', item: null },
       },
       decor: [
         { kind: 'board', x: 7, y: 6, w: 14 },
@@ -4589,50 +4811,124 @@ __mod.maps = (function () {
         { kind: 'bike', x: 8, y: 3, w: 4, h: 2 },
         { kind: 'bin', x: 13, y: 3, w: 4, h: 2 },
         { kind: 'lamp', x: 30, y: 3 },
+        { kind: 'radiator', x: 10, y: 5, w: 6 },
+        { kind: 'radiator', x: 27, y: 7, w: 6 },
+        { kind: 'radiator', x: 43, y: 5, w: 6 },
+        { kind: 'radiator', x: 5, y: 11, h: 4 },
+        { kind: 'radiator', x: 55, y: 11, h: 4 },
+        { kind: 'radiator', x: 11, y: 42, w: 8 },
+        { kind: 'radiator', x: 29, y: 42, w: 6 },
+        { kind: 'extinguisher', x: 11, y: 20 },
+        { kind: 'extinguisher', x: 43, y: 20 },
+        { kind: 'extinguisher', x: 6, y: 21 },
+        { kind: 'extinguisher', x: 13, y: 27 },
+        { kind: 'extinguisher', x: 43, y: 27 },
+        { kind: 'ceiling', x: 2, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 9, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 15, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 21, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 29, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 36, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 44, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 50, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 56, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 1, y: 8, w: 3, h: 3 },
+        { kind: 'ceiling', x: 8, y: 8, w: 3, h: 3 },
+        { kind: 'ceiling', x: 15, y: 8, w: 3, h: 3 },
+        { kind: 'ceiling', x: 22, y: 8, w: 3, h: 3 },
+        { kind: 'ceiling', x: 29, y: 8, w: 3, h: 3 },
+        { kind: 'ceiling', x: 36, y: 8, w: 3, h: 3 },
+        { kind: 'ceiling', x: 43, y: 8, w: 3, h: 3 },
+        { kind: 'ceiling', x: 50, y: 8, w: 3, h: 3 },
+        { kind: 'ceiling', x: 57, y: 8, w: 3, h: 3 },
+        { kind: 'ceiling', x: 1, y: 15, w: 3, h: 3 },
+        { kind: 'ceiling', x: 8, y: 15, w: 3, h: 3 },
+        { kind: 'ceiling', x: 15, y: 15, w: 3, h: 3 },
+        { kind: 'ceiling', x: 22, y: 15, w: 3, h: 3 },
+        { kind: 'ceiling', x: 29, y: 15, w: 3, h: 3 },
+        { kind: 'ceiling', x: 36, y: 15, w: 3, h: 3 },
+        { kind: 'ceiling', x: 43, y: 15, w: 3, h: 3 },
+        { kind: 'ceiling', x: 57, y: 15, w: 3, h: 3 },
+        { kind: 'ceiling', x: 1, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 8, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 15, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 22, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 29, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 36, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 43, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 50, y: 22, w: 3, h: 3 },
+        { kind: 'ceiling', x: 57, y: 23, w: 3, h: 3 },
+        { kind: 'ceiling', x: 1, y: 29, w: 3, h: 3 },
+        { kind: 'ceiling', x: 8, y: 29, w: 3, h: 3 },
+        { kind: 'ceiling', x: 15, y: 29, w: 3, h: 3 },
+        { kind: 'ceiling', x: 22, y: 29, w: 3, h: 3 },
+        { kind: 'ceiling', x: 30, y: 29, w: 3, h: 3 },
+        { kind: 'ceiling', x: 36, y: 29, w: 3, h: 3 },
+        { kind: 'ceiling', x: 43, y: 29, w: 3, h: 3 },
+        { kind: 'ceiling', x: 50, y: 30, w: 3, h: 3 },
+        { kind: 'ceiling', x: 57, y: 29, w: 3, h: 3 },
+        { kind: 'ceiling', x: 2, y: 36, w: 3, h: 3 },
+        { kind: 'ceiling', x: 8, y: 36, w: 3, h: 3 },
+        { kind: 'ceiling', x: 15, y: 36, w: 3, h: 3 },
+        { kind: 'ceiling', x: 22, y: 37, w: 3, h: 3 },
+        { kind: 'ceiling', x: 29, y: 37, w: 3, h: 3 },
+        { kind: 'ceiling', x: 36, y: 36, w: 3, h: 3 },
+        { kind: 'ceiling', x: 43, y: 36, w: 3, h: 3 },
+        { kind: 'ceiling', x: 50, y: 36, w: 3, h: 3 },
+        { kind: 'ceiling', x: 56, y: 36, w: 3, h: 3 },
+        { kind: 'ceiling', x: 1, y: 43, w: 3, h: 3 },
+        { kind: 'ceiling', x: 8, y: 43, w: 3, h: 3 },
+        { kind: 'ceiling', x: 15, y: 43, w: 3, h: 3 },
+        { kind: 'ceiling', x: 22, y: 43, w: 3, h: 3 },
+        { kind: 'ceiling', x: 29, y: 43, w: 3, h: 3 },
+        { kind: 'ceiling', x: 36, y: 43, w: 3, h: 3 },
+        { kind: 'ceiling', x: 43, y: 43, w: 3, h: 3 },
+        { kind: 'ceiling', x: 50, y: 43, w: 3, h: 3 },
+        { kind: 'ceiling', x: 57, y: 43, w: 3, h: 3 },
       ],
       legend: LOOT,
       tiles: [
         '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++',
         '+.......YY...YY...YY...YY...YY...YY...YY...YY...YY..........+',
-        '+YY.....YY...YY...YY...YY...YY.w.YY...YY...YY...YY..v.....YY+',
+        '+YY...b.YY...YY...YY...YY...YY.w.YY.e.YY...YY.b.YY..v.b...YY+',
         '+YY...................SSSS..KKK.......SSSS................YY+',
         '+...........................KKK.............................+',
         '+...........................................................+',
         '+.....###OOOOOOOO#########OOOOOOOO########OOOOOOOO#####.....+',
-        '+YY...#TTTT.BB...CCCC.%TTTT.FF...CCCC.%...............#...YY+',
-        '+YY...#TTTT......CCCC.%TTTT......CCCC.%BB.BB.BB..IIII.#...YY+',
-        '+.....#...............%...............%BB.BB.BB..IIII.#.....+',
-        '+.....OTT.TT.....TT.TT%TT.TT.....TT.TT%BB.BB.BB.......O.....+',
-        '+.....OTT.TT.....TT.TT%TT.TT.....TT.TT%BB.BB.BB..BBBB.O.....+',
-        '+YY...O...............%...............%BB.BB.BB..BBBB.O...YY+',
-        '+YY...O...............%...............%BB.BB.BB.......O...YY+',
-        '+.....OTT.GG.....00.TT%TT.TT.....77.TT%...............O.....+',
-        '+.....OTT.GG.....00.TT%TT.TT.....77.TT%..........SSSS.O.....+',
-        '+.....#.......w.......%...............%.TTTTT....SSSS.#.....+',
-        '+YY...#...............%...............%.TTTTT....SSSS.#...YY+',
-        '+YY...#TT.AA.....TT.TT%66.TT.....TT.TT%CCC............#...YY+',
-        '+.....#TT.AA.....TT.TT%66.TT.....TT.TT%...............#.....+',
+        '+YY...#TTTT.BB....CCCC%TTTT.BB....CCCC%BB.BB.BB...BBBB#...YY+',
+        '+YY...#TTTT.......CCCC%TTTT.....a.CCCC%BB.BB.BB...BBBB#...YY+',
+        '+.....#...............%...............%BB.BB.BB.......#.....+',
+        '+.b...OTT.II.....FF.AA%TT.TT.....TT.TT%BB.BB.BB.......O.....+',
+        '+.....OTT.II.....FF.AA%TT.TT.....TT.TT%BB.BB.BB...BBBBO.....+',
+        '+YY...O...............%...............%BB.BB.BB...BBBBO...YY+',
+        '+YY...O...............%...............%...............O...YY+',
+        '+.....OTT.GG.....00.TT%TT.TT.e...TT.TT%...a...a.......O.....+',
+        '+.....OTT.GG.....00.TT%TT.TT.....TT.TT%...........SSSSO.....+',
+        '+.....#.......w.......%...............%77777......SSSS#.....+',
+        '+YY...#...............%...............%77777......SSSS#...YY+',
+        '+YY...#TT.TT..q..TT.TT%TT.TT..q..TT.TT%.......q.......#...YY+',
+        '+.....#TT.TT.....TT.TT%TT.TT.....TT.TT%CCC............#.....+',
         '+.....#%%%%%%DDD%%%%%%%%%%%%%DDD%%%%%%%%%%%%%DDD%%%%%%#.....+',
         'X.....#CCCC.......555555555.......CCCCCCCCC.......9999#.....+',
         'X.....D..CC.......555555555.......CCCCCCCCC.......9999#...YY+',
-        'X.....D......................~~~......................#...YY+',
-        '+..w..D.................HH...~~~........HH.........@..#.....+',
+        'X.....D......................~~~e...........e.........#...YY+',
+        '+..w..D.................HH...~~~........H..........@..#.....+',
         '+.....#..............SS..............SS...............#.....+',
         '+.....#CCCCCC.......444444444.......CCCCCCC.......8888#.....+',
         '+YY...#%%%%%%%%DDD%%%%%%%%%%%%%DDD%%%%%%%%%%%DDD%%%%%%#...YY+',
-        '+YY...#...................%.............%.............#...YY+',
-        '+.....#.SS............333.%.........222.%BBB.....BBBB.#.....+',
-        '+.....#.SS............333.%TTTT.....222.%BBB.....BBBB.#.....+',
-        '+.....#.SS................%TTTT.........%BBB.....BBBB.#.....+',
-        '+YY...#...............CCC.%.............%.............#...YY+',
-        '+YY...#.SS............CCC.%WW.........CC.CCC.WW..CCCC.#...YY+',
-        '+.....#.SS......w.........%WW.........CC.CCC.WW..CCCC.#.....+',
-        '+.....#.SS................%..EEEEEEE..CC..............#.....+',
-        '+.....#...............BBB.%..EEEEEEE..CC%.............#.....+',
-        '+YY...#.SS............BBB.%..EEEEEEE....%CCCC...CCCCC.#...YY+',
-        '+YY...#.SS................%.............%CCCC...CCCCC.#...YY+',
-        '+.....#.SS.SSSSS...SSSSS..%.1111.HH.....%CCCC...CCCCC.#.....+',
-        '+.....#....SSSSS...SSSSS..%.............%.............#.....+',
+        '+YY...#SS..............333%..........CCC%BBB......BBBB#...YY+',
+        '+.....#SS..............333%.....e....CCC%BBB......BBBB#.....+',
+        '+.....#SS.a...............%TTTT.........%BBB......BBBB#.....+',
+        '+.....#...................%TTTT.........%.............#.....+',
+        '+YY...#................CCC%.............%.............#...YY+',
+        '+YY...#SS..............CCC%11.........CC.CCC.WW...CCCC#...YY+',
+        '+.....#SS.a.....w.........%11.........CC.CCC.WW...CCCC#.....+',
+        '+.....#SS.................%..EEEEEEE..CC..............#.....+',
+        '+.....#................222%..EEEEEEE..CC%..........HH.#.....+',
+        '+YY...#................222%..EEEEEEE....%.............#...YY+',
+        '+YY...#SS........e........%...........a.%CCCC.a..66666#...YY+',
+        '+.....#SS..SSSSS...SSSSS..%.............%CCCC....66666#.....+',
+        '+.....#SS..SSSSS...SSSSS..%BBBB.........%CCCC....66666#.....+',
         '+.....####OOOOOOOOOO########OOOOOOOO###################.....+',
         '+YY.......................................................YY+',
         '+YY.......................................................YY+',
@@ -8494,7 +8790,7 @@ __mod.sim = (function () {
   // know about a tick comes back as events.
   const { TUNING } = __mod.tuning;
   const { createRng } = __mod.rng;
-  const { solveMove, clampToWorld } = __mod.physics;
+  const { solveMove, clampToWorld, blocked } = __mod.physics;
   const { navGrid, flowField, steer, nearestStand, cellOf } = __mod.nav;
   const { addNoise, isAwake, itemStats, canBank, sleepStage, resolveUpgrades, bumpNoise, timeLimit, rarityOf, comboBonus, gradeEscape, isBigScore, detectionRate, watcherConfig, locationRules, proximityScale, stridePerUnit } = __mod.rules;
 
@@ -8858,6 +9154,9 @@ __mod.sim = (function () {
 
   const mix = (lo, hi, t) => lo + (hi - lo) * t;
   const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+  // How close to the gap counts as being in it rather than merely beside it.
+  // Under half a tile: he has to have stepped in.
+  const IN_THE_NOOK = 8;
 
   // How far, and how sharply, this level's person can see — the location's own
   // numbers, scaled by how far into the location you are. Resolved once per sim:
@@ -8932,22 +9231,6 @@ __mod.sim = (function () {
     }
     entity.heard = sim.noise;
     return entity.target;
-  }
-
-  // Is the thief in one of the places the map says you can be out of sight?
-  //
-  // Read off his middle rather than his box: half in a doorway is not hidden, and
-  // a hiding place you can benefit from by standing next to it is not a place, it
-  // is a radius. Cheap enough to do every step — there are two or three of these
-  // on a level and the test is a rectangle.
-  function hidingIn(sim, player) {
-    const spots = sim.level.hides;
-    if (!spots || !spots.length) return null;
-    for (const spot of spots) {
-      if (player.x >= spot.x && player.x < spot.x + spot.w
-        && player.y >= spot.y && player.y < spot.y + spot.h) return spot;
-    }
-    return null;
   }
 
   function updateInvestigation(sim, player) {
@@ -9117,12 +9400,20 @@ __mod.sim = (function () {
         } else {
           // Re-read where you are when you have moved, or every so often —
           // never every frame, which would be both wasteful and uncanny.
-          entity.repathAt += STEP_SECONDS;
-          const drifted = !entity.goal
-            || Math.hypot(entity.goal.x - player.x, entity.goal.y - player.y) > rules.repathAfter;
-          if (drifted || entity.repathAt >= rules.repathEvery) {
-            entity.repathAt = 0;
-            routeTo(entity, sim.level, player.x, player.y);
+          // ...but only while he can actually see you. Behind the lockers you
+          // are not somewhere he knows about, and a man who keeps walking to your
+          // live position for two more seconds does know — he would arrive at the
+          // furniture you are behind every single time, which makes hiding while
+          // chased worthless and makes him a cheat. So the goal freezes at the
+          // last place he saw you, he goes there, and he looks around.
+          if (!sim.hidden) {
+            entity.repathAt += STEP_SECONDS;
+            const drifted = !entity.goal
+              || Math.hypot(entity.goal.x - player.x, entity.goal.y - player.y) > rules.repathAfter;
+            if (drifted || entity.repathAt >= rules.repathEvery) {
+              entity.repathAt = 0;
+              routeTo(entity, sim.level, player.x, player.y);
+            }
           }
         }
       }
@@ -9314,6 +9605,13 @@ __mod.sim = (function () {
       vision: visionOf(rules, level),
       hidden: false,
       hideIn: null,
+      // Getting in and out of one: null, or an animation in progress.
+      hiding: null,
+      hideTargetId: null,
+      // What the one interaction button is offering right now, if anything:
+      // 'leave' while tucked in, 'hide' beside somewhere to tuck into, 'search'
+      // beside something to look inside. One button, whatever is to hand.
+      action: null,
       investigator,
       // How loud this spot is, as a multiplier on everything you do. Always 1
       // where a location has no proximity rule, which is everywhere but here.
@@ -9446,6 +9744,80 @@ __mod.sim = (function () {
   // Which piece of furniture a SEARCH would open: the nearest unsearched one
   // within reach, measured to the edge of the box rather than its centre, so a
   // long bank of lockers offers itself along its whole length.
+  // The nearest hiding place within arm's reach, measured to the edge of the nook
+  // rather than its middle — the same rule the cupboards use, so walking up to a
+  // bank of lockers offers itself at the same distance as walking up to a desk.
+  // Behind the furniture: he crosses the last few units rather than appearing
+  // there. The target is the middle of the nook, which the map already guaranteed
+  // is somewhere a person fits — so nothing here can push him into a wall.
+  function enterHiding(sim, player, spot, rules) {
+    sim.hiding = {
+      t: 0,
+      duration: rules.enter,
+      into: spot,
+      from: { x: player.x, y: player.y },
+      to: { x: spot.x + spot.w / 2, y: spot.y + spot.h / 2 }
+    };
+    sim.hideTargetId = null;
+    sim.events.push({ type: 'hiding', x: player.x, y: player.y, spot: spot.id });
+  }
+
+  // ...and back out, to the side the room is on. Worked out from the thing he is
+  // hiding behind: step out away from it, not through it.
+  function leaveHiding(sim, player, rules) {
+    const spot = sim.hideIn || (sim.hiding && sim.hiding.into);
+    const anchor = spot && spot.anchor;
+    let ax = 0;
+    let ay = 0;
+    if (anchor) {
+      const cx = spot.x + spot.w / 2;
+      const cy = spot.y + spot.h / 2;
+      ax = cx - (anchor.x + anchor.w / 2);
+      ay = cy - (anchor.y + anchor.h / 2);
+      const len = Math.hypot(ax, ay) || 1;
+      ax /= len;
+      ay /= len;
+    }
+    const out = { x: player.x + ax * 22, y: player.y + ay * 22 };
+    sim.hidden = false;
+    sim.hideIn = null;
+    sim.hiding = {
+      t: 0,
+      duration: rules.leave,
+      into: null,
+      from: { x: player.x, y: player.y },
+      // Never through the furniture, and never into a wall: if the step out is
+      // blocked he simply stands up where he is, which is still out of hiding.
+      to: blocked(out.x, out.y, player.w, player.h, sim.level.colliders)
+        ? { x: player.x, y: player.y } : out
+    };
+    sim.events.push({ type: 'hiding', x: player.x, y: player.y, spot: null });
+  }
+
+  function nearestHide(sim, player, reach) {
+    let best = null;
+    let bestDistance = Infinity;
+    for (const spot of sim.level.hides || []) {
+      const dx = Math.max(spot.x - player.x, 0, player.x - (spot.x + spot.w));
+      const dy = Math.max(spot.y - player.y, 0, player.y - (spot.y + spot.h));
+      const distance = Math.hypot(dx, dy);
+      if (distance <= reach && distance < bestDistance) {
+        bestDistance = distance;
+        best = spot;
+      }
+    }
+    return best ? { spot: best, distance: bestDistance } : null;
+  }
+
+  // How far the player is from a piece of furniture, measured to its edge rather
+  // than its middle — the rule the search has always used, lifted out so the
+  // hiding places can be compared against cupboards on the same terms.
+  function stashGap(player, stash) {
+    const dx = Math.max(stash.x - player.x, 0, player.x - (stash.x + stash.w));
+    const dy = Math.max(stash.y - player.y, 0, player.y - (stash.y + stash.h));
+    return Math.hypot(dx, dy);
+  }
+
   function nearestStash(sim, player, reach) {
     let best = null;
     let bestDistance = Infinity;
@@ -9528,19 +9900,15 @@ __mod.sim = (function () {
     }
 
     const player = playerOf(sim);
+    // Nothing the stick says counts while he is climbing in behind the lockers or
+    // straightening up out of them: the animation owns his position for those few
+    // tenths, and a thief who can walk out of the middle of it is not hiding, he
+    // is sliding.
+    const busy = !!sim.hiding;
     for (const entity of sim.entities) {
       const update = UPDATERS[entity.kind];
-      if (update) update(entity, sim, entity.kind === 'player' ? input : EMPTY_INPUT);
-    }
-
-    // Out of sight, if the map offers anywhere to be. Resolved before anyone
-    // looks for you and after you have moved, so stepping into a doorway is worth
-    // exactly the frame you are in it for.
-    const wasHidden = sim.hidden;
-    sim.hideIn = hidingIn(sim, player);
-    sim.hidden = !!sim.hideIn;
-    if (sim.hidden !== wasHidden) {
-      sim.events.push({ type: 'hide', hidden: sim.hidden, x: player.x, y: player.y });
+      if (!update) continue;
+      update(entity, sim, entity.kind === 'player' && !busy ? input : EMPTY_INPUT);
     }
 
     // How sensitive this spot is. Distance is measured to where the person
@@ -9577,11 +9945,17 @@ __mod.sim = (function () {
         player.x > zone.x && player.x < zone.x + zone.w &&
         player.y > zone.y && player.y < zone.y + zone.h;
       if (inside && !zone.active && zone.cooldown === 0 && sim.status === 'running') {
-        const amount = Math.round(
-          TUNING.hazards.creakNoise * sim.mods.hazardNoise * sim.proximity);
+        // What it costs depends on what it is. Paper is nearly free; a bag left
+        // across a doorway is most of a dropped phone. Everything else about it —
+        // the cooldown, the proximity multiplier, the soft-shoe upgrade — is the
+        // same for all of them, because they are all the same mechanic.
+        const kind = zone.kind || 'boards';
+        const sound = TUNING.hazards.underfoot[kind] || TUNING.hazards.underfoot.boards;
+        const amount = Math.round(sound.noise * sim.mods.hazardNoise * sim.proximity);
         if (amount > 0) {
           sim.noise = addNoise(sim.noise, amount);
-          sim.events.push({ type: 'creak', x: player.x, y: player.y, noise: amount });
+          sim.events.push({ type: 'creak', kind, say: sound.say,
+            x: player.x, y: player.y, noise: amount });
           if (endsAtCap(sim)) finish(sim, 'lost', 'awake');
         }
         zone.cooldown = TUNING.hazards.creakCooldown;
@@ -9713,6 +10087,39 @@ __mod.sim = (function () {
       if (sim.reach.t >= sim.reach.duration) sim.reach = null;
     }
 
+    // Getting behind the lockers, and coming back out. Only where a location asks
+    // for it, which is the school; everywhere else `sim.level.hides` is empty and
+    // none of this runs.
+    const hideRules = sim.rules.hide;
+    if (hideRules && sim.status === 'running') {
+      if (sim.hiding) {
+        // Mid-animation. He is carried between the two positions rather than
+        // teleported, and nothing he does with the stick counts until he arrives.
+        sim.hiding.t += STEP_SECONDS;
+        const k = Math.min(1, sim.hiding.t / sim.hiding.duration);
+        const eased = k * k * (3 - 2 * k);
+        player.x = sim.hiding.from.x + (sim.hiding.to.x - sim.hiding.from.x) * eased;
+        player.y = sim.hiding.from.y + (sim.hiding.to.y - sim.hiding.from.y) * eased;
+        player.speed = 0;
+        player.vx = 0;
+        player.vy = 0;
+        player.moving = false;
+        if (k >= 1) {
+          const going = sim.hiding.into;
+          sim.hidden = !!going;
+          sim.hideIn = going || null;
+          sim.hiding = null;
+          sim.events.push({ type: 'hide', hidden: sim.hidden, x: player.x, y: player.y });
+        }
+      } else if (sim.hidden) {
+        // Tucked in. The button says LEAVE; so does pushing the stick, because a
+        // player who wants out will push the stick before they read anything.
+        const shoved = Math.hypot(input.x || 0, input.y || 0) >= hideRules.breakOut;
+        const pressed = input.search && !sim.prevSearch;
+        if (shoved || pressed) leaveHiding(sim, player, hideRules);
+      }
+    }
+
     // Looking inside the furniture. Only where a location asks for it, which is
     // the school and nowhere else — everywhere else `sim.stashes` is empty and
     // none of this runs.
@@ -9722,13 +10129,36 @@ __mod.sim = (function () {
         sim.searchTargetId = null;
         sim.searching.t += STEP_SECONDS;
         if (sim.searching.t >= sim.searching.duration) finishSearch(sim);
+      } else if (sim.hidden || sim.hiding) {
+        // Tucked in behind the lockers, the button says LEAVE and nothing else.
+        sim.searchTargetId = null;
+        sim.hideTargetId = null;
       } else {
+        // Both mechanics share one button, and the locker you would hide behind
+        // is frequently the locker you would search — so which is on offer has to
+        // be a rule the player can feel rather than a comparison of two distances
+        // that are nearly equal.
+        //
+        // The rule is where he is standing. In the gap, it is HIDE; anywhere else
+        // with a cupboard in reach, it is SEARCH. So walking up to the lockers
+        // offers to open them and stepping into the alcove beside them offers to
+        // get behind them, and one step chooses.
         const stash = nearestStash(sim, player, searchRules.reach);
-        sim.searchTargetId = stash ? stash.id : null;
+        const nook = hideRules ? nearestHide(sim, player, hideRules.reach) : null;
+        const hiding = nook && (nook.distance <= IN_THE_NOOK || !stash);
+        sim.searchTargetId = hiding ? null : (stash ? stash.id : null);
+        sim.hideTargetId = hiding ? nook.spot.id : null;
         const pressed = input.search && !sim.prevSearch;
-        if (stash && pressed) beginSearch(sim, stash, searchRules);
+        if (pressed && hiding) enterHiding(sim, player, nook.spot, hideRules);
+        else if (pressed && stash) beginSearch(sim, stash, searchRules);
       }
     }
+    // One button, and what it is offering. Leaving beats hiding beats searching:
+    // the thing you are already doing comes first, and a cupboard you could open
+    // is never more urgent than getting out from behind it.
+    sim.action = sim.hidden || (sim.hiding && sim.hiding.into) ? 'leave'
+      : sim.hideTargetId ? 'hide'
+        : sim.searchTargetId || sim.searching ? 'search' : null;
     sim.prevSearch = !!input.search;
 
     // Last, so that the meter he reacts to is this tick's meter: lifting
@@ -10256,9 +10686,16 @@ __mod.audio = (function () {
       },
 
       // A dry knock under the foot.
-      creak() {
-        tone(220, 0.11, 'sawtooth', 0.05);
-        tone(140, 0.20, 'sawtooth', 0.04, 0.05);
+      // Something underfoot. Pitched and voiced by how much noise it cost, so a
+      // crinkle of paper and a bag going over are not the same sound played at
+      // the same volume: quiet things are brief and bright, heavy ones are low
+      // and have a tail.
+      creak(noise = 5) {
+        const heavy = Math.max(0, Math.min(1, (noise - 2) / 6));
+        const top = 340 - heavy * 150;
+        tone(top, 0.06 + heavy * 0.07, heavy > 0.55 ? 'sawtooth' : 'triangle',
+          0.028 + heavy * 0.03);
+        tone(top * 0.62, 0.10 + heavy * 0.14, 'sawtooth', 0.02 + heavy * 0.026, 0.04);
       },
 
       // Barely-there footfall, alternating so a walk cycle has two feet. Louder
@@ -11436,7 +11873,104 @@ __mod.art = (function () {
 
   // Old boards that announce you. Drawn as a worn patch with nail heads — the
   // player should be able to see the hazard before stepping on it.
+  // What is lying on the floor there. Small, low-contrast and deterministic from
+  // its own position, so the same sheet of paper is the same sheet every time and
+  // none of it competes with the loot for attention — it has to be noticeable
+  // enough to route around and quiet enough not to look like something to take.
+  const UNDERFOOT_PAINTERS = {
+    paper: (ctx, z) => {
+      const n = 2 + Math.floor(hash(z.x, z.y) * 2);
+      for (let i = 0; i < n; i++) {
+        const h = hash(z.x + i * 13, z.y - i * 7);
+        const w = 7 + h * 4;
+        ctx.save();
+        ctx.translate(z.x + z.w / 2 + (h - 0.5) * 9, z.y + z.h / 2 + (hash(z.y, z.x + i) - 0.5) * 9);
+        ctx.rotate((h - 0.5) * 1.5);
+        ctx.fillStyle = 'rgba(16,14,20,0.22)';
+        ctx.fillRect(-w / 2 + 1, -w / 2 + 1.5, w, w * 0.78);
+        ctx.fillStyle = 'rgba(238,236,228,0.88)';
+        ctx.fillRect(-w / 2, -w / 2, w, w * 0.78);
+        ctx.fillStyle = 'rgba(120,126,138,0.5)';
+        for (let r = 0; r < 2; r++) ctx.fillRect(-w / 2 + 1.5, -w / 2 + 2 + r * 2.4, w - 3, 0.8);
+        ctx.restore();
+      }
+    },
+    plastic: (ctx, z) => {
+      // A crisp packet: crumpled, so a few facets rather than a rectangle.
+      const cx = z.x + z.w / 2;
+      const cy = z.y + z.h / 2;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate((hash(z.x, z.y) - 0.5) * 2);
+      ctx.fillStyle = 'rgba(16,14,20,0.22)';
+      ctx.beginPath();
+      ctx.moveTo(-5, 2); ctx.lineTo(0, -3); ctx.lineTo(6, 1); ctx.lineTo(2, 6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = 'rgba(196,84,72,0.82)';
+      ctx.beginPath();
+      ctx.moveTo(-6, 1); ctx.lineTo(-1, -4); ctx.lineTo(5, 0); ctx.lineTo(1, 5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,236,200,0.45)';
+      ctx.beginPath();
+      ctx.moveTo(-3, 0); ctx.lineTo(-1, -3); ctx.lineTo(2, -1);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    },
+    clutter: (ctx, z) => {
+      // Pencils and a rubber. Nothing you would notice from across the room and
+      // everything you would notice from on top of.
+      const cx = z.x + z.w / 2;
+      const cy = z.y + z.h / 2;
+      const inks = ['#d8b24a', '#4f7fbf', '#c4574f'];
+      for (let i = 0; i < 3; i++) {
+        const h = hash(z.x + i * 31, z.y + i * 17);
+        ctx.save();
+        ctx.translate(cx + (h - 0.5) * 10, cy + (hash(z.y + i, z.x) - 0.5) * 8);
+        ctx.rotate(h * Math.PI);
+        ctx.fillStyle = 'rgba(16,14,20,0.20)';
+        ctx.fillRect(-4.5, -0.6, 9, 2.2);
+        ctx.fillStyle = inks[i % inks.length];
+        ctx.fillRect(-5, -1, 10, 2);
+        ctx.fillStyle = '#e8d8b8';
+        ctx.fillRect(4, -1, 1.6, 2);
+        ctx.restore();
+      }
+    },
+    bag: (ctx, z) => {
+      // A backpack, dumped. Big enough to read as an obstacle from a distance,
+      // which is the point — it is the expensive one.
+      const cx = z.x + z.w / 2;
+      const cy = z.y + z.h / 2;
+      const tone = ['#3f5a8a', '#6b4a7a', '#3f6a58'][Math.floor(hash(z.x, z.y) * 3) % 3];
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate((hash(z.y, z.x) - 0.5) * 1.1);
+      ctx.fillStyle = SHADOW;
+      roundRect(ctx, -7, -4, 15, 12, 4);
+      ctx.fill();
+      fillRound(ctx, -8, -6, 15, 12, 4, tone);
+      fillRound(ctx, -6, -4, 11, 5, 3, 'rgba(255,255,255,0.14)');
+      ctx.strokeStyle = 'rgba(12,14,22,0.5)';                    // straps
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(-4, -6); ctx.quadraticCurveTo(-6, 0, -3, 6);
+      ctx.moveTo(2, -6); ctx.quadraticCurveTo(4, 0, 1, 6);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(232,214,168,0.75)';                  // a buckle
+      ctx.fillRect(-2, 1, 4, 2);
+      ctx.restore();
+    }
+  };
+
   function drawCreakZone(ctx, zone) {
+    const paint = UNDERFOOT_PAINTERS[zone.kind];
+    if (paint) {
+      paint(ctx, zone);
+      return;
+    }
     ctx.save();
     ctx.globalAlpha = 0.5;
     fillRound(ctx, zone.x, zone.y, zone.w, zone.h, 3, 'rgba(60,34,16,0.42)');
@@ -11859,12 +12393,96 @@ __mod.art = (function () {
     ctx.fillRect(d.x + d.w - 9, d.y + 2, 5, 3);
   }
 
-  const DECOR_FLOOR = { floor: drawFloorPatch, court: drawCourt };
+  const DECOR_FLOOR = {
+    floor: drawFloorPatch, court: drawCourt };
   const DECOR_WALL = {
     board: drawBoard, notice: drawNotice, poster: drawPoster,
     sign: drawSign, clock: drawClock, tools: drawTools, hoop: drawHoop
   };
+  // A ceiling light. Painted into the room once rather than animated every frame:
+  // there are a dozen of these in a corridor and none of them flicker, so they
+  // belong in the static cache with the floor and cost nothing to have.
+  function drawCeilingLight(ctx, d) {
+    const cx = d.x + d.w / 2;
+    const cy = d.y + d.h / 2;
+    const r = Math.max(d.w, d.h) * 1.15;
+    const pool = ctx.createRadialGradient(cx, cy, 2, cx, cy, r);
+    pool.addColorStop(0, 'rgba(255,244,214,0.20)');
+    pool.addColorStop(0.55, 'rgba(255,240,205,0.09)');
+    pool.addColorStop(1, 'rgba(255,238,200,0)');
+    ctx.fillStyle = pool;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, TAU);
+    ctx.fill();
+    // The fitting itself: a strip light seen from directly underneath. Faint on
+    // purpose — it is above everything in the room, so drawn solid it reads as a
+    // white bar lying across the desks rather than as a light over them.
+    const along = d.w >= d.h;
+    const w = along ? Math.max(13, d.w * 0.62) : 3.4;
+    const h = along ? 3.4 : Math.max(13, d.h * 0.62);
+    fillRound(ctx, cx - w / 2, cy - h / 2, w, h, 1.6, 'rgba(245,242,228,0.26)');
+    fillRound(ctx, cx - w / 2 + 0.8, cy - h / 2 + 0.8, w - 1.6, h - 1.6, 1.2,
+      'rgba(255,252,238,0.38)');
+  }
+
+  // A radiator, under a window where a radiator goes.
+  function drawRadiator(ctx, d) {
+    const along = d.w >= d.h;
+    ctx.fillStyle = SHADOW;
+    roundRect(ctx, d.x + 1, d.y + 3, d.w, d.h, 2);
+    ctx.fill();
+    fillRound(ctx, d.x, d.y, d.w, d.h, 2, '#cdd3d8');
+    ctx.fillStyle = 'rgba(120,132,142,0.55)';
+    const n = Math.max(3, Math.round((along ? d.w : d.h) / 5));
+    for (let i = 1; i < n; i++) {
+      if (along) ctx.fillRect(d.x + (d.w / n) * i, d.y + 1.5, 1.2, d.h - 3);
+      else ctx.fillRect(d.x + 1.5, d.y + (d.h / n) * i, d.w - 3, 1.2);
+    }
+    fillRound(ctx, d.x + 1, d.y + 1, along ? d.w - 2 : 1.6, along ? 1.6 : d.h - 2, 0.8,
+      'rgba(255,255,255,0.5)');
+  }
+
+  // A fire extinguisher on the wall, which every corridor in every school has.
+  function drawExtinguisher(ctx, d) {
+    const cx = d.x + d.w / 2;
+    const cy = d.y + d.h / 2;
+    ctx.fillStyle = SHADOW;
+    roundRect(ctx, cx - 3, cy - 4, 7, 11, 2);
+    ctx.fill();
+    fillRound(ctx, cx - 4, cy - 6, 8, 12, 3, '#c0392b');
+    fillRound(ctx, cx - 4, cy - 6, 8, 4, 3, '#d9503f');
+    ctx.fillStyle = '#2f3138';
+    ctx.fillRect(cx - 1.6, cy - 8.5, 3.2, 3);
+    ctx.fillStyle = 'rgba(255,255,255,0.65)';
+    ctx.fillRect(cx - 2.4, cy - 1, 4.8, 1.4);
+  }
+
+  // A coat rack: pegs and whatever is still on them.
+  function drawCoats(ctx, d) {
+    const along = d.w >= d.h;
+    ctx.fillStyle = 'rgba(70,52,36,0.85)';
+    if (along) ctx.fillRect(d.x, d.y + d.h / 2 - 1, d.w, 2.4);
+    else ctx.fillRect(d.x + d.w / 2 - 1, d.y, 2.4, d.h);
+    const n = Math.max(2, Math.round((along ? d.w : d.h) / 7));
+    const coats = ['#4f6f9e', '#8a5a44', '#5c7a52', '#7a5470'];
+    for (let i = 0; i < n; i++) {
+      const t = (i + 0.5) / n;
+      const px = along ? d.x + d.w * t : d.x + d.w / 2;
+      const py = along ? d.y + d.h / 2 : d.y + d.h * t;
+      ctx.fillStyle = 'rgba(50,38,26,0.9)';
+      ctx.fillRect(px - 0.8, py - 1, 1.6, 3.4);
+      if (hash(d.x + i * 17, d.y) > 0.45) {
+        ctx.fillStyle = coats[i % coats.length];
+        roundRect(ctx, px - 3.4, py + 1, 6.8, 8, 2.5);
+        ctx.fill();
+      }
+    }
+  }
+
   const DECOR_PROPS = {
+    // Last of all, so the light falls over the room rather than under it.
+    ceiling: drawCeilingLight,
+    radiator: drawRadiator, extinguisher: drawExtinguisher, coats: drawCoats,
     bin: drawBin, plant: drawPotPlant, kettle: drawKettle,
     desklamp: drawDeskLamp, lamp: drawLightPool,
     bike: drawBike, car: drawCar
@@ -13292,6 +13910,17 @@ __mod.render = (function () {
       }
     }
 
+    // How far into a hiding place he is, 0 out to 1 tucked in — the animation
+    // while it runs, and flat 1 once he is there.
+    function hidingShare(sim) {
+      if (sim.hiding) {
+        const k = Math.min(1, sim.hiding.t / sim.hiding.duration);
+        const eased = k * k * (3 - 2 * k);
+        return sim.hiding.into ? eased : 1 - eased;
+      }
+      return sim.hidden ? 1 : 0;
+    }
+
     // The beta's markers over the hiding places. Culled like everything else,
     // and skipped entirely — not merely drawn transparent — when the flag is off,
     // so turning it off before release costs nothing per frame.
@@ -13694,9 +14323,36 @@ __mod.render = (function () {
         };
         // Locations that ask for the drawn figures get them; everywhere else
         // keeps the character it has always had.
+        // Tucked in behind something. He is drawn a little smaller and a little
+        // way into the furniture he is hiding behind, which is the whole of the
+        // read: standing on the tile at full size beside a bank of lockers looks
+        // like standing beside a bank of lockers.
+        const tuck = hidingShare(sim);
+        let hx = px;
+        let hy = py;
+        if (tuck > 0) {
+          const spot = sim.hideIn || (sim.hiding && sim.hiding.into);
+          const anchor = spot && spot.anchor;
+          if (anchor) {
+            const ax = anchor.x + anchor.w / 2;
+            const ay = anchor.y + anchor.h / 2;
+            const len = Math.hypot(ax - px, ay - py) || 1;
+            hx += ((ax - px) / len) * 7 * tuck;
+            hy += ((ay - py) / len) * 7 * tuck;
+          }
+          ctx.save();
+          ctx.translate(hx, hy);
+          ctx.scale(1 - tuck * 0.16, 1 - tuck * 0.16);
+          ctx.translate(-hx, -hy);
+          ctx.globalAlpha = 1 - tuck * 0.25;
+        }
         const hand = sim.rules.figures
-          ? drawFigure(ctx, px, py, stance, THIEF_LOOK)
-          : drawThief(ctx, px, py, stance);
+          ? drawFigure(ctx, hx, hy, stance, THIEF_LOOK)
+          : drawThief(ctx, hx, hy, stance);
+        if (tuck > 0) {
+          ctx.globalAlpha = 1;
+          ctx.restore();
+        }
 
         if (sim.reach) {
           drawGrabbedItem(ctx, ITEM_ART[sim.reach.type] || '?', sim.reach, hand, reachProgress);
@@ -13747,6 +14403,8 @@ __mod.main = (function () {
 
   const $ = (id) => document.getElementById(id);
   const WAKE_BEAT = 0.9;         // seconds of wake-up animation before the fail screen
+  // What the one interaction button says, per action the simulation is offering.
+  const ACTION_LABEL = { search: 'SEARCH', hide: 'HIDE', leave: 'LEAVE' };
 
   function boot() {
     const params = new URLSearchParams(location.search);
@@ -14080,9 +14738,13 @@ __mod.main = (function () {
             }
           }
         } else if (event.type === 'creak') {
-          pops.push({ x: event.x, y: event.y - 6, value: null, text: 'CREAK', life: 1 });
-          audio.creak();
-          buzz(18);
+          // What it was, in the player's own words. A CRINKLE and a THUMP cost
+          // different amounts and the player has to be able to tell which they
+          // just paid without reading the meter.
+          pops.push({ x: event.x, y: event.y - 6, value: null,
+            text: event.say || 'CREAK', life: 1 });
+          audio.creak(event.noise);
+          buzz(Math.min(30, 8 + event.noise * 2.5));
         } else if (event.type === 'bump') {
           pops.push({
             x: event.x, y: event.y - 6, value: null, text: `+${event.noise}`,

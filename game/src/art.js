@@ -980,7 +980,104 @@ function drawBedBase(ctx, level) {
 
 // Old boards that announce you. Drawn as a worn patch with nail heads — the
 // player should be able to see the hazard before stepping on it.
+// What is lying on the floor there. Small, low-contrast and deterministic from
+// its own position, so the same sheet of paper is the same sheet every time and
+// none of it competes with the loot for attention — it has to be noticeable
+// enough to route around and quiet enough not to look like something to take.
+const UNDERFOOT_PAINTERS = {
+  paper: (ctx, z) => {
+    const n = 2 + Math.floor(hash(z.x, z.y) * 2);
+    for (let i = 0; i < n; i++) {
+      const h = hash(z.x + i * 13, z.y - i * 7);
+      const w = 7 + h * 4;
+      ctx.save();
+      ctx.translate(z.x + z.w / 2 + (h - 0.5) * 9, z.y + z.h / 2 + (hash(z.y, z.x + i) - 0.5) * 9);
+      ctx.rotate((h - 0.5) * 1.5);
+      ctx.fillStyle = 'rgba(16,14,20,0.22)';
+      ctx.fillRect(-w / 2 + 1, -w / 2 + 1.5, w, w * 0.78);
+      ctx.fillStyle = 'rgba(238,236,228,0.88)';
+      ctx.fillRect(-w / 2, -w / 2, w, w * 0.78);
+      ctx.fillStyle = 'rgba(120,126,138,0.5)';
+      for (let r = 0; r < 2; r++) ctx.fillRect(-w / 2 + 1.5, -w / 2 + 2 + r * 2.4, w - 3, 0.8);
+      ctx.restore();
+    }
+  },
+  plastic: (ctx, z) => {
+    // A crisp packet: crumpled, so a few facets rather than a rectangle.
+    const cx = z.x + z.w / 2;
+    const cy = z.y + z.h / 2;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate((hash(z.x, z.y) - 0.5) * 2);
+    ctx.fillStyle = 'rgba(16,14,20,0.22)';
+    ctx.beginPath();
+    ctx.moveTo(-5, 2); ctx.lineTo(0, -3); ctx.lineTo(6, 1); ctx.lineTo(2, 6);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = 'rgba(196,84,72,0.82)';
+    ctx.beginPath();
+    ctx.moveTo(-6, 1); ctx.lineTo(-1, -4); ctx.lineTo(5, 0); ctx.lineTo(1, 5);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,236,200,0.45)';
+    ctx.beginPath();
+    ctx.moveTo(-3, 0); ctx.lineTo(-1, -3); ctx.lineTo(2, -1);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  },
+  clutter: (ctx, z) => {
+    // Pencils and a rubber. Nothing you would notice from across the room and
+    // everything you would notice from on top of.
+    const cx = z.x + z.w / 2;
+    const cy = z.y + z.h / 2;
+    const inks = ['#d8b24a', '#4f7fbf', '#c4574f'];
+    for (let i = 0; i < 3; i++) {
+      const h = hash(z.x + i * 31, z.y + i * 17);
+      ctx.save();
+      ctx.translate(cx + (h - 0.5) * 10, cy + (hash(z.y + i, z.x) - 0.5) * 8);
+      ctx.rotate(h * Math.PI);
+      ctx.fillStyle = 'rgba(16,14,20,0.20)';
+      ctx.fillRect(-4.5, -0.6, 9, 2.2);
+      ctx.fillStyle = inks[i % inks.length];
+      ctx.fillRect(-5, -1, 10, 2);
+      ctx.fillStyle = '#e8d8b8';
+      ctx.fillRect(4, -1, 1.6, 2);
+      ctx.restore();
+    }
+  },
+  bag: (ctx, z) => {
+    // A backpack, dumped. Big enough to read as an obstacle from a distance,
+    // which is the point — it is the expensive one.
+    const cx = z.x + z.w / 2;
+    const cy = z.y + z.h / 2;
+    const tone = ['#3f5a8a', '#6b4a7a', '#3f6a58'][Math.floor(hash(z.x, z.y) * 3) % 3];
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate((hash(z.y, z.x) - 0.5) * 1.1);
+    ctx.fillStyle = SHADOW;
+    roundRect(ctx, -7, -4, 15, 12, 4);
+    ctx.fill();
+    fillRound(ctx, -8, -6, 15, 12, 4, tone);
+    fillRound(ctx, -6, -4, 11, 5, 3, 'rgba(255,255,255,0.14)');
+    ctx.strokeStyle = 'rgba(12,14,22,0.5)';                    // straps
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(-4, -6); ctx.quadraticCurveTo(-6, 0, -3, 6);
+    ctx.moveTo(2, -6); ctx.quadraticCurveTo(4, 0, 1, 6);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(232,214,168,0.75)';                  // a buckle
+    ctx.fillRect(-2, 1, 4, 2);
+    ctx.restore();
+  }
+};
+
 function drawCreakZone(ctx, zone) {
+  const paint = UNDERFOOT_PAINTERS[zone.kind];
+  if (paint) {
+    paint(ctx, zone);
+    return;
+  }
   ctx.save();
   ctx.globalAlpha = 0.5;
   fillRound(ctx, zone.x, zone.y, zone.w, zone.h, 3, 'rgba(60,34,16,0.42)');
@@ -1403,12 +1500,96 @@ function drawCar(ctx, d) {
   ctx.fillRect(d.x + d.w - 9, d.y + 2, 5, 3);
 }
 
-const DECOR_FLOOR = { floor: drawFloorPatch, court: drawCourt };
+const DECOR_FLOOR = {
+  floor: drawFloorPatch, court: drawCourt };
 const DECOR_WALL = {
   board: drawBoard, notice: drawNotice, poster: drawPoster,
   sign: drawSign, clock: drawClock, tools: drawTools, hoop: drawHoop
 };
+// A ceiling light. Painted into the room once rather than animated every frame:
+// there are a dozen of these in a corridor and none of them flicker, so they
+// belong in the static cache with the floor and cost nothing to have.
+function drawCeilingLight(ctx, d) {
+  const cx = d.x + d.w / 2;
+  const cy = d.y + d.h / 2;
+  const r = Math.max(d.w, d.h) * 1.15;
+  const pool = ctx.createRadialGradient(cx, cy, 2, cx, cy, r);
+  pool.addColorStop(0, 'rgba(255,244,214,0.20)');
+  pool.addColorStop(0.55, 'rgba(255,240,205,0.09)');
+  pool.addColorStop(1, 'rgba(255,238,200,0)');
+  ctx.fillStyle = pool;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, TAU);
+  ctx.fill();
+  // The fitting itself: a strip light seen from directly underneath. Faint on
+  // purpose — it is above everything in the room, so drawn solid it reads as a
+  // white bar lying across the desks rather than as a light over them.
+  const along = d.w >= d.h;
+  const w = along ? Math.max(13, d.w * 0.62) : 3.4;
+  const h = along ? 3.4 : Math.max(13, d.h * 0.62);
+  fillRound(ctx, cx - w / 2, cy - h / 2, w, h, 1.6, 'rgba(245,242,228,0.26)');
+  fillRound(ctx, cx - w / 2 + 0.8, cy - h / 2 + 0.8, w - 1.6, h - 1.6, 1.2,
+    'rgba(255,252,238,0.38)');
+}
+
+// A radiator, under a window where a radiator goes.
+function drawRadiator(ctx, d) {
+  const along = d.w >= d.h;
+  ctx.fillStyle = SHADOW;
+  roundRect(ctx, d.x + 1, d.y + 3, d.w, d.h, 2);
+  ctx.fill();
+  fillRound(ctx, d.x, d.y, d.w, d.h, 2, '#cdd3d8');
+  ctx.fillStyle = 'rgba(120,132,142,0.55)';
+  const n = Math.max(3, Math.round((along ? d.w : d.h) / 5));
+  for (let i = 1; i < n; i++) {
+    if (along) ctx.fillRect(d.x + (d.w / n) * i, d.y + 1.5, 1.2, d.h - 3);
+    else ctx.fillRect(d.x + 1.5, d.y + (d.h / n) * i, d.w - 3, 1.2);
+  }
+  fillRound(ctx, d.x + 1, d.y + 1, along ? d.w - 2 : 1.6, along ? 1.6 : d.h - 2, 0.8,
+    'rgba(255,255,255,0.5)');
+}
+
+// A fire extinguisher on the wall, which every corridor in every school has.
+function drawExtinguisher(ctx, d) {
+  const cx = d.x + d.w / 2;
+  const cy = d.y + d.h / 2;
+  ctx.fillStyle = SHADOW;
+  roundRect(ctx, cx - 3, cy - 4, 7, 11, 2);
+  ctx.fill();
+  fillRound(ctx, cx - 4, cy - 6, 8, 12, 3, '#c0392b');
+  fillRound(ctx, cx - 4, cy - 6, 8, 4, 3, '#d9503f');
+  ctx.fillStyle = '#2f3138';
+  ctx.fillRect(cx - 1.6, cy - 8.5, 3.2, 3);
+  ctx.fillStyle = 'rgba(255,255,255,0.65)';
+  ctx.fillRect(cx - 2.4, cy - 1, 4.8, 1.4);
+}
+
+// A coat rack: pegs and whatever is still on them.
+function drawCoats(ctx, d) {
+  const along = d.w >= d.h;
+  ctx.fillStyle = 'rgba(70,52,36,0.85)';
+  if (along) ctx.fillRect(d.x, d.y + d.h / 2 - 1, d.w, 2.4);
+  else ctx.fillRect(d.x + d.w / 2 - 1, d.y, 2.4, d.h);
+  const n = Math.max(2, Math.round((along ? d.w : d.h) / 7));
+  const coats = ['#4f6f9e', '#8a5a44', '#5c7a52', '#7a5470'];
+  for (let i = 0; i < n; i++) {
+    const t = (i + 0.5) / n;
+    const px = along ? d.x + d.w * t : d.x + d.w / 2;
+    const py = along ? d.y + d.h / 2 : d.y + d.h * t;
+    ctx.fillStyle = 'rgba(50,38,26,0.9)';
+    ctx.fillRect(px - 0.8, py - 1, 1.6, 3.4);
+    if (hash(d.x + i * 17, d.y) > 0.45) {
+      ctx.fillStyle = coats[i % coats.length];
+      roundRect(ctx, px - 3.4, py + 1, 6.8, 8, 2.5);
+      ctx.fill();
+    }
+  }
+}
+
 const DECOR_PROPS = {
+  // Last of all, so the light falls over the room rather than under it.
+  ceiling: drawCeilingLight,
+  radiator: drawRadiator, extinguisher: drawExtinguisher, coats: drawCoats,
   bin: drawBin, plant: drawPotPlant, kettle: drawKettle,
   desklamp: drawDeskLamp, lamp: drawLightPool,
   bike: drawBike, car: drawCar
