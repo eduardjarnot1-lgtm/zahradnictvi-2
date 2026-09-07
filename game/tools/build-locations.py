@@ -479,7 +479,7 @@ STASH_SHARE = {
 SEARCH_CAP = {'Vault': 0.55}
 # ...and how much is left lying about, the same way round.
 FLOOR_SHARE = {
-    'Museum': 3.0, 'Shop': 1.6, 'Vault': 1.9, 'Penthouse': 1.2,
+    'Museum': 2.4, 'Shop': 1.6, 'Vault': 1.9, 'Penthouse': 1.2,
 }
 
 
@@ -733,6 +733,58 @@ def corner_props(x, y, w, h, kinds):
     """A prop in each spare corner of a room, in the order given."""
     spots = [(x + 1, y + 1), (x + w - 2, y + 1), (x + 1, y + h - 2), (x + w - 2, y + h - 2)]
     return [(k, spots[i % 4][0], spots[i % 4][1]) for i, k in enumerate(kinds)]
+
+
+# The seven hand-drawn floorplans are recreations of reference drawings and
+# have no room grammar behind them, so nothing knows which of their rooms is a
+# ward and which is a store cupboard — and they were the only levels in the game
+# with nothing on their walls. This is the general answer: find the quiet
+# corners, and put something in them. It is less than a room grammar can do and
+# far more than nothing.
+CORNER_PROPS = ['plant', 'bin', 'lamp', 'plant', 'bin']
+
+# What a hand-drawn building's floor is made of. One patch under the whole
+# thing, inserted ahead of everything else so any room dressing that does exist
+# still lands on top of it.
+HAND_FLOOR = {
+    'apartment': 'boards', 'cottage': 'boards', 'hotelfloor': 'carpet',
+    'officefloor': 'carpet', 'school': 'tiles', 'hospital': 'tiles',
+    'museum': 'tiles',
+}
+
+
+def floor_under(g, theme):
+    tag = HAND_FLOOR.get(theme)
+    if tag:
+        g.decor.insert(0, ('floor', 1, 1, g.cols - 2, g.rows - 2, tag))
+
+
+def dress_corners(g, every=3):
+    """Props in the corners of a hand-drawn building: wherever two walls meet
+    around a tile of open floor, and never in a doorway's approach."""
+    put = 0
+    spots = []
+    for y in range(2, g.rows - 2):
+        for x in range(2, g.cols - 2):
+            if g.g[y][x] != '.' or (x, y) in g.keep:
+                continue
+            walls = sum(1 for (dx, dy) in ((1, 0), (-1, 0), (0, 1), (0, -1))
+                        if g.g[y + dy][x + dx] in '#%')
+            if walls < 2:
+                continue
+            if any(g.g[y + dy][x + dx] == 'D'
+                   for dy in range(-2, 3) for dx in range(-2, 3)):
+                continue
+            spots.append((x, y))
+    for i, (x, y) in enumerate(spots):
+        if i % every:
+            continue
+        if any(max(abs(x - px), abs(y - py)) < 3 for (px, py) in
+               [(d[1], d[2]) for d in g.decor if d[0] in ('plant', 'bin', 'lamp')]):
+            continue
+        g.deco(CORNER_PROPS[put % len(CORNER_PROPS)], x, y)
+        put += 1
+    return put
 
 
 def place_watcher(g, x, y, w, h, wide=6, tall=3):
@@ -1476,7 +1528,63 @@ def ground_bands(cols, rows, pad):
     return out
 
 
-def add_grounds(inner, sides, deep, flavour, loot):
+# Which corner of the building gets bitten out, per tier. This is what stops a
+# location's five levels being the same rectangle at five sizes: with every
+# stick of furniture removed, level three is an L, level four is a T with the
+# bite in the middle of a side, and level five is a C. The bite becomes yard,
+# so the building's shape and the shape of its grounds are the same decision
+# seen from two sides.
+NOTCHES = [None, None, 'ne', 'sw', 'nw']
+
+
+def notch(g, bx, by, bw, bh, where):
+    """Take a bite out of the building. Everything inside the bite becomes plot,
+    and the outer wall closes round it.
+
+    Refuses if the bite would swallow the person, the spawn or the way out —
+    those are the three things a level cannot be built without, and moving them
+    to suit a silhouette is the tail wagging the dog."""
+    nw = max(6, bw // 3)
+    nh = max(5, bh // 3)
+    nx = bx if where in ('nw', 'sw') else bx + bw - nw
+    ny = by if where in ('nw', 'ne') else by + bh - nh
+    for y in range(ny, ny + nh):
+        for x in range(nx, nx + nw):
+            if g.g[y][x] in 'E@X':
+                return False
+    for y in range(ny, ny + nh):
+        for x in range(nx, nx + nw):
+            g.g[y][x] = '.'
+            g.keep.discard((x, y))
+    # Anything the demolished rooms had on their walls or floors goes with
+    # them: a blackboard hanging in a car park is worse than no blackboard.
+    g.decor = [d for d in g.decor
+               if not (nx - 1 <= d[1] < nx + nw and ny - 1 <= d[2] < ny + nh)]
+    # ...and the building's wall follows the new corner round.
+    left = nx > bx
+    top = ny > by
+    if left:
+        g.vwall(nx, ny, nh, '#')
+    else:
+        g.vwall(nx + nw - 1, ny, nh, '#')
+    if top:
+        g.hwall(nx, ny, nw, '#')
+    else:
+        g.hwall(nx, ny + nh - 1, nw, '#')
+    # Whatever the demolition left standing against the new wall gets cleared
+    # back a couple of tiles. A classroom cut down to a two-tile strip with its
+    # desks jammed against a fresh wall reads as damage rather than as a
+    # building of that shape, which is the opposite of the point.
+    for y in range(max(0, ny - 2), min(g.rows, ny + nh + 2)):
+        for x in range(max(0, nx - 2), min(g.cols, nx + nw + 2)):
+            near_wall = (nx - 2 <= x < nx + nw + 2 and ny - 2 <= y < ny + nh + 2)
+            inside_bite = nx <= x < nx + nw and ny <= y < ny + nh
+            if near_wall and not inside_bite and g.g[y][x] in 'TSWNVCBP':
+                g.g[y][x] = '.'
+    return (nx, ny, nw, nh)
+
+
+def add_grounds(inner, sides, deep, flavour, loot, bite=True):
     """Wrap a finished building in its own grounds, and move the way out into
     them. Returns the new grid."""
     found = find_exit(inner)
@@ -1520,9 +1628,19 @@ def add_grounds(inner, sides, deep, flavour, loot):
     g.lane(max(1, gate[0] - 2), max(1, gate[1] - 2), 5, 5)
     g.lane(max(1, door[0] - 2), max(1, door[1] - 2), 5, 5)
 
+    # The bite out of the building, taken before the grounds are dressed so the
+    # yard grows into it: an L-shaped block with an L-shaped yard round it.
+    where = NOTCHES[min(4, max(0, sides))] if bite else None
+    bite = notch(g, l, t, inner.cols, inner.rows, where) if where else None
+
     bands = ground_bands(cols, rows, (l, t, r, b))
     for ((bx, by, bw, bh), _) in bands:
         g.deco('floor', bx, by, bw, bh, style['surface'])
+    # The bite is grounds too — it is the yard growing into the building's
+    # corner, and it has to look like it or it reads as a room somebody forgot
+    # to furnish.
+    if bite:
+        g.deco('floor', bite[0], bite[1], bite[2], bite[3], style['surface'])
     # The path: a run of hard standing from the door out to the gate, drawn as
     # dressing rather than built as geometry — it is a surface, not a wall, and
     # the player can step off it wherever they like.
@@ -1646,8 +1764,12 @@ def build():
             pad = (YARDS.get(name) or [0] * 5)[tier]
             if name in SHAPED:
                 g = SHAPED[name][tier]()
+                # No bite here. The school's five levels are five hand-drawn
+                # silhouettes already — a rectangle, an L, a T, a U round a
+                # courtyard and one irregular floor with wings — and taking a
+                # corner off one of them is vandalism, not variety.
                 if pad:
-                    g = add_grounds(g, pad, YARD_DEEP[tier], name, Loot(tier))
+                    g = add_grounds(g, pad, YARD_DEEP[tier], name, Loot(tier), bite=False)
                 g.clear_landings(); draft.clear_exit(g)
                 top_up_loot(g, tier)
                 promote_prize(g, tier)
@@ -1657,6 +1779,8 @@ def build():
                     g.open_by_removal()
             elif tier == 4 and handdrawn:
                 g = HANDDRAWN[handdrawn]()
+                floor_under(g, theme)
+                dress_corners(g, every=3)
                 if pad:
                     g = add_grounds(g, pad, YARD_DEEP[tier], name, Loot(tier))
                 g.clear_landings(); draft.clear_exit(g)
