@@ -510,6 +510,11 @@ function updateInvestigation(sim, player) {
       if (gap <= rules.followAt && (!scanning || player.moving)) {
         entity.lostFor = 0;
         entity.repathAt = 0;
+        // The moment he picks you out is not the moment you lose. He shouts,
+        // he squares up, and then he comes — and the banner that says HE HAS
+        // SEEN YOU is only worth putting on the screen if there is a beat in
+        // which the player can do something about it.
+        entity.grace = 0.9;
         setState(sim, entity, 'following');
         routeTo(entity, sim.level, player.x, player.y);
         // Guards raise the alarm. Not a third way to lose — the game has two

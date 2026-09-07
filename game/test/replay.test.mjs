@@ -39,7 +39,11 @@ test('run-length encoding round-trips', () => {
 });
 
 test('a recording is small', () => {
+  // Twelve kilobytes for a full playthrough of a building with grounds round
+  // it. The limit was eight when a level was one screen and a run was thirty
+  // seconds of walking; what has to stay true is that a recording is a handful
+  // of kilobytes rather than a frame-by-frame dump.
   const bytes = JSON.stringify(golden).length;
-  assert.ok(bytes < 8000, `golden recording is ${bytes} bytes`);
+  assert.ok(bytes < 12000, `golden recording is ${bytes} bytes`);
   assert.ok(frameCount(golden) > 500, 'golden run should be a real playthrough');
 });

@@ -18,7 +18,11 @@ const TILE = TUNING.world.tile;
 // in specific rooms and a hash is not an opinion about a floorplan.
 const FURNITURE = {
   T: 'table', S: 'sofa', W: 'wardrobe', N: 'nightstand',
-  V: 'tvBench', C: 'chest', B: 'bookshelf', P: 'plinth'
+  V: 'tvBench', C: 'chest', B: 'bookshelf', P: 'plinth',
+  // Outdoors. A tree and a hedge are furniture in every sense the game cares
+  // about: you cannot walk through them, you can hide behind them, and walking
+  // into one is a noise.
+  Y: 'tree', Z: 'hedge'
 };
 
 const FLOOR = new Set([' ', '.', 'D', ',', '~', '@', 'X']);
@@ -96,6 +100,12 @@ export function tileLevel(spec) {
   // glass with light coming through it.
   const windows = mergeRects(grid, rows, cols, 'O');
   for (const r of windows) colliders.push({ type: 'wall', window: true, ...r });
+  // A fence is a wall you can see over: it stops you and it is part of the
+  // building's surroundings rather than of a room, so brushing it costs no
+  // noise, exactly like the wall it stands in for.
+  for (const r of mergeRects(grid, rows, cols, '+')) {
+    colliders.push({ type: 'wall', fence: true, ...r });
+  }
 
   // --- the watcher's furniture ---------------------------------------------
   const watcherRects = mergeRects(grid, rows, cols, 'E');
@@ -203,7 +213,7 @@ export function tileLevel(spec) {
     });
 
   // --- anything left over is a typo, and a typo is a broken level ------------
-  const known = new Set([...FLOOR, '#', '%', 'O', 'E',
+  const known = new Set([...FLOOR, '#', '%', 'O', 'E', '+',
     ...Object.keys(FURNITURE), ...Object.keys(legend), ...Object.keys(search)]);
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {

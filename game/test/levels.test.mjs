@@ -125,10 +125,15 @@ test('difficulty climbs across each location', () => {
 // to tighten is how much of the clock is spare once you have worked the place.
 test('the clock tightens across the first four levels of every location', () => {
   for (const [location, levels] of Object.entries(byLocation())) {
-    const clocks = levels.map((l) => timeLimit(l));
+    // Seconds *per step of map*, not raw seconds. Levels three and up carry
+    // their own grounds now, so the plot doubles part-way through a location
+    // and raw seconds have to rise with it — what tightens is how much of the
+    // clock is spare once you have actually worked the place, which is what
+    // the calibrator's slack curve sets and what a player feels.
+    const clocks = levels.map((l) => timeLimit(l) / Math.hypot(l.width, l.height));
     for (let i = 1; i < 4; i++) {
       assert.ok(clocks[i] < clocks[i - 1],
-        `${location} level ${i + 1} has ${clocks[i]}s, no tighter than ${clocks[i - 1]}s`);
+        `${location} level ${i + 1} has ${clocks[i].toFixed(3)}s a step, no tighter than ${clocks[i - 1].toFixed(3)}`);
     }
     assert.ok(clocks[4] <= clocks[0], `${location} ends looser than it began: ${clocks}`);
   }
@@ -159,11 +164,17 @@ test('every hand-drawn floorplan is a real building, not one big room', () => {
 
 // The exact proportions asked for, checked rather than trusted: a map drawn at
 // 36x57 must be 36x57 in the game, not 36x55 because a wall moved.
+//
+// Six of these are now a drawn building standing in its own grounds, and the
+// size below is the plot: the building inside it is still the drawing, tile for
+// tile, and `surround` is the only thing that touched it. Only the hospital,
+// which is a ward at night and has no outside worth walking into, is still the
+// bare drawing.
 test('each floorplan is exactly the size it was drawn at', () => {
   // Apartment 5, House 5, Hotel 5, Office 5, School 5, Hospital 5, Museum 5.
   const SIZES = {
-    5: [36, 57], 10: [43, 36], 15: [49, 34], 20: [44, 33],
-    25: [49, 36], 30: [45, 32], 35: [43, 40]
+    5: [42, 69], 10: [55, 48], 15: [55, 46], 20: [50, 45],
+    25: [61, 48], 30: [45, 32], 35: [55, 52]
   };
   for (const [id, [cols, rows]] of Object.entries(SIZES)) {
     const level = LEVELS.find((l) => l.id === Number(id));

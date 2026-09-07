@@ -80,19 +80,23 @@ for (const [name, levels] of byLocation) {
   let lift = 1;
   levels.forEach((l, t) => {
     const seconds = measured.get(l.id);
-    if (!seconds) return;
+    // A level the greedy bot could not finish is the *hardest* level in the
+    // location, not a level with no opinion — and letting it drop out of the
+    // sum quietly shortens everybody else's clock, which is the wrong way
+    // round. It asks for the whole allowance.
+    if (!seconds) {
+      lift = MOST_LIFT;
+      return;
+    }
     lift = Math.max(lift, (seconds * FLOOR) / (sized[t] * SLACK[t]));
   });
   lift = Math.min(lift, MOST_LIFT);
-  // A location never ends looser than it began. The slack curve guarantees
-  // that on its own for four levels of steadily growing map, but the fifth is
-  // sometimes a hand-drawn floorplan of a quite different shape — and a level
-  // five that is more generous than a level one is the curve running backwards.
-  let first = 0;
+  // Seconds per step of map are what tighten, and the slack curve does that by
+  // construction — `sized` is the map's own demand and SLACK falls across the
+  // five. Raw seconds go up when the plot does, which is right: a building with
+  // grounds round it takes longer to cross whatever else is true of it.
   levels.forEach((l, t) => {
-    let clock = Math.max(20, Math.round(sized[t] * SLACK[t] * lift));
-    if (t === 0) first = clock;
-    else clock = Math.min(clock, first - 1);
+    const clock = Math.max(20, Math.round(sized[t] * SLACK[t] * lift));
     clocks[l.id] = clock;
     const seconds = measured.get(l.id);
     console.log(`L${String(l.id).padStart(2)} ${l.name.padEnd(10)} ${l.tier}/5  ` +

@@ -479,7 +479,7 @@ STASH_SHARE = {
 SEARCH_CAP = {'Vault': 0.55}
 # ...and how much is left lying about, the same way round.
 FLOOR_SHARE = {
-    'Museum': 2.2, 'Shop': 1.6, 'Vault': 1.9, 'Penthouse': 1.2,
+    'Museum': 3.0, 'Shop': 1.6, 'Vault': 1.9, 'Penthouse': 1.2,
 }
 
 
@@ -1385,6 +1385,222 @@ def vault(g, tier):
     vault_plan(g, tier, layers, furnish)
 
 
+# ------------------------------------------------------------------- grounds
+# The outside of the building.
+#
+# A location is not an indoor rectangle with a way out cut into one wall; it is
+# a place, and the place has surroundings. From part-way through each of the
+# locations where it makes sense, the map is the building *and* its grounds: you
+# come out of a corridor, through a door, into a yard, and the way out is a gate
+# in the fence at the far side of it.
+#
+# The progression is the brief's: nothing at level one, a strip of yard at two,
+# grounds down two sides at three, and a whole plot by five. Four locations get
+# none at all — a hospital ward at night, a penthouse forty floors up, a shop
+# with the shutters down and a vault underground do not have an outside you
+# could walk into, and forcing one on them would be adding grass for the sake
+# of grass.
+#
+# How many sides of the building are grounds, per tier. Nought is an indoor
+# level; one is a yard along the side the way out is already on; four is a plot
+# with the building standing in the middle of it.
+YARDS = {
+    'School':    [0, 1, 2, 3, 4],
+    'Apartment': [0, 0, 1, 2, 3],
+    'House':     [0, 1, 2, 3, 4],
+    'Hotel':     [0, 0, 1, 2, 3],
+    'Office':    [0, 0, 1, 2, 3],
+    'Museum':    [0, 0, 1, 2, 4],
+    'Mansion':   [0, 1, 2, 3, 4],
+}
+# ...and how deep, in tiles. Deep enough to be a place rather than a verge: a
+# yard you cross in one step is the "patch of grass outside the building" the
+# brief specifically says not to build.
+YARD_DEEP = [0, 7, 7, 6, 6]
+
+# What the grounds of each location are made of: the surface underfoot, what is
+# planted in them, and the one thing that says which place this is.
+GROUNDS = {
+    'School':    dict(surface='grass', path='paving', props=('bike', 'bin'),
+                      court=True, sign='Playground', shed='C'),
+    'Apartment': dict(surface='grass', path='paving', props=('car', 'bin'),
+                      sign='Parking', shed='C'),
+    'House':     dict(surface='grass', path='gravel', props=('bin',),
+                      sign='Garden', shed='B'),
+    'Hotel':     dict(surface='grass', path='tarmac', props=('car',),
+                      sign='Reception', shed='W'),
+    'Office':    dict(surface='gravel', path='tarmac', props=('car', 'bin'),
+                      sign='Car park', shed='C'),
+    'Museum':    dict(surface='paving', path='paving', props=('bin',),
+                      plinths=True, sign='Sculpture garden', shed='C'),
+    'Mansion':   dict(surface='grass', path='gravel', props=('car',),
+                      sign='Grounds', shed='W'),
+}
+
+# Which sides get grounds, and in what order they are added. The side the
+# building's own way out is already cut into comes first, always: that door
+# becomes the way into the yard, and a yard on the other side of the building
+# from the only door is a yard nobody can reach.
+SIDE_ORDER = {
+    'left':   ['left', 'bottom', 'top', 'right'],
+    'right':  ['right', 'bottom', 'top', 'left'],
+    'bottom': ['bottom', 'left', 'right', 'top'],
+    'top':    ['top', 'left', 'right', 'bottom'],
+}
+
+
+def find_exit(g):
+    for y in range(g.rows):
+        for x in range(g.cols):
+            if g.g[y][x] == 'X':
+                side = ('left' if x == 0 else 'right' if x == g.cols - 1
+                        else 'top' if y == 0 else 'bottom')
+                return (x, y, side)
+    return None
+
+
+def ground_bands(cols, rows, pad):
+    """The margin round the building, as up to four rectangles, each knowing
+    which way is out — planting goes against the fence, not across the middle of
+    the yard."""
+    l, t, r, b = pad
+    out = []
+    if l:
+        out.append(((0, 0, l, rows), 'left'))
+    if r:
+        out.append(((cols - r, 0, r, rows), 'right'))
+    if t:
+        out.append(((l, 0, cols - l - r, t), 'top'))
+    if b:
+        out.append(((l, rows - b, cols - l - r, b), 'bottom'))
+    return out
+
+
+def add_grounds(inner, sides, deep, flavour, loot):
+    """Wrap a finished building in its own grounds, and move the way out into
+    them. Returns the new grid."""
+    found = find_exit(inner)
+    if not found:
+        return inner
+    ex, ey, side = found
+    pad = {'left': 0, 'top': 0, 'right': 0, 'bottom': 0}
+    for name in SIDE_ORDER[side][:sides]:
+        pad[name] = deep
+    l, t, r, b = pad['left'], pad['top'], pad['right'], pad['bottom']
+    g = draft.surround(inner, l, t, r, b)
+    cols, rows = g.cols, g.rows
+    style = GROUNDS[flavour]
+
+    # The building's own way out becomes a door into the yard: you are not out
+    # of the place until you are off the plot.
+    door = (ex + l, ey + t)
+    for y in range(rows):
+        for x in range(cols):
+            if g.g[y][x] == 'X':
+                g.g[y][x] = 'D'
+
+    # The plot's edge is a fence, not a wall — the grounds have to read as
+    # outdoors, and you have to be able to see where the map ends.
+    g.box(0, 0, cols, rows, '+')
+
+    # The gate, straight out from the door, so the route reads at a glance:
+    # room, corridor, door, yard, gate.
+    if side == 'left':
+        gate = (0, min(rows - 3, max(2, door[1])))
+        g.fill(0, gate[1] - 1, 1, 3, 'X')
+    elif side == 'right':
+        gate = (cols - 1, min(rows - 3, max(2, door[1])))
+        g.fill(cols - 1, gate[1] - 1, 1, 3, 'X')
+    elif side == 'top':
+        gate = (min(cols - 3, max(2, door[0])), 0)
+        g.fill(gate[0] - 1, 0, 3, 1, 'X')
+    else:
+        gate = (min(cols - 3, max(2, door[0])), rows - 1)
+        g.fill(gate[0] - 1, rows - 1, 3, 1, 'X')
+    g.lane(max(1, gate[0] - 2), max(1, gate[1] - 2), 5, 5)
+    g.lane(max(1, door[0] - 2), max(1, door[1] - 2), 5, 5)
+
+    bands = ground_bands(cols, rows, (l, t, r, b))
+    for ((bx, by, bw, bh), _) in bands:
+        g.deco('floor', bx, by, bw, bh, style['surface'])
+    # The path: a run of hard standing from the door out to the gate, drawn as
+    # dressing rather than built as geometry — it is a surface, not a wall, and
+    # the player can step off it wherever they like.
+    px0, px1 = sorted((door[0], gate[0]))
+    py0, py1 = sorted((door[1], gate[1]))
+    g.deco('floor', px0, max(0, min(door[1], gate[1]) - 1),
+           px1 - px0 + 1, 3 if py1 == py0 else 3, style['path'])
+    if py1 > py0:
+        g.deco('floor', max(0, gate[0] - 1), py0, 3, py1 - py0 + 1, style['path'])
+    g.lane(px0, max(0, min(door[1], gate[1]) - 1), px1 - px0 + 1, 3)
+    g.deco('sign', max(1, min(cols - 4, gate[0] - 1)), max(1, min(rows - 2, gate[1] - 3)),
+           3, 1, style['sign'])
+
+    # Planting, along the fence and in the corners of the plot. Trees are laid
+    # rather than filled, so nothing lands in the gate's lane or across the
+    # path — a yard you cannot cross is a worse yard than no yard at all.
+    for ((bx, by, bw, bh), where) in bands:
+        wide = bw >= bh
+        # Trees along the inside of the fence, not down the middle of the yard.
+        row = {'top': by + 1, 'bottom': by + bh - 3,
+               'left': bx + 1, 'right': bx + bw - 3}[where]
+        for k in range(2, (bw if wide else bh) - 3, 5):
+            tx = bx + k if wide else row
+            ty = row if wide else by + k
+            g.lay(tx, ty, 2, 2, 'Y', shift=1, strict=True)
+        # ...and a hedge in lengths with gaps between them. A single unbroken
+        # run across a yard is a wall with leaves on, and it seals the yard off
+        # from the rest of the plot as thoroughly as one.
+        hedge = {'top': by, 'bottom': by + bh - 1,
+                 'left': bx, 'right': bx + bw - 1}[where]
+        span = bw if wide else bh
+        for k in range(3, span - 4, 9):
+            if wide:
+                g.lay(bx + k, hedge, 5, 1, 'Z', shift=1, strict=True)
+            else:
+                g.lay(hedge, by + k, 1, 5, 'Z', shift=1, strict=True)
+
+    # Benches, an outbuilding, and the one thing that says which place this is.
+    biggest = max((r for (r, _) in bands), key=lambda rect: rect[2] * rect[3]) if bands else None
+    if biggest:
+        bx, by, bw, bh = biggest
+        if bw >= bh:
+            g.lay(bx + bw // 3, by + bh // 2, 4, 1, 'S', shift=2, strict=True)
+            g.lay(bx + 2 * bw // 3, by + bh // 2, 4, 1, 'S', shift=2, strict=True)
+            sx, sy = bx + (bw - 4) // 2, by + 1
+        else:
+            g.lay(bx + bw // 2, by + bh // 3, 1, 4, 'S', shift=2, strict=True)
+            g.lay(bx + bw // 2, by + 2 * bh // 3, 1, 4, 'S', shift=2, strict=True)
+            sx, sy = bx + 1, by + (bh - 4) // 2
+        # An outbuilding: a store, a garage, a bin shed. Somewhere outside
+        # actually worth walking to, and something the search system can offer.
+        g.lay(sx, sy, 3, 2, style['shed'], shift=2, strict=True)
+        if style.get('court') and bw >= 11 and bh >= 5:
+            g.deco('court', bx + 3, by + 2, bw - 6, bh - 3)
+            g.deco('hoop', bx + bw // 2 - 1, by + 1, 3, 1)
+        if style.get('plinths'):
+            # A sculpture garden. Same rule as the hall inside: what is on show
+            # is out where you have to cross to reach it, so each piece gets
+            # something worth the walk standing beside it.
+            span = bw if bw >= bh else bh
+            for k in range(3, span - 3, 6):
+                if bw >= bh:
+                    if g.lay(bx + k, by + bh // 2 - 1, 2, 2, 'P', shift=1, strict=True):
+                        g.drop(bx + k + 3, by + bh // 2, loot.next(), radius=3, box=True)
+                else:
+                    if g.lay(bx + bw // 2 - 1, by + k, 2, 2, 'P', shift=1, strict=True):
+                        g.drop(bx + bw // 2 + 2, by + k, loot.next(), radius=3, box=True)
+        for i, kind in enumerate(style['props']):
+            g.deco(kind, min(cols - 5, bx + 2 + i * 5), min(rows - 3, by + bh - 3), 4, 2)
+        g.deco('lamp', bx + bw // 2, by + bh // 2)
+
+    # ...and something to find out here. The grounds are playable or they are
+    # scenery, and scenery is exactly what the brief says not to build.
+    for ((bx, by, bw, bh), _) in bands:
+        g.drop(bx + bw // 2, by + bh // 2, loot.next(), radius=6, box=True)
+    return g
+
+
 # name, theme, watcher, seated, grammar, and which hand-drawn map is its level 5
 LOCATIONS = [
     ('Apartment', 'apartment',  'dad',        False, apartment, 'flat'),
@@ -1424,8 +1640,14 @@ def build():
     problems = []
     for (name, theme, watcher, seated, grammar, handdrawn) in LOCATIONS:
         for tier in range(5):
+            # Does this level have an outside? If so the building is built
+            # first, exactly as it always was, and then put in the middle of
+            # its own plot — which is why nothing below here has to know.
+            pad = (YARDS.get(name) or [0] * 5)[tier]
             if name in SHAPED:
                 g = SHAPED[name][tier]()
+                if pad:
+                    g = add_grounds(g, pad, YARD_DEEP[tier], name, Loot(tier))
                 g.clear_landings(); draft.clear_exit(g)
                 top_up_loot(g, tier)
                 promote_prize(g, tier)
@@ -1435,6 +1657,8 @@ def build():
                     g.open_by_removal()
             elif tier == 4 and handdrawn:
                 g = HANDDRAWN[handdrawn]()
+                if pad:
+                    g = add_grounds(g, pad, YARD_DEEP[tier], name, Loot(tier))
                 g.clear_landings(); draft.clear_exit(g)
                 promote_prize(g, tier)
                 g.clear_freebies()
@@ -1445,6 +1669,8 @@ def build():
                 cols, rows = TIER_SIZE[tier]
                 g = shell(cols, rows)
                 grammar(g, tier)
+                if pad:
+                    g = add_grounds(g, pad, YARD_DEEP[tier], name, Loot(tier))
                 g.clear_landings()
                 draft.clear_exit(g)
                 top_up_loot(g, tier)
@@ -1454,6 +1680,10 @@ def build():
                 depth = g.open_until_connected()
                 if depth is None and not g.open_by_removal():
                     problems.append(f'{name} L{tier + 1}: no route to everything')
+            # The repair passes move furniture, and moving furniture can strand
+            # a coin behind whatever they left standing. So the last word on
+            # where the loot is comes after they have all had theirs.
+            g.rehome_loot()
             # Furniture you can look inside, and the floor swept of most of
             # what used to be lying on it. This runs last because it only
             # rewrites characters in place: nothing it does can move a wall or

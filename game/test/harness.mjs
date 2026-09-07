@@ -139,6 +139,11 @@ export function steal(run, itemId) {
   if (!item) throw new Error(`no item ${itemId}`);
   walkTo(run, item);
   for (let guard = 0; guard < 60 && !item.taken && run.sim.status === 'running'; guard++) {
+    // Standing on the spot pressing TAKE while somebody walks up to you is the
+    // one thing a player would never do — and `walkTo` has already handed
+    // control back for exactly this reason, so honour it here too.
+    if (run.heed && run.sim.investigator
+        && run.sim.investigator.state === 'following') break;
     tick(run, { x: 0, y: 0, take: true });
     tick(run, { x: 0, y: 0, take: false });
   }
@@ -163,10 +168,14 @@ export function escape(run) {
     const p = playerOf(run.sim);
     return Math.hypot(p.x - centre.x, p.y - centre.y) < 46;
   };
+  // Look up on the way to the door: somebody chasing you is worth shaking off
+  // before you commit to a run across a yard, and somebody on his rounds is
+  // worth waiting out. Both cost seconds, which is why the loop gives up on
+  // caution once the clock gets short and simply goes.
   run.heedBeat = true;
   let idle = 0;
   for (let go = 0; go < 40 && run.sim.status === 'running'; go++) {
-    if (run.sim.timeLeft < 10) break;
+    if (run.sim.timeLeft < 12) break;
     // Nowhere to walk from here: whatever we are standing in has no route out
     // of it at path resolution. Shuffle off it and ask again.
     const before = run.sim.frame;
@@ -188,6 +197,7 @@ export function escape(run) {
       idle = 0;
     }
   }
+  run.heed = false;
   run.heedBeat = false;
   // ...and then go, whoever is in the way. The clock is the other way to lose,
   // and standing in a side room waiting for a corridor to clear until the timer
@@ -246,13 +256,58 @@ export function waitOut(run, maxFrames = 60 * 25) {
 // making more, standing still *at the place he is heading for* is the one thing
 // that cannot work — which is the point. So: put ground between yourself and
 // his guess, then stop, and let the meter come down.
+// Being chased is not the same problem as being looked for. Somebody walking
+// towards a memory is escaped by getting away from the memory; somebody looking
+// straight at you is escaped by putting a building between you, and the one
+// direction that reliably does that is the way out — which is where you were
+// going anyway. Running blindly away ends in whichever corner is behind you,
+// and a corner is where a fast guard catches people.
+export function boltForDoor(run, maxFrames = 60 * 8) {
+  const { sim } = run;
+  const w = sim.investigator;
+  const p = playerOf(sim);
+  const exit = run.level.exit;
+  const door = { x: exit.x + exit.w / 2, y: exit.y + exit.h / 2 };
+  let path = [];
+  let at = 0;
+  for (let i = 0; i < maxFrames && sim.status === 'running'; i++) {
+    if (w.state !== 'following') return true;
+    if (i % 20 === 0 || at >= path.length) {
+      path = pathTo(run.level, { x: p.x, y: p.y }, door);
+      at = 0;
+    }
+    while (at < path.length - 1
+      && Math.hypot(path[at].x - p.x, path[at].y - p.y) < 10) at++;
+    const target = path[at] || door;
+    let dx = target.x - p.x;
+    let dy = target.y - p.y;
+    // ...unless the way out runs straight through him. Then take the long way
+    // for a moment: sideways, and back on the path once he is behind you.
+    const gx = w.x - p.x;
+    const gy = w.y - p.y;
+    const gap = Math.hypot(gx, gy) || 1;
+    const len = Math.hypot(dx, dy) || 1;
+    if (gap < 150 && (dx * gx + dy * gy) / (len * gap) > 0.35) {
+      dx = -gy;
+      dy = gx;
+    }
+    const d = Math.hypot(dx, dy) || 1;
+    tick(run, { x: dx / d, y: dy / d, take: false, search: false });
+  }
+  return sim.status === 'running' && w.state !== 'following';
+}
+
 export function slipAway(run, maxFrames = 60 * 8) {
   const { sim } = run;
   const w = sim.investigator;
   if (!w || w.state === 'asleep') return true;
   const p = playerOf(sim);
   for (let i = 0; i < maxFrames && sim.status === 'running'; i++) {
-    const spot = w.target || w;
+    // While he is only walking towards a memory, the thing to get away from is
+    // the memory. Once he is following you it is the man — his goal is your own
+    // position, and running away from where you are standing is running
+    // nowhere, which is what this used to do.
+    const spot = w.state === 'following' ? w : (w.target || w);
     const dx = p.x - spot.x;
     const dy = p.y - spot.y;
     const far = Math.hypot(dx, dy);
@@ -262,13 +317,30 @@ export function slipAway(run, maxFrames = 60 * 8) {
     // are nominally far enough just lets him close it again. Keep going until
     // he has lost the thread.
     if (w.state !== 'following' && far > 190 && gap > 190) break;
-    if (w.state === 'following' && gap > 210 && far > 210) {
-      // Far enough to start holding it — but keep drifting, not standing.
-      tick(run, { x: dx / (far || 1) * 0.35, y: dy / (far || 1) * 0.35, take: false, search: false });
+    if (w.state === 'following') {
+      // Chased: head for the door rather than for whichever wall is behind us.
+      if (!boltForDoor(run, maxFrames - i)) break;
       continue;
     }
+    // Straight away from him ends in a corner, and a corner is where a fast
+    // guard catches you. Near an edge, steer back towards the middle of the
+    // map as well — which is what running away actually looks like.
     const d = far || 1;
-    tick(run, { x: dx / d, y: dy / d, take: false, search: false });
+    let vx = dx / d;
+    let vy = dy / d;
+    const edge = 110;
+    const cx = run.level.width / 2;
+    const cy = run.level.height / 2;
+    const near = Math.min(p.x, run.level.width - p.x, p.y, run.level.height - p.y);
+    if (near < edge) {
+      const pull = 1 - near / edge;
+      vx += ((cx - p.x) / (Math.abs(cx - p.x) || 1)) * pull * 1.2;
+      vy += ((cy - p.y) / (Math.abs(cy - p.y) || 1)) * pull * 1.2;
+      const len = Math.hypot(vx, vy) || 1;
+      vx /= len;
+      vy /= len;
+    }
+    tick(run, { x: vx, y: vy, take: false, search: false });
   }
   return waitOut(run);
 }
@@ -341,6 +413,7 @@ export function playEfficiently(levelId, { budget = 70, reserve = null, seed = 7
     if (wakes && run.sim.noise > wakes - 26) {
       for (let i = 0; i < 60 * 10 && run.sim.status === 'running'; i++) {
         if (run.sim.noise <= wakes - 38 || run.sim.timeLeft < keepBack) break;
+        if (hunting(run.sim)) break;
         // ...but not while a man on his round is walking towards the spot you
         // chose to stand still on. Waiting is the answer to a full meter, not
         // to a guard; standing there is how you get walked into.
@@ -355,6 +428,9 @@ export function playEfficiently(levelId, { budget = 70, reserve = null, seed = 7
     if (wakes && run.sim.noise > wakes - 14 && run.sim.status === 'running') {
       for (let i = 0; i < 60 * 10 && run.sim.status === 'running'; i++) {
         if (run.sim.noise <= wakes - 30 || run.sim.timeLeft < keepBack) break;
+        // Holding still is the answer to a full meter, not to a man walking
+        // towards you with your position in his head.
+        if (hunting(run.sim)) break;
         if (onBeat(run.sim) && closeTo(run.sim) < 140) { keepAway(run); break; }
         tick(run);
       }
@@ -362,12 +438,12 @@ export function playEfficiently(levelId, { budget = 70, reserve = null, seed = 7
     if (!best.taken) gaveUp.add(best.id);
     // Woke him anyway? Then get off the spot he is heading for and go quiet,
     // exactly as a player would, rather than walking on and into him.
-    // Seen. Standing in a corner does not shake a man who is looking straight
-    // at you, so the answer a player reaches for is the door with whatever is
-    // already in the bag — and this bot's job is to prove the level can be
-    // walked out of, not to prove it can be cleared.
-    if (run.sim.investigator && run.sim.investigator.state === 'following') break;
+    // Seen. Get out of his way first — running is what shakes somebody who is
+    // looking straight at you — and if he is still on you after that, take the
+    // door with whatever is already in the bag. This bot's job is to prove the
+    // level can be walked out of, not that it can be cleared.
     if (hunting(run.sim)) slipAway(run);
+    if (run.sim.investigator && run.sim.investigator.state === 'following') break;
   }
   run.heed = false;
   if (run.sim.status === 'running') escape(run);

@@ -53,7 +53,7 @@ class Grid:
                     return False
         return True
 
-    def lay(self, x, y, w, h, ch, shift=3):
+    def lay(self, x, y, w, h, ch, shift=3, strict=False):
         """Place a piece of furniture, out of the way of every doorway.
 
         Tries where it was asked for first, then a few tiles either side along
@@ -75,7 +75,7 @@ class Grid:
                 # is not moving aside, it is losing furniture.
                 if not self.clear_of_keep(nx, ny, w, h):
                     continue
-                if d != 0 and not self.empty(nx, ny, w, h):
+                if (d != 0 or strict) and not self.empty(nx, ny, w, h):
                     continue
                 self.fill(nx, ny, w, h, ch)
                 return True
@@ -440,6 +440,109 @@ class Grid:
         for row in self.g:
             print("    '" + ''.join(row) + "',")
         print()
+
+
+def surround(inner, left, top, right, bottom):
+    """Put a finished building in the middle of a bigger plot.
+
+    Everything comes across: the characters, the room dressing, the reserved
+    lanes. What is new is the margin round it, which starts as open ground and
+    is then made into somewhere — a yard, a car park, a garden — by whichever
+    location this is.
+    """
+    g = Grid(inner.cols + left + right, inner.rows + top + bottom)
+    for y in range(inner.rows):
+        for x in range(inner.cols):
+            g.g[y + top][x + left] = inner.g[y][x]
+    for (kind, x, y, w, h, tag) in inner.decor:
+        g.decor.append((kind, x + left, y + top, w, h, tag))
+    for (x, y) in inner.keep:
+        g.keep.add((x + left, y + top))
+    g.bad = list(inner.bad)
+    g.moved = list(inner.moved)
+    return g
+
+
+class Wing:
+    """A rectangle of a bigger plot, addressed as if it were the whole map.
+
+    The room grammars were all written against a grid that *is* the building:
+    they read `cols` and `rows` and lay walls along the edges. Putting a
+    building inside grounds means the building is no longer the map, and the
+    choice is either to thread an offset through every grammar or to hand them
+    something that looks exactly like the grid they expect. This is the second
+    one: the same methods, shifted.
+
+    Everything downstream — the repair passes, the searchable-furniture pass,
+    the emitter — works on the real grid underneath, because by then the
+    building and its grounds are one map and that is the point of them.
+    """
+
+    def __init__(self, grid, x, y, cols, rows):
+        self.grid = grid
+        self.x0, self.y0 = x, y
+        self.cols, self.rows = cols, rows
+
+    # --- the parts of Grid a room grammar actually touches -------------------
+    @property
+    def bad(self):
+        return self.grid.bad
+
+    @property
+    def moved(self):
+        return self.grid.moved
+
+    def fill(self, x, y, w, h, ch):
+        self.grid.fill(x + self.x0, y + self.y0, w, h, ch)
+
+    def box(self, x, y, w, h, ch='#'):
+        self.grid.box(x + self.x0, y + self.y0, w, h, ch)
+
+    def hwall(self, x, y, w, ch='%'):
+        self.grid.hwall(x + self.x0, y + self.y0, w, ch)
+
+    def vwall(self, x, y, h, ch='%'):
+        self.grid.vwall(x + self.x0, y + self.y0, h, ch)
+
+    def put(self, x, y, ch):
+        self.grid.put(x + self.x0, y + self.y0, ch)
+
+    def lane(self, x, y, w, h):
+        self.grid.lane(x + self.x0, y + self.y0, w, h)
+
+    def deco(self, kind, x, y, w=1, h=1, tag=None):
+        self.grid.deco(kind, x + self.x0, y + self.y0, w, h, tag)
+
+    def lay(self, x, y, w, h, ch, shift=3):
+        return self.grid.lay(x + self.x0, y + self.y0, w, h, ch, shift)
+
+    def must(self, x, y, w, h, ch):
+        self.grid.must(x + self.x0, y + self.y0, w, h, ch)
+
+    def spread(self, x, y, w, h, ch, least=2):
+        return self.grid.spread(x + self.x0, y + self.y0, w, h, ch, least)
+
+    def drop(self, x, y, ch, radius=3, box=False):
+        # Bounded to the wing: a coin nudged out of a bedroom and onto the lawn
+        # is not what the room grammar meant, and the grounds place their own.
+        for r in range(radius + 1):
+            for dy in range(-r, r + 1):
+                for dx in range(-r, r + 1):
+                    if max(abs(dx), abs(dy)) != r:
+                        continue
+                    nx, ny = x + dx, y + dy
+                    if not (0 <= nx < self.cols and 0 <= ny < self.rows):
+                        continue
+                    gx, gy = nx + self.x0, ny + self.y0
+                    if self.grid.g[gy][gx] != '.':
+                        continue
+                    if box and self.grid._blocked(gx * 20 + 10, gy * 20 + 10):
+                        continue
+                    self.grid.g[gy][gx] = ch
+                    if (nx, ny) != (x, y):
+                        self.grid.moved.append((ch, x, y, (nx, ny)))
+                    return
+        self.grid.bad.append((ch, x, y))
 
 
 def clear_exit(g):

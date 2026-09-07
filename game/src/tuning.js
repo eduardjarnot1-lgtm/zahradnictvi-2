@@ -384,11 +384,14 @@ const PEOPLE = {
     recovery: { delay: 0.85, rate: 6 },
     alertness: {
       blur: 215, sharp: 18, speedLow: 0.74, speedHigh: 1.22,
-      riseLow: 1.6, riseHigh: 0.7, sweepLow: 4.0, sweepHigh: 2.0
+      riseLow: 1.8, riseHigh: 0.8, sweepLow: 4.0, sweepHigh: 2.0
     },
     investigate: {
-      wakeAt: 60, calmAt: 40, rising: 1.2, settling: 0.9, speed: 86,
-      followAt: 58, unfollowAt: 155
+      // He is a porter, not a guard: he comes to look, and he only actually
+      // takes off after you if you are close enough that there is nothing else
+      // he could be looking at.
+      wakeAt: 60, calmAt: 40, rising: 1.2, settling: 0.9, speed: 80,
+      catchAt: 20, followAt: 42, unfollowAt: 104, unfollowFor: 1.5
     },
     // No round. He is a night porter asleep at a desk, not a guard on a beat —
     // and the floor he sleeps on is one corridor with the way out at the end of
@@ -439,14 +442,14 @@ const PEOPLE = {
   Museum: person({
     recovery: { delay: 1.2, rate: 4.5 },
     alertness: {
-      from: 45, blur: 175, sharp: 13, speedLow: 0.82, speedHigh: 1.16,
+      from: 45, blur: 175, sharp: 13, speedLow: 0.78, speedHigh: 1.05,
       riseLow: 1.2, riseHigh: 0.5, sweepLow: 5.0, sweepHigh: 2.6,
       narrow: 0.68, refix: 4
     },
     investigate: {
       wakeAt: 56, calmAt: 34, rising: 0.9, settling: 0.7, speed: 96,
       accel: 520, decel: 700, searchFor: 4.0, catchAt: 24,
-      followAt: 64, unfollowAt: 145, unfollowFor: 2.0
+      followAt: 58, unfollowAt: 108, unfollowFor: 1.5
     },
     patrol: beat(2, 160, 4, 3.4, 0.56),
     alarm: alarmAt(72, 5.0),
@@ -458,14 +461,14 @@ const PEOPLE = {
   Mansion: person({
     recovery: { delay: 1.25, rate: 4 },
     alertness: {
-      from: 42, blur: 165, sharp: 12, speedLow: 0.86, speedHigh: 1.10,
+      from: 42, blur: 165, sharp: 12, speedLow: 0.82, speedHigh: 1.06,
       riseLow: 1.0, riseHigh: 0.45, sweepLow: 5.2, sweepHigh: 2.6,
       narrow: 0.70, refix: 4
     },
     investigate: {
       wakeAt: 54, calmAt: 33, rising: 0.8, settling: 0.7, speed: 102,
       accel: 540, decel: 720, searchFor: 4.2, catchAt: 24,
-      followAt: 66, unfollowAt: 150, unfollowFor: 2.2
+      followAt: 60, unfollowAt: 112, unfollowFor: 1.6
     },
     patrol: beat(2, 180, 4, 3.0, 0.60),
     alarm: alarmAt(76, 4.5),
@@ -502,14 +505,14 @@ const PEOPLE = {
   Vault: person({
     recovery: { delay: 1.4, rate: 3.5 },
     alertness: {
-      from: 38, blur: 145, sharp: 10, speedLow: 0.90, speedHigh: 1.05,
+      from: 38, blur: 145, sharp: 10, speedLow: 0.86, speedHigh: 1.02,
       riseLow: 0.9, riseHigh: 0.4, sweepLow: 5.6, sweepHigh: 2.8,
       narrow: 0.74, refix: 3.5
     },
     investigate: {
       wakeAt: 50, calmAt: 30, rising: 0.7, settling: 0.6, speed: 110,
       accel: 580, decel: 760, searchFor: 4.6, catchAt: 25,
-      followAt: 70, unfollowAt: 155, unfollowFor: 2.4
+      followAt: 62, unfollowAt: 118, unfollowFor: 1.8
     },
     // No round. The vault is one ring of corridor with no side rooms to step
     // into, so a guard walking it is not something a thief can time — it is a

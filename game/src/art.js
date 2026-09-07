@@ -641,7 +641,59 @@ function drawDesk(ctx, c) {
   }
 }
 
+// --- outdoors ----------------------------------------------------------------
+// A tree from above is a ring of canopy over a dark trunk shadow. Three fills
+// and a scatter of leaf clumps: no strokes, because the grounds of a level five
+// can hold thirty of these and a stroke is the expensive part.
+function drawTree(ctx, c) {
+  const cx = c.x + c.w / 2;
+  const cy = c.y + c.h / 2;
+  const r = Math.min(c.w, c.h) * 0.52;
+  ctx.fillStyle = 'rgba(30,44,26,0.34)';
+  ctx.beginPath();
+  ctx.arc(cx + 4, cy + 7, r, 0, TAU);
+  ctx.fill();
+  ctx.fillStyle = '#3f6236';
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, TAU);
+  ctx.fill();
+  ctx.fillStyle = '#4e7a41';
+  for (let i = 0; i < 5; i++) {
+    const a = i * 1.257 + (c.x % 7) * 0.2;
+    ctx.beginPath();
+    ctx.arc(cx + Math.cos(a) * r * 0.42, cy + Math.sin(a) * r * 0.42, r * 0.40, 0, TAU);
+    ctx.fill();
+  }
+  ctx.fillStyle = '#5f9150';
+  ctx.beginPath();
+  ctx.arc(cx - r * 0.20, cy - r * 0.24, r * 0.36, 0, TAU);
+  ctx.fill();
+  ctx.fillStyle = '#2b3f24';
+  ctx.beginPath();
+  ctx.arc(cx, cy, r * 0.16, 0, TAU);
+  ctx.fill();
+}
+
+// A hedge or a bank of shrubs: a soft-cornered slab with clumps along its top,
+// so a run of them reads as planting rather than as a green wall.
+function drawHedge(ctx, c) {
+  ctx.fillStyle = 'rgba(30,44,26,0.30)';
+  roundRect(ctx, c.x + 3, c.y + 6, c.w, c.h, 7);
+  ctx.fill();
+  fillRound(ctx, c.x, c.y, c.w, c.h, 7, '#3a5c32');
+  fillRound(ctx, c.x + 2, c.y + 2, c.w - 4, c.h * 0.42, 5, '#4a7340');
+  ctx.fillStyle = '#57874a';
+  const step = 11;
+  for (let x = c.x + 6; x < c.x + c.w - 3; x += step) {
+    ctx.beginPath();
+    ctx.arc(x, c.y + c.h * 0.30, 4.2, 0, TAU);
+    ctx.fill();
+  }
+}
+
 const SCHOOL_PAINTERS = { sofa: drawBench, chest: drawLockers, table: drawDesk };
+
+const OUTDOOR_PAINTERS = { tree: drawTree, hedge: drawHedge };
 
 const FURNITURE_PAINTERS = {
   table: drawTable,
@@ -656,7 +708,9 @@ const FURNITURE_PAINTERS = {
 
 export function drawFurniture(ctx, c) {
   const style = furnitureStyle(c);
-  const paint = (c.theme === 'school' && SCHOOL_PAINTERS[style]) || FURNITURE_PAINTERS[style];
+  // Outdoors first: a tree is a tree whatever building it is standing beside.
+  const paint = OUTDOOR_PAINTERS[style]
+    || (c.theme === 'school' && SCHOOL_PAINTERS[style]) || FURNITURE_PAINTERS[style];
   paint(ctx, c);
 }
 
@@ -964,6 +1018,34 @@ function drawWallSlab(ctx, c) {
   ctx.fillRect(c.x, c.y + c.h - 2.5, c.w, 2.5);
 }
 
+// A fence: posts and two rails, drawn along whichever way the run goes. It
+// stops you like a wall and it has to read as something you can see over, or
+// the grounds stop being grounds and become another room.
+function drawFence(ctx, c) {
+  const along = c.w >= c.h;
+  const len = along ? c.w : c.h;
+  ctx.fillStyle = 'rgba(24,20,16,0.30)';
+  if (along) ctx.fillRect(c.x, c.y + c.h - 3, c.w, 4);
+  else ctx.fillRect(c.x + c.w - 3, c.y, 4, c.h);
+  // Two rails.
+  ctx.fillStyle = '#6d5b45';
+  for (const t of [0.28, 0.66]) {
+    if (along) ctx.fillRect(c.x, Math.round(c.y + c.h * t), c.w, 3);
+    else ctx.fillRect(Math.round(c.x + c.w * t), c.y, 3, c.h);
+  }
+  // ...and a post every tile and a bit.
+  ctx.fillStyle = '#5a4a37';
+  for (let d = 4; d < len - 2; d += 24) {
+    if (along) ctx.fillRect(Math.round(c.x + d), c.y + 1, 4, c.h - 2);
+    else ctx.fillRect(c.x + 1, Math.round(c.y + d), c.w - 2, 4);
+  }
+  ctx.fillStyle = 'rgba(255,236,200,0.16)';
+  for (let d = 4; d < len - 2; d += 24) {
+    if (along) ctx.fillRect(Math.round(c.x + d), c.y + 1, 4, 2);
+    else ctx.fillRect(c.x + 1, Math.round(c.y + d), 2, 4);
+  }
+}
+
 // A window: a lit pane in the wall, and the light it throws on the floor. On a
 // floorplan these are what tell you which side of the building you are on.
 function drawWindowPane(ctx, c) {
@@ -1014,6 +1096,13 @@ function drawWindowPane(ctx, c) {
 // gym is sprung boards, a corridor is tile, a store room is bare concrete, and
 // telling them apart at a glance is most of what makes a floorplan readable.
 const FLOORS = {
+  // Outdoors. Grass gets flecks rather than seams so it reads as ground rather
+  // than as a floor somebody laid; paving and gravel keep their courses, which
+  // is what makes a path read as a path.
+  grass:    { base: '#4f7a3f', line: 'rgba(38,62,30,0.30)', pitch: 0 },
+  paving:   { base: '#8d8b84', line: 'rgba(58,57,52,0.36)', pitch: 34, dir: 'grid' },
+  gravel:   { base: '#8a8175', line: 'rgba(56,52,46,0.26)', pitch: 0 },
+  tarmac:   { base: '#4f4e52', line: 'rgba(230,226,180,0.30)', pitch: 46, dir: 'h' },
   boards:   { base: '#a9773f', line: 'rgba(120,78,36,0.42)', pitch: 26, dir: 'h' },
   carpet:   { base: '#7e7b63', line: 'rgba(56,54,42,0.30)', pitch: 0 },
   tiles:    { base: '#8d8f86', line: 'rgba(58,60,54,0.34)', pitch: 30, dir: 'grid' },
@@ -1214,6 +1303,40 @@ function drawLightPool(ctx, d) {
 // Split by whether a thing is on the floor, on a wall, or standing in the room:
 // a blackboard has to go on before the furniture that stands in front of it,
 // and a bin has to go on after.
+// A bike rack: a run of hoops with a couple of bikes in them. Small, cheap, and
+// the single quickest way to say "this is the outside of a school".
+function drawBike(ctx, d) {
+  const y = d.y + d.h * 0.5;
+  ctx.strokeStyle = '#9aa3ad';
+  ctx.lineWidth = 2.4;
+  ctx.beginPath();
+  for (let x = d.x + 6; x < d.x + d.w - 3; x += 13) {
+    ctx.moveTo(x, y + 8);
+    ctx.lineTo(x, y - 6);
+    ctx.lineTo(x + 7, y - 6);
+    ctx.lineTo(x + 7, y + 8);
+  }
+  ctx.stroke();
+  ctx.fillStyle = '#c05a45';
+  ctx.beginPath();
+  ctx.arc(d.x + 12, y + 2, 3.4, 0, TAU);
+  ctx.arc(d.x + 25, y + 2, 3.4, 0, TAU);
+  ctx.fill();
+}
+
+// A parked car, from above: a rounded body, a windscreen band and two lamps.
+function drawCar(ctx, d) {
+  ctx.fillStyle = 'rgba(20,18,24,0.34)';
+  roundRect(ctx, d.x + 3, d.y + 7, d.w, d.h, 8);
+  ctx.fill();
+  fillRound(ctx, d.x, d.y, d.w, d.h, 8, '#54607a');
+  fillRound(ctx, d.x + 4, d.y + d.h * 0.22, d.w - 8, d.h * 0.30, 4, '#8fa2c4');
+  fillRound(ctx, d.x + 4, d.y + d.h * 0.62, d.w - 8, d.h * 0.20, 4, '#6d7c9a');
+  ctx.fillStyle = '#ffe9b0';
+  ctx.fillRect(d.x + 4, d.y + 2, 5, 3);
+  ctx.fillRect(d.x + d.w - 9, d.y + 2, 5, 3);
+}
+
 const DECOR_FLOOR = { floor: drawFloorPatch, court: drawCourt };
 const DECOR_WALL = {
   board: drawBoard, notice: drawNotice, poster: drawPoster,
@@ -1221,7 +1344,8 @@ const DECOR_WALL = {
 };
 const DECOR_PROPS = {
   bin: drawBin, plant: drawPotPlant, kettle: drawKettle,
-  desklamp: drawDeskLamp, lamp: drawLightPool
+  desklamp: drawDeskLamp, lamp: drawLightPool,
+  bike: drawBike, car: drawCar
 };
 
 function paintDecor(ctx, level, table) {
@@ -1247,7 +1371,10 @@ export function paintStaticRoom(ctx, level) {
   if (level.tiles) {
     // A hand-drawn map: the building is whatever the grid says it is.
     for (const c of level.colliders) {
-      if (c.type === 'wall' && !c.window) drawWallSlab(ctx, c);
+      if (c.type === 'wall' && !c.window && !c.fence) drawWallSlab(ctx, c);
+    }
+    for (const c of level.colliders) {
+      if (c.fence) drawFence(ctx, c);
     }
     for (const c of level.colliders) {
       if (c.type === 'partition') drawPartition(ctx, c);
