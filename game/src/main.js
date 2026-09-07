@@ -551,21 +551,29 @@ export function boot() {
       takeButton.classList.toggle('on', targeted);
     }
 
-    // SEARCH exists only where there is furniture to open. It appears when one
-    // is in reach, fills like a progress ring while his hands are in it, and
-    // goes away again — so a location without the mechanic never shows it and
-    // a player who has never met it is never asked about it.
+    // One button, for whatever is to hand, and nothing when nothing is.
+    //
+    // It began as SEARCH and is now the game's only interaction button: walk up
+    // to a cupboard and it says SEARCH, step into the gap behind the lockers
+    // and it says HIDE, and once you are in there it says LEAVE. Which of those
+    // is on offer is the simulation's decision — `sim.action` — so the HUD only
+    // renders it, and a location with none of those mechanics shows no button.
     const busy = !!sim.searching;
-    const here = busy || !!sim.searchTargetId;
+    const label = ACTION_LABEL[sim.action] || 'SEARCH';
+    const here = busy || !!sim.action;
     if (hudLast.searchHere !== here) {
       hudLast.searchHere = here;
       searchButton.classList.toggle('here', here);
       searchButton.classList.toggle('on', here);
     }
-    if (hudLast.searchBusy !== busy) {
+    if (hudLast.searchBusy !== busy || hudLast.actionLabel !== label) {
       hudLast.searchBusy = busy;
+      hudLast.actionLabel = label;
       searchButton.classList.toggle('busy', busy);
-      searchButton.textContent = busy ? '' : 'SEARCH';
+      searchButton.textContent = busy ? '' : label;
+      // Getting out is the urgent one, and should not look like opening a
+      // drawer.
+      searchButton.classList.toggle('leave', sim.action === 'leave');
     }
     if (busy) {
       const share = Math.round((sim.searching.t / sim.searching.duration) * 20) / 20;

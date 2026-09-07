@@ -8,7 +8,7 @@ import { playerOf } from './sim.js';
 import {
   paintStaticRoom, drawSleeper, drawGuard, drawSlumped, drawThief, drawCaretakerWalking,
   drawGrabbedItem,
-  roundRect, ITEM_ART, lampPositions, drawHideLabel
+  roundRect, ITEM_ART, lampPositions, drawHideLabel, drawFurniture
 } from './art.js';
 
 // W and H are the *window*, not the world: how much of a level fits on screen
@@ -696,18 +696,34 @@ export function createRenderer(canvas, options = {}) {
           hx += ((ax - px) / len) * 7 * tuck;
           hy += ((ay - py) / len) * 7 * tuck;
         }
+        // Down as well as in. `stand` is the figure's own getting-up channel —
+        // the one the caretaker rises out of his chair on — run backwards, so
+        // hiding bends him down using the animation the game already has rather
+        // than a second idea of what crouching looks like.
+        stance.stand = 1 - tuck * 0.42;
         ctx.save();
         ctx.translate(hx, hy);
-        ctx.scale(1 - tuck * 0.16, 1 - tuck * 0.16);
+        ctx.scale(1 - tuck * 0.10, 1 - tuck * 0.10);
         ctx.translate(-hx, -hy);
-        ctx.globalAlpha = 1 - tuck * 0.25;
       }
       const hand = sim.rules.figures
         ? drawFigure(ctx, hx, hy, stance, THIEF_LOOK)
         : drawThief(ctx, hx, hy, stance);
       if (tuck > 0) {
-        ctx.globalAlpha = 1;
         ctx.restore();
+        // ...and the furniture goes back on top of him. The room is painted
+        // once into a cache underneath everything, so without this the thief is
+        // drawn over the lockers he is supposed to be behind and "hidden" is
+        // something only the meter knows about. Repainting the one piece he is
+        // behind is a few draws on the frames where it matters and nothing on
+        // any other.
+        const over = sim.hideIn || (sim.hiding && sim.hiding.into);
+        if (over && over.anchor && over.anchor.type === 'furniture') {
+          ctx.save();
+          ctx.globalAlpha = tuck;
+          drawFurniture(ctx, over.anchor);
+          ctx.restore();
+        }
       }
 
       if (sim.reach) {

@@ -271,10 +271,11 @@ export function tileLevel(spec) {
       const d = Math.hypot(dx, dy) + (c.type === 'furniture' ? 0 : TILE * 0.9);
       if (d < nearest) { nearest = d; best = c; }
     }
-    spot.anchor = best && nearest <= TILE * 2.6
-      ? { x: best.x, y: best.y, w: best.w, h: best.h,
-          style: best.style || (best.type === 'furniture' ? 'cabinet' : 'wall') }
-      : null;
+    // The collider itself, not a copy of its numbers: the renderer paints it a
+    // second time over the top of a hidden thief so that the lockers actually
+    // occlude him, and to do that it needs the piece exactly as the room drew
+    // it — style, theme and all.
+    spot.anchor = best && nearest <= TILE * 2.6 ? best : null;
   }
 
   const kind = spec.watcher || 'sleeper';

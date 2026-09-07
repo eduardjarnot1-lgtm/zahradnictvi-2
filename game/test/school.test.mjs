@@ -1630,6 +1630,24 @@ test('every school level offers a few places to be out of sight, and only the sc
     if (level.location === 'School') continue;
     assert.equal(level.hides.length, 0,
       `L${level.id} (${level.location}) has hiding places, and hiding is a school beta`);
+    // Belt and braces: no maps *and* no rules. Either one alone would keep the
+    // button off the screen, and the mechanic is meant to be off in these
+    // buildings rather than merely unreachable in them.
+    const sim = createSim({ level });
+    assert.equal(sim.rules.hide, undefined,
+      `L${level.id} (${level.location}) has the hiding rules loaded`);
+    const p = playerOf(sim);
+    // Stand him everywhere a stash is and confirm the button never offers it.
+    for (const stash of sim.stashes.slice(0, 6)) {
+      p.x = stash.x + stash.w / 2;
+      p.y = stash.y + stash.h + 16;
+      p.prevX = p.x;
+      p.prevY = p.y;
+      stepSim(sim);
+      assert.notEqual(sim.action, 'hide',
+        `L${level.id} (${level.location}) offered HIDE`);
+      assert.ok(!sim.hidden, `L${level.id} (${level.location}) let him hide`);
+    }
   }
 });
 
@@ -1703,6 +1721,60 @@ test('nothing in the school stands one tile off a wall', () => {
   }
   assert.ok(total <= GAPS_ALLOWED,
     `${total} pieces stand one tile off a wall: ${found.slice(0, 6).join('; ')}`);
+});
+
+test('HIDE appears on the way in and goes away again when you leave', () => {
+  // Section 9: the button is not a permanent fixture. It has to be offered on
+  // approach — early enough to be found by walking about — and withdrawn the
+  // moment you are out of range of anywhere to hide.
+  const run = openSchool(25);
+  const { sim } = run;
+  const p = playerOf(sim);
+  const reach = sim.rules.hide.reach;
+  const edge = (r, x, y) => Math.hypot(
+    Math.max(r.x - x, 0, x - (r.x + r.w)), Math.max(r.y - y, 0, y - (r.y + r.h)));
+
+  let offered = 0;
+  let wrong = 0;
+  // Every standable tile on the level, so this is the whole contract rather
+  // than one lucky approach.
+  for (let ty = 1; ty < sim.level.tiles.rows - 1; ty++) {
+    for (let tx = 1; tx < sim.level.tiles.cols - 1; tx++) {
+      const cx = tx * 20 + 10;
+      const cy = ty * 20 + 10;
+      if (blocked(cx, cy, TUNING.player.boxWidth, TUNING.player.boxHeight,
+        sim.level.colliders)) continue;
+      p.x = cx; p.y = cy; p.prevX = cx; p.prevY = cy;
+      p.speed = 0;
+      // Keep the level alive. A thief teleported across the map tile by tile
+      // walks into the caretaker sooner or later, and once the level is over
+      // the simulation stops stepping — which makes every remaining reading a
+      // stale one, and quietly turns most of this sweep into nothing.
+      sim.status = 'running';
+      sim.noise = 0;
+      sim.hidden = false;
+      sim.hiding = null;
+      tick(run);
+      const near = sim.level.hides.some((h) => edge(h, cx, cy) <= reach);
+      if (sim.action === 'hide') {
+        offered++;
+        if (!near) wrong++;
+      } else if (near && sim.action !== 'search') {
+        // Inside reach of a hiding place, and no cupboard nearer: it has to be
+        // on offer.
+        wrong++;
+      }
+    }
+  }
+  assert.equal(wrong, 0, `${wrong} tiles disagreed about whether HIDE is on offer`);
+  assert.ok(offered > 6, `HIDE was only on offer from ${offered} tiles — too hard to find`);
+
+  // ...and standing well away from all of them, it is gone.
+  p.x = sim.level.spawn.x; p.y = sim.level.spawn.y;
+  p.prevX = p.x; p.prevY = p.y;
+  tick(run);
+  assert.ok(sim.level.hides.every((h) => edge(h, p.x, p.y) > reach), 'the spawn is clear of them');
+  assert.notEqual(sim.action, 'hide', 'still offering HIDE from across the school');
 });
 
 test('the button offers what is to hand, and nothing when nothing is', () => {

@@ -478,8 +478,8 @@ const PEOPLE = {
     // because coming out is usually urgent.
     hide: {
       reach: 44,        // how close the lockers have to be to offer themselves
-      enter: 0.5,       // seconds spent getting in...
-      leave: 0.34,      // ...and rather fewer getting out
+      enter: 0.62,      // seconds spent getting in...
+      leave: 0.42,      // ...and rather fewer getting out
       // Pushing the stick while tucked in brings you out. The button is the
       // signposted way and this is the one every player will find first, and a
       // hiding place you can be stuck in is the one thing this must not be.

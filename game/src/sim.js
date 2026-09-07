@@ -371,9 +371,6 @@ export function alertnessOf(sim) {
 
 const mix = (lo, hi, t) => lo + (hi - lo) * t;
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
-// How close to the gap counts as being in it rather than merely beside it.
-// Under half a tile: he has to have stepped in.
-const IN_THE_NOOK = 8;
 
 // How far, and how sharply, this level's person can see — the location's own
 // numbers, scaled by how far into the location you are. Resolved once per sim:
@@ -1352,17 +1349,18 @@ export function stepSim(sim, input = EMPTY_INPUT) {
       sim.hideTargetId = null;
     } else {
       // Both mechanics share one button, and the locker you would hide behind
-      // is frequently the locker you would search — so which is on offer has to
-      // be a rule the player can feel rather than a comparison of two distances
-      // that are nearly equal.
+      // is frequently the locker you would search, so one of them has to win.
       //
-      // The rule is where he is standing. In the gap, it is HIDE; anywhere else
-      // with a cupboard in reach, it is SEARCH. So walking up to the lockers
-      // offers to open them and stepping into the alcove beside them offers to
-      // get behind them, and one step chooses.
+      // Whichever is nearer. Requiring him to be standing *in* the gap was the
+      // first rule and it was wrong in the way that matters: the button then
+      // only appears once you are already there, and what a player needs is for
+      // it to appear as they walk up. Approaching the gap beside a bank of
+      // lockers offers HIDE; walking up to the face of the cupboard offers
+      // SEARCH; and a step either way changes its mind, which is what makes it
+      // legible rather than arbitrary.
       const stash = nearestStash(sim, player, searchRules.reach);
       const nook = hideRules ? nearestHide(sim, player, hideRules.reach) : null;
-      const hiding = nook && (nook.distance <= IN_THE_NOOK || !stash);
+      const hiding = nook && (!stash || nook.distance <= stashGap(player, stash));
       sim.searchTargetId = hiding ? null : (stash ? stash.id : null);
       sim.hideTargetId = hiding ? nook.spot.id : null;
       const pressed = input.search && !sim.prevSearch;
