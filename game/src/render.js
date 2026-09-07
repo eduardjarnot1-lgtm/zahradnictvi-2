@@ -8,7 +8,7 @@ import { playerOf } from './sim.js';
 import {
   paintStaticRoom, drawSleeper, drawGuard, drawSlumped, drawThief, drawCaretakerWalking,
   drawGrabbedItem,
-  roundRect, ITEM_ART, lampPositions
+  roundRect, ITEM_ART, lampPositions, drawHideLabel
 } from './art.js';
 
 // W and H are the *window*, not the world: how much of a level fits on screen
@@ -16,6 +16,9 @@ import {
 // level built before maps could be larger than the screen.
 const { width: W, height: H, wallThickness: WT, hudStrip: HUD_H } = TUNING.world;
 const TAU = Math.PI * 2;
+// How much of getting up out of a chair the *seated* drawing covers. The rest
+// belongs to the standing figure, which picks him up already half out of it.
+const SEATED_SHARE = 0.74;
 
 export function createRenderer(canvas, options = {}) {
   const ctx = canvas.getContext('2d');
@@ -263,6 +266,20 @@ export function createRenderer(canvas, options = {}) {
     }
   }
 
+  // The beta's markers over the hiding places. Culled like everything else,
+  // and skipped entirely — not merely drawn transparent — when the flag is off,
+  // so turning it off before release costs nothing per frame.
+  function drawHideLabels(sim, time) {
+    if (!TUNING.beta || !TUNING.beta.hideLabels) return;
+    const spots = sim.level.hides;
+    if (!spots || !spots.length) return;
+    for (const spot of spots) {
+      if (spot.x > camera.x + W + 40 || spot.x + spot.w < camera.x - 40) continue;
+      if (spot.y > camera.y + H + 40 || spot.y + spot.h < camera.y - 40) continue;
+      drawHideLabel(ctx, spot, { active: sim.hideIn === spot, time });
+    }
+  }
+
   function drawItems(sim, time) {
     ctx.textAlign = 'center';
     // On a floorplan most of the loot is off screen every frame, and each one
@@ -458,7 +475,8 @@ export function createRenderer(canvas, options = {}) {
     const wx = w.prevX + (w.x - w.prevX) * alpha;
     const wy = w.prevY + (w.y - w.prevY) * alpha;
     const rules = sim.investigateRules;
-    const { stand, glance } = gettingUp(w, rules, time);
+    const seated = (watcherConfig(sim.level.watcher.kind).pose || 'bed') === 'desk';
+    const { stand, glance } = gettingUp(w, rules, time, seated);
     // The same speed-driven gait the thief uses, against his own top speed —
     // he is slower, so a brisk walk for him is not a run.
     const gait = gaitBlend(w.speed / rules.speed);
@@ -490,7 +508,7 @@ export function createRenderer(canvas, options = {}) {
   // decide what to do about it.
   //
   // `stand` is how upright he is; `glance` turns his head without turning him.
-  function gettingUp(w, rules, time) {
+  function gettingUp(w, rules, time, seated) {
     const ease = (t) => t * t * (3 - 2 * t);
     if (w.state === 'settling') {
       return { stand: Math.max(0, 1 - w.stateFor / rules.settling), glance: 0 };
@@ -500,13 +518,19 @@ export function createRenderer(canvas, options = {}) {
       const searching = w.state === 'searching';
       return { stand: 1, glance: searching ? Math.sin(w.stateFor * 2.1) * 0.9 : 0 };
     }
-    const p = Math.min(1, w.stateFor / rules.rising);
-    // The first beat belongs to the sleeping figure, so this picks him up
-    // already sitting rather than flat on the couch.
-    if (p < 0.55) return { stand: 0.16 + ease((p - 0.18) / 0.37) * 0.44, glance: 0 };  // sits up
-    if (p < 0.82) return { stand: 0.60 + ease((p - 0.55) / 0.27) * 0.40, glance: 0 };  // stands
-    // On his feet, having a look round before he sets off.
-    return { stand: 1, glance: Math.sin((p - 0.82) / 0.18 * Math.PI * 1.5) * 1.15 };
+    const p = Math.min(1, w.stateFor / Math.max(0.01, w.riseFor || rules.rising));
+    // Whatever share of getting up the seated drawing did not cover. For a man
+    // at a desk that is the last quarter of it and he is already half out of
+    // the chair when it starts; for a man on a couch it is nearly all of it,
+    // which is what it always was.
+    const from = seated ? SEATED_SHARE : 0.18;
+    const q = Math.max(0, Math.min(1, (p - from) / (1 - from)));
+    // Hips off the seat, then feet under him, then upright with a look round.
+    if (q < 0.62) {
+      return { stand: (seated ? 0.55 : 0.16) + ease(q / 0.62) * (seated ? 0.45 : 0.84),
+        glance: 0 };
+    }
+    return { stand: 1, glance: Math.sin((q - 0.62) / 0.38 * Math.PI * 1.5) * 1.15 };
   }
 
   return {
@@ -563,8 +587,19 @@ export function createRenderer(canvas, options = {}) {
       // twitching. Cutting to a standing man on the frame the meter crosses 80
       // throws that moment away.
       const w = sim.investigator;
-      const reacting = w && w.state === 'rising'
-        && w.stateFor < sim.investigateRules.rising * 0.18;
+      // How far through getting up he is, on the simulation's own clock — which
+      // stretches with how alarmed he is, so the drawing has to read it rather
+      // than assume it.
+      const riseFor = w && w.riseFor ? w.riseFor : sim.investigateRules.rising;
+      const risen = w && w.state === 'rising'
+        ? Math.min(1, w.stateFor / Math.max(0.01, riseFor)) : 1;
+      // A man at a desk stays the seated drawing for most of getting up: he
+      // lifts his head, looks about, straightens, gets his hands under him. The
+      // standing figure only takes over for the last of it. A man on a couch
+      // has always had one beat of reacting and then stood; leaving that alone
+      // keeps every other location exactly as it was.
+      const seatedUntil = pose === 'desk' ? SEATED_SHARE : 0.18;
+      const reacting = w && w.state === 'rising' && risen < seatedUntil;
       const up = w && w.state !== 'asleep' && !reacting;
       if (w && w.target && !up) drawInvestigationMark(w, time);
       if (up) {
@@ -573,7 +608,8 @@ export function createRenderer(canvas, options = {}) {
         drawGuard(ctx, sim.level, stage, time, sim.wakeSeconds || 0, sim.startle || 0,
           sim.seen || 0, sim.level.watcher.sees || config.sees, kind);
       } else if (pose === 'desk') {
-        drawSlumped(ctx, sim.level, stage, time, sim.wakeSeconds || 0, sim.startle || 0, kind);
+        drawSlumped(ctx, sim.level, stage, time, sim.wakeSeconds || 0, sim.startle || 0, kind,
+          reacting ? risen / seatedUntil : 0);
       } else {
         // Being woken is a startle in its own right, on top of any bang.
         const jolt = reacting
@@ -583,6 +619,7 @@ export function createRenderer(canvas, options = {}) {
           Math.max(sim.startle || 0, jolt), kind, pose);
       }
       drawStashes(sim, time);
+      drawHideLabels(sim, time);
       drawItems(sim, time);
 
       // Tiptoe, walk or run, read off the speed he is actually travelling at

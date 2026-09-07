@@ -44,6 +44,11 @@ TIER_SIZE = [(30, 26), (33, 28), (36, 31), (40, 34), (44, 38)]
 
 LOOT_CHARS = 'cwpkrmtnlvjdg'
 
+# Which locations offer somewhere to hide, and how many places. The school
+# only: hiding is new, and trying a new mechanic in one building is how the
+# rest of this game was built.
+HIDES = {'School': 3}
+
 
 class Loot:
     """Hands out loot characters for a tier, cycling so a room gets variety."""
@@ -434,8 +439,11 @@ TIER_STASH_LOOT = [
 # caretaker is asleep on, obviously not.
 SEARCHABLE_STYLES = {'C': 'chest', 'B': 'bookshelf', 'W': 'wardrobe',
                      'T': 'table', 'V': 'tvBench'}
-# Digits first, then the uppercase letters no other tile uses.
-STASH_CHARS = '1234567890AFGHIJKLMQRUYZ'
+# Digits first, then the uppercase letters no other tile uses — which is fewer
+# than it was. H is a hiding place, and Y and Z became a tree and a hedge when
+# the buildings went outdoors; a stash allocated one of those characters is not
+# a cupboard with a diamond in it, it is a diamond inside a tree.
+STASH_CHARS = '1234567890AFGIJKLMQRU'
 
 
 def _blobs(g, chars):
@@ -1497,7 +1505,7 @@ YARD_DEEP = [0, 7, 7, 6, 6]
 # planted in them, and the one thing that says which place this is.
 GROUNDS = {
     'School':    dict(surface='grass', path='paving', props=('bike', 'bin'),
-                      court=True, sign='Playground', shed='C'),
+                      court=True, sign='Playground', shed='K'),
     'Apartment': dict(surface='grass', path='paving', props=('car', 'bin'),
                       sign='Parking', shed='C'),
     'House':     dict(surface='grass', path='gravel', props=('bin',),
@@ -1643,7 +1651,7 @@ def reachable_yards(g, yards, pad):
     return [rect for i, rect in enumerate(yards) if i in found]
 
 
-def add_grounds(inner, sides, deep, flavour, loot, bite=True, voids=()):
+def add_grounds(inner, sides, deep, flavour, loot, bite=True, voids=(), plant_yards=False):
     """Wrap a finished building in its own grounds, and move the way out into
     them. Returns the new grid."""
     found = find_exit(inner)
@@ -1706,11 +1714,30 @@ def add_grounds(inner, sides, deep, flavour, loot, bite=True, voids=()):
             continue
         yards.append((x0, y0, x1 - x0, y1 - y0))
     yards = reachable_yards(g, yards, (l, t, r, b))
+    opened = set()
     for (yx, yy, yw, yh) in yards:
         for y in range(yy, yy + yh):
             for x in range(yx, yx + yw):
                 g.g[y][x] = '.'
                 g.keep.discard((x, y))
+                opened.add((x, y))
+    # ...and the building keeps its wall. A block cut out of a silhouette is
+    # frequently the only thing standing between a room and the outside — a
+    # school's gymnasium has no wall of its own along the corner the drawing
+    # left out, because the corner *was* the wall. Opening it wholesale puts the
+    # gym hall in the car park. So the tile where new ground meets old inside
+    # goes back to being masonry, which is exactly where the outer wall belongs.
+    outside = opened | {(x, y) for y in range(rows) for x in range(cols)
+                        if x < l or y < t or x >= cols - r or y >= rows - b}
+    for (x, y) in sorted(opened):
+        for (nx, ny) in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
+            if not (0 <= nx < cols and 0 <= ny < rows):
+                continue
+            if (nx, ny) in outside or g.g[ny][nx] in '#+':
+                continue
+            g.g[y][x] = '#'
+            opened.discard((x, y))
+            break
 
     bands = ground_bands(cols, rows, (l, t, r, b))
     for ((bx, by, bw, bh), _) in bands:
@@ -1722,6 +1749,29 @@ def add_grounds(inner, sides, deep, flavour, loot, bite=True, voids=()):
         g.deco('floor', bite[0], bite[1], bite[2], bite[3], style['surface'])
     for (yx, yy, yw, yh) in yards:
         g.deco('floor', yx, yy, yw, yh, style['surface'])
+        # ...and something in it. A corner the building does not fill is still
+        # part of the campus, and an acre of unbroken lawn reads as the place
+        # the map ran out rather than as anywhere. Trees in from the corners, a
+        # bench to sit on, a lamp — laid strictly, so nothing lands in a lane or
+        # across the path out.
+        #
+        # Asked for rather than assumed: this went in for the school, and a
+        # school-only pass has no business rearranging the other ten locations'
+        # gardens on its way past.
+        if not plant_yards:
+            continue
+        if yw >= 7 and yh >= 7:
+            for (tx, ty) in ((yx + 2, yy + 2), (yx + yw - 4, yy + 2),
+                             (yx + 2, yy + yh - 4), (yx + yw - 4, yy + yh - 4)):
+                g.lay(tx, ty, 2, 2, 'Y', shift=1, strict=True)
+            if yw >= yh:
+                g.lay(yx + yw // 2 - 2, yy + yh // 2, 4, 1, 'S', shift=2, strict=True)
+            else:
+                g.lay(yx + yw // 2, yy + yh // 2 - 2, 1, 4, 'S', shift=2, strict=True)
+            g.deco('lamp', yx + yw // 2, yy + yh // 2)
+            g.drop(yx + yw // 2, yy + 2 + yh // 3, loot.next(), radius=4, box=True)
+        elif yw >= 5 and yh >= 5:
+            g.lay(yx + yw // 2 - 1, yy + yh // 2 - 1, 2, 2, 'Y', shift=1, strict=True)
     # The path: a run of hard standing from the door out to the gate, drawn as
     # dressing rather than built as geometry — it is a surface, not a wall, and
     # the player can step off it wherever they like.
@@ -1798,6 +1848,93 @@ def add_grounds(inner, sides, deep, flavour, loot, bite=True, voids=()):
     for ((bx, by, bw, bh), _) in bands:
         g.drop(bx + bw // 2, by + bh // 2, loot.next(), radius=6, box=True)
     return g
+
+
+# ------------------------------------------------------------- hiding places
+# Somewhere to be, when he is coming and the corridor is long.
+#
+# Not placed by hand: a hiding place is only worth the name if there is
+# genuinely something between you and the room — the back of a bank of lockers,
+# the gap behind the shelving in the stores, the corner a wall turns — and the
+# map already knows where those are. So the rule is the definition: standable
+# floor, tucked in on most sides, off the routes anyone has to take, and far
+# enough from the spawn and the way out that it is a decision rather than a
+# doorstep.
+# Measured on the ring *two* tiles out rather than the one next door, and that
+# is forced rather than chosen: the player is 22 units wide and a tile is 20, so
+# the box always overlaps its neighbours' columns. A tile with a cabinet
+# immediately beside it is a tile nobody can stand on. Two out is where "behind
+# the cabinet" actually lives for this collision model.
+HIDE_MIN_COVER = 8        # of the sixteen cells two tiles out, how many are solid
+HIDE_APART = 9            # tiles between one hiding place and the next
+HIDE_CLEAR = 6            # ...and from the spawn and the way out
+
+
+def add_hides(g, want=3):
+    """Mark up to `want` hiding places. Returns how many it found."""
+    TILE = 20
+    solid = set('#%OTSWNVCBPEYZ+')
+    marker = {}
+    for y in range(g.rows):
+        for x in range(g.cols):
+            if g.g[y][x] in '@X':
+                marker.setdefault(g.g[y][x], (x, y))
+    reached = {(gx * 4 // TILE, gy * 4 // TILE) for (gx, gy) in g._reached()}
+
+    def cover(x, y):
+        n = 0
+        for dy in range(-2, 3):
+            for dx in range(-2, 3):
+                if max(abs(dx), abs(dy)) != 2:
+                    continue
+                nx, ny = x + dx, y + dy
+                if not (0 <= nx < g.cols and 0 <= ny < g.rows) or g.g[ny][nx] in solid:
+                    n += 1
+        return n
+
+    def usable(x, y):
+        if not (0 <= x < g.cols and 0 <= y < g.rows) or g.g[y][x] != '.':
+            return False
+        if (x, y) in g.keep or (x, y) not in reached:
+            return False
+        return not g._blocked(x * TILE + TILE / 2, y * TILE + TILE / 2)
+
+    picks = []
+    spots = []
+    for y in range(1, g.rows - 1):
+        for x in range(1, g.cols - 1):
+            if not usable(x, y):
+                continue
+            c = cover(x, y)
+            if c < HIDE_MIN_COVER:
+                continue
+            if any(marker.get(m) and max(abs(x - marker[m][0]), abs(y - marker[m][1])) < HIDE_CLEAR
+                   for m in ('@', 'X')):
+                continue
+            spots.append((c, x, y))
+    # The best-covered first, and then spread out: three hiding places in the
+    # same alcove is one hiding place.
+    spots.sort(key=lambda t: (-t[0], t[2], t[1]))
+    for (c, x, y) in spots:
+        if len(picks) >= want:
+            break
+        if any(max(abs(x - px), abs(y - py)) < HIDE_APART for (px, py) in picks):
+            continue
+        picks.append((x, y))
+    for (x, y) in picks:
+        cells = [(x, y)]
+        # A neighbour if there is a sensible one, so the spot is a place to
+        # stand rather than a tile to be precisely on. Only ever floor that is
+        # already covered: growing into the open would make it a worse hiding
+        # place than the tile it started from.
+        for (nx, ny) in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
+            if len(cells) >= 2:
+                break
+            if usable(nx, ny) and cover(nx, ny) >= HIDE_MIN_COVER - 2:
+                cells.append((nx, ny))
+        for (cx, cy) in cells:
+            g.g[cy][cx] = 'H'
+    return len(picks)
 
 
 # ============================================================== the silhouette
@@ -2261,7 +2398,11 @@ def build():
                 # courtyard and one irregular floor with wings — and taking a
                 # corner off one of them is vandalism, not variety.
                 if pad:
-                    g = add_grounds(g, pad, YARD_DEEP[tier], name, Loot(tier), bite=False)
+                    # The corners the drawing left out become campus rather than
+                    # masonry: an L-shaped school has an L-shaped playground.
+                    g = add_grounds(g, pad, YARD_DEEP[tier], name, Loot(tier),
+                                    bite=False, voids=list(g.solids),
+                                    plant_yards=True)
                 g.clear_landings(); draft.clear_exit(g)
                 top_up_loot(g, tier)
                 promote_prize(g, tier)
@@ -2316,6 +2457,16 @@ def build():
             # because a searchable piece is named by the character the room
             # grammar already used for it.
             thin_floor_loot(g, tier, name)
+            # Hiding places go down after every pass that can move furniture
+            # and before the one that renames it. `make_searchable` rewrites a
+            # cupboard's character to a digit, and the tool's idea of what is
+            # solid is a list of the *furniture* letters — so a hiding place
+            # chosen after that pass can be tucked in beside what the tool reads
+            # as thin air and turns out to be a locker. Only the school has
+            # them: hiding is a beta mechanic and this is the building it is
+            # being tried in.
+            if name in HIDES:
+                add_hides(g, HIDES[name])
             stashes = make_searchable(g, tier, name)
             if g.bad:
                 problems.append(f'{name} L{tier + 1}: {g.bad}')

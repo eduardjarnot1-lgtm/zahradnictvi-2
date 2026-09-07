@@ -719,8 +719,30 @@ test('every school level supports the full loop, from anywhere on the map', () =
         if (d > far) { far = d; away = { x: px, y: py }; }
       }
       assert.ok(away, `L${level.id}: nowhere to park the thief`);
+      // Somewhere reachable and, at any given moment, as far from the man as
+      // this map allows. Now that he has eyes rather than a collision radius,
+      // a thief parked on one fixed spot gets seen from most of a classroom
+      // away and walked into — which tests his eyesight, not his routing, and
+      // this test is about routing.
+      const flee = (from) => {
+        let best = away;
+        let mostly = -1;
+        for (let i = 0; i < reachable.length; i += 7) {
+          if (reachable[i] < 0) continue;
+          const cx = i % grid.cols;
+          const px = cx * grid.cell + grid.cell / 2;
+          const py = ((i - cx) / grid.cols) * grid.cell + grid.cell / 2;
+          if (Math.hypot(px - door.x, py - door.y) < 110) continue;
+          const d = Math.hypot(px - from.x, py - from.y);
+          if (d > mostly) { mostly = d; best = { x: px, y: py }; }
+        }
+        return best;
+      };
       let arrived = false;
       for (let i = 0; i < 60 * 140; i++) {
+        if (sim.vision && Math.hypot(w.x - away.x, w.y - away.y) < sim.vision.range + 80) {
+          away = flee(w);
+        }
         place(sim, away.x, away.y);
         if (!arrived) sim.noise = Math.max(sim.noise, 85);
         stepSim(sim);
@@ -1217,9 +1239,13 @@ test('E: he stops guessing and comes after you once you are close enough', () =>
   assert.equal(w.state, 'investigating');
   const memory = { ...w.target };
 
-  // Walk into him. Well inside followAt, still outside catchAt.
-  for (let i = 0; i < 20; i++) {
-    place(sim, w.x + RULES.investigate.followAt - 20, w.y);
+  // Stand where he cannot miss you: near enough that his certainty climbs
+  // quickly, far enough that he has not simply walked into you. Give it a
+  // couple of seconds, because being picked out is no longer a line you step
+  // over — it is a certainty that fills.
+  const close = RULES.investigate.catchAt + 22;
+  for (let i = 0; i < 60 * 3; i++) {
+    place(sim, w.x + close, w.y);
     sim.noise = Math.max(sim.noise, 85);
     tick(run);
     if (w.state === 'following') break;
@@ -1237,13 +1263,13 @@ test('E: he does not pick you out from across the room — only up close', () =>
   const { sim } = run;
   const w = sim.investigator;
   assert.ok(rouse(run, { x: sim.level.width - 60, y: 60 }));
-  // Just outside the range, for a long time, with the meter high.
+  // Beyond what he can make out at all, for a long time, with the meter high.
   let held = 0;
   for (let i = 0; i < 60 * 6; i++) {
-    const at = placeAway(sim, w, RULES.investigate.followAt + 60);
+    const at = placeAway(sim, w, sim.vision.range + 80);
     sim.noise = Math.max(sim.noise, 85);
     tick(run);
-    if (!at || at.d <= RULES.investigate.followAt) continue;  // the room put us in range
+    if (!at || at.d <= sim.vision.range) continue;   // the room put us in range
     held++;
     assert.notEqual(w.state, 'following',
       `he started following from ${at.d.toFixed(0)} away`);
@@ -1256,23 +1282,50 @@ test('F: he loses you again, but only after real distance held for real time', (
   const { sim } = run;
   const w = sim.investigator;
   assert.ok(rouse(run, { x: sim.level.width - 60, y: 60 }));
-  for (let i = 0; i < 40 && w.state !== 'following'; i++) {
-    place(sim, w.x + RULES.investigate.followAt - 20, w.y);
+  for (let i = 0; i < 60 * 4 && w.state !== 'following'; i++) {
+    place(sim, w.x + RULES.investigate.catchAt + 22, w.y);
     tick(run);
   }
   assert.equal(w.state, 'following');
 
-  // Stepping back a little must not shake him off: that is the hysteresis.
+  // Stepping back a little must not shake him off: that is the hysteresis, and
+  // it is measured against the distance he gives up at rather than the distance
+  // he first saw you at — the two are far apart on purpose.
   for (let i = 0; i < 60 * 3; i++) {
-    place(sim, w.x + RULES.investigate.followAt + 40, w.y);
+    // In whichever direction the room actually has that much space. Asking for
+    // a spot due east of him on a six-hundred-unit map walks off the end of it,
+    // and `place` answers by snapping to the nearest standable tile — which
+    // can be the one he is standing on.
+    const at = placeAway(sim, w, RULES.investigate.unfollowAt - 60);
+    if (!at) continue;
     tick(run);
-    assert.equal(w.state, 'following', 'a step backwards should not lose him');
+    assert.equal(w.state, 'following',
+      `a step back to ${at.d.toFixed(0)} should not lose him`);
   }
 
   // Real distance, held. He should give up — but not instantly.
+  //
+  // Held, not parked: a thief who stands in a corner while a man walks at him
+  // gets walked into, and always should. What this is about is whether keeping
+  // the distance sheds him, so the thief keeps the distance — put back to
+  // whichever standable spot is furthest from the man, every frame.
+  const away = () => {
+    let best = { x: 40, y: 40 };
+    let far = -1;
+    for (let ty = 1; ty < sim.level.tiles.rows - 1; ty += 2) {
+      for (let tx = 1; tx < sim.level.tiles.cols - 1; tx += 2) {
+        const px = tx * 20 + 10;
+        const py = ty * 20 + 10;
+        const d = Math.hypot(px - w.x, py - w.y);
+        if (d > far) { far = d; best = { x: px, y: py }; }
+      }
+    }
+    return best;
+  };
   let gaveUpAfter = null;
   for (let i = 0; i < 60 * 12; i++) {
-    place(sim, 40, 40);
+    const spot = away();
+    place(sim, spot.x, spot.y);
     tick(run);
     if (w.state !== 'following') { gaveUpAfter = i / 60; break; }
   }
@@ -1288,7 +1341,7 @@ test('F: losing you sends him back through the ordinary states, not to a dead en
   const { sim } = run;
   const w = sim.investigator;
   assert.ok(rouse(run, { x: sim.level.width - 60, y: 60 }));
-  for (let i = 0; i < 40 && w.state !== 'following'; i++) {
+  for (let i = 0; i < 60 * 4 && w.state !== 'following'; i++) {
     place(sim, w.x + 40, w.y);
     tick(run);
   }
@@ -1386,8 +1439,16 @@ test('F: running opens a gap, and holding it loses him', () => {
   w.prevY = w.y;
   w.target = { x: p.x, y: p.y };
   sim.noise = 85;
-  tick(run);
-  assert.equal(w.state, 'following', 'forty units away is well inside his range');
+  // Forty units away is well inside what he can see, but seeing is no longer
+  // instantaneous: his certainty fills over about a second at this range, and
+  // that second is the point of the mechanic.
+  for (let i = 0; i < 60 * 3 && w.state !== 'following'; i++) {
+    // Keeping the distance while it fills. Standing there would simply let him
+    // walk the forty units and take you, which is a different mechanic.
+    place(sim, w.x + 90, w.y);
+    tick(run);
+  }
+  assert.equal(w.state, 'following', 'ninety units away is well inside his range');
 
   const gaps = [];
   let shaken = null;
@@ -1408,8 +1469,256 @@ test('F: running opens a gap, and holding it loses him', () => {
     'he must be slower than you, or none of this is escapable');
 });
 
+// --- section 1 to 8: eyes, and what he does with them ------------------------
+
+// How long it takes him to become certain, standing at a given distance.
+function noticeAt(run, distance, { moving = true } = {}) {
+  const { sim } = run;
+  const w = sim.investigator;
+  const p = playerOf(sim);
+  // Back to the top of the mechanic. Left in `following` he is already certain
+  // by definition — the state pins it — and every reading after the first would
+  // come back as nought seconds.
+  if (w.state === 'following') w.state = 'investigating';
+  w.notice = 0;
+  w.lostFor = 0;
+  for (let i = 0; i < 60 * 20; i++) {
+    const at = placeAway(sim, w, distance);
+    if (!at) return null;
+    // A thief who is walking is a thief he can pick out; one holding still
+    // against the lockers is most of the way to being furniture. Put back on
+    // the spot every frame, so the *speed* is what differs and not the
+    // distance — and it has to be the speed the simulation reads off the
+    // entity, because setting `moving` by hand is overwritten before the eyes
+    // are consulted.
+    p.speed = moving ? TUNING.player.speed : 0;
+    p.vx = moving ? TUNING.player.speed : 0;
+    p.vy = 0;
+    sim.noise = Math.max(sim.noise, 85);
+    tick(run);
+    if (w.notice >= 1) return i / 60;
+    if (sim.status !== 'running') return null;
+  }
+  return Infinity;
+}
+
+test('being seen is a matter of degree, and the degree is distance', () => {
+  const run = openSchool(25);
+  const { sim } = run;
+  assert.ok(rouse(run, { x: sim.level.width - 80, y: 80 }));
+  const eye = sim.vision;
+  const near = noticeAt(run, eye.sure + 30);
+  const mid = noticeAt(run, eye.sure + (eye.range - eye.sure) * 0.55);
+  assert.ok(near !== null && mid !== null, 'the map should have room for both');
+  assert.ok(near < mid,
+    `close took ${near}s and mid-range ${mid}s — closer has to be quicker`);
+  // ...and past the edge of what he can make out, never.
+  const beyond = noticeAt(run, eye.range + 70);
+  assert.ok(beyond === null || beyond === Infinity,
+    `he became certain from ${eye.range + 70} away in ${beyond}s`);
+});
+
+test('holding still is most of what hides you from him', () => {
+  const run = openSchool(25);
+  const { sim } = run;
+  assert.ok(rouse(run, { x: sim.level.width - 80, y: 80 }));
+  const at = sim.vision.sure + (sim.vision.range - sim.vision.sure) * 0.4;
+  const walking = noticeAt(run, at, { moving: true });
+  const frozen = noticeAt(run, at, { moving: false });
+  assert.ok(walking !== null && frozen !== null);
+  assert.ok(frozen > walking * 2,
+    `moving took ${walking}s and standing still ${frozen}s — freezing should buy far more than that`);
+});
+
+test('he reacts to what he can see even while walking towards what he heard', () => {
+  // Section three, and the whole point of the pass: a noise at one end of the
+  // building must not blind him to a thief at the other. He is walking to A;
+  // the thief appears at B, nowhere near it; he must come to B.
+  const run = openSchool(25);
+  const { sim } = run;
+  const w = sim.investigator;
+  const p = playerOf(sim);
+  assert.ok(rouse(run, { x: sim.level.width - 80, y: 80 }));
+  assert.equal(w.state, 'investigating');
+  const heard = { ...w.target };
+
+  // Step into view, well away from the place he is walking to.
+  let stepped = null;
+  for (let i = 0; i < 60 * 6; i++) {
+    const at = placeAway(sim, w, sim.vision.sure + 25);
+    if (at) stepped = at;
+    p.moving = true;
+    tick(run);
+    p.moving = true;
+    if (w.state === 'following') break;
+    if (sim.status !== 'running') break;
+  }
+  assert.ok(stepped, 'nowhere to stand in front of him');
+  assert.equal(w.state, 'following', 'he should have abandoned the noise for the thief');
+  assert.ok(Math.hypot(p.x - heard.x, p.y - heard.y) > 120,
+    'the test is only worth anything if the thief is nowhere near the noise');
+  assert.ok(Math.hypot(w.goal.x - p.x, w.goal.y - p.y)
+    < Math.hypot(w.goal.x - heard.x, w.goal.y - heard.y),
+    'he is still walking to the noise rather than to the thief he can see');
+});
+
+test('what he is walking towards keeps up with where the thief actually is', () => {
+  // Section six: the follow target updates. He must never be walking at a spot
+  // the thief left four seconds ago.
+  const run = openSchool(25);
+  const { sim } = run;
+  const w = sim.investigator;
+  const p = playerOf(sim);
+  assert.ok(rouse(run, { x: sim.level.width - 80, y: 80 }));
+  for (let i = 0; i < 60 * 6 && w.state !== 'following'; i++) {
+    placeAway(sim, w, sim.vision.sure + 25);
+    p.moving = true;
+    tick(run);
+    p.moving = true;
+  }
+  assert.equal(w.state, 'following');
+  let worst = 0;
+  for (let i = 0; i < 60 * 4 && sim.status === 'running'; i++) {
+    const at = placeAway(sim, w, 120 + (i % 40));
+    tick(run);
+    if (!at || w.state !== 'following') continue;
+    worst = Math.max(worst, Math.hypot(w.goal.x - p.x, w.goal.y - p.y));
+  }
+  assert.ok(worst < RULES.investigate.repathAfter + 60,
+    `his goal drifted ${worst.toFixed(0)} units behind the thief`);
+});
+
+// --- sections 14 to 17: somewhere to hide -----------------------------------
+
+test('every school level offers a few places to be out of sight, and only the school does', () => {
+  for (const level of SCHOOL) {
+    assert.ok(level.hides.length >= 2 && level.hides.length <= 3,
+      `L${level.id} has ${level.hides.length} hiding places`);
+    for (const spot of level.hides) {
+      // Somewhere a person can actually stand, and somewhere they have to go to
+      // rather than fall into: a hiding place on the doorstep is not a decision.
+      const cx = spot.x + spot.w / 2;
+      const cy = spot.y + spot.h / 2;
+      assert.ok(!blocked(cx, cy, TUNING.player.boxWidth, TUNING.player.boxHeight,
+        level.colliders), `L${level.id}: nobody can stand in the hiding place at ${cx},${cy}`);
+      assert.ok(Math.hypot(cx - level.spawn.x, cy - level.spawn.y) > 90,
+        `L${level.id}: a hiding place on the spawn`);
+    }
+  }
+  for (const level of LEVELS) {
+    if (level.location === 'School') continue;
+    assert.equal(level.hides.length, 0,
+      `L${level.id} (${level.location}) has hiding places, and hiding is a school beta`);
+  }
+});
+
+test('standing in a hiding place makes him far slower to pick you out', () => {
+  const run = openSchool(25);
+  const { sim } = run;
+  const w = sim.investigator;
+  const p = playerOf(sim);
+  const spot = sim.level.hides[0];
+  const at = { x: spot.x + spot.w / 2, y: spot.y + spot.h / 2 };
+  // Put him a fixed, generous distance away and hold him there, so the only
+  // thing that differs between the two readings is whether the thief is in the
+  // hiding place or a stride outside it.
+  const readFrom = (px, py) => {
+    w.state = 'investigating';
+    w.notice = 0;
+    w.lostFor = 0;
+    w.x = at.x + 70;
+    w.y = at.y;
+    w.prevX = w.x;
+    w.prevY = w.y;
+    let seconds = null;
+    for (let i = 0; i < 60 * 12 && seconds === null; i++) {
+      p.x = px; p.y = py; p.prevX = px; p.prevY = py;
+      p.speed = TUNING.player.speed;
+      w.x = at.x + 70; w.y = at.y; w.prevX = w.x; w.prevY = w.y;
+      sim.noise = Math.max(sim.noise, 85);
+      tick(run);
+      if (w.notice >= 1) seconds = i / 60;
+    }
+    return seconds;
+  };
+  const exposed = readFrom(at.x + 30, at.y);
+  const hidden = readFrom(at.x, at.y);
+  assert.ok(exposed !== null, 'he should pick out a thief standing in the open');
+  assert.ok(hidden === null || hidden > exposed * 4,
+    `out in the open took ${exposed}s and hidden ${hidden}s — hiding should be worth far more`);
+});
+
+test('hiding is not invulnerability', () => {
+  const run = openSchool(25);
+  const { sim } = run;
+  const w = sim.investigator;
+  const p = playerOf(sim);
+  const spot = sim.level.hides[0];
+  p.x = spot.x + spot.w / 2;
+  p.y = spot.y + spot.h / 2;
+  p.prevX = p.x; p.prevY = p.y;
+  tick(run);
+  assert.ok(sim.hidden, 'standing in it should count as hidden');
+
+  // Noise still carries. Hiding is about being seen, not about being silent.
+  const before = sim.noise;
+  sim.noise = before + 20;
+  tick(run);
+  assert.ok(sim.noise > before, 'a hidden thief still makes noise');
+
+  // ...and he can still walk into you.
+  w.state = 'investigating';
+  w.x = p.x + RULES.investigate.catchAt - 6;
+  w.y = p.y;
+  w.prevX = w.x; w.prevY = w.y;
+  w.grace = 0;
+  tick(run);
+  assert.equal(sim.status, 'lost', 'walking into a hidden thief should still be walking into him');
+});
+
+test('he does not know which hiding place you went into', () => {
+  // Section seventeen. Losing sight of the thief near a hiding place sends him
+  // to the last place he actually saw him, and then to look around — it must
+  // not send him to the hiding place, which he has no way of knowing about.
+  const run = openSchool(25);
+  const { sim } = run;
+  const w = sim.investigator;
+  const p = playerOf(sim);
+  const spot = sim.level.hides[0];
+  const at = { x: spot.x + spot.w / 2, y: spot.y + spot.h / 2 };
+  // Seen, out in the open, a good way from the hiding place.
+  w.state = 'following';
+  w.notice = 1;
+  w.x = at.x + 150;
+  w.y = at.y;
+  w.prevX = w.x; w.prevY = w.y;
+  p.x = at.x + 90; p.y = at.y; p.prevX = p.x; p.prevY = p.y;
+  tick(run);
+  // ...and then into the hiding place, and gone.
+  for (let i = 0; i < 60 * 8 && w.state === 'following'; i++) {
+    p.x = at.x; p.y = at.y; p.prevX = p.x; p.prevY = p.y;
+    sim.noise = Math.max(sim.noise, 70);
+    tick(run);
+  }
+  assert.notEqual(w.state, 'following', 'he should have lost the thief in the hiding place');
+  assert.ok(['searching', 'investigating', 'returning'].includes(w.state),
+    `he ended up ${w.state}`);
+  assert.ok(w.target, 'he should still have somewhere he means to look');
+});
+
 test('the follow range and the give-up range are far enough apart to be stable', () => {
   const f = RULES.investigate;
+  // The school sees rather than collides, so the ordering that matters is
+  // between what he can make out and what it takes to shake him: give up
+  // sooner than he can see and he would drop you while watching you, which is
+  // the flicker this pair of numbers exists to prevent.
+  const eye = RULES.vision;
+  assert.ok(eye, 'the school is the location with eyes');
+  assert.ok(f.unfollowAt > eye.range,
+    `he gives up at ${f.unfollowAt} but can still see you at ${eye.range}`);
+  assert.ok(eye.sure < eye.range / 2, 'certainty should have room to fall off');
+  assert.ok(eye.range > f.followAt * 2,
+    `${eye.range} is not noticeably further than the ${f.followAt} it replaced`);
   assert.ok(f.unfollowAt > f.followAt * 2.5,
     `${f.followAt} to ${f.unfollowAt} is not enough hysteresis to stop him flickering`);
   assert.ok(f.unfollowFor >= 1.5, 'losing him should take seconds, not a frame');

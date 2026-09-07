@@ -22,10 +22,15 @@ const FURNITURE = {
   // Outdoors. A tree and a hedge are furniture in every sense the game cares
   // about: you cannot walk through them, you can hide behind them, and walking
   // into one is a noise.
-  Y: 'tree', Z: 'hedge'
+  Y: 'tree', Z: 'hedge',
+  // A brick outbuilding: the caretaker's store, the bin shed, the shelter at
+  // the edge of the playground. It was a chest before, and in the school's own
+  // theme a chest is drawn as a bank of lockers — so the store at the bottom of
+  // the field was a row of lockers standing on the grass.
+  K: 'shed'
 };
 
-const FLOOR = new Set([' ', '.', 'D', ',', '~', '@', 'X']);
+const FLOOR = new Set([' ', '.', 'D', ',', '~', '@', 'X', 'H']);
 
 // Maximal-rectangle merge over cells sharing a character. Fewer, larger
 // colliders than one box per tile: the physics loop is linear in collider
@@ -178,6 +183,12 @@ export function tileLevel(spec) {
   const creaks = mergeRects(grid, rows, cols, '~')
     .map((r, i) => ({ id: `L${spec.id}-c${i}`, ...r }));
   const doors = mergeRects(grid, rows, cols, 'D');
+  // Somewhere to be out of sight. Floor like any other — you walk onto it, it
+  // costs nothing, nothing collides — except that the map has written down that
+  // a person standing here is hard to pick out from the furniture. The rects
+  // are what the simulation tests against and what the renderer marks.
+  const hides = mergeRects(grid, rows, cols, 'H')
+    .map((r, i) => ({ id: `L${spec.id}-h${i}`, ...r }));
 
   // --- spawn ----------------------------------------------------------------
   const spawnCells = cellsOf(grid, rows, cols, (ch) => ch === '@');
@@ -243,6 +254,7 @@ export function tileLevel(spec) {
     // map is allowed more seconds while still being tighter to play.
     clock: spec.clock || 0,
     doors,
+    hides,
     stashes,
     decor,
     windows,

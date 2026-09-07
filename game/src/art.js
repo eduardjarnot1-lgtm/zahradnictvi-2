@@ -89,7 +89,13 @@ const SLEEPER_LOOKS = {
   // has to be recognisably the man who gets up off it.
   caretaker: { hair: '#b6bcc1', style: 'balding', skin: '#e9bd95', skinShade: '#c99b73',
                duvet: '#6f7c4e', duvetTop: '#899763', fold: 'rgba(40,52,26,0.35)',
-               sheet: '#e6e2d2', pillow: '#f2ecdc', shoulder: '#dfe0cf' },
+               sheet: '#e6e2d2', pillow: '#f2ecdc', shoulder: '#dfe0cf',
+               // Asleep at his desk he is in the same olive work coat he stands
+               // up in. He was wearing the pale one the sleepers get under a
+               // blanket, which meant the most visible moment in the level —
+               // the man getting to his feet — was also the moment he changed
+               // clothes. Matched to CARETAKER_LOOK.coat in figure.js.
+               shirt: '#77854f' },
 
   // --- the seven of the floorplan levels ------------------------------------
   // Dad: dark, greying at the temples, under the flat's grey-blue bedding.
@@ -560,38 +566,69 @@ function drawBench(ctx, c) {
   }
 }
 
-// A bank of lockers. Doors, handles, vents — the detail is what makes a long
-// grey run along a corridor read as lockers rather than as a wall.
+// A bank of lockers, installed against a wall rather than parked in front of
+// one.
+//
+// The difference is mostly in what happens at the edges. A slab with a drop
+// shadow all round it floats; a cabinet has a plinth it stands on, a top rail
+// that catches the corridor light, a shadow only where its front face meets the
+// floor, and a hairline of daylight down each door seam. None of that is
+// expensive and all of it is the difference between furniture and a rectangle.
 function drawLockers(ctx, c) {
   const along = c.w >= c.h;
+  // Contact shadow under the front face only — a bank of lockers is bolted to
+  // the wall behind it and there is nothing for a shadow to fall on that side.
   ctx.fillStyle = SHADOW;
-  roundRect(ctx, c.x + 2, c.y + 6, c.w, c.h, 3);
+  if (along) roundRect(ctx, c.x + 1, c.y + c.h - 3, c.w, 7, 3);
+  else roundRect(ctx, c.x + c.w - 3, c.y + 1, 7, c.h, 3);
   ctx.fill();
-  fillRound(ctx, c.x, c.y, c.w, c.h, 3, '#4d6b73');
-  fillRound(ctx, c.x + 1.5, c.y + 1.5, c.w - 3, c.h * 0.30, 2, '#628893');
+
+  // The carcass, then the plinth it stands on: a dark strip at the foot, which
+  // is what stops the whole thing reading as painted onto the floor.
+  fillRound(ctx, c.x, c.y, c.w, c.h, 2.5, '#3c565d');
+  if (along) fillRound(ctx, c.x, c.y + c.h - 3.5, c.w, 3.5, 1.5, '#2b3f45');
+  else fillRound(ctx, c.x + c.w - 3.5, c.y, 3.5, c.h, 1.5, '#2b3f45');
+  // ...and the top rail, along the back edge, catching the corridor lights.
+  if (along) fillRound(ctx, c.x + 1, c.y + 1, c.w - 2, 3, 1.5, '#6f959f');
+  else fillRound(ctx, c.x + 1, c.y + 1, 3, c.h - 2, 1.5, '#6f959f');
+
   const span = along ? c.w : c.h;
   const doors = Math.max(1, Math.round(span / 20));
   const pitch = span / doors;
   for (let i = 0; i < doors; i++) {
-    const a = (along ? c.x : c.y) + i * pitch + 1.6;
-    const len = pitch - 3.2;
+    const a = (along ? c.x : c.y) + i * pitch + 1.4;
+    const len = pitch - 2.8;
     if (len <= 1) continue;
     if (along) {
-      fillRound(ctx, a, c.y + 2.6, len, c.h - 5, 2, '#3f5a61');
-      fillRound(ctx, a + 1, c.y + 3.4, len - 2, 2, 1, '#6f959f');
-      // vents
-      ctx.fillStyle = 'rgba(20,34,38,0.55)';
-      for (let v = 0; v < 3; v++) ctx.fillRect(a + 2.5, c.y + 5.5 + v * 2, len - 5, 1);
-      // handle
-      ctx.fillStyle = '#c9d6d2';
-      ctx.fillRect(a + len - 4, c.y + c.h * 0.55, 2, 4);
+      const top = c.y + 3.6;
+      const deep = c.h - 7.6;
+      if (deep <= 1) continue;
+      fillRound(ctx, a, top, len, deep, 1.5, '#47646c');
+      fillRound(ctx, a + 0.8, top + 0.8, len - 1.6, 1.6, 0.8, '#5d818b');
+      ctx.fillStyle = 'rgba(18,30,34,0.50)';               // vents
+      for (let v = 0; v < 3; v++) {
+        const y = top + 2.4 + v * 2;
+        if (y < top + deep - 2) ctx.fillRect(a + 2.2, y, Math.max(1, len - 4.4), 0.9);
+      }
+      ctx.fillStyle = '#cbd8d4';                            // handle
+      ctx.fillRect(a + len - 3.4, top + deep * 0.45, 1.6, 3.4);
+      ctx.fillStyle = 'rgba(10,18,22,0.45)';                // the seam beside it
+      ctx.fillRect(a + len + 0.5, top, 0.9, deep);
     } else {
-      fillRound(ctx, c.x + 2.6, a, c.w - 5, len, 2, '#3f5a61');
-      fillRound(ctx, c.x + 3.4, a + 1, 2, len - 2, 1, '#6f959f');
-      ctx.fillStyle = 'rgba(20,34,38,0.55)';
-      for (let v = 0; v < 3; v++) ctx.fillRect(c.x + 5.5 + v * 2, a + 2.5, 1, len - 5);
-      ctx.fillStyle = '#c9d6d2';
-      ctx.fillRect(c.x + c.w * 0.55, a + len - 4, 4, 2);
+      const left = c.x + 3.6;
+      const deep = c.w - 7.6;
+      if (deep <= 1) continue;
+      fillRound(ctx, left, a, deep, len, 1.5, '#47646c');
+      fillRound(ctx, left + 0.8, a + 0.8, 1.6, len - 1.6, 0.8, '#5d818b');
+      ctx.fillStyle = 'rgba(18,30,34,0.50)';
+      for (let v = 0; v < 3; v++) {
+        const x = left + 2.4 + v * 2;
+        if (x < left + deep - 2) ctx.fillRect(x, a + 2.2, 0.9, Math.max(1, len - 4.4));
+      }
+      ctx.fillStyle = '#cbd8d4';
+      ctx.fillRect(left + deep * 0.45, a + len - 3.4, 3.4, 1.6);
+      ctx.fillStyle = 'rgba(10,18,22,0.45)';
+      ctx.fillRect(left, a + len + 0.5, deep, 0.9);
     }
   }
 }
@@ -693,7 +730,36 @@ function drawHedge(ctx, c) {
 
 const SCHOOL_PAINTERS = { sofa: drawBench, chest: drawLockers, table: drawDesk };
 
-const OUTDOOR_PAINTERS = { tree: drawTree, hedge: drawHedge };
+// An outbuilding: brick, a shallow pitched roof, a door on the long side. Small
+// enough to be a store and solid enough to hide behind, which is what the ones
+// at the edge of a playground are for.
+function drawShed(ctx, c) {
+  ctx.fillStyle = SHADOW;
+  roundRect(ctx, c.x + 3, c.y + 7, c.w, c.h, 3);
+  ctx.fill();
+  fillRound(ctx, c.x, c.y, c.w, c.h, 3, '#7a5140');           // brick
+  ctx.fillStyle = 'rgba(40,24,18,0.22)';                      // courses
+  for (let y = c.y + 4; y < c.y + c.h - 2; y += 4) {
+    ctx.fillRect(c.x + 2, y, c.w - 4, 1);
+  }
+  const along = c.w >= c.h;
+  // The roof, overhanging the front. One slab lighter than the walls, with a
+  // ridge down the middle: from above that is the whole of a pitched roof.
+  fillRound(ctx, c.x + 1, c.y + 1, c.w - 2, c.h - 2, 2.5, '#8d6250');
+  ctx.fillStyle = 'rgba(255,235,215,0.16)';
+  if (along) ctx.fillRect(c.x + 2, c.y + 2, c.w - 4, Math.max(1, c.h * 0.34));
+  else ctx.fillRect(c.x + 2, c.y + 2, Math.max(1, c.w * 0.34), c.h - 4);
+  ctx.fillStyle = 'rgba(40,24,18,0.40)';
+  if (along) ctx.fillRect(c.x + 2, c.y + c.h / 2 - 0.5, c.w - 4, 1.2);
+  else ctx.fillRect(c.x + c.w / 2 - 0.5, c.y + 2, 1.2, c.h - 4);
+  // The door, on the side facing into the yard.
+  ctx.fillStyle = '#4a3a2c';
+  if (along) fillRound(ctx, c.x + c.w * 0.5 - 4, c.y + c.h - 4, 8, 4, 1, '#4a3a2c');
+  else fillRound(ctx, c.x + c.w - 4, c.y + c.h * 0.5 - 4, 4, 8, 1, '#4a3a2c');
+}
+
+const OUTDOOR_PAINTERS = {
+  shed: drawShed, tree: drawTree, hedge: drawHedge };
 
 const FURNITURE_PAINTERS = {
   table: drawTable,
@@ -1394,6 +1460,10 @@ export function paintStaticRoom(ctx, level) {
     }
   }
   for (const door of level.doors) drawDoorway(ctx, door);
+  // Somewhere to stand out of sight. Painted into the floor rather than over
+  // the room, so it reads as part of the building — a shadowed recess in the
+  // corner behind the lockers rather than a decal dropped on top of it.
+  for (const spot of level.hides || []) drawHideSpot(ctx, spot);
   // Boards, notices, posters, signs: on the wall, and therefore behind whatever
   // is standing in front of the wall.
   paintDecor(ctx, level, DECOR_WALL);
@@ -1414,6 +1484,60 @@ export function paintStaticRoom(ctx, level) {
   vignette.addColorStop(1, `rgba(${T.vignette},0.32)`);
   ctx.fillStyle = vignette;
   ctx.fillRect(0, 0, W, H);
+}
+
+// The floor of a hiding place: a darker patch with a soft edge, and a hairline
+// round it so its extent is legible rather than guessed at. The label that says
+// what it is belongs to the beta and is drawn live — see `drawHideLabel`.
+function drawHideSpot(ctx, spot) {
+  const { x, y, w, h } = spot;
+  // Light, not dark. A deep pool of shadow on a pale corridor floor reads as a
+  // hole or a scorch mark rather than as a corner you can stand in; what says
+  // "recess" is a shallow gradient and a clean edge.
+  const pool = ctx.createRadialGradient(x + w / 2, y + h / 2, 2,
+    x + w / 2, y + h / 2, Math.max(w, h) * 0.75);
+  pool.addColorStop(0, 'rgba(12,20,34,0.20)');
+  pool.addColorStop(1, 'rgba(12,20,34,0)');
+  ctx.fillStyle = pool;
+  ctx.fillRect(x - w * 0.3, y - h * 0.3, w * 1.6, h * 1.6);
+  ctx.fillStyle = 'rgba(14,22,36,0.16)';
+  roundRect(ctx, x + 1, y + 1, w - 2, h - 2, 4);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(140,205,235,0.30)';
+  ctx.lineWidth = 1.2;
+  ctx.setLineDash([4, 4]);
+  roundRect(ctx, x + 1, y + 1, w - 2, h - 2, 4);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+// The beta's own label, over a hiding place. Drawn live rather than baked in
+// because it brightens when you are standing in one, and because a temporary
+// testing indicator should be one call to delete rather than a repaint of every
+// level's floor: turn TUNING.beta.hideLabels off and nothing here runs.
+export function drawHideLabel(ctx, spot, { active = false, time = 0 } = {}) {
+  const cx = spot.x + spot.w / 2;
+  // Clear of the thief's head. The player stands in the middle of the spot and
+  // is drawn after this, so a label tucked just above the floor patch is a
+  // label you can only read when you are not using it.
+  const top = spot.y - 22;
+  const label = 'HIDE';
+  ctx.font = 'bold 9px system-ui';
+  const pad = 6;
+  const width = ctx.measureText(label).width + pad * 2;
+  const pulse = active ? 0.72 + 0.28 * Math.sin(time * 5) : 0.62;
+  ctx.globalAlpha = pulse;
+  ctx.fillStyle = active ? 'rgba(28,58,72,0.92)' : 'rgba(18,24,34,0.82)';
+  roundRect(ctx, cx - width / 2, top - 12, width, 13, 6);
+  ctx.fill();
+  ctx.strokeStyle = active ? 'rgba(150,232,255,0.95)' : 'rgba(140,205,235,0.55)';
+  ctx.lineWidth = 1;
+  roundRect(ctx, cx - width / 2, top - 12, width, 13, 6);
+  ctx.stroke();
+  ctx.fillStyle = active ? '#e6fbff' : '#bcd8e6';
+  ctx.textAlign = 'center';
+  ctx.fillText(label, cx, top - 2.5);
+  ctx.globalAlpha = 1;
 }
 
 // A couch, drawn from the watcher's own collider: what Dr. Marek and Mr. Vrána
@@ -1748,7 +1872,23 @@ export function drawDeskset(ctx, level, kind = 'worker') {
   fillRound(ctx, desk.x + desk.w - 32, desk.y + desk.h * 0.64, 5, 5, 2, '#6b4a30');
 }
 
-export function drawSlumped(ctx, level, stage, clock, wake = 0, startle = 0, kind = 'worker') {
+// Getting up out of a chair, drawn seated.
+//
+// The beats, and where each one lives: he twitches (0.00), his head comes off
+// the desk (0.12), he looks left and right without moving (0.34), his back
+// straightens and his hands come down onto the desk (0.52), then he pushes the
+// chair away and takes his weight on them (0.74). Only after all of that does
+// the standing figure take over, which is what stops a wake-up reading as a cut
+// from one pose to another.
+//
+// `up` is 0..1 across that seated stretch. Everything below is a curve on it
+// rather than a switch, so the timing can be re-tuned without any of these
+// numbers having to agree with each other.
+const wakeBeat = (t, from, to) => Math.max(0, Math.min(1, (t - from) / (to - from)));
+const wakeEase = (t) => t * t * (3 - 2 * t);
+
+export function drawSlumped(ctx, level, stage, clock, wake = 0, startle = 0,
+                            kind = 'worker', up = 0) {
   const look = sleeperLook(kind);
   const desk = level.bed;
   const cx = desk.x + desk.w / 2;
@@ -1762,9 +1902,21 @@ export function drawSlumped(ctx, level, stage, clock, wake = 0, startle = 0, kin
   const fidgetRate = [0.08, 0.15, 0.3, 0.55, 0.9, 0][stage];
   const fidget = Math.max(0, Math.sin(clock * fidgetRate * TAU) - 0.86) * 6;
   const jolt = startle > 0 ? Math.sin(clock * 25) * startle * 4 : 0;
-  // Waking is sitting up off the desk.
-  const rise = stage === SLEEP_AWAKE ? Math.min(1, wake / 0.45) : 0;
+  // Waking is sitting up off the desk. Driven by the state machine's own
+  // progress through getting up when there is one, so the drawing and the
+  // simulation cannot run to different clocks; `wake` is the fallback for the
+  // sleepers with no rising state at all.
+  const b = (from, to) => (up > 0 ? wakeEase(wakeBeat(up, from, to)) : 0);
+  const lifting = b(0.12, 0.46);        // head off the desk
+  const casting = b(0.34, 0.70);        // looking about, without turning
+  const straight = b(0.52, 0.88);       // back straightening
+  const pushing = b(0.74, 1.00);        // hands down, chair going back
+  const rise = up > 0 ? Math.max(lifting, straight)
+    : (stage === SLEEP_AWAKE ? Math.min(1, wake / 0.45) : 0);
   const ease = rise * rise * (3 - 2 * rise);
+  // Where he is looking while he casts about. A head turn, not a body turn: a
+  // man looking round a room does not rotate on the spot to do it.
+  const gaze = casting > 0 ? Math.sin(up * 11) * casting * (1 - pushing) * 3.4 : 0;
 
   // The desk and everything on it. Painted into the room rather than here in
   // the schools, so that it is still standing there once he has got up and
@@ -1772,33 +1924,63 @@ export function drawSlumped(ctx, level, stage, clock, wake = 0, startle = 0, kin
   // having it wink out of existence the moment he leaves it was daft.
   if (!level.deskPainted) drawDeskset(ctx, level, kind);
 
-  // The chair, behind him.
-  fillRound(ctx, cx - 14, cy + desk.h * 0.36, 28, 15, 5, '#3a3f52');
-  fillRound(ctx, cx - 12, cy + desk.h * 0.36 + 2, 24, 10, 4, '#4a5064');
+  // The chair, behind him — and going backwards as he pushes off it. A man
+  // standing up out of a chair moves the chair; leaving it welded to the floor
+  // is most of why the old version read as a figure inflating rather than as
+  // somebody getting up.
+  const chairY = cy + desk.h * 0.36 + pushing * 9;
+  fillRound(ctx, cx - 14, chairY, 28, 15, 5, '#3a3f52');
+  fillRound(ctx, cx - 12, chairY + 2, 24, 10, 4, '#4a5064');
 
-  // Shoulders folded over the desk, in his shirt.
-  const bodyY = cy + 10 - ease * 10;
+  // Shoulders folded over the desk, in his shirt. As his back straightens the
+  // torso narrows and lifts: folded over a desk you see the whole of a man's
+  // back, sitting up you see the top of his shoulders, and the width is what
+  // says which of those you are looking at.
+  const bodyY = cy + 10 - ease * 10 - pushing * 5;
   const bodyX = cx + fidget * 0.6 + jolt;
-  fillRound(ctx, bodyX - 19, bodyY - 4 + breath * 0.4, 38, 20, 8, look.shirt || look.shoulder);
-  fillRound(ctx, bodyX - 19, bodyY - 4 + breath * 0.4, 38, 8, 6, '#ffffff22');
+  const halfW = 19 - straight * 3.5;
+  const deep = 20 - straight * 4;
+  fillRound(ctx, bodyX - halfW, bodyY - 4 + breath * 0.4, halfW * 2, deep, 8,
+    look.shirt || look.shoulder);
+  fillRound(ctx, bodyX - halfW, bodyY - 4 + breath * 0.4, halfW * 2, 8, 6, '#ffffff22');
   if (look.tie) {                                   // a tie he never loosened
     ctx.fillStyle = look.tie;
     ctx.fillRect(bodyX - 2.5, bodyY + 2, 5, 13);
   }
-  // Arms out across the desk, one under his head.
+  // The arms. Out across the desk with his head on one of them, then drawn in
+  // as he sits up, and finally planted either side of him on the desk to take
+  // his weight — which is how a heavy man in his sixties actually stands up,
+  // and the beat the old version skipped entirely.
   ctx.strokeStyle = look.shirt || look.shoulder;
   ctx.lineCap = 'round';
   ctx.lineWidth = 8;
+  const handOut = 26 - straight * 6 + pushing * 4;
+  const handUp = -15 + straight * 13 + pushing * 8;
+  const elbow = -10 + straight * 10 + pushing * 6;
   ctx.beginPath();
   ctx.moveTo(bodyX - 16, bodyY + 2);
-  ctx.quadraticCurveTo(bodyX - 26, bodyY - 10, bodyX - 12, bodyY - 15 + breath * 0.5);
+  ctx.quadraticCurveTo(bodyX - handOut, bodyY + elbow,
+    bodyX - 12 - pushing * 5, bodyY + handUp + breath * 0.5);
   ctx.moveTo(bodyX + 16, bodyY + 2);
-  ctx.quadraticCurveTo(bodyX + 26, bodyY - 10, bodyX + 13, bodyY - 15 + breath * 0.5);
+  ctx.quadraticCurveTo(bodyX + handOut, bodyY + elbow,
+    bodyX + 13 + pushing * 5, bodyY + handUp + breath * 0.5);
   ctx.stroke();
+  if (pushing > 0.05) {
+    // Hands, flat on the desk. Small, and the whole reason the push reads.
+    ctx.fillStyle = look.skin;
+    for (const side of [-1, 1]) {
+      ctx.beginPath();
+      ctx.ellipse(bodyX + side * (12 + pushing * 5), bodyY + handUp + 2,
+        4.2, 3.2, 0, 0, TAU);
+      ctx.fill();
+    }
+  }
 
-  // The head, face down on his own forearm.
-  const headX = bodyX;
-  const headY = bodyY - 12 + breath * 0.6 - ease * 12;
+  // The head: face down on his own forearm, then lifted, then turning as he
+  // looks about. The turn is the head only — `gaze` slides the face across it
+  // rather than rotating the body, which is what looking round a room is.
+  const headX = bodyX + gaze;
+  const headY = bodyY - 12 + breath * 0.6 - ease * 12 - pushing * 3;
   ctx.fillStyle = look.skinShade;
   ctx.beginPath();
   ctx.arc(headX, headY + 1.5, 13, 0, TAU);

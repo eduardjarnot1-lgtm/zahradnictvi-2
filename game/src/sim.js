@@ -257,7 +257,11 @@ function makeInvestigator(level, rules) {
     beat: 0,
     // Seconds of "he has seen you, go" before walking into him actually ends
     // the level.
-    grace: 0
+    grace: 0,
+    // How sure he is that the shape over there is a person, 0..1. Only the
+    // locations with a `vision` block use it; everywhere else finding you is
+    // still a threshold, and this stays at nothing.
+    notice: 0
   };
 }
 
@@ -366,6 +370,27 @@ export function alertnessOf(sim) {
 }
 
 const mix = (lo, hi, t) => lo + (hi - lo) * t;
+const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+
+// How far, and how sharply, this level's person can see — the location's own
+// numbers, scaled by how far into the location you are. Resolved once per sim:
+// it is a property of the building and of which night this is, and neither
+// changes while the level is running.
+function visionOf(rules, level) {
+  const eye = rules.vision;
+  if (!eye) return null;
+  const scale = eye.tier ? (eye.tier[(level.tier || 1) - 1] || 1) : 1;
+  return {
+    ...eye,
+    range: eye.range * scale,
+    sure: eye.sure * scale,
+    // He is not merely short-sighted on the first night, he is less interested:
+    // scaling only the distance would make the near field just as deadly on
+    // level one as on level five, which is the half of it players actually feel.
+    near: eye.near * scale,
+    far: eye.far * scale
+  };
+}
 
 // Whether filling the meter ends the level there and then.
 //
@@ -420,6 +445,22 @@ function takeFix(sim, entity, player, alert) {
   }
   entity.heard = sim.noise;
   return entity.target;
+}
+
+// Is the thief in one of the places the map says you can be out of sight?
+//
+// Read off his middle rather than his box: half in a doorway is not hidden, and
+// a hiding place you can benefit from by standing next to it is not a place, it
+// is a radius. Cheap enough to do every step — there are two or three of these
+// on a level and the test is a rectangle.
+function hidingIn(sim, player) {
+  const spots = sim.level.hides;
+  if (!spots || !spots.length) return null;
+  for (const spot of spots) {
+    if (player.x >= spot.x && player.x < spot.x + spot.w
+      && player.y >= spot.y && player.y < spot.y + spot.h) return spot;
+  }
+  return null;
 }
 
 function updateInvestigation(sim, player) {
@@ -507,7 +548,32 @@ function updateInvestigation(sim, player) {
       // works, and it is the counter the round is there to be countered by.
       // Once something has actually sent him looking, that stops being true.
       const scanning = entity.state === 'patrolling' || entity.state === 'watching';
-      if (gap <= rules.followAt && (!scanning || player.moving)) {
+      // Two ways to be picked out, and a location has one or the other.
+      //
+      // Without eyes it is a threshold: get inside `followAt` and he has you.
+      // With them it is a curve — certainty per second, steep at his elbow and
+      // shallow at the edge of what he can make out — so distance buys time
+      // rather than safety, holding still buys most of the rest, and a hiding
+      // place buys nearly all of it. Crucially this runs in every state he is
+      // on his feet in, so a man walking towards a noise at one end of the
+      // building can still catch sight of you at the other and come here
+      // instead: the noise is where he is going, not what he is looking at.
+      const eye = sim.vision;
+      let picked;
+      if (eye) {
+        const t = clamp01((gap - eye.sure) / Math.max(1, eye.range - eye.sure));
+        let rate = gap > eye.range ? 0 : mix(eye.near, eye.far, t * t);
+        if (!player.moving) rate *= eye.still;
+        if (sim.hidden) rate *= eye.hidden;
+        if (scanning && !player.moving) rate = 0;
+        entity.notice = rate > 0
+          ? Math.min(1, entity.notice + rate * STEP_SECONDS)
+          : Math.max(0, entity.notice - eye.fade * STEP_SECONDS);
+        picked = entity.notice >= eye.commit;
+      } else {
+        picked = gap <= rules.followAt && (!scanning || player.moving);
+      }
+      if (picked) {
         entity.lostFor = 0;
         entity.repathAt = 0;
         // The moment he picks you out is not the moment you lose. He shouts,
@@ -534,9 +600,27 @@ function updateInvestigation(sim, player) {
       // He loses track of you gradually. Snapping this back to zero the
       // instant you clip the edge of his range meant one unlucky corner threw
       // away four seconds of running, and following became permanent.
-      entity.lostFor = gap >= rules.unfollowAt
+      // Two ways to lose him, and they are the same way: he cannot see you.
+      // Distance is one of them. Standing somewhere he cannot pick you out of
+      // is the other, and it has to count or a hiding place would be a piece of
+      // floor with a label on it — he would walk to the spot he last saw you,
+      // which is the spot you are standing on, and take you out of it.
+      //
+      // It is not instant, though. The same two seconds apply, and he spends
+      // them walking towards where you were: hide with him on top of you and he
+      // arrives before the doubt does, which is the whole reason to break away
+      // first.
+      const outOfSight = sim.hidden || gap >= rules.unfollowAt;
+      entity.lostFor = outOfSight
         ? entity.lostFor + STEP_SECONDS
         : Math.max(0, entity.lostFor - STEP_SECONDS * 1.6);
+      // He has you, until he does not: certainty holds while you are in the
+      // open and drains while you are not, so coming back out of a hiding place
+      // in front of him is picked up again from part way rather than from cold.
+      const eye = sim.vision;
+      entity.notice = sim.hidden && eye
+        ? Math.max(0, entity.notice - eye.fade * STEP_SECONDS)
+        : 1;
       if (entity.lostFor >= rules.unfollowFor) {
         // He gives up on you, not on the noise: the last place he saw you is
         // now the place worth looking at, and the ordinary rules take over.
@@ -557,9 +641,18 @@ function updateInvestigation(sim, player) {
     }
   }
 
+  if (!onFootNow || sim.status !== 'running') {
+    entity.notice = Math.max(0, entity.notice - STEP_SECONDS * 2);
+  }
+
   // A man half woken by a distant clatter takes his time; one woken by a
   // bookcase going over is on his feet at once.
   const risingFor = tune ? mix(tune.riseLow, tune.riseHigh, alert) : rules.rising;
+  // How long getting up is taking *this* time, published for the renderer. It
+  // depends on how alarmed he is, so the drawing cannot work it out from the
+  // tuning alone — and an animation that runs to a different clock from the
+  // state it is animating is the thing that makes a wake-up look like a cut.
+  entity.riseFor = risingFor;
   const searchFor = tune ? mix(tune.sweepLow, tune.sweepHigh, alert) : rules.searchFor;
 
   switch (entity.state) {
@@ -729,6 +822,11 @@ export function createSim({ level, seed = 1, upgrades = {} }) {
     // a patrol is a property of the location *and* of how far in you are.
     patrol: rules.patrol && (level.tier || 1) >= (rules.patrol.from || 1)
       ? rules.patrol : null,
+    // What this level's person can see, and whether the thief is currently out
+    // of sight in one of the places the map says you can be.
+    vision: visionOf(rules, level),
+    hidden: false,
+    hideIn: null,
     investigator,
     // How loud this spot is, as a multiplier on everything you do. Always 1
     // where a location has no proximity rule, which is everywhere but here.
@@ -946,6 +1044,16 @@ export function stepSim(sim, input = EMPTY_INPUT) {
   for (const entity of sim.entities) {
     const update = UPDATERS[entity.kind];
     if (update) update(entity, sim, entity.kind === 'player' ? input : EMPTY_INPUT);
+  }
+
+  // Out of sight, if the map offers anywhere to be. Resolved before anyone
+  // looks for you and after you have moved, so stepping into a doorway is worth
+  // exactly the frame you are in it for.
+  const wasHidden = sim.hidden;
+  sim.hideIn = hidingIn(sim, player);
+  sim.hidden = !!sim.hideIn;
+  if (sim.hidden !== wasHidden) {
+    sim.events.push({ type: 'hide', hidden: sim.hidden, x: player.x, y: player.y });
   }
 
   // How sensitive this spot is. Distance is measured to where the person

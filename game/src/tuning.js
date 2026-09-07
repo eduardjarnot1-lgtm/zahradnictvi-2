@@ -190,6 +190,50 @@ const WALKER_GAIT = {
 };
 
 // Mr. Vrána, once he is awake.
+// What one person can see, as opposed to hear.
+//
+// The point of it is that it is not a circle with an edge. A threshold makes
+// the same decision every time you cross it, so the only skill it can ask for
+// is knowing where the line is; a curve asks how long you are willing to be
+// where, which is the question a stealth game is actually about. Certainty
+// builds at `near` per second when you are at his elbow and at `far` per second
+// at the limit of what he can make out, easing between the two — and it drains
+// at `fade` the moment he cannot see you, so being glimpsed across a hall is
+// survivable and being glimpsed across a desk is not.
+//
+//   distance    40    80   120   160   180
+//   seconds   0.24  0.42  0.75   1.6  never
+const VISION = {
+  // How far he can pick you out at all. The old snap-to-follow was 58 — under
+  // three tiles, near enough to be a collision — and this is most of a
+  // classroom, which is what "he is in the room with you" ought to mean.
+  //
+  // Not more than this, though, and the reason is the maps: the first school is
+  // 600 by 520, and a range that has to sit below the distance at which he
+  // gives up, which in turn has to be openable by running down a corridor that
+  // is only three hundred units long, has very little room above it. Two and a
+  // half times what it was is a different game; four times is a level you
+  // cannot leave.
+  range: 150,
+  // Inside this he has you at once and there is nothing to be done about it.
+  sure: 44,
+  // Certainty per second at his elbow, and out at the far edge.
+  near: 4.2,
+  far: 0.62,
+  // Standing still is most of what saves you: he is looking for movement, and a
+  // figure holding still against a bank of lockers is not obviously a person.
+  still: 0.30,
+  // ...and how fast the doubt comes back once he cannot see you.
+  fade: 1.35,
+  // What it takes before he stops guessing and comes.
+  commit: 1.0,
+  // A hiding place is not a force field. It is most of one.
+  hidden: 0.10,
+  // How much of all this the first level of the week gets. The same man, paying
+  // more attention by the fifth.
+  tier: [0.74, 0.83, 0.90, 0.96, 1.0]
+};
+
 const INVESTIGATE = {
   // Where he gets up, and where he gives up. Both lower than they were,
   // because filling the meter no longer ends the level: the stretch from
@@ -418,7 +462,28 @@ const PEOPLE = {
 
   // Mr. Vrána. The one the whole system was written for, and still the middle
   // of the range: slower than the guards, sharper than the sleepers.
-  School: person(),
+  School: person({
+    // Mr. Vrána looks up. Everywhere else in the game a person on his feet
+    // finds you by walking into you — `followAt`, a hard threshold under three
+    // tiles. Here he has eyes, and they work continuously: how quickly he picks
+    // you out falls off with distance instead of switching on at a line, so the
+    // far edge of his attention is somewhere you can cross if you are quick and
+    // quiet, and his elbow is not.
+    vision: VISION,
+    // Getting out of a chair takes a beat longer than it did. There are now
+    // eight of them between the head coming off the desk and the first step —
+    // and a wake-up you can read is also a wake-up the player can use, which is
+    // the point of showing it rather than cutting to a man already walking.
+    alertness: { riseLow: 2.3, riseHigh: 1.1 },
+    investigate: {
+      // Losing him has to cost more ground than being seen does, or he would
+      // drop you while still watching you: the two numbers are one mechanism
+      // and they have to be ordered. Held for the same two seconds as
+      // everywhere else, and kept close enough above the range that a corridor
+      // on the smallest school map is still long enough to open it.
+      unfollowAt: 185
+    }
+  }),
 
   // Dr. Marek, out on the staff couch at the end of a double shift. Deeply
   // asleep and then instantly, professionally awake — the fastest riser in the
@@ -963,6 +1028,11 @@ export const TUNING = {
       effect: [1, 1.12, 1.25, 1.4]
     }
   },
+
+  // Beta-only testing aids, kept in one place so switching them off before
+  // release is a line rather than an excavation. The hiding places themselves
+  // are a mechanic and stay; only the labels over them are temporary.
+  beta: { hideLabels: true },
 
   // Graphics quality caps the render resolution and the particle budget.
   quality: {

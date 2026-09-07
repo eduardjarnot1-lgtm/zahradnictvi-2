@@ -32,6 +32,8 @@ class Grid:
         # ended up as bare shells with a coin in them. Reserving the lane before
         # anything is placed means there is nothing to repair.
         self.keep = set()
+        # Blocks the building does not stand on — see `solid` below.
+        self.solids = []
 
     def reserve(self, x, y, w, h):
         for yy in range(max(0, y), min(self.rows, y + h)):
@@ -466,6 +468,7 @@ def surround(inner, left, top, right, bottom):
         g.keep.add((x + left, y + top))
     g.bad = list(inner.bad)
     g.moved = list(inner.moved)
+    g.solids = [(x + left, y + top, w, h) for (x, y, w, h) in inner.solids]
     return g
 
 
@@ -974,8 +977,15 @@ def solid(g, x, y, w, h):
     """Mark a block as not part of the building. This is how the silhouettes are
     cut: the grid stays rectangular because everything downstream assumes it is,
     and the *building* becomes an L or a U or a courtyard by walling off what is
-    outside it. Read off the walls alone, the five levels are five shapes."""
+    outside it. Read off the walls alone, the five levels are five shapes.
+
+    The block is remembered as well as filled. Filled, it is a slab of masonry
+    the size of a gymnasium sitting in the middle of the campus — which is what
+    the corner of an L-shaped school looked like, and it read as a grey
+    placeholder rather than as anywhere. Remembered, the grounds can grow into
+    it, which is what is actually outside a building."""
     g.fill(x, y, w, h, '#')
+    g.solids.append((x, y, w, h))
 
 
 def pack(a, b, wide, gap=1):
@@ -1026,7 +1036,15 @@ def sch_library(g, x, y, w, h, door):
 
 
 def sch_store(g, x, y, w, h, door, name='Store'):
-    """Shelving, cupboards under it, boxes wherever they will go."""
+    """Shelving, cupboards under it, boxes wherever they will go.
+
+    A store is deep and narrow more often than not, and the door lane runs the
+    whole way down it. Packing three-wide units into what is left either side of
+    that lane finds room for none of them in a nine-tile room — which is how the
+    caretaker's stores ended up as a bare grey rectangle with a sign on it. So
+    the run along the *side* walls is the main event and the packing at the ends
+    is what happens if there is room for it.
+    """
     lane = (door - 1, door + 3)
     band = pack(x, lane[0] - 1, 3) + pack(lane[1] + 1, x + w - 1, 3)
     for i, xx in enumerate(band):
@@ -1034,9 +1052,18 @@ def sch_store(g, x, y, w, h, door, name='Store'):
     if h >= 7:
         for i, xx in enumerate(band):
             g.fill(xx, y + h - 2, 3, 2, 'C' if i % 2 == 0 else 'W')
+    # Racking down both side walls, broken into bays with a gap between them.
+    # `lay` refuses a reserved lane and shifts along the wall rather than
+    # standing in the doorway, so this cannot seal the room it is furnishing.
+    if h >= 9 and w >= 6:
+        for k in range(0, h - 6, 5):
+            top = y + 2 + k
+            if top + 3 > y + h - 2:
+                break
+            g.lay(x, top, 2, 3, 'B' if k % 10 == 0 else 'C', shift=1)
+            g.lay(x + w - 2, top, 2, 3, 'C' if k % 10 == 0 else 'B', shift=1)
     g.deco('floor', x, y, w, h, 'concrete')
-    if band:
-        g.deco('tools', band[0], y + h // 2, 3, 1)
+    g.deco('tools', band[0] if band else x + 1, y + h // 2, 3, 1)
     g.deco('sign', door, y - 1, 3, 1, name)
 
 
