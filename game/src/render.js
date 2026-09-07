@@ -462,8 +462,8 @@ export function createRenderer(canvas, options = {}) {
     // The same speed-driven gait the thief uses, against his own top speed —
     // he is slower, so a brisk walk for him is not a run.
     const gait = gaitBlend(w.speed / rules.speed);
-    const band = sim.rules.caretakerGait
-      ? gaitOf(w.gaitShare === undefined ? 0 : w.gaitShare, sim.rules.caretakerGait)
+    const band = sim.rules.watcherGait
+      ? gaitOf(w.gaitShare === undefined ? 0 : w.gaitShare, sim.rules.watcherGait)
       : null;
     const stance = {
       facing: w.facing,

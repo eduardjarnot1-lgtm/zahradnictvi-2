@@ -38,17 +38,20 @@ test('filling the meter does not end a school level', () => {
   }
 });
 
-test('everywhere else, a full meter still wakes him and ends it', () => {
-  // The old rule is the game everywhere but the school, and it has to stay
-  // exactly as it was — this is the isolation test for the whole change.
-  const elsewhere = FLOORPLANS.filter((l) => l.location !== 'School');
-  for (const level of [elsewhere[0], elsewhere[12], elsewhere[30], elsewhere[elsewhere.length - 1]]) {
+test('nowhere in the game does a full meter end a level any more', () => {
+  // This used to be the isolation test: the school stopped losing on a full
+  // meter and everywhere else still did. Both halves of that are gone. Every
+  // building in the game is now one person listening, so filling the meter
+  // makes them fast and right and ends nothing — being walked into, or running
+  // out of clock, is what loses you a level.
+  const somewhere = ['Apartment', 'Hotel', 'Museum', 'Vault']
+    .map((name) => FLOORPLANS.find((l) => l.location === name));
+  for (const level of somewhere) {
     const run = createRun(level.id);
     const { sim } = run;
     sim.timeLeft = 9999;
     // Driven by an actual noise rather than by assigning the meter: the check
-    // lives where noise is *made*, so a number poked in from outside never
-    // reaches it. Take something loud with the meter already nearly full.
+    // lived where noise is *made*, so this is where it would still be.
     const item = sim.items.reduce((a, b) => (a && a.value >= b.value ? a : b));
     walkTo(run, item, 60 * 40);
     sim.noise = 99;
@@ -56,8 +59,8 @@ test('everywhere else, a full meter still wakes him and ends it', () => {
       tick(run, { x: 0, y: 0, take: true, search: false });
       tick(run, { x: 0, y: 0, take: false, search: false });
     }
-    assert.equal(sim.status, 'lost', `${level.name} L${level.id} did not end on a full meter`);
-    assert.equal(sim.failReason, 'awake');
+    assert.notEqual(sim.failReason, 'awake',
+      `${level.name} L${level.id} still ends the level on a full meter`);
   }
 });
 
@@ -275,10 +278,27 @@ test('he actually walks faster when the meter is higher', () => {
 
 // --- and the rest of the game is untouched ----------------------------------
 
-test('no other location has an alertness curve', () => {
+test('every location has an alertness curve, and no two are the same person', () => {
+  const names = Object.keys(TUNING.locations);
+  assert.equal(names.length, 11, 'eleven locations, eleven people');
+  const seen = new Set();
   for (const [name, rules] of Object.entries(TUNING.locations)) {
-    if (name === 'School') continue;
-    assert.equal(rules.alertness, undefined, `${name} picked up an alertness curve`);
+    assert.ok(rules.alertness, `${name} has no alertness curve`);
+    assert.ok(rules.investigate, `${name} has nobody who comes looking`);
+    // The curve has to have room in it: mapping the whole meter onto nought to
+    // one puts every waking moment at the top of it, which is the bug the
+    // school's `from` was added to fix.
+    assert.ok(rules.alertness.from < rules.investigate.wakeAt,
+      `${name} only wakes above the top of its own curve`);
+    // Nobody may be faster than the thief. A threat you cannot outrun is not a
+    // chase, it is a countdown — `unfollowAt` is unreachable and being seen
+    // becomes the same thing as being caught.
+    const top = rules.investigate.speed * rules.alertness.speedHigh;
+    assert.ok(top < TUNING.player.speed,
+      `${name} tops out at ${top.toFixed(0)} against the thief's ${TUNING.player.speed}`);
+    const finger = [rules.investigate.speed, rules.alertness.blur, rules.investigate.wakeAt].join('/');
+    assert.ok(!seen.has(finger), `${name} is the same person as somebody else (${finger})`);
+    seen.add(finger);
   }
   assert.equal(alertnessOf({ noise: 100, rules: {} }), 0);
 });

@@ -6,7 +6,7 @@
 // may still get more seconds than a smaller one — walking further genuinely
 // takes longer — while being tighter to play, which is the honest reading of
 // "time goes down as difficulty goes up".
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { LEVELS } from '../src/levels.js';
 import { playEfficiently } from '../test/harness.mjs';
 
@@ -22,9 +22,25 @@ const WINDOW = Math.hypot(400, 620);
 // Never less than this multiple of a measured good run, whatever the formula
 // says: a level has to be winnable before it is anything else.
 const FLOOR = 1.35;
-const clocks = {};
+// ...but no location may be lifted past this. The floor is a safety net for a
+// level that measures slow, not a licence to hand a small map ninety seconds:
+// past here a level stops being a level and becomes a walkthrough, and the
+// fairness bot — which plays with a reserve, as a player does — clears every
+// one of these inside the capped clock anyway.
+const MOST_LIFT = 1.30;
+// Start from whatever is already written down. A level the bot cannot finish
+// on either seed gets no new number — and dropping it from the file would not
+// give it a longer clock, it would take its clock away and hand it back to the
+// campaign-wide formula, which is how a level that is already hard becomes
+// unwinnable. Keeping the old number is the conservative answer.
+const CLOCKS_AT = new URL('../src/maps.js.clocks', import.meta.url);
+let clocks = {};
+try { clocks = JSON.parse(readFileSync(CLOCKS_AT, 'utf8')); } catch { clocks = {}; }
 let worst = 0;
 
+// Pass one: how long each level actually takes to work, measured rather than
+// guessed.
+const measured = new Map();
 for (const level of LEVELS) {
   // Measure how long the map takes to *work* — the full efficient haul and the
   // walk out — with the clock lifted and nothing held back. Measuring against
@@ -40,16 +56,52 @@ for (const level of LEVELS) {
   }
   level.clock = real;
   if (seconds > 900) { console.log(`L${level.id} ${level.name} ${level.tier}/5  COULD NOT FINISH`); continue; }
-  // Size sets the clock; the measured run only ever raises it.
-  const size = Math.hypot(level.width, level.height) / WINDOW;
-  const demand = PER_WINDOW * size;
-  const clock = Math.max(20, Math.round(demand * SLACK[level.tier - 1]),
-    Math.round(seconds * FLOOR));
-  clocks[level.id] = clock;
+  measured.set(level.id, seconds);
   worst = Math.max(worst, seconds);
-  console.log(`L${String(level.id).padStart(2)} ${level.name.padEnd(10)} ${level.tier}/5  ` +
-    `${String(level.tiles.cols) + 'x' + level.tiles.rows}`.padEnd(7) +
-    `  run ${seconds.toFixed(1)}s  clock ${clock}s  slack ${(clock / seconds).toFixed(2)}`);
 }
-writeFileSync(new URL('../src/maps.js.clocks', import.meta.url), JSON.stringify(clocks, null, 1));
+
+// Pass two: turn that into clocks, one location at a time.
+//
+// The floor — never less than FLOOR times a measured good run — cannot be
+// applied level by level. A slow run on level two would hand level two more
+// seconds than level one, and the whole point of the curve is that a location
+// gets tighter as it goes. So the floor is resolved for the *location*: work
+// out the most generous base any of its five levels needs, then lay the slack
+// curve back over that. Every level keeps at least its floor, and the curve
+// keeps its shape.
+const byLocation = new Map();
+for (const level of LEVELS) {
+  if (!byLocation.has(level.location)) byLocation.set(level.location, []);
+  byLocation.get(level.location).push(level);
+}
+for (const [name, levels] of byLocation) {
+  const sized = levels.map((l) => PER_WINDOW * (Math.hypot(l.width, l.height) / WINDOW));
+  // The one multiplier that satisfies every level's floor at once.
+  let lift = 1;
+  levels.forEach((l, t) => {
+    const seconds = measured.get(l.id);
+    if (!seconds) return;
+    lift = Math.max(lift, (seconds * FLOOR) / (sized[t] * SLACK[t]));
+  });
+  lift = Math.min(lift, MOST_LIFT);
+  // A location never ends looser than it began. The slack curve guarantees
+  // that on its own for four levels of steadily growing map, but the fifth is
+  // sometimes a hand-drawn floorplan of a quite different shape — and a level
+  // five that is more generous than a level one is the curve running backwards.
+  let first = 0;
+  levels.forEach((l, t) => {
+    let clock = Math.max(20, Math.round(sized[t] * SLACK[t] * lift));
+    if (t === 0) first = clock;
+    else clock = Math.min(clock, first - 1);
+    clocks[l.id] = clock;
+    const seconds = measured.get(l.id);
+    console.log(`L${String(l.id).padStart(2)} ${l.name.padEnd(10)} ${l.tier}/5  ` +
+      `${String(l.tiles.cols) + 'x' + l.tiles.rows}`.padEnd(7) +
+      (seconds ? `  run ${seconds.toFixed(1)}s  clock ${clock}s  slack ${(clock / seconds).toFixed(2)}`
+        : `  run    ?    clock ${clock}s  (kept)`));
+  });
+  if (lift > 1.001) console.log(`   ${name}: every clock lifted x${lift.toFixed(2)} to clear its slowest level`);
+}
+
+writeFileSync(CLOCKS_AT, JSON.stringify(clocks, null, 1));
 console.log(`\nwrote ${Object.keys(clocks).length} clocks; slowest efficient run ${worst.toFixed(1)}s`);

@@ -18,6 +18,7 @@ import { navGrid, flowField, cellOf } from '../src/nav.js';
 import { blocked } from '../src/physics.js';
 import { createRun, tick, walkTo, escape, waitOut, playEfficiently, slipAway } from './harness.mjs';
 
+const FLOORPLANS = LEVELS;
 const SCHOOL = LEVELS.filter((l) => l.location === 'School');
 const ELSEWHERE = LEVELS.filter((l) => l.location !== 'School');
 const RULES = TUNING.locations.School;
@@ -174,58 +175,82 @@ function openRunOfFloor(level, preferred, length = 80, axis = 'y') {
 
 // --- the mechanics are the school's alone -----------------------------------
 
-test('only the school has location rules at all', () => {
-  assert.deepEqual(Object.keys(TUNING.locations), ['School'],
-    'a second location here means a second location has changed behaviour');
-  for (const level of SCHOOL) assert.ok(locationRules(level).investigate, `L${level.id} missing rules`);
-  for (const level of ELSEWHERE) {
-    assert.deepEqual(locationRules(level), {}, `L${level.id} (${level.location}) picked up rules`);
+test('every location has rules of its own, and the school is one of eleven', () => {
+  // This was the isolation test, back when the school was the only building in
+  // the game that behaved this way. It is now the coverage test: the machinery
+  // is the game's, and a location that is missing from here is a location that
+  // quietly kept the old fuse.
+  const names = Object.keys(TUNING.locations);
+  assert.equal(names.length, 11, `eleven locations, found ${names.length}`);
+  for (const level of FLOORPLANS) {
+    const rules = locationRules(level);
+    assert.ok(rules.investigate, `L${level.id} (${level.location}) has nobody in it`);
+    assert.ok(rules.alertness, `L${level.id} (${level.location}) has no alertness curve`);
+    assert.ok(rules.proximity, `L${level.id} (${level.location}) has no proximity curve`);
+    assert.ok(rules.recovery, `L${level.id} (${level.location}) has no recovery rate`);
   }
 });
 
-test('the drawn figures are the school\'s, and nowhere else\'s', () => {
+test('the drawn figures are the whole game\'s now', () => {
   // A visual switch rather than a rewrite: the renderer asks the location
-  // whether it wants the new characters. One line moves it to the whole game,
-  // and this is the test that would need changing with it.
-  assert.equal(RULES.figures, true, 'the school should be drawing the new figures');
-  for (const level of ELSEWHERE) {
-    assert.ok(!locationRules(level).figures,
-      `L${level.id} (${level.location}) picked up the school's characters`);
+  // whether it wants the new characters. That one line has now been moved to
+  // every location, which is what §20 asks for — one game, not one polished
+  // building surrounded by an older one.
+  for (const level of FLOORPLANS) {
+    assert.equal(locationRules(level).figures, true,
+      `L${level.id} (${level.location}) is still drawing the old walker`);
   }
 });
 
-test('no other location gets an investigator, a proximity curve or a new decay rate', () => {
+test('every location gets an investigator and a proximity curve', () => {
   for (const level of ELSEWHERE) {
     const sim = createSim({ level });
-    assert.equal(sim.investigator, null, `L${level.id} (${level.location}) has someone walking about`);
-    assert.equal(sim.investigateRules, null);
-    assert.equal(sim.entities.length, 1, `L${level.id} gained an entity`);
+    assert.ok(sim.investigator, `L${level.id} (${level.location}) has nobody walking about`);
+    assert.ok(sim.investigateRules, `L${level.id} has no investigation rules`);
+    assert.equal(sim.entities.length, 2, `L${level.id} has the wrong number of people in it`);
     stepSim(sim, { x: 1, y: 0, take: false });
-    assert.equal(sim.proximity, 1, `L${level.id} scaled its noise by distance`);
+    assert.notEqual(sim.proximity, 1,
+      `L${level.id} (${level.location}) is not scaling its noise by distance`);
   }
 });
 
-test('elsewhere, noise still costs exactly what it says on the tin', () => {
-  // The same item, taken on a level with no proximity rule, must move the
-  // meter by its printed value — near the sleeper or far from them.
+test('noise costs what it says on the tin times how near he is, everywhere', () => {
+  // The printed value is the floor price. What you actually pay is that times
+  // the proximity curve, which is between 0.85 and 3 — and that is now true in
+  // all eleven buildings rather than in one of them.
   for (const level of ELSEWHERE.slice(0, 8)) {
     const sim = createSim({ level });
     const item = sim.items[0];
     place(sim, item.x, item.y);
     stepSim(sim, { x: 0, y: 0, take: true });
-    assert.equal(Math.round(sim.noise), item.noise,
-      `L${level.id} (${level.location}) charged ${sim.noise} for a ${item.noise} item`);
+    const rules = locationRules(level);
+    const scale = proximityScale(rules,
+      Math.hypot(item.x - level.watcher.x, item.y - level.watcher.y));
+    assert.ok(Math.abs(sim.noise - item.noise * scale) < 0.6,
+      `L${level.id} (${level.location}) charged ${sim.noise.toFixed(1)} for a ${item.noise} item at x${scale.toFixed(2)}`);
+    assert.ok(scale >= rules.proximity.farScale && scale <= rules.proximity.nearScale);
   }
 });
 
-test('the settling rate elsewhere is untouched', () => {
-  const level = ELSEWHERE.find((l) => l.location === 'Apartment');
-  const sim = createSim({ level });
-  sim.noise = 50;
-  for (let i = 0; i < 60 * 2; i++) stepSim(sim);
-  const spent = 2 - TUNING.recovery.delay;
-  assert.ok(Math.abs((50 - sim.noise) - spent * TUNING.recovery.rate) < 0.1,
-    `apartment decay moved ${(50 - sim.noise).toFixed(2)}, expected ${(spent * TUNING.recovery.rate).toFixed(2)}`);
+test('every location settles at its own pace, and none of them is a reset button', () => {
+  // Standing still is now a tactic in all eleven buildings, and how fast it
+  // works is part of who lives there: a grandfather in an armchair settles
+  // twice as readily as a vault guard.
+  const rates = new Set();
+  for (const name of Object.keys(TUNING.locations)) {
+    const level = FLOORPLANS.find((l) => l.location === name);
+    const rules = locationRules(level);
+    const sim = createSim({ level });
+    sim.noise = 50;
+    for (let i = 0; i < 60 * 2; i++) stepSim(sim);
+    const spent = 2 - rules.recovery.delay;
+    assert.ok(Math.abs((50 - sim.noise) - spent * rules.recovery.rate) < 0.2,
+      `${name} decayed ${(50 - sim.noise).toFixed(2)}, expected ${(spent * rules.recovery.rate).toFixed(2)}`);
+    // Slow enough that it is a decision against the clock rather than a button.
+    assert.ok(rules.recovery.rate <= 9 && rules.recovery.delay >= 0.85, `${name} settles too easily`);
+    rates.add(`${rules.recovery.delay}/${rules.recovery.rate}`);
+  }
+  assert.ok(rates.size >= 6, `only ${rates.size} distinct settling rates across eleven locations`);
 });
 
 // --- distance decides how much a noise costs --------------------------------

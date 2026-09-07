@@ -121,7 +121,11 @@ test('noise clamps at the cap and the sleeper stages line up', () => {
   assert.equal(sleepStage(TUNING.noise.max - 1) === SLEEP_AWAKE, false);
 });
 
-test('the exit does nothing once he is awake', () => {
+test('the exit works whatever the meter says, because the meter is a person', () => {
+  // It used to be a fuse: fill it and the door stopped working, because he was
+  // awake and the level was over. It is now how alert one person is, and being
+  // hunted out of a building with a full meter and the haul still in the bag is
+  // exactly the ending the game should allow — you got away with it.
   const level = LEVELS[0];
   const sim = createSim({ level, seed: 1 });
   sim.noise = TUNING.noise.max;
@@ -129,7 +133,10 @@ test('the exit does nothing once he is awake', () => {
   player.x = level.exit.x + level.exit.w / 2;
   player.y = level.exit.y + 20;
   stepSim(sim, { x: 0, y: 1, take: false });
-  assert.notEqual(sim.status, 'won');
+  assert.equal(sim.status, 'won');
+  // ...but it is graded as what it was. A run out of the door with the meter
+  // full is a close call, and a close call pays no bonus.
+  assert.equal(sim.escapeGrade.bonus, 0);
 });
 
 // --- movement feel ----------------------------------------------------------
@@ -264,7 +271,11 @@ test('a creaky board costs noise once, then goes quiet', () => {
 
   player.x = zone.x + zone.w / 2;                    // step on
   stepSim(sim, { x: 0, y: 0 });
-  assert.equal(sim.noise, TUNING.hazards.creakNoise);
+  // The printed cost, times how near the person listening is: every location
+  // scales its noise by distance now, so the flat number is the floor price
+  // rather than the price.
+  assert.ok(Math.abs(sim.noise - TUNING.hazards.creakNoise * sim.proximity) < 0.5,
+    `a board cost ${sim.noise} at x${sim.proximity.toFixed(2)}`);
 
   const events = [];
   for (let i = 0; i < 120; i++) {                     // stand on it
@@ -469,8 +480,18 @@ test('standing perfectly still bleeds noise off, slowly', () => {
   assert.equal(run.sim.noise, 60, 'recovery should not start instantly');
 
   for (let i = 0; i < 60 * 2; i++) tick(run, { x: 0, y: 0 });
+  // Against this location's own settling rate: how readily a building goes
+  // quiet is part of who lives in it, and a flat number here would only be
+  // testing that nobody had given anyone a personality.
+  const settle = locationRules(run.level).recovery;
   const dropped = 60 - run.sim.noise;
-  assert.ok(dropped > 2 && dropped < 6, `dropped ${dropped.toFixed(1)} in two seconds`);
+  // Two and a half seconds of standing still by now — half a second above,
+  // then two more — of which the delay is spent before anything moves.
+  const want = (2.5 - settle.delay) * settle.rate;
+  assert.ok(Math.abs(dropped - want) < 0.6, `dropped ${dropped.toFixed(1)}, expected ${want.toFixed(1)}`);
+  // ...and slow enough, wherever you are, that it is a decision against the
+  // clock rather than a button that undoes a mistake.
+  assert.ok(dropped < 15, `dropped ${dropped.toFixed(1)} in two seconds`);
 });
 
 test('recovery is far too slow to be a reset button', () => {
@@ -596,6 +617,11 @@ test('a quiet, unhurried escape is graded perfect and pays a bonus', () => {
 test('a loud or last-second escape is graded a close call, with no bonus', () => {
   const run = createRun(1);
   run.sim.noise = 90;
+  // Grading, not stealth. At ninety the flat's sleeper is up and coming, and
+  // whether he catches this particular walk to the door is not what this test
+  // is about — so there is nobody in the building for it.
+  run.sim.investigator = null;
+  run.sim.investigateRules = null;
   escape(run);
   assert.equal(run.sim.status, 'won');
   assert.equal(run.sim.escapeGrade.grade, 'close');
@@ -686,7 +712,10 @@ test('a creep takes more, shorter steps per unit than a run', () => {
     `creeping should be far more steps per unit: ${creepPerUnit.toFixed(4)} vs ${runPerUnit.toFixed(4)}`);
   // ...and yet moving faster is still more steps per second, or the animation
   // would visibly lag the movement.
-  assert.ok(sp.walkPhase > cp.walkPhase * 1.5,
+  // Four times the stick, but a stride twice as long with it, so the cadence
+  // only goes up by about half — which is the whole shape of the band table and
+  // the reason a run reads as a run rather than as a walk on fast-forward.
+  assert.ok(sp.walkPhase > cp.walkPhase * 1.35,
     `faster must still step more often: ${sp.walkPhase.toFixed(2)} vs ${cp.walkPhase.toFixed(2)}`);
 });
 

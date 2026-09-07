@@ -33,7 +33,7 @@ export const FLOORPLANS = [
     theme: 'apartment',
     watcher: 'dad',
     seated: false,
-    clock: 56,
+    clock: 72,
     legend: LOOT,
     tiles: [
       '##############################',
@@ -73,7 +73,7 @@ export const FLOORPLANS = [
     theme: 'apartment',
     watcher: 'dad',
     seated: false,
-    clock: 53,
+    clock: 69,
     legend: LOOT,
     tiles: [
       '#################################',
@@ -115,7 +115,7 @@ export const FLOORPLANS = [
     theme: 'apartment',
     watcher: 'dad',
     seated: false,
-    clock: 51,
+    clock: 66,
     legend: LOOT,
     tiles: [
       '####################################',
@@ -160,7 +160,7 @@ export const FLOORPLANS = [
     theme: 'apartment',
     watcher: 'dad',
     seated: false,
-    clock: 50,
+    clock: 64,
     legend: LOOT,
     tiles: [
       '########################################',
@@ -208,7 +208,7 @@ export const FLOORPLANS = [
     theme: 'apartment',
     watcher: 'dad',
     seated: false,
-    clock: 56,
+    clock: 71,
     legend: LOOT,
     tiles: [
       '#############OOOOOOOO###############',
@@ -279,7 +279,7 @@ export const FLOORPLANS = [
     theme: 'cottage',
     watcher: 'grandpa',
     seated: false,
-    clock: 56,
+    clock: 72,
     legend: LOOT,
     tiles: [
       '##############################',
@@ -319,7 +319,7 @@ export const FLOORPLANS = [
     theme: 'cottage',
     watcher: 'grandpa',
     seated: false,
-    clock: 53,
+    clock: 69,
     legend: LOOT,
     tiles: [
       '#################################',
@@ -361,7 +361,7 @@ export const FLOORPLANS = [
     theme: 'cottage',
     watcher: 'grandpa',
     seated: false,
-    clock: 51,
+    clock: 66,
     legend: LOOT,
     tiles: [
       '####################################',
@@ -406,7 +406,7 @@ export const FLOORPLANS = [
     theme: 'cottage',
     watcher: 'grandpa',
     seated: false,
-    clock: 50,
+    clock: 64,
     legend: LOOT,
     tiles: [
       '########################################',
@@ -454,7 +454,7 @@ export const FLOORPLANS = [
     theme: 'cottage',
     watcher: 'grandpa',
     seated: false,
-    clock: 51,
+    clock: 61,
     legend: LOOT,
     tiles: [
       '####OOOOOOO##################OOOOOOOO######',
@@ -504,7 +504,7 @@ export const FLOORPLANS = [
     theme: 'hotelfloor',
     watcher: 'porter',
     seated: true,
-    clock: 56,
+    clock: 72,
     legend: LOOT,
     tiles: [
       '##############################',
@@ -544,7 +544,7 @@ export const FLOORPLANS = [
     theme: 'hotelfloor',
     watcher: 'porter',
     seated: true,
-    clock: 53,
+    clock: 69,
     legend: LOOT,
     tiles: [
       '#################################',
@@ -586,7 +586,7 @@ export const FLOORPLANS = [
     theme: 'hotelfloor',
     watcher: 'porter',
     seated: true,
-    clock: 51,
+    clock: 66,
     legend: LOOT,
     tiles: [
       '####################################',
@@ -631,7 +631,7 @@ export const FLOORPLANS = [
     theme: 'hotelfloor',
     watcher: 'porter',
     seated: true,
-    clock: 50,
+    clock: 64,
     legend: LOOT,
     tiles: [
       '########################################',
@@ -679,7 +679,7 @@ export const FLOORPLANS = [
     theme: 'hotelfloor',
     watcher: 'porter',
     seated: true,
-    clock: 50,
+    clock: 65,
     legend: LOOT,
     tiles: [
       '###OOOOOO######OOOOOO######OOOOOO######OOOOOO####',
@@ -727,7 +727,7 @@ export const FLOORPLANS = [
     theme: 'officefloor',
     watcher: 'worker',
     seated: true,
-    clock: 56,
+    clock: 72,
     legend: LOOT,
     tiles: [
       '##############################',
@@ -767,7 +767,7 @@ export const FLOORPLANS = [
     theme: 'officefloor',
     watcher: 'worker',
     seated: true,
-    clock: 53,
+    clock: 69,
     legend: LOOT,
     tiles: [
       '#################################',
@@ -809,7 +809,7 @@ export const FLOORPLANS = [
     theme: 'officefloor',
     watcher: 'worker',
     seated: true,
-    clock: 51,
+    clock: 66,
     legend: LOOT,
     tiles: [
       '####################################',
@@ -854,7 +854,7 @@ export const FLOORPLANS = [
     theme: 'officefloor',
     watcher: 'worker',
     seated: true,
-    clock: 50,
+    clock: 64,
     legend: LOOT,
     tiles: [
       '########################################',
@@ -902,7 +902,7 @@ export const FLOORPLANS = [
     theme: 'officefloor',
     watcher: 'worker',
     seated: true,
-    clock: 46,
+    clock: 60,
     legend: LOOT,
     tiles: [
       '####OOOOOO###OOOOOO######OOOOO##############',
@@ -1024,7 +1024,7 @@ export const FLOORPLANS = [
     theme: 'school',
     watcher: 'caretaker',
     seated: false,
-    clock: 53,
+    clock: 55,
     search: {
       '1': { style: 'wardrobe', item: 'k' },
       '2': { style: 'chest', item: 'm' },
@@ -1105,7 +1105,7 @@ export const FLOORPLANS = [
     theme: 'school',
     watcher: 'caretaker',
     seated: false,
-    clock: 51,
+    clock: 53,
     search: {
       '1': { style: 'wardrobe', item: 'k' },
       '2': { style: 'chest', item: 't' },
@@ -1192,7 +1192,7 @@ export const FLOORPLANS = [
     theme: 'school',
     watcher: 'caretaker',
     seated: false,
-    clock: 50,
+    clock: 52,
     search: {
       '1': { style: 'wardrobe', item: 'k' },
       '2': { style: 'chest', item: 'r' },
@@ -1385,7 +1385,7 @@ export const FLOORPLANS = [
     theme: 'hospital',
     watcher: 'doctor',
     seated: false,
-    clock: 56,
+    clock: 72,
     legend: LOOT,
     tiles: [
       '##############################',
@@ -1425,7 +1425,7 @@ export const FLOORPLANS = [
     theme: 'hospital',
     watcher: 'doctor',
     seated: false,
-    clock: 53,
+    clock: 69,
     legend: LOOT,
     tiles: [
       '#################################',
@@ -1467,7 +1467,7 @@ export const FLOORPLANS = [
     theme: 'hospital',
     watcher: 'doctor',
     seated: false,
-    clock: 51,
+    clock: 66,
     legend: LOOT,
     tiles: [
       '####################################',
@@ -1512,7 +1512,7 @@ export const FLOORPLANS = [
     theme: 'hospital',
     watcher: 'doctor',
     seated: false,
-    clock: 50,
+    clock: 64,
     legend: LOOT,
     tiles: [
       '########################################',
@@ -1560,7 +1560,7 @@ export const FLOORPLANS = [
     theme: 'hospital',
     watcher: 'doctor',
     seated: false,
-    clock: 46,
+    clock: 60,
     legend: LOOT,
     tiles: [
       '###OOOOOO#####OOOOOO#####OOOOOO##############',
@@ -1607,7 +1607,7 @@ export const FLOORPLANS = [
     watcher: 'nightguard',
     seated: true,
     sight: 75,
-    clock: 56,
+    clock: 72,
     legend: LOOT,
     tiles: [
       '##############################',
@@ -1648,7 +1648,7 @@ export const FLOORPLANS = [
     watcher: 'nightguard',
     seated: true,
     sight: 93,
-    clock: 53,
+    clock: 69,
     legend: LOOT,
     tiles: [
       '#################################',
@@ -1691,7 +1691,7 @@ export const FLOORPLANS = [
     watcher: 'nightguard',
     seated: true,
     sight: 112,
-    clock: 51,
+    clock: 66,
     legend: LOOT,
     tiles: [
       '####################################',
@@ -1737,7 +1737,7 @@ export const FLOORPLANS = [
     watcher: 'nightguard',
     seated: true,
     sight: 132,
-    clock: 50,
+    clock: 64,
     legend: LOOT,
     tiles: [
       '########################################',
@@ -1786,7 +1786,7 @@ export const FLOORPLANS = [
     watcher: 'nightguard',
     seated: true,
     sight: 150,
-    clock: 49,
+    clock: 64,
     legend: LOOT,
     tiles: [
       '#####OOOOO####################OOOOO########',
@@ -1841,7 +1841,7 @@ export const FLOORPLANS = [
     watcher: 'security',
     seated: true,
     sight: 79,
-    clock: 59,
+    clock: 70,
     legend: LOOT,
     tiles: [
       '##############################',
@@ -1882,7 +1882,7 @@ export const FLOORPLANS = [
     watcher: 'security',
     seated: true,
     sight: 98,
-    clock: 53,
+    clock: 67,
     legend: LOOT,
     tiles: [
       '#################################',
@@ -1925,7 +1925,7 @@ export const FLOORPLANS = [
     watcher: 'security',
     seated: true,
     sight: 118,
-    clock: 51,
+    clock: 64,
     legend: LOOT,
     tiles: [
       '####################################',
@@ -1971,7 +1971,7 @@ export const FLOORPLANS = [
     watcher: 'security',
     seated: true,
     sight: 139,
-    clock: 50,
+    clock: 62,
     legend: LOOT,
     tiles: [
       '########################################',
@@ -2020,7 +2020,7 @@ export const FLOORPLANS = [
     watcher: 'security',
     seated: true,
     sight: 158,
-    clock: 48,
+    clock: 61,
     legend: LOOT,
     tiles: [
       '############################################',
@@ -2299,7 +2299,7 @@ export const FLOORPLANS = [
     theme: 'shop',
     watcher: 'shopkeeper',
     seated: true,
-    clock: 56,
+    clock: 63,
     legend: LOOT,
     tiles: [
       '##############################',
@@ -2339,7 +2339,7 @@ export const FLOORPLANS = [
     theme: 'shop',
     watcher: 'shopkeeper',
     seated: true,
-    clock: 53,
+    clock: 60,
     legend: LOOT,
     tiles: [
       '#################################',
@@ -2381,7 +2381,7 @@ export const FLOORPLANS = [
     theme: 'shop',
     watcher: 'shopkeeper',
     seated: true,
-    clock: 51,
+    clock: 58,
     legend: LOOT,
     tiles: [
       '####################################',
@@ -2426,7 +2426,7 @@ export const FLOORPLANS = [
     theme: 'shop',
     watcher: 'shopkeeper',
     seated: true,
-    clock: 50,
+    clock: 56,
     legend: LOOT,
     tiles: [
       '########################################',
@@ -2474,7 +2474,7 @@ export const FLOORPLANS = [
     theme: 'shop',
     watcher: 'shopkeeper',
     seated: true,
-    clock: 48,
+    clock: 55,
     legend: LOOT,
     tiles: [
       '############################################',
@@ -2527,7 +2527,7 @@ export const FLOORPLANS = [
     watcher: 'vaultguard',
     seated: true,
     sight: 75,
-    clock: 56,
+    clock: 64,
     legend: LOOT,
     tiles: [
       '##############################',
@@ -2568,7 +2568,7 @@ export const FLOORPLANS = [
     watcher: 'vaultguard',
     seated: true,
     sight: 93,
-    clock: 53,
+    clock: 61,
     legend: LOOT,
     tiles: [
       '#################################',
@@ -2611,7 +2611,7 @@ export const FLOORPLANS = [
     watcher: 'vaultguard',
     seated: true,
     sight: 112,
-    clock: 51,
+    clock: 59,
     legend: LOOT,
     tiles: [
       '####################################',
@@ -2657,7 +2657,7 @@ export const FLOORPLANS = [
     watcher: 'vaultguard',
     seated: true,
     sight: 132,
-    clock: 50,
+    clock: 57,
     legend: LOOT,
     tiles: [
       '########################################',
@@ -2706,7 +2706,7 @@ export const FLOORPLANS = [
     watcher: 'vaultguard',
     seated: true,
     sight: 150,
-    clock: 48,
+    clock: 56,
     legend: LOOT,
     tiles: [
       '############################################',

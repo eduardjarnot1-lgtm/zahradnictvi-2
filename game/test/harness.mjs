@@ -100,6 +100,18 @@ export function walkTo(run, target, maxFrames = null, pace = 1) {
     let stalled = 0;
     for (let guard = 0; guard < 120; guard++) {
       if (run.sim.status !== 'running' || frames++ > budget) return false;
+      // Spotted, mid-walk. A player does not carry on towards the shelf with a
+      // guard closing on them, and a bot that does is not testing whether the
+      // level is winnable, only whether it is winnable while ignoring the man
+      // in it. `run.heed` is set by the bots that are supposed to look up.
+      // `heed` is "stop what you are doing, he has seen you"; `heedBeat` is
+      // only "wait for the man on his round to go past". Running for the door
+      // wants the second and not the first: once he is chasing you, the answer
+      // is the door, not standing about deciding.
+      if (run.sim.investigator
+          && ((run.heed && run.sim.investigator.state === 'following')
+            || ((run.heed || run.heedBeat) && onBeat(run.sim)
+              && closeTo(run.sim) < 150))) return false;
       const p = playerOf(run.sim);
       const dx = waypoint.x - p.x;
       const dy = waypoint.y - p.y;
@@ -141,7 +153,48 @@ export function escape(run) {
   const push = exit.side === 'left' ? { x: -1, y: 0 }
     : exit.side === 'right' ? { x: 1, y: 0 } : { x: 0, y: 1 };
 
-  walkTo(run, centre);
+  // Three goes at the door. In a building whose person walks a round, the way
+  // out is sometimes simply occupied — the hotel's porter has his desk in the
+  // corridor the exit is at the end of — and the answer to that is to wait in
+  // the next room until he has moved, not to walk into him. `run.heed` makes
+  // `walkTo` hand control back the moment he turns round, and this is what
+  // does something with it.
+  const atDoor = () => {
+    const p = playerOf(run.sim);
+    return Math.hypot(p.x - centre.x, p.y - centre.y) < 46;
+  };
+  run.heedBeat = true;
+  let idle = 0;
+  for (let go = 0; go < 40 && run.sim.status === 'running'; go++) {
+    if (run.sim.timeLeft < 10) break;
+    // Nowhere to walk from here: whatever we are standing in has no route out
+    // of it at path resolution. Shuffle off it and ask again.
+    const before = run.sim.frame;
+    // `walkTo` reports whether it ran out of budget, not whether it arrived —
+    // a path that stalls against a corner walks its whole waypoint list and
+    // says yes. Ask where we actually ended up.
+    walkTo(run, centre, 60 * 20);
+    if (atDoor()) break;
+    freezeUntilPast(run);
+    if (run.sim.frame === before && ++idle > 2) {
+      const mid = { x: run.level.width / 2, y: run.level.height / 2 };
+      const p = playerOf(run.sim);
+      const dx = mid.x - p.x;
+      const dy = mid.y - p.y;
+      const d = Math.hypot(dx, dy) || 1;
+      for (let i = 0; i < 40 && run.sim.status === 'running'; i++) {
+        tick(run, { x: dx / d, y: dy / d, take: false, search: false });
+      }
+      idle = 0;
+    }
+  }
+  run.heedBeat = false;
+  // ...and then go, whoever is in the way. The clock is the other way to lose,
+  // and standing in a side room waiting for a corridor to clear until the timer
+  // runs out is not caution, it is a different loss.
+  for (let go = 0; go < 4 && run.sim.status === 'running'; go++) {
+    if (walkTo(run, centre, 60 * 20)) break;
+  }
   for (let guard = 0; guard < 240 && run.sim.status === 'running'; guard++) {
     const p = playerOf(run.sim);
     // Stay lined up with the doorway while pressing through it.
@@ -171,6 +224,12 @@ export function waitOut(run, maxFrames = 60 * 25) {
   if (!w) return true;
   for (let i = 0; i < maxFrames && run.sim.status === 'running'; i++) {
     if (w.state === 'asleep') return true;
+    // A round is not something you wait out standing where you are.
+    if (onBeat(run.sim)) return closeTo(run.sim) > 140 || keepAway(run);
+    // Waiting for a man to go back to sleep is a decision against the clock,
+    // and on a floor the length of a hotel corridor the walk out is most of
+    // what is left. Past halfway there is nothing to wait for.
+    if (run.sim.timeLeft < run.sim.timeLimit * 0.44) return false;
     tick(run);
   }
   return run.sim.status === 'running' && w.state === 'asleep';
@@ -214,6 +273,17 @@ export function slipAway(run, maxFrames = 60 * 8) {
   return waitOut(run);
 }
 
+// Is the person in this building actually after us?
+//
+// A guard walking his round is on his feet and is not hunting anybody, so a bot
+// that treats "not asleep" as "he is coming" spends a location like the hotel
+// running away from a man doing his job and never leaves with anything. The
+// states that mean trouble are the ones he entered because of something we did.
+export function hunting(sim) {
+  const w = sim.investigator;
+  return !!w && w.state !== 'asleep' && w.state !== 'patrolling' && w.state !== 'watching';
+}
+
 export function playEfficiently(levelId, { budget = 70, reserve = null, seed = 7 } = {}) {
   const run = createRun(levelId, seed);
   // Never spend past the point where he gets up. In a building where the meter
@@ -224,7 +294,12 @@ export function playEfficiently(levelId, { budget = 70, reserve = null, seed = 7
   if (wakes) budget = Math.min(budget, wakes - 8);
   // Leave a share of the clock for the walk out. Moving carefully near
   // furniture is slower, so the tighter the level the earlier you stop.
-  const keepBack = reserve === null ? Math.max(9, run.sim.timeLimit * 0.45) : reserve;
+  // Leave more of the clock where somebody is walking a round: the way out can
+  // simply be occupied, and the answer to that is to wait, which costs seconds
+  // rather than distance. A reserve set for an empty corridor is what turns a
+  // patrolled level into a loss on the timer.
+  const keepBack = reserve === null
+    ? Math.max(9, run.sim.timeLimit * (run.sim.patrol ? 0.58 : 0.45)) : reserve;
   // Best deals first — but a deal on the far side of the building is not the
   // deal it looks like. Sorting purely by value per point of noise sends the
   // player zig-zagging across a floorplan, which is not how anyone plays and
@@ -235,10 +310,16 @@ export function playEfficiently(levelId, { budget = 70, reserve = null, seed = 7
   // loop never ends: unlike the old fixed-list version, this one re-picks its
   // target every step.
   const gaveUp = new Set();
+  run.heed = true;
   while (run.sim.status === 'running') {
     // Leave enough clock to actually get out. Stealing until the timer dies is
     // the greed the game is supposed to punish, not efficient play.
     if (run.sim.timeLeft < keepBack) break;
+    // Somebody is walking his round through the room we are standing in. Step
+    // out of his way first and pick the next thing up afterwards — which is
+    // what a player does, and is the whole point of giving a guard a beat.
+    if (onBeat(run.sim) && closeTo(run.sim) < 150) freezeUntilPast(run);
+    if (hunting(run.sim)) slipAway(run);
     const player = playerOf(run.sim);
     let best = null;
     let bestScore = 0;
@@ -259,7 +340,11 @@ export function playEfficiently(levelId, { budget = 70, reserve = null, seed = 7
     // stand still for a moment, not to press on and hope.
     if (wakes && run.sim.noise > wakes - 26) {
       for (let i = 0; i < 60 * 10 && run.sim.status === 'running'; i++) {
-        if (run.sim.noise <= wakes - 38) break;
+        if (run.sim.noise <= wakes - 38 || run.sim.timeLeft < keepBack) break;
+        // ...but not while a man on his round is walking towards the spot you
+        // chose to stand still on. Waiting is the answer to a full meter, not
+        // to a guard; standing there is how you get walked into.
+        if (onBeat(run.sim) && closeTo(run.sim) < 140) { keepAway(run); break; }
         tick(run);
       }
     }
@@ -269,17 +354,79 @@ export function playEfficiently(levelId, { budget = 70, reserve = null, seed = 7
     // already near the line is how a run ends up being hunted.
     if (wakes && run.sim.noise > wakes - 14 && run.sim.status === 'running') {
       for (let i = 0; i < 60 * 10 && run.sim.status === 'running'; i++) {
-        if (run.sim.noise <= wakes - 30) break;
+        if (run.sim.noise <= wakes - 30 || run.sim.timeLeft < keepBack) break;
+        if (onBeat(run.sim) && closeTo(run.sim) < 140) { keepAway(run); break; }
         tick(run);
       }
     }
     if (!best.taken) gaveUp.add(best.id);
     // Woke him anyway? Then get off the spot he is heading for and go quiet,
     // exactly as a player would, rather than walking on and into him.
-    if (run.sim.investigator && run.sim.investigator.state !== 'asleep') slipAway(run);
+    // Seen. Standing in a corner does not shake a man who is looking straight
+    // at you, so the answer a player reaches for is the door with whatever is
+    // already in the bag — and this bot's job is to prove the level can be
+    // walked out of, not to prove it can be cleared.
+    if (run.sim.investigator && run.sim.investigator.state === 'following') break;
+    if (hunting(run.sim)) slipAway(run);
   }
+  run.heed = false;
   if (run.sim.status === 'running') escape(run);
   return { run, result: snapshot(run.sim) };
+}
+
+// Is he walking a round rather than looking for us, and how far away is he?
+export function onBeat(sim) {
+  const w = sim.investigator;
+  return !!w && (w.state === 'patrolling' || w.state === 'watching');
+}
+
+export function closeTo(sim) {
+  const w = sim.investigator;
+  if (!w) return Infinity;
+  const p = playerOf(sim);
+  return Math.hypot(p.x - w.x, p.y - w.y);
+}
+
+// Stand absolutely still while a man on his round goes past. He picks out
+// movement, not shapes, so this is the counter the game actually gives you —
+// and it costs clock rather than distance, which is the trade the round exists
+// to create.
+export function freezeUntilPast(run, gap = 170, maxFrames = 60 * 9) {
+  const { sim } = run;
+  for (let i = 0; i < maxFrames && sim.status === 'running'; i++) {
+    if (!onBeat(sim)) return hunting(sim) ? false : true;
+    if (closeTo(sim) > gap) return true;
+    // Standing still stops him picking you out; it does not stop him walking
+    // into you. Once he is inside a room's width, holding your ground is no
+    // longer the play — get out of the lane he is walking down.
+    if (closeTo(sim) < 130) { keepAway(run, 195, 60 * 5); continue; }
+    tick(run);
+  }
+  return sim.status === 'running';
+}
+
+// Give a man on his rounds room. He is not looking for us, so this is not an
+// escape — it is stepping into the next room until he has gone past.
+export function keepAway(run, gap = 180, maxFrames = 60 * 7) {
+  const { sim } = run;
+  const w = sim.investigator;
+  if (!w) return true;
+  const p = playerOf(sim);
+  let stuck = 0;
+  for (let i = 0; i < maxFrames && sim.status === 'running'; i++) {
+    const dx = p.x - w.x;
+    const dy = p.y - w.y;
+    const d = Math.hypot(dx, dy);
+    if (d > gap) return true;
+    const wasX = p.x;
+    const wasY = p.y;
+    tick(run, { x: dx / (d || 1), y: dy / (d || 1), take: false, search: false });
+    // Backing away in a straight line ends in a corner, and a player wedged in
+    // a corner cannot be pathed out of it — the route home starts from a cell
+    // with no free neighbours and comes back empty. Stop when the wall does.
+    if (Math.abs(p.x - wasX) < 0.05 && Math.abs(p.y - wasY) < 0.05 && ++stuck > 8) return false;
+  }
+  return false;
 }
 
 // Open every cupboard on the map, wherever they can be reached. "Take
@@ -314,8 +461,7 @@ export function playSearching(levelId, { seed = 7, pace = 0.6, budget = 64 } = {
   const settle = (until) => {
     for (let i = 0; i < 60 * 12 && sim.status === 'running' && sim.noise > until; i++) {
       if (sim.investigator && sim.investigator.state === 'following') return false;
-      if (sim.investigator && sim.investigator.state !== 'asleep'
-          && Math.hypot(p.x - him().x, p.y - him().y) < 170) return false;
+      if (hunting(sim) && Math.hypot(p.x - him().x, p.y - him().y) < 170) return false;
       tick(run);
     }
     return true;

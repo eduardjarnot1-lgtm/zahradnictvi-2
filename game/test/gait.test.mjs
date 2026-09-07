@@ -13,7 +13,7 @@ import { gaitOf, stridePerUnit } from '../src/rules.js';
 import { legCycle, footStep, pelvisRise, kneeOf, footReach } from '../src/gait.js';
 
 const SCHOOL = TUNING.locations.School.gait;
-const VRANA = TUNING.locations.School.caretakerGait;
+const VRANA = TUNING.locations.School.watcherGait;
 const TAU = Math.PI * 2;
 const bandOf = (share, config = SCHOOL) => gaitOf(share, config);
 
@@ -345,12 +345,33 @@ test('following puts a bit of urgency into him without making him sprint', () =>
 
 // --- section 18: the school, and nowhere else --------------------------------
 
-test('no other location has a gait of its own', () => {
+test('every location has a gait, and the walkers are not all the same walker', () => {
+  const steps = new Map();
   for (const [name, rules] of Object.entries(TUNING.locations)) {
-    if (name === 'School') continue;
-    assert.equal(rules.gait, undefined, `${name} picked up a gait`);
-    assert.equal(rules.caretakerGait, undefined, `${name} picked up a caretaker gait`);
+    assert.ok(rules.gait, `${name} has no gait for the thief`);
+    assert.ok(rules.watcherGait, `${name} has no gait for its own person`);
+    // The thief is the same man everywhere, so his band table is shared
+    // outright rather than copied.
+    assert.equal(rules.gait, TUNING.locations.School.gait,
+      `${name} has its own copy of the thief's walk`);
+    // A band with air under it needs a duty factor under a half or there is no
+    // moment with both feet off the ground — and `pelvisRise` would be dividing
+    // by a gap of nothing.
+    for (const band of rules.watcherGait.bands) {
+      if (band.flight > 0) {
+        assert.ok(band.duty < 0.5,
+          `${name} has a band with air under it and both feet down (${band.duty})`);
+      }
+      assert.ok(band.step > 0 && band.duty > 0.2 && band.duty <= 0.82,
+        `${name} has a band out of range`);
+    }
+    steps.set(name, rules.watcherGait.bands.map((b) => b.step).join(','));
   }
+  // Grandpa does not walk like the estate's security. If every location shared
+  // one walker the whole point of §12 would be missing.
+  assert.ok(new Set(steps.values()).size >= 6,
+    `only ${new Set(steps.values()).size} distinct walks across eleven locations`);
+  assert.notEqual(steps.get('House'), steps.get('Mansion'));
 });
 
 test('everywhere else keeps exactly the stride it always had', () => {

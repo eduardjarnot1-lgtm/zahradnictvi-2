@@ -4,7 +4,7 @@
 import { TUNING } from './tuning.js';
 import { createRng } from './rng.js';
 import { solveMove, clampToWorld } from './physics.js';
-import { navGrid, flowField, steer, nearestStand } from './nav.js';
+import { navGrid, flowField, steer, nearestStand, cellOf } from './nav.js';
 import {
   addNoise, isAwake, itemStats, canBank, sleepStage, resolveUpgrades, bumpNoise, timeLimit,
   rarityOf, comboBonus, gradeEscape, isBigScore, detectionRate, watcherConfig,
@@ -112,7 +112,7 @@ const UPDATERS = {
   watcher(entity, sim) {
     const rules = sim.investigateRules;
     const walking = entity.state === 'investigating' || entity.state === 'returning'
-      || entity.state === 'following';
+      || entity.state === 'following' || entity.state === 'patrolling';
     const scripted = entity.state === 'rising' || entity.state === 'settling';
 
     if (!walking) {
@@ -151,9 +151,15 @@ const UPDATERS = {
     // He walks faster the more alert he is. A man who half heard something
     // wanders over; a man who heard a window go covers the ground.
     const tune = sim.rules.alertness;
-    const top = tune
-      ? rules.speed * (tune.speedLow + (tune.speedHigh - tune.speedLow) * (entity.alert || 0))
-      : rules.speed;
+    const patrol = sim.patrol;
+    // Walking a beat is not walking towards something. A guard on his rounds
+    // strolls, whatever the meter says — the meter only starts moving him once
+    // he has something to go and look at.
+    const top = entity.state === 'patrolling' && patrol
+      ? rules.speed * patrol.speed
+      : tune
+        ? rules.speed * (tune.speedLow + (tune.speedHigh - tune.speedLow) * (entity.alert || 0))
+        : rules.speed;
     const wanted = Math.hypot(dirX, dirY) > 0.01;
     const rate = (wanted ? rules.accel : rules.decel) * STEP_SECONDS;
     const dvx = dirX * top - entity.vx;
@@ -191,7 +197,7 @@ const UPDATERS = {
     // both wrong for a man of his age and wrong for what he is doing. The state
     // adds a little on top: hurrying after someone is not the same walk as
     // going back to bed.
-    const gait = sim.rules.caretakerGait;
+    const gait = sim.rules.watcherGait;
     const urgency = gait && gait.urgency ? gait.urgency[entity.state] || 0 : 0;
     // Eased rather than switched. Catching sight of you changes how he carries
     // himself, and a man does not change his stride between one frame and the
@@ -211,8 +217,8 @@ const UPDATERS = {
 // That is the whole mechanic — he is walking towards a memory, so moving away
 // quietly works, and it is the one thing here that must not be "improved" into
 // tracking the player.
-const WATCHER_STATES = ['asleep', 'rising', 'investigating', 'searching',
-  'following', 'returning', 'settling'];
+const WATCHER_STATES = ['asleep', 'patrolling', 'watching', 'rising',
+  'investigating', 'searching', 'following', 'returning', 'settling'];
 
 function makeInvestigator(level, rules) {
   return {
@@ -244,8 +250,72 @@ function makeInvestigator(level, rules) {
     // Following: how long you have been far enough away to be losing him, and
     // when he last re-read where you were.
     lostFor: 0,
-    repathAt: 0
+    repathAt: 0,
+    // His round, for the locations whose person has one: a ring of places he
+    // can actually stand, worked out once and then walked in order.
+    beats: null,
+    beat: 0,
+    // Seconds of "he has seen you, go" before walking into him actually ends
+    // the level.
+    grace: 0
   };
+}
+
+// Where a guard's round goes.
+//
+// Down the open axis through his own post, and no further than the walls let
+// him. A ring of points around him sounds right and is not: on a hotel floor
+// the ring lands inside the guest rooms, and a guard who walks into a small
+// room a thief is standing in has caught them through no decision either of
+// them made. What a guard actually walks is the circulation — the corridor, the
+// length of the hall, the run of floor his desk is on — so the round is read
+// off the building: probe outwards from the post in each direction, keep the
+// two directions with the most open floor, and walk between their far ends.
+//
+// It also means his round *is* his room. The far side of the building stays
+// genuinely far, and where his post sits is the thing the player has to plan
+// around, which is what a guard is for.
+// How far off the round has to stay from the way in. A round that walks over
+// the spot the player starts on is not a round, it is an ambush laid before
+// anyone has done anything — the level opens with a man arriving at the door
+// you came through, and there is no play in that.
+const KEEP_CLEAR = 150;
+
+function reach(grid, x, y, dx, dy, radius, avoid) {
+  let last = null;
+  for (let d = grid.cell * 2; d <= radius; d += grid.cell) {
+    const px = x + dx * d;
+    const py = y + dy * d;
+    if (px < 0 || py < 0 || px >= grid.cols * grid.cell || py >= grid.rows * grid.cell) break;
+    const { cx, cy } = cellOf(grid, px, py);
+    if (grid.blocked[cx + cy * grid.cols]) break;
+    if (avoid && Math.hypot(px - avoid.x, py - avoid.y) < KEEP_CLEAR) break;
+    last = { x: px, y: py, d };
+  }
+  return last;
+}
+
+function beatsOf(entity, level, patrol) {
+  if (!entity.nav) entity.nav = navGrid(level, entity.w, entity.h);
+  const grid = entity.nav;
+  const from = entity.stand || entity.home;
+  const arms = [[1, 0], [-1, 0], [0, 1], [0, -1]]
+    .map(([dx, dy]) => reach(grid, from.x, from.y, dx, dy, patrol.radius, level.spawn))
+    .filter((a) => a && a.d >= grid.cell * 4)
+    .sort((a, b) => b.d - a.d)
+    .slice(0, 2);
+  if (!arms.length) return [];
+  // Both ends, and a stop partway along the longer one, so a round has a middle
+  // as well as two ends and does not read as pacing.
+  const out = [];
+  for (const arm of arms) out.push({ x: arm.x, y: arm.y });
+  if (arms[0].d >= grid.cell * 8 && patrol.points > 2) {
+    out.splice(1, 0, {
+      x: from.x + (arms[0].x - from.x) * 0.5,
+      y: from.y + (arms[0].y - from.y) * 0.5
+    });
+  }
+  return out.slice(0, Math.max(2, patrol.points));
 }
 
 // Send him somewhere. The flood is a few hundred microseconds on the largest
@@ -381,17 +451,21 @@ function updateInvestigation(sim, player) {
   // sitting above the line re-fixes him on you the instant he gives up, over
   // and over, and a thief who has done everything right can never shake him.
   const turning = entity.state === 'returning' || entity.state === 'settling';
+  // On his feet but not going anywhere in particular: a man walking his round,
+  // or stopped on it to listen. He has nothing to get up from, so a noise turns
+  // him straight round rather than waking him.
+  const onBeat = entity.state === 'patrolling' || entity.state === 'watching';
   const stirred = sim.noise > rules.wakeAt
     && (!turning || !tune || jump >= tune.refix);
   if (stirred && sim.status === 'running'
-      && (entity.state === 'asleep' || turning)) {
+      && (entity.state === 'asleep' || turning || onBeat)) {
     if (!entity.nav) entity.nav = navGrid(sim.level, entity.w, entity.h);
     if (!entity.stand) entity.stand = nearestStand(entity.nav, entity.home.x, entity.home.y);
     entity.target = null;
     takeFix(sim, entity, player, alert);
     // Already on his feet? Then he simply turns round; only a man sitting down
     // has to get up first.
-    setState(sim, entity, entity.state === 'returning' ? 'investigating' : 'rising');
+    setState(sim, entity, entity.state === 'asleep' ? 'rising' : 'investigating');
     if (entity.state === 'investigating') routeTo(entity, sim.level, entity.target.x, entity.target.y);
   }
 
@@ -422,15 +496,34 @@ function updateInvestigation(sim, player) {
   // flicker between chasing and not chasing on every step across the line.
   // Losing him costs real ground held for real seconds.
   const onFootNow = entity.state === 'investigating' || entity.state === 'searching'
-    || entity.state === 'returning' || entity.state === 'following';
+    || entity.state === 'returning' || entity.state === 'following'
+    || entity.state === 'patrolling' || entity.state === 'watching';
   const gap = Math.hypot(player.x - entity.x, player.y - entity.y);
   if (onFootNow && sim.status === 'running') {
     if (entity.state !== 'following') {
-      if (gap <= rules.followAt) {
+      // A man walking his round is looking down a corridor, not looking for
+      // you. He picks out movement — so standing still while he goes past
+      // works, exactly the way freezing inside a guard's line of sight already
+      // works, and it is the counter the round is there to be countered by.
+      // Once something has actually sent him looking, that stops being true.
+      const scanning = entity.state === 'patrolling' || entity.state === 'watching';
+      if (gap <= rules.followAt && (!scanning || player.moving)) {
         entity.lostFor = 0;
         entity.repathAt = 0;
         setState(sim, entity, 'following');
         routeTo(entity, sim.level, player.x, player.y);
+        // Guards raise the alarm. Not a third way to lose — the game has two
+        // and needs no more — but a floor under the meter: a man who has
+        // actually laid eyes on you does not settle back to nothing, so the
+        // rest of the level is played against someone who stays sharp. Going
+        // quiet still helps; it cannot buy back the moment he saw you.
+        const alarm = sim.rules.alarm;
+        if (alarm) {
+          if (!sim.alarmed) sim.events.push({ type: 'alarm', x: entity.x, y: entity.y });
+          sim.alarmed = true;
+          sim.noiseFloor = alarm.floor;
+          sim.noise = Math.max(sim.noise, alarm.floor);
+        }
       }
     } else {
       // He loses track of you gradually. Snapping this back to zero the
@@ -492,15 +585,67 @@ function updateInvestigation(sim, player) {
         entity.target = null;
         entity.goal = null;
         entity.field = null;
-        entity.x = entity.home.x;
-        entity.y = entity.home.y;
-        // The renderer draws between prevX and x; leaving the old value here
-        // would slide him back to the couch over one visible frame.
-        entity.prevX = entity.x;
-        entity.prevY = entity.y;
+        // A man who sits back down goes back into his own chair. A man with a
+        // round to walk stays on his feet where he is — putting him back on the
+        // seat would drop him inside his own desk, and the next step of his
+        // round would start from inside a solid rectangle.
+        if (!sim.patrol) {
+          entity.x = entity.home.x;
+          entity.y = entity.home.y;
+          // The renderer draws between prevX and x; leaving the old value here
+          // would slide him back to the couch over one visible frame.
+          entity.prevX = entity.x;
+          entity.prevY = entity.y;
+        }
         entity.vx = 0;
         entity.vy = 0;
       }
+      break;
+    // --- the round ---------------------------------------------------------
+    // Only for the people whose location gives them one. Everywhere else
+    // 'asleep' is exactly what it says and nothing below here runs.
+    case 'asleep':
+      if (sim.patrol && sim.status === 'running') {
+        const patrol = sim.patrol;
+        if (!entity.nav) entity.nav = navGrid(sim.level, entity.w, entity.h);
+        if (!entity.stand) entity.stand = nearestStand(entity.nav, entity.home.x, entity.home.y);
+        // The round is measured from where he *stands*, not from where he sits.
+        // His desk is furniture and he is inside it: probing outwards from the
+        // middle of it walks into his own desk on the first step, every way.
+        if (!entity.beats) entity.beats = beatsOf(entity, sim.level, patrol);
+        if (entity.beats.length) {
+          // He starts the level sitting at his post, and his post is furniture.
+          // The first step of the first round has to begin somewhere a person
+          // can actually stand, or the physics has nothing to push him out of.
+          if (entity.stand && Math.hypot(entity.x - entity.home.x, entity.y - entity.home.y) < 1) {
+            entity.x = entity.stand.x;
+            entity.y = entity.stand.y;
+            entity.prevX = entity.x;
+            entity.prevY = entity.y;
+          }
+          // Post, point, post, next point. A guard who walks his stops in a
+          // ring is away from his desk the whole time, and on a floor with one
+          // corridor that means the corridor is never clear. Coming back
+          // between stops halves what he covers and leaves the far end of the
+          // building the windows the player is supposed to be reading.
+          const ring = entity.beats;
+          const spot = entity.beat % 2 === 0
+            ? ring[(entity.beat / 2) % ring.length]
+            : (entity.stand || entity.home);
+          entity.beat++;
+          setState(sim, entity, 'patrolling');
+          routeTo(entity, sim.level, spot.x, spot.y);
+        }
+      }
+      break;
+    case 'patrolling':
+      if (arrived(entity, rules)) setState(sim, entity, 'watching');
+      break;
+    case 'watching':
+      // A pause at each stop, turning his head over the room. This is the part
+      // of a round the player actually plays against: it is the window.
+      entity.facing += Math.sin(entity.stateFor * 1.9) * 1.8 * STEP_SECONDS;
+      if (entity.stateFor >= sim.patrol.pause) setState(sim, entity, 'asleep');
       break;
     default:
       break;
@@ -514,8 +659,28 @@ function updateInvestigation(sim, player) {
   // Walking into you ends the level through the same door everything else
   // does. Not while he is getting up or lying down: standing over him as he
   // stirs deserves a moment to back away, not an instant loss.
+  //
+  // And not while he is walking his round, either. A man on his beat is not
+  // looking for you — bumping into him is how he finds out you are there, which
+  // is a very bad moment and is not the same thing as being caught. He turns
+  // and comes after you instead, which the `following` rules above then run.
+  //
+  // And the moment he turns is not the moment you lose. He shouts, he squares
+  // up, and *then* he comes — a second of it, which is the second the player
+  // uses. Without that grace the bump and the loss are the same frame, and a
+  // guard's round stops being something you can be surprised by and recover
+  // from, which is the only reason to put one in a level.
+  if (entity.grace > 0) entity.grace = Math.max(0, entity.grace - STEP_SECONDS);
+  const alerted = entity.state !== 'patrolling' && entity.state !== 'watching';
   if (onFootNow && sim.status === 'running' && gap <= rules.catchAt) {
-    finish(sim, 'lost', 'caught');
+    if (alerted && entity.grace <= 0) finish(sim, 'lost', 'caught');
+    else if (!alerted) {
+      entity.lostFor = 0;
+      entity.repathAt = 0;
+      entity.grace = 1.0;
+      setState(sim, entity, 'following');
+      routeTo(entity, sim.level, player.x, player.y);
+    }
   }
 }
 
@@ -554,6 +719,11 @@ export function createSim({ level, seed = 1, upgrades = {} }) {
     // ask again sixty times a second.
     rules,
     investigateRules: rules.investigate || null,
+    // The round, if this level is far enough into its location for its person
+    // to be walking one. Resolved once, so nothing in the tick has to know that
+    // a patrol is a property of the location *and* of how far in you are.
+    patrol: rules.patrol && (level.tier || 1) >= (rules.patrol.from || 1)
+      ? rules.patrol : null,
     investigator,
     // How loud this spot is, as a multiplier on everything you do. Always 1
     // where a location has no proximity rule, which is everywhere but here.
@@ -566,6 +736,11 @@ export function createSim({ level, seed = 1, upgrades = {} }) {
     timeLimit: timeLimit(level),
     escapeGrade: null,
     stillFor: 0,       // seconds spent perfectly still, for noise recovery
+    // Whether a guard has raised the alarm, and the floor it puts under the
+    // meter for the rest of the level. Zero everywhere the person is asleep
+    // rather than paid to be awake.
+    alarmed: false,
+    noiseFloor: 0,
     bumpCooldown: 0,
     money: 0,          // what you get paid (haul plus any bag bonus)
     haul: 0,           // raw value of what you took — stars are judged on this
@@ -835,7 +1010,14 @@ export function stepSim(sim, input = EMPTY_INPUT) {
   // so freezing is a real answer, and it plays against the clock.
   if (sim.watches && sim.status === 'running') {
     const speedShare = player.speed / TUNING.player.speed;
-    const rate = detectionRate(sim.level.watcher, player, speedShare);
+    // His eyes are where he is, not where his desk is. A guard walking his
+    // round who cannot see anything but his own chair is a guard who may as
+    // well be a wall — and it is the one thing that makes a round dangerous.
+    const w = sim.investigator;
+    const eyes = w && w.state !== 'asleep'
+      ? { kind: sim.level.watcher.kind, sees: sim.level.watcher.sees, x: w.x, y: w.y }
+      : sim.level.watcher;
+    const rate = detectionRate(eyes, player, speedShare);
     if (rate > 0) {
       sim.seen = Math.min(1, sim.seen + STEP_SECONDS * 3);
       sim.noise = addNoise(sim.noise, rate * STEP_SECONDS);
@@ -893,6 +1075,13 @@ export function stepSim(sim, input = EMPTY_INPUT) {
     sim.bumpCooldown = TUNING.hazards.bumpCooldown;
   }
 
+  // ...and so does the alarm. It holds the meter up for a hard few seconds and
+  // then winds down, so being seen is expensive rather than terminal.
+  if (sim.noiseFloor > 0) {
+    const alarm = sim.rules.alarm;
+    sim.noiseFloor = Math.max(0, sim.noiseFloor - (alarm ? alarm.fade : 5) * STEP_SECONDS);
+  }
+
   // The flinch fades on its own.
   if (sim.startle > 0) sim.startle = Math.max(0, sim.startle - TUNING.startle.decay * STEP_SECONDS);
 
@@ -908,8 +1097,8 @@ export function stepSim(sim, input = EMPTY_INPUT) {
     // bed — and waits longer before it starts, so it is never a reflex.
     const settle = sim.rules.recovery || TUNING.recovery;
     sim.stillFor += STEP_SECONDS;
-    if (sim.stillFor > settle.delay && sim.noise > 0) {
-      sim.noise = Math.max(0, sim.noise - settle.rate * STEP_SECONDS);
+    if (sim.stillFor > settle.delay && sim.noise > sim.noiseFloor) {
+      sim.noise = Math.max(sim.noiseFloor, sim.noise - settle.rate * STEP_SECONDS);
     }
   } else {
     sim.stillFor = 0;

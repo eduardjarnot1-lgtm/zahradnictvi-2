@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { LEVELS } from '../src/levels.js';
 import { validateAll, validateLevel } from '../src/validate.js';
 import {
-  levelTotals, forcesChoice, itemStats, timeLimit, furnitureStyle, lootOf
+  levelTotals, forcesChoice, itemStats, timeLimit, furnitureStyle, lootOf, locationRules
 } from '../src/rules.js';
 import { play, playEfficiently } from './harness.mjs';
 
@@ -212,11 +212,14 @@ test('every level states its own clock, and none of them is a walkover', () => {
     assert.equal(timeLimit(level), level.clock);
     // Never more generous per step than the tightest single-screen room was.
     // The ceiling the clocks are calibrated to: the easiest level of a location
-    // gets 24 seconds per window of map, times its slack. Nothing may exceed
-    // what level 1 of its own size would be given.
-    // ...with a little room above it, because a level whose measured run came
-    // out long is given the seconds it actually needs.
-    const cap = 24 * 2.35 * (Math.hypot(level.width, level.height) / windowSpan);
+    // gets 24 seconds per window of map, times its slack — 2.15 for level one.
+    // Nothing may exceed what level 1 of its own size would be given, lifted by
+    // the most the calibrator is allowed to lift a location whose slowest level
+    // measured long (1.30). Every building in the game is now played against
+    // somebody who gets up and comes looking, and waiting for them to sit back
+    // down is time a run genuinely spends — but 2.15 x 1.30 is the whole of the
+    // allowance, and past it a level stops being a level.
+    const cap = 24 * 2.15 * 1.30 * (Math.hypot(level.width, level.height) / windowSpan);
     assert.ok(level.clock <= cap,
       `level ${level.id} has ${level.clock}s for a ${level.width}x${level.height} map (cap ${cap.toFixed(0)}s)`);
     assert.ok(level.clock >= 20, `level ${level.id} has only ${level.clock}s`);
@@ -247,17 +250,32 @@ test('the validator notices a doorway bricked up', () => {
   assert.equal(result.ok, false, 'bricking up every doorway should not validate');
 });
 
-test('greed never pays: taking everything loses, one way or another', () => {
-  for (const level of LEVELS.filter(forcesChoice)) {
-    const { result } = play(level.id, { seed: 5, everything: true });
-    assert.equal(result.status, 'lost', `level ${level.id} should be unsurvivable if greedy`);
-    // On the bigger rooms the clock can run out before the meter fills, and in
-    // the school a greedy run is loud enough that Mr. Vrána gets up and walks
-    // into you. All three are legitimate ways for greed to fail.
-    if (result.reason !== 'time' && result.reason !== 'caught') {
-      assert.equal(result.noise, 100, `level ${level.id} lost for '${result.reason}' at ${result.noise}`);
+test('greed never pays: taking everything is caught, timed out, or unrewarded', () => {
+  // This used to read "taking everything loses", full stop, because filling the
+  // meter ended the level. It does not any more — in any of the eleven
+  // buildings — so the promise has to be stated as what it actually is: a
+  // greedy run is caught, or runs out of clock, or gets out with the building
+  // awake behind it and no bonus for it. What it is never is free.
+  let lost = 0;
+  const greedy = LEVELS.filter(forcesChoice);
+  for (const level of greedy) {
+    const { run, result } = play(level.id, { seed: 5, everything: true });
+    if (result.status === 'lost') {
+      lost++;
+      assert.ok(['time', 'caught', 'awake', 'seen'].includes(result.reason),
+        `level ${level.id} lost for '${result.reason}'`);
+      continue;
     }
+    // Got out. Then it was loud enough to have the person up, and the escape
+    // grade says so: nothing is paid for a run made with the building awake.
+    assert.ok(run.sim.noise > locationRules(level).investigate.wakeAt,
+      `level ${level.id} cleared itself out quietly, which is not greed, it is a walkover`);
+    assert.equal(run.sim.escapeGrade.bonus, 0,
+      `level ${level.id} paid a bonus for a greedy run`);
   }
+  // ...and most of the time it simply does not work.
+  assert.ok(lost > greedy.length * 0.5,
+    `only ${lost} of ${greedy.length} greedy runs actually failed`);
 });
 
 test('every declared doorway is wide enough to walk through', () => {
