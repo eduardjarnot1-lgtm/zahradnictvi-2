@@ -508,16 +508,39 @@ def thin_floor_loot(g, tier, location='School'):
     # thinning first: a gallery whose display cases are empty and whose value is
     # all in the staff-room drawers is not a museum, it is a school with
     # sculpture in it.
-    def on_show(i):
+    # Only what the player can actually get to. The thinning used to delete the
+    # odd stranded coin by luck rather than by rule, and choosing survivors on
+    # purpose exposed that: a coin behind a bank of display cases is not worth
+    # visiting however many plinths it is beside.
+    reached = {(gx * 4 // 20, gy * 4 // 20) for (gx, gy) in g._reached()}
+
+    def cases(i):
         x, y, _ = found[i]
-        return any(g.g[yy][xx] == 'P'
-                   for yy in range(max(0, y - 3), min(g.rows, y + 4))
-                   for xx in range(max(0, x - 3), min(g.cols, x + 4)))
-    best = max(range(len(found)), key=lambda i: value.get(found[i][2], 0))
-    kept = {best}
-    kept |= {i for i in range(len(found)) if on_show(i)}
+        return {(xx, yy)
+                for yy in range(max(0, y - 3), min(g.rows, y + 4))
+                for xx in range(max(0, x - 3), min(g.cols, x + 4))
+                if g.g[yy][xx] == 'P'}
+    here = [i for i in range(len(found)) if (found[i][0], found[i][1]) in reached]
+    if not here:
+        here = list(range(len(found)))
+    best = max(here, key=lambda i: value.get(found[i][2], 0))
+    on_show = {i for i in here if cases(i)}
+    kept = {best} | on_show
     if len(kept) > keep:
-        kept = set(sorted(kept, key=lambda i: (i != best, found[i][1], found[i][0]))[:keep])
+        # More things on show than the level is allowed to leave lying about, so
+        # which ones survive matters. Taking them in map order takes them in
+        # clumps: two coins either side of one case, and the four cases at the
+        # far end of the hall with nothing beside them at all. Spread instead —
+        # each survivor beside a case none of the others is beside — so what the
+        # thinning leaves is a hall where every case is worth the walk.
+        spread, covered = [best], cases(best)
+        pool = sorted(on_show - {best})
+        while len(spread) < keep and pool:
+            pick = max(pool, key=lambda i: (len(cases(i) - covered), -found[i][1], -found[i][0]))
+            spread.append(pick)
+            covered |= cases(pick)
+            pool.remove(pick)
+        kept = set(spread)
     rest = [i for i in range(len(found)) if i not in kept]
     rest.sort(key=lambda i: (found[i][1], found[i][0]))
     want = max(0, keep - len(kept))
@@ -1584,7 +1607,43 @@ def notch(g, bx, by, bw, bh, where):
     return (nx, ny, nw, nh)
 
 
-def add_grounds(inner, sides, deep, flavour, loot, bite=True):
+def reachable_yards(g, yards, pad):
+    """Which of the building's missing corners you can actually walk into.
+
+    A silhouette leaves the plot in pieces, and not every piece touches the
+    grounds: a wing running out to the edge of an unpadded side can shut a strip
+    of yard off behind it completely. Left as ground that is a courtyard with no
+    way in, which is scenery pretending to be a place; left as mass it is simply
+    the building being a bit thicker there, which is true and reads fine. So the
+    parts that reach the grounds become yard and the rest stay solid."""
+    l, t, r, b = pad
+    inside = {}
+    for i, (yx, yy, yw, yh) in enumerate(yards):
+        for y in range(yy, yy + yh):
+            for x in range(yx, yx + yw):
+                inside[(x, y)] = i
+    # Start from the padding ring, which is grounds by construction.
+    stack = []
+    for y in range(1, g.rows - 1):
+        for x in range(1, g.cols - 1):
+            if x < l or y < t or x >= g.cols - r or y >= g.rows - b:
+                stack.append((x, y))
+    seen, found = set(), set()
+    while stack:
+        x, y = stack.pop()
+        if (x, y) in seen or not (0 < x < g.cols - 1 and 0 < y < g.rows - 1):
+            continue
+        here = inside.get((x, y))
+        if here is None and g.g[y][x] in '#%+':
+            continue
+        seen.add((x, y))
+        if here is not None:
+            found.add(here)
+        stack += [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
+    return [rect for i, rect in enumerate(yards) if i in found]
+
+
+def add_grounds(inner, sides, deep, flavour, loot, bite=True, voids=()):
     """Wrap a finished building in its own grounds, and move the way out into
     them. Returns the new grid."""
     found = find_exit(inner)
@@ -1633,6 +1692,26 @@ def add_grounds(inner, sides, deep, flavour, loot, bite=True):
     where = NOTCHES[min(4, max(0, sides))] if bite else None
     bite = notch(g, l, t, inner.cols, inner.rows, where) if where else None
 
+    # The plot the building does not stand on. Now that the silhouettes are
+    # authored rather than bitten out, this is where an L's missing corner and a
+    # U's courtyard actually live: the shape arrives as solid mass and leaves as
+    # ground, so the building's outline and the shape of its yard are the same
+    # decision seen from two sides. Kept a tile clear of the fence, which is
+    # already drawn by the time we get here.
+    yards = []
+    for (vx, vy, vw, vh) in voids:
+        x0, y0 = max(1, vx + l), max(1, vy + t)
+        x1, y1 = min(cols - 1, vx + l + vw), min(rows - 1, vy + t + vh)
+        if x1 <= x0 or y1 <= y0:
+            continue
+        yards.append((x0, y0, x1 - x0, y1 - y0))
+    yards = reachable_yards(g, yards, (l, t, r, b))
+    for (yx, yy, yw, yh) in yards:
+        for y in range(yy, yy + yh):
+            for x in range(yx, yx + yw):
+                g.g[y][x] = '.'
+                g.keep.discard((x, y))
+
     bands = ground_bands(cols, rows, (l, t, r, b))
     for ((bx, by, bw, bh), _) in bands:
         g.deco('floor', bx, by, bw, bh, style['surface'])
@@ -1641,6 +1720,8 @@ def add_grounds(inner, sides, deep, flavour, loot, bite=True):
     # to furnish.
     if bite:
         g.deco('floor', bite[0], bite[1], bite[2], bite[3], style['surface'])
+    for (yx, yy, yw, yh) in yards:
+        g.deco('floor', yx, yy, yw, yh, style['surface'])
     # The path: a run of hard standing from the door out to the gate, drawn as
     # dressing rather than built as geometry — it is a surface, not a wall, and
     # the player can step off it wherever they like.
@@ -1719,6 +1800,417 @@ def add_grounds(inner, sides, deep, flavour, loot, bite=True):
     return g
 
 
+# ============================================================== the silhouette
+# What shape the building is, before a single stick of furniture is in it.
+#
+# A room grammar fills a rectangle, so a grammar on its own can only ever draw
+# rectangles: take the furniture out of the old ten locations and you had ten
+# stacks of the same box at five sizes. The school was the exception only
+# because its five levels are drawn by hand.
+#
+# Drawing fifty more by hand is one answer. This is the other: keep the grammar
+# on a rectangle and make the *building* more than one rectangle. The grammar
+# runs in the core, wings hang off it, and the wall each wing shares with the
+# core carries the door between them. Read off the walls alone — every stick of
+# furniture removed — level three of a location is now an L and level five is a
+# U or a cross, and no two locations climb through the same five shapes.
+#
+# A wing is (side, align, along, deep): which face of the core it hangs off and
+# whereabouts along that face, how much of the face it takes, and how far it
+# reaches out as a multiple of the tier's wing depth.
+
+# How far a wing reaches out, by tier, and how much of it the core pays for.
+#
+# The first pass at this took the wing out of the core so the plot stayed the
+# size it had always been, and it was wrong in a way worth writing down: every
+# room grammar in this file is *tuned* to the tier sizes below. Take eight
+# columns off an apartment and its two rooms per band go from fifteen tiles wide
+# to eleven, the furnishing rules keep laying the same pieces, and what comes
+# out is a room furnished wall to wall with a one-tile gap down it — which looks
+# furnished, is not walkable, and made the connectivity pass bulldoze eighty
+# pieces to open a route. So the core keeps its envelope, the plot grows by most
+# of the wing, and the clocks are recalibrated to pay for the extra ground.
+WING_DEEP = [0, 7, 8, 8, 9]
+# ...and the core pays none of it. Two tiles looked harmless and was not: an
+# apartment's rooms went from fifteen tiles wide to fourteen, which is the exact
+# width at which its two furniture runs leave a one-tile gap between them
+# instead of two — and a one-tile gap is not a gap, because the player is wider
+# than one tile. The grammars are tuned to the sizes above and get them.
+SQUEEZE = [0, 0, 0, 0, 0]
+
+SHAPES = {
+    # A rectangle. Every location's first level, because the level that teaches
+    # the building should be the one you can hold in your head.
+    'bar':   [],
+    # An L: one wing off one end of the far face.
+    'ell':   [('far', 'far', 0.46, 1.0)],
+    # A T: the wing off the middle instead, so there are two ways round to most
+    # of the building and one dead end at the bottom of the stem.
+    'tee':   [('far', 'mid', 0.42, 1.0)],
+    # A U: two wings off the ends, and the gap between them is a courtyard —
+    # open ground the building wraps round on three sides.
+    'you':   [('far', 'near', 0.30, 1.0), ('far', 'far', 0.30, 1.0)],
+    # A C on its side: two arms reaching off the same flank.
+    'cee':   [('a', 'near', 0.34, 1.0), ('a', 'far', 0.34, 1.0)],
+    # Branching wings: one off a flank and one off the far end, at different
+    # depths, so the building is not symmetrical and neither is the route.
+    'wings': [('a', 'near', 0.30, 0.8), ('far', 'far', 0.34, 1.0)],
+    # Irregular: a leg and an alcove that do not line up with anything.
+    'jag':   [('far', 'far', 0.34, 1.0), ('b', 'near', 0.28, 0.8)],
+}
+
+# Which five shapes each location climbs through. The sequences differ on
+# purpose: a flat gains a hallway and an alcove, a hotel branches into wings, a
+# museum hangs side galleries off its hall, and the mansion ends up round a
+# court. Same machinery, and no two locations read alike from the walls.
+FOOTPRINTS = {
+    'Apartment': ['bar', 'ell', 'jag', 'tee', 'wings'],
+    'House':     ['bar', 'ell', 'tee', 'cee', 'you'],
+    'Hotel':     ['bar', 'ell', 'tee', 'wings', 'you'],
+    'Office':    ['bar', 'ell', 'cee', 'tee', 'jag'],
+    'Hospital':  ['bar', 'ell', 'tee', 'wings', 'you'],
+    'Museum':    ['bar', 'ell', 'wings', 'cee', 'tee'],
+    'Mansion':   ['bar', 'ell', 'tee', 'wings', 'you'],
+    'Penthouse': ['bar', 'ell', 'tee', 'cee', 'jag'],
+    'Shop':      ['bar', 'ell', 'tee', 'wings', 'cee'],
+    'Vault':     ['bar', 'ell', 'cee', 'tee', 'you'],
+}
+
+# Which wall each grammar cuts its way out of. A wing may never cover it: the
+# exit has to sit in the outer wall of the whole plot for the game to read which
+# side it is on, so the core is always flush against that face and the wings go
+# somewhere else. 'far' below means the face opposite the way out, 'near' the
+# one beside it, 'side' either flank.
+EXIT_SIDE = {
+    'Apartment': 'left', 'House': 'bottom', 'Hotel': 'left', 'Office': 'left',
+    'Hospital': 'left', 'Museum': 'bottom', 'Mansion': 'bottom',
+    'Penthouse': 'left', 'Shop': 'bottom', 'Vault': 'bottom',
+}
+
+# Reading a wing's abstract face against the wall the way out is cut into.
+# 'far' is the face opposite the exit; 'a' and 'b' are the two flanks. The exit
+# face itself is never offered, which is the whole constraint: the core stays
+# flush against it so the way out lands in the outer wall of the plot, where the
+# game reads which side it is on.
+FACES = {
+    'left':   {'far': 'right',  'a': 'top',  'b': 'bottom'},
+    'right':  {'far': 'left',   'a': 'top',  'b': 'bottom'},
+    'bottom': {'far': 'top',    'a': 'left', 'b': 'right'},
+    'top':    {'far': 'bottom', 'a': 'left', 'b': 'right'},
+}
+
+
+def footprint(cols, rows, shape, tier, exit_side):
+    """Work out the core and its wings inside a plot of about this size.
+
+    Returns (cols, rows, core, wings) where each wing is (rect, face) and every
+    rectangle includes its own walls. Wings overlap the core by exactly one
+    tile: that shared line is the wall between them."""
+    spec = SHAPES[shape]
+    faces = FACES[exit_side]
+    wings = [(faces[side], align, along, deep) for (side, align, along, deep) in spec]
+    deep = {'left': 0, 'top': 0, 'right': 0, 'bottom': 0}
+    reach = []
+    for (face, align, along, mult) in wings:
+        across = cols if face in ('left', 'right') else rows
+        d = max(7, int(round(WING_DEEP[tier] * mult)))
+        d = min(d, across // 2 - 4)
+        reach.append(d)
+        deep[face] = max(deep[face], d)
+    across_x = deep['left'] + deep['right']
+    across_y = deep['top'] + deep['bottom']
+    core_w = cols - min(across_x, SQUEEZE[tier])
+    core_h = rows - min(across_y, SQUEEZE[tier])
+    cols = core_w + across_x
+    rows = core_h + across_y
+    core = (deep['left'], deep['top'], core_w, core_h)
+    out = []
+    for (face, align, along, _), d in zip(wings, reach):
+        if face in ('top', 'bottom'):
+            w = max(11, int(round(along * core_w)))
+            w = min(w, core_w - 2)
+            x = {'near': core[0] + 1, 'mid': core[0] + (core_w - w) // 2,
+                 'far': core[0] + core_w - w - 1}[align]
+            y = core[1] + core_h - 1 if face == 'bottom' else core[1] - d + 1
+            out.append(((x, y, w, d), face))
+        else:
+            h = max(10, int(round(along * core_h)))
+            h = min(h, core_h - 2)
+            y = {'near': core[1] + 1, 'mid': core[1] + (core_h - h) // 2,
+                 'far': core[1] + core_h - h - 1}[align]
+            x = core[0] + core_w - 1 if face == 'right' else core[0] - d + 1
+            out.append(((x, y, d, h), face))
+    # Pull the plot in tight around the building. Without this a wing hanging
+    # off the left leaves a one-tile strip of nothing down that edge, and once
+    # the grounds are wrapped round the outside that strip becomes a ribbon of
+    # yard with a wall down one side of it and no way in — which the
+    # connectivity pass then tries to solve by demolishing the building.
+    rects = [core] + [r for (r, _) in out]
+    x0 = min(r[0] for r in rects)
+    y0 = min(r[1] for r in rects)
+    cols = max(r[0] + r[2] for r in rects) - x0
+    rows = max(r[1] + r[3] for r in rects) - y0
+    core = (core[0] - x0, core[1] - y0, core[2], core[3])
+    out = [((r[0] - x0, r[1] - y0, r[2], r[3]), face) for (r, face) in out]
+    return cols, rows, core, out
+
+
+def void_rects(cols, rows, rects):
+    """The plot the building does not stand on, as few rectangles as possible.
+
+    Merged rather than listed tile by tile because these become floor patches in
+    the emitted map, and a courtyard written down as three hundred one-tile
+    patches is three hundred entries nobody can read."""
+    used = [[False] * cols for _ in range(rows)]
+    for (x, y, w, h) in rects:
+        for yy in range(max(0, y), min(rows, y + h)):
+            for xx in range(max(0, x), min(cols, x + w)):
+                used[yy][xx] = True
+    taken = [[False] * cols for _ in range(rows)]
+    out = []
+    for y in range(rows):
+        for x in range(cols):
+            if used[y][x] or taken[y][x]:
+                continue
+            w = 0
+            while x + w < cols and not used[y][x + w] and not taken[y][x + w]:
+                w += 1
+            h = 1
+            while y + h < rows:
+                if any(used[y + h][x + i] or taken[y + h][x + i] for i in range(w)):
+                    break
+                h += 1
+            for dy in range(h):
+                for dx in range(w):
+                    taken[y + dy][x + dx] = True
+            out.append((x, y, w, h))
+    return out
+
+
+# What a wing of each location is made of. A wing is not a spare room with two
+# boxes in it: it is the part of the building the grammar did not build, and it
+# has to be recognisably the same place — a hotel's wing has wardrobes and
+# linen in it, a museum's has a workshop, a vault's has deposit boxes.
+# What a wing of each location is made of. A wing is not a spare room with two
+# boxes in it: it is the part of the building the grammar did not build, and it
+# has to be recognisably the same place — a hotel's wing has wardrobes and linen
+# in it, a museum's has a workshop, a vault's has deposit boxes.
+#
+# Which pieces, exactly, is not a free choice. What you can open in a building
+# is read off the characters its rooms are furnished with, so a wing that fills
+# itself from a generic kit quietly rewrites the location's vocabulary: adding a
+# table to a shop and a bookshelf to a vault collapsed seven distinct buildings
+# into four that all open the same three things. Each kit below is drawn from
+# what its own location already uses, and a piece that is deliberately *not*
+# openable — a bench, a plinth, a nightstand — carries the rest of the room.
+ANNEX = {
+    'Apartment': dict(rooms=['Hall', 'Box room', 'Alcove'], floor='boards',
+                      big='W', mid='C', small='N', props=['plant', 'bin']),
+    'House':     dict(rooms=['Scullery', 'Pantry', 'Back room'], floor='boards',
+                      big='B', mid='C', small='T', props=['kettle', 'plant']),
+    'Hotel':     dict(rooms=['Suite', 'Linen', 'Service'], floor='carpet',
+                      big='W', mid='C', small='N', props=['lamp', 'plant']),
+    'Office':    dict(rooms=['Meeting room', 'Filing', 'Copy room'], floor='carpet',
+                      big='V', mid='T', small='B', props=['plant', 'bin']),
+    'Hospital':  dict(rooms=['Side ward', 'Supplies', 'Sluice'], floor='tiles',
+                      big='C', mid='B', small='N', props=['bin', 'plant']),
+    # A bench rather than another plinth: what is on show in a museum is on show
+    # in the hall, and side galleries full of empty cases make the hall's cases
+    # look like scenery too.
+    'Museum':    dict(rooms=['Side gallery', 'Store', 'Workshop'], floor='parquet',
+                      big='B', mid='C', small='S', props=['plant', 'lamp']),
+    'Mansion':   dict(rooms=['Drawing room', 'Study', 'Gun room'], floor='carpet',
+                      big='B', mid='C', small='T', props=['lamp', 'plant']),
+    'Penthouse': dict(rooms=['Dressing room', 'Snug', 'Gallery'], floor='carpet',
+                      big='W', mid='C', small='T', props=['lamp', 'plant']),
+    'Shop':      dict(rooms=['Stockroom', 'Fitting rooms', 'Back office'], floor='tiles',
+                      big='B', mid='C', small='W', props=['bin', 'plant']),
+    'Vault':     dict(rooms=['Deposit room', 'Records', 'Anteroom'], floor='concrete',
+                      big='C', mid='T', small='P', props=['lamp']),
+}
+
+
+def annex(g, rect, face, tier, location, loot, door):
+    """Furnish a wing: a spine off the door and the rooms that hang off it, or
+    one open room where the wing is too shallow for both.
+
+    Nothing here places a spawn, a way out or a person — the core has all three,
+    and a building with two ways out of it is not a harder level, it is a
+    broken one."""
+    kit = ANNEX[location]
+    wx, wy, ww, wh = rect
+    # (along, deep) -> a rectangle on the grid. `along` runs parallel to the
+    # wall the wing shares with the core; `deep` runs away from it. Writing the
+    # wing in these two axes is what lets one routine furnish a wing hanging off
+    # any of the four faces without four copies of it.
+    if face in ('top', 'bottom'):
+        span, depth = ww - 2, wh - 2
+        a0 = wx + 1
+        d0 = wy + 1 if face == 'bottom' else wy + wh - 2
+        step = 1 if face == 'bottom' else -1
+        def box(a, d, al, dl):
+            return (a0 + a, d0 + d if step > 0 else d0 - d - dl + 1, al, dl)
+    else:
+        span, depth = wh - 2, ww - 2
+        a0 = wy + 1
+        d0 = wx + 1 if face == 'right' else wx + ww - 2
+        step = 1 if face == 'right' else -1
+        def box(a, d, al, dl):
+            return (d0 + d if step > 0 else d0 - d - dl + 1, a0 + a, dl, al)
+
+    # The way in, reserved through the whole depth of the wing before a stick
+    # of furniture is placed. Three tiles beyond the doorway is enough for a
+    # room with a corridor in front of it and nowhere near enough for a wing:
+    # what it leaves is a bookcase across the only route in, which from the far
+    # side is indistinguishable from a wall.
+    da = (door[0] if face in ('top', 'bottom') else door[1]) - a0
+    da = max(0, min(span - 3, da))
+    g.lane(*box(da, 0, 3, depth))
+
+    rooms = []
+    if depth >= 8 and span >= 13:
+        # Deep enough for a passage and rooms off it: the wing reads as part of
+        # the building rather than as a bay off the end of it.
+        g.lane(*box(0, 0, span, 3))
+        cut = 4
+        n = 3 if span >= 22 else 2
+        w = span // n
+        for i in range(n):
+            a = i * w
+            aw = span - a if i == n - 1 else w
+            if i:
+                r = box(a - 1, cut, 1, depth - cut)
+                g.fill(r[0], r[1], r[2], r[3], '%')
+            d = a + aw // 2 - 1
+            door = box(d, cut - 1, 3, 1)
+            g.fill(door[0], door[1], door[2], door[3], 'D')
+            g.lane(*box(d, cut - 3, 3, 5))
+            rooms.append(box(a, cut, aw, depth - cut))
+        band = box(0, 0, span, 3)
+        g.deco('floor', band[0], band[1], band[2], band[3], kit['floor'])
+    else:
+        rooms.append(box(0, 0, span, depth))
+
+    for i, (rx, ry, rw, rh) in enumerate(rooms):
+        if rw < 3 or rh < 2:
+            continue
+        # Five pieces where there is room for five. Two of them was the first
+        # pass and it showed: a side ward with a cabinet and a pot plant in it
+        # reads as a room somebody forgot to finish, and it gives the search
+        # system nothing to work with either — a cupboard is only worth
+        # noticing among furniture that is not one. They go along the back wall
+        # in two runs and against each side, and `lay` shifts them out of the
+        # lane rather than standing in it.
+        back = max(3, rw // 3)
+        g.lay(rx + 1, ry + 1, back, max(2, rh // 2), kit['big'])
+        g.lay(rx + rw - back - 1, ry + 1, back, max(2, rh // 3), kit['mid'])
+        g.lay(rx + 1, ry + rh - 3, max(3, rw // 4), 2, kit['small'])
+        g.lay(rx + rw - 4, ry + rh - 3, 3, 2, kit['big'])
+        if rw > 11 and rh > 4:
+            g.lay(rx + rw // 2 - 2, ry + rh // 2 - 1, 4, 2, kit['mid'])
+        if rw > 9 and rh > 5 and kit['floor'] in ('carpet', 'boards'):
+            g.lay(rx + rw // 2 - 2, ry + rh - 4, 5, 2, ',')
+        dress(g, rx, ry, rw, rh, kit['floor'],
+              props=corner_props(rx, ry, rw, rh, kit['props']))
+        g.deco('sign', rx + rw // 2 - 1, ry, 3, 1,
+               kit['rooms'][i % len(kit['rooms'])])
+        g.drop(rx + rw // 2, ry + rh // 2, loot.next(), radius=3, box=True)
+        if rw > 8:
+            g.drop(rx + 2, ry + rh - 2, loot.next(), radius=3, box=True)
+
+
+def shaped(cols, rows, shape, tier, location, grammar, loot):
+    """Build one level as a core the grammar fills and wings hanging off it."""
+    cols, rows, core, wings = footprint(cols, rows, shape, tier,
+                                        EXIT_SIDE[location])
+    rects = [core] + [r for (r, _) in wings]
+    g = draft.blocks(cols, rows, rects)
+    # The doors first, so their lanes are reserved before the grammar or the
+    # wings put anything down. This is the same lesson as every other doorway in
+    # this file: reserve, then furnish, and there is nothing left to repair.
+    grammar(draft.Wing(g, *core), tier)
+    # The doors after the grammar, so each one can be put where the grammar left
+    # the core open — and before the wings are furnished, so the lane through
+    # each wing is reserved before anything can stand in it.
+    kept, doors = [core], []
+    for (r, face) in wings:
+        # A wing is not owed the exact spot the silhouette asked for. If the
+        # grammar has left the wall there packed, slide the wing along that face
+        # and ask again — a bedroom wing four tiles further down the building is
+        # the same silhouette to anyone looking at it, and it is the difference
+        # between a wing and no wing at all.
+        r, door = slide(g, core, r, face)
+        if door:
+            annex(g, r, face, tier, location, loot, door)
+            kept.append(r)
+            doors.append((r, door))
+        else:
+            # No way in that a person fits through. Fill it back in: a wing you
+            # cannot enter is a sealed room the connectivity pass will tear the
+            # building apart trying to open.
+            seal(g, core, r)
+
+    # ...and then check rather than trust. Choosing a doorway with clear floor
+    # on both sides is a local test, and a local test cannot see that the floor
+    # it found is itself walled off from the rest of the building — which is how
+    # a museum ended up with a wing behind its own display cases and the repair
+    # pass carving nine tiles deep to reach it. Walk the map and believe the
+    # walk: a wing the player cannot get to is not a wing.
+    reach = {(gx * 4 // 20, gy * 4 // 20) for (gx, gy) in g._reached()}
+    for (r, door) in doors:
+        if any((door[0] + dx, door[1] + dy) in reach
+               for dx in (-1, 0, 1) for dy in (-1, 0, 1)):
+            continue
+        seal(g, core, r)
+        kept.remove(r)
+    return g, void_rects(cols, rows, kept)
+
+
+def slide(g, core, rect, face, reach=8):
+    """Find somewhere along the core's face this wing can actually join it.
+
+    Returns the wing (moved, perhaps) and its doorway, or the wing unmoved and
+    None. Tries where the silhouette asked first, then works outwards in steps
+    of two, staying inside the core's own span so the wing never hangs off the
+    end of the building it is attached to."""
+    cx, cy, cw, ch = core
+    x, y, w, h = rect
+    along = face in ('top', 'bottom')
+    lo = (cx + 1) if along else (cy + 1)
+    hi = (cx + cw - w - 1) if along else (cy + ch - h - 1)
+    at = x if along else y
+    for step in [0] + [s * d for s in range(2, reach + 1, 2) for d in (1, -1)]:
+        here = max(lo, min(hi, at + step))
+        moved = (here, y, w, h) if along else (x, here, w, h)
+        # Carve the wing where it now stands. Cheap enough to redo: this runs
+        # once per wing at authoring time and never in the game.
+        g.fill(moved[0] + 1, moved[1] + 1, moved[2] - 2, moved[3] - 2, '.')
+        g.box(*moved, '#')
+        door = draft.join(g, core, moved)
+        if door:
+            return moved, door
+        seal(g, core, moved)
+    return rect, None
+
+
+def seal(g, core, rect):
+    """Fill a wing back in, and put the core's own wall back across the doorway
+    the wing had opened in it.
+
+    Only that stretch of wall: re-boxing the whole core paints over the way out,
+    which the grammar cut into one of these same four walls, and a level with no
+    exit does not load."""
+    cx, cy, cw, ch = core
+    x, y, w, h = rect
+    g.fill(x, y, w, h, '#')
+    if y + h - 1 == cy or cy + ch - 1 == y:          # a wing above or below
+        row = cy if y + h - 1 == cy else cy + ch - 1
+        g.fill(max(cx, x), row, min(cx + cw, x + w) - max(cx, x), 1, '#')
+    else:                                            # ...or off a flank
+        col = cx if x + w - 1 == cx else cx + cw - 1
+        g.fill(col, max(cy, y), 1, min(cy + ch, y + h) - max(cy, y), '#')
+
+
 # name, theme, watcher, seated, grammar, and which hand-drawn map is its level 5
 LOCATIONS = [
     ('Apartment', 'apartment',  'dad',        False, apartment, 'flat'),
@@ -1782,7 +2274,8 @@ def build():
                 floor_under(g, theme)
                 dress_corners(g, every=3)
                 if pad:
-                    g = add_grounds(g, pad, YARD_DEEP[tier], name, Loot(tier))
+                    g = add_grounds(g, pad, YARD_DEEP[tier], name, Loot(tier),
+                                    bite=False)
                 g.clear_landings(); draft.clear_exit(g)
                 promote_prize(g, tier)
                 g.clear_freebies()
@@ -1790,11 +2283,15 @@ def build():
                 if g.open_until_connected() is None:
                     g.open_by_removal()
             else:
-                cols, rows = TIER_SIZE[tier]
-                g = shell(cols, rows)
-                grammar(g, tier)
+                # The building's outline, then the grammar inside it. Level one
+                # of every location is still a plain rectangle; from level two
+                # the walls alone tell you which level you are on.
+                shape = FOOTPRINTS[name][tier]
+                g, voids = shaped(*TIER_SIZE[tier], shape, tier, name,
+                                  grammar, Loot(tier))
                 if pad:
-                    g = add_grounds(g, pad, YARD_DEEP[tier], name, Loot(tier))
+                    g = add_grounds(g, pad, YARD_DEEP[tier], name, Loot(tier),
+                                    bite=False, voids=voids)
                 g.clear_landings()
                 draft.clear_exit(g)
                 top_up_loot(g, tier)

@@ -38,9 +38,10 @@ class Grid:
             for xx in range(max(0, x), min(self.cols, x + w)):
                 self.keep.add((xx, yy))
 
-    # Never over a wall, a doorway, the way out or the spot you start on: those
-    # are the building, and furniture is what stands in it.
-    STRUCTURE = set('#%ODX@')
+    # Never over a wall, a fence, a doorway, the way out or the spot you start
+    # on: those are the building and its plot, and furniture is what stands in
+    # them.
+    STRUCTURE = set('#%ODX@+')
 
     def clear_of_keep(self, x, y, w, h):
         for yy in range(y, y + h):
@@ -113,7 +114,7 @@ class Grid:
     def empty(self, x, y, w, h):
         for yy in range(y, y + h):
             for xx in range(x, x + w):
-                if self.g[yy][xx] in 'TSWNVCBPE':
+                if self.g[yy][xx] in 'TSWNVCBPEYZ':
                     return False
         return True
 
@@ -212,7 +213,12 @@ class Grid:
     # answer here means furniture is only ever moved when it has to be.
     def _blocked(self, x, y):
         PW, PH, TILE = 22, 24, 20
-        solid = set('#%OTSWNVCBPE')
+        # Everything tilemap.js turns into a collider. The fence, the trees and
+        # the hedges were missing from this list, which meant the tool believed
+        # you could walk through the boundary of the plot and out across the
+        # planting — so a yard the game had sealed off looked perfectly
+        # reachable here, and the levels shipped with loot in it.
+        solid = set('#%OTSWNVCBPE+YZ')
         if x < PW / 2 or x > self.cols * TILE - PW / 2: return True
         if y < PH / 2 or y > self.rows * TILE - PH / 2: return True
         for ty in range(int((y - PH / 2) // TILE), int((y + PH / 2 - 0.001) // TILE) + 1):
@@ -563,6 +569,128 @@ def shell(cols, rows):
     g = Grid(cols, rows)
     g.box(0, 0, cols, rows, '#')
     return g
+
+
+def blocks(cols, rows, rects):
+    """A building that is not a rectangle.
+
+    The grid stays rectangular, because everything downstream assumes it is.
+    What changes is which of it is *building*: every tile starts solid, and each
+    rectangle carves its rooms out of that. The outline the walls draw is the
+    union of the rectangles and nothing else — an L is two of them meeting at a
+    corner, a U is three, a courtyard is four round a hole.
+
+    Rectangles are given including their walls, and two that are meant to join
+    are given overlapping by exactly one tile: that shared line is the wall
+    between them, and `join` cuts the door through it. Anything the rectangles
+    do not claim stays solid, which is the whole trick — the mass outside an
+    L-shaped building is the same character as the mass inside its walls, so
+    the silhouette costs nothing to draw and cannot be walked through.
+    """
+    g = Grid(cols, rows)
+    g.fill(0, 0, cols, rows, '#')
+    for (x, y, w, h) in rects:
+        g.fill(x + 1, y + 1, w - 2, h - 2, '.')
+    for (x, y, w, h) in rects:
+        g.box(x, y, w, h, '#')
+    return g
+
+
+def join(g, a, b, width=3):
+    """Cut a doorway through the wall two rectangles share, and reserve the
+    standing room either side of it.
+
+    Called *after* the room grammar has built the core, and that ordering is the
+    whole of the difficulty: the grammar knows nothing about the wing, so it
+    will happily run one of its own partitions along the far side of the wall
+    the door has to go through. Cutting in the middle regardless leaves a
+    three-tile doorway with a wall stub in front of it — open on the map, shut
+    to anything the size of a person.
+
+    So the position is chosen rather than assumed: work outwards from the middle
+    of the shared span and take the first place with clear floor on both sides.
+    Returns the doorway's top-left tile, or None if the two do not touch or
+    nothing along the wall is clear.
+    """
+    ax, ay, aw, ah = a
+    bx, by, bw, bh = b
+    horizontal = ay + ah - 1 == by or by + bh - 1 == ay
+    vertical = ax + aw - 1 == bx or bx + bw - 1 == ax
+    if horizontal:
+        line = by if ay + ah - 1 == by else ay
+        lo, hi = max(ax, bx) + 1, min(ax + aw, bx + bw) - 1
+    elif vertical:
+        line = bx if ax + aw - 1 == bx else ax
+        lo, hi = max(ay, by) + 1, min(ay + ah, by + bh) - 1
+    else:
+        return None
+    if hi - lo < width:
+        return None
+
+    # Which side is which. `a` is the core the grammar filled, so a door has to
+    # reach real circulation there — five tiles, not two, because three tiles of
+    # cleared floor boxed in by a bank of display cases is a cupboard, not a way
+    # through. The wing is empty at this point, so three is plenty on that side.
+    into_a = 1 if (line == ay or line == ax) else -1
+
+    def tiles(at, deep_a=3, deep_b=3):
+        for i in range(width):
+            for step in list(range(1, deep_a + 1)) + [-k for k in range(1, deep_b + 1)]:
+                d = step * into_a
+                x, y = (at + i, line + d) if horizontal else (line + d, at + i)
+                if 0 <= x < g.cols and 0 <= y < g.rows:
+                    yield x, y
+
+    def clear(at, furniture_counts):
+        """Is a door here open on both sides, for as far as a person needs?"""
+        blocking = '#%OX@E' + ('TSWNVCBP' if furniture_counts else '')
+        n = 0
+        for (x, y) in tiles(at):
+            if g.g[y][x] in blocking:
+                return False
+            n += 1
+        return n == width * 6
+
+    mid = (lo + hi) // 2 - width // 2
+    order = [c for c in [mid] + [mid + s * d for s in range(1, hi - lo) for d in (1, -1)]
+             if lo <= c and c + width <= hi]
+    # First choice is a stretch of wall with nothing at all against it on either
+    # side. Only if the grammar has left none does the door go somewhere with
+    # furniture in the way — and then that furniture moves, because the lane in
+    # front of a doorway is not somewhere a wardrobe may stand. Without this the
+    # wing ends up joined to the building by an opening you cannot walk through,
+    # which the connectivity pass then answers by demolishing the room.
+    # Only a stretch with nothing at all behind it will do. Letting the door go
+    # somewhere merely free of walls and then moving the furniture out of the
+    # way sounds reasonable and is not: what it leaves is three tiles of floor
+    # boxed in by whatever stood on either side of the lane, which is a cupboard
+    # rather than a way through, and the connectivity pass answers a wing behind
+    # a cupboard by demolishing the building. No door here means the caller
+    # fills the wing back in, and the building is simply a different shape.
+    at = next((c for c in order if clear(c, True)), None)
+    if at is None:
+        return None
+    if horizontal:
+        g.fill(at, line, width, 1, 'D')
+        g.lane(at, line - 3, width, 7)
+    else:
+        g.fill(line, at, 1, width, 'D')
+        g.lane(line - 3, at, 7, width)
+    # Whole pieces, not the tiles of them that happen to fall inside the lane.
+    # Clearing half a wardrobe leaves a one-tile stub in the middle of the
+    # route, and a one-tile stub blocks a corridor exactly as well as the whole
+    # wardrobe did — it is simply harder to see in the map.
+    for (x, y) in tiles(at):
+        if g.g[y][x] not in 'TSWNVCBP':
+            continue
+        ch, stack = g.g[y][x], [(x, y)]
+        while stack:
+            cx, cy = stack.pop()
+            if not (0 <= cx < g.cols and 0 <= cy < g.rows) or g.g[cy][cx] != ch:
+                continue
+            g.g[cy][cx] = '.'
+            stack += [(cx + 1, cy), (cx - 1, cy), (cx, cy + 1), (cx, cy - 1)]
+    return (at, line) if horizontal else (line, at)
 
 
 # =============================================================== 1 THE MUSEUM

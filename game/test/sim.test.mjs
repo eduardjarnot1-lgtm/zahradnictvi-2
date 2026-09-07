@@ -573,12 +573,24 @@ test('a streak forms from quick steals and pays a bonus', () => {
   // be down to three coins spread across a building.
   const busiest = LEVELS.reduce((a, b) => (a.items.length >= b.items.length ? a : b));
   const run = createRun(busiest.id);
-  // The three items closest together: a streak is about stealing without
-  // dawdling, and on a floorplan the first three in the list can be rooms apart.
-  const first = run.sim.items[0];
-  const near = [...run.sim.items]
-    .sort((a, b) => Math.hypot(a.x - first.x, a.y - first.y) - Math.hypot(b.x - first.x, b.y - first.y))
-    .slice(0, 3);
+  // The three items closest *to each other* — not the three nearest to whichever
+  // one happens to be first in the list, which is a different question and on a
+  // floorplan can pick a tight pair and something two galleries away. A streak
+  // is about stealing without dawdling, so the test has to find the place on the
+  // map where that is possible and go there.
+  const items = run.sim.items;
+  const gap = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+  let near = items.slice(0, 3);
+  let widest = Infinity;
+  for (let a = 0; a < items.length; a++) {
+    for (let b = a + 1; b < items.length; b++) {
+      for (let c = b + 1; c < items.length; c++) {
+        const spread = Math.max(gap(items[a], items[b]), gap(items[b], items[c]),
+          gap(items[a], items[c]));
+        if (spread < widest) { widest = spread; near = [items[a], items[b], items[c]]; }
+      }
+    }
+  }
   for (const item of near) {
     if (run.sim.status !== 'running') break;
     steal(run, item.id);
