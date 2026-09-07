@@ -115,3 +115,10 @@ all of which the brief explicitly rules out for this beta (no accounts, no
 cloud sync, no server). A dependency-free static app loads instantly, deploys
 to the existing Netlify site as-is, and keeps `data.js` / `progress.js` as the
 seams where a GraphQL backend can be added later without rewriting the UI.
+
+## Single-file build
+
+`python3 german/tools/build_artifact.py` inlines the CSS, the modules, the
+vocabulary and Master Fuka's picture into `dist/master-fuka-german.html` — one
+file that runs with no server and no network. Edit the sources, never the
+bundle.
