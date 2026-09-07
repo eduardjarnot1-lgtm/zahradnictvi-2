@@ -6,11 +6,15 @@ import { play } from './harness.mjs';
 
 const golden = JSON.parse(fs.readFileSync(new URL('./fixtures/golden-l3.json', import.meta.url)));
 
-test('the golden level 3 run still pays out exactly $225', () => {
+// A fixed recording of a real playthrough, replayed frame for frame. If any
+// change to the simulation moves a single number, this is the test that says
+// so — and it is re-cut whenever the level it plays is deliberately rebuilt,
+// which is the only time it may legitimately change.
+test('the golden level 3 run still pays out exactly $115', () => {
   const result = replay(golden);
   assert.equal(result.status, 'won');
-  assert.equal(result.haul, 225);
-  assert.deepEqual(result.taken, ['L3-1', 'L3-3', 'L3-4']);
+  assert.equal(result.haul, 115);
+  assert.deepEqual(result.taken, ['L3-0', 'L3-1', 'L3-2']);
 });
 
 test('replaying is byte-for-byte reproducible', () => {

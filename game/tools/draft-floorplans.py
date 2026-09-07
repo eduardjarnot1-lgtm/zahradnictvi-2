@@ -22,6 +22,112 @@ class Grid:
         # character in it is something you can collide with — and a poster on a
         # wall is not. Kept in tile coordinates; tilemap.js scales them.
         self.decor = []
+        # Tiles no piece of furniture may stand on: the lane in front of every
+        # doorway, the way out, and the spot you start on.
+        #
+        # This exists because the repair passes below cannot tell the difference
+        # between "this wardrobe is in the way" and "this room is furnished".
+        # Carving an aisle out of a room whose door is blocked works, and what
+        # it leaves is an empty room — which is how ten of the eleven locations
+        # ended up as bare shells with a coin in them. Reserving the lane before
+        # anything is placed means there is nothing to repair.
+        self.keep = set()
+
+    def reserve(self, x, y, w, h):
+        for yy in range(max(0, y), min(self.rows, y + h)):
+            for xx in range(max(0, x), min(self.cols, x + w)):
+                self.keep.add((xx, yy))
+
+    # Never over a wall, a doorway, the way out or the spot you start on: those
+    # are the building, and furniture is what stands in it.
+    STRUCTURE = set('#%ODX@')
+
+    def clear_of_keep(self, x, y, w, h):
+        for yy in range(y, y + h):
+            for xx in range(x, x + w):
+                if not (0 <= xx < self.cols and 0 <= yy < self.rows):
+                    return False
+                if (xx, yy) in self.keep:
+                    return False
+                if self.g[yy][xx] in Grid.STRUCTURE:
+                    return False
+        return True
+
+    def lay(self, x, y, w, h, ch, shift=3):
+        """Place a piece of furniture, out of the way of every doorway.
+
+        Tries where it was asked for first, then a few tiles either side along
+        the room's long axis, and gives up rather than standing in a lane. A
+        piece that has to be moved aside is a piece that reads as arranged
+        around the door, which is what furniture in a real room does."""
+        offsets = [0]
+        for i in range(1, shift + 1):
+            offsets += [i, -i]
+        along_x = w <= h
+        for swap in (False, True):
+            for d in offsets:
+                across = along_x != swap
+                nx = x + (d if across else 0)
+                ny = y + (0 if across else d)
+                # Where it was asked for, it may stand on whatever is there —
+                # that is what the room grammar meant. Anywhere else it has been
+                # moved aside, and shoving a second piece through the first one
+                # is not moving aside, it is losing furniture.
+                if not self.clear_of_keep(nx, ny, w, h):
+                    continue
+                if d != 0 and not self.empty(nx, ny, w, h):
+                    continue
+                self.fill(nx, ny, w, h, ch)
+                return True
+        # A run too long to be moved aside is broken around the lane instead.
+        # A wall of shelving with a gap where the door is reads exactly right,
+        # and it is the difference between a stockroom and an empty rectangle.
+        if w >= 6 or h >= 6:
+            return self.spread(x, y, w, h, ch)
+        return False
+
+    def spread(self, x, y, w, h, ch, least=2):
+        """Lay a long run in the segments left between the reserved lanes."""
+        along = w >= h
+        span = w if along else h
+        placed = False
+        start = None
+        for i in range(span + 1):
+            if along:
+                free = i < span and self.clear_of_keep(x + i, y, 1, h)
+            else:
+                free = i < span and self.clear_of_keep(x, y + i, w, 1)
+            if free:
+                if start is None:
+                    start = i
+                continue
+            if start is not None and i - start >= least:
+                if along:
+                    self.fill(x + start, y, i - start, h, ch)
+                else:
+                    self.fill(x, y + start, w, i - start, ch)
+                placed = True
+            start = None
+        return placed
+
+    def empty(self, x, y, w, h):
+        for yy in range(y, y + h):
+            for xx in range(x, x + w):
+                if self.g[yy][xx] in 'TSWNVCBPE':
+                    return False
+        return True
+
+    def must(self, x, y, w, h, ch):
+        """A piece the level cannot do without — the sleeper's own bed, desk or
+        couch. Placed out of the way if there is anywhere out of the way, and
+        placed anyway if there is not."""
+        if not self.lay(x, y, w, h, ch):
+            self.fill(x, y, w, h, ch)
+
+    def lane(self, x, y, w, h):
+        """Reserve a doorway's approach: the three tiles of the opening and one
+        either side of them, run right through whatever is behind it."""
+        self.reserve(x, y, w, h)
 
     def deco(self, kind, x, y, w=1, h=1, tag=None):
         """Mark a rectangle of tiles as carrying a piece of decoration. The
@@ -172,6 +278,36 @@ class Grid:
                     self.g[y][x] = '.'
                 elif exit_ and max(abs(x - exit_[0]), abs(y - exit_[1])) <= 2:
                     self.g[y][x] = '.'
+
+    # Loot the player cannot get to is not a decision, it is a bug — and worse,
+    # it is a bug the repair pass answers by demolishing whatever furniture is
+    # nearest, because from its point of view the room is sealed. So anything
+    # stranded is picked up and put down again somewhere it can be reached,
+    # before the repair pass is ever asked to look at the map.
+    def rehome_loot(self):
+        cells = self._reached()
+        if not cells:
+            return
+        reach = {(gx * 4 // 20, gy * 4 // 20) for (gx, gy) in cells}
+        open_floor = sorted(t for t in reach
+                            if self.g[t[1]][t[0]] == '.'
+                            and not self._blocked(t[0] * 20 + 10, t[1] * 20 + 10))
+        if not open_floor:
+            return
+        taken = set()
+        for y in range(self.rows):
+            for x in range(self.cols):
+                if self.g[y][x] not in LOOT or (x, y) in reach:
+                    continue
+                ch = self.g[y][x]
+                self.g[y][x] = '.'
+                spot = min((t for t in open_floor if t not in taken),
+                           key=lambda t: (t[0] - x) ** 2 + (t[1] - y) ** 2, default=None)
+                if spot is None:
+                    continue
+                taken.add(spot)
+                self.g[spot[1]][spot[0]] = ch
+                self.moved.append((ch, x, y, spot))
 
     # Widen the aisles only as far as connectivity actually needs. Carving every
     # aisle to the far wall works, but it strips a conference room of its table

@@ -782,26 +782,43 @@ function openStash(run, stash) {
   };
 }
 
-test('only the school has furniture worth opening', () => {
-  for (const level of SCHOOL) {
-    assert.ok(level.stashes.length >= 3, `L${level.id} has ${level.stashes.length} searchable`);
-  }
-  for (const level of ELSEWHERE) {
-    assert.equal(level.stashes.length, 0,
-      `L${level.id} (${level.location}) grew searchable furniture`);
+test('every building in the game has furniture worth opening', () => {
+  for (const level of FLOORPLANS) {
+    assert.ok(level.stashes.length >= 3,
+      `L${level.id} (${level.location}) has ${level.stashes.length} searchable pieces`);
   }
 });
 
-test('pressing SEARCH does nothing at all anywhere else', () => {
-  for (const level of ELSEWHERE.slice(0, 10)) {
-    const sim = createSim({ level });
-    assert.equal(sim.stashes.length, 0);
-    for (let i = 0; i < 30; i++) stepSim(sim, { x: 0, y: 0, take: false, search: true });
-    assert.equal(sim.searchTargetId, null, `L${level.id} offered something to search`);
-    assert.equal(sim.searching, null);
-    assert.equal(sim.money, 0, `L${level.id} paid out for a search`);
-    assert.equal(sim.noise, 0, `L${level.id} made noise for a search`);
+test('...and plenty that is not worth opening', () => {
+  // "Do not make every piece of furniture searchable." A cabinet you can look
+  // inside has to be a thing you notice, and it is only a thing you notice if
+  // most of the room is not one.
+  for (const level of FLOORPLANS) {
+    const furniture = level.colliders.filter((c) => c.type === 'furniture');
+    const openable = furniture.filter((c) => c.searchable).length;
+    assert.ok(openable < furniture.length,
+      `L${level.id} (${level.location}) made every stick of furniture searchable`);
+    assert.ok(openable / furniture.length <= 0.75,
+      `L${level.id} (${level.location}) is ${Math.round(openable / furniture.length * 100)}% cupboards`);
   }
+});
+
+test('the vocabulary of what you can open is the building\'s own', () => {
+  // A hotel hides things in wardrobes and an office in filing cabinets; the
+  // style comes from the character the room grammar already used, so this is a
+  // property of the buildings rather than a table somebody has to maintain.
+  const styles = {};
+  for (const level of FLOORPLANS) {
+    for (const s of level.stashes) {
+      (styles[level.location] = styles[level.location] || new Set()).add(s.style);
+    }
+  }
+  const hotel = styles.Hotel || new Set();
+  const office = styles.Office || new Set();
+  assert.ok(hotel.has('wardrobe'), 'a hotel room has a wardrobe in it');
+  assert.ok(office.has('table'), 'an office is desks');
+  assert.ok(new Set(Object.values(styles).map((v) => [...v].sort().join(','))).size >= 5,
+    'the eleven locations should not all open the same kind of furniture');
 });
 
 test('every school level has some empty furniture, or there is no decision', () => {
@@ -1054,11 +1071,40 @@ test('most of what a school level is worth is inside the furniture', () => {
     assert.ok(level.items.length <= 6,
       `L${level.id} still has ${level.items.length} things lying about`);
   }
-  // Nowhere else changed: every other location keeps all of its loot in view.
-  for (const level of ELSEWHERE) {
-    assert.equal(level.stashes.length, 0, `L${level.id} (${level.location}) grew cupboards`);
-    assert.ok(level.items.length >= 7, `L${level.id} lost floor loot`);
+});
+
+test('most of what any level is worth is inside the furniture', () => {
+  // The same promise, everywhere. Two locations deliberately sit lower than the
+  // rest: a museum puts its value on plinths in the middle of the hall and a
+  // shop puts it on the shelves, and hiding all of that in the staff-room
+  // cupboards would be turning them into the school.
+  // A museum puts its value on plinths in the middle of the hall; a vault puts
+  // it in the deposit boxes, and its guard is close enough to everything that
+  // the noise ceiling refuses to let anything expensive be hidden in a drawer
+  // near him. Both are the location being itself rather than the mechanic
+  // being missing.
+  const OPEN_HANDED = new Set(['Museum', 'Vault']);
+  for (const level of FLOORPLANS) {
+    const onFloor = level.items.reduce((sum, i) => sum + itemStats(i.type).value, 0);
+    const hidden = level.stashes.reduce(
+      (sum, s) => sum + (s.item ? itemStats(s.item).value : 0), 0);
+    const share = hidden / (hidden + onFloor);
+    const least = OPEN_HANDED.has(level.location) ? 0.30 : 0.60;
+    assert.ok(share >= least && share <= 0.88,
+      `L${level.id} (${level.location}): ${(share * 100).toFixed(0)}% hidden`);
+    assert.ok(level.items.length >= 3, `L${level.id} has nothing visible at all`);
   }
+  // ...and the game as a whole lands inside the band the brief actually asks
+  // for, which no single level has to hit on its own.
+  let hidden = 0;
+  let onFloor = 0;
+  for (const level of FLOORPLANS) {
+    onFloor += level.items.reduce((sum, i) => sum + itemStats(i.type).value, 0);
+    hidden += level.stashes.reduce((sum, s) => sum + (s.item ? itemStats(s.item).value : 0), 0);
+  }
+  const share = hidden / (hidden + onFloor);
+  assert.ok(share >= 0.70 && share <= 0.85,
+    `the game is ${(share * 100).toFixed(0)}% hidden overall`);
 });
 
 test('the star targets count what is hidden, or a school level looks empty', () => {

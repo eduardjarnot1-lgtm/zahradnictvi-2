@@ -24,10 +24,14 @@ test('a scripted run wins with exactly the money it stole', () => {
   assert.ok(result.noise > 0 && result.noise < TUNING.noise.max);
 });
 
-test('taking everything on level 10 wakes him', () => {
-  const { result } = play(10);
-  assert.equal(result.status, 'lost');
-  assert.equal(result.noise, TUNING.noise.max);
+test('taking everything on level 10 fills the meter and puts him on his feet', () => {
+  // It used to end the level. It now ends the quiet: Grandpa is up, he is
+  // walking the cottage, and whether you get out with it is a different
+  // question from whether you were allowed to try.
+  const { run, result } = play(10);
+  assert.equal(Math.round(run.sim.noise), TUNING.noise.max);
+  assert.notEqual(run.sim.investigator.state, 'asleep',
+    `he slept through a full meter (${result.status})`);
 });
 
 test('same seed and same inputs produce an identical run', () => {
@@ -41,7 +45,10 @@ test('the simulation never calls Math.random', () => {
   const original = Math.random;
   Math.random = () => { throw new Error('sim used Math.random'); };
   try {
-    play(6, { take: ['L6-0', 'L6-6'] });
+    // Whatever level six happens to hold: naming item ids ties a test about
+    // randomness to a particular generated map.
+    const some = LEVELS.find((l) => l.id === 6).items.slice(0, 2).map((i) => i.id);
+    play(6, { take: some });
   } finally {
     Math.random = original;
   }
@@ -310,11 +317,17 @@ test('no upgrade makes a stolen item quieter', () => {
 
 test('Quick Feet raise top speed, Velvet Bag raises the payout', () => {
   const level = LEVELS[0];
-  const fast = createSim({ level, seed: 1, upgrades: { feet: 3 } });
-  const player = playerOf(fast);
-  // From the spawn, which is open floor on every map by construction.
-  for (let i = 0; i < 40; i++) stepSim(fast, { x: 0, y: -1 });
-  assert.ok(player.speed > TUNING.player.speed * 1.15, `only reached ${player.speed}`);
+  // Whichever way out of the spawn actually has floor in it. The spawn is open
+  // by construction; the room around it is furnished, so "up" is not a
+  // direction you can rely on getting to full speed in.
+  let best = 0;
+  for (const [dx, dy] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) {
+    const fast = createSim({ level, seed: 1, upgrades: { feet: 3 } });
+    const player = playerOf(fast);
+    for (let i = 0; i < 40; i++) stepSim(fast, { x: dx, y: dy });
+    best = Math.max(best, player.speed);
+  }
+  assert.ok(best > TUNING.player.speed * 1.15, `only reached ${best}`);
 
   const rich = createSim({ level, seed: 1, upgrades: { bag: 3 } });
   assert.ok(rich.items[0].value > rich.items[0].rawValue);
@@ -390,13 +403,12 @@ test('escaping in time still wins even with the clock nearly out', () => {
 const wardrobeLevel = () => LEVELS.find((l) => l.colliders.some((c) => c.type === 'furniture'));
 
 test('walking squarely into furniture costs noise', () => {
-  const level = LEVELS[0];
-  const furniture = level.colliders.find((c) => c.type === 'furniture');
+  const { level, from, push } = RUN_UP;
   const run = createRun(level.id);
   const player = playerOf(run.sim);
-  player.x = furniture.x + furniture.w / 2;
-  player.y = furniture.y - 40;
-  for (let i = 0; i < 60 && run.sim.noise === 0; i++) tick(run, { x: 0, y: 1 });
+  player.x = from.x;
+  player.y = from.y;
+  for (let i = 0; i < 60 && run.sim.noise === 0; i++) tick(run, { x: push.x, y: push.y });
   assert.ok(run.sim.noise > 0, 'bumping a cabinet should be heard');
 });
 
@@ -556,7 +568,11 @@ test('star targets are always reachable without waking him', () => {
 });
 
 test('a streak forms from quick steals and pays a bonus', () => {
-  const run = createRun(2);
+  // A level with enough lying about to make three quick lifts possible: most of
+  // what a level is worth is inside the furniture now, so a level's *floor* can
+  // be down to three coins spread across a building.
+  const busiest = LEVELS.reduce((a, b) => (a.items.length >= b.items.length ? a : b));
+  const run = createRun(busiest.id);
   // The three items closest together: a streak is about stealing without
   // dawdling, and on a floorplan the first three in the list can be rooms apart.
   const first = run.sim.items[0];
@@ -628,7 +644,10 @@ test('a loud or last-second escape is graded a close call, with no bonus', () =>
   assert.equal(run.sim.escapeGrade.bonus, 0);
 });
 
-test('bonuses never turn a loss into a win', () => {
+test('a level is never graded until it is actually left', () => {
+  // The counterpart to the grading tests above: money and bonuses are handed
+  // out at the door and nowhere else, so a run with the meter full and the
+  // haul in the bag has no grade at all until it gets out.
   const run = createRun(1);
   run.sim.noise = 99.9;
   const item = run.sim.items[0];
@@ -636,7 +655,12 @@ test('bonuses never turn a loss into a win', () => {
   for (let i = 0; i < 40 && run.sim.status === 'running'; i++) {
     tick(run, { x: 0, y: 0, take: i % 2 === 0 });
   }
+  assert.equal(run.sim.escapeGrade, null);
+  // ...and running the clock out is a loss whatever is in the bag.
+  run.sim.timeLeft = 0.2;
+  for (let i = 0; i < 60 && run.sim.status === 'running'; i++) tick(run, { x: 0, y: 0 });
   assert.equal(run.sim.status, 'lost');
+  assert.equal(run.sim.failReason, 'time');
   assert.equal(run.sim.escapeGrade, null);
 });
 
@@ -754,15 +778,59 @@ test('the gait blend follows the actual speed, and only the speed', () => {
 
 // --- collisions scale with how hard you hit ---------------------------------
 
+// Somewhere in the game with room to get a run-up at a piece of furniture.
+//
+// Taking whichever collider happens to be first on level one ties these tests
+// to one particular generated map — and the moment the rooms were properly
+// furnished, the first piece on level one had Dad's bed a tile above it and
+// nobody could stand there. So: search the levels for a piece with a clear
+// approach from any of the four sides, and hand back where to stand and which
+// way to push.
+function runUp(clearance = 52) {
+  const sides = [[0, -1], [0, 1], [-1, 0], [1, 0]];
+  for (const level of LEVELS) {
+    const solid = level.colliders;
+    for (const c of level.colliders) {
+      if (c.type !== 'furniture') continue;
+      for (const [dx, dy] of sides) {
+        const cx = c.x + c.w / 2;
+        const cy = c.y + c.h / 2;
+        const edgeX = cx + dx * (c.w / 2);
+        const edgeY = cy + dy * (c.h / 2);
+        let clear = true;
+        for (let d = 13; d <= clearance + 13; d += 6) {
+          const x = dx ? edgeX + dx * d : cx;
+          const y = dy ? edgeY + dy * d : cy;
+          if (x < 32 || y < 32 || x > level.width - 32 || y > level.height - 32) { clear = false; break; }
+          if (solid.some((o) => o !== c
+            && x + 11 > o.x && x - 11 < o.x + o.w && y + 12 > o.y && y - 12 < o.y + o.h)) {
+            clear = false;
+            break;
+          }
+        }
+        if (!clear) continue;
+        return {
+          level,
+          furniture: c,
+          from: { x: dx ? edgeX + dx * 46 : cx, y: dy ? edgeY + dy * 46 : cy },
+          push: { x: -dx, y: -dy }
+        };
+      }
+    }
+  }
+  throw new Error('no furniture in the whole game has a clear approach');
+}
+
+const RUN_UP = runUp();
+
 function bumpInto(magnitude) {
-  const level = LEVELS[0];
-  const furniture = level.colliders.find((c) => c.type === 'furniture');
+  const { level, from, push } = RUN_UP;
   const run = createRun(level.id);
   const player = playerOf(run.sim);
-  player.x = furniture.x + furniture.w / 2;
-  player.y = furniture.y - 46;
+  player.x = from.x;
+  player.y = from.y;
   for (let i = 0; i < 80; i++) {
-    tick(run, { x: 0, y: magnitude });
+    tick(run, { x: push.x * magnitude, y: push.y * magnitude });
     const bump = run.sim.events.find((e) => e.type === 'bump');
     if (bump) return bump;
   }
@@ -779,15 +847,14 @@ test('the same furniture costs more noise the faster you hit it', () => {
 });
 
 test('a hard collision bounces you back and shakes the room', () => {
-  const level = LEVELS[0];
-  const furniture = level.colliders.find((c) => c.type === 'furniture');
+  const { level, from, push } = RUN_UP;
   const run = createRun(level.id);
   const player = playerOf(run.sim);
-  player.x = furniture.x + furniture.w / 2;
-  player.y = furniture.y - 46;
+  player.x = from.x;
+  player.y = from.y;
   let atImpact = null;
   for (let i = 0; i < 80; i++) {
-    tick(run, { x: 0, y: 1 });
+    tick(run, { x: push.x, y: push.y });
     if (run.sim.events.some((e) => e.type === 'bump')) { atImpact = playerOf(run.sim).y; break; }
   }
   assert.ok(atImpact !== null);
@@ -803,17 +870,18 @@ test('a bang makes him flinch, and the flinch fades on its own', () => {
 });
 
 test('you can always walk away from furniture — never stuck, never jittering', () => {
-  const level = LEVELS[0];
-  const furniture = level.colliders.find((c) => c.type === 'furniture');
+  const { level, from, push } = RUN_UP;
   const run = createRun(level.id);
   const player = playerOf(run.sim);
-  player.x = furniture.x + furniture.w / 2;
-  player.y = furniture.y - 46;
-  for (let i = 0; i < 90; i++) tick(run, { x: 0, y: 1 });      // shove into it
-  const stuckAt = playerOf(run.sim).y;
+  player.x = from.x;
+  player.y = from.y;
+  for (let i = 0; i < 90; i++) tick(run, { x: push.x, y: push.y });      // shove into it
+  const stuckAt = { x: playerOf(run.sim).x, y: playerOf(run.sim).y };
 
-  for (let i = 0; i < 60; i++) tick(run, { x: 0, y: -1 });     // and walk away
-  assert.ok(playerOf(run.sim).y < stuckAt - 40, 'should have escaped the furniture');
+  for (let i = 0; i < 60; i++) tick(run, { x: -push.x, y: -push.y });    // and walk away
+  const back = playerOf(run.sim);
+  assert.ok(Math.hypot(back.x - stuckAt.x, back.y - stuckAt.y) > 40,
+    'should have escaped the furniture');
   assert.ok(!blocked(playerOf(run.sim).x, playerOf(run.sim).y,
     TUNING.player.boxWidth, TUNING.player.boxHeight, level.colliders),
     'must never end up inside a collider');

@@ -319,8 +319,12 @@ test('museum rooms put their value on plinths, out in the open', () => {
     assert.ok(plinths.length >= level.tier * 2,
       `level ${level.id} is tier ${level.tier} with only ${plinths.length} plinths`);
     // ...and most of them have something worth taking beside them.
+    // Within the aisle beside it. A three-tile plinth in a three-tile aisle
+    // puts the nearest spot a person can actually stand exactly sixty units
+    // from its middle — the player is wider than a tile — so "beside it" is
+    // the aisle, not a tile that nobody can occupy.
     const guarded = plinths.filter((p) => level.items.some((item) =>
-      Math.abs(item.x - (p.x + p.w / 2)) < 60 && Math.abs(item.y - (p.y + p.h / 2)) < 60));
+      Math.abs(item.x - (p.x + p.w / 2)) <= 70 && Math.abs(item.y - (p.y + p.h / 2)) <= 70));
     assert.ok(guarded.length >= Math.ceil(plinths.length / 2),
       `only ${guarded.length} of ${plinths.length} plinths are worth visiting`);
   }

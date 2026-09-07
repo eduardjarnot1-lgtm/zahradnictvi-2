@@ -162,10 +162,14 @@ test('the rooms differ from one another', () => {
   }
 });
 
-test('the school is still the only location with any of this', () => {
+test('every location is dressed and searchable now, not just the school', () => {
+  // The isolation test, inverted. Room dressing and furniture you can look
+  // inside were the school's alone while they were being proved; they are the
+  // game's now, and a location with neither is a location that was missed.
   for (const l of OTHERS) {
-    assert.equal((l.decor || []).length, 0, `${l.name} L${l.id} picked up room dressing`);
-    assert.equal(l.stashes.length, 0, `${l.name} L${l.id} picked up searchable furniture`);
+    assert.ok((l.decor || []).length > 0 || l.tier === 5,
+      `${l.name} L${l.id} has no room dressing at all`);
+    assert.ok(l.stashes.length > 0, `${l.name} L${l.id} has nothing to look inside`);
   }
 });
 

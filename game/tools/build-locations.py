@@ -88,6 +88,12 @@ def top_up_loot(g, tier):
         return None
     spawn, exit_ = marker('@'), marker('X')
     target = TIER_ITEMS[tier]
+    # Only where the player can actually get to. A free, standable tile is not
+    # the same thing as a reachable one — a pocket of floor behind a bank of
+    # display cases passes every local test and fails the only one that matters,
+    # and the repair pass answers an unreachable coin by bulldozing whatever is
+    # nearest to it. That is how a museum lost the middle row of its hall.
+    reached = {(gx * 4 // TILE, gy * 4 // TILE) for (gx, gy) in g._reached()}
     # Walk the map on a coarse lattice so the extra loot ends up spread through
     # the building instead of clustered in whichever room is emptiest.
     for step in (5, 4, 3):
@@ -96,6 +102,7 @@ def top_up_loot(g, tier):
                 if len(items()) >= target: return
                 if g.g[y][x] != '.': continue
                 if g._blocked(x * TILE + TILE / 2, y * TILE + TILE / 2): continue
+                if (x, y) not in reached: continue
                 near = items()
                 if any(max(abs(x - ix), abs(y - iy)) < 3 for (ix, iy) in near): continue
                 if spawn and max(abs(x - spawn[0]), abs(y - spawn[1])) <= 3: continue
@@ -121,13 +128,14 @@ def promote_prize(g, tier):
         g.g[best[1]][best[0]] = TIER_PRIZE[tier]
 
 
-def scatter(g, tier, spots, box=False):
+def scatter(g, tier, spots, box=True):
     """Drop loot at roughly these tiles, snapping each onto real floor.
 
     `box` asks for floor the player can actually stand on rather than merely a
-    free tile. It matters wherever furniture is packed tightly enough to leave
-    one-tile gaps: a gap that narrow looks like floor and is not, and a coin
-    dropped into one is a level that cannot be finished."""
+    free tile, and it is the default because every one of these rooms is packed
+    tightly enough to leave one-tile gaps somewhere: a gap that narrow looks
+    like floor and is not, and a coin dropped into one used to be answered by
+    the repair pass bulldozing the room around it."""
     loot = Loot(tier)
     for (x, y) in spots:
         g.drop(x, y, loot.next(), box=box)
@@ -173,13 +181,29 @@ def corridor_plan(g, tier, top, bottom, furnish, corridor_rows=6, exit_side='lef
     # has always had.
     place = door_at or (lambda x, w, top_side: x + w // 2 - 1)
     for (x, w) in tops:
-        g.fill(place(x, w, True), y1, 3, 1, 'D')
+        d = place(x, w, True)
+        g.fill(d, y1, 3, 1, 'D')
+        # The lane, reserved before a stick of furniture is placed: three tiles
+        # of doorway and one either side, run right through the room behind it
+        # and out into the corridor in front of it. Everything the grammar lays
+        # down afterwards goes into what is left, which is what stops the
+        # connectivity repair from having to empty the room to open the door.
+        g.lane(d, 1, 3, y1 - 1)
+        g.lane(d, y1 + 1, 3, corridor_rows)
     for (x, w) in bots:
-        g.fill(place(x, w, False), y2, 3, 1, 'D')
+        d = place(x, w, False)
+        g.fill(d, y2, 3, 1, 'D')
+        g.lane(d, y2 + 1, 3, rows - y2 - 2)
+        g.lane(d, y1 + 1, 3, corridor_rows)
+
+    # ...and the way out gets one too, the length of the corridor: a wardrobe
+    # parked between you and the door is the one obstruction the repair passes
+    # cannot reason about, because from the far side it looks like a wall.
+    mid = y1 + corridor_rows // 2
+    g.lane(1, mid - 1, cols - 2, 3)
 
     furnish(tops, 1, y1 - 1, bots, y2 + 1, rows - y2 - 2, y1 + 1, corridor_rows)
 
-    mid = y1 + corridor_rows // 2
     if exit_side == 'left':
         g.fill(0, mid - 1, 1, 3, 'X')
         g.drop(cols - 3, mid, '@', radius=99, box=True)
@@ -208,6 +232,9 @@ def hall_plan(g, tier, plinth_cols, plinth_rows, back_rooms, furnish):
         for c in range(plinth_cols):
             bx = x0 + c * (bw + gap)
             by = y0 + r * (bh + gap)
+            # Filled rather than laid: the plinth grid *is* the hall, and a
+            # case nudged a tile aside to clear a lane merges into its
+            # neighbour and stops being a case of its own.
             g.fill(bx, by, bw, bh, 'P')
             blocks.append((bx, by))
 
@@ -220,13 +247,18 @@ def hall_plan(g, tier, plinth_cols, plinth_rows, back_rooms, furnish):
         ww = (inner - i * w) if i == back_rooms - 1 else w
         if i:
             g.vwall(x - 1, split_y + 1, rows - split_y - 2)
-        g.fill(x + ww // 2 - 1, split_y, 3, 1, 'D')
+        d = x + ww // 2 - 1
+        g.fill(d, split_y, 3, 1, 'D')
+        g.lane(d, split_y + 1, 3, rows - split_y - 2)
+        g.lane(d, split_y - 3, 3, 3)
         rooms.append((x, ww))
+
+    # The way out, and the lane up to it through the middle back room.
+    ex = rooms[len(rooms) // 2]
+    g.lane(ex[0] + ex[1] // 2 - 1, split_y, 3, rows - split_y - 1)
 
     furnish(blocks, rooms, split_y)
 
-    # Out through the bottom, under the middle room.
-    ex = rooms[len(rooms) // 2]
     g.fill(ex[0] + ex[1] // 2 - 1, rows - 1, 3, 1, 'X')
     g.drop(ex[0] + ex[1] // 2, rows - 4, '@', radius=99, box=True)
     return blocks, rooms, split_y
@@ -255,14 +287,21 @@ def warren_plan(g, tier, bands, per_band, furnish):
                 # joined top-to-bottom and the map is two separate towers that
                 # never meet.
                 dy = y + (h // 3 if (b + i) % 2 else 2 * h // 3) - 1
-                g.fill(x - 1, max(y, min(y + h - 3, dy)), 1, 3, 'D')
+                dy = max(y, min(y + h - 3, dy))
+                g.fill(x - 1, dy, 1, 3, 'D')
+                # Three tiles deep either side of the opening, no more: a lane
+                # driven the full width of a room this small leaves nowhere for
+                # a bed, and an empty room is the thing this is here to stop.
+                g.lane(x - 4, dy, 7, 3)
             row.append((x, y, ww, h))
         # Doorways between this band and the one above, staggered left/right so
         # the route through the building is not a straight line.
         if b:
             for i, (x, _, ww, _) in enumerate(row):
                 off = 2 if (b + i) % 2 else ww - 5
-                g.fill(x + max(1, min(ww - 4, off)), y - 1, 3, 1, 'D')
+                dx = x + max(1, min(ww - 4, off))
+                g.fill(dx, y - 1, 3, 1, 'D')
+                g.lane(dx, y - 4, 3, 7)
         cells.append(row)
     furnish(cells)
     return cells
@@ -281,8 +320,11 @@ def open_plan(g, tier, islands, side_rooms, furnish):
         hh = h if i < side_rooms - 1 else rows - 1 - y
         if i:
             g.hwall(wall_x + 1, y - 1, cols - wall_x - 2)
-        g.fill(wall_x, y + hh // 2 - 1, 1, 3, 'D')
+        dy = y + hh // 2 - 1
+        g.fill(wall_x, dy, 1, 3, 'D')
+        g.lane(wall_x - 4, dy, 7, 3)
         rooms.append((wall_x + 1, y, cols - wall_x - 2, hh))
+    g.lane(1, rows // 2 - 1, wall_x, 3)
     furnish(rooms, wall_x)
     g.fill(0, rows // 2 - 1, 1, 3, 'X')
     g.drop(wall_x - 3, rows - 4, '@', radius=99, box=True)
@@ -314,9 +356,12 @@ def vault_plan(g, tier, layers, furnish):
         # not a lap of it, which is what a quarter-turn per layer worked out to.
         if i % 2:
             g.fill(x + w // 2 - 1, y + h - 1, 3, 1, 'D')
+            g.lane(x + w // 2 - 1, y + h - 1 - step, 3, step * 2 + 1)
         else:
             g.fill(x + w // 2 - 1, y, 3, 1, 'D')
+            g.lane(x + w // 2 - 1, y - step, 3, step * 2 + 1)
         rings.append((x, y, w, h))
+    g.lane(cols // 2 - 1, rows - 1 - step, 3, step + 1)
     furnish(rings)
     g.fill(cols // 2 - 1, rows - 1, 3, 1, 'X')
     g.drop(cols // 2, rows - 3, '@', radius=99, box=True)
@@ -418,14 +463,34 @@ def _blobs(g, chars):
     return out
 
 
-def thin_floor_loot(g, tier):
-    """Take most of the loot off the school's floors.
+# How much of a location's furniture is worth opening, as a share of the
+# school's. A museum puts its value on plinths in the middle of the hall and a
+# shop puts it on the shelves — the point of those buildings is that the loot is
+# out where you have to cross the floor for it, so hiding all of it in the
+# staff-room cupboards would be turning them into the school. The residential
+# and office buildings are the other way about: a flat is drawers.
+STASH_SHARE = {
+    'Museum': 0.80, 'Shop': 0.85, 'Vault': 0.85, 'Penthouse': 0.90,
+}
+# The most of a location's furniture that may be searchable. A vault is racks
+# and cabinets and nothing else, so the general cap would make almost every
+# piece in it something to open — which is the chore the mechanic is supposed
+# not to be.
+SEARCH_CAP = {'Vault': 0.55}
+# ...and how much is left lying about, the same way round.
+FLOOR_SHARE = {
+    'Museum': 2.2, 'Shop': 1.6, 'Vault': 1.9, 'Penthouse': 1.2,
+}
+
+
+def thin_floor_loot(g, tier, location='School'):
+    """Take most of the loot off the floors.
 
     What is left is what section three of the brief asks visible loot to be:
     a few easy rewards to get you moving, and one thing worth crossing the map
     for. Everything else is now behind a cupboard door.
     """
-    keep = TIER_FLOOR[tier]
+    keep = max(2, round(TIER_FLOOR[tier] * FLOOR_SHARE.get(location, 1.0)))
     found = [(x, y, g.g[y][x]) for y in range(g.rows) for x in range(g.cols)
              if g.g[y][x] in LOOT_CHARS]
     if len(found) <= keep:
@@ -439,12 +504,27 @@ def thin_floor_loot(g, tier):
     # Keep the single best one — the tempting thing out in the open — and then
     # spread the rest of the survivors across the map rather than leaving a
     # cluster in whichever room happened to come first.
+    # What a museum is *for* is the things on the plinths, so those survive the
+    # thinning first: a gallery whose display cases are empty and whose value is
+    # all in the staff-room drawers is not a museum, it is a school with
+    # sculpture in it.
+    def on_show(i):
+        x, y, _ = found[i]
+        return any(g.g[yy][xx] == 'P'
+                   for yy in range(max(0, y - 3), min(g.rows, y + 4))
+                   for xx in range(max(0, x - 3), min(g.cols, x + 4)))
     best = max(range(len(found)), key=lambda i: value.get(found[i][2], 0))
     kept = {best}
-    rest = [i for i in range(len(found)) if i != best]
+    kept |= {i for i in range(len(found)) if on_show(i)}
+    if len(kept) > keep:
+        kept = set(sorted(kept, key=lambda i: (i != best, found[i][1], found[i][0]))[:keep])
+    rest = [i for i in range(len(found)) if i not in kept]
     rest.sort(key=lambda i: (found[i][1], found[i][0]))
-    step = len(rest) / max(1, keep - 1)
-    for k in range(keep - 1):
+    want = max(0, keep - len(kept))
+    step = len(rest) / max(1, want) if want else 0
+    for k in range(want):
+        if not rest:
+            break
         kept.add(rest[min(len(rest) - 1, int(k * step))])
     for i, (x, y, _) in enumerate(found):
         if i not in kept:
@@ -453,7 +533,11 @@ def thin_floor_loot(g, tier):
             g.g[y][x] = tempting if i == best else petty
 
 
-def make_searchable(g, tier):
+def make_searchable(g, tier, location='School'):
+    # The school's rooms already put their furniture down as discrete pieces —
+    # a bank of lockers, a cupboard, a desk — so its blobs are taken whole and
+    # the maps it already ships are untouched by the carving below.
+    carve = location != 'School'
     """Turn some of the school's furniture into things you can look inside.
 
     Returns the legend the level needs: digit -> {style, item}. Nothing else
@@ -511,8 +595,44 @@ def make_searchable(g, tier):
                 return True
         return False
 
-    blobs = [b for b in _blobs(g, SEARCHABLE_STYLES)
-             if 2 <= len(b[1]) <= 24 and rectangular(b) and openable(b)]
+    # A whole run of shelving is not a cupboard.
+    #
+    # The game hangs what is inside a searchable piece on the largest rectangle
+    # its character merges into, so a piece has to *be* a rectangle for this
+    # tool's distance to be the game's distance. Several of the grammars lay
+    # furniture down in continuous runs — a bank of desks across an office, a
+    # wall of shelving down a shop — and those come out as one forty-cell blob
+    # that is either not a rectangle or far too big to be a thing you open.
+    #
+    # So a piece is carved out of the run instead: one desk in the bank, one
+    # section of the shelving, given its own character. The rest stays ordinary
+    # furniture. Which piece is chosen is the one furthest from the person
+    # listening, because that is the one worth putting anything in.
+    def carved(blob):
+        ch, cells = blob
+        if 2 <= len(cells) <= 24 and rectangular(blob):
+            return blob
+        if not carve:
+            return None
+        have = set(cells)
+        for (pw, ph) in ((4, 3), (3, 3), (3, 2), (2, 3), (4, 2), (2, 2),
+                         (3, 1), (1, 3), (2, 1), (1, 2)):
+            best, far = None, -1
+            for (x, y) in cells:
+                if any((x + dx, y + dy) not in have
+                       for dx in range(pw) for dy in range(ph)):
+                    continue
+                cx, cy = x + pw / 2, y + ph / 2
+                d = ((cx - watcher[0]) ** 2 + (cy - watcher[1]) ** 2) if watcher else 0
+                if d > far:
+                    far, best = d, (x, y)
+            if best:
+                bx, by = best
+                return (ch, [(bx + dx, by + dy) for dx in range(pw) for dy in range(ph)])
+        return None
+
+    blobs = [p for p in (carved(b) for b in _blobs(g, SEARCHABLE_STYLES))
+             if p and openable(p)]
     if not blobs:
         return {}
 
@@ -537,14 +657,23 @@ def make_searchable(g, tier):
         return (((cx - watcher[0]) ** 2 + (cy - watcher[1]) ** 2) ** 0.5) * TILE
 
     blobs.sort(key=key)                   # nearest the caretaker first
-    wanted = min(TIER_STASHES[tier], len(blobs), len(STASH_CHARS))
+    # ...and never most of the room. A cupboard worth opening is only worth
+    # noticing if the furniture around it is furniture, so at most three pieces
+    # in five may be something you can look inside.
+    wanted = min(max(2, round(TIER_STASHES[tier] * STASH_SHARE.get(location, 1.0))),
+                 len(blobs), len(STASH_CHARS))
+    if carve:
+        # Where pieces are carved out of runs, nearly every blob is a candidate
+        # and the cap has to bite; the school lays its furniture down as
+        # discrete pieces already, and most of them are not cupboards.
+        wanted = min(wanted, max(4, int(len(blobs) * SEARCH_CAP.get(location, 0.65))))
     # Spread the choices across the range rather than taking the nearest few:
     # a level where every searchable thing is in one room is not an exploration.
     step = len(blobs) / wanted
     chosen = [blobs[min(len(blobs) - 1, int(i * step))] for i in range(wanted)]
 
     loot = TIER_STASH_LOOT[tier]
-    filled = min(TIER_FILLED[tier], wanted)
+    filled = min(max(1, round(TIER_FILLED[tier] * STASH_SHARE.get(location, 1.0))), wanted)
     distances = [spread(b) for b in chosen]
 
     # Where the best thing on the map goes. Not the very nearest piece: at the
@@ -585,6 +714,27 @@ def make_searchable(g, tier):
     return legend
 
 
+# --- dressing the rooms ------------------------------------------------------
+# None of this collides with anything. It is the layer between "there is a
+# cabinet here" and "this is a stockroom": the floor treatment, the sign over
+# the door, the bin in the corner, the clock on the corridor wall. The room
+# grammar is the only thing that knows a room is a ward rather than a store
+# cupboard, so it is the only thing that can say what belongs on its walls.
+def dress(g, x, y, w, h, tag, sign=None, door=None, above=True, props=()):
+    g.deco('floor', x, y, w, h, tag)
+    if sign is not None and door is not None:
+        g.deco('sign', door, y - 1 if above else y + h, 3, 1, sign)
+    for item in props:
+        kind, px, py = item[0], item[1], item[2]
+        g.deco(kind, min(g.cols - 1, max(0, px)), min(g.rows - 1, max(0, py)))
+
+
+def corner_props(x, y, w, h, kinds):
+    """A prop in each spare corner of a room, in the order given."""
+    spots = [(x + 1, y + 1), (x + w - 2, y + 1), (x + 1, y + h - 2), (x + w - 2, y + h - 2)]
+    return [(k, spots[i % 4][0], spots[i % 4][1]) for i, k in enumerate(kinds)]
+
+
 def place_watcher(g, x, y, w, h, wide=6, tall=3):
     """The bed, desk or couch the level's person is on, centred in its room with
     room to walk round it. This is the one piece of furniture that can never be
@@ -592,7 +742,11 @@ def place_watcher(g, x, y, w, h, wide=6, tall=3):
     opening."""
     ww = max(3, min(wide, w - 6))
     hh = max(2, min(tall, h - 6))
-    g.fill(x + (w - ww) // 2, y + 2, ww, hh, 'E')
+    # The one piece that has to exist: without it the level has nobody in it and
+    # the tile reader throws. If every position in the room is spoken for, it
+    # goes down anyway and the repair passes sort out the consequences.
+    if not g.must(x + (w - ww) // 2, y + 2, ww, hh, 'E'):
+        g.fill(x + (w - ww) // 2, y + 2, ww, hh, 'E')
 
 
 def _rowsof(x, y, w, h, n):
@@ -607,23 +761,51 @@ def apartment(g, tier):
     n = [2, 2, 3, 3, 3][tier]
     bands = [2, 3, 3, 4, 4][tier]
 
+    # What each room of a flat is, in the order the bands are laid out: the
+    # bedroom Dad is asleep in first, then the rooms a flat actually has.
+    # Naming them is what turns a grid of rectangles with furniture in it into
+    # somewhere a person lives.
+    ROOMS = [('Living room', 'boards', 'V'), ('Kitchen', 'tiles', 'C'),
+             ('Study', 'carpet', 'T'), ('Spare room', 'carpet', 'W'),
+             ('Dining room', 'boards', 'T'), ('Hall', 'boards', 'B')]
+
     def furnish(cells):
         placed = []
         for b, row in enumerate(cells):
             for i, (x, y, w, h) in enumerate(row):
                 if b == 0 and i == 0:
-                    g.fill(x + 1, y + 1, min(6, w - 3), min(5, h - 3), 'E')   # Dad's bed
-                    g.fill(x + 1, y + h - 3, 2, 2, 'N')
+                    g.must(x + 1, y + 1, min(6, w - 3), min(5, h - 3), 'E')   # Dad's bed
+                    g.lay(x + 1, y + h - 3, 2, 2, 'N')
+                    g.lay(x + w - 4, y + 1, 3, 2, 'W')
+                    dress(g, x, y, w, h, 'carpet',
+                          props=[('lamp', x + 3, y + 3)] + corner_props(x, y, w, h, ['plant']))
+                    placed.append((x + w - 3, y + h - 3))
                     continue
+                name, tag, extra = ROOMS[(b * 3 + i - 1) % len(ROOMS)]
                 kind = 'TSCWV'[(b * 3 + i) % 5]
-                g.fill(x + 1, y + 1, max(3, w // 2), max(2, h // 3), kind)
-                if h > 9:
-                    g.fill(x + w - max(4, w // 3) - 1, y + h - max(3, h // 3) - 1,
-                           max(3, w // 3), max(2, h // 4), 'CTB'[(b + i) % 3])
+                g.lay(x + 1, y + 1, max(3, w // 2), max(2, h // 3), kind)
+                if h > 7:
+                    g.lay(x + w - max(4, w // 3) - 1, y + h - max(3, h // 3) - 1,
+                          max(3, w // 3), max(2, h // 4), 'CTB'[(b + i) % 3])
+                # A third and fourth piece. Two things in a room is a diagram;
+                # four is somewhere a person keeps their things — and it is what
+                # gives the search system anything to work with, because a
+                # cupboard is only worth noticing among furniture that is not.
+                g.lay(x + w - 4, y + 1, 3, 2, extra)
+                g.lay(x + w - 3, y + h // 2, 2, 2, 'NC'[(b + i) % 2])
                 if h > 11 and w > 10:
-                    g.fill(x + w // 2 - 2, y + h // 2, 4, 2, ',')
+                    g.lay(x + w // 2 - 2, y + h // 2, 4, 2, ',')
+                dress(g, x, y, w, h, tag,
+                      props=corner_props(x, y, w, h, ['plant', 'bin', 'lamp'][:(b + i) % 3 + 1]))
+                if name == 'Kitchen':
+                    g.deco('kettle', x + 1, y + 2)
                 placed.append((x + w // 2, y + h // 2))
+                placed.append((x + 2, y + h - 2))
         scatter(g, tier, placed)
+    # The way out, reserved before anything is furnished. Three tiles of doorway
+    # need two rows of standing room in front of them, and a sofa laid along the
+    # wall beside the door leaves one — which reads as a way out and is not.
+    g.lane(1, g.rows // 2 - 2, 4, 5)
     warren_plan(g, tier, bands, n, furnish)
     g.fill(0, g.rows // 2 - 1, 1, 3, 'X')
     g.drop(g.cols - 3, g.rows - 3, '@', radius=99, box=True)
@@ -638,16 +820,25 @@ def house(g, tier):
         for b, row in enumerate(cells):
             for i, (x, y, w, h) in enumerate(row):
                 if b == 0 and i == 0:
-                    g.fill(x + 2, y + 2, min(5, w - 4), min(3, h - 4), 'E')   # the armchair
-                    g.fill(x + 1, y + 1, 2, 3, 'C')                           # the stove
+                    g.must(x + 2, y + 2, min(5, w - 4), min(3, h - 4), 'E')   # the armchair
+                    g.lay(x + 1, y + 1, 2, 3, 'C')                            # the stove
+                    g.lay(x + w - 4, y + h - 3, 3, 2, 'B')
+                    dress(g, x, y, w, h, 'boards',
+                          props=[('lamp', x + 3, y + 4), ('kettle', x + 1, y + 4)])
+                    placed.append((x + w - 3, y + 2))
                     continue
-                g.fill(x + 1, y + 1, max(4, w // 2), max(2, h // 4), 'TSB'[(b + i) % 3])
-                if h > 8:
-                    g.fill(x + 1, y + h - 3, max(4, w // 2), 2, 'CW'[(b * 2 + i) % 2])
+                g.lay(x + 1, y + 1, max(4, w // 2), max(2, h // 4), 'TSB'[(b + i) % 3])
+                if h > 7:
+                    g.lay(x + 1, y + h - 3, max(4, w // 2), 2, 'CW'[(b * 2 + i) % 2])
+                g.lay(x + w - 4, y + 2, 3, 2, 'CWB'[(b + i) % 3])
                 if h > 10 and w > 9:
-                    g.fill(x + w // 2 - 2, y + h // 2 - 1, 5, 3, ',')
+                    g.lay(x + w // 2 - 2, y + h // 2 - 1, 5, 3, ',')
+                dress(g, x, y, w, h, 'boards' if (b + i) % 2 else 'carpet',
+                      props=corner_props(x, y, w, h, ['plant', 'lamp', 'bin'][:(b + i) % 3 + 1]))
                 placed.append((x + w - 3, y + h // 2))
+                placed.append((x + 2, y + 2))
         scatter(g, tier, placed)
+    g.lane(g.cols // 2 - 2, g.rows - 5, 5, 4)
     warren_plan(g, tier, bands, n, furnish)
     g.fill(g.cols // 2 - 1, g.rows - 1, 1 + 2, 1, 'X')
     g.drop(g.cols // 2, g.rows - 4, '@', radius=99, box=True)
@@ -656,19 +847,34 @@ def house(g, tier):
 def _suite_furnish(g, tier, bed_char='S'):
     def furnish(tops, ty, th, bots, by, bh, cy, ch):
         placed = []
+        room = 0
         for (rooms, y0, h) in ((tops, ty, th), (bots, by, bh)):
             for i, (x, w) in enumerate(rooms):
                 # Bed one side, storage the other, aisle down the middle under
                 # the door — the shape that stops a room sealing itself.
-                g.fill(x + 1, y0 + 1, max(3, w // 3), max(3, h // 2 - 1), bed_char)
-                g.fill(x + w - max(3, w // 4) - 1, y0 + 1, max(2, w // 4), max(2, h // 3), 'W')
+                g.lay(x + 1, y0 + 1, max(3, w // 3), max(3, h // 2 - 1), bed_char)
+                g.lay(x + w - max(3, w // 4) - 1, y0 + 1, max(2, w // 4), max(2, h // 3), 'W')
                 if h > 7:
-                    g.fill(x + 1, y0 + h - 3, max(3, w // 3), 2, 'C')
+                    g.lay(x + 1, y0 + h - 3, max(3, w // 3), 2, 'C')
+                # A writing desk and a bedside table: a hotel room with a bed
+                # and a wardrobe in it is a diagram of a hotel room.
+                g.lay(x + w - 4, y0 + h - 3, 3, 2, 'T')
+                g.lay(x + 1 + max(3, w // 3), y0 + 1, 2, 2, 'N')
+                room += 1
+                dress(g, x, y0, w, h, 'carpet',
+                      props=[('lamp', x + w - 3, y0 + 2), ('bin', x + 1, y0 + h - 1)])
                 placed.append((x + w // 2, y0 + h - 2))
                 placed.append((x + 2, y0 + h // 2))
         # Corridor units, kept clear of every door mouth.
         for i, (x, w) in enumerate(tops[:-1]):
-            g.fill(x + w - 2, cy + 2, 2, max(1, ch - 4), 'C')
+            g.lay(x + w - 2, cy + 2, 2, max(1, ch - 4), 'C')
+        # The corridor itself: carpet, a clock, a fire notice, a plant at each
+        # end. A corridor is the part of a hotel you actually walk down.
+        g.deco('floor', 1, cy, g.cols - 2, ch, 'carpet')
+        g.deco('clock', g.cols // 4, cy)
+        g.deco('notice', g.cols // 2 + 4, cy, 4, 1)
+        g.deco('plant', 2, cy + ch - 1)
+        g.deco('plant', g.cols - 3, cy + ch - 1)
         scatter(g, tier, placed)
     return furnish
 
@@ -682,7 +888,7 @@ def hotel(g, tier):
         base(tops, ty, th, bots, by, bh, cy, ch)
         # Otakar's desk, in the middle of the corridor. The corridor is six
         # tiles deep, so there is a way past it whichever side you take.
-        g.fill(g.cols // 2 - 3, cy + 2, 6, 2, 'E')
+        g.must(g.cols // 2 - 3, cy + 2, 6, 2, 'E')
     corridor_plan(g, tier, top, bottom, furnish)
 
 
@@ -755,10 +961,10 @@ def school(g, tier):
         rows = [r for r in range(y + 4, y + h, 4) if r + 1 <= y + h - 1]
         for r in rows:
             for xx in bands(x, w, keep):
-                g.fill(xx, r, 2, 2, 'T')
+                g.lay(xx, r, 2, 2, 'T')
         front = y + 1 if door_below else y + h - 2
         for i, xx in enumerate(bands(x, w, keep, wide=4)):
-            g.fill(xx, front, 4, min(2, h - 2), 'T' if i == 0 else 'C')
+            g.lay(xx, front, 4, min(2, h - 2), 'T' if i == 0 else 'C')
         g.deco('board', x + 1, (y - 1) if door_below else (y + h), w - 2, 1)
         g.deco('bin', x + w - 2, front)
         g.deco('desklamp', x + 2, front + 1)
@@ -771,14 +977,14 @@ def school(g, tier):
         keep = lane(x, w)
         tall = max(2, min(h - 6, h // 2))
         for xx in bands(x, w, keep, wide=2, gap=2):
-            g.fill(xx, y + 1, 2, tall, 'B')
+            g.lay(xx, y + 1, 2, tall, 'B')
         # A table to read at, and a counter by the door. Stacks alone leave a
         # library reading as a warehouse.
         for xx in bands(x, w, keep, wide=5)[:1]:
-            g.fill(xx, y + tall + 3, 5, 2, 'T')
+            g.lay(xx, y + tall + 3, 5, 2, 'T')
         for xx in bands(x, w, keep, wide=3)[-1:]:
             if h > 9:
-                g.fill(xx, y + h - 3, 3, 2, 'C')
+                g.lay(xx, y + h - 3, 3, 2, 'C')
         g.deco('floor', x, y, w, h, 'carpet')
         g.deco('lamp', x + w // 2, y + h // 2)
         g.deco('plant', x + w - 2, y + h - 2)
@@ -788,12 +994,12 @@ def school(g, tier):
     def gym(x, w, y, h, door_above):
         """Benching round the edges and a floor left clear in the middle. A
         hall is mostly nothing, and filling it would make it a store room."""
-        g.fill(x + 1, y + 2, 2, max(2, h - 4), 'S')
-        g.fill(x + w - 3, y + 2, 2, max(2, h - 4), 'S')
+        g.lay(x + 1, y + 2, 2, max(2, h - 4), 'S')
+        g.lay(x + w - 3, y + 2, 2, max(2, h - 4), 'S')
         keep = lane(x, w)
         for xx in bands(x, w, keep, wide=4):
             if xx > x + 2 and xx + 4 < x + w - 2:
-                g.fill(xx, y + h - 3, 4, 2, 'S')
+                g.lay(xx, y + h - 3, 4, 2, 'S')
         # Floor before court: the list is painted in order, and a floor laid
         # after its markings covers them up.
         g.deco('floor', x, y, w, h, 'parquet')
@@ -806,13 +1012,13 @@ def school(g, tier):
         shelving, cupboards under it, and boxes wherever they will go."""
         keep = lane(x, w)
         for i, xx in enumerate(bands(x, w, keep, wide=3)):
-            g.fill(xx, y + 1, 3, min(3, h - 4), 'B' if i % 2 == 0 else 'C')
+            g.lay(xx, y + 1, 3, min(3, h - 4), 'B' if i % 2 == 0 else 'C')
         if h > 9:
             for i, xx in enumerate(bands(x, w, keep, wide=3)):
-                g.fill(xx, y + 5, 3, 2, 'C' if i % 2 else 'B')
+                g.lay(xx, y + 5, 3, 2, 'C' if i % 2 else 'B')
         for i, xx in enumerate(bands(x, w, keep, wide=3)):
             if y + h - 3 > y + 7:
-                g.fill(xx, y + h - 3, 3, 2, 'C' if i % 2 == 0 else 'W')
+                g.lay(xx, y + h - 3, 3, 2, 'C' if i % 2 == 0 else 'W')
         g.deco('floor', x, y, w, h, 'concrete')
         g.deco('tools', x + 1, y + h // 2, 2, 1)
         g.deco('sign', x + w // 2 - 1, y - 1, 3, 1, 'Store')
@@ -824,14 +1030,14 @@ def school(g, tier):
         keep = lane(x, w)
         spots = bands(x, w, keep, wide=3)
         for i, xx in enumerate(spots):
-            g.fill(xx, y + 1, 3, 2, 'T' if i == 0 else 'C')
+            g.lay(xx, y + 1, 3, 2, 'T' if i == 0 else 'C')
         if h > 8 and spots:
-            g.fill(spots[0], y + h - 3, 2, 2, 'W')          # the fridge
+            g.lay(spots[0], y + h - 3, 2, 2, 'W')          # the fridge
             for xx in spots[1:]:
-                g.fill(xx, y + h - 3, 3, 2, 'C')            # pigeonholes
+                g.lay(xx, y + h - 3, 3, 2, 'C')            # pigeonholes
         if h > 11:
             for xx in bands(x, w, keep, wide=4)[:1]:
-                g.fill(xx, y + 5, 4, 2, 'T')                # the table they sit at
+                g.lay(xx, y + 5, 4, 2, 'T')                # the table they sit at
         g.deco('floor', x, y, w, h, 'carpet')
         g.deco('kettle', x + w - 3, y + 3)
         g.deco('lamp', x + w // 2, y + h - 4)
@@ -856,7 +1062,7 @@ def school(g, tier):
         for (x, w) in tops:
             keep = lane(x, w)
             for xx in bands(x, w, keep, wide=4):
-                g.fill(xx, cy, 4, 2, 'C')
+                g.lay(xx, cy, 4, 2, 'C')
         # Along the lower wall, one bank deep and hard against it. Anything
         # further out leaves a single tile between the lockers and the wall,
         # and a single tile is not a gap — the player is taller than one — so
@@ -865,7 +1071,7 @@ def school(g, tier):
             if ch >= 5:
                 keep = lane(x, w)
                 for xx in bands(x, w, keep, wide=4):
-                    g.fill(xx, cy + ch - 1, 4, 1, 'C')
+                    g.lay(xx, cy + ch - 1, 4, 1, 'C')
         g.deco('floor', 1, cy, g.cols - 2, ch, 'tiles')
         g.deco('notice', g.cols // 2 - 2, cy, 4, 1)
         g.deco('clock', g.cols - 7, cy)
@@ -876,7 +1082,7 @@ def school(g, tier):
 
 def hospital(g, tier):
     top = [2, 3, 3, 4, 4][tier]
-    bottom = [1, 2, 3, 3, 4][tier]
+    bottom = [2, 2, 3, 3, 4][tier]
 
     def furnish(tops, ty, th, bots, by, bh, cy, ch):
         placed = []
@@ -886,25 +1092,34 @@ def hospital(g, tier):
                 place_watcher(g, x, ty, w, th, 7, 3)
                 placed.append((x + 2, ty + th - 3))
                 continue
-            g.fill(x + 1, ty + 1, max(3, w // 3), max(4, th // 2), 'S')
+            g.lay(x + 1, ty + 1, max(3, w // 3), max(4, th // 2), 'S')
             if th > 9:
-                g.fill(x + 1, ty + th - 4, max(3, w // 3), 3, 'S')
-            g.fill(x + w - 3, ty + 2, 2, 2, 'N')
+                g.lay(x + 1, ty + th - 4, max(3, w // 3), 3, 'S')
+            g.lay(x + w - 3, ty + 2, 2, 2, 'N')
+            g.lay(x + w - 4, ty + th - 3, 3, 2, 'C')     # the ward's own cabinet
+            dress(g, x, ty, w, th, 'tiles', 'Ward %d' % (i + 1), None,
+                  props=[('bin', x + 1, ty + th - 1), ('plant', x + w - 2, ty + 1)])
             placed.append((x + w - 3, ty + th - 3))
-        for (x, w) in bots:                   # dispensary, stores, treatment
-            g.fill(x + 1, by + 1, max(4, w - 5), 2, 'B')
+        for j, (x, w) in enumerate(bots):     # dispensary, stores, treatment
+            g.lay(x + 1, by + 1, max(4, w - 5), 2, 'B')
             if bh > 7:
-                g.fill(x + 1, by + bh - 4, max(4, w - 5), 2, 'C')
+                g.lay(x + 1, by + bh - 4, max(4, w - 5), 2, 'C')
+            g.lay(x + w - 4, by + 2, 3, 2, 'C')
+            dress(g, x, by, w, bh, 'tiles',
+                  props=[('tools', x + 2, by + bh - 2), ('bin', x + w - 2, by + bh - 2)])
             placed.append((x + w - 3, by + bh // 2))
-        g.fill(g.cols // 2 - 2, cy + 2, 5, max(1, ch - 4), 'T')   # nurses' station
+        g.lay(g.cols // 2 - 2, cy + 2, 5, max(1, ch - 4), 'T')   # nurses' station
+        g.deco('floor', 1, cy, g.cols - 2, ch, 'tiles')
+        g.deco('clock', 3, cy)
+        g.deco('notice', g.cols - 8, cy, 4, 1)
         scatter(g, tier, placed)
 
     corridor_plan(g, tier, top, bottom, furnish)
 
 
 def office(g, tier):
-    top = [1, 2, 2, 3, 3][tier]
-    bottom = [1, 2, 3, 3, 4][tier]
+    top = [2, 2, 3, 3, 3][tier]
+    bottom = [2, 2, 3, 3, 4][tier]
 
     def furnish(tops, ty, th, bots, by, bh, cy, ch):
         placed = []
@@ -918,17 +1133,29 @@ def office(g, tier):
                 yy = ty + 1 + r * 3
                 if yy + 2 >= ty + th:
                     break
-                g.fill(x + 1, yy, max(4, w // 3), 2, 'T')
+                g.lay(x + 1, yy, max(4, w // 3), 2, 'T')
                 if w > 12:
-                    g.fill(x + w - max(4, w // 3) - 1, yy, max(4, w // 3), 2, 'T')
+                    g.lay(x + w - max(4, w // 3) - 1, yy, max(4, w // 3), 2, 'T')
+            # Filing down the back wall of every open-plan bay.
+            g.lay(x + 1, ty + th - 3, max(3, w // 3), 2, 'C')
+            dress(g, x, ty, w, th, 'carpet', 'Open plan', None,
+                  props=[('plant', x + w - 2, ty + 1), ('bin', x + 1, ty + th - 1),
+                         ('desklamp', x + 2, ty + 2)])
             placed.append((x + w // 2, ty + th - 2))
-        for (x, w) in bots:                   # meeting rooms and the lounge
-            g.fill(x + 2, by + 2, max(4, w - 6), max(3, bh // 2 - 1), 'T')
+        for j, (x, w) in enumerate(bots):     # meeting rooms and the lounge
+            g.lay(x + 2, by + 2, max(4, w - 6), max(3, bh // 2 - 1), 'T')
             if bh > 8:
-                g.fill(x + 1, by + bh - 3, max(4, w // 2), 2, 'S')
+                g.lay(x + 1, by + bh - 3, max(4, w // 2), 2, 'S')
+            g.lay(x + w - 4, by + bh - 3, 3, 2, 'C')
+            dress(g, x, by, w, bh, 'carpet', ['Meeting', 'Boardroom', 'Lounge'][j % 3], None,
+                  props=[('plant', x + 1, by + 1), ('bin', x + w - 2, by + bh - 1)])
             placed.append((x + w - 3, by + bh - 3))
         for (x, w) in tops[:-1]:
-            g.fill(x + w - 3, cy + 2, 3, max(1, ch - 4), 'C')
+            g.lay(x + w - 3, cy + 2, 3, max(1, ch - 4), 'C')
+        g.deco('floor', 1, cy, g.cols - 2, ch, 'tiles')
+        g.deco('clock', 4, cy)
+        g.deco('notice', g.cols // 2, cy, 4, 1)
+        g.deco('plant', g.cols - 3, cy + ch - 1)
         scatter(g, tier, placed)
 
     corridor_plan(g, tier, top, bottom, furnish)
@@ -941,20 +1168,42 @@ def museum(g, tier):
 
     def furnish(blocks, rooms, split_y):
         placed = []
-        # Right beside each case, not a room away from it.
+        # In the aisle beside each case, not a room away from it: what a museum
+        # is worth is out on the floor where you have to cross to reach it.
         for (bx, by) in blocks:
-            placed.append((bx + 1, by + 3))
+            placed.append((bx - 1, by + 1))
+            placed.append((bx + 3, by + 1))
+        back_h = g.rows - split_y - 2
         for i, (x, w) in enumerate(rooms):
             if i == 0:
                 # The guard room: Bruno's monitor desk, and space around it.
-                place_watcher(g, x, split_y + 1, w, g.rows - split_y - 2, 5, 3)
+                place_watcher(g, x, split_y + 1, w, back_h, 5, 3)
+                g.lay(x + w - 4, split_y + back_h - 3, 3, 2, 'C')
+                dress(g, x, split_y + 1, w, back_h, 'concrete', 'Security', None,
+                      props=[('desklamp', x + 2, split_y + 3), ('kettle', x + 1, split_y + back_h - 2)])
                 placed.append((x + 2, g.rows - 4))
                 continue
-            g.fill(x + 1, split_y + 2, max(3, w // 3), 2, 'B')
+            # Store rooms and the curators' office: the paperwork side of a
+            # museum, and where anything not on show actually lives.
+            g.lay(x + 1, split_y + 2, max(3, w // 3), 2, 'B')
+            g.lay(x + w - 5, split_y + 2, 4, 2, 'C')
+            g.lay(x + 1, split_y + back_h - 3, max(3, w // 3), 2, 'T')
+            g.lay(x + w - 4, split_y + back_h - 3, 3, 2, 'C')
+            dress(g, x, split_y + 1, w, back_h, 'concrete',
+                  ['Store', 'Office', 'Archive'][i % 3], None,
+                  props=[('bin', x + w - 2, split_y + back_h - 1), ('tools', x + 2, split_y + 4)])
             placed.append((x + w - 3, split_y + 3))
-        # Benches down the sides of the hall.
-        g.fill(1, 3, 2, max(3, split_y // 3), 'S')
-        g.fill(g.cols - 3, 3, 2, max(3, split_y // 3), 'S')
+        # Benches down the sides of the hall, with a rope-line floor and the
+        # gallery signage above it.
+        g.lay(1, 3, 2, max(3, split_y // 3), 'S')
+        g.lay(g.cols - 3, 3, 2, max(3, split_y // 3), 'S')
+        g.deco('floor', 1, 1, g.cols - 2, split_y - 1, 'tiles')
+        g.deco('poster', 4, 1, 5, 1)
+        g.deco('poster', g.cols - 10, 1, 5, 1)
+        g.deco('sign', g.cols // 2 - 1, 1, 3, 1, 'Gallery')
+        g.deco('plant', 2, split_y - 2)
+        g.deco('plant', g.cols - 3, split_y - 2)
+        g.deco('lamp', g.cols // 2, split_y // 2)
         scatter(g, tier, placed)
 
     hall_plan(g, tier, pc, pr, back, furnish)
@@ -962,24 +1211,39 @@ def museum(g, tier):
 
 def shop(g, tier):
     pc = [3, 3, 4, 4, 5][tier]
-    pr = [1, 2, 2, 2, 3][tier]
-    back = [2, 2, 2, 3, 3][tier]
+    pr = [2, 2, 3, 3, 3][tier]
+    back = [2, 3, 3, 3, 4][tier]
 
     def furnish(blocks, rooms, split_y):
         placed = []
         for (bx, by) in blocks:
             placed.append((bx + 1, by + 3))
+        back_h = g.rows - split_y - 2
         for i, (x, w) in enumerate(rooms):
             if i == 0:
                 # The night manager's counter.
-                place_watcher(g, x, split_y + 1, w, g.rows - split_y - 2, 5, 3)
+                place_watcher(g, x, split_y + 1, w, back_h, 5, 3)
+                g.lay(x + w - 4, split_y + back_h - 3, 3, 2, 'C')
+                dress(g, x, split_y + 1, w, back_h, 'tiles', 'Counter', None,
+                      props=[('kettle', x + 1, split_y + back_h - 2), ('desklamp', x + 2, split_y + 3)])
                 placed.append((x + 2, g.rows - 4))
                 continue
-            g.fill(x + 1, split_y + 2, max(4, w - 5), 2, 'B')       # stockroom shelving
+            g.lay(x + 1, split_y + 2, max(4, w - 5), 2, 'B')       # stockroom shelving
+            g.lay(x + 1, split_y + back_h - 3, max(3, w // 3), 2, 'C')
+            g.lay(x + w - 4, split_y + back_h - 3, 3, 2, 'W')
+            dress(g, x, split_y + 1, w, back_h, 'concrete',
+                  ['Stock', 'Back office'][i % 2], None,
+                  props=[('tools', x + 2, split_y + 4), ('bin', x + w - 2, split_y + back_h - 1)])
             placed.append((x + w - 3, split_y + 3))
         # Shelving runs down both side walls: a shop is a corridor of goods.
-        g.fill(1, 2, 2, max(4, split_y - 4), 'B')
-        g.fill(g.cols - 3, 2, 2, max(4, split_y - 4), 'B')
+        g.lay(1, 2, 2, max(4, split_y - 4), 'B')
+        g.lay(g.cols - 3, 2, 2, max(4, split_y - 4), 'B')
+        g.deco('floor', 1, 1, g.cols - 2, split_y - 1, 'tiles')
+        g.deco('sign', g.cols // 2 - 1, 1, 3, 1, 'Sale')
+        g.deco('poster', 3, 1, 4, 1)
+        g.deco('poster', g.cols - 8, 1, 4, 1)
+        g.deco('clock', g.cols // 2 + 5, 1)
+        g.deco('bin', 2, split_y - 2)
         scatter(g, tier, placed)
 
     hall_plan(g, tier, pc, pr, back, furnish)
@@ -994,41 +1258,66 @@ def mansion(g, tier):
         for b, row in enumerate(cells):
             for i, (x, y, w, h) in enumerate(row):
                 if b == 0 and i == 0:
-                    g.fill(x + 2, y + 2, min(7, w - 4), 3, 'E')    # the guard's desk
+                    g.must(x + 2, y + 2, min(7, w - 4), 3, 'E')    # the guard's desk
+                    g.lay(x + 1, y + h - 3, 3, 2, 'C')
+                    dress(g, x, y, w, h, 'parquet', 'Security', None,
+                          props=[('desklamp', x + 3, y + 4), ('kettle', x + 1, y + h - 2)])
+                    placed.append((x + w - 3, y + h - 3))
                     continue
-                g.fill(x + 1, y + 1, max(4, w // 2), max(2, h // 4), 'STB'[(b + i) % 3])
-                if h > 8:
-                    g.fill(x + w - max(4, w // 3) - 1, y + h - 4, max(3, w // 3), 3, 'WC'[(b + i) % 2])
+                g.lay(x + 1, y + 1, max(4, w // 2), max(2, h // 4), 'STB'[(b + i) % 3])
+                if h > 7:
+                    g.lay(x + w - max(4, w // 3) - 1, y + h - 4, max(3, w // 3), 3, 'WC'[(b + i) % 2])
+                g.lay(x + 1, y + h - 3, 3, 2, 'CB'[(b + i) % 2])
                 if h > 10 and w > 10:
-                    g.fill(x + w // 2 - 3, y + h // 2 - 1, 6, 3, ',')
+                    g.lay(x + w // 2 - 3, y + h // 2 - 1, 6, 3, ',')
+                dress(g, x, y, w, h, 'parquet' if (b + i) % 2 else 'carpet',
+                      props=corner_props(x, y, w, h, ['plant', 'lamp', 'bin'][:(b + i) % 3 + 1]))
+                g.deco('poster', x + w // 2 - 2, y, 4, 1)
                 placed.append((x + 2, y + h - 3))
                 if w > 12:
                     placed.append((x + w - 4, y + 2))
         scatter(g, tier, placed)
+    g.lane(g.cols // 2 - 2, g.rows - 5, 5, 4)
     warren_plan(g, tier, bands, n, furnish)
     g.fill(g.cols // 2 - 1, g.rows - 1, 3, 1, 'X')
     g.drop(g.cols // 2, g.rows - 4, '@', radius=99, box=True)
 
 
 def penthouse(g, tier):
-    side = [1, 2, 2, 3, 3][tier]
-    islands = [2, 3, 4, 5, 6][tier]
+    side = [2, 2, 3, 3, 3][tier]
+    islands = [3, 4, 5, 6, 7][tier]
 
     def furnish(rooms, wall_x):
         placed = []
         for i, (x, y, w, h) in enumerate(rooms):
             if i == 0:
-                g.fill(x + 1, y + 1, min(6, w - 2), min(5, h - 3), 'E')   # the owner's bed
+                g.must(x + 1, y + 1, min(6, w - 2), min(5, h - 3), 'E')   # the owner's bed
+                g.lay(x + 1, y + h - 3, 3, 2, 'N')
+                dress(g, x, y, w, h, 'carpet', 'Bedroom', None,
+                      props=[('lamp', x + 2, y + 2), ('plant', x + w - 2, y + h - 2)])
             else:
-                g.fill(x + 1, y + 1, max(3, w - 3), max(2, h // 3), 'WC'[i % 2])
+                g.lay(x + 1, y + 1, max(3, w - 3), max(2, h // 3), 'WC'[i % 2])
+                g.lay(x + 1, y + h - 3, max(3, w // 2), 2, 'CT'[i % 2])
+                dress(g, x, y, w, h, 'parquet',
+                      ['Dressing room', 'Study', 'Store'][i % 3], None,
+                      props=[('bin', x + w - 2, y + h - 1), ('plant', x + 1, y + 1)])
             placed.append((x + w // 2, y + h - 3))
         # Islands of furniture across the open floor.
         for k in range(islands):
             ix = 3 + (k % 3) * ((wall_x - 6) // 3)
             iy = 3 + (k // 3) * ((g.rows - 8) // 2)
-            g.fill(ix, iy, min(6, wall_x - ix - 3), 3, 'STV'[k % 3])
+            g.lay(ix, iy, min(6, wall_x - ix - 3), 3, 'STV'[k % 3])
+            # ...each with something beside it, so the floor reads as arranged
+            # rather than as three sofas dropped on a plan.
+            g.lay(ix + min(6, wall_x - ix - 3) + 1, iy, 2, 2, 'NC'[k % 2])
             placed.append((ix + 1, iy + 5))
-        g.fill(wall_x // 2 - 3, g.rows // 2 - 2, 7, 4, ',')
+        g.lay(wall_x // 2 - 3, g.rows // 2 - 2, 7, 4, ',')
+        g.deco('floor', 1, 1, wall_x - 1, g.rows - 2, 'parquet')
+        g.deco('lamp', wall_x // 2, g.rows // 3)
+        g.deco('lamp', wall_x // 3, 2 * g.rows // 3)
+        g.deco('plant', 2, 2)
+        g.deco('plant', wall_x - 2, g.rows - 3)
+        g.deco('poster', wall_x // 2 - 2, 0, 5, 1)
         scatter(g, tier, placed)
     open_plan(g, tier, islands, side, furnish)
 
@@ -1047,25 +1336,51 @@ def vault(g, tier):
             # clear of the ring walls: a rack in the corner leaves a one-tile
             # channel round the outside of the next ring and the layer stops
             # being walkable.
-            g.fill(x + 4, y + h - 5, 3, 3, 'C')
-            g.fill(x + w - 7, y + h - 5, 3, 3, 'C')
-            for k in range(max(1, (h - 12) // 6)):
+            g.lay(x + 4, y + h - 5, 3, 3, 'C')
+            g.lay(x + w - 7, y + h - 5, 3, 3, 'C')
+            g.lay(x + 4, y + 2, 3, 2, 'C')
+            g.lay(x + w - 7, y + 2, 3, 2, 'C')
+            for k in range(max(2, (h - 12) // 6)):
                 ry = y + 4 + k * 6
                 if ry + 3 >= y + h - 5:
                     break
-                g.fill(x + 2, ry, 2, 3, 'B')
-                g.fill(x + w - 4, ry, 2, 3, 'B')
+                # Deposit boxes: a solid block of steel doors, not a cupboard
+                # you rummage in. Drawn as a plinth and, more to the point, not
+                # something the search system will offer you — a vault whose
+                # every rack opens is a chore with a guard in it.
+                g.lay(x + 2, ry, 2, 3, 'P')
+                g.lay(x + w - 4, ry, 2, 3, 'P')
                 placed.append((x + 5, ry + 1))
                 placed.append((x + w - 6, ry + 1))
+            # Deposit boxes along the top and bottom of the band as well: a
+            # vault is racks on every wall, and two racks in a ring is a
+            # corridor with a cupboard in it.
+            for k in range(max(1, (w - 20) // 8)):
+                rx = x + 10 + k * 8
+                if rx + 3 >= x + w - 10:
+                    break
+                g.lay(rx, y + 2, 3, 2, 'P')
+                placed.append((rx + 1, y + 5))
             placed.append((x + w // 2, y + h - 2))
+            # A clerk's table in each ring: somewhere a box gets opened, and one
+            # more thing worth looking inside.
+            g.lay(x + 4, y + 2, 3, 2, 'T')
+            g.deco('floor', x + 1, y + 1, w - 2, h - 2, 'concrete')
+            g.deco('sign', x + w // 2 - 1, y + 1, 3, 1, 'Level %d' % (i + 1))
+            g.deco('lamp', x + w // 2, y + h // 2)
         if rings:
             x, y, w, h = rings[-1]
-            g.fill(x + w // 2 - 2, y + h // 2 - 1, 4, 3, 'P')   # the prize, in the middle
+            g.lay(x + w // 2 - 2, y + h // 2 - 1, 4, 3, 'P')   # the prize, in the middle
             placed.append((x + w // 2 + 4, y + h // 2))
         # The guard's post is in a corner of the outer band. In the middle he
         # would cover every ring at once, which is not a stealth level — from
         # the corner the far side of the vault is genuinely out of his range.
-        g.fill(2, 1, 6, 2, 'E')
+        g.must(2, 1, 6, 2, 'E')
+        g.lay(2, 4, 3, 2, 'C')
+        g.deco('floor', 1, 1, g.cols - 2, g.rows - 2, 'concrete')
+        g.deco('desklamp', 3, 3)
+        g.deco('clock', 10, 1)
+        g.deco('notice', g.cols - 8, 1, 4, 1)
         scatter(g, tier, placed)
     vault_plan(g, tier, layers, furnish)
 
@@ -1115,6 +1430,7 @@ def build():
                 top_up_loot(g, tier)
                 promote_prize(g, tier)
                 g.clear_freebies()
+                g.rehome_loot()
                 if g.open_until_connected() is None:
                     g.open_by_removal()
             elif tier == 4 and handdrawn:
@@ -1122,6 +1438,7 @@ def build():
                 g.clear_landings(); draft.clear_exit(g)
                 promote_prize(g, tier)
                 g.clear_freebies()
+                g.rehome_loot()
                 if g.open_until_connected() is None:
                     g.open_by_removal()
             else:
@@ -1133,15 +1450,22 @@ def build():
                 top_up_loot(g, tier)
                 promote_prize(g, tier)
                 g.clear_freebies()
+                g.rehome_loot()
                 depth = g.open_until_connected()
                 if depth is None and not g.open_by_removal():
                     problems.append(f'{name} L{tier + 1}: no route to everything')
-            # Searchable furniture is the school's alone for now, and it runs
-            # last: it only rewrites characters in place, so nothing it does can
-            # move a wall or close a route that the passes above just opened.
-            if name == 'School':
-                thin_floor_loot(g, tier)
-            stashes = make_searchable(g, tier) if name == 'School' else {}
+            # Furniture you can look inside, and the floor swept of most of
+            # what used to be lying on it. This runs last because it only
+            # rewrites characters in place: nothing it does can move a wall or
+            # close a route that the passes above just opened.
+            #
+            # Every location gets it now. What differs is the vocabulary — a
+            # hotel hides things in wardrobes and a bank of lockers is a school
+            # thing — and that falls out of what each grammar builds with,
+            # because a searchable piece is named by the character the room
+            # grammar already used for it.
+            thin_floor_loot(g, tier, name)
+            stashes = make_searchable(g, tier, name)
             if g.bad:
                 problems.append(f'{name} L{tier + 1}: {g.bad}')
             base = SIGHT_BASE.get(watcher, 0)
