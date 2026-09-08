@@ -402,8 +402,15 @@ const SHARED = {
   recovery: RECOVERY,
   search: SEARCH,
   alertness: ALERTNESS,
-  gait: THIEF_GAIT,
-  watcherGait: WALKER_GAIT,
+  // The five-band walk, and the room that answers back. Both were written for
+  // the school and both turned out not to be about the school at all — a body
+  // that walks differently the faster it goes, and a building that shows you
+  // what your last action cost, are things every location in this game wanted.
+  // They are the shared default now; a location that needs a different walker
+  // still says so, the way the guards and the sleepers do below.
+  gait: SCHOOL_THIEF_GAIT,
+  watcherGait: SCHOOL_WALKER_GAIT,
+  reacts: true,
   figures: true,
   investigate: INVESTIGATE
 };
@@ -435,6 +442,16 @@ function walkLike(base, over = {}) {
     legLen: legLen === undefined ? base.legLen : legLen,
     seg: seg === undefined ? base.seg : seg,
     urgency: urgency || base.urgency,
+    // Carried through, not dropped. These four say how the bands *blend* —
+    // where the careful posture has faded out, where the run weight starts, how
+    // far a careful walker rolls onto his toes, how far the arms lag the legs —
+    // and a derived walker that loses them is a five-band table read as though
+    // it were the old four: boundaries in the wrong places and a permanent
+    // tiptoe back at the bottom of the range.
+    creepBy: base.creepBy,
+    runFrom: base.runFrom,
+    toeBias: base.toeBias,
+    armLag: base.armLag,
     bands: base.bands.map((b) => ({
       ...b,
       step: round2(b.step * step),
@@ -450,7 +467,7 @@ function walkLike(base, over = {}) {
 // A guard is not a man being woken up. He is on his feet already, he is fit,
 // and he can run — so his gait comes off the thief's band table rather than the
 // sleeper's, which is the one that has air in its top band.
-const GUARD_GAIT = walkLike(THIEF_GAIT, {
+const GUARD_GAIT = walkLike(SCHOOL_THIEF_GAIT, {
   step: 1.04, lift: 0.94, swing: 0.92, sway: 0.9, legLen: 13.4, seg: 6.85,
   urgency: { investigating: 0.04, searching: 0, patrolling: -0.06, watching: 0,
     returning: -0.02, following: 0.20 }
@@ -503,7 +520,7 @@ const PEOPLE = {
       speed: 68, accel: 380, decel: 560, searchFor: 3.0,
       followAt: 52, unfollowAt: 140
     },
-    watcherGait: walkLike(WALKER_GAIT, { step: 0.96, lift: 0.95 })
+    watcherGait: walkLike(SCHOOL_WALKER_GAIT, { step: 0.96, lift: 0.95 })
   }),
 
   // Grandpa, asleep in the armchair. The slowest man in the game by some way,
@@ -520,7 +537,7 @@ const PEOPLE = {
       speed: 60, accel: 320, decel: 500, searchFor: 2.8,
       followAt: 48, unfollowAt: 130
     },
-    watcherGait: walkLike(WALKER_GAIT, {
+    watcherGait: walkLike(SCHOOL_WALKER_GAIT, {
       step: 0.86, duty: 0.04, lift: 0.78, swing: 0.80, sway: 1.12,
       legLen: 13.2, seg: 6.70
     })
@@ -546,7 +563,7 @@ const PEOPLE = {
     // it, so a man walking up and down it is not an obstacle to time, it is a
     // toll gate. Walking the building is what the museum's and the estate's
     // guards are for; Otakar's danger is that his desk is on the only route.
-    watcherGait: walkLike(WALKER_GAIT, { step: 1.04, lift: 1.05, swing: 1.05 })
+    watcherGait: walkLike(SCHOOL_WALKER_GAIT, { step: 1.04, lift: 1.05, swing: 1.05 })
   }),
 
   // Mr. Halas, face down on the quarterly report. Wakes badly, and the open
@@ -561,24 +578,15 @@ const PEOPLE = {
       wakeAt: 64, calmAt: 42, rising: 1.7, settling: 1.0, speed: 74,
       searchFor: 2.8
     },
-    watcherGait: walkLike(WALKER_GAIT, { step: 0.98, sway: 0.92 })
+    watcherGait: walkLike(SCHOOL_WALKER_GAIT, { step: 0.98, sway: 0.92 })
   }),
 
   // Mr. Vrána. The one the whole system was written for, and still the middle
   // of the range: slower than the guards, sharper than the sleepers.
   School: person({
-    // Five locomotion states instead of four, and no permanent tiptoe in
-    // either of them. School only, for now: the rest of the game still walks
-    // off the shared tables above.
-    gait: SCHOOL_THIEF_GAIT,
-    watcherGait: SCHOOL_WALKER_GAIT,
-    // The room answers. Every action that costs something — a knock, a drawer,
-    // a sheet of paper underfoot, being picked out across a hall — gets a
-    // short visible reaction where it happened, on top of the number it moves.
-    // School only: the flag is what the other ten locations do not have.
-    // Named for what it does rather than `feedback`, which is already the name
-    // of the screen-shake block at the bottom of this file.
-    reacts: true,
+    // The walk and the reacting room are the shared default now — see SHARED
+    // above. What is left here is what makes this building this building.
+    //
     // Mr. Vrána looks up. Everywhere else in the game a person on his feet
     // finds you by walking into you — `followAt`, a hard threshold under three
     // tiles. Here he has eyes, and they work continuously: how quickly he picks
@@ -641,7 +649,7 @@ const PEOPLE = {
       wakeAt: 62, calmAt: 41, rising: 1.0, settling: 0.8, speed: 90,
       accel: 470, followAt: 58
     },
-    watcherGait: walkLike(WALKER_GAIT, { step: 1.08, duty: -0.02, swing: 1.10 })
+    watcherGait: walkLike(SCHOOL_WALKER_GAIT, { step: 1.08, duty: -0.02, swing: 1.10 })
   }),
 
   // Bruno. The first professional the campaign puts in front of you: he walks
@@ -693,7 +701,7 @@ const PEOPLE = {
       riseLow: 2.0, riseHigh: 0.9, sweepLow: 3.8, sweepHigh: 2.0
     },
     investigate: { wakeAt: 63, calmAt: 41, rising: 1.5, speed: 82 },
-    watcherGait: walkLike(WALKER_GAIT, { step: 1.02 })
+    watcherGait: walkLike(SCHOOL_WALKER_GAIT, { step: 1.02 })
   }),
 
   // The night manager, dozing behind the counter with the shutters down.
@@ -704,7 +712,7 @@ const PEOPLE = {
       riseLow: 2.5, riseHigh: 1.2, sweepLow: 3.4, sweepHigh: 1.9
     },
     investigate: { wakeAt: 65, calmAt: 43, rising: 1.8, speed: 72 },
-    watcherGait: walkLike(WALKER_GAIT, { step: 0.94, sway: 1.05 })
+    watcherGait: walkLike(SCHOOL_WALKER_GAIT, { step: 0.94, sway: 1.05 })
   }),
 
   // The last man in the game, and the only one who is properly awake before

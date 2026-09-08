@@ -345,16 +345,18 @@ test('a search says which piece opened, from which side, and for how long', () =
   assert.fail('the search never finished');
 });
 
-test('the room answers in the school and nowhere else', () => {
-  // The whole of the scope rule, in one assertion: the flag the host reads
-  // before spawning any of this exists in exactly one location.
-  const reacting = Object.entries(TUNING.locations)
-    .filter(([, rules]) => rules.reacts)
+test('every room answers, in all eleven buildings', () => {
+  // This was the school's alone and is now the shared default. It stopped
+  // being a scope rule and became a floor: a location that does *not* light up
+  // when you knock something over is a location that got left behind, so the
+  // assertion is the other way round from the one it replaces.
+  const quiet = Object.entries(TUNING.locations)
+    .filter(([, rules]) => !rules.reacts)
     .map(([name]) => name);
-  assert.deepEqual(reacting, ['School']);
+  assert.deepEqual(quiet, [], `these locations still do not answer: ${quiet}`);
   for (const level of LEVELS) {
     const sim = createSim({ level, seed: 3 });
-    assert.equal(!!sim.rules.reacts, level.location === 'School', `L${level.id}`);
+    assert.equal(!!sim.rules.reacts, true, `L${level.id} (${level.location})`);
   }
 });
 

@@ -129,68 +129,86 @@ export const sleeperLook = (kind) => SLEEPER_LOOKS[kind] || SLEEPER_LOOKS.sleepe
 const THEMES = {
   bedroom:   { wall: '#7c3346', lip: '#9a4257', shade: '#5f2637', skirt: '#c96b6a',
                floor: '#bd7a3e', alt: '#b17138', seam: 'rgba(143,85,38,0.6)',
-               grain: 'rgba(207,143,82,0.30)', light: '255,216,138', vignette: '60,20,40' },
+               grain: 'rgba(207,143,82,0.30)', light: '255,216,138', vignette: '60,20,40',
+               night: '#1a1220', deep: 0.46 },
   apartment: { wall: '#4c5570', lip: '#616c8c', shade: '#3a4257', skirt: '#93a0c0',
                floor: '#b08a5e', alt: '#a58156', seam: 'rgba(126,95,60,0.6)',
-               grain: 'rgba(198,162,120,0.28)', light: '255,226,170', vignette: '28,32,54' },
+               grain: 'rgba(198,162,120,0.28)', light: '255,226,170', vignette: '28,32,54',
+               night: '#141a2a', deep: 0.48 },
   hotel:     { wall: '#3f6560', lip: '#527d77', shade: '#2f4c48', skirt: '#96c3bb',
                floor: '#a97f4d', alt: '#9e7645', seam: 'rgba(126,90,48,0.6)',
-               grain: 'rgba(198,155,96,0.28)', light: '255,232,186', vignette: '18,44,44' },
+               grain: 'rgba(198,155,96,0.28)', light: '255,232,186', vignette: '18,44,44',
+               night: '#0f1e20', deep: 0.50 },
   office:    { wall: '#3d4652', lip: '#515c6b', shade: '#2c343d', skirt: '#8d9aab',
                floor: '#8e8b84', alt: '#85827b', seam: 'rgba(96,94,88,0.6)',
-               grain: 'rgba(170,167,158,0.26)', light: '208,232,255', vignette: '20,26,34' },
+               grain: 'rgba(170,167,158,0.26)', light: '208,232,255', vignette: '20,26,34',
+               night: '#101620', deep: 0.56 },
   luxury:    { wall: '#4a2f63', lip: '#603d80', shade: '#38234a', skirt: '#c9a86a',
                floor: '#9d6b3f', alt: '#926239', seam: 'rgba(116,74,38,0.6)',
-               grain: 'rgba(190,140,88,0.28)', light: '255,214,150', vignette: '38,20,54' },
+               grain: 'rgba(190,140,88,0.28)', light: '255,214,150', vignette: '38,20,54',
+               night: '#18102a', deep: 0.50 },
   penthouse: { wall: '#2c2f3d', lip: '#3d4152', shade: '#1f222d', skirt: '#d3b166',
                floor: '#7d6242', alt: '#74593b', seam: 'rgba(92,70,44,0.6)',
-               grain: 'rgba(170,140,100,0.26)', light: '255,236,190', vignette: '14,16,24' },
+               grain: 'rgba(170,140,100,0.26)', light: '255,236,190', vignette: '14,16,24',
+               night: '#0c0e18', deep: 0.58 },
   house:     { wall: '#54484f', lip: '#6b5c65', shade: '#3f363c', skirt: '#c4a68f',
                floor: '#a97c50', alt: '#9e7348', seam: 'rgba(126,88,52,0.6)',
-               grain: 'rgba(200,156,110,0.28)', light: '255,228,172', vignette: '30,24,30' },
+               grain: 'rgba(200,156,110,0.28)', light: '255,228,172', vignette: '30,24,30',
+               night: '#1a1418', deep: 0.46 },
   mansion:   { wall: '#3a2e46', lip: '#4d3d5c', shade: '#2a2033', skirt: '#cfae74',
                floor: '#8a6a4c', alt: '#806244', seam: 'rgba(104,78,54,0.6)',
-               grain: 'rgba(186,152,112,0.26)', light: '255,232,180', vignette: '24,16,32' },
+               grain: 'rgba(186,152,112,0.26)', light: '255,232,180', vignette: '24,16,32',
+               night: '#140e1c', deep: 0.54 },
   // Pale stone and cool grey, after the museum reference.
   gallery:   { wall: '#5a5f6b', lip: '#767c8a', shade: '#454a55', skirt: '#d7d2c8',
                floor: '#9a988f', alt: '#918f86', seam: 'rgba(110,108,100,0.55)',
-               grain: 'rgba(190,187,176,0.24)', light: '232,240,255', vignette: '26,28,36' },
+               grain: 'rgba(190,187,176,0.24)', light: '232,240,255', vignette: '26,28,36',
+               night: '#101420', deep: 0.56 },
   // Warm cream floors and white walls, after the apartment reference.
   suite:     { wall: '#6e6455', lip: '#8a7e6c', shade: '#544c40', skirt: '#f0e7d6',
                floor: '#c3a985', alt: '#b99f7c', seam: 'rgba(150,124,90,0.5)',
-               grain: 'rgba(216,194,160,0.26)', light: '255,238,204', vignette: '38,32,26' },
+               grain: 'rgba(216,194,160,0.26)', light: '255,238,204', vignette: '38,32,26',
+               night: '#1e1810', deep: 0.42 },
   // Marble and cool stone, after the great-hall reference.
   museum:    { wall: '#4a4f5e', lip: '#616779', shade: '#383c48', skirt: '#cdd3dc',
                floor: '#a6a8ac', alt: '#9d9fa4', seam: 'rgba(120,122,128,0.5)',
-               grain: 'rgba(200,203,210,0.22)', light: '226,238,255', vignette: '20,22,30' },
+               grain: 'rgba(200,203,210,0.22)', light: '226,238,255', vignette: '20,22,30',
+               night: '#0e1220', deep: 0.58 },
   // Deep carpet and warm lamps, after the hotel-corridor reference.
   hotelfloor:{ wall: '#4c3a3f', lip: '#63494f', shade: '#3a2c30', skirt: '#c9a98f',
                floor: '#8f5c52', alt: '#86554c', seam: 'rgba(102,62,54,0.55)',
-               grain: 'rgba(180,120,104,0.24)', light: '255,222,178', vignette: '30,18,20' },
+               grain: 'rgba(180,120,104,0.24)', light: '255,222,178', vignette: '30,18,20',
+               night: '#1a1012', deep: 0.50 },
   // Varnished boards and green board-paint, after the classroom reference.
   school:    { wall: '#3f5a4a', lip: '#527461', shade: '#2f4437', skirt: '#a9c4ae',
                floor: '#b07a3c', alt: '#a67236', seam: 'rgba(132,88,42,0.6)',
-               grain: 'rgba(206,152,88,0.30)', light: '236,246,214', vignette: '20,32,26' },
+               grain: 'rgba(206,152,88,0.30)', light: '236,246,214', vignette: '20,32,26',
+               night: '#0b1a24', deep: 0.52 },
   // Grey contract carpet and a dark ceiling, after the open-plan reference.
   officefloor:{ wall: '#333a44', lip: '#464e5b', shade: '#242a32', skirt: '#7f8b9c',
                floor: '#7f8a7c', alt: '#778274', seam: 'rgba(92,100,90,0.55)',
-               grain: 'rgba(160,170,158,0.24)', light: '214,236,255', vignette: '16,20,26' },
+               grain: 'rgba(160,170,158,0.24)', light: '214,236,255', vignette: '16,20,26',
+               night: '#0e1218', deep: 0.56 },
   // Pale green tile and hard strip lighting: a hospital floor at night.
   hospital:  { wall: '#33565a', lip: '#457076', shade: '#254045', skirt: '#bcd8d4',
                floor: '#b6c4bd', alt: '#adbcb5', seam: 'rgba(126,140,132,0.5)',
-               grain: 'rgba(206,218,210,0.22)', light: '224,244,255', vignette: '16,28,30' },
+               grain: 'rgba(206,218,210,0.22)', light: '224,244,255', vignette: '16,28,30',
+               night: '#0c1a1e', deep: 0.46 },
   // Dark green boards and firelight, after the cottage reference.
   cottage:   { wall: '#3d4a35', lip: '#516046', shade: '#2c3627', skirt: '#c4b58c',
                floor: '#b5763a', alt: '#a96d34', seam: 'rgba(134,84,38,0.6)',
-               grain: 'rgba(212,148,86,0.30)', light: '255,208,132', vignette: '26,24,14' },
+               grain: 'rgba(212,148,86,0.30)', light: '255,208,132', vignette: '26,24,14',
+               night: '#1c1408', deep: 0.48 },
   // Shop lino and cold strip light, with the shutters down.
   shop:      { wall: '#4a3f2e', lip: '#61533d', shade: '#362d21', skirt: '#d8c79c',
                floor: '#a5a08f', alt: '#9c9787', seam: 'rgba(116,112,100,0.5)',
-               grain: 'rgba(198,192,176,0.22)', light: '236,244,220', vignette: '24,20,14' },
+               grain: 'rgba(198,192,176,0.22)', light: '236,244,220', vignette: '24,20,14',
+               night: '#100c06', deep: 0.54 },
   // Poured concrete and steel: no daylight ever gets in here.
   vault:     { wall: '#2b2f36', lip: '#3d434d', shade: '#1e2127', skirt: '#8d97a6',
                floor: '#6f747c', alt: '#686d75', seam: 'rgba(84,88,96,0.55)',
-               grain: 'rgba(140,146,156,0.20)', light: '198,222,255', vignette: '10,12,16' }
+               grain: 'rgba(140,146,156,0.20)', light: '198,222,255', vignette: '10,12,16',
+               night: '#06080c', deep: 0.66 }
 };
 
 let T = THEMES.bedroom;   // set once per room paint; drawing is synchronous
@@ -230,13 +248,19 @@ const fillRound = (ctx, x, y, w, h, r, color) => {
   ctx.fill();
 };
 
-// ------------------------------------------------------- the school's finish
+// -------------------------------------------------------------- the finish
 //
-// Everything below is the school's own, switched on by `polish` in
-// `paintStaticRoom` and off everywhere else. It is all baked into the room
-// cache — painted once when a level loads and blitted every frame after that —
-// so none of it costs a millisecond while the game is running, which is what
-// makes it affordable to do properly.
+// This was written for the school, where it was switched on by a flag and off
+// in the other ten buildings. None of it turned out to be about the school:
+// a wall that catches the light along its top edge, a floor with grout in it,
+// and furniture that casts a shadow where it meets the ground are what every
+// room in this game wanted. So there is no flag any more — this is simply how
+// the game paints, and the eleven locations differ by their palette and their
+// contents rather than by how much care the painter took.
+//
+// It is all baked into the room cache — painted once when a level loads and
+// blitted every frame after that — so none of it costs a millisecond while the
+// game is running, which is what makes it affordable to do properly.
 //
 // Three ideas, in the order they matter:
 //
@@ -248,11 +272,10 @@ const fillRound = (ctx, x, y, w, h, r, color) => {
 //   MATERIAL    A flat fill is a colour, not a surface. Tile wants grout and a
 //               sheen, wood wants grain and butt joints, steel wants a brushed
 //               gradient down the door. Cheap, and the difference between a
-//               floorplan and a school.
-//   LIGHT       A corridor lit evenly end to end is a diagram. Pools under the
-//               strip lights, spill from the windows, and everything else a
-//               shade down.
-let polish = false;
+//               floorplan and a building.
+//   LIGHT       A room lit evenly end to end is a diagram. Pools under the
+//               fittings, spill from the windows, and everything else a shade
+//               down — in each location's own colour of darkness.
 
 // A soft contact shadow under something standing on the floor.
 //
@@ -548,6 +571,20 @@ function mottleFloor(ctx, d, base, fleck, warm) {
   ctx.restore();
 }
 
+// The shadow a thing standing on the floor casts, for every painter in the file.
+//
+// This replaces a hard offset copy of the object drawn three units right and
+// seven down — which is what every piece of furniture in the game had, and what
+// made rooms read as stickers on a floor rather than objects in one. The soft
+// version was written for the school; there was never anything about it that
+// was the school's.
+//
+// `spread` scales with the piece: a wardrobe throws further than a pot plant.
+function drop(ctx, box, spread) {
+  groundShadow(ctx, box, spread === undefined
+    ? Math.max(5, Math.min(11, Math.max(box.w, box.h) * 0.18)) : spread, 0.32);
+}
+
 // ---------------------------------------------------------------- solids
 // The thickness trick: a dark base fills the whole collider, the lit top face
 // covers all but the bottom lip. The silhouette still equals the collider
@@ -678,9 +715,7 @@ function drawTable(ctx, c) {
 
 function drawSofa(ctx, c) {
   const tone = fabricTone(c);
-  ctx.fillStyle = SHADOW;
-  roundRect(ctx, c.x + 3, c.y + 7, c.w, c.h, 9);
-  ctx.fill();
+  drop(ctx, c);
   fillRound(ctx, c.x, c.y, c.w, c.h, 9, tone.base);
   fillRound(ctx, c.x + 3, c.y + 3, c.w - 6, c.h * 0.40, 6, tone.top);      // back
   const seatY = c.y + c.h * 0.44;
@@ -800,9 +835,7 @@ function drawNightstand(ctx, c) {
 
 // A museum plinth: a pale stone block with an artefact standing on it.
 function drawPlinth(ctx, c) {
-  ctx.fillStyle = SHADOW;
-  roundRect(ctx, c.x + 3, c.y + 7, c.w, c.h, 4);
-  ctx.fill();
+  drop(ctx, c);
   fillRound(ctx, c.x, c.y, c.w, c.h, 4, '#8e8a86');
   fillRound(ctx, c.x, c.y, c.w, c.h - 7, 4, '#c8c3bb');
   fillRound(ctx, c.x + 4, c.y + 3, c.w - 8, c.h - 15, 3, '#ddd8cf');
@@ -862,7 +895,7 @@ function drawPlinth(ctx, c) {
 // is a board with a lipped edge and a shadowed underside, and drawing those is
 // most of what tells the eye it is a piece of furniture at a height rather than
 // a rectangle painted on the floor.
-function drawDeskWood(ctx, c) {
+function drawDesk(ctx, c) {
   groundShadow(ctx, c, 9, 0.34);
   const base = '#b9803f';
   // The carcass, dark, so the lit top can sit proud of it.
@@ -992,7 +1025,7 @@ function drawDeskWood(ctx, c) {
 
 // A corridor bench, in the same wood. Slatted, on steel legs, with the gap
 // between the slats actually reading as a gap.
-function drawBenchWood(ctx, c) {
+function drawBench(ctx, c) {
   const along = c.w >= c.h;
   groundShadow(ctx, c, 8, 0.32);
   const base = '#a97644';
@@ -1020,37 +1053,6 @@ function drawBenchWood(ctx, c) {
   } else {
     ctx.fillRect(c.x + c.w - 2, c.y + 3, 4, 5);
     ctx.fillRect(c.x + c.w - 2, c.y + c.h - 8, 4, 5);
-  }
-}
-
-function drawBench(ctx, c) {
-  if (polish) return drawBenchWood(ctx, c);
-  const along = c.w >= c.h;
-  ctx.fillStyle = SHADOW;
-  roundRect(ctx, c.x + 2, c.y + 6, c.w, c.h, 4);
-  ctx.fill();
-  fillRound(ctx, c.x, c.y, c.w, c.h, 4, '#a97644');
-  fillRound(ctx, c.x + 1.5, c.y + 1.5, c.w - 3, (along ? c.h : c.h) * 0.42, 3, '#c08d55');
-  // The seam down the middle of the slats.
-  ctx.strokeStyle = 'rgba(96,60,28,0.5)';
-  ctx.lineWidth = 1.2;
-  ctx.beginPath();
-  if (along) {
-    ctx.moveTo(c.x + 3, c.y + c.h * 0.62);
-    ctx.lineTo(c.x + c.w - 3, c.y + c.h * 0.62);
-  } else {
-    ctx.moveTo(c.x + c.w * 0.62, c.y + 3);
-    ctx.lineTo(c.x + c.w * 0.62, c.y + c.h - 3);
-  }
-  ctx.stroke();
-  // Legs, at the ends.
-  ctx.fillStyle = '#6d4a2a';
-  if (along) {
-    ctx.fillRect(c.x + 3, c.y + c.h - 2.5, 5, 3);
-    ctx.fillRect(c.x + c.w - 8, c.y + c.h - 2.5, 5, 3);
-  } else {
-    ctx.fillRect(c.x + c.w - 3, c.y + 3, 3, 5);
-    ctx.fillRect(c.x + c.w - 3, c.y + c.h - 8, 3, 5);
   }
 }
 
@@ -1148,7 +1150,7 @@ function lockerDoors(ctx, c, along, a0, a1, d0, d1, flip, seed0) {
 // from it. Against a wall: a top rail on the closed side, one row of doors, a
 // plinth at the foot. An island in a corridor: a row of doors each way with the
 // crest of the unit running down the middle between them.
-function drawLockersMetal(ctx, c) {
+function drawLockers(ctx, c) {
   const along = c.w >= c.h;
   const island = !c.back;
   // An island is walked round, so it is grounded all the way round; a bank
@@ -1232,112 +1234,10 @@ function drawLockersMetal(ctx, c) {
 // that catches the corridor light, a shadow only where its front face meets the
 // floor, and a hairline of daylight down each door seam. None of that is
 // expensive and all of it is the difference between furniture and a rectangle.
-function drawLockers(ctx, c) {
-  if (polish) return drawLockersMetal(ctx, c);
-  const along = c.w >= c.h;
-  // Contact shadow under the front face only — a bank of lockers is bolted to
-  // the wall behind it and there is nothing for a shadow to fall on that side.
-  ctx.fillStyle = SHADOW;
-  if (along) roundRect(ctx, c.x + 1, c.y + c.h - 3, c.w, 7, 3);
-  else roundRect(ctx, c.x + c.w - 3, c.y + 1, 7, c.h, 3);
-  ctx.fill();
-
-  // The carcass, then the plinth it stands on: a dark strip at the foot, which
-  // is what stops the whole thing reading as painted onto the floor.
-  fillRound(ctx, c.x, c.y, c.w, c.h, 2.5, '#3c565d');
-  if (along) fillRound(ctx, c.x, c.y + c.h - 3.5, c.w, 3.5, 1.5, '#2b3f45');
-  else fillRound(ctx, c.x + c.w - 3.5, c.y, 3.5, c.h, 1.5, '#2b3f45');
-  // ...and the top rail, along the back edge, catching the corridor lights.
-  if (along) fillRound(ctx, c.x + 1, c.y + 1, c.w - 2, 3, 1.5, '#6f959f');
-  else fillRound(ctx, c.x + 1, c.y + 1, 3, c.h - 2, 1.5, '#6f959f');
-
-  const span = along ? c.w : c.h;
-  const doors = Math.max(1, Math.round(span / 20));
-  const pitch = span / doors;
-  for (let i = 0; i < doors; i++) {
-    const a = (along ? c.x : c.y) + i * pitch + 1.4;
-    const len = pitch - 2.8;
-    if (len <= 1) continue;
-    if (along) {
-      const top = c.y + 3.6;
-      const deep = c.h - 7.6;
-      if (deep <= 1) continue;
-      fillRound(ctx, a, top, len, deep, 1.5, '#47646c');
-      fillRound(ctx, a + 0.8, top + 0.8, len - 1.6, 1.6, 0.8, '#5d818b');
-      ctx.fillStyle = 'rgba(18,30,34,0.50)';               // vents
-      for (let v = 0; v < 3; v++) {
-        const y = top + 2.4 + v * 2;
-        if (y < top + deep - 2) ctx.fillRect(a + 2.2, y, Math.max(1, len - 4.4), 0.9);
-      }
-      ctx.fillStyle = '#cbd8d4';                            // handle
-      ctx.fillRect(a + len - 3.4, top + deep * 0.45, 1.6, 3.4);
-      ctx.fillStyle = 'rgba(10,18,22,0.45)';                // the seam beside it
-      ctx.fillRect(a + len + 0.5, top, 0.9, deep);
-    } else {
-      const left = c.x + 3.6;
-      const deep = c.w - 7.6;
-      if (deep <= 1) continue;
-      fillRound(ctx, left, a, deep, len, 1.5, '#47646c');
-      fillRound(ctx, left + 0.8, a + 0.8, 1.6, len - 1.6, 0.8, '#5d818b');
-      ctx.fillStyle = 'rgba(18,30,34,0.50)';
-      for (let v = 0; v < 3; v++) {
-        const x = left + 2.4 + v * 2;
-        if (x < left + deep - 2) ctx.fillRect(x, a + 2.2, 0.9, Math.max(1, len - 4.4));
-      }
-      ctx.fillStyle = '#cbd8d4';
-      ctx.fillRect(left + deep * 0.45, a + len - 3.4, 3.4, 1.6);
-      ctx.fillStyle = 'rgba(10,18,22,0.45)';
-      ctx.fillRect(left, a + len + 0.5, deep, 0.9);
-    }
-  }
-}
-
 // A school desk. The shared table painter scatters whatever a table in a house
 // might have on it — a pot plant, a mug, a vase — and a classroom full of pot
 // plants growing out of the desks is the sort of thing you only notice once you
 // look at the whole map at once. What sits on a school desk is paper.
-function drawDesk(ctx, c) {
-  if (polish) return drawDeskWood(ctx, c);
-  ctx.fillStyle = SHADOW;
-  roundRect(ctx, c.x + 3, c.y + 7, c.w, c.h, 4);
-  ctx.fill();
-  fillRound(ctx, c.x, c.y, c.w, c.h, 4, '#b9803f');
-  fillRound(ctx, c.x + 2, c.y + 2, c.w - 4, c.h * 0.44, 3, '#d09a56');
-  // The seam between two desks pushed together, which is how a classroom is
-  // actually laid out and what stops a pair reading as one slab.
-  if (c.w >= c.h) {
-    ctx.strokeStyle = 'rgba(110,68,28,0.45)';
-    ctx.lineWidth = 1.2;
-    ctx.beginPath();
-    ctx.moveTo(c.x + c.w / 2, c.y + 2);
-    ctx.lineTo(c.x + c.w / 2, c.y + c.h - 2);
-    ctx.stroke();
-  }
-  // Paper, and sometimes a book. Deterministic from the position, so the same
-  // desk carries the same clutter every time the level is drawn.
-  const r = hash(c.x + 11, c.y + 5);
-  if (r > 0.30) {
-    fillRound(ctx, c.x + 4, c.y + c.h * 0.30, 9, 7, 1, PALETTE.paper);
-    ctx.fillStyle = 'rgba(90,80,70,0.40)';
-    ctx.fillRect(c.x + 5.5, c.y + c.h * 0.30 + 2, 6, 1);
-    ctx.fillRect(c.x + 5.5, c.y + c.h * 0.30 + 4, 4, 1);
-  }
-  if (r > 0.68 && c.w > 26) {
-    const spines = ['#c2543f', '#3f7f88', '#6f5a94'];
-    fillRound(ctx, c.x + c.w - 14, c.y + c.h * 0.34, 9, 6, 1, spines[Math.floor(r * 3) % 3]);
-  }
-  // Chairs, tucked under the near edge. Drawn rather than placed: a chair is
-  // not something you collide with in a game where you walk over the floor of
-  // a classroom, and putting one in the tile grid would cost a tile each and
-  // wall the room in. Two to a desk, which is what a paired desk means.
-  const seats = c.w >= 34 ? 2 : 1;
-  for (let i = 0; i < seats; i++) {
-    const cx = c.x + c.w * ((i + 0.5) / seats);
-    fillRound(ctx, cx - 7, c.y + c.h - 1, 14, 9, 3, '#8a5a30');
-    fillRound(ctx, cx - 6, c.y + c.h, 12, 4, 2, '#a3703f');
-  }
-}
-
 // --- outdoors ----------------------------------------------------------------
 // A tree from above is a ring of canopy over a dark trunk shadow. Three fills
 // and a scatter of leaf clumps: no strokes, because the grounds of a level five
@@ -1394,9 +1294,7 @@ const SCHOOL_PAINTERS = { sofa: drawBench, chest: drawLockers, table: drawDesk }
 // enough to be a store and solid enough to hide behind, which is what the ones
 // at the edge of a playground are for.
 function drawShed(ctx, c) {
-  ctx.fillStyle = SHADOW;
-  roundRect(ctx, c.x + 3, c.y + 7, c.w, c.h, 3);
-  ctx.fill();
+  drop(ctx, c);
   fillRound(ctx, c.x, c.y, c.w, c.h, 3, '#7a5140');           // brick
   ctx.fillStyle = 'rgba(40,24,18,0.22)';                      // courses
   for (let y = c.y + 4; y < c.y + c.h - 2; y += 4) {
@@ -1599,9 +1497,7 @@ function drawBedBase(ctx, level) {
   ctx.fillStyle = pool;
   ctx.fillRect(bed.x - bed.w, bed.y - bed.h, bed.w * 3, bed.h * 3);
 
-  ctx.fillStyle = SHADOW;
-  roundRect(ctx, bed.x + 3, bed.y + 9, bed.w, bed.h, 9);
-  ctx.fill();
+  drop(ctx, bed);
 
   // Frame: a dark base with a lit rail, and posts at the corners.
   fillRound(ctx, bed.x, bed.y, bed.w, bed.h, 9, PALETTE.bedFrameDark);
@@ -1767,36 +1663,17 @@ export function drawCreakZone(ctx, zone) {
 // An interior wall: same material as the room's shell, with a lit top edge and
 // a soft shadow so it reads as standing up out of the floor.
 function drawPartition(ctx, c) {
-  if (polish) {
-    wallFoot(ctx, c);
-    const g = c.w > c.h
-      ? ctx.createLinearGradient(0, c.y, 0, c.y + c.h)
-      : ctx.createLinearGradient(c.x, 0, c.x + c.w, 0);
-    g.addColorStop(0, T.lip);
-    g.addColorStop(0.34, T.wall);
-    g.addColorStop(1, T.shade);
-    ctx.fillStyle = g;
-    roundRect(ctx, c.x, c.y, c.w, c.h, 3);
-    ctx.fill();
-    ctx.fillStyle = T.skirt;                                 // skirting, both faces
-    if (c.w > c.h) {
-      ctx.fillRect(c.x, c.y + c.h - 2.5, c.w, 2.5);
-      ctx.fillRect(c.x, c.y, c.w, 2);
-    } else {
-      ctx.fillRect(c.x, c.y, 2, c.h);
-      ctx.fillRect(c.x + c.w - 2, c.y, 2, c.h);
-    }
-    ctx.fillStyle = 'rgba(255,255,255,0.16)';
-    if (c.w > c.h) ctx.fillRect(c.x, c.y + c.h - 2.5, c.w, 0.8);
-    else ctx.fillRect(c.x + c.w - 2, c.y, 0.8, c.h);
-    return;
-  }
-  ctx.fillStyle = 'rgba(30,16,26,0.34)';
-  roundRect(ctx, c.x + 3, c.y + 6, c.w, c.h, 3);
+  wallFoot(ctx, c);
+  const g = c.w > c.h
+    ? ctx.createLinearGradient(0, c.y, 0, c.y + c.h)
+    : ctx.createLinearGradient(c.x, 0, c.x + c.w, 0);
+  g.addColorStop(0, T.lip);
+  g.addColorStop(0.34, T.wall);
+  g.addColorStop(1, T.shade);
+  ctx.fillStyle = g;
+  roundRect(ctx, c.x, c.y, c.w, c.h, 3);
   ctx.fill();
-  fillRound(ctx, c.x, c.y, c.w, c.h, 3, T.wall);
-  fillRound(ctx, c.x, c.y, c.w, Math.min(4, c.h * 0.4), 2, T.lip);
-  ctx.fillStyle = T.skirt;                                   // skirting, both faces
+  ctx.fillStyle = T.skirt;                                 // skirting, both faces
   if (c.w > c.h) {
     ctx.fillRect(c.x, c.y + c.h - 2.5, c.w, 2.5);
     ctx.fillRect(c.x, c.y, c.w, 2);
@@ -1804,76 +1681,26 @@ function drawPartition(ctx, c) {
     ctx.fillRect(c.x, c.y, 2, c.h);
     ctx.fillRect(c.x + c.w - 2, c.y, 2, c.h);
   }
-  // Doorway jambs at the open ends.
-  ctx.fillStyle = T.shade;
-  if (c.w > c.h) {
-    ctx.fillRect(c.x, c.y, 2, c.h);
-    ctx.fillRect(c.x + c.w - 2, c.y, 2, c.h);
-  } else {
-    ctx.fillRect(c.x, c.y, c.w, 2);
-    ctx.fillRect(c.x, c.y + c.h - 2, c.w, 2);
-  }
+  ctx.fillStyle = 'rgba(255,255,255,0.16)';
+  if (c.w > c.h) ctx.fillRect(c.x, c.y + c.h - 2.5, c.w, 0.8);
+  else ctx.fillRect(c.x + c.w - 2, c.y, 0.8, c.h);
 }
 
 // A doorway: a threshold board across the opening and a jamb at each side. In
 // the reference floorplans this is what makes a gap read as a way through
 // rather than as a hole where a wall should be.
-function drawDoorway(ctx, door) {
-  if (polish) return drawDoorwayLeaf(ctx, door);
-  const horizontal = door.w > door.h;
-  ctx.save();
-  ctx.globalAlpha = 0.85;
-  fillRound(ctx, door.x, door.y, door.w, door.h, 2, T.shade);
-  ctx.globalAlpha = 1;
-  // Threshold board.
-  fillRound(ctx, door.x + 1, door.y + 1, door.w - 2, door.h - 2, 1.5, '#8a6a44');
-  ctx.strokeStyle = 'rgba(255,232,190,0.22)';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  if (horizontal) {
-    ctx.moveTo(door.x + 3, door.y + door.h / 2);
-    ctx.lineTo(door.x + door.w - 3, door.y + door.h / 2);
-  } else {
-    ctx.moveTo(door.x + door.w / 2, door.y + 3);
-    ctx.lineTo(door.x + door.w / 2, door.y + door.h - 3);
-  }
-  ctx.stroke();
-  // Jambs at the open ends, so the wall reads as stopping rather than fading.
-  ctx.fillStyle = T.lip;
-  if (horizontal) {
-    ctx.fillRect(door.x - 2, door.y, 3, door.h);
-    ctx.fillRect(door.x + door.w - 1, door.y, 3, door.h);
-  } else {
-    ctx.fillRect(door.x, door.y - 2, door.w, 3);
-    ctx.fillRect(door.x, door.y + door.h - 1, door.w, 3);
-  }
-  ctx.restore();
-}
-
 // Everything that never moves, drawn once per level into an offscreen canvas.
 // A wall slab on a hand-drawn map. The building's shape comes from the grid
 // rather than from a fixed rectangle round the edge, so each run of wall is
 // drawn as its own block: a dark base, a lit top edge, and skirting down the
 // faces that look into a room.
-function drawWallSlab(ctx, c) {
-  if (polish) return wallSlabLit(ctx, c);
-  ctx.fillStyle = 'rgba(24,12,20,0.38)';
-  roundRect(ctx, c.x + 2, c.y + 5, c.w, c.h, 2);
-  ctx.fill();
-  fillRound(ctx, c.x, c.y, c.w, c.h, 2, T.shade);
-  fillRound(ctx, c.x, c.y, c.w, Math.max(3, c.h - 4), 2, T.wall);
-  fillRound(ctx, c.x, c.y, c.w, Math.min(4, c.h * 0.35), 1.5, T.lip);
-  ctx.fillStyle = T.skirt;
-  ctx.fillRect(c.x, c.y + c.h - 2.5, c.w, 2.5);
-}
-
 // The same wall with height in it.
 //
 // A wall seen from above is a band, and a band of one colour is a line on a
 // plan. What makes it a wall is that the top of it catches the light, the face
 // below it falls away, there is a skirting board where it meets the floor, and
 // the floor darkens for a few units out from that. All four are here.
-function wallSlabLit(ctx, c) {
+function drawWallSlab(ctx, c) {
   wallFoot(ctx, c);
   const g = ctx.createLinearGradient(0, c.y, 0, c.y + c.h);
   g.addColorStop(0, T.lip);
@@ -1933,7 +1760,7 @@ function drawFence(ctx, c) {
 // the brightest edge — a cold sky through it, a highlight running diagonally
 // across the pane, and a painted timber frame round the lot. The moonlight it
 // spills on the floor is unchanged; that part always worked.
-function drawWindowGlass(ctx, c) {
+function drawWindowPane(ctx, c) {
   const vertical = c.h > c.w;
   // The frame, and the sill under it on the inward face.
   fillRound(ctx, c.x, c.y, c.w, c.h, 2, T.shade);
@@ -2009,7 +1836,7 @@ function drawWindowGlass(ctx, c) {
 // A doorway with a door in it. Same threshold and jambs as before, plus the
 // two things section 12 asks for by name: a leaf you can see is a door, and a
 // handle on it.
-function drawDoorwayLeaf(ctx, door) {
+function drawDoorway(ctx, door) {
   const horizontal = door.w > door.h;
   ctx.save();
   ctx.globalAlpha = 0.85;
@@ -2060,41 +1887,6 @@ function drawDoorwayLeaf(ctx, door) {
 
 // A window: a lit pane in the wall, and the light it throws on the floor. On a
 // floorplan these are what tell you which side of the building you are on.
-function drawWindowPane(ctx, c) {
-  if (polish) return drawWindowGlass(ctx, c);
-  const vertical = c.h > c.w;
-  fillRound(ctx, c.x, c.y, c.w, c.h, 2, T.shade);
-  fillRound(ctx, c.x + 2, c.y + 2, c.w - 4, c.h - 4, 1.5, '#cfe6ff');
-  ctx.strokeStyle = 'rgba(70,90,120,0.55)';
-  ctx.lineWidth = 1.4;
-  ctx.beginPath();
-  const bars = Math.max(1, Math.round((vertical ? c.h : c.w) / 34));
-  for (let i = 1; i < bars; i++) {
-    if (vertical) {
-      const y = c.y + (c.h / bars) * i;
-      ctx.moveTo(c.x, y);
-      ctx.lineTo(c.x + c.w, y);
-    } else {
-      const x = c.x + (c.w / bars) * i;
-      ctx.moveTo(x, c.y);
-      ctx.lineTo(x, c.y + c.h);
-    }
-  }
-  ctx.stroke();
-
-  // A soft pool of moonlight spilling inward.
-  const cx = c.x + c.w / 2;
-  const cy = c.y + c.h / 2;
-  const reach = Math.max(c.w, c.h) * 1.5 + 40;
-  const pool = ctx.createRadialGradient(cx, cy, 4, cx, cy, reach);
-  pool.addColorStop(0, `rgba(${T.light},0.20)`);
-  pool.addColorStop(1, `rgba(${T.light},0)`);
-  ctx.fillStyle = pool;
-  ctx.beginPath();
-  ctx.arc(cx, cy, reach, 0, TAU);
-  ctx.fill();
-}
-
 // --------------------------------------------------------------- room dressing
 // What a building has on its walls and floors, as opposed to what it is built
 // from. None of this collides with anything and none of it is in the tile grid:
@@ -2128,15 +1920,13 @@ function drawFloorPatch(ctx, d) {
   // The school lays its floors rather than ruling lines over a colour. Same
   // rectangles, same tags, same palette: what changes is that tile has grout
   // and a batch tone, boards have butt joints and grain, and the field is mown.
-  if (polish) {
-    if (d.tag === 'tiles' || d.tag === 'paving') return tileFloor(ctx, d, f.base);
-    if (d.tag === 'boards') return boardFloor(ctx, d, f.base);
-    if (d.tag === 'parquet') return parquetFloor(ctx, d, f.base);
-    if (d.tag === 'grass') return grassFloor(ctx, d, f.base);
-    if (d.tag === 'carpet') return mottleFloor(ctx, d, f.base, 'rgba(52,50,38,0.30)', 'rgba(150,146,120,0.16)');
-    if (d.tag === 'concrete' || d.tag === 'gravel' || d.tag === 'tarmac') {
-      return mottleFloor(ctx, d, f.base, 'rgba(34,32,28,0.26)', 'rgba(190,186,176,0.12)');
-    }
+  if (d.tag === 'tiles' || d.tag === 'paving') return tileFloor(ctx, d, f.base);
+  if (d.tag === 'boards') return boardFloor(ctx, d, f.base);
+  if (d.tag === 'parquet') return parquetFloor(ctx, d, f.base);
+  if (d.tag === 'grass') return grassFloor(ctx, d, f.base);
+  if (d.tag === 'carpet') return mottleFloor(ctx, d, f.base, 'rgba(52,50,38,0.30)', 'rgba(150,146,120,0.16)');
+  if (d.tag === 'concrete' || d.tag === 'gravel' || d.tag === 'tarmac') {
+    return mottleFloor(ctx, d, f.base, 'rgba(34,32,28,0.26)', 'rgba(190,186,176,0.12)');
   }
   ctx.fillStyle = f.base;
   ctx.fillRect(d.x, d.y, d.w, d.h);
@@ -2188,7 +1978,7 @@ function drawCourt(ctx, d) {
 // The slate, the ghost of yesterday's lesson and the tray were already here.
 // What section 1 asks for is the small stuff on top: chalk in the tray, a
 // duster beside it, and a wiped arc where an arm has been across the slate.
-function drawBoardKit(ctx, d) {
+function drawBoard(ctx, d) {
   fillRound(ctx, d.x, d.y + 3, d.w, d.h + 7, 2, '#2b3a33');
   const slate = ctx.createLinearGradient(0, d.y + 5, 0, d.y + d.h + 7);
   slate.addColorStop(0, '#3a4f45');
@@ -2235,7 +2025,7 @@ function drawBoardKit(ctx, d) {
 // Cork, a frame, overlapping sheets at slight angles and a pin in each: a grid
 // of neat rectangles reads as a colour swatch, and what says noticeboard is
 // that nobody ever puts anything on one straight.
-function drawNoticePinned(ctx, d) {
+function drawNotice(ctx, d) {
   fillRound(ctx, d.x, d.y + 4, d.w, d.h + 6, 2, '#6b4a2e');
   const cork = ctx.createLinearGradient(0, d.y + 6, 0, d.y + d.h + 8);
   cork.addColorStop(0, '#cbac80');
@@ -2280,35 +2070,6 @@ function drawNoticePinned(ctx, d) {
     ctx.arc(-0.35, -3.6, 0.4, 0, TAU);
     ctx.fill();
     ctx.restore();
-  }
-}
-
-function drawBoard(ctx, d) {
-  if (polish) return drawBoardKit(ctx, d);
-  // A blackboard: dark slate, a chalk tray along the bottom, and the ghost of
-  // whatever was last written on it.
-  fillRound(ctx, d.x, d.y + 3, d.w, d.h + 7, 2, '#2b3a33');
-  fillRound(ctx, d.x + 2, d.y + 5, d.w - 4, d.h + 2, 1, '#33463d');
-  ctx.strokeStyle = 'rgba(226,232,214,0.22)';
-  ctx.lineWidth = 1.4;
-  ctx.beginPath();
-  for (let i = 0; i < 3; i++) {
-    const y = d.y + 9 + i * 4;
-    ctx.moveTo(d.x + 8 + (i % 2) * 6, y);
-    ctx.lineTo(d.x + d.w * (0.45 + 0.16 * i), y);
-  }
-  ctx.stroke();
-  fillRound(ctx, d.x + 1, d.y + d.h + 8, d.w - 2, 3, 1, '#8a6a44');
-}
-
-function drawNotice(ctx, d) {
-  if (polish) return drawNoticePinned(ctx, d);
-  fillRound(ctx, d.x, d.y + 4, d.w, d.h + 6, 2, '#6b4a2e');
-  fillRound(ctx, d.x + 2, d.y + 6, d.w - 4, d.h + 2, 1, '#c2a377');
-  const tints = ['#f4ece0', '#f0d9a8', '#cfe0ef', '#efc9c0'];
-  for (let i = 0; i * 13 < d.w - 10; i++) {
-    ctx.fillStyle = tints[i % tints.length];
-    ctx.fillRect(d.x + 5 + i * 13, d.y + 8 + (i % 2) * 3, 9, 8);
   }
 }
 
@@ -2500,9 +2261,7 @@ function drawCeilingLight(ctx, d) {
 // A radiator, under a window where a radiator goes.
 function drawRadiator(ctx, d) {
   const along = d.w >= d.h;
-  ctx.fillStyle = SHADOW;
-  roundRect(ctx, d.x + 1, d.y + 3, d.w, d.h, 2);
-  ctx.fill();
+  drop(ctx, d);
   fillRound(ctx, d.x, d.y, d.w, d.h, 2, '#cdd3d8');
   ctx.fillStyle = 'rgba(120,132,142,0.55)';
   const n = Math.max(3, Math.round((along ? d.w : d.h) / 5));
@@ -2589,10 +2348,10 @@ function paintDecor(ctx, level, table) {
 // live on top of this cache and is not dimmed by it at all; what dims is the
 // architecture behind them, which is the contrast that makes them readable. A
 // heavier wash looks better in a screenshot and plays worse.
-function paintSchoolNight(ctx, level) {
+function paintNight(ctx, level) {
   // Built at half size and blown back up. Every edge in this layer is a soft
   // gradient, so half the pixels are indistinguishable from all of them — and
-  // on the biggest school this is the single most expensive thing in the bake,
+  // on the biggest maps this is the single most expensive thing in the bake,
   // so a quarter of the fill area is the difference between a level that loads
   // and a level that hitches.
   const SCALE = 0.5;
@@ -2602,14 +2361,20 @@ function paintSchoolNight(ctx, level) {
   const m = mask.getContext('2d');
   if (!m) return;
   m.scale(SCALE, SCALE);
-  m.fillStyle = '#0b1a24';
+  // Each building has its own colour of dark and its own amount of it. A hotel
+  // suite at night is warm and only dim; a vault is nearly black and the same
+  // colour as its own concrete. Same pass, eleven different nights.
+  m.fillStyle = T.night;
   m.fillRect(0, 0, W, H);
 
   // Punch a hole. `reach` is where the light has died away entirely; the middle
   // is cleared completely, so the floor directly under a fitting is exactly the
   // colour it was painted.
   m.globalCompositeOperation = 'destination-out';
-  const lit = (cx, cy, reach, core = 0.30) => {
+  // ...and keep a running total of how much floor the building's own lights
+  // actually reach, which is what decides how dark the rest of it may go.
+  let cover = 0;
+  const lit = (cx, cy, reach, core = 0.30, stretch = 1) => {
     const g = m.createRadialGradient(cx, cy, reach * core, cx, cy, reach);
     g.addColorStop(0, 'rgba(0,0,0,1)');
     g.addColorStop(0.55, 'rgba(0,0,0,0.55)');
@@ -2618,6 +2383,7 @@ function paintSchoolNight(ctx, level) {
     m.beginPath();
     m.arc(cx, cy, reach, 0, TAU);
     m.fill();
+    cover += Math.PI * reach * reach * stretch * 0.55;
   };
 
   for (const d of level.decor || []) {
@@ -2629,20 +2395,21 @@ function paintSchoolNight(ctx, level) {
       m.save();
       m.translate(cx, cy);
       m.scale(1.7, 1);
-      lit(0, 0, Math.max(d.w, d.h) * 1.15);
+      lit(0, 0, Math.max(d.w, d.h) * 1.15, 0.30, 1.7);
       m.restore();
     } else if (d.kind === 'lamp') {
       lit(cx, cy, 66);
     } else if (d.kind === 'desklamp') {
       lit(cx, cy, 52);
     } else if (d.kind === 'floor' && (d.tag === 'boards' || d.tag === 'parquet')) {
-      // A room the map has bothered to floor is a room in use, and a classroom
-      // with its lights off is a black rectangle you cannot plan a route
-      // through. Lift it most of the way — not all — so it reads as unlit but
-      // legible, and the corridor is still visibly the brighter place.
+      // A room the map has bothered to floor is a room in use, and a room with
+      // its lights off is a black rectangle you cannot plan a route through.
+      // Lift it most of the way — not all — so it reads as unlit but legible,
+      // and the lit corridor is still visibly the brighter place.
       m.globalCompositeOperation = 'destination-out';
       m.fillStyle = 'rgba(0,0,0,0.30)';
       m.fillRect(d.x, d.y, d.w, d.h);
+      cover += d.w * d.h * 0.30;
     }
   }
 
@@ -2656,28 +2423,35 @@ function paintSchoolNight(ctx, level) {
     m.translate(cx + (vertical ? (cx < W / 2 ? 20 : -20) : 0),
       cy + (vertical ? 0 : (cy < H / 2 ? 20 : -20)));
     m.scale(vertical ? 1 : 1.5, vertical ? 1.5 : 1);
-    lit(0, 0, Math.max(40, (vertical ? c.h : c.w) * 0.6), 0.12);
+    lit(0, 0, Math.max(40, (vertical ? c.h : c.w) * 0.6), 0.12, 1.5);
     m.restore();
   }
 
-  // ...and the sign over the way out, which is the one light in a school that
+  // ...and the sign over the way out, which is the one light in a building that
   // is never switched off and the one the player most wants to find.
   if (level.exit) {
     lit(level.exit.x + level.exit.w / 2, level.exit.y + level.exit.h / 2, 58);
   }
 
+  // How dark this building is allowed to get depends on how much of it is lit.
+  //
+  // The school has a fitting every few metres and its own night reaches nearly
+  // every tile, so it can carry a deep one and the dark stretches between the
+  // pools read as atmosphere. A vault has four lights in a hall, a shop has
+  // one. Washed to the same depth those stop being atmospheric and become a
+  // room the player cannot plan a route through — which is a worse game, not a
+  // moodier one. So the depth the theme asks for is what a building the map
+  // actually lights gets, and one it barely lights is let off in proportion.
+  // Never blacker than the theme wants, never so black there is nothing to see.
+  const reached = Math.min(1, cover / (W * H));
   ctx.save();
-  ctx.globalAlpha = 0.52;
+  ctx.globalAlpha = Math.min(T.deep, 0.30 + reached * 0.34);
   ctx.drawImage(mask, 0, 0, W, H);
   ctx.restore();
 }
 
 export function paintStaticRoom(ctx, level) {
   T = THEMES[level.theme] || THEMES.bedroom;
-  // The school's finish, and only the school's. Everything gated on this is
-  // baked into the cache below, so the other ten locations paint exactly the
-  // pixels they painted before and pay nothing for the branch.
-  polish = level.location === 'School';
   W = level.width;
   H = level.height;
   lampPositions.length = 0;
@@ -2731,7 +2505,7 @@ export function paintStaticRoom(ctx, level) {
   drawWatcherFurniture(ctx, level, watcherConfig(level.watcher.kind).pose || 'bed');
 
   // The lights, and everything they do not reach.
-  if (polish) paintSchoolNight(ctx, level);
+  paintNight(ctx, level);
 
   // The vignette is sized to the map, so a wide floorplan is not darkened at
   // its ends the way a tall one is at its corners.
@@ -2802,9 +2576,7 @@ export function drawHideLabel(ctx, spot, { active = false, time = 0 } = {}) {
 // map drew it.
 function drawCouchBase(ctx, level) {
   const c = level.bed;
-  ctx.fillStyle = SHADOW;
-  roundRect(ctx, c.x + 3, c.y + 8, c.w, c.h, 9);
-  ctx.fill();
+  drop(ctx, c);
   fillRound(ctx, c.x, c.y, c.w, c.h, 9, '#6a5a52');
   fillRound(ctx, c.x + 3, c.y + 3, c.w - 6, c.h * 0.34, 6, '#836f64');
   fillRound(ctx, c.x, c.y + c.h * 0.24, 9, c.h * 0.72, 4, '#836f64');
@@ -2814,9 +2586,7 @@ function drawCouchBase(ctx, level) {
 // An armchair pulled up to the fire, for Grandpa.
 function drawChairBase(ctx, level) {
   const c = level.bed;
-  ctx.fillStyle = SHADOW;
-  roundRect(ctx, c.x + 3, c.y + 8, c.w, c.h, 10);
-  ctx.fill();
+  drop(ctx, c);
   fillRound(ctx, c.x, c.y, c.w, c.h, 10, '#6d4630');
   fillRound(ctx, c.x + 3, c.y + 3, c.w - 6, c.h * 0.40, 8, '#8a5c3f');
   fillRound(ctx, c.x, c.y + c.h * 0.22, 11, c.h * 0.74, 6, '#8a5c3f');
@@ -3096,9 +2866,7 @@ export function drawSleeper(ctx, level, stage, clock, wake = 0, startle = 0, kin
 // the room and keep it there after he leaves.
 export function drawDeskset(ctx, level, kind = 'worker') {
   const desk = level.bed;
-  ctx.fillStyle = SHADOW;
-  roundRect(ctx, desk.x + 3, desk.y + 8, desk.w, desk.h, 6);
-  ctx.fill();
+  drop(ctx, desk);
   fillRound(ctx, desk.x, desk.y, desk.w, desk.h, 6, PALETTE.woods[1].dark);
   fillRound(ctx, desk.x, desk.y, desk.w, desk.h - 7, 6, PALETTE.woods[1].base);
   fillRound(ctx, desk.x + 4, desk.y + 3, desk.w - 8, desk.h - 15, 4, PALETTE.woods[1].top);
@@ -3376,9 +3144,7 @@ export function drawGuard(ctx, level, stage, clock, wake = 0, startle = 0, seen 
   }
 
   // Desk.
-  ctx.fillStyle = SHADOW;
-  roundRect(ctx, desk.x + 3, desk.y + 8, desk.w, desk.h, 7);
-  ctx.fill();
+  drop(ctx, desk);
   fillRound(ctx, desk.x, desk.y, desk.w, desk.h, 7, PALETTE.woods[0].dark);
   fillRound(ctx, desk.x, desk.y, desk.w, desk.h - 8, 7, PALETTE.woods[0].base);
   fillRound(ctx, desk.x + 4, desk.y + 4, desk.w - 8, desk.h - 18, 5, PALETTE.woods[0].top);

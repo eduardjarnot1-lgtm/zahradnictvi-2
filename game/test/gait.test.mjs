@@ -316,14 +316,20 @@ test('the arms are a pair of arms, not a pair of pendulums', () => {
   const apart = Math.abs(zero['-1'] - zero[1]);
   assert.ok(apart > 0.005 && apart < 0.12,
     `the arms turn round ${apart.toFixed(3)} of a cycle apart`);
-  // And nowhere else: the lopsidedness is the school's, declared by its own
-  // table, so every other location's arms stay the matched pair they were.
+  // Everywhere, now. `armLag` is the thief's own and he is the same man in
+  // every building, so the pair of arms he has in the school is the pair he has
+  // in the apartment — what changes between locations is the walker he is being
+  // chased by, and that one lags differently again.
   const other = gaitOf(0.45, TUNING.locations.Apartment.gait);
+  let differs = false;
   for (let i = 0; i <= 40; i++) {
     const u = i / 40;
-    assert.equal(armSwing(-1, u, other), armSwing(1, u, other),
-      'the apartment thief grew a lopsided arm swing');
+    if (armSwing(-1, u, other) !== armSwing(1, u, other)) differs = true;
   }
+  assert.ok(differs, 'the apartment thief swings a matched pair of pendulums');
+  assert.notEqual(TUNING.locations.Apartment.watcherGait.armLag,
+    TUNING.locations.Apartment.gait.armLag,
+    'the thief and the man chasing him lag their arms identically');
   // Still opposed to their own leg, which the asymmetry must not have broken.
   for (let i = 0; i <= 100; i++) {
     const u = i / 100;
@@ -494,22 +500,25 @@ test('following puts a bit of urgency into him without making him sprint', () =>
 
 test('every location has a gait, and the walkers are not all the same walker', () => {
   const steps = new Map();
-  const elsewhere = TUNING.locations.Apartment.gait;
+  const shared = TUNING.locations.Apartment.gait;
   for (const [name, rules] of Object.entries(TUNING.locations)) {
     assert.ok(rules.gait, `${name} has no gait for the thief`);
     assert.ok(rules.watcherGait, `${name} has no gait for its own person`);
-    // The thief is the same man in the other ten, so his band table is shared
-    // outright rather than copied. The school is the exception, on purpose: the
-    // five-state locomotion was asked for there and nowhere else, so it must
-    // *not* be the shared object — and everywhere else must still be.
-    if (name === 'School') {
-      assert.notEqual(rules.gait, elsewhere,
-        'the school was supposed to have its own locomotion');
-      assert.equal(rules.gait.bands.length, 5,
-        'the school walks in five states');
-    } else {
-      assert.equal(rules.gait, elsewhere,
-        `${name} has its own copy of the thief's walk`);
+    // The thief is one man in eleven buildings, so his band table is shared
+    // outright rather than copied — and it is the five-state one now. That
+    // started as the school's and turned out not to be about the school at
+    // all: a body that walks differently the faster it goes is what every
+    // location wanted.
+    assert.equal(rules.gait, shared, `${name} has its own copy of the thief's walk`);
+    assert.equal(rules.gait.bands.length, 5, `${name} does not walk in five states`);
+    // Every walker blends those five the same way, which the derived ones only
+    // do if `walkLike` carries the blend fields through. Dropping them is how a
+    // five-band table gets read as the old four.
+    for (const gait of [rules.gait, rules.watcherGait]) {
+      assert.equal(gait.bands.length, 5, `${name} has a four-band walker left`);
+      assert.notEqual(gait.creepBy, undefined, `${name} lost creepBy`);
+      assert.notEqual(gait.toeBias, undefined, `${name} lost toeBias`);
+      assert.ok('runFrom' in gait, `${name} lost runFrom`);
     }
     // A band with air under it needs a duty factor under a half or there is no
     // moment with both feet off the ground — and `pelvisRise` would be dividing
@@ -527,11 +536,15 @@ test('every location has a gait, and the walkers are not all the same walker', (
     }
     steps.set(name, rules.watcherGait.bands.map((b) => b.step).join(','));
   }
-  // Grandpa does not walk like the estate's security. If every location shared
-  // one walker the whole point of §12 would be missing.
+  // Grandpa does not walk like the estate's security. One shared *system* is
+  // the point; one shared walker would not be.
   assert.ok(new Set(steps.values()).size >= 6,
     `only ${new Set(steps.values()).size} distinct walks across eleven locations`);
   assert.notEqual(steps.get('House'), steps.get('Mansion'));
+  // ...and the ones paid to chase you can, while the ones woken out of a chair
+  // cannot. That is the difference the five bands exist to carry.
+  assert.equal(TUNING.locations.House.watcherGait.runFrom, null);
+  assert.notEqual(TUNING.locations.Vault.watcherGait.runFrom, null);
 });
 
 test('everywhere else keeps exactly the stride it always had', () => {

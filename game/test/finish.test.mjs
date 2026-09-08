@@ -1,10 +1,10 @@
-// The school's finish, and the fence round it.
+// The finish, and the floor under it.
 //
-// Everything the polish pass added is gated on one flag, set from the level's
-// own location. These tests are here because that flag is easy to lose: a
-// painter that forgets to branch, or a look object handed to the wrong figure,
-// would quietly repaint the other ten locations, and nothing else in the suite
-// would notice until someone opened a bedroom and found it lit like a school.
+// The finish used to be the school's alone, behind a flag. It is now simply how
+// the game paints, in all eleven buildings, so these tests changed sides: they
+// used to prove the other ten locations were untouched, and now they prove none
+// of them can fall back below the school. What is still fenced is identity —
+// each location's own colour of night, and the skins, which stay the school's.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -16,32 +16,89 @@ import { createSim } from '../src/sim.js';
 const art = readFileSync(new URL('../src/art.js', import.meta.url), 'utf8');
 const render = readFileSync(new URL('../src/render.js', import.meta.url), 'utf8');
 
-test('the finish is switched on by the location and by nothing else', () => {
-  // One assignment, reading one field. If a second way to turn it on appears,
-  // the scope of this pass stops being checkable by reading a line.
-  const sets = art.match(/^\s*polish = .*$/gm) || [];
-  assert.equal(sets.length, 1, `polish is assigned ${sets.length} times`);
-  assert.match(sets[0], /polish = level\.location === 'School';/);
+test('the finish is not gated on anything any more', () => {
+  // There is no flag, so there is no location that can be left behind one. The
+  // second half matters as much as the first: a painter that still branched
+  // would leave a second, worse version of the room in the file waiting to be
+  // reached by accident.
+  assert.equal(/\bpolish\b/.test(art), false, 'art.js still has a polish flag');
+  assert.match(art, /^  paintNight\(ctx, level\);$/m,
+    'the night pass is no longer called unconditionally');
 });
 
-test('every polished painter still has the old one behind it', () => {
-  // Each of these is a `if (polish) return <other>(...)` at the top of the
-  // painter the other ten locations share. The point is that the branch is an
-  // early return into a separate function rather than a rewrite of the
-  // original: whatever a bedroom drew before this pass, it still draws.
-  for (const [painter, polished] of [
-    ['drawLockers', 'drawLockersMetal'],
-    ['drawDesk', 'drawDeskWood'],
-    ['drawBench', 'drawBenchWood'],
-    ['drawWindowPane', 'drawWindowGlass'],
-    ['drawDoorway', 'drawDoorwayLeaf'],
-    ['drawWallSlab', 'wallSlabLit']
-  ]) {
-    const at = art.indexOf(`function ${painter}(ctx,`);
-    assert.ok(at > 0, `${painter} is gone`);
-    const head = art.slice(at, at + 220);
-    assert.match(head, new RegExp(`if \\(polish\\) return ${polished}\\(`),
-      `${painter} no longer defers to ${polished}`);
+test('there is one painter per thing, not a good one and a plain one', () => {
+  // Each of these used to be a pair: the shared painter, and the school's,
+  // reached by an early return. The pair is gone — the good one took the shared
+  // name — so every location gets the finish because there is nothing else to
+  // get. If a second name ever comes back, so does the two-tier room.
+  for (const painter of ['drawLockers', 'drawDesk', 'drawBench', 'drawWindowPane',
+    'drawDoorway', 'drawWallSlab', 'drawPartition', 'drawBoard', 'drawNotice']) {
+    const found = art.match(new RegExp(`^function ${painter}\\(`, 'gm')) || [];
+    assert.equal(found.length, 1, `${painter} is defined ${found.length} times`);
+  }
+  for (const gone of ['drawLockersMetal', 'drawDeskWood', 'drawBenchWood',
+    'drawWindowGlass', 'drawDoorwayLeaf', 'wallSlabLit', 'drawBoardKit',
+    'drawNoticePinned', 'paintSchoolNight']) {
+    assert.equal(art.includes(gone), false, `${gone} is still a separate painter`);
+  }
+});
+
+test('every building has its own night, and the school keeps the one it had', () => {
+  // Same pass, eleven different nights: the identity half of the brief. If two
+  // themes ever agree on both the colour and the depth they stop being two
+  // places. The school's own numbers are pinned because it is the benchmark the
+  // other ten were brought up to — moving it moves the target.
+  const table = art.slice(art.indexOf('const THEMES = {'));
+  const themes = table.slice(0, table.indexOf('\n};'));
+  const names = [...themes.matchAll(/^  (\w+):\s*\{/gm)].map((m) => m[1]);
+  assert.ok(names.length >= 18, `only ${names.length} themes found`);
+  const nights = [...themes.matchAll(/night: '(#[0-9a-f]{6})', deep: ([0-9.]+)/g)];
+  assert.equal(nights.length, names.length, 'a theme has no night');
+  assert.equal(new Set(nights.map((m) => m[1] + m[2])).size, nights.length,
+    'two themes have the same night');
+  assert.match(themes, /school:[\s\S]{0,400}?night: '#0b1a24', deep: 0\.52/,
+    "the school's night moved");
+});
+
+test('a building is only as dark as its own lights allow', () => {
+  // The night is capped by how much of the floor the level's own fittings
+  // reach. The school is lit end to end and takes the full depth its theme
+  // asks for; a shop with one light would be a black rectangle at that depth,
+  // so it is let off. This reproduces the sum `paintNight` keeps while it
+  // punches the holes, reading the two constants out of the source so the test
+  // moves when the tuning does.
+  const [, floor, span] = art.match(
+    /Math\.min\(T\.deep, ([0-9.]+) \+ reached \* ([0-9.]+)\)/) || [];
+  assert.ok(floor && span, 'the night no longer scales with the light');
+  const reach = (l) => {
+    let cover = 0;
+    const add = (r, stretch = 1) => { cover += Math.PI * r * r * stretch * 0.55; };
+    for (const d of l.decor || []) {
+      if (d.kind === 'ceiling') add(Math.max(d.w, d.h) * 1.15, 1.7);
+      else if (d.kind === 'lamp') add(66);
+      else if (d.kind === 'desklamp') add(52);
+      else if (d.kind === 'floor' && (d.tag === 'boards' || d.tag === 'parquet')) {
+        cover += d.w * d.h * 0.30;
+      }
+    }
+    for (const c of l.colliders) {
+      if (c.type === 'wall' && c.window) {
+        const v = c.h > c.w;
+        add(Math.max(40, (v ? c.h : c.w) * 0.6), 1.5);
+      }
+    }
+    if (l.exit) add(58);
+    return Math.min(1, cover / (l.width * l.height));
+  };
+  for (const level of LEVELS) {
+    const depth = Math.min(0.52, Number(floor) + reach(level) * Number(span));
+    // Nothing may be washed so far down that the room stops being legible...
+    assert.ok(depth <= 0.53, `L${level.id} is washed to ${depth}`);
+    // ...and the school, which is lit end to end, must still take the full
+    // depth it took before the other ten locations joined it under this pass.
+    if (level.location === 'School') {
+      assert.equal(depth.toFixed(2), '0.52', `L${level.id} no longer takes its night`);
+    }
   }
 });
 
@@ -70,18 +127,15 @@ test('only the school hands its people the lit look', () => {
   assert.match(render, /sim\.rules\.reacts \? skin : THIEF_LOOK/);
 });
 
-test('the school is the only location with a finish to lose', () => {
-  // The flag reads `level.location`, so this is the set of levels it can ever
-  // be true for — five, and the five the whole beta is about.
+test('the school is five levels, and every level reacts', () => {
   const lit = LEVELS.filter((l) => l.location === 'School');
   assert.equal(lit.length, 5);
   assert.deepEqual(lit.map((l) => l.id), [21, 22, 23, 24, 25]);
-  // ...and they are the same five the rest of the beta is gated on, so there is
-  // one scope here and not two that have to be kept in step.
+  // The reacting room is no longer the school's — it is the floor every
+  // location is held to. Nothing may fall back below it.
   for (const level of LEVELS) {
-    const reacts = !!createSim({ level }).rules.reacts;
-    assert.equal(reacts, level.location === 'School',
-      `L${level.id} (${level.location}) disagrees about being the school`);
+    assert.equal(!!createSim({ level }).rules.reacts, true,
+      `L${level.id} (${level.location}) does not react`);
   }
 });
 
@@ -91,11 +145,11 @@ test('nothing in the finish is drawn per frame', () => {
   // — so none of it can cost a millisecond while the game is running. If one of
   // these ever gets called from `draw`, that argument is gone.
   const live = render.slice(render.indexOf('function draw('));
-  for (const name of ['drawLockersMetal', 'drawDeskWood', 'drawBenchWood',
-    'drawWindowGlass', 'drawDoorwayLeaf', 'wallSlabLit', 'paintSchoolNight',
+  for (const name of ['drawLockers', 'drawDesk', 'drawBench', 'drawWindowPane',
+    'drawDoorway', 'drawWallSlab', 'paintNight',
     'tileFloor', 'boardFloor', 'grassFloor', 'parquetFloor']) {
     assert.equal(live.includes(name), false, `${name} is called live`);
-    assert.equal(art.includes(`export function ${name}`), false,
+    assert.equal(new RegExp(`export function ${name}\\b`).test(art), false,
       `${name} is exported, which is how it would end up called live`);
   }
 });
