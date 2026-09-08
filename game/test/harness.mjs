@@ -112,6 +112,17 @@ export function walkTo(run, target, maxFrames = null, pace = 1) {
           && ((run.heed && run.sim.investigator.state === 'following')
             || ((run.heed || run.heedBeat) && onBeat(run.sim)
               && closeTo(run.sim) < 150))) return false;
+      // A shut door in the way. A player walking at one presses the button and
+      // waits the half second it takes to come round, so this does too — and it
+      // is the only thing that presses the button in here, checked against what
+      // the simulation says it is offering rather than fired blind, so it can
+      // never open a cupboard or climb into one by accident.
+      if (run.sim.action === 'open') {
+        tick(run, { x: 0, y: 0, take: false, search: true });
+        tick(run, { x: 0, y: 0, take: false, search: false });
+        frames += 2;
+        continue;
+      }
       const p = playerOf(run.sim);
       const dx = waypoint.x - p.x;
       const dy = waypoint.y - p.y;
@@ -127,7 +138,9 @@ export function walkTo(run, target, maxFrames = null, pace = 1) {
       const throttle = Math.min(arriving, nearFurniture(run.level, p) ? 0.7 : 1) * pace;
       tick(run, { x: (dx / distance) * throttle, y: (dy / distance) * throttle, take: false });
       // Wedged against geometry: give up on this cell rather than burn the budget.
-      if (Math.abs(p.x - wasX) < 0.05 && Math.abs(p.y - wasY) < 0.05 && ++stalled > 6) break;
+      const swinging = run.sim.doors.some((d) => d.open && d.swing < 1);
+      if (!swinging && Math.abs(p.x - wasX) < 0.05 && Math.abs(p.y - wasY) < 0.05
+          && ++stalled > 6) break;
     }
   }
   return run.sim.status === 'running';

@@ -11012,7 +11012,7 @@ __mod.sim = (function () {
         entity,
         entity.vx * STEP_SECONDS,
         entity.vy * STEP_SECONDS,
-        sim.level.colliders
+        sim.solids
       );
       // How hard the collision was, measured on the blocked axis only. A head-on
       // walk into a cabinet registers; sliding along its edge does not. (Reading
@@ -11158,7 +11158,7 @@ __mod.sim = (function () {
       }
 
       const moved = solveMove(
-        entity, entity.vx * STEP_SECONDS, entity.vy * STEP_SECONDS, sim.level.colliders
+        entity, entity.vx * STEP_SECONDS, entity.vy * STEP_SECONDS, sim.solids
       );
       if (moved.hitX) entity.vx = 0;
       if (moved.hitY) entity.vy = 0;
@@ -11844,7 +11844,7 @@ __mod.sim = (function () {
     const rules = locationRules(level);
     const investigator = rules.investigate ? makeInvestigator(level, rules.investigate) : null;
 
-    return {
+    const sim = {
       level,
       seed,
       mods,
@@ -11941,6 +11941,19 @@ __mod.sim = (function () {
       // Creaky boards: plain trigger zones, each with its own cooldown so
       // standing on one does not drain the meter.
       creaks: level.creaks.map((zone) => ({ ...zone, cooldown: 0, active: false })),
+      // Every door in the building, shut.
+      //
+      // The map has always carried these rectangles and the room painter has
+      // always drawn a leaf standing open against the jamb, because a door that
+      // did nothing was better drawn out of the way. They do something now: a
+      // shut door is solid, and getting through one is a thing you do rather
+      // than a thing you walk over. `swing` is how far it has come round, 0 shut
+      // and 1 flat against the jamb, and it is here rather than in the renderer
+      // because the collider goes away partway through it — so where the leaf is
+      // has to be the same fact for the physics and the picture.
+      doors: level.doors.map((door, i) => ({
+        ...door, id: `L${level.id}-o${i}`, open: false, swing: 0
+      })),
       wakeSeconds: 0,   // drives the wake-up animation only
       startle: 0,       // a visible flinch from a bang, separate from the meter
       shake: 0,
@@ -11948,8 +11961,29 @@ __mod.sim = (function () {
       shakeX: 0,
       shakeY: 0,
       prevTake: false,
+      doorTargetId: null,
+      // Filled in below, once the object exists to hang it off.
+      solids: level.colliders,
       events: []
     };
+    reSolid(sim);
+    return sim;
+  }
+
+  // Everything solid this frame: the building, plus whichever doors are still
+  // shut. Cached on the sim and rebuilt only when one of them opens, because it
+  // is read four times a step by every entity and the building never changes.
+  //
+  // A door stops being solid the moment it is opened, not when the leaf finishes
+  // coming round. The other way was the honest simulation and it played badly:
+  // the button says OPEN, you press it, and then for half a second you are still
+  // walking into a door — which registers as walking into furniture, which costs
+  // noise, which turned a perfect escape through three doorways into a merely
+  // clean one. You pushed it open; you are through. The swing is what that looks
+  // like, not a queue you stand in.
+  function reSolid(sim) {
+    const shut = sim.doors.filter((d) => !d.open);
+    sim.solids = shut.length ? sim.level.colliders.concat(shut) : sim.level.colliders;
   }
 
   const playerOf = (sim) => sim.entities.find((e) => e.kind === 'player');
@@ -12010,6 +12044,55 @@ __mod.sim = (function () {
     if (endsAtCap(sim)) finish(sim, 'lost', 'awake');
   }
 
+  // Doors, and how long one takes to come round.
+  //
+  // A door is not an animation over a hole in the wall: while it is shut it is
+  // solid, and the leaf stops being solid partway through its swing rather than
+  // at either end of it — at four fifths, which is where a person can get past it
+  // but it is still visibly moving. Anything less and you walk through a door
+  // that is plainly still in your way; anything more and you stand waiting on the
+  // last frames of a picture.
+  //
+  // Half a second. Long enough that the swing is a thing that happens and short
+  // enough that a floor with a dozen doors on it is not a floor of waiting: on
+  // the biggest apartment the route past the loot crosses five of them, which is
+  // a second and a quarter out of fifty-five.
+  const DOOR_SWING = 0.5;
+  // ...and how near you have to be for the button to offer it. Wider than the
+  // reach for a cupboard, because a door is a thing you walk at rather than a
+  // thing you stop in front of, and the button has to be there before you arrive.
+  const DOOR_REACH = 30;
+
+  // The gap between a box and a door's rectangle, or 0 inside it.
+  function doorGap(entity, door) {
+    const dx = Math.max(door.x - (entity.x + entity.w / 2), 0,
+      entity.x - entity.w / 2 - (door.x + door.w));
+    const dy = Math.max(door.y - (entity.y + entity.h / 2), 0,
+      entity.y - entity.h / 2 - (door.y + door.h));
+    return Math.hypot(dx, dy);
+  }
+
+  // The nearest shut door within reach, and nothing once it is open: a door
+  // standing open is scenery again.
+  function nearestDoor(sim, entity, reach) {
+    let best = null;
+    let bestGap = reach;
+    for (const door of sim.doors) {
+      if (door.open) continue;
+      const gap = doorGap(entity, door);
+      if (gap <= bestGap) { best = door; bestGap = gap; }
+    }
+    return best;
+  }
+
+  function openDoor(sim, door) {
+    if (door.open) return;
+    door.open = true;
+    reSolid(sim);
+    sim.events.push({ type: 'door', id: door.id, x: door.x + door.w / 2,
+      y: door.y + door.h / 2, w: door.w, h: door.h });
+  }
+
   // Getting into a locker, in beats rather than in one move.
   //
   // These are fractions of the whole, so retuning how long it takes cannot
@@ -12031,11 +12114,11 @@ __mod.sim = (function () {
   // and standing him where he is, which is at least still out of the locker.
   function wayOut(sim, player, spot) {
     const back = (spot && spot.stand) || { x: player.x, y: player.y };
-    if (!blocked(back.x, back.y, player.w, player.h, sim.level.colliders)) return back;
+    if (!blocked(back.x, back.y, player.w, player.h, sim.solids)) return back;
     const tile = TUNING.world.tile;
     for (const [dx, dy] of [[0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [-1, 1], [1, -1], [-1, -1]]) {
       const at = { x: back.x + dx * tile, y: back.y + dy * tile };
-      if (!blocked(at.x, at.y, player.w, player.h, sim.level.colliders)) return at;
+      if (!blocked(at.x, at.y, player.w, player.h, sim.solids)) return at;
     }
     return { x: player.x, y: player.y };
   }
@@ -12282,6 +12365,25 @@ __mod.sim = (function () {
     }
     sim.targetId = nearest ? nearest.id : null;
 
+    // Doors coming round. Presentation only by this point — the leaf stopped
+    // being solid when it was opened — but it lives here rather than in the
+    // renderer so that a replay of a run shows the same doors standing open at
+    // the same moment the run did.
+    for (const door of sim.doors) {
+      if (door.open && door.swing < 1) {
+        door.swing = Math.min(1, door.swing + STEP_SECONDS / DOOR_SWING);
+      }
+    }
+    // ...and the person who lives here opens the ones he walks into. He is not
+    // sneaking about his own building, so there is no button and no beat: he
+    // reaches the door and it is open, which is also what stops a shut door from
+    // walling him out of the room he is investigating.
+    for (const entity of sim.entities) {
+      if (entity.kind === 'player') continue;
+      const door = nearestDoor(sim, entity, 14);
+      if (door) openDoor(sim, door);
+    }
+
     // Creaky boards. Entering one costs noise; it then goes quiet for a while,
     // so a board cannot be milked and cannot drain you while you stand on it.
     for (const zone of sim.creaks) {
@@ -12379,7 +12481,7 @@ __mod.sim = (function () {
           player,
           player.bumpNormalX * recoil * force,
           player.bumpNormalY * recoil * force,
-          sim.level.colliders
+          sim.solids
         );
         player.x = bounced.x;
         player.y = bounced.y;
@@ -12493,6 +12595,7 @@ __mod.sim = (function () {
         // Tucked in behind the lockers, the button says LEAVE and nothing else.
         sim.searchTargetId = null;
         sim.hideTargetId = null;
+        sim.doorTargetId = null;
       } else {
         // Both mechanics share one button, and the locker you would hide behind
         // is frequently the locker you would search, so one of them has to win.
@@ -12506,11 +12609,22 @@ __mod.sim = (function () {
         // legible rather than arbitrary.
         const stash = nearestStash(sim, player, searchRules.reach);
         const nook = hideRules ? nearestHide(sim, player, hideRules.reach) : null;
-        const hiding = nook && (!stash || nook.distance <= stashGap(player, stash));
-        sim.searchTargetId = hiding ? null : (stash ? stash.id : null);
+        // ...and a third thing the one button can be. Same rule as the other two:
+        // whichever is nearer. A shut door you are pressed against has no gap at
+        // all, so it wins where it should — and a step back from it hands the
+        // button to the cupboard beside it, which is what makes it readable.
+        const door = nearestDoor(sim, player, DOOR_REACH);
+        const doorGapNow = door ? doorGap(player, door) : Infinity;
+        const nookGap = nook ? nook.distance : Infinity;
+        const stashGapNow = stash ? stashGap(player, stash) : Infinity;
+        const opening = door && doorGapNow <= Math.min(nookGap, stashGapNow);
+        const hiding = !opening && nook && nookGap <= stashGapNow;
+        sim.searchTargetId = opening || hiding ? null : (stash ? stash.id : null);
         sim.hideTargetId = hiding ? nook.spot.id : null;
+        sim.doorTargetId = opening ? door.id : null;
         const pressed = input.search && !sim.prevSearch;
-        if (pressed && hiding) enterHiding(sim, player, nook.spot, hideRules);
+        if (pressed && opening) openDoor(sim, door);
+        else if (pressed && hiding) enterHiding(sim, player, nook.spot, hideRules);
         else if (pressed && stash) beginSearch(sim, stash, searchRules, player);
       }
     }
@@ -12540,8 +12654,9 @@ __mod.sim = (function () {
     // during either animation does nothing, because the stick and the button are
     // both ignored until he is standing still again.
     sim.action = sim.hidden || sim.hiding ? 'leave'
-      : sim.hideTargetId ? 'hide'
-        : sim.searchTargetId || sim.searching ? 'search' : null;
+      : sim.doorTargetId ? 'open'
+        : sim.hideTargetId ? 'hide'
+          : sim.searchTargetId || sim.searching ? 'search' : null;
     sim.prevSearch = !!input.search;
 
     // Last, so that the meter he reacts to is this tick's meter: lifting
@@ -12655,8 +12770,14 @@ __mod.replay = (function () {
 
   function expand(recording) {
     const out = [];
-    for (const [count, x, y, take] of recording.frames) {
-      for (let i = 0; i < count; i++) out.push(unpack([x, y, take]));
+    // The fifth column is the action button, and it used to be dropped here: the
+    // run went in with a search, a hide and a door being opened in it and came
+    // back out as a walk with the button never touched. Nothing noticed, because
+    // the only recordings anything replayed were runs that picked things up off
+    // the floor and left. Older recordings have no fifth column and unpack to
+    // `false`, which is what they always did.
+    for (const [count, x, y, take, search] of recording.frames) {
+      for (let i = 0; i < count; i++) out.push(unpack([x, y, take, search]));
     }
     return out;
   }
@@ -14975,6 +15096,49 @@ __mod.art = (function () {
   // A doorway: a threshold board across the opening and a jamb at each side. In
   // the reference floorplans this is what makes a gap read as a way through
   // rather than as a hole where a wall should be.
+  // The leaf of a door, swinging.
+  //
+  // Drawn live rather than baked, and the only thing about a doorway that is:
+  // the threshold, the jambs and the frame are in the room cache where they
+  // belong, and this is a single rotated rectangle over the top of them. Shut it
+  // lies across the opening; open it lies along the jamb it is hinged on, in
+  // exactly the place the baked version used to sit.
+  //
+  // The hinge is the low end of the opening and it swings into the room the way
+  // every other shadow in this game falls, so a corridor of doors all stand back
+  // the same way rather than looking hung at random.
+  function drawDoorLeaf(ctx, door, swing) {
+    const horizontal = door.w > door.h;
+    const span = (horizontal ? door.w : door.h) - 2;
+    const thick = 4.2;
+    // A quarter turn, eased so it comes off the latch quickly and settles.
+    const t = swing * swing * (3 - 2 * swing);
+    ctx.save();
+    ctx.translate(door.x + 1, door.y + 1);
+    if (!horizontal) ctx.rotate(Math.PI / 2);
+    // Shut is across the opening, open is back along the jamb: one rotation
+    // between the two, about the hinge at the origin.
+    ctx.rotate(-(1 - t) * Math.PI / 2);
+    // Its shadow on the floor, which is what makes a swinging door read as a
+    // thing standing up rather than a stripe sliding about.
+    ctx.fillStyle = `rgba(12,16,20,${0.20 + 0.14 * (1 - t)})`;
+    roundRect(ctx, 1.4, -thick + 2.4, span, thick, 1.4);
+    ctx.fill();
+    const g = ctx.createLinearGradient(0, -thick, 0, 0);
+    g.addColorStop(0, '#9d7a4e');
+    g.addColorStop(1, '#6d5133');
+    ctx.fillStyle = g;
+    roundRect(ctx, 0, -thick, span, thick, 1.4);
+    ctx.fill();
+    // The lit top edge, so the leaf has a height to it.
+    ctx.fillStyle = 'rgba(255,232,190,0.16)';
+    ctx.fillRect(0.6, -thick + 0.4, span - 1.2, 1);
+    // ...and the handle on the swinging edge.
+    ctx.fillStyle = '#cfd8dc';
+    ctx.fillRect(span - 5.4, -thick + 1.4, 3.4, 1.5);
+    ctx.restore();
+  }
+
   // Everything that never moves, drawn once per level into an offscreen canvas.
   // A wall slab on a hand-drawn map. The building's shape comes from the grid
   // rather than from a fixed rectangle round the edge, so each run of wall is
@@ -15142,22 +15306,11 @@ __mod.art = (function () {
     }
     ctx.stroke();
 
-    // The leaf, standing open against the jamb it is hinged on — which is how
-    // every internal door in a school actually is at night, and how the player
-    // gets to walk through the opening the map says is open.
-    const leaf = 4.2;
-    const g = horizontal
-      ? ctx.createLinearGradient(0, door.y, 0, door.y + leaf)
-      : ctx.createLinearGradient(door.x, 0, door.x + leaf, 0);
-    g.addColorStop(0, '#9d7a4e');
-    g.addColorStop(1, '#6d5133');
-    ctx.fillStyle = g;
-    if (horizontal) ctx.fillRect(door.x + 1, door.y - leaf + 1, door.w * 0.46, leaf);
-    else ctx.fillRect(door.x - leaf + 1, door.y + 1, leaf, door.h * 0.46);
-    // ...and the handle on the swinging edge.
-    ctx.fillStyle = '#cfd8dc';
-    if (horizontal) ctx.fillRect(door.x + door.w * 0.42, door.y - leaf + 1.4, 3.4, 1.5);
-    else ctx.fillRect(door.x - leaf + 1.4, door.y + door.h * 0.42, 1.5, 3.4);
+    // The leaf itself is not here any more. It used to be painted into this cache
+    // standing open against its jamb, because a door that did nothing was better
+    // drawn out of the way; it swings now, so it is drawn live over the room by
+    // `drawDoorLeaf` below. What stays baked is everything that never moves: the
+    // threshold under it, and the jambs it hangs between.
 
     // Jambs at the open ends, so the wall reads as stopping rather than fading.
     ctx.fillStyle = T.lip;
@@ -16895,7 +17048,7 @@ __mod.art = (function () {
     ctx.fillText(art, 0, 8);
     ctx.restore();
   }
-  return { PALETTE, sleeperLook, ITEM_ART, ITEM_NAMES, roundRect, lampPositions, drawFurniture, drawCreakZone, paintStaticRoom, drawHideLabel, drawWatcherFurniture, drawSleeper, drawDeskset, deskScreen, drawSlumped, drawGuard, drawWalker, drawThief, drawCaretakerWalking, drawGrabbedItem };
+  return { PALETTE, sleeperLook, ITEM_ART, ITEM_NAMES, roundRect, lampPositions, drawFurniture, drawCreakZone, drawDoorLeaf, paintStaticRoom, drawHideLabel, drawWatcherFurniture, drawSleeper, drawDeskset, deskScreen, drawSlumped, drawGuard, drawWalker, drawThief, drawCaretakerWalking, drawGrabbedItem };
 })();
 __mod.effects = (function () {
   // What the room does back.
@@ -17537,7 +17690,7 @@ __mod.render = (function () {
   const { sleepStage, rarityOf, isBigScore, watcherConfig, gaitBlend, gaitOf, hash } = __mod.rules;
   const { drawFigure, THIEF_LOOK, CARETAKER_LOOK, SCHOOL_CARETAKER_LOOK, skinById, DEFAULT_SKIN } = __mod.figure;
   const { playerOf } = __mod.sim;
-  const { paintStaticRoom, drawSleeper, drawGuard, drawSlumped, drawThief, drawCaretakerWalking, drawGrabbedItem, roundRect, ITEM_ART, lampPositions, drawHideLabel, deskScreen } = __mod.art;
+  const { paintStaticRoom, drawSleeper, drawGuard, drawSlumped, drawThief, drawCaretakerWalking, drawGrabbedItem, roundRect, ITEM_ART, lampPositions, drawHideLabel, deskScreen, drawDoorLeaf } = __mod.art;
 
   // W and H are the *window*, not the world: how much of a level fits on screen
   // at once. A level that is exactly this size never scrolls, which is every
@@ -18301,6 +18454,17 @@ __mod.render = (function () {
           drawSleeper(ctx, sim.level, stage, time, sim.wakeSeconds || 0,
             Math.max(sim.startle || 0, jolt), kind, pose);
         }
+        // The doors, over the room and under the people: a leaf is at furniture
+        // height, so a thief standing in a doorway is in front of the door he has
+        // just pushed open. Only the ones on screen, and only the ones actually
+        // moving or shut — a door that finished swinging an hour ago is drawn
+        // exactly where the threshold under it says it is, every frame, for the
+        // price of one rotated rectangle.
+        for (const door of sim.doors) {
+          if (door.x > camera.x + W + 40 || door.x + door.w < camera.x - 40) continue;
+          if (door.y > camera.y + H + 40 || door.y + door.h < camera.y - 40) continue;
+          drawDoorLeaf(ctx, door, door.swing);
+        }
         drawStashes(sim, time);
         // What the room is doing about all this: the drawer that is open, the
         // locker still rocking, the ring going out from the last noise. Under the
@@ -18458,7 +18622,7 @@ __mod.main = (function () {
   const $ = (id) => document.getElementById(id);
   const WAKE_BEAT = 0.9;         // seconds of wake-up animation before the fail screen
   // What the one interaction button says, per action the simulation is offering.
-  const ACTION_LABEL = { search: 'SEARCH', hide: 'HIDE', leave: 'EXIT' };
+  const ACTION_LABEL = { search: 'SEARCH', hide: 'HIDE', leave: 'EXIT', open: 'OPEN' };
 
   function boot() {
     const params = new URLSearchParams(location.search);
@@ -19154,10 +19318,11 @@ __mod.main = (function () {
       // One button, for whatever is to hand, and nothing when nothing is.
       //
       // It began as SEARCH and is now the game's only interaction button: walk up
-      // to a cupboard and it says SEARCH, step into the gap behind the lockers
-      // and it says HIDE, and once you are in there it says LEAVE. Which of those
-      // is on offer is the simulation's decision — `sim.action` — so the HUD only
-      // renders it, and a location with none of those mechanics shows no button.
+      // to a cupboard and it says SEARCH, walk at a shut door and it says OPEN,
+      // step into the gap behind the lockers and it says HIDE, and once you are in
+      // there it says EXIT. Which of those is on offer is the simulation's
+      // decision — `sim.action` — so the HUD only renders it, and a location with
+      // none of those mechanics shows no button.
       const busy = !!sim.searching;
       const label = ACTION_LABEL[sim.action] || 'SEARCH';
       const here = busy || !!sim.action;

@@ -21,7 +21,7 @@ import { createEffects } from './effects.js';
 const $ = (id) => document.getElementById(id);
 const WAKE_BEAT = 0.9;         // seconds of wake-up animation before the fail screen
 // What the one interaction button says, per action the simulation is offering.
-const ACTION_LABEL = { search: 'SEARCH', hide: 'HIDE', leave: 'EXIT' };
+const ACTION_LABEL = { search: 'SEARCH', hide: 'HIDE', leave: 'EXIT', open: 'OPEN' };
 
 export function boot() {
   const params = new URLSearchParams(location.search);
@@ -717,10 +717,11 @@ export function boot() {
     // One button, for whatever is to hand, and nothing when nothing is.
     //
     // It began as SEARCH and is now the game's only interaction button: walk up
-    // to a cupboard and it says SEARCH, step into the gap behind the lockers
-    // and it says HIDE, and once you are in there it says LEAVE. Which of those
-    // is on offer is the simulation's decision — `sim.action` — so the HUD only
-    // renders it, and a location with none of those mechanics shows no button.
+    // to a cupboard and it says SEARCH, walk at a shut door and it says OPEN,
+    // step into the gap behind the lockers and it says HIDE, and once you are in
+    // there it says EXIT. Which of those is on offer is the simulation's
+    // decision — `sim.action` — so the HUD only renders it, and a location with
+    // none of those mechanics shows no button.
     const busy = !!sim.searching;
     const label = ACTION_LABEL[sim.action] || 'SEARCH';
     const here = busy || !!sim.action;

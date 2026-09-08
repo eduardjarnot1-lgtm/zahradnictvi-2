@@ -36,8 +36,14 @@ export function recordFrame(recording, input) {
 
 export function expand(recording) {
   const out = [];
-  for (const [count, x, y, take] of recording.frames) {
-    for (let i = 0; i < count; i++) out.push(unpack([x, y, take]));
+  // The fifth column is the action button, and it used to be dropped here: the
+  // run went in with a search, a hide and a door being opened in it and came
+  // back out as a walk with the button never touched. Nothing noticed, because
+  // the only recordings anything replayed were runs that picked things up off
+  // the floor and left. Older recordings have no fifth column and unpack to
+  // `false`, which is what they always did.
+  for (const [count, x, y, take, search] of recording.frames) {
+    for (let i = 0; i < count; i++) out.push(unpack([x, y, take, search]));
   }
   return out;
 }

@@ -151,13 +151,16 @@ test('the exit works whatever the meter says, because the meter is a person', ()
 // The longest unobstructed run of floor on a level, found rather than assumed:
 // hard-coding "a clear stretch" ties the test to one particular map, and these
 // maps change.
-const clearStretch = (level, { onRug = null } = {}) => {
+// Somewhere with room to walk in a straight line. `solids` rather than the
+// level's own colliders because a shut door is in the way as much as a wall is,
+// and a lane that crosses one is not a lane you can measure a walk along.
+const clearStretch = (level, { onRug = null, solids = level.colliders } = {}) => {
   const { boxWidth: PW, boxHeight: PH } = TUNING.player;
   let best = null;
   for (let y = PH; y < level.height - PH; y += 8) {
     let start = null;
     for (let x = PW; x <= level.width - PW; x += 8) {
-      const free = !blocked(x, y, PW + 8, PH + 8, level.colliders)
+      const free = !blocked(x, y, PW + 8, PH + 8, solids)
         && (onRug === null || onRug === level.rugs.some(
           (r) => x > r.x && x < r.x + r.w && y > r.y && y < r.y + r.h));
       if (free) {
@@ -175,7 +178,7 @@ const clearStretch = (level, { onRug = null } = {}) => {
 const openRun = () => {
   const run = createRun(1);
   const player = playerOf(run.sim);
-  const lane = clearStretch(run.level);
+  const lane = clearStretch(run.level, { solids: run.sim.solids });
   player.x = lane.x + TUNING.player.boxWidth;
   player.y = lane.y;
   return run;
@@ -477,7 +480,7 @@ test('a glancing slide along furniture is not a collision', () => {
   // noise either way — the question is whether brushing the edge adds anything
   // on top, and comparing against zero would only be testing the footsteps.
   const control = createRun(best.level.id);
-  const lane = clearStretch(control.level);
+  const lane = clearStretch(control.level, { solids: control.sim.solids });
   const walker = playerOf(control.sim);
   walker.x = lane.x + PW;
   walker.y = lane.y;
@@ -743,8 +746,13 @@ test('a creep takes more, shorter steps per unit than a run', () => {
   // of floor costs more steps when you cross it carefully.
   const creep = openRun();
   const sprint = openRun();
-  for (let i = 0; i < 150; i++) tick(creep, { x: 0.25, y: 0 });
-  for (let i = 0; i < 150; i++) tick(sprint, { x: 1, y: 0 });
+  // Ninety, not the hundred and fifty this used to walk. The lane `openRun`
+  // finds is the longest stretch of floor with nothing in the way, and a shut
+  // door is now something in the way — so the longest one on level 1 is shorter
+  // than it was, and a run at top speed used to cross the whole of it and spend
+  // its last frames pressed against the far wall with the phase standing still.
+  for (let i = 0; i < 90; i++) tick(creep, { x: 0.25, y: 0 });
+  for (let i = 0; i < 90; i++) tick(sprint, { x: 1, y: 0 });
   const startX = playerOf(openRun().sim).x;
   const cp = playerOf(creep.sim);
   const sp = playerOf(sprint.sim);

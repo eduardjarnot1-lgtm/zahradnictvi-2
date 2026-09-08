@@ -12,7 +12,7 @@ import { playerOf } from './sim.js';
 import {
   paintStaticRoom, drawSleeper, drawGuard, drawSlumped, drawThief, drawCaretakerWalking,
   drawGrabbedItem,
-  roundRect, ITEM_ART, lampPositions, drawHideLabel, deskScreen
+  roundRect, ITEM_ART, lampPositions, drawHideLabel, deskScreen, drawDoorLeaf
 } from './art.js';
 
 // W and H are the *window*, not the world: how much of a level fits on screen
@@ -776,6 +776,17 @@ export function createRenderer(canvas, options = {}) {
           : 0;
         drawSleeper(ctx, sim.level, stage, time, sim.wakeSeconds || 0,
           Math.max(sim.startle || 0, jolt), kind, pose);
+      }
+      // The doors, over the room and under the people: a leaf is at furniture
+      // height, so a thief standing in a doorway is in front of the door he has
+      // just pushed open. Only the ones on screen, and only the ones actually
+      // moving or shut — a door that finished swinging an hour ago is drawn
+      // exactly where the threshold under it says it is, every frame, for the
+      // price of one rotated rectangle.
+      for (const door of sim.doors) {
+        if (door.x > camera.x + W + 40 || door.x + door.w < camera.x - 40) continue;
+        if (door.y > camera.y + H + 40 || door.y + door.h < camera.y - 40) continue;
+        drawDoorLeaf(ctx, door, door.swing);
       }
       drawStashes(sim, time);
       // What the room is doing about all this: the drawer that is open, the

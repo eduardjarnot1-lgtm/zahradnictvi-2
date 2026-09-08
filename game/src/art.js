@@ -1689,6 +1689,49 @@ function drawPartition(ctx, c) {
 // A doorway: a threshold board across the opening and a jamb at each side. In
 // the reference floorplans this is what makes a gap read as a way through
 // rather than as a hole where a wall should be.
+// The leaf of a door, swinging.
+//
+// Drawn live rather than baked, and the only thing about a doorway that is:
+// the threshold, the jambs and the frame are in the room cache where they
+// belong, and this is a single rotated rectangle over the top of them. Shut it
+// lies across the opening; open it lies along the jamb it is hinged on, in
+// exactly the place the baked version used to sit.
+//
+// The hinge is the low end of the opening and it swings into the room the way
+// every other shadow in this game falls, so a corridor of doors all stand back
+// the same way rather than looking hung at random.
+export function drawDoorLeaf(ctx, door, swing) {
+  const horizontal = door.w > door.h;
+  const span = (horizontal ? door.w : door.h) - 2;
+  const thick = 4.2;
+  // A quarter turn, eased so it comes off the latch quickly and settles.
+  const t = swing * swing * (3 - 2 * swing);
+  ctx.save();
+  ctx.translate(door.x + 1, door.y + 1);
+  if (!horizontal) ctx.rotate(Math.PI / 2);
+  // Shut is across the opening, open is back along the jamb: one rotation
+  // between the two, about the hinge at the origin.
+  ctx.rotate(-(1 - t) * Math.PI / 2);
+  // Its shadow on the floor, which is what makes a swinging door read as a
+  // thing standing up rather than a stripe sliding about.
+  ctx.fillStyle = `rgba(12,16,20,${0.20 + 0.14 * (1 - t)})`;
+  roundRect(ctx, 1.4, -thick + 2.4, span, thick, 1.4);
+  ctx.fill();
+  const g = ctx.createLinearGradient(0, -thick, 0, 0);
+  g.addColorStop(0, '#9d7a4e');
+  g.addColorStop(1, '#6d5133');
+  ctx.fillStyle = g;
+  roundRect(ctx, 0, -thick, span, thick, 1.4);
+  ctx.fill();
+  // The lit top edge, so the leaf has a height to it.
+  ctx.fillStyle = 'rgba(255,232,190,0.16)';
+  ctx.fillRect(0.6, -thick + 0.4, span - 1.2, 1);
+  // ...and the handle on the swinging edge.
+  ctx.fillStyle = '#cfd8dc';
+  ctx.fillRect(span - 5.4, -thick + 1.4, 3.4, 1.5);
+  ctx.restore();
+}
+
 // Everything that never moves, drawn once per level into an offscreen canvas.
 // A wall slab on a hand-drawn map. The building's shape comes from the grid
 // rather than from a fixed rectangle round the edge, so each run of wall is
@@ -1856,22 +1899,11 @@ function drawDoorway(ctx, door) {
   }
   ctx.stroke();
 
-  // The leaf, standing open against the jamb it is hinged on — which is how
-  // every internal door in a school actually is at night, and how the player
-  // gets to walk through the opening the map says is open.
-  const leaf = 4.2;
-  const g = horizontal
-    ? ctx.createLinearGradient(0, door.y, 0, door.y + leaf)
-    : ctx.createLinearGradient(door.x, 0, door.x + leaf, 0);
-  g.addColorStop(0, '#9d7a4e');
-  g.addColorStop(1, '#6d5133');
-  ctx.fillStyle = g;
-  if (horizontal) ctx.fillRect(door.x + 1, door.y - leaf + 1, door.w * 0.46, leaf);
-  else ctx.fillRect(door.x - leaf + 1, door.y + 1, leaf, door.h * 0.46);
-  // ...and the handle on the swinging edge.
-  ctx.fillStyle = '#cfd8dc';
-  if (horizontal) ctx.fillRect(door.x + door.w * 0.42, door.y - leaf + 1.4, 3.4, 1.5);
-  else ctx.fillRect(door.x - leaf + 1.4, door.y + door.h * 0.42, 1.5, 3.4);
+  // The leaf itself is not here any more. It used to be painted into this cache
+  // standing open against its jamb, because a door that did nothing was better
+  // drawn out of the way; it swings now, so it is drawn live over the room by
+  // `drawDoorLeaf` below. What stays baked is everything that never moves: the
+  // threshold under it, and the jambs it hangs between.
 
   // Jambs at the open ends, so the wall reads as stopping rather than fading.
   ctx.fillStyle = T.lip;

@@ -26,6 +26,21 @@ test('a recording replays to the same result as the live run', () => {
   assert.deepEqual(replay(run.recording), result);
 });
 
+test('a run that pressed the button replays as one that pressed it', () => {
+  // The hole that hid a real bug for as long as it existed. Every recording
+  // anything replayed was a walk with a few things picked up off the floor, so
+  // the fifth column — the action button — was never once exercised through a
+  // replay, and `expand` was quietly dropping it. A run that searched a
+  // cupboard came back as a run that walked past it.
+  //
+  // So: a run that uses the button for all three of the things it can be, and
+  // the assertion is that the replay agrees about what happened.
+  const { run, result } = play(21, { take: ['L21-0'], seed: 11, everything: true });
+  const pressed = expand(run.recording).filter((i) => i.search).length;
+  assert.ok(pressed > 0, 'this run never pressed the button, so it proves nothing');
+  assert.deepEqual(replay(run.recording), result);
+});
+
 test('run-length encoding round-trips', () => {
   const recording = createRecorder(1, 1);
   const inputs = [
