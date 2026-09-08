@@ -10,7 +10,7 @@ import { playerOf } from './sim.js';
 import {
   paintStaticRoom, drawSleeper, drawGuard, drawSlumped, drawThief, drawCaretakerWalking,
   drawGrabbedItem,
-  roundRect, ITEM_ART, lampPositions, drawHideLabel, drawFurniture, deskScreen
+  roundRect, ITEM_ART, lampPositions, drawHideLabel, deskScreen
 } from './art.js';
 
 // W and H are the *window*, not the world: how much of a level fits on screen
@@ -268,15 +268,26 @@ export function createRenderer(canvas, options = {}) {
     }
   }
 
-  // How far into a hiding place he is, 0 out to 1 tucked in — the animation
-  // while it runs, and flat 1 once he is there.
-  function hidingShare(sim) {
-    if (sim.hiding) {
-      const k = Math.min(1, sim.hiding.t / sim.hiding.duration);
-      const eased = k * k * (3 - 2 * k);
-      return sim.hiding.into ? eased : 1 - eased;
-    }
-    return sim.hidden ? 1 : 0;
+  // Which locker he is climbing into or out of, and which way its door faces.
+  //
+  // While he is stepping through it the figure is clipped to the floor in front
+  // of that face, so he is cut off exactly at the cabinet's mouth and is
+  // swallowed by it a bit at a time — the same read as walking through a
+  // doorway, and drawn with the same full-size figure as everywhere else. There
+  // is no second, smaller thief and no transparent one.
+  function mouthOf(sim) {
+    const spot = (sim.hiding && (sim.hiding.into || sim.hiding.spot)) || sim.hideIn;
+    const anchor = spot && spot.anchor;
+    if (!anchor || !spot.stand) return null;
+    const sx = spot.stand.x;
+    const sy = spot.stand.y;
+    // Which face of the cabinet the marked spot is off. Compared as gaps to the
+    // box rather than to its middle, so standing off the end of a long bank
+    // still names the long side he is actually facing.
+    const gx = Math.max(anchor.x - sx, 0, sx - (anchor.x + anchor.w));
+    const gy = Math.max(anchor.y - sy, 0, sy - (anchor.y + anchor.h));
+    if (gy >= gx) return sy > anchor.y ? { axis: 'y', at: anchor.y + anchor.h, sign: 1 } : { axis: 'y', at: anchor.y, sign: -1 };
+    return sx > anchor.x ? { axis: 'x', at: anchor.x + anchor.w, sign: 1 } : { axis: 'x', at: anchor.x, sign: -1 };
   }
 
   // The beta's markers over the hiding places. Culled like everything else,
@@ -286,10 +297,25 @@ export function createRenderer(canvas, options = {}) {
     if (!TUNING.beta || !TUNING.beta.hideLabels) return;
     const spots = sim.level.hides;
     if (!spots || !spots.length) return;
+    // Nothing at all while he is inside one. A label floating over the locker
+    // he is hidden in is a sign saying where he went, and half of what the
+    // state is worth is that the screen stops pointing at him.
+    if (sim.hideState !== 'out') return;
+    const player = sim.entities.find((e) => e.kind === 'player');
+    // ...and only the one he could actually use. These are beta markers, not
+    // map furniture: they appear as he walks up, at exactly the distance the
+    // button appears at, so what they mark is "you can get in here now" rather
+    // than "there is a hiding place somewhere over there".
+    const reach = sim.rules.hide ? sim.rules.hide.reach : 0;
     for (const spot of spots) {
       if (spot.x > camera.x + W + 40 || spot.x + spot.w < camera.x - 40) continue;
       if (spot.y > camera.y + H + 40 || spot.y + spot.h < camera.y - 40) continue;
-      drawHideLabel(ctx, spot, { active: sim.hideIn === spot, time });
+      if (player) {
+        const dx = Math.max(spot.x - player.x, 0, player.x - (spot.x + spot.w));
+        const dy = Math.max(spot.y - player.y, 0, player.y - (spot.y + spot.h));
+        if (Math.hypot(dx, dy) > reach) continue;
+      }
+      drawHideLabel(ctx, spot, { active: sim.hideTargetId === spot.id, time });
     }
   }
 
@@ -764,13 +790,25 @@ export function createRenderer(canvas, options = {}) {
       // heading is untouched, so nothing about movement changes.
       let facing = player.facing;
       let rummage = 0;
-      if (sim.searching) {
-        rummage = Math.min(1, sim.searching.t / sim.searching.duration);
-        const toward = Math.atan2(sim.searching.y - py, sim.searching.x - px);
+      const turnTo = (toward, share) => {
         let turn = toward - facing;
         while (turn > Math.PI) turn -= Math.PI * 2;
         while (turn < -Math.PI) turn += Math.PI * 2;
-        facing += turn * Math.min(1, rummage * 4);
+        facing += turn * Math.min(1, share);
+      };
+      if (sim.searching) {
+        rummage = Math.min(1, sim.searching.t / sim.searching.duration);
+        turnTo(Math.atan2(sim.searching.y - py, sim.searching.x - px), rummage * 4);
+      }
+      // ...and the same for the locker: he turns to face the door before he
+      // reaches it and steps in facing it, then turns back out into the
+      // corridor as he comes back out. Presentation, exactly as above — the
+      // simulation's heading is untouched — and the reason the last thing you
+      // see of him is his back rather than his profile.
+      if (sim.hiding) {
+        const { from, to } = sim.hiding;
+        turnTo(Math.atan2(to.y - from.y, to.x - from.x),
+          (sim.hiding.t / sim.hiding.duration) * 5);
       }
 
       const stance = {
@@ -793,54 +831,37 @@ export function createRenderer(canvas, options = {}) {
       };
       // Locations that ask for the drawn figures get them; everywhere else
       // keeps the character it has always had.
-      // Tucked in behind something. He is drawn a little smaller and a little
-      // way into the furniture he is hiding behind, which is the whole of the
-      // read: standing on the tile at full size beside a bank of lockers looks
-      // like standing beside a bank of lockers.
-      const tuck = hidingShare(sim);
-      let hx = px;
-      let hy = py;
-      if (tuck > 0) {
-        const spot = sim.hideIn || (sim.hiding && sim.hiding.into);
-        const anchor = spot && spot.anchor;
-        if (anchor) {
-          const ax = anchor.x + anchor.w / 2;
-          const ay = anchor.y + anchor.h / 2;
-          const len = Math.hypot(ax - px, ay - py) || 1;
-          hx += ((ax - px) / len) * 7 * tuck;
-          hy += ((ay - py) / len) * 7 * tuck;
-        }
-        // Down as well as in. `stand` is the figure's own getting-up channel —
-        // the one the caretaker rises out of his chair on — run backwards, so
-        // hiding bends him down using the animation the game already has rather
-        // than a second idea of what crouching looks like.
-        stance.stand = 1 - tuck * 0.42;
-        ctx.save();
-        ctx.translate(hx, hy);
-        ctx.scale(1 - tuck * 0.10, 1 - tuck * 0.10);
-        ctx.translate(-hx, -hy);
-      }
-      const hand = sim.rules.figures
-        ? drawFigure(ctx, hx, hy, stance, THIEF_LOOK)
-        : drawThief(ctx, hx, hy, stance);
-      if (tuck > 0) {
-        ctx.restore();
-        // ...and the furniture goes back on top of him. The room is painted
-        // once into a cache underneath everything, so without this the thief is
-        // drawn over the lockers he is supposed to be behind and "hidden" is
-        // something only the meter knows about. Repainting the one piece he is
-        // behind is a few draws on the frames where it matters and nothing on
-        // any other.
-        const over = sim.hideIn || (sim.hiding && sim.hiding.into);
-        if (over && over.anchor && over.anchor.type === 'furniture') {
+      // Inside a locker there is no thief to draw. Not a smaller one, not a
+      // fainter one, not one with his feet showing: the simulation says whether
+      // there is a figure in the world to paint, and while he is in the cabinet
+      // the answer is no. Everything below is skipped, which is also why hiding
+      // costs nothing to draw.
+      const mouth = sim.hideShown === false ? null : mouthOf(sim);
+      let hand = null;
+      if (sim.hideShown !== false) {
+        if (mouth) {
+          // Clipped to the floor on his side of the cabinet's mouth. He is cut
+          // off at the door frame and disappears into it a bit at a time as he
+          // steps through, at full size the whole way.
           ctx.save();
-          ctx.globalAlpha = tuck;
-          drawFurniture(ctx, over.anchor);
-          ctx.restore();
+          ctx.beginPath();
+          const far = 4000;
+          if (mouth.axis === 'y') {
+            ctx.rect(camera.x - 40, mouth.sign > 0 ? mouth.at : mouth.at - far,
+              W + 80, far);
+          } else {
+            ctx.rect(mouth.sign > 0 ? mouth.at : mouth.at - far, camera.y - 40,
+              far, H + 80);
+          }
+          ctx.clip();
         }
+        hand = sim.rules.figures
+          ? drawFigure(ctx, px, py, stance, THIEF_LOOK)
+          : drawThief(ctx, px, py, stance);
+        if (mouth) ctx.restore();
       }
 
-      if (sim.reach) {
+      if (sim.reach && hand) {
         drawGrabbedItem(ctx, ITEM_ART[sim.reach.type] || '?', sim.reach, hand, reachProgress);
       }
 

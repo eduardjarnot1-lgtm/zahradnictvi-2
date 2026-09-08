@@ -47,7 +47,7 @@ LOOT_CHARS = 'cwpkrmtnlvjdg'
 # Which locations offer somewhere to hide, and how many places. The school
 # only: hiding is new, and trying a new mechanic in one building is how the
 # rest of this game was built.
-HIDES = {'School': 3}
+HIDES = {'School': 2}
 # ...and which have things on the floor to tread on. The school, for the same
 # reason: one building at a time.
 LITTER_AT = {'School'}
@@ -1878,11 +1878,18 @@ def add_grounds(inner, sides, deep, flavour, loot, bite=True, voids=(), plant_ya
 # alcove, a dead end, the back of a bank: somewhere the room does not see into.
 HIDE_MIN_COVER = 11
 HIDE_MIN_PIECES = 3       # ...and how many of those have to be furniture
-HIDE_APART = 9            # tiles between one hiding place and the next
+HIDE_APART = 13           # tiles between one hiding place and the next
 HIDE_CLEAR = 6            # ...and from the spawn and the way out
+# ...and the same figure for a spot you climb *inside*. Cover is what makes a
+# patch of floor a hiding place, and a locker door is not a patch of floor: once
+# the player is in the cabinet the room can see the cabinet and nothing else, so
+# what the surroundings have to supply is only that the spot reads as a corner
+# of the school rather than the middle of the assembly hall. Holding out for an
+# alcove *and* a locker leaves two of the five levels with nowhere to hide.
+HIDE_DOOR_COVER = 7
 
 
-def add_hides(g, want=3, least=2):
+def add_hides(g, want=2, least=2, into=''):
     """Mark up to `want` hiding places. Returns how many it found.
 
     Two passes, and the second one matters. Eleven-of-sixteen cover is a proper
@@ -1891,6 +1898,13 @@ def add_hides(g, want=3, least=2):
     Rather than ship a level with nowhere to hide, the requirement comes down a
     notch at a time until the level has at least a couple. A shallower nook is a
     worse hiding place than an alcove; it is a far better one than none.
+
+    `into` is what the player actually climbs into — the school passes 'C', the
+    lockers. A spot is only usable if one of those stands squarely two tiles
+    away, north/south/east/west: two, because a tile with furniture immediately
+    beside it is a tile a 22-wide player cannot stand on, and squarely, because
+    he opens the door and steps straight in rather than sidling in diagonally.
+    Every spot that survives is a locker you can be standing in front of.
     """
     TILE = 20
     solid = set('#%OTSWNVCBPEYZ+')
@@ -1911,6 +1925,7 @@ def add_hides(g, want=3, least=2):
         furniture is what the ranking is really on and walls only break ties."""
         n = 0
         pieces = 0
+        doors = 0
         for dy in range(-2, 3):
             for dx in range(-2, 3):
                 if max(abs(dx), abs(dy)) != 2:
@@ -1924,7 +1939,10 @@ def add_hides(g, want=3, least=2):
                     n += 1
                     if ch in 'TSWNVCBPEYZ':
                         pieces += 1
-        return n, pieces
+                    # Straight ahead, and something you can climb inside.
+                    if into and ch in into and (dx == 0 or dy == 0):
+                        doors += 1
+        return n, pieces, doors
 
     def usable(x, y):
         if not (0 <= x < g.cols and 0 <= y < g.rows) or g.g[y][x] != '.':
@@ -1940,18 +1958,22 @@ def add_hides(g, want=3, least=2):
             for x in range(1, g.cols - 1):
                 if not usable(x, y):
                     continue
-                c, pieces = cover(x, y)
+                c, pieces, doors = cover(x, y)
+                if into and not doors:
+                    continue
                 if c < min_cover or pieces < HIDE_MIN_PIECES:
                     continue
                 if any(marker.get(m)
                        and max(abs(x - marker[m][0]), abs(y - marker[m][1])) < HIDE_CLEAR
                        for m in ('@', 'X')):
                     continue
-                spots.append((pieces, c, x, y))
-        # Most furniture first, then most covered, then spread out: three hiding
-        # places in the same alcove is one hiding place.
-        spots.sort(key=lambda t: (-t[0], -t[1], t[3], t[2]))
-        for (pieces, c, x, y) in spots:
+                spots.append((doors, pieces, c, x, y))
+        # Most locker frontage first, then most furniture, then most covered,
+        # then spread out: two hiding places in the same alcove is one hiding
+        # place. Without `into` the first key is a constant zero and this is the
+        # ranking it has always been.
+        spots.sort(key=lambda t: (-t[0], -t[1], -t[2], t[4], t[3]))
+        for (doors, pieces, c, x, y) in spots:
             if len(found) >= want:
                 break
             if any(max(abs(x - px), abs(y - py)) < apart for (px, py) in found):
@@ -1960,8 +1982,9 @@ def add_hides(g, want=3, least=2):
         return found
 
     picks = []
-    for step in range(4):
-        picks = gather(HIDE_MIN_COVER - step, HIDE_APART - step)
+    start = HIDE_DOOR_COVER if into else HIDE_MIN_COVER
+    for step in range(6):
+        picks = gather(start - step, HIDE_APART - step)
         if len(picks) >= least:
             break
     for (x, y) in picks:
@@ -1973,8 +1996,14 @@ def add_hides(g, want=3, least=2):
         for (nx, ny) in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
             if len(cells) >= 2:
                 break
-            if usable(nx, ny) and cover(nx, ny)[0] >= HIDE_MIN_COVER - 2:
-                cells.append((nx, ny))
+            if not usable(nx, ny) or cover(nx, ny)[0] < start - 2:
+                continue
+            # ...and still in front of a door. The spot is where the player
+            # stands to step into the locker, so a second tile that has drifted
+            # off the front of it is a tile the animation cannot start from.
+            if into and not cover(nx, ny)[2]:
+                continue
+            cells.append((nx, ny))
         for (cx, cy) in cells:
             g.g[cy][cx] = 'H'
     return len(picks)
@@ -2805,7 +2834,7 @@ def build():
                 while snug_to_walls(g):
                     pass
             if name in HIDES:
-                add_hides(g, HIDES[name])
+                add_hides(g, HIDES[name], into='C')
             if name in LITTER_AT:
                 add_litter(g, tier)
             if name in SNUG:

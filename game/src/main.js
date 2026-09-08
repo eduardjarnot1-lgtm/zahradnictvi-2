@@ -20,7 +20,7 @@ import { createEffects } from './effects.js';
 const $ = (id) => document.getElementById(id);
 const WAKE_BEAT = 0.9;         // seconds of wake-up animation before the fail screen
 // What the one interaction button says, per action the simulation is offering.
-const ACTION_LABEL = { search: 'SEARCH', hide: 'HIDE', leave: 'LEAVE' };
+const ACTION_LABEL = { search: 'SEARCH', hide: 'HIDE', leave: 'EXIT' };
 
 export function boot() {
   const params = new URLSearchParams(location.search);
@@ -440,8 +440,15 @@ export function boot() {
           fx.ring(event.x, event.y, 14, '255,120,100');
         }
       } else if (event.type === 'hiding') {
-        // Getting in behind the lockers, and coming back out. A short breath of
-        // dust at his feet either way, so the animation has a beat under it.
+        // Climbing into a locker, and climbing back out. The door is the same
+        // door the search animation swings — same hinge, same overshoot, same
+        // rebound as it shuts — held open for as long as it takes him to get
+        // through it rather than for as long as it takes to rummage.
+        if (reacts && event.where) {
+          fx.open(event.where, event.style || 'chest', event.from, event.duration);
+        }
+        // ...and a short breath of dust at his feet either way, so the beat has
+        // something under it.
         if (reacts) fx.ring(event.x, event.y, 3, '190,214,228');
       } else if (event.type === 'won') {
         const level = LEVELS.find((l) => l.id === currentLevelId);

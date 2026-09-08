@@ -1613,7 +1613,10 @@ test('what he is walking towards keeps up with where the thief actually is', () 
 
 test('every school level offers a few places to be out of sight, and only the school does', () => {
   for (const level of SCHOOL) {
-    assert.ok(level.hides.length >= 2 && level.hides.length <= 3,
+    // Two. Not three, and never one: two is enough to be a choice — a corner
+    // to duck into on each half of the building — and few enough that finding
+    // them is part of learning the level rather than a thing you fall over.
+    assert.equal(level.hides.length, 2,
       `L${level.id} has ${level.hides.length} hiding places`);
     for (const spot of level.hides) {
       // Somewhere a person can actually stand, and somewhere they have to go to
@@ -1811,9 +1814,9 @@ test('the button offers what is to hand, and nothing when nothing is', () => {
   tick(run);
   assert.equal(sim.action, 'hide');
 
-  // ...and once tucked in: LEAVE.
+  // ...and once tucked in: LEAVE, which the HUD writes as EXIT.
   tick(run, { x: 0, y: 0, take: false, search: true });
-  for (let i = 0; i < 60 && !sim.hidden; i++) tick(run);
+  for (let i = 0; i < 60 * 3 && !sim.hidden; i++) tick(run);
   assert.ok(sim.hidden);
   assert.equal(sim.action, 'leave');
 });
@@ -1832,7 +1835,7 @@ test('getting in and out is a move, not a teleport', () => {
 
   const path = [];
   tick(run, { x: 0, y: 0, take: false, search: true });
-  for (let i = 0; i < 60 && !sim.hidden; i++) {
+  for (let i = 0; i < 60 * 3 && !sim.hidden; i++) {
     path.push({ x: p.x, y: p.y });
     tick(run);
   }
@@ -1846,33 +1849,174 @@ test('getting in and out is a move, not a teleport', () => {
   }
 });
 
-test('you can always get out of a hiding place', () => {
+test('you can always get out of a locker, and only on purpose', () => {
   for (const level of SCHOOL) {
     for (const spot of level.hides) {
       // By the button...
       let run = createRun(level.id);
       let p = playerOf(run.sim);
-      const at = { x: spot.x + spot.w / 2, y: spot.y + spot.h / 2 };
+      const at = { x: spot.stand.x, y: spot.stand.y };
       p.x = at.x; p.y = at.y; p.prevX = p.x; p.prevY = p.y;
       tick(run, { x: 0, y: 0, take: false, search: true });
-      for (let i = 0; i < 60 && !run.sim.hidden; i++) tick(run);
+      for (let i = 0; i < 60 * 3 && !run.sim.hidden; i++) tick(run);
       assert.ok(run.sim.hidden, `L${level.id}: could not get into ${spot.id}`);
       tick(run, { x: 0, y: 0, take: false, search: true });
-      for (let i = 0; i < 60 && run.sim.hiding; i++) tick(run);
+      for (let i = 0; i < 60 * 3 && run.sim.hideState !== 'out'; i++) tick(run);
       assert.ok(!run.sim.hidden, `L${level.id}: the button did not get him out of ${spot.id}`);
+      // ...and back onto the marked spot, which is the tile the map already
+      // proved a person fits on. Not a step off whatever normal the corner of
+      // the cabinet happened to point along.
+      assert.ok(Math.hypot(p.x - at.x, p.y - at.y) < 1,
+        `L${level.id}: he came out of ${spot.id} at ${p.x},${p.y}, not at ${at.x},${at.y}`);
+      assert.ok(!blocked(p.x, p.y, TUNING.player.boxWidth, TUNING.player.boxHeight,
+        level.colliders), `L${level.id}: he came out of ${spot.id} inside something`);
 
-      // ...and by simply pushing the stick, which is what everyone will try.
+      // ...and *not* by leaning on the stick, which is the whole point of a
+      // door. Section 11: a thumb resting on the pad while Mr. Vrána walks past
+      // must not be able to shove him out into the corridor.
       run = createRun(level.id);
       p = playerOf(run.sim);
       p.x = at.x; p.y = at.y; p.prevX = p.x; p.prevY = p.y;
       tick(run, { x: 0, y: 0, take: false, search: true });
-      for (let i = 0; i < 60 && !run.sim.hidden; i++) tick(run);
-      for (let i = 0; i < 90 && run.sim.hidden; i++) {
-        tick(run, { x: 1, y: 0, take: false, search: false });
+      for (let i = 0; i < 60 * 3 && !run.sim.hidden; i++) tick(run);
+      const inside = { x: p.x, y: p.y };
+      for (let i = 0; i < 60 * 4; i++) {
+        tick(run, { x: 1, y: i % 2 ? 1 : -1, take: false, search: false });
       }
-      assert.ok(!run.sim.hidden, `L${level.id}: walking out of ${spot.id} did nothing`);
+      assert.ok(run.sim.hidden, `L${level.id}: the stick pushed him out of ${spot.id}`);
+      assert.ok(Math.hypot(p.x - inside.x, p.y - inside.y) < 0.001,
+        `L${level.id}: the stick moved him about inside ${spot.id}`);
     }
   }
+});
+
+// --- the hiding places are lockers, and only a couple of them ---------------
+
+test('every hiding place is a locker you stand squarely in front of', () => {
+  // Sections 1 and 4: the spot is not a patch of shadow, it is a doorstep. A
+  // cabinet with a door, square on, close enough to open — and the two
+  // positions the animation runs between written down on the map rather than
+  // worked out from wherever the player happened to be standing.
+  for (const level of SCHOOL) {
+    for (const spot of level.hides) {
+      const a = spot.anchor;
+      assert.ok(a, `L${level.id}: ${spot.id} has nothing to climb into`);
+      assert.equal(a.style, 'chest',
+        `L${level.id}: ${spot.id} is in front of a ${a.style}, not a locker`);
+      assert.ok(spot.stand && spot.inside, `L${level.id}: ${spot.id} has no way in`);
+
+      // Square on: the gap to the cabinet is along one axis and nothing along
+      // the other, so he opens the door and walks straight through it.
+      const gx = Math.max(a.x - spot.stand.x, 0, spot.stand.x - (a.x + a.w));
+      const gy = Math.max(a.y - spot.stand.y, 0, spot.stand.y - (a.y + a.h));
+      assert.ok(Math.min(gx, gy) === 0 && Math.max(gx, gy) <= 32,
+        `L${level.id}: ${spot.id} is ${gx},${gy} off the cabinet — not square on`);
+      // Within arm's reach, so the button is on offer from the marked tile.
+      assert.ok(Math.hypot(gx, gy) <= TUNING.locations.School.hide.reach,
+        `L${level.id}: ${spot.id} is out of reach of the thing it opens`);
+
+      // Inside is inside: the target of the walk-in is within the cabinet's own
+      // box, which is what makes the door he opened the door he went through.
+      assert.ok(spot.inside.x > a.x && spot.inside.x < a.x + a.w
+        && spot.inside.y > a.y && spot.inside.y < a.y + a.h,
+        `L${level.id}: ${spot.id} puts him at ${spot.inside.x},${spot.inside.y}, `
+        + `which is outside the cabinet`);
+    }
+  }
+});
+
+test('two lockers open, and the rest of the school is scenery', () => {
+  // Section 19: a corridor where every locker is a hiding place is a corridor
+  // with no decision in it. The marked ones have to be a small fraction of the
+  // banks on the floor, and they have to be at opposite ends of it.
+  let banks = 0;
+  let opened = 0;
+  for (const level of SCHOOL) {
+    const lockers = level.colliders.filter((c) => c.style === 'chest');
+    const open = new Set(level.hides.map((h) => h.anchor));
+    assert.equal(open.size, level.hides.length,
+      `L${level.id}: both hiding places are the same cabinet`);
+    banks += lockers.length;
+    opened += open.size;
+    // Where the level is big enough to have a choice of banks, the ones that
+    // open have to be a minority of them. The two smallest levels have barely
+    // more banks than hiding places — that is those levels being two rooms and
+    // a corridor, not the mechanic being carpeted over the school.
+    if (lockers.length >= 6) {
+      assert.ok(open.size / lockers.length < 0.4,
+        `L${level.id}: ${open.size} of ${lockers.length} banks open — too many`);
+    }
+
+    // Sections 15 and 16: distinct, and far enough apart that reaching one is
+    // not the same as reaching the other.
+    const [a, b] = level.hides;
+    assert.ok(Math.hypot(a.stand.x - b.stand.x, a.stand.y - b.stand.y) > 200,
+      `L${level.id}: the two hiding places are ${Math.hypot(a.stand.x - b.stand.x, a.stand.y - b.stand.y).toFixed(0)} apart`);
+  }
+  // ...and over the location as a whole, most of the lockers are furniture.
+  assert.ok(opened / banks < 0.3,
+    `${opened} of the school's ${banks} banks of lockers open — the corridor is all doors`);
+});
+
+test('there is no thief to draw for the whole time he is in the locker', () => {
+  // Sections 3 and 21, at the seam the renderer actually reads. `hideShown` is
+  // the only thing the drawing is told about hiding, and it is a boolean: there
+  // is a figure at full size or there is no figure. Nothing shrinks, nothing
+  // fades, and no part of him is left showing — because there is nothing to
+  // leave showing.
+  const run = openSchool(23);
+  const { sim } = run;
+  const p = playerOf(sim);
+  const spot = sim.level.hides[0];
+  p.x = spot.stand.x; p.y = spot.stand.y; p.prevX = p.x; p.prevY = p.y;
+  tick(run);
+  assert.equal(sim.hideShown, true, 'he is standing in the corridor');
+
+  const shown = [];
+  tick(run, { x: 0, y: 0, take: false, search: true });
+  for (let i = 0; i < 60 * 3 && !sim.hidden; i++) { shown.push(sim.hideShown); tick(run); }
+  assert.ok(sim.hidden);
+  // Going in: drawn while he walks up and steps through, gone before the door
+  // has finished shutting. Once he is gone he stays gone — no flicker back.
+  assert.ok(shown[0] === true, 'he should be drawn walking up to the locker');
+  assert.ok(shown.includes(false), 'he should be gone before the door shuts');
+  assert.equal(shown.lastIndexOf(true) < shown.indexOf(false), true,
+    'he came back after disappearing');
+
+  // ...and while he is in there, every single frame.
+  for (let i = 0; i < 60 * 5; i++) {
+    tick(run);
+    assert.equal(sim.hideShown, false, `he was drawn ${i} frames into hiding`);
+  }
+
+  // Coming out: nothing for the beat the door swings open, then a figure again.
+  const back = [];
+  tick(run, { x: 0, y: 0, take: false, search: true });
+  for (let i = 0; i < 60 * 3 && sim.hideState !== 'out'; i++) { back.push(sim.hideShown); tick(run); }
+  assert.equal(back[0], false, 'the door opens on an empty corridor first');
+  assert.ok(back.includes(true), 'he should step back out of it');
+  assert.equal(sim.hideShown, true, 'and be a thief again once he is out');
+});
+
+test('the clock, the money and the noise all keep running inside a locker', () => {
+  // Section 11: movement stops and nothing else does. A hiding place that
+  // pauses the level is a pause button.
+  const run = openSchool(24);
+  const { sim } = run;
+  const p = playerOf(sim);
+  const spot = sim.level.hides[0];
+  p.x = spot.stand.x; p.y = spot.stand.y; p.prevX = p.x; p.prevY = p.y;
+  tick(run, { x: 0, y: 0, take: false, search: true });
+  for (let i = 0; i < 60 * 3 && !sim.hidden; i++) tick(run);
+  assert.ok(sim.hidden);
+
+  const money = sim.money;
+  const clock = sim.timeLeft;
+  sim.noise = 60;
+  for (let i = 0; i < 60 * 3; i++) tick(run);
+  assert.ok(sim.timeLeft < clock - 2.5, 'the clock stopped while he was hidden');
+  assert.ok(sim.noise < 60, 'the noise meter stopped draining while he was hidden');
+  assert.equal(sim.money, money, 'and hiding is not worth money');
 });
 
 test('every hiding place is behind something you can see', () => {

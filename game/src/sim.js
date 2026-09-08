@@ -840,6 +840,11 @@ export function createSim({ level, seed = 1, upgrades = {} }) {
     // man half out from behind a cabinet has not emerged yet.
     undetectable: false,
     hideIn: null,
+    // Whether there is a thief to draw at all. False for the whole of the time
+    // he is inside a locker, and for the beats at either end where the door is
+    // moving and he is already through it. Nothing shrinks and nothing fades;
+    // the figure is either drawn as it always is or it is not drawn.
+    hideShown: true,
     // Getting in and out of one: null, or an animation in progress.
     hiding: null,
     hideTargetId: null,
@@ -976,45 +981,71 @@ function takeItem(sim, item) {
   if (endsAtCap(sim)) finish(sim, 'lost', 'awake');
 }
 
-// Which piece of furniture a SEARCH would open: the nearest unsearched one
-// within reach, measured to the edge of the box rather than its centre, so a
-// long bank of lockers offers itself along its whole length.
-// The nearest hiding place within arm's reach, measured to the edge of the nook
-// rather than its middle — the same rule the cupboards use, so walking up to a
-// bank of lockers offers itself at the same distance as walking up to a desk.
-// Behind the furniture: he crosses the last few units rather than appearing
-// there. The target is the middle of the nook, which the map already guaranteed
-// is somewhere a person fits — so nothing here can push him into a wall.
+// Getting into a locker, in beats rather than in one move.
+//
+// These are fractions of the whole, so retuning how long it takes cannot
+// reorder what happens in it. Going in: cross the last stride to the tile in
+// front of the door, step through the door, and then the beat where the door
+// swings shut on an empty corridor with him already gone. Coming out: the door
+// swings open with him still inside and invisible, he steps out, and he
+// steadies on his feet before the stick is his again.
+const ENTER_WALK = 0.30;
+const ENTER_STEP = 0.80;
+const LEAVE_HOLD = 0.22;
+const LEAVE_STEP = 0.70;
+
+// Where he ends up when he comes back out. The spot the map marked, which the
+// generator already proved is floor a person fits on — not a step off wherever
+// he happened to be standing when he pressed the button, and not a step out of
+// the cabinet along a normal that a corner could point into a wall. If that one
+// square is somehow occupied, try the ring of tiles around it before giving up
+// and standing him where he is, which is at least still out of the locker.
+function wayOut(sim, player, spot) {
+  const back = (spot && spot.stand) || { x: player.x, y: player.y };
+  if (!blocked(back.x, back.y, player.w, player.h, sim.level.colliders)) return back;
+  const tile = TUNING.world.tile;
+  for (const [dx, dy] of [[0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [-1, 1], [1, -1], [-1, -1]]) {
+    const at = { x: back.x + dx * tile, y: back.y + dy * tile };
+    if (!blocked(at.x, at.y, player.w, player.h, sim.level.colliders)) return at;
+  }
+  return { x: player.x, y: player.y };
+}
+
+// Into the locker. He crosses the last few units, opens the door and steps
+// through it rather than appearing inside; the target is the middle of the
+// cabinet's near face, so the door he opened is the door he went through.
 function enterHiding(sim, player, spot, rules) {
   sim.hiding = {
     t: 0,
     duration: rules.enter,
     into: spot,
     from: { x: player.x, y: player.y },
-    to: { x: spot.x + spot.w / 2, y: spot.y + spot.h / 2 }
+    // The doorstep, then the inside of the cabinet. Both are written on the
+    // map, so neither depends on the approach.
+    stand: { ...spot.stand },
+    to: { ...spot.inside }
   };
   sim.hideState = 'entering';
   sim.hideTargetId = null;
-  sim.events.push({ type: 'hiding', x: player.x, y: player.y, spot: spot.id });
+  sim.events.push({
+    type: 'hiding',
+    going: true,
+    x: player.x,
+    y: player.y,
+    spot: spot.id,
+    // What the door animation needs: which piece, drawn in which style, and
+    // which face of it he is standing at. Long enough that the door is still
+    // open while he is climbing in, and starts swinging shut as he vanishes.
+    where: spot.anchor,
+    style: spot.anchor ? spot.anchor.style : null,
+    from: { ...spot.stand },
+    duration: rules.enter * ENTER_STEP
+  });
 }
 
-// ...and back out, to the side the room is on. Worked out from the thing he is
-// hiding behind: step out away from it, not through it.
+// ...and back out, onto the tile he came in from.
 function leaveHiding(sim, player, rules) {
   const spot = sim.hideIn || (sim.hiding && sim.hiding.into);
-  const anchor = spot && spot.anchor;
-  let ax = 0;
-  let ay = 0;
-  if (anchor) {
-    const cx = spot.x + spot.w / 2;
-    const cy = spot.y + spot.h / 2;
-    ax = cx - (anchor.x + anchor.w / 2);
-    ay = cy - (anchor.y + anchor.h / 2);
-    const len = Math.hypot(ax, ay) || 1;
-    ax /= len;
-    ay /= len;
-  }
-  const out = { x: player.x + ax * 22, y: player.y + ay * 22 };
   sim.hidden = false;
   sim.hideIn = null;
   sim.hideState = 'leaving';
@@ -1022,15 +1053,51 @@ function leaveHiding(sim, player, rules) {
     t: 0,
     duration: rules.leave,
     into: null,
+    // Kept, because the door he is coming out through is still this one's.
+    spot,
     from: { x: player.x, y: player.y },
-    // Never through the furniture, and never into a wall: if the step out is
-    // blocked he simply stands up where he is, which is still out of hiding.
-    to: blocked(out.x, out.y, player.w, player.h, sim.level.colliders)
-      ? { x: player.x, y: player.y } : out
+    stand: null,
+    to: wayOut(sim, player, spot)
   };
-  sim.events.push({ type: 'hiding', x: player.x, y: player.y, spot: null });
+  sim.events.push({
+    type: 'hiding',
+    going: false,
+    x: player.x,
+    y: player.y,
+    spot: spot ? spot.id : null,
+    where: spot ? spot.anchor : null,
+    style: spot && spot.anchor ? spot.anchor.style : null,
+    from: spot ? { ...spot.stand } : { x: player.x, y: player.y },
+    duration: rules.leave * (LEAVE_STEP + 0.06)
+  });
 }
 
+// Where he is partway through, and whether there is anything to draw.
+//
+// `shown` is the whole of "completely hidden": once the door is shutting on him
+// there is no figure, no smaller figure and no fainter figure — the renderer is
+// simply not told to draw one. The last beat going in and the first beat coming
+// out are the door moving with nobody in the corridor.
+function hidePose(h) {
+  const k = h.duration > 0 ? Math.min(1, h.t / h.duration) : 1;
+  const at = (a, b, u) => {
+    const e = u * u * (3 - 2 * u);
+    return { x: a.x + (b.x - a.x) * e, y: a.y + (b.y - a.y) * e, shown: true };
+  };
+  if (h.into) {
+    if (k < ENTER_WALK) return at(h.from, h.stand, k / ENTER_WALK);
+    if (k < ENTER_STEP) return at(h.stand, h.to, (k - ENTER_WALK) / (ENTER_STEP - ENTER_WALK));
+    return { x: h.to.x, y: h.to.y, shown: false };
+  }
+  if (k < LEAVE_HOLD) return { x: h.from.x, y: h.from.y, shown: false };
+  if (k < LEAVE_STEP) return at(h.from, h.to, (k - LEAVE_HOLD) / (LEAVE_STEP - LEAVE_HOLD));
+  return { x: h.to.x, y: h.to.y, shown: true };
+}
+
+// The nearest hiding place within arm's reach, measured to the edge of the
+// marked spot rather than its middle — the same rule the cupboards use, so
+// walking up to a bank of lockers offers itself at the same distance as walking
+// up to a desk.
 function nearestHide(sim, player, reach) {
   let best = null;
   let bestDistance = Infinity;
@@ -1055,6 +1122,9 @@ function stashGap(player, stash) {
   return Math.hypot(dx, dy);
 }
 
+// Which piece of furniture a SEARCH would open: the nearest unsearched one
+// within reach, measured to the edge of the box rather than its centre, so a
+// long bank of lockers offers itself along its whole length.
 function nearestStash(sim, player, reach) {
   let best = null;
   let bestDistance = Infinity;
@@ -1144,11 +1214,13 @@ export function stepSim(sim, input = EMPTY_INPUT) {
   }
 
   const player = playerOf(sim);
-  // Nothing the stick says counts while he is climbing in behind the lockers or
-  // straightening up out of them: the animation owns his position for those few
-  // tenths, and a thief who can walk out of the middle of it is not hiding, he
-  // is sliding.
-  const busy = !!sim.hiding;
+  // Nothing the stick says counts while he is climbing into a locker, while he
+  // is inside one, or while he is straightening up out of it. The animation
+  // owns his position for the two ends of that, and while he is in there he has
+  // no position to own — a thief who can be walked about inside a cabinet is
+  // not hiding, he is sliding, and a thumb resting on the pad while Mr. Vrána
+  // walks past must not be able to shove him out into the corridor.
+  const busy = sim.hideState !== 'out';
   for (const entity of sim.entities) {
     const update = UPDATERS[entity.kind];
     if (!update) continue;
@@ -1345,31 +1417,37 @@ export function stepSim(sim, input = EMPTY_INPUT) {
   const hideRules = sim.rules.hide;
   if (hideRules && sim.status === 'running') {
     if (sim.hiding) {
-      // Mid-animation. He is carried between the two positions rather than
-      // teleported, and nothing he does with the stick counts until he arrives.
+      // Mid-animation. He is carried through the beats rather than teleported
+      // between them, and nothing he does with the stick or the button counts
+      // until he arrives at one end of it or the other.
       sim.hiding.t += STEP_SECONDS;
-      const k = Math.min(1, sim.hiding.t / sim.hiding.duration);
-      const eased = k * k * (3 - 2 * k);
-      player.x = sim.hiding.from.x + (sim.hiding.to.x - sim.hiding.from.x) * eased;
-      player.y = sim.hiding.from.y + (sim.hiding.to.y - sim.hiding.from.y) * eased;
+      const pose = hidePose(sim.hiding);
+      player.x = pose.x;
+      player.y = pose.y;
       player.speed = 0;
       player.vx = 0;
       player.vy = 0;
       player.moving = false;
-      if (k >= 1) {
+      // The one thing the renderer needs from all of this, and the one thing it
+      // must not work out for itself.
+      sim.hideShown = pose.shown;
+      if (sim.hiding.t >= sim.hiding.duration) {
         const going = sim.hiding.into;
         sim.hideState = going ? 'hidden' : 'out';
         sim.hidden = !!going;
         sim.hideIn = going || null;
         sim.hiding = null;
+        sim.hideShown = !going;
         sim.events.push({ type: 'hide', hidden: sim.hidden, x: player.x, y: player.y });
       }
     } else if (sim.hidden) {
-      // Tucked in. The button says LEAVE; so does pushing the stick, because a
-      // player who wants out will push the stick before they read anything.
-      const shoved = Math.hypot(input.x || 0, input.y || 0) >= hideRules.breakOut;
+      // Inside. The button says EXIT and it is the only way out: see the note
+      // on the tuning for why pushing the stick is not.
+      sim.hideShown = false;
       const pressed = input.search && !sim.prevSearch;
-      if (shoved || pressed) leaveHiding(sim, player, hideRules);
+      if (pressed) leaveHiding(sim, player, hideRules);
+    } else {
+      sim.hideShown = true;
     }
   }
 
@@ -1424,8 +1502,15 @@ export function stepSim(sim, input = EMPTY_INPUT) {
 
   // One button, and what it is offering. Leaving beats hiding beats searching:
   // the thing you are already doing comes first, and a cupboard you could open
-  // is never more urgent than getting out from behind it.
-  sim.action = sim.hidden || (sim.hiding && sim.hiding.into) ? 'leave'
+  // is never more urgent than getting out of the locker you are in.
+  //
+  // It reads EXIT for the whole of the cycle — climbing in, sitting inside, and
+  // climbing back out. The two animations are the best part of a second each,
+  // and a button that blinks out for a second in the middle of the one gesture
+  // the player is making is a button they will think they missed. Pressing it
+  // during either animation does nothing, because the stick and the button are
+  // both ignored until he is standing still again.
+  sim.action = sim.hidden || sim.hiding ? 'leave'
     : sim.hideTargetId ? 'hide'
       : sim.searchTargetId || sim.searching ? 'search' : null;
   sim.prevSearch = !!input.search;

@@ -593,13 +593,19 @@ const PEOPLE = {
     // tucks himself in over half a second. Coming out is quicker than going in,
     // because coming out is usually urgent.
     hide: {
-      reach: 44,        // how close the lockers have to be to offer themselves
-      enter: 0.62,      // seconds spent getting in...
-      leave: 0.42,      // ...and rather fewer getting out
-      // Pushing the stick while tucked in brings you out. The button is the
-      // signposted way and this is the one every player will find first, and a
-      // hiding place you can be stuck in is the one thing this must not be.
-      breakOut: 0.35
+      reach: 44,        // how close the locker has to be to offer itself
+      // Seconds spent climbing into a locker, and rather fewer getting back
+      // out. Both are longer than they were, and deliberately so: what happens
+      // in them is a walk to the door, the door swinging open, a step inside
+      // and the door swinging shut, and none of those four beats is legible if
+      // the whole thing is over in six tenths of a second.
+      enter: 1.05,
+      leave: 0.85
+      // There is no stick shortcut out any more. It was a way out you could
+      // find without reading anything, and it was also a way out you could take
+      // by accident with a thumb resting on the pad while Mr. Vrána walks past
+      // — which is the one thing a hiding place must never do. The button says
+      // EXIT, in the same place the button that said HIDE was.
     },
     // Getting out of a chair takes a beat longer than it did. There are now
     // eight of them between the head coming off the desk and the first step —

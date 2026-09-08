@@ -110,6 +110,10 @@ export function createEffects() {
     if (!box) return;
     opens.push({
       box, style: style || 'table', out: facing(box, from),
+      // ...and *where* along that face. A bank of lockers is eleven tiles long
+      // and the door that opens has to be the one he is standing at, not the
+      // one in the middle of the run.
+      at: from ? { x: from.x, y: from.y } : null,
       t: 0, life: Math.max(0.5, duration) + 0.34, hold: Math.max(0.5, duration)
     });
   }
@@ -386,13 +390,26 @@ export function createEffects() {
 
   // Everything an opening piece needs, in the face's own frame: the mouth of
   // it, its contents, and whatever is between them and the room.
-  function inFace(ctx, box, out, run) {
+  function inFace(ctx, box, out, run, at) {
     const along = out.x !== 0;
     const span = Math.min(along ? box.h : box.w, 30) * 0.84;
     const deep = Math.min(along ? box.w : box.h, 18) * 0.60;
+    // How far along the face to put it. The middle of it, unless whoever opened
+    // it is standing somewhere else along a long piece — a bank of lockers is
+    // nine tiles wide and the door that swings has to be the one in front of
+    // him. Held far enough in that the whole mouth stays inside the piece's own
+    // footprint, so the end of a run opens its end locker rather than a hole in
+    // the wall beside it.
+    let slide = 0;
+    if (at) {
+      const span2 = along ? box.h : box.w;
+      const mid = (along ? box.y : box.x) + span2 / 2;
+      const reach = Math.max(0, span2 / 2 - span / 2);
+      slide = Math.max(-reach, Math.min(reach, (along ? at.y : at.x) - mid));
+    }
     ctx.save();
-    ctx.translate(box.x + box.w / 2 + out.x * box.w * 0.5,
-      box.y + box.h / 2 + out.y * box.h * 0.5);
+    ctx.translate(box.x + box.w / 2 + out.x * box.w * 0.5 + (along ? 0 : slide),
+      box.y + box.h / 2 + out.y * box.h * 0.5 + (along ? slide : 0));
     ctx.rotate(along ? (out.x > 0 ? 0 : Math.PI) : (out.y > 0 ? Math.PI / 2 : -Math.PI / 2));
     run(span, deep);
     ctx.restore();
@@ -443,7 +460,7 @@ export function createEffects() {
       ctx.fillStyle = '#cbd8d4';
       ctx.fillRect(-0.4, -3, 1.4, 6);
       ctx.restore();
-    });
+    }, o.at);
   }
 
   // A locker or cupboard door, seen from above.
@@ -488,7 +505,7 @@ export function createEffects() {
       };
       leaf(-span / 2, 1);
       if (twin) leaf(span / 2, -1);
-    });
+    }, o.at);
   }
 
   // A shelf: no door to open, so the hand goes in and the books come out. The
@@ -515,7 +532,7 @@ export function createEffects() {
         ctx.fill();
         ctx.restore();
       }
-    });
+    }, o.at);
   }
 
   function drawOpen(ctx, o) {

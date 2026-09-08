@@ -914,13 +914,19 @@ __mod.tuning = (function () {
       // tucks himself in over half a second. Coming out is quicker than going in,
       // because coming out is usually urgent.
       hide: {
-        reach: 44,        // how close the lockers have to be to offer themselves
-        enter: 0.62,      // seconds spent getting in...
-        leave: 0.42,      // ...and rather fewer getting out
-        // Pushing the stick while tucked in brings you out. The button is the
-        // signposted way and this is the one every player will find first, and a
-        // hiding place you can be stuck in is the one thing this must not be.
-        breakOut: 0.35
+        reach: 44,        // how close the locker has to be to offer itself
+        // Seconds spent climbing into a locker, and rather fewer getting back
+        // out. Both are longer than they were, and deliberately so: what happens
+        // in them is a walk to the door, the door swinging open, a step inside
+        // and the door swinging shut, and none of those four beats is legible if
+        // the whole thing is over in six tenths of a second.
+        enter: 1.05,
+        leave: 0.85
+        // There is no stick shortcut out any more. It was a way out you could
+        // find without reading anything, and it was also a way out you could take
+        // by accident with a thumb resting on the pad while Mr. Vrána walks past
+        // — which is the one thing a hiding place must never do. The button says
+        // EXIT, in the same place the button that said HIDE was.
       },
       // Getting out of a chair takes a beat longer than it did. There are now
       // eight of them between the head coming off the desk and the first step —
@@ -2245,6 +2251,11 @@ __mod.tilemap = (function () {
   const FLOOR = new Set([' ', '.', 'D', ',', '~', '@', 'X', 'H',
     ...Object.keys(UNDERFOOT)]);
 
+  // Furniture with a door and a person-sized space behind it. A chest is a bank
+  // of lockers in the school's theme and a wardrobe everywhere it is one; both
+  // are things you can be inside. A table is not, however close you stand to it.
+  const ENTERABLE = new Set(['chest', 'wardrobe']);
+
   // Maximal-rectangle merge over cells sharing a character. Fewer, larger
   // colliders than one box per tile: the physics loop is linear in collider
   // count and a floorplan is mostly long straight walls.
@@ -2454,11 +2465,16 @@ __mod.tilemap = (function () {
       }
     }
 
-    // What each hiding place is *behind*. A hiding place is not a spot on the
-    // floor, it is the far side of a piece of furniture — so the game needs to
-    // know which piece, to draw the thief tucked against it and to say what he is
-    // hiding behind. Nearest solid thing to the middle of the nook, which on a
-    // covered tile is the cabinet or the wall that makes it one.
+    // What each hiding place is a doorstep to. A hiding place is not a patch of
+    // floor, it is the tile you stand on to climb into the cabinet in front of
+    // you — so the game needs to know which cabinet, to swing its door, to draw
+    // it over the thief on the way in, and to put him back on the right side of
+    // it on the way out.
+    //
+    // A locker straight ahead wins outright. The map only marks a spot where one
+    // is squarely two tiles away, so there is always one to find; the fallback
+    // below is what the seven hand-drawn floorplans and any future location get,
+    // and it is the older rule — nearest solid thing, furniture over building.
     for (const spot of hides) {
       const cx = spot.x + spot.w / 2;
       const cy = spot.y + spot.h / 2;
@@ -2474,14 +2490,33 @@ __mod.tilemap = (function () {
         // wall in it — that is most of what makes it a nook — and the wall is
         // usually a hair closer than the lockers, so nearest-wins named the
         // building every time. What the player is hiding behind is the object.
-        const d = Math.hypot(dx, dy) + (c.type === 'furniture' ? 0 : TILE * 0.9);
+        let d = Math.hypot(dx, dy) + (c.type === 'furniture' ? 0 : TILE * 0.9);
+        // Straight ahead and openable: the thing he actually gets inside. Square
+        // on, because he opens the door and steps in along one axis rather than
+        // squeezing past the corner of it.
+        const square = ENTERABLE.has(c.style)
+          && ((dx === 0 && dy > 0 && dy <= TILE * 1.6) || (dy === 0 && dx > 0 && dx <= TILE * 1.6));
+        if (square) d -= TILE * 4;
         if (d < nearest) { nearest = d; best = c; }
       }
       // The collider itself, not a copy of its numbers: the renderer paints it a
-      // second time over the top of a hidden thief so that the lockers actually
-      // occlude him, and to do that it needs the piece exactly as the room drew
-      // it — style, theme and all.
+      // second time over the top of a thief on his way in so that the lockers
+      // actually occlude him, and to do that it needs the piece exactly as the
+      // room drew it — style, theme and all.
       spot.anchor = best && nearest <= TILE * 2.6 ? best : null;
+      // Where the thief ends up while he is inside, and where he comes back out.
+      //
+      // Both are written down here rather than worked out from wherever he
+      // happened to be standing when he pressed the button. Inside is the middle
+      // of the cabinet, so the door he opens is the door he goes through; outside
+      // is the middle of the marked spot, which the generator already proved is
+      // floor a person fits on. Neither can drift into a wall, and neither
+      // depends on the approach.
+      spot.stand = { x: cx, y: cy };
+      spot.inside = spot.anchor
+        ? { x: Math.max(spot.anchor.x + 11, Math.min(spot.anchor.x + spot.anchor.w - 11, cx)),
+          y: Math.max(spot.anchor.y + 12, Math.min(spot.anchor.y + spot.anchor.h - 12, cy)) }
+        : { x: cx, y: cy };
     }
 
     const kind = spec.watcher || 'sleeper';
@@ -4409,7 +4444,7 @@ __mod.maps = (function () {
         { kind: 'ceiling', x: 2, y: 1, w: 3, h: 3 },
         { kind: 'ceiling', x: 8, y: 1, w: 3, h: 3 },
         { kind: 'ceiling', x: 15, y: 2, w: 3, h: 3 },
-        { kind: 'ceiling', x: 22, y: 1, w: 3, h: 3 },
+        { kind: 'ceiling', x: 23, y: 1, w: 3, h: 3 },
         { kind: 'ceiling', x: 1, y: 9, w: 3, h: 3 },
         { kind: 'ceiling', x: 8, y: 7, w: 3, h: 3 },
         { kind: 'ceiling', x: 15, y: 7, w: 3, h: 3 },
@@ -4427,18 +4462,18 @@ __mod.maps = (function () {
       tiles: [
         '###OOOOOOO########OOOOOOOO####',
         '#.........TTTT%TTTT......CCCC#',
-        '#.c...a...TTTT%TTTT...a..CCCC#',
+        '#.c...a...TTTT%TTTT...aH.CCCC#',
         'O.............%..............O',
         'OTT.....66..44%TT.......TT.33O',
         'OTT.c...66..44%TT.......TT.33O',
         'O.....a.......%...e...e......O',
-        '#.............%...........HH.#',
+        '#.............%..............#',
         '#.............%..............#',
         '#%%%DDD%%%%%%%%%%%%%DDD%%%%%%#',
         '#........222222222........111#',
         'X........222222222........111#',
         'X........~~~.................#',
-        'X........~~~..............@..#',
+        'X........~~~HH............@..#',
         '#.q...b...........b..........#',
         '#.........CCC................#',
         '#%%%%DDD%%%%%%%DDD%%%%%%DDD%%#',
@@ -4446,7 +4481,7 @@ __mod.maps = (function () {
         '#555.......%SS.....SS%.......#',
         '#555.......%SS.....SS%.......#',
         '#..........%SS.....SS%EEEE...#',
-        '#.H........%SS.....SS%EEEE...#',
+        '#..........%SS.....SS%EEEE...#',
         '#..........%.........%EEEE...#',
         '#CCC.......%.........%.......#',
         '#CCC.......%.........%.......#',
@@ -4552,16 +4587,16 @@ __mod.maps = (function () {
         'X......#.........666.......22222........+',
         'X......D.........666.......22222........+',
         'X......D...........~~~................@.+',
-        '+......D...........~~~..................+',
+        '+......D.........H.~~~.......H..........+',
         '+KKK...#..q...b...........q.............+',
         '+KKK...#................................+',
         '+......#.................%%%DDD%%%%%DDD%+',
         '+YY.....#################SS....SS%......+',
         '+YY.....................#SS....SS%......+',
-        '+..S.....YY..........YY.#SS....SS%.H....+',
+        '+..S.....YY..........YY.#SS....SS%......+',
         '+..S.....YY..........YY.#SS....SS%......+',
         '+..S....................#SS....SS%EEEE..+',
-        '+YYS..........SSSS....H.#SS....SS%EEEE..+',
+        '+YYS..........SSSS......#SS....SS%EEEE..+',
         '+YY.....................#SS....SS%EEEE..+',
         '+........YY..........YY.#SS....SS%......+',
         '+........YY..........YY.#........%......+',
@@ -4675,19 +4710,19 @@ __mod.maps = (function () {
         '+YY....#TTTT.wb...a.%.a...b...a.%88...br.99.+',
         '+YY....#............%...........%88......99.+',
         '+......O00........TT%77.......66%88.w....99.+',
-        '+.H....O00........TT%77.......66%...........+',
-        '+......O......q.....%.....q.....%.H...a...a.+',
+        '+......O00........TT%77.......66%...........+',
+        '+......O......q.....%.....q.....%.a...a...e.+',
         '+YY....O............%...........%...........+',
         '+YY....OTT........TT%TT.......44%TTTTT......+',
         '+......#TT........TT%TT.......44%TTTT.......+',
         '+......#%%%%%DDD%%%%%%%%%DDD%%%%%%%%%DDD%%%%+',
         'X......#CCC.......33333.......22222...e.....+',
         'X......D..C.w.....33333.......22222.........+',
-        'X......D...................~~~............@.+',
+        'X......D....HH.............~~~......HH....@.+',
         '+......D..............e....~~~e.............+',
         '+..S...#55555555555...............CCCCCCCCC.+',
         '+..S...#....................................+',
-        '+YYS.e.#...........%%DDD%%%%%DDD%%..........+',
+        '+YYS...#...........%%DDD%%%%%DDD%%..........+',
         '+YYS....###########%S...SS.......%##########+',
         '+KKK..............#%SS..SS.......%#.........+',
         '+KKK.....YY....YY.#%SS..SS.......%#.YY..YY..+',
@@ -4699,7 +4734,7 @@ __mod.maps = (function () {
         '+..S.........S....#%SS..SS.......%#....S....+',
         '+YYS..............#%SS..SS.......%#.........+',
         '+YYS.....YY....YY.#%.............%#.YY..YY..+',
-        '+..S.....YY....YY.#%.....H.11....%#.YY..YY..+',
+        '+..S.....YY....YY.#%.......11....%#.YY..YY..+',
         '+.................#%.......11....%#.........+',
         '+.................#%##OOOOOOOO###%#.........+',
         '+YY.........................................+',
@@ -4843,7 +4878,7 @@ __mod.maps = (function () {
         '+.....#.............%.............%BB.......55.+',
         '+.b...OTT.a....TT.00%99...b..TT.TT%BB.a...a.55.+',
         '+.....OTT......TT.00%99......TT.TT%............+',
-        '+YY...O.............%.............%.H..........+',
+        '+YY...O.............%.............%............+',
         '+YY...O......w......%.............%............+',
         '+.....OTT.a....TT.TT%TT...q..44.TT%33333..q....+',
         '+.....OTT......TT.TT%TT......44.TT%33333.......+',
@@ -5054,7 +5089,7 @@ __mod.maps = (function () {
         'X.....#CCCC.......555555555.......CCCCCCCCC.......9999#.....+',
         'X.....D..CC.......555555555.......CCCCCCCCC.......9999#...YY+',
         'X.....D......................~~~e...........e.........#...YY+',
-        '+..w..D.................HH...~~~........H..........@..#.....+',
+        '+..w..D.................HH...~~~........HH.........@..#.....+',
         '+.....#..............SS..............SS...............#.....+',
         '+.....#CCCCCC.......444444444.......CCCCCCC.......8888#.....+',
         '+YY...#%%%%%%%%DDD%%%%%%%%%%%%%DDD%%%%%%%%%%%DDD%%%%%%#...YY+',
@@ -5066,7 +5101,7 @@ __mod.maps = (function () {
         '+YY...#SS..............CCC%11.........CC.CCC.WW...CCCC#...YY+',
         '+.....#SS.a.....w.........%11.........CC.CCC.WW...CCCC#.....+',
         '+.....#SS.................%..EEEEEEE..CC..............#.....+',
-        '+.....#................222%..EEEEEEE..CC%..........HH.#.....+',
+        '+.....#................222%..EEEEEEE..CC%.............#.....+',
         '+YY...#................222%..EEEEEEE....%.............#...YY+',
         '+YY...#SS........e........%...........a.%CCCC.a..66666#...YY+',
         '+.....#SS..SSSSS...SSSSS..%.............%CCCC....66666#.....+',
@@ -9817,6 +9852,11 @@ __mod.sim = (function () {
       // man half out from behind a cabinet has not emerged yet.
       undetectable: false,
       hideIn: null,
+      // Whether there is a thief to draw at all. False for the whole of the time
+      // he is inside a locker, and for the beats at either end where the door is
+      // moving and he is already through it. Nothing shrinks and nothing fades;
+      // the figure is either drawn as it always is or it is not drawn.
+      hideShown: true,
       // Getting in and out of one: null, or an animation in progress.
       hiding: null,
       hideTargetId: null,
@@ -9953,45 +9993,71 @@ __mod.sim = (function () {
     if (endsAtCap(sim)) finish(sim, 'lost', 'awake');
   }
 
-  // Which piece of furniture a SEARCH would open: the nearest unsearched one
-  // within reach, measured to the edge of the box rather than its centre, so a
-  // long bank of lockers offers itself along its whole length.
-  // The nearest hiding place within arm's reach, measured to the edge of the nook
-  // rather than its middle — the same rule the cupboards use, so walking up to a
-  // bank of lockers offers itself at the same distance as walking up to a desk.
-  // Behind the furniture: he crosses the last few units rather than appearing
-  // there. The target is the middle of the nook, which the map already guaranteed
-  // is somewhere a person fits — so nothing here can push him into a wall.
+  // Getting into a locker, in beats rather than in one move.
+  //
+  // These are fractions of the whole, so retuning how long it takes cannot
+  // reorder what happens in it. Going in: cross the last stride to the tile in
+  // front of the door, step through the door, and then the beat where the door
+  // swings shut on an empty corridor with him already gone. Coming out: the door
+  // swings open with him still inside and invisible, he steps out, and he
+  // steadies on his feet before the stick is his again.
+  const ENTER_WALK = 0.30;
+  const ENTER_STEP = 0.80;
+  const LEAVE_HOLD = 0.22;
+  const LEAVE_STEP = 0.70;
+
+  // Where he ends up when he comes back out. The spot the map marked, which the
+  // generator already proved is floor a person fits on — not a step off wherever
+  // he happened to be standing when he pressed the button, and not a step out of
+  // the cabinet along a normal that a corner could point into a wall. If that one
+  // square is somehow occupied, try the ring of tiles around it before giving up
+  // and standing him where he is, which is at least still out of the locker.
+  function wayOut(sim, player, spot) {
+    const back = (spot && spot.stand) || { x: player.x, y: player.y };
+    if (!blocked(back.x, back.y, player.w, player.h, sim.level.colliders)) return back;
+    const tile = TUNING.world.tile;
+    for (const [dx, dy] of [[0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [-1, 1], [1, -1], [-1, -1]]) {
+      const at = { x: back.x + dx * tile, y: back.y + dy * tile };
+      if (!blocked(at.x, at.y, player.w, player.h, sim.level.colliders)) return at;
+    }
+    return { x: player.x, y: player.y };
+  }
+
+  // Into the locker. He crosses the last few units, opens the door and steps
+  // through it rather than appearing inside; the target is the middle of the
+  // cabinet's near face, so the door he opened is the door he went through.
   function enterHiding(sim, player, spot, rules) {
     sim.hiding = {
       t: 0,
       duration: rules.enter,
       into: spot,
       from: { x: player.x, y: player.y },
-      to: { x: spot.x + spot.w / 2, y: spot.y + spot.h / 2 }
+      // The doorstep, then the inside of the cabinet. Both are written on the
+      // map, so neither depends on the approach.
+      stand: { ...spot.stand },
+      to: { ...spot.inside }
     };
     sim.hideState = 'entering';
     sim.hideTargetId = null;
-    sim.events.push({ type: 'hiding', x: player.x, y: player.y, spot: spot.id });
+    sim.events.push({
+      type: 'hiding',
+      going: true,
+      x: player.x,
+      y: player.y,
+      spot: spot.id,
+      // What the door animation needs: which piece, drawn in which style, and
+      // which face of it he is standing at. Long enough that the door is still
+      // open while he is climbing in, and starts swinging shut as he vanishes.
+      where: spot.anchor,
+      style: spot.anchor ? spot.anchor.style : null,
+      from: { ...spot.stand },
+      duration: rules.enter * ENTER_STEP
+    });
   }
 
-  // ...and back out, to the side the room is on. Worked out from the thing he is
-  // hiding behind: step out away from it, not through it.
+  // ...and back out, onto the tile he came in from.
   function leaveHiding(sim, player, rules) {
     const spot = sim.hideIn || (sim.hiding && sim.hiding.into);
-    const anchor = spot && spot.anchor;
-    let ax = 0;
-    let ay = 0;
-    if (anchor) {
-      const cx = spot.x + spot.w / 2;
-      const cy = spot.y + spot.h / 2;
-      ax = cx - (anchor.x + anchor.w / 2);
-      ay = cy - (anchor.y + anchor.h / 2);
-      const len = Math.hypot(ax, ay) || 1;
-      ax /= len;
-      ay /= len;
-    }
-    const out = { x: player.x + ax * 22, y: player.y + ay * 22 };
     sim.hidden = false;
     sim.hideIn = null;
     sim.hideState = 'leaving';
@@ -9999,15 +10065,51 @@ __mod.sim = (function () {
       t: 0,
       duration: rules.leave,
       into: null,
+      // Kept, because the door he is coming out through is still this one's.
+      spot,
       from: { x: player.x, y: player.y },
-      // Never through the furniture, and never into a wall: if the step out is
-      // blocked he simply stands up where he is, which is still out of hiding.
-      to: blocked(out.x, out.y, player.w, player.h, sim.level.colliders)
-        ? { x: player.x, y: player.y } : out
+      stand: null,
+      to: wayOut(sim, player, spot)
     };
-    sim.events.push({ type: 'hiding', x: player.x, y: player.y, spot: null });
+    sim.events.push({
+      type: 'hiding',
+      going: false,
+      x: player.x,
+      y: player.y,
+      spot: spot ? spot.id : null,
+      where: spot ? spot.anchor : null,
+      style: spot && spot.anchor ? spot.anchor.style : null,
+      from: spot ? { ...spot.stand } : { x: player.x, y: player.y },
+      duration: rules.leave * (LEAVE_STEP + 0.06)
+    });
   }
 
+  // Where he is partway through, and whether there is anything to draw.
+  //
+  // `shown` is the whole of "completely hidden": once the door is shutting on him
+  // there is no figure, no smaller figure and no fainter figure — the renderer is
+  // simply not told to draw one. The last beat going in and the first beat coming
+  // out are the door moving with nobody in the corridor.
+  function hidePose(h) {
+    const k = h.duration > 0 ? Math.min(1, h.t / h.duration) : 1;
+    const at = (a, b, u) => {
+      const e = u * u * (3 - 2 * u);
+      return { x: a.x + (b.x - a.x) * e, y: a.y + (b.y - a.y) * e, shown: true };
+    };
+    if (h.into) {
+      if (k < ENTER_WALK) return at(h.from, h.stand, k / ENTER_WALK);
+      if (k < ENTER_STEP) return at(h.stand, h.to, (k - ENTER_WALK) / (ENTER_STEP - ENTER_WALK));
+      return { x: h.to.x, y: h.to.y, shown: false };
+    }
+    if (k < LEAVE_HOLD) return { x: h.from.x, y: h.from.y, shown: false };
+    if (k < LEAVE_STEP) return at(h.from, h.to, (k - LEAVE_HOLD) / (LEAVE_STEP - LEAVE_HOLD));
+    return { x: h.to.x, y: h.to.y, shown: true };
+  }
+
+  // The nearest hiding place within arm's reach, measured to the edge of the
+  // marked spot rather than its middle — the same rule the cupboards use, so
+  // walking up to a bank of lockers offers itself at the same distance as walking
+  // up to a desk.
   function nearestHide(sim, player, reach) {
     let best = null;
     let bestDistance = Infinity;
@@ -10032,6 +10134,9 @@ __mod.sim = (function () {
     return Math.hypot(dx, dy);
   }
 
+  // Which piece of furniture a SEARCH would open: the nearest unsearched one
+  // within reach, measured to the edge of the box rather than its centre, so a
+  // long bank of lockers offers itself along its whole length.
   function nearestStash(sim, player, reach) {
     let best = null;
     let bestDistance = Infinity;
@@ -10121,11 +10226,13 @@ __mod.sim = (function () {
     }
 
     const player = playerOf(sim);
-    // Nothing the stick says counts while he is climbing in behind the lockers or
-    // straightening up out of them: the animation owns his position for those few
-    // tenths, and a thief who can walk out of the middle of it is not hiding, he
-    // is sliding.
-    const busy = !!sim.hiding;
+    // Nothing the stick says counts while he is climbing into a locker, while he
+    // is inside one, or while he is straightening up out of it. The animation
+    // owns his position for the two ends of that, and while he is in there he has
+    // no position to own — a thief who can be walked about inside a cabinet is
+    // not hiding, he is sliding, and a thumb resting on the pad while Mr. Vrána
+    // walks past must not be able to shove him out into the corridor.
+    const busy = sim.hideState !== 'out';
     for (const entity of sim.entities) {
       const update = UPDATERS[entity.kind];
       if (!update) continue;
@@ -10322,31 +10429,37 @@ __mod.sim = (function () {
     const hideRules = sim.rules.hide;
     if (hideRules && sim.status === 'running') {
       if (sim.hiding) {
-        // Mid-animation. He is carried between the two positions rather than
-        // teleported, and nothing he does with the stick counts until he arrives.
+        // Mid-animation. He is carried through the beats rather than teleported
+        // between them, and nothing he does with the stick or the button counts
+        // until he arrives at one end of it or the other.
         sim.hiding.t += STEP_SECONDS;
-        const k = Math.min(1, sim.hiding.t / sim.hiding.duration);
-        const eased = k * k * (3 - 2 * k);
-        player.x = sim.hiding.from.x + (sim.hiding.to.x - sim.hiding.from.x) * eased;
-        player.y = sim.hiding.from.y + (sim.hiding.to.y - sim.hiding.from.y) * eased;
+        const pose = hidePose(sim.hiding);
+        player.x = pose.x;
+        player.y = pose.y;
         player.speed = 0;
         player.vx = 0;
         player.vy = 0;
         player.moving = false;
-        if (k >= 1) {
+        // The one thing the renderer needs from all of this, and the one thing it
+        // must not work out for itself.
+        sim.hideShown = pose.shown;
+        if (sim.hiding.t >= sim.hiding.duration) {
           const going = sim.hiding.into;
           sim.hideState = going ? 'hidden' : 'out';
           sim.hidden = !!going;
           sim.hideIn = going || null;
           sim.hiding = null;
+          sim.hideShown = !going;
           sim.events.push({ type: 'hide', hidden: sim.hidden, x: player.x, y: player.y });
         }
       } else if (sim.hidden) {
-        // Tucked in. The button says LEAVE; so does pushing the stick, because a
-        // player who wants out will push the stick before they read anything.
-        const shoved = Math.hypot(input.x || 0, input.y || 0) >= hideRules.breakOut;
+        // Inside. The button says EXIT and it is the only way out: see the note
+        // on the tuning for why pushing the stick is not.
+        sim.hideShown = false;
         const pressed = input.search && !sim.prevSearch;
-        if (shoved || pressed) leaveHiding(sim, player, hideRules);
+        if (pressed) leaveHiding(sim, player, hideRules);
+      } else {
+        sim.hideShown = true;
       }
     }
 
@@ -10401,8 +10514,15 @@ __mod.sim = (function () {
 
     // One button, and what it is offering. Leaving beats hiding beats searching:
     // the thing you are already doing comes first, and a cupboard you could open
-    // is never more urgent than getting out from behind it.
-    sim.action = sim.hidden || (sim.hiding && sim.hiding.into) ? 'leave'
+    // is never more urgent than getting out of the locker you are in.
+    //
+    // It reads EXIT for the whole of the cycle — climbing in, sitting inside, and
+    // climbing back out. The two animations are the best part of a second each,
+    // and a button that blinks out for a second in the middle of the one gesture
+    // the player is making is a button they will think they missed. Pressing it
+    // during either animation does nothing, because the stick and the button are
+    // both ignored until he is standing still again.
+    sim.action = sim.hidden || sim.hiding ? 'leave'
       : sim.hideTargetId ? 'hide'
         : sim.searchTargetId || sim.searching ? 'search' : null;
     sim.prevSearch = !!input.search;
@@ -14021,6 +14141,10 @@ __mod.effects = (function () {
       if (!box) return;
       opens.push({
         box, style: style || 'table', out: facing(box, from),
+        // ...and *where* along that face. A bank of lockers is eleven tiles long
+        // and the door that opens has to be the one he is standing at, not the
+        // one in the middle of the run.
+        at: from ? { x: from.x, y: from.y } : null,
         t: 0, life: Math.max(0.5, duration) + 0.34, hold: Math.max(0.5, duration)
       });
     }
@@ -14297,13 +14421,26 @@ __mod.effects = (function () {
 
     // Everything an opening piece needs, in the face's own frame: the mouth of
     // it, its contents, and whatever is between them and the room.
-    function inFace(ctx, box, out, run) {
+    function inFace(ctx, box, out, run, at) {
       const along = out.x !== 0;
       const span = Math.min(along ? box.h : box.w, 30) * 0.84;
       const deep = Math.min(along ? box.w : box.h, 18) * 0.60;
+      // How far along the face to put it. The middle of it, unless whoever opened
+      // it is standing somewhere else along a long piece — a bank of lockers is
+      // nine tiles wide and the door that swings has to be the one in front of
+      // him. Held far enough in that the whole mouth stays inside the piece's own
+      // footprint, so the end of a run opens its end locker rather than a hole in
+      // the wall beside it.
+      let slide = 0;
+      if (at) {
+        const span2 = along ? box.h : box.w;
+        const mid = (along ? box.y : box.x) + span2 / 2;
+        const reach = Math.max(0, span2 / 2 - span / 2);
+        slide = Math.max(-reach, Math.min(reach, (along ? at.y : at.x) - mid));
+      }
       ctx.save();
-      ctx.translate(box.x + box.w / 2 + out.x * box.w * 0.5,
-        box.y + box.h / 2 + out.y * box.h * 0.5);
+      ctx.translate(box.x + box.w / 2 + out.x * box.w * 0.5 + (along ? 0 : slide),
+        box.y + box.h / 2 + out.y * box.h * 0.5 + (along ? slide : 0));
       ctx.rotate(along ? (out.x > 0 ? 0 : Math.PI) : (out.y > 0 ? Math.PI / 2 : -Math.PI / 2));
       run(span, deep);
       ctx.restore();
@@ -14354,7 +14491,7 @@ __mod.effects = (function () {
         ctx.fillStyle = '#cbd8d4';
         ctx.fillRect(-0.4, -3, 1.4, 6);
         ctx.restore();
-      });
+      }, o.at);
     }
 
     // A locker or cupboard door, seen from above.
@@ -14399,7 +14536,7 @@ __mod.effects = (function () {
         };
         leaf(-span / 2, 1);
         if (twin) leaf(span / 2, -1);
-      });
+      }, o.at);
     }
 
     // A shelf: no door to open, so the hand goes in and the books come out. The
@@ -14426,7 +14563,7 @@ __mod.effects = (function () {
           ctx.fill();
           ctx.restore();
         }
-      });
+      }, o.at);
     }
 
     function drawOpen(ctx, o) {
@@ -14531,7 +14668,7 @@ __mod.render = (function () {
   const { sleepStage, rarityOf, isBigScore, watcherConfig, gaitBlend, gaitOf, hash } = __mod.rules;
   const { drawFigure, THIEF_LOOK, CARETAKER_LOOK } = __mod.figure;
   const { playerOf } = __mod.sim;
-  const { paintStaticRoom, drawSleeper, drawGuard, drawSlumped, drawThief, drawCaretakerWalking, drawGrabbedItem, roundRect, ITEM_ART, lampPositions, drawHideLabel, drawFurniture, deskScreen } = __mod.art;
+  const { paintStaticRoom, drawSleeper, drawGuard, drawSlumped, drawThief, drawCaretakerWalking, drawGrabbedItem, roundRect, ITEM_ART, lampPositions, drawHideLabel, deskScreen } = __mod.art;
 
   // W and H are the *window*, not the world: how much of a level fits on screen
   // at once. A level that is exactly this size never scrolls, which is every
@@ -14788,15 +14925,26 @@ __mod.render = (function () {
       }
     }
 
-    // How far into a hiding place he is, 0 out to 1 tucked in — the animation
-    // while it runs, and flat 1 once he is there.
-    function hidingShare(sim) {
-      if (sim.hiding) {
-        const k = Math.min(1, sim.hiding.t / sim.hiding.duration);
-        const eased = k * k * (3 - 2 * k);
-        return sim.hiding.into ? eased : 1 - eased;
-      }
-      return sim.hidden ? 1 : 0;
+    // Which locker he is climbing into or out of, and which way its door faces.
+    //
+    // While he is stepping through it the figure is clipped to the floor in front
+    // of that face, so he is cut off exactly at the cabinet's mouth and is
+    // swallowed by it a bit at a time — the same read as walking through a
+    // doorway, and drawn with the same full-size figure as everywhere else. There
+    // is no second, smaller thief and no transparent one.
+    function mouthOf(sim) {
+      const spot = (sim.hiding && (sim.hiding.into || sim.hiding.spot)) || sim.hideIn;
+      const anchor = spot && spot.anchor;
+      if (!anchor || !spot.stand) return null;
+      const sx = spot.stand.x;
+      const sy = spot.stand.y;
+      // Which face of the cabinet the marked spot is off. Compared as gaps to the
+      // box rather than to its middle, so standing off the end of a long bank
+      // still names the long side he is actually facing.
+      const gx = Math.max(anchor.x - sx, 0, sx - (anchor.x + anchor.w));
+      const gy = Math.max(anchor.y - sy, 0, sy - (anchor.y + anchor.h));
+      if (gy >= gx) return sy > anchor.y ? { axis: 'y', at: anchor.y + anchor.h, sign: 1 } : { axis: 'y', at: anchor.y, sign: -1 };
+      return sx > anchor.x ? { axis: 'x', at: anchor.x + anchor.w, sign: 1 } : { axis: 'x', at: anchor.x, sign: -1 };
     }
 
     // The beta's markers over the hiding places. Culled like everything else,
@@ -14806,10 +14954,25 @@ __mod.render = (function () {
       if (!TUNING.beta || !TUNING.beta.hideLabels) return;
       const spots = sim.level.hides;
       if (!spots || !spots.length) return;
+      // Nothing at all while he is inside one. A label floating over the locker
+      // he is hidden in is a sign saying where he went, and half of what the
+      // state is worth is that the screen stops pointing at him.
+      if (sim.hideState !== 'out') return;
+      const player = sim.entities.find((e) => e.kind === 'player');
+      // ...and only the one he could actually use. These are beta markers, not
+      // map furniture: they appear as he walks up, at exactly the distance the
+      // button appears at, so what they mark is "you can get in here now" rather
+      // than "there is a hiding place somewhere over there".
+      const reach = sim.rules.hide ? sim.rules.hide.reach : 0;
       for (const spot of spots) {
         if (spot.x > camera.x + W + 40 || spot.x + spot.w < camera.x - 40) continue;
         if (spot.y > camera.y + H + 40 || spot.y + spot.h < camera.y - 40) continue;
-        drawHideLabel(ctx, spot, { active: sim.hideIn === spot, time });
+        if (player) {
+          const dx = Math.max(spot.x - player.x, 0, player.x - (spot.x + spot.w));
+          const dy = Math.max(spot.y - player.y, 0, player.y - (spot.y + spot.h));
+          if (Math.hypot(dx, dy) > reach) continue;
+        }
+        drawHideLabel(ctx, spot, { active: sim.hideTargetId === spot.id, time });
       }
     }
 
@@ -15284,13 +15447,25 @@ __mod.render = (function () {
         // heading is untouched, so nothing about movement changes.
         let facing = player.facing;
         let rummage = 0;
-        if (sim.searching) {
-          rummage = Math.min(1, sim.searching.t / sim.searching.duration);
-          const toward = Math.atan2(sim.searching.y - py, sim.searching.x - px);
+        const turnTo = (toward, share) => {
           let turn = toward - facing;
           while (turn > Math.PI) turn -= Math.PI * 2;
           while (turn < -Math.PI) turn += Math.PI * 2;
-          facing += turn * Math.min(1, rummage * 4);
+          facing += turn * Math.min(1, share);
+        };
+        if (sim.searching) {
+          rummage = Math.min(1, sim.searching.t / sim.searching.duration);
+          turnTo(Math.atan2(sim.searching.y - py, sim.searching.x - px), rummage * 4);
+        }
+        // ...and the same for the locker: he turns to face the door before he
+        // reaches it and steps in facing it, then turns back out into the
+        // corridor as he comes back out. Presentation, exactly as above — the
+        // simulation's heading is untouched — and the reason the last thing you
+        // see of him is his back rather than his profile.
+        if (sim.hiding) {
+          const { from, to } = sim.hiding;
+          turnTo(Math.atan2(to.y - from.y, to.x - from.x),
+            (sim.hiding.t / sim.hiding.duration) * 5);
         }
 
         const stance = {
@@ -15313,54 +15488,37 @@ __mod.render = (function () {
         };
         // Locations that ask for the drawn figures get them; everywhere else
         // keeps the character it has always had.
-        // Tucked in behind something. He is drawn a little smaller and a little
-        // way into the furniture he is hiding behind, which is the whole of the
-        // read: standing on the tile at full size beside a bank of lockers looks
-        // like standing beside a bank of lockers.
-        const tuck = hidingShare(sim);
-        let hx = px;
-        let hy = py;
-        if (tuck > 0) {
-          const spot = sim.hideIn || (sim.hiding && sim.hiding.into);
-          const anchor = spot && spot.anchor;
-          if (anchor) {
-            const ax = anchor.x + anchor.w / 2;
-            const ay = anchor.y + anchor.h / 2;
-            const len = Math.hypot(ax - px, ay - py) || 1;
-            hx += ((ax - px) / len) * 7 * tuck;
-            hy += ((ay - py) / len) * 7 * tuck;
-          }
-          // Down as well as in. `stand` is the figure's own getting-up channel —
-          // the one the caretaker rises out of his chair on — run backwards, so
-          // hiding bends him down using the animation the game already has rather
-          // than a second idea of what crouching looks like.
-          stance.stand = 1 - tuck * 0.42;
-          ctx.save();
-          ctx.translate(hx, hy);
-          ctx.scale(1 - tuck * 0.10, 1 - tuck * 0.10);
-          ctx.translate(-hx, -hy);
-        }
-        const hand = sim.rules.figures
-          ? drawFigure(ctx, hx, hy, stance, THIEF_LOOK)
-          : drawThief(ctx, hx, hy, stance);
-        if (tuck > 0) {
-          ctx.restore();
-          // ...and the furniture goes back on top of him. The room is painted
-          // once into a cache underneath everything, so without this the thief is
-          // drawn over the lockers he is supposed to be behind and "hidden" is
-          // something only the meter knows about. Repainting the one piece he is
-          // behind is a few draws on the frames where it matters and nothing on
-          // any other.
-          const over = sim.hideIn || (sim.hiding && sim.hiding.into);
-          if (over && over.anchor && over.anchor.type === 'furniture') {
+        // Inside a locker there is no thief to draw. Not a smaller one, not a
+        // fainter one, not one with his feet showing: the simulation says whether
+        // there is a figure in the world to paint, and while he is in the cabinet
+        // the answer is no. Everything below is skipped, which is also why hiding
+        // costs nothing to draw.
+        const mouth = sim.hideShown === false ? null : mouthOf(sim);
+        let hand = null;
+        if (sim.hideShown !== false) {
+          if (mouth) {
+            // Clipped to the floor on his side of the cabinet's mouth. He is cut
+            // off at the door frame and disappears into it a bit at a time as he
+            // steps through, at full size the whole way.
             ctx.save();
-            ctx.globalAlpha = tuck;
-            drawFurniture(ctx, over.anchor);
-            ctx.restore();
+            ctx.beginPath();
+            const far = 4000;
+            if (mouth.axis === 'y') {
+              ctx.rect(camera.x - 40, mouth.sign > 0 ? mouth.at : mouth.at - far,
+                W + 80, far);
+            } else {
+              ctx.rect(mouth.sign > 0 ? mouth.at : mouth.at - far, camera.y - 40,
+                far, H + 80);
+            }
+            ctx.clip();
           }
+          hand = sim.rules.figures
+            ? drawFigure(ctx, px, py, stance, THIEF_LOOK)
+            : drawThief(ctx, px, py, stance);
+          if (mouth) ctx.restore();
         }
 
-        if (sim.reach) {
+        if (sim.reach && hand) {
           drawGrabbedItem(ctx, ITEM_ART[sim.reach.type] || '?', sim.reach, hand, reachProgress);
         }
 
@@ -15414,7 +15572,7 @@ __mod.main = (function () {
   const $ = (id) => document.getElementById(id);
   const WAKE_BEAT = 0.9;         // seconds of wake-up animation before the fail screen
   // What the one interaction button says, per action the simulation is offering.
-  const ACTION_LABEL = { search: 'SEARCH', hide: 'HIDE', leave: 'LEAVE' };
+  const ACTION_LABEL = { search: 'SEARCH', hide: 'HIDE', leave: 'EXIT' };
 
   function boot() {
     const params = new URLSearchParams(location.search);
@@ -15834,8 +15992,15 @@ __mod.main = (function () {
             fx.ring(event.x, event.y, 14, '255,120,100');
           }
         } else if (event.type === 'hiding') {
-          // Getting in behind the lockers, and coming back out. A short breath of
-          // dust at his feet either way, so the animation has a beat under it.
+          // Climbing into a locker, and climbing back out. The door is the same
+          // door the search animation swings — same hinge, same overshoot, same
+          // rebound as it shuts — held open for as long as it takes him to get
+          // through it rather than for as long as it takes to rummage.
+          if (reacts && event.where) {
+            fx.open(event.where, event.style || 'chest', event.from, event.duration);
+          }
+          // ...and a short breath of dust at his feet either way, so the beat has
+          // something under it.
           if (reacts) fx.ring(event.x, event.y, 3, '190,214,228');
         } else if (event.type === 'won') {
           const level = LEVELS.find((l) => l.id === currentLevelId);

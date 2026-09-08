@@ -39,6 +39,11 @@ const UNDERFOOT = {
 const FLOOR = new Set([' ', '.', 'D', ',', '~', '@', 'X', 'H',
   ...Object.keys(UNDERFOOT)]);
 
+// Furniture with a door and a person-sized space behind it. A chest is a bank
+// of lockers in the school's theme and a wardrobe everywhere it is one; both
+// are things you can be inside. A table is not, however close you stand to it.
+const ENTERABLE = new Set(['chest', 'wardrobe']);
+
 // Maximal-rectangle merge over cells sharing a character. Fewer, larger
 // colliders than one box per tile: the physics loop is linear in collider
 // count and a floorplan is mostly long straight walls.
@@ -248,11 +253,16 @@ export function tileLevel(spec) {
     }
   }
 
-  // What each hiding place is *behind*. A hiding place is not a spot on the
-  // floor, it is the far side of a piece of furniture — so the game needs to
-  // know which piece, to draw the thief tucked against it and to say what he is
-  // hiding behind. Nearest solid thing to the middle of the nook, which on a
-  // covered tile is the cabinet or the wall that makes it one.
+  // What each hiding place is a doorstep to. A hiding place is not a patch of
+  // floor, it is the tile you stand on to climb into the cabinet in front of
+  // you — so the game needs to know which cabinet, to swing its door, to draw
+  // it over the thief on the way in, and to put him back on the right side of
+  // it on the way out.
+  //
+  // A locker straight ahead wins outright. The map only marks a spot where one
+  // is squarely two tiles away, so there is always one to find; the fallback
+  // below is what the seven hand-drawn floorplans and any future location get,
+  // and it is the older rule — nearest solid thing, furniture over building.
   for (const spot of hides) {
     const cx = spot.x + spot.w / 2;
     const cy = spot.y + spot.h / 2;
@@ -268,14 +278,33 @@ export function tileLevel(spec) {
       // wall in it — that is most of what makes it a nook — and the wall is
       // usually a hair closer than the lockers, so nearest-wins named the
       // building every time. What the player is hiding behind is the object.
-      const d = Math.hypot(dx, dy) + (c.type === 'furniture' ? 0 : TILE * 0.9);
+      let d = Math.hypot(dx, dy) + (c.type === 'furniture' ? 0 : TILE * 0.9);
+      // Straight ahead and openable: the thing he actually gets inside. Square
+      // on, because he opens the door and steps in along one axis rather than
+      // squeezing past the corner of it.
+      const square = ENTERABLE.has(c.style)
+        && ((dx === 0 && dy > 0 && dy <= TILE * 1.6) || (dy === 0 && dx > 0 && dx <= TILE * 1.6));
+      if (square) d -= TILE * 4;
       if (d < nearest) { nearest = d; best = c; }
     }
     // The collider itself, not a copy of its numbers: the renderer paints it a
-    // second time over the top of a hidden thief so that the lockers actually
-    // occlude him, and to do that it needs the piece exactly as the room drew
-    // it — style, theme and all.
+    // second time over the top of a thief on his way in so that the lockers
+    // actually occlude him, and to do that it needs the piece exactly as the
+    // room drew it — style, theme and all.
     spot.anchor = best && nearest <= TILE * 2.6 ? best : null;
+    // Where the thief ends up while he is inside, and where he comes back out.
+    //
+    // Both are written down here rather than worked out from wherever he
+    // happened to be standing when he pressed the button. Inside is the middle
+    // of the cabinet, so the door he opens is the door he goes through; outside
+    // is the middle of the marked spot, which the generator already proved is
+    // floor a person fits on. Neither can drift into a wall, and neither
+    // depends on the approach.
+    spot.stand = { x: cx, y: cy };
+    spot.inside = spot.anchor
+      ? { x: Math.max(spot.anchor.x + 11, Math.min(spot.anchor.x + spot.anchor.w - 11, cx)),
+        y: Math.max(spot.anchor.y + 12, Math.min(spot.anchor.y + spot.anchor.h - 12, cy)) }
+      : { x: cx, y: cy };
   }
 
   const kind = spec.watcher || 'sleeper';
