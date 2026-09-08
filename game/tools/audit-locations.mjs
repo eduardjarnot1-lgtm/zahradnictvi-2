@@ -8,7 +8,14 @@
 //
 // Columns, in the order the work happened:
 //
-//   furn/room   pieces of furniture per 100x100 of floor
+//   bare        the biggest patch of indoor floor with nothing standing in
+//               it, in tiles a side, across the location's five levels — the
+//               number that answers "is there a grey rectangle in this
+//               building". Some open floor is the point of a stealth game; a
+//               hall you could park a bus in is not.
+//   furn/room   pieces of furniture per 100x100 of the whole plot, grounds
+//               included, so a location with big yards scores lower here
+//               without being any emptier indoors
 //   dress/room  pieces of dressing per the same
 //   lights      fittings across the location's five levels
 //   proud       furniture standing a tile off the wall behind it, which is the
@@ -26,6 +33,71 @@ import { createSim } from '../src/sim.js';
 const LOCS = [...new Set(LEVELS.map((l) => l.location))];
 const at = (loc) => LEVELS.filter((l) => l.location === loc);
 const sum = (a) => a.reduce((x, y) => x + y, 0);
+
+// The biggest patch of indoor floor with nothing standing in it, in tiles a
+// side. This is the number that answers "does this building have a grey
+// rectangle in it": density per square metre is not it, because a plot with a
+// big lawn on it scores badly while every room inside is full, and a floor with
+// one enormous bare hall in the middle of it scores well.
+//
+// Indoors is worked out the way the generator works it out: flood in from the
+// edge of the map over everything that is not the building's masonry, and
+// whatever that does not reach is a room.
+const TILE = 20;
+function barePatch(level) {
+  const cols = Math.ceil(level.width / TILE);
+  const rows = Math.ceil(level.height / TILE);
+  const wall = [];
+  const full = [];
+  for (let y = 0; y < rows; y++) {
+    wall.push(new Array(cols).fill(false));
+    full.push(new Array(cols).fill(false));
+  }
+  for (const c of level.colliders) {
+    const masonry = c.type === 'wall' || c.type === 'partition';
+    for (let ty = Math.floor(c.y / TILE); ty < Math.ceil((c.y + c.h) / TILE); ty++) {
+      for (let tx = Math.floor(c.x / TILE); tx < Math.ceil((c.x + c.w) / TILE); tx++) {
+        if (ty < 0 || ty >= rows || tx < 0 || tx >= cols) continue;
+        if (masonry && !c.fence) wall[ty][tx] = true;
+        full[ty][tx] = true;
+      }
+    }
+  }
+  // Doorways stop the flood, the way they do in the generator: they are where
+  // the building is open to the yard.
+  for (const d of level.doors) {
+    for (let ty = Math.floor(d.y / TILE); ty < Math.ceil((d.y + d.h) / TILE); ty++) {
+      for (let tx = Math.floor(d.x / TILE); tx < Math.ceil((d.x + d.w) / TILE); tx++) {
+        if (ty >= 0 && ty < rows && tx >= 0 && tx < cols) wall[ty][tx] = true;
+      }
+    }
+  }
+  const out = [];
+  for (let y = 0; y < rows; y++) out.push(new Array(cols).fill(false));
+  const stack = [];
+  for (let x = 0; x < cols; x++) { stack.push([x, 0], [x, rows - 1]); }
+  for (let y = 0; y < rows; y++) { stack.push([0, y], [cols - 1, y]); }
+  while (stack.length) {
+    const [x, y] = stack.pop();
+    if (x < 0 || y < 0 || x >= cols || y >= rows || out[y][x] || wall[y][x]) continue;
+    out[y][x] = true;
+    stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
+  }
+  // Largest square of indoor tiles with nothing standing in them.
+  const sq = [];
+  for (let y = 0; y < rows; y++) sq.push(new Array(cols).fill(0));
+  let best = 0;
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      const open = !wall[y][x] && !full[y][x] && !out[y][x];
+      sq[y][x] = !open ? 0
+        : (y === 0 || x === 0) ? 1
+          : 1 + Math.min(sq[y - 1][x], sq[y][x - 1], sq[y - 1][x - 1]);
+      if (sq[y][x] > best) best = sq[y][x];
+    }
+  }
+  return best;
+}
 
 const rows = [];
 for (const loc of LOCS) {
@@ -53,6 +125,7 @@ for (const loc of LOCS) {
   }
   rows.push({
     loc,
+    bare: Math.max(...ls.map(barePatch)),
     furniturePerRoom: (sum(furniture) / sum(area)).toFixed(1),
     dressingPerRoom: (sum(dressing) / sum(area)).toFixed(1),
     lights: sum(lights),
@@ -71,9 +144,9 @@ for (const loc of LOCS) {
   });
 }
 
-const cols = ['loc', 'furniturePerRoom', 'dressingPerRoom', 'lights', 'proud', 'hides',
+const cols = ['loc', 'bare', 'furniturePerRoom', 'dressingPerRoom', 'lights', 'proud', 'hides',
   'stashes', 'underfoot', 'doors', 'reacts', 'gait', 'hideRules', 'story'];
-const head = ['location', 'furn/room', 'dress/room', 'lights', 'proud', 'hides',
+const head = ['location', 'bare', 'furn/room', 'dress/room', 'lights', 'proud', 'hides',
   'stash', 'floor', 'doors', 'react', 'gait5', 'hide', 'what says who was here'];
 const w = cols.map((c, i) => Math.max(head[i].length, ...rows.map((r) => String(r[c]).length)));
 console.log(head.map((h, i) => h.padEnd(w[i])).join('  '));

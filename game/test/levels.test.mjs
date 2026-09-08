@@ -230,7 +230,9 @@ test('each floorplan is exactly the size it was drawn at', () => {
   // Apartment 5, House 5, Hotel 5, Office 5, School 5, Hospital 5, Museum 5.
   const SIZES = {
     5: [42, 69], 10: [55, 48], 15: [55, 46], 20: [50, 45],
-    25: [61, 48], 30: [45, 32], 35: [55, 52]
+    // Level 30 grew when the hospital got its ambulance bay: the drawn plan
+    // is the same plan, with a plot round it, exactly as the school's is.
+    25: [61, 48], 30: [57, 44], 35: [55, 52]
   };
   for (const [id, [cols, rows]] of Object.entries(SIZES)) {
     const level = LEVELS.find((l) => l.id === Number(id));

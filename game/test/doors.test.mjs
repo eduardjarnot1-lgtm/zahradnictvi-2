@@ -150,12 +150,23 @@ test('the man whose building it is opens his own doors', () => {
   // one he could not open would leave him pressed against it for the rest of
   // the level. He opens what he walks into, which is also just what a person
   // does in their own house.
-  for (const id of [11, 21, 36, 45]) {
-    const run = createRun(id, 7);
-    run.sim.noise = 80;                       // wake him and give him somewhere to be
-    for (let i = 0; i < 60 * 40 && run.sim.status === 'running'; i++) tick(run);
-    const opened = run.sim.doors.filter((d) => d.open).length;
-    assert.ok(opened > 0, `L${id}: he never opened a door in forty seconds`);
+  //
+  // Put him at one rather than waiting for his round to take him past one.
+  // Waiting is what this test used to do, and on the two open-plan buildings —
+  // a penthouse and a shop floor — his round genuinely never goes near a door
+  // in ninety seconds, which says nothing about whether he can open one.
+  for (const level of LEVELS) {
+    const sim = createSim({ level, seed: 4 });
+    const him = sim.entities.find((e) => e.kind !== 'player');
+    if (!him) continue;
+    const door = sim.doors[0];
+    him.x = door.x + door.w / 2;
+    him.y = door.y + door.h / 2;
+    him.prevX = him.x;
+    him.prevY = him.y;
+    stepSim(sim);
+    assert.equal(door.open, true,
+      `L${level.id} (${level.location}): he could not open his own door`);
   }
 });
 

@@ -123,6 +123,21 @@ export function createRenderer(canvas, options = {}) {
     roomKey = key;
   }
 
+  // The whole room, at a size that fits in an image, for looking at a floor all
+  // at once rather than a screen of it at a time. Debug only, and called from
+  // nowhere in the game: an empty corner or a wing that never got furnished is
+  // invisible from inside the game, because you only ever see four hundred
+  // units of it, and it is exactly what an audit of the maps has to find.
+  function bakeWhole(level, scale = 1) {
+    const sheet = document.createElement('canvas');
+    sheet.width = Math.ceil(level.width * scale);
+    sheet.height = Math.ceil(level.height * scale);
+    const sheetCtx = sheet.getContext('2d');
+    sheetCtx.setTransform(scale, 0, 0, scale, 0, 0);
+    paintStaticRoom(sheetCtx, level);
+    return sheet.toDataURL('image/png');
+  }
+
   // Only the visible slice of the cache is blitted, so the cost of drawing the
   // room is the size of the screen rather than the size of the map.
   function blitRoom(level) {
@@ -667,6 +682,9 @@ export function createRenderer(canvas, options = {}) {
     // player instead of sliding in from wherever the last level ended.
     snapCamera(level, x, y) { centreOn(level, x, y); },
     get camera() { return camera; },
+    // The whole floor as one image, for auditing maps. Nothing in the game
+    // calls it; the debug boot hands it to a browser check and that is all.
+    bakeWhole,
     set debug(on) { debug = !!on; },
     // The skin, by id. Set from the menu and kept across levels, because it is
     // a property of the player rather than of the room they are in.

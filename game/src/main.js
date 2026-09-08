@@ -1003,5 +1003,12 @@ export function boot() {
     // The camera is presentation, so it lives in the renderer — exposed here so
     // a test can assert it stays inside the map.
     Object.defineProperty(window.__dwhBoot, 'camera', { get: () => renderer.camera });
+    // A whole floor as one image. Looking at a map through the game's window
+    // shows four hundred units of it at a time, which is the one view that
+    // cannot tell you whether a far corner was ever furnished.
+    window.__dwhBoot.mapImage = (id, scale = 1) => {
+      const level = LEVELS.find((l) => l.id === id);
+      return level ? renderer.bakeWhole(level, scale) : null;
+    };
   }
 }

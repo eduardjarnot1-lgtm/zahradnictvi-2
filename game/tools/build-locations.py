@@ -1570,6 +1570,15 @@ YARDS = {
     'Office':    [0, 0, 1, 2, 3],
     'Museum':    [0, 0, 1, 2, 4],
     'Mansion':   [0, 1, 2, 3, 4],
+    # The four that had none, and read as a building dropped on a dark
+    # rectangle because of it. A shop has a pavement and a yard the deliveries
+    # come into; a hospital has an ambulance bay; a bank has a service yard
+    # behind it. The penthouse's outside is the one that is not at ground
+    # level at all, and is the better for it.
+    'Hospital':  [0, 1, 2, 3, 4],
+    'Shop':      [0, 0, 1, 2, 3],
+    'Penthouse': [0, 0, 1, 2, 3],
+    'Vault':     [0, 0, 1, 2, 2],
 }
 # ...and how deep, in tiles. Deep enough to be a place rather than a verge: a
 # yard you cross in one step is the "patch of grass outside the building" the
@@ -1593,6 +1602,19 @@ GROUNDS = {
                       plinths=True, sign='Sculpture garden', shed='C'),
     'Mansion':   dict(surface='grass', path='gravel', props=('car',),
                       sign='Grounds', shed='W'),
+    'Hospital':  dict(surface='grass', path='tarmac', props=('car', 'bin'),
+                      sign='Ambulances', shed='C'),
+    # A pavement out front and the yard the deliveries come into.
+    'Shop':      dict(surface='paving', path='tarmac', props=('bin', 'car'),
+                      sign='Deliveries', shed='C'),
+    # Not a garden: a roof. Paving, planters, and the lights of a city you
+    # cannot see from a floorplan — which is why the surface is the flat grey
+    # of a terrace rather than the green of a lawn.
+    'Penthouse': dict(surface='paving', path='paving', props=('plant', 'bin'),
+                      sign='Terrace', shed='W'),
+    # Concrete, a van's worth of turning room, and a shutter.
+    'Vault':     dict(surface='concrete', path='tarmac', props=('car',),
+                      sign='Loading bay', shed='C'),
 }
 
 # Which sides get grounds, and in what order they are added. The side the
@@ -1751,7 +1773,21 @@ def add_grounds(inner, sides, deep, flavour, loot, bite=True, voids=(), plant_ya
 
     # The plot's edge is a fence, not a wall — the grounds have to read as
     # outdoors, and you have to be able to see where the map ends.
-    g.box(0, 0, cols, rows, '+')
+    #
+    # Except where the building is already there. A plot is only padded on some
+    # of its sides, so on the others the building's own outer wall *is* the edge
+    # of the map — and painting a fence straight over it took the north wall off
+    # the vault's deposit rooms and left two rooms open to the sky. They read as
+    # interiors, they are lit like interiors, and every pass that asks whether a
+    # tile is indoors correctly answered no, so nothing was ever put in them.
+    for x in range(cols):
+        for y in (0, rows - 1):
+            if g.g[y][x] not in '#%O':
+                g.g[y][x] = '+'
+    for y in range(rows):
+        for x in (0, cols - 1):
+            if g.g[y][x] not in '#%O':
+                g.g[y][x] = '+'
 
     # The gate, straight out from the door, so the route reads at a glance:
     # room, corridor, door, yard, gate.
@@ -2293,6 +2329,230 @@ def add_fittings(g, tier, kinds=('radiator', 'extinguisher'), step=7):
             g.deco('ceiling', spot[0] - 1, spot[1] - 1, 3, 3)
             put += 1
     return put
+
+
+# ------------------------------------------------------------ the empty half
+# What to do about a room the grammar never furnished.
+#
+# The room grammars each dress the rooms they know they made. What none of them
+# dresses is everything else: the band round the outside of a vault's rings, the
+# wing a footprint hangs off the core, the middle of a penthouse's floor. Baked
+# and looked at whole rather than a screen at a time, the vault's top floor was
+# sixty-seven per cent bare concrete with two entirely empty deposit rooms in
+# it, and the penthouse was a parquet field with a dozen things floating in it.
+# Against the school — desks, benches, lockers on every corridor wall, a library
+# of shelving — they read as unfinished, because they were.
+#
+# So: after every grammar and every repair pass has had its say, find what is
+# still bare and furnish it, out of the vocabulary that building already uses.
+# Not to fill it — an empty floor you can cross is half of what makes a stealth
+# level — but so that the bare parts are rooms with something in them rather
+# than grey rectangles.
+#
+# Each entry is the pieces to try, biggest first, as (character, width, height).
+# The school is not in the table and never gets this pass: it is the benchmark
+# the rest are being brought up to, and it is already furnished by hand.
+FILLER = {
+    # Shelving, cupboards and a side table: a flat is full of places to put
+    # things down.
+    'Apartment': [('B', 3, 2), ('S', 4, 2), ('T', 3, 2), ('C', 2, 2)],
+    'House':     [('B', 3, 2), ('S', 4, 2), ('T', 3, 2), ('C', 2, 2)],
+    # A hotel corridor is wardrobes and luggage racks; the rooms are beds and
+    # bedsides, which the grammar already lays.
+    'Hotel':     [('W', 2, 3), ('T', 3, 2), ('B', 3, 2), ('C', 2, 2)],
+    # Desks in rows, filing down the walls.
+    'Office':    [('T', 4, 2), ('B', 3, 2), ('C', 2, 2)],
+    'Hospital':  [('B', 3, 2), ('T', 3, 2), ('C', 2, 2), ('N', 2, 2)],
+    # Cases against the walls and a store cupboard, and deliberately no plinths.
+    # A plinth in this building is an exhibit, and where the exhibits stand is
+    # the grammar's decision — it puts something worth taking beside each one,
+    # which is the whole of what makes a gallery a gallery. Filling the bare
+    # floor with more of them doubled the count and left two thirds of the
+    # cases empty, so the promise that a plinth is worth walking to stopped
+    # being true.
+    'Museum':    [('B', 3, 2), ('C', 2, 2)],
+    'Mansion':   [('B', 3, 2), ('S', 4, 2), ('T', 3, 2), ('C', 2, 2)],
+    # A penthouse is arranged rather than filled: long seating, low tables, and
+    # a screen. Fewer, larger pieces than anywhere else.
+    'Penthouse': [('S', 5, 2), ('V', 4, 2), ('T', 3, 2), ('B', 3, 2)],
+    # Shop shelving, run in banks.
+    'Shop':      [('B', 4, 2), ('B', 3, 2), ('P', 2, 2), ('C', 2, 2)],
+    # Racks of deposit boxes on every wall, which is what a vault is, and a
+    # clerk's table where one gets opened.
+    'Vault':     [('P', 2, 3), ('P', 3, 2), ('C', 3, 2), ('T', 3, 2)],
+}
+
+# How far a new piece has to be from anything already standing, pass by pass.
+#
+# This is the whole of what stops the pass filling a room that is already
+# furnished: a piece only ever lands where there is nothing for several tiles in
+# any direction, so a dressed room is left alone and a bare one gets a wall's
+# worth. Run once at four and the emptiest walls get one cupboard each and the
+# room is still mostly floor, so the requirement comes down a notch at a time —
+# the same shape as the pass that finds hiding places. Two is a bank of lockers'
+# worth of spacing, which is what a school corridor looks like and what a bare
+# wall anywhere else should look like too.
+FILL_CLEAR = [5, 4, 3, 2]
+# ...and how far apart an island stands from anything else. Bigger, because an
+# island is a thing you walk round rather than past, and a floor of them is a
+# warehouse rather than a room.
+ISLAND_CLEAR = 7
+# ...and how much room to leave in front of a piece, so one against a wall never
+# seals the lane past itself. Two tiles, because the player is wider than one.
+FILL_LANE = 2
+
+
+def indoors(g):
+    """Which tiles are inside the building rather than out on the plot.
+
+    Flood in from the edge of the map over everything that is not the
+    building's own masonry: whatever that reaches is outdoors, and whatever it
+    does not is a room. On a level with no grounds the edge of the map *is* the
+    outer wall, nothing seeds the flood, and the whole map is indoors — which
+    is the right answer for a building with no plot round it.
+
+    Wanted because a bank of shop shelving standing on the pavement outside the
+    shop is worse than a bare pavement, and the pass that fills empty floor has
+    no other way to tell the two apart: a yard and a stockroom are both '.'."""
+    # A doorway is a barrier here, not a gap. It is the one place the building
+    # is open to the yard, so a flood that walks through it comes out the other
+    # side and calls the whole floor outdoors — which is exactly what happened,
+    # and emptied the vault's bands again the moment it got a loading yard.
+    masonry = set('#%OD')
+    out = set()
+    stack = []
+    for x in range(g.cols):
+        for y in (0, g.rows - 1):
+            if g.g[y][x] not in masonry:
+                stack.append((x, y))
+    for y in range(g.rows):
+        for x in (0, g.cols - 1):
+            if g.g[y][x] not in masonry:
+                stack.append((x, y))
+    while stack:
+        x, y = stack.pop()
+        if (x, y) in out or not (0 <= x < g.cols and 0 <= y < g.rows):
+            continue
+        if g.g[y][x] in masonry:
+            continue
+        out.add((x, y))
+        stack += [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
+    return out
+
+
+def furnish_empty(g, tier, kit, clear=4, islands=False, outside=None):
+    """Put something in the parts of the building nobody furnished."""
+    if not kit:
+        return 0
+    outside = indoors(g) if outside is None else outside
+    solid = set('#%OTSWNVCBPEYZ+')
+    pieces = set('TSWNVCBPE')
+    doors = [(x, y) for y in range(g.rows) for x in range(g.cols) if g.g[y][x] == 'D']
+    marks = [(x, y) for y in range(g.rows) for x in range(g.cols) if g.g[y][x] in '@X']
+
+    def bare(x, y):
+        return (0 <= x < g.cols and 0 <= y < g.rows
+                and g.g[y][x] == '.' and (x, y) not in g.keep
+                and (x, y) not in outside)
+
+    def clear_around(x, y, w, h):
+        """Nothing standing within FILL_CLEAR of the footprint, and not on top
+        of a doorway's approach or the spawn or the way out."""
+        for cy in range(y - clear, y + h + clear):
+            for cx in range(x - clear, x + w + clear):
+                if not (0 <= cx < g.cols and 0 <= cy < g.rows):
+                    continue
+                if g.g[cy][cx] in pieces:
+                    return False
+        for (dx, dy) in doors:
+            if x - 3 <= dx < x + w + 3 and y - 3 <= dy < y + h + 3:
+                return False
+        for (mx, my) in marks:
+            if x - 4 <= mx < x + w + 4 and y - 4 <= my < y + h + 4:
+                return False
+        return True
+
+    def island(x, y, w, h):
+        """Standing on its own, with room to walk all the way round it.
+
+        For the floors that have no wall to put anything against: a penthouse is
+        one enormous room, and the grammar's answer — a handful of sofas — left
+        six hundred units of parquet with nothing on it. An island is furniture
+        you route round rather than past, which is the other half of what makes
+        a floor worth crossing carefully. Widely spaced, because a floor of
+        them is a warehouse."""
+        for step in range(1, FILL_LANE + 1):
+            ring = ([(x + i, y - step) for i in range(-1, w + 1)]
+                    + [(x + i, y + h + step - 1) for i in range(-1, w + 1)]
+                    + [(x - step, y + j) for j in range(-1, h + 1)]
+                    + [(x + w + step - 1, y + j) for j in range(-1, h + 1)])
+            if not all(bare(cx, cy) for (cx, cy) in ring):
+                return False
+        return True
+
+    def backed(x, y, w, h):
+        """Which side has a wall behind it, and whether the front is open.
+
+        Furniture goes against walls. A cupboard in the middle of a room is a
+        cupboard somebody is about to walk into, and a room whose middle is full
+        is a room you cannot cross — which is half of what a stealth level is
+        made of. So: wall on one side, and a clear lane on the opposite one."""
+        for (bx, by, fx, fy) in ((0, -1, 0, 1), (0, 1, 0, -1), (-1, 0, 1, 0), (1, 0, -1, 0)):
+            back = all(0 <= x + i + bx * 0 < g.cols
+                       and 0 <= y + j + by * 0 < g.rows
+                       for i in range(w) for j in range(h))
+            if not back:
+                continue
+            # Every cell along the backing edge must be solid...
+            edge = []
+            if by:
+                ey = y - 1 if by < 0 else y + h
+                edge = [(x + i, ey) for i in range(w)]
+            else:
+                ex = x - 1 if bx < 0 else x + w
+                edge = [(ex, y + j) for j in range(h)]
+            if not all(0 <= cx < g.cols and 0 <= cy < g.rows
+                       and g.g[cy][cx] in solid for (cx, cy) in edge):
+                continue
+            # ...and every cell of the lane in front must be bare floor.
+            lane = []
+            for step in range(1, FILL_LANE + 1):
+                if fy:
+                    ly = y - step if fy < 0 else y + h + step - 1
+                    lane += [(x + i, ly) for i in range(w)]
+                else:
+                    lx = x - step if fx < 0 else x + w + step - 1
+                    lane += [(lx, y + j) for j in range(h)]
+            if all(bare(cx, cy) for (cx, cy) in lane):
+                return True
+        return False
+
+    placed = []
+    for (ch, pw, ph) in kit:
+        for y in range(1, g.rows - ph):
+            for x in range(1, g.cols - pw):
+                if not all(bare(x + i, y + j) for i in range(pw) for j in range(ph)):
+                    continue
+                if not clear_around(x, y, pw, ph):
+                    continue
+                if not (island(x, y, pw, ph) if islands else backed(x, y, pw, ph)):
+                    continue
+                for j in range(ph):
+                    for i in range(pw):
+                        g.g[y + j][x + i] = ch
+                placed.append((x, y, pw, ph, ch))
+
+    # One reachability check for the lot, then peel back from the last piece
+    # until the map is whole again. Checking after every placement would be
+    # honest and is forty floods a level; this is one, and the failure case —
+    # which is rare, because every piece is against a wall with a lane in front
+    # of it — costs no more than the honest version would have.
+    while placed and not g.connected():
+        (x, y, pw, ph, _) = placed.pop()
+        for j in range(ph):
+            for i in range(pw):
+                g.g[y + j][x + i] = '.'
+    return len(placed)
 
 
 # --------------------------------------------------------- what happened here
@@ -3028,6 +3288,18 @@ def build():
             # as thin air and turns out to be a locker. Only the school has
             # them: hiding is a beta mechanic and this is the building it is
             # being tried in.
+            # Something in the parts of the building the grammar never
+            # furnished. First of the dressing passes, and that order matters:
+            # everything below reads the furniture. Pushing pieces flat against
+            # walls, choosing somewhere to hide behind one, and deciding which
+            # of them opens all have to see the room as it will actually ship —
+            # and a hiding place chosen before this ran got a cupboard put down
+            # on top of it.
+            plot = indoors(g)
+            for gap in FILL_CLEAR:
+                furnish_empty(g, tier, FILLER.get(name, []), gap, outside=plot)
+            furnish_empty(g, tier, FILLER.get(name, []), ISLAND_CLEAR,
+                          islands=True, outside=plot)
             if name in SNUG:
                 # Again and again: pushing one bank of lockers flat frequently
                 # frees the tile the next one needed, and each pass is cheap.
