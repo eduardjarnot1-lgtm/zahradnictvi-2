@@ -52,7 +52,34 @@ HIDES = {'School': 2}
 # reason: one building at a time.
 LITTER_AT = {'School'}
 # ...and which get their furniture pushed flush against the walls behind it.
-SNUG = {'School'}
+# All of them. A cabinet standing one tile proud of the wall behind it is the
+# single loudest tell that a room was generated rather than built, and the pass
+# that fixes it puts every move back if the map came off worse for it.
+SNUG = {'Apartment', 'House', 'Hotel', 'Office', 'School', 'Hospital',
+        'Museum', 'Mansion', 'Penthouse', 'Shop', 'Vault'}
+
+# What each building has bolted to it, and how close together its lights are.
+#
+# Every location is lit, because a building the map does not light is a
+# building the player cannot read — before this the school had a fitting every
+# few metres and the other ten had between none and a dozen for a whole floor.
+# What differs is the vocabulary and the spacing. An institution puts a light
+# every seven tiles and an extinguisher by the fire door; a home lights itself
+# more sparsely and would not thank you for the extinguisher. The school's own
+# entry is the pair it already had, so its five levels come out unchanged.
+FITTINGS = {
+    'Apartment': (('radiator',), 9),
+    'House':     (('radiator',), 9),
+    'Hotel':     (('radiator', 'extinguisher'), 8),
+    'Office':    (('radiator', 'extinguisher'), 7),
+    'School':    (('radiator', 'extinguisher'), 7),
+    'Hospital':  (('radiator', 'extinguisher'), 7),
+    'Museum':    (('extinguisher',), 8),
+    'Mansion':   (('radiator',), 9),
+    'Penthouse': ((), 9),
+    'Shop':      (('extinguisher',), 8),
+    'Vault':     (('extinguisher',), 8),
+}
 
 
 class Loot:
@@ -2146,7 +2173,7 @@ def snug_to_walls(g):
 # All of it is decoration rather than geometry — nothing here collides — so it
 # costs a rectangle in the emitted map and one draw into the room cache, and
 # nothing per frame. That is what makes it affordable to have a lot of.
-def add_fittings(g, tier):
+def add_fittings(g, tier, kinds=('radiator', 'extinguisher'), step=7):
     """Radiators, extinguishers, coat pegs, and the lights."""
     put = 0
     inside = set('.,~abeq')
@@ -2155,7 +2182,7 @@ def add_fittings(g, tier):
         return 0 <= x < g.cols and 0 <= y < g.rows and g.g[y][x] in inside
 
     # Radiators under the windows, on whichever side of the wall is indoors.
-    for y in range(g.rows):
+    for y in range(g.rows) if 'radiator' in kinds else ():
         for x in range(g.cols):
             if g.g[y][x] != 'O':
                 continue
@@ -2189,7 +2216,8 @@ def add_fittings(g, tier):
     # opposite the first of them: both are corridor things, and both go where
     # there is wall to put them on.
     doors = [(x, y) for y in range(g.rows) for x in range(g.cols)
-             if g.g[y][x] == 'D' and g.g[y][max(0, x - 1)] != 'D']
+             if g.g[y][x] == 'D' and g.g[y][max(0, x - 1)] != 'D'] \
+        if 'extinguisher' in kinds else []
     for i, (x, y) in enumerate(doors):
         if i % 2:
             continue
@@ -2206,7 +2234,6 @@ def add_fittings(g, tier):
     # The lights. On a lattice, wherever there is floor under them and no light
     # already nearby — so a long corridor gets a row of them and a cupboard gets
     # one, which is how a building is actually lit.
-    step = 7
     lit = []
     for y in range(2, g.rows - 2, step):
         for x in range(2, g.cols - 2, step):
@@ -2217,7 +2244,7 @@ def add_fittings(g, tier):
                     break
             if not spot:
                 continue
-            if any(max(abs(spot[0] - lx), abs(spot[1] - ly)) < 5 for (lx, ly) in lit):
+            if any(max(abs(spot[0] - lx), abs(spot[1] - ly)) < step - 2 for (lx, ly) in lit):
                 continue
             lit.append(spot)
             g.deco('ceiling', spot[0] - 1, spot[1] - 1, 3, 3)
@@ -2829,16 +2856,27 @@ def build():
             # them: hiding is a beta mechanic and this is the building it is
             # being tried in.
             if name in SNUG:
-                # Twice: pushing one bank of lockers flat frequently frees the
-                # tile the next one needed, and the second pass is cheap.
-                while snug_to_walls(g):
-                    pass
+                # Again and again: pushing one bank of lockers flat frequently
+                # frees the tile the next one needed, and each pass is cheap.
+                #
+                # Bounded, because two of these buildings do not settle. A pass
+                # accepts any move that leaves the map no worse, and "no worse"
+                # is not "better" — so an office chair can be pushed north on
+                # one pass and south on the next, forever, and the loop that
+                # ran to exhaustion on the school (twelve passes, five levels)
+                # ran to exhaustion for good on the office. Twenty is well past
+                # where every building that does settle has settled; the two
+                # that do not are stopped mid-shuffle with their furniture
+                # against a wall either way, which is the whole point of it.
+                for _ in range(20):
+                    if not snug_to_walls(g):
+                        break
             if name in HIDES:
                 add_hides(g, HIDES[name], into='C')
             if name in LITTER_AT:
                 add_litter(g, tier)
-            if name in SNUG:
-                add_fittings(g, tier)
+            fittings, light_step = FITTINGS[name]
+            add_fittings(g, tier, fittings, light_step)
             stashes = make_searchable(g, tier, name)
             if g.bad:
                 problems.append(f'{name} L{tier + 1}: {g.bad}')

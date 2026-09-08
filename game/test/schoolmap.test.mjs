@@ -173,6 +173,63 @@ test('every location is dressed and searchable now, not just the school', () => 
   }
 });
 
+test('every building is lit, and lit in its own way', () => {
+  // Section 13. Before this pass the school had a fitting every few metres and
+  // the other ten had between none and a dozen for a whole floor of a building
+  // — which is why washing them all to the same darkness made the school
+  // atmospheric and the hospital unreadable. Every location lights itself now.
+  const lights = (l) => (l.decor || []).filter(
+    (d) => d.kind === 'ceiling' || d.kind === 'lamp' || d.kind === 'desklamp').length;
+  const per = new Map();
+  for (const l of FLOORPLANS) {
+    assert.ok(lights(l) >= 4,
+      `${l.location} L${l.id} has ${lights(l)} lights in ${l.width}x${l.height}`);
+    per.set(l.location, (per.get(l.location) || 0) + lights(l));
+  }
+  // ...and not all to the same recipe. An institution is lit on a tighter
+  // lattice than a home, so the totals must not come out as one number.
+  assert.ok(new Set(per.values()).size >= 6,
+    `only ${new Set(per.values()).size} distinct lighting densities across 11 buildings`);
+});
+
+test('nothing stands one tile proud of the wall behind it', () => {
+  // Sections 3 to 5. A cabinet with a one-tile gap between it and the wall is
+  // the loudest tell that a room was generated rather than built, and the gap
+  // is not even walkable: the player's box is 22 units wide and a tile is 20.
+  // The pass that pushes furniture back used to run on the school alone.
+  //
+  // Counted rather than forbidden. A piece can legitimately stand proud when
+  // pushing it back would strand something else, and the pass puts any move
+  // back that leaves the map worse — so what is being held to is that the gap
+  // is now the exception. Across all fifty-five levels it was 47% of every
+  // piece of furniture in the game and one hotel floor where it was every
+  // single piece; it is 13% and one floor at 52% now.
+  let proud = 0;
+  let total = 0;
+  for (const l of FLOORPLANS) {
+    const walls = l.colliders.filter((c) => c.type === 'wall' || c.type === 'partition');
+    const furniture = l.colliders.filter((c) => c.type === 'furniture');
+    let here = 0;
+    for (const f of furniture) {
+      // A gap of about one tile, between faces that actually front each other.
+      const gap = walls.some((w) => {
+        const alongX = f.x < w.x + w.w - 4 && w.x < f.x + f.w - 4;
+        const alongY = f.y < w.y + w.h - 4 && w.y < f.y + f.h - 4;
+        const tile = (g) => g > 12 && g < 28;
+        return (alongX && (tile(f.y - (w.y + w.h)) || tile(w.y - (f.y + f.h))))
+          || (alongY && (tile(f.x - (w.x + w.w)) || tile(w.x - (f.x + f.w))));
+      });
+      if (gap) here++;
+    }
+    proud += here;
+    total += furniture.length;
+    assert.ok(here <= furniture.length * 0.60,
+      `${l.location} L${l.id}: ${here} of ${furniture.length} pieces stand proud of a wall`);
+  }
+  assert.ok(proud <= total * 0.20,
+    `${proud} of ${total} pieces of furniture in the game stand a tile off the wall`);
+});
+
 test('a searchable piece is always furniture you would actually open', () => {
   const openable = new Set(['chest', 'bookshelf', 'wardrobe', 'table', 'tvBench']);
   for (const l of SCHOOL) {
