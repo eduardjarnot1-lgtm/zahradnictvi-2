@@ -8500,6 +8500,25 @@ __mod.figure = (function () {
     build: 1.12
   };
 
+  // --- the school's finish -----------------------------------------------------
+  //
+  // The same two people with one field added, and every extra pass in this file
+  // is gated on it. `lit` is the colour of the light in the room they are
+  // standing in — the school's cool strip lighting — and what it buys is the
+  // three things a flat cartoon figure is missing at this size:
+  //
+  //   a rim along the top of the head and shoulders, which is what separates a
+  //   dark figure from a dark bank of lockers behind him;
+  //   a gradient down the sweater instead of a fill with a lit blob on it, so
+  //   the body has a round side and a shadow side;
+  //   a soft contact shadow rather than a grey disc.
+  //
+  // One gradient and three arcs per figure per frame, with two figures on the
+  // screen. That is affordable in a way that lighting the room live is not, and
+  // it is where the money shows.
+  const SCHOOL_THIEF_LOOK = { ...THIEF_LOOK, lit: '226,240,214' };
+  const SCHOOL_CARETAKER_LOOK = { ...CARETAKER_LOOK, lit: '226,240,214' };
+
   // --- small drawing helpers ---------------------------------------------------
   // A two-segment limb with a knee or elbow, drawn over a slightly fatter dark
   // copy of itself. That rim is the whole reason an arm reads as being in front
@@ -8648,10 +8667,30 @@ __mod.figure = (function () {
     // and spreads as he sinks onto both feet. Cheap, and it is most of what sells
     // the feet being on the floor rather than above it.
     const low = 1 - Math.min(1, bobbed / 3);
-    ctx.fillStyle = 'rgba(16,8,22,0.28)';
-    ctx.beginPath();
-    ctx.ellipse(x, y + 18, (10.4 + low * 1.4) * build, 3.7 + low * 0.6, 0, 0, TAU);
-    ctx.fill();
+    const shadowW = (10.4 + low * 1.4) * build;
+    const shadowH = 3.7 + low * 0.6;
+    if (look.lit) {
+      // A shadow with an edge is a disc lying on the floor beside him. This one
+      // is darkest under the feet and gone by its rim, which is what a soft
+      // ceiling light actually casts and what makes him stand *on* the floor.
+      ctx.save();
+      ctx.translate(x, y + 18);
+      ctx.scale(1, shadowH / shadowW);
+      const g2 = ctx.createRadialGradient(0, 0, shadowW * 0.15, 0, 0, shadowW);
+      g2.addColorStop(0, 'rgba(14,18,16,0.52)');
+      g2.addColorStop(0.5, 'rgba(14,18,16,0.26)');
+      g2.addColorStop(1, 'rgba(14,18,16,0)');
+      ctx.fillStyle = g2;
+      ctx.beginPath();
+      ctx.arc(0, 0, shadowW, 0, TAU);
+      ctx.fill();
+      ctx.restore();
+    } else {
+      ctx.fillStyle = 'rgba(16,8,22,0.28)';
+      ctx.beginPath();
+      ctx.ellipse(x, y + 18, shadowW, shadowH, 0, 0, TAU);
+      ctx.fill();
+    }
 
     // --- legs ------------------------------------------------------------------
     const drawLeg = (side, foot, far) => {
@@ -8831,15 +8870,37 @@ __mod.figure = (function () {
       ctx.closePath();
     };
 
-    ctx.fillStyle = look.coat;
-    path();
-    ctx.fill();
+    if (look.lit) {
+      // Lit at the shoulders, base through the chest, dark into the hem: the
+      // sweater as a rounded mass with a top and an underside rather than a
+      // colour with a lighter patch on it.
+      const g = ctx.createLinearGradient(0, top - 2, 0, bottom + 1);
+      g.addColorStop(0, look.coatLit);
+      g.addColorStop(0.34, look.coat);
+      g.addColorStop(1, look.coatDark);
+      ctx.fillStyle = g;
+      path();
+      ctx.fill();
+      // ...and the rim: a hairline of the room's own light along the top of the
+      // shoulders. This is the pass that lifts a dark figure off a dark bank of
+      // lockers, and it is one stroke.
+      ctx.strokeStyle = `rgba(${look.lit},0.30)`;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(cx - shoulder * 0.86 + lead, top + 1.4 + leadY);
+      ctx.quadraticCurveTo(cx + lead, top - 2.4 + leadY, cx + shoulder * 0.86 + lead, top + 1.4 + leadY);
+      ctx.stroke();
+    } else {
+      ctx.fillStyle = look.coat;
+      path();
+      ctx.fill();
 
-    // Light from above, inset so it stays inside the sweater without a clip.
-    ctx.fillStyle = look.coatLit;
-    ctx.beginPath();
-    ctx.ellipse(cx + lead - shoulder * 0.16, top + 3.2, shoulder * 0.80, 4.4, 0, 0, TAU);
-    ctx.fill();
+      // Light from above, inset so it stays inside the sweater without a clip.
+      ctx.fillStyle = look.coatLit;
+      ctx.beginPath();
+      ctx.ellipse(cx + lead - shoulder * 0.16, top + 3.2, shoulder * 0.80, 4.4, 0, 0, TAU);
+      ctx.fill();
+    }
 
     // A shadow along the hem, where the sweater falls away from the hips.
     ctx.fillStyle = look.coatDark;
@@ -8887,6 +8948,28 @@ __mod.figure = (function () {
     ctx.beginPath();
     ctx.ellipse(x + shift * 0.22, y, r * 0.95, r, 0, 0, TAU);
     ctx.fill();
+
+    // ...and a face that is not one colour. The light comes from above and a
+    // little to the left everywhere else in this room, so the jaw and the right
+    // of the face fall away. Clipped to the face so it cannot spill onto the
+    // hair, which is the whole reason this is a clip and not an inset ellipse.
+    if (look.lit) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.ellipse(x + shift * 0.22, y, r * 0.95, r, 0, 0, TAU);
+      ctx.clip();
+      ctx.fillStyle = look.skinDark;
+      ctx.globalAlpha = 0.34;
+      ctx.beginPath();
+      ctx.ellipse(x + shift * 0.22 + r * 0.74, y + r * 0.42, r * 0.78, r * 0.92, -0.4, 0, TAU);
+      ctx.fill();
+      ctx.globalAlpha = 0.30;
+      ctx.beginPath();
+      ctx.ellipse(x + shift * 0.22, y + r * 1.02, r * 1.1, r * 0.42, 0, 0, TAU);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    }
 
     if (away) {
       // Walking away: no face at all. The back of a head is a hair mass, plus an
@@ -8981,6 +9064,19 @@ __mod.figure = (function () {
 
     if (beanie) drawBeanie(ctx, x, y, r, turn, sideOn, look);
     else drawCrownLight(ctx, x, y, r, turn, look);
+
+    // The room's light, catching the top of the skull. Last, so it lies over the
+    // hat as well as the hair, and thin — a rim is an edge, and an edge that has
+    // width is a halo. Along with the shoulder rim below it, this is what stops a
+    // dark figure sinking into a dark bank of lockers.
+    if (look.lit) {
+      ctx.strokeStyle = `rgba(${look.lit},0.26)`;
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.ellipse(x, y - (beanie ? r * 0.30 : r * 0.06), r * 1.00, r * 0.94,
+        0, Math.PI * 1.12, Math.PI * 1.88);
+      ctx.stroke();
+    }
   }
 
   // The beanie. Its brim has to sit above the brows, which is higher than it
@@ -9011,7 +9107,7 @@ __mod.figure = (function () {
   }
 
   const figureHeight = GROUND + Math.abs(HEAD_Y) + HEAD_R;
-  return { THIEF_LOOK, CARETAKER_LOOK, drawFigure, figureHeight };
+  return { THIEF_LOOK, CARETAKER_LOOK, SCHOOL_THIEF_LOOK, SCHOOL_CARETAKER_LOOK, drawFigure, figureHeight };
 })();
 __mod.sim = (function () {
   // The simulation. Pure in the sense that matters: no document, no ctx, no Date,
@@ -11489,6 +11585,310 @@ __mod.art = (function () {
     ctx.fill();
   };
 
+  // ------------------------------------------------------- the school's finish
+  //
+  // Everything below is the school's own, switched on by `polish` in
+  // `paintStaticRoom` and off everywhere else. It is all baked into the room
+  // cache — painted once when a level loads and blitted every frame after that —
+  // so none of it costs a millisecond while the game is running, which is what
+  // makes it affordable to do properly.
+  //
+  // Three ideas, in the order they matter:
+  //
+  //   GROUNDING   A rectangle with a hard offset copy of itself behind it reads
+  //               as a sticker. A soft shadow that is darkest where the object
+  //               meets the floor and gone a few units out reads as an object
+  //               standing on the floor. Nothing else on this list changes the
+  //               picture as much.
+  //   MATERIAL    A flat fill is a colour, not a surface. Tile wants grout and a
+  //               sheen, wood wants grain and butt joints, steel wants a brushed
+  //               gradient down the door. Cheap, and the difference between a
+  //               floorplan and a school.
+  //   LIGHT       A corridor lit evenly end to end is a diagram. Pools under the
+  //               strip lights, spill from the windows, and everything else a
+  //               shade down.
+  let polish = false;
+
+  // A soft contact shadow under something standing on the floor.
+  //
+  // Two passes: a wide, faint one for the ambient occlusion the object casts into
+  // the floor around it, and a tight dark one right at its foot for the contact
+  // itself. The offset is down and very slightly right, which is where every
+  // other shadow in this game falls, so the whole room agrees about where the
+  // light is.
+  function groundShadow(ctx, c, spread = 7, strength = 0.34) {
+    const g = ctx.createLinearGradient(0, c.y + c.h - 2, 0, c.y + c.h + spread);
+    g.addColorStop(0, `rgba(16,22,20,${strength})`);
+    g.addColorStop(0.45, `rgba(16,22,20,${strength * 0.45})`);
+    g.addColorStop(1, 'rgba(16,22,20,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(c.x - spread * 0.35, c.y + c.h - 2, c.w + spread * 0.9, spread + 2);
+    // ...and a whisper down each side, so a bank of lockers is not a shape that
+    // only exists below the waist.
+    const side = ctx.createLinearGradient(c.x + c.w, 0, c.x + c.w + spread * 0.6, 0);
+    side.addColorStop(0, `rgba(16,22,20,${strength * 0.55})`);
+    side.addColorStop(1, 'rgba(16,22,20,0)');
+    ctx.fillStyle = side;
+    ctx.fillRect(c.x + c.w, c.y + 2, spread * 0.6, c.h);
+  }
+
+  // The dark that gathers where a wall meets the floor. Same idea as above and a
+  // different shape: a wall is long and the room only sees one face of it, so
+  // this is a band down that face rather than a halo round a box.
+  function wallFoot(ctx, c) {
+    const deep = 9;
+    const g = ctx.createLinearGradient(0, c.y + c.h, 0, c.y + c.h + deep);
+    g.addColorStop(0, 'rgba(12,20,16,0.34)');
+    g.addColorStop(1, 'rgba(12,20,16,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(c.x - 2, c.y + c.h, c.w + 4, deep);
+    const up = ctx.createLinearGradient(0, c.y, 0, c.y - deep * 0.6);
+    up.addColorStop(0, 'rgba(12,20,16,0.20)');
+    up.addColorStop(1, 'rgba(12,20,16,0)');
+    ctx.fillStyle = up;
+    ctx.fillRect(c.x - 2, c.y - deep * 0.6, c.w + 4, deep * 0.6);
+  }
+
+  // Tone jitter that is the same every time. Two objects a tile apart get
+  // different shades and the same object gets the same shade on every repaint,
+  // which is the whole requirement for a surface that reads as made of pieces.
+  function shade(x, y, amount) {
+    return (hash(x, y) - 0.5) * amount;
+  }
+
+  // Lighten or darken a hex colour by a fraction. Enough colour maths for a
+  // brushed gradient and a grout line; anything more belongs in a palette.
+  function tint(hex, k) {
+    const n = parseInt(hex.slice(1), 16);
+    const f = (c) => Math.max(0, Math.min(255, Math.round(c + (k > 0 ? (255 - c) * k : c * k))));
+    return `rgb(${f((n >> 16) & 255)},${f((n >> 8) & 255)},${f(n & 255)})`;
+  }
+
+  // --- floors ------------------------------------------------------------------
+  //
+  // One surface per material rather than one grid with the pitch changed. The
+  // corridor floor is the single biggest area in the game and the tile grid it
+  // had was a colour with lines ruled over it; this is tile.
+  //
+  // All of it is baked into the room cache, but "baked" is not "free": the
+  // biggest school is 1220 by 960, which is three thousand tiles, and the first
+  // draft set `fillStyle` once per tile and tripled the time a level takes to
+  // load. Setting a fill colour is the expensive call here, not filling — so
+  // every painter below sorts its pieces into a handful of shade buckets, builds
+  // one path per bucket, and pays for the colour once instead of once per tile.
+  // Same picture, a quarter of the cost.
+  const SHADES = 7;
+
+  // The bucket a piece falls in, and the colour that bucket paints. Quantising
+  // the jitter is what makes the batching possible at all, and at seven steps
+  // the banding is well under what a tile's own grout hides.
+  function shadeBucket(x, y) {
+    return Math.min(SHADES - 1, Math.floor(hash(x, y) * SHADES));
+  }
+
+  function shadeTable(base, amount) {
+    const out = [];
+    for (let i = 0; i < SHADES; i++) {
+      out.push(tint(base, ((i + 0.5) / SHADES - 0.5) * amount));
+    }
+    return out;
+  }
+
+  // Fill every rect in each bucket with that bucket's colour: one fillStyle and
+  // one fill per bucket rather than per piece.
+  function paintBuckets(ctx, rects, colours) {
+    for (let i = 0; i < colours.length; i++) {
+      const list = rects[i];
+      if (!list.length) continue;
+      ctx.fillStyle = colours[i];
+      ctx.beginPath();
+      for (let j = 0; j < list.length; j += 4) {
+        ctx.rect(list[j], list[j + 1], list[j + 2], list[j + 3]);
+      }
+      ctx.fill();
+    }
+  }
+
+  const emptyBuckets = () => Array.from({ length: SHADES }, () => []);
+
+  function tileFloor(ctx, d, base) {
+    const pitch = 20;
+    ctx.fillStyle = base;
+    ctx.fillRect(d.x, d.y, d.w, d.h);
+    const x0 = Math.floor(d.x / pitch) * pitch;
+    const y0 = Math.floor(d.y / pitch) * pitch;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(d.x, d.y, d.w, d.h);
+    ctx.clip();
+    // Each tile its own shade. A real floor is a batch of tiles that never quite
+    // matched, and this is the whole of why it reads as laid rather than printed.
+    const rects = emptyBuckets();
+    for (let y = y0; y < d.y + d.h; y += pitch) {
+      for (let x = x0; x < d.x + d.w; x += pitch) {
+        rects[shadeBucket(x, y)].push(x, y, pitch - 1, pitch - 1);
+      }
+    }
+    paintBuckets(ctx, rects, shadeTable(base, 0.085));
+    // A lit top-left edge on each one, which is what gives a tile an edge rather
+    // than a gap beside it. One colour, so one path for the lot.
+    ctx.fillStyle = 'rgba(255,255,255,0.055)';
+    ctx.beginPath();
+    for (let y = y0; y < d.y + d.h; y += pitch) {
+      for (let x = x0; x < d.x + d.w; x += pitch) {
+        ctx.rect(x, y, pitch - 1, 1);
+        ctx.rect(x, y, 1, pitch - 1);
+      }
+    }
+    ctx.fill();
+    // Grout: the gaps left between the tiles, darkened in one pass.
+    ctx.fillStyle = 'rgba(38,42,38,0.22)';
+    ctx.beginPath();
+    for (let y = y0; y < d.y + d.h; y += pitch) ctx.rect(d.x, y + pitch - 1, d.w, 1);
+    for (let x = x0; x < d.x + d.w; x += pitch) ctx.rect(x + pitch - 1, d.y, 1, d.h);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function boardFloor(ctx, d, base) {
+    const deep = 15;
+    ctx.fillStyle = base;
+    ctx.fillRect(d.x, d.y, d.w, d.h);
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(d.x, d.y, d.w, d.h);
+    ctx.clip();
+    const y0 = Math.floor(d.y / deep) * deep;
+    const rects = emptyBuckets();
+    const joints = [];
+    const light = [];
+    const dark = [];
+    for (let y = y0, row = 0; y < d.y + d.h; y += deep, row++) {
+      // Butt joints staggered by row, so the boards read as laid in courses
+      // rather than as a sheet with lines on it.
+      const stagger = (row % 3) * 46 + (row % 2) * 23;
+      for (let x = Math.floor((d.x - stagger) / 138) * 138 + stagger;
+        x < d.x + d.w; x += 138) {
+        rects[shadeBucket(x, y)].push(x, y, 138, deep - 1);
+        joints.push(x, y, 1, deep - 1);
+        // Grain: two streaks along the board, offset by where the board is.
+        light.push(x + 4, y + 3 + (hash(x, y) > 0.5 ? 1 : 0), 130, 1);
+        dark.push(x + 10, y + deep - 5, 118, 1);
+      }
+      joints.push(d.x, y + deep - 1, d.w, 1);           // the seam between courses
+    }
+    paintBuckets(ctx, rects, shadeTable(base, 0.085));
+    const run = (list, colour) => {
+      ctx.fillStyle = colour;
+      ctx.beginPath();
+      for (let i = 0; i < list.length; i += 4) ctx.rect(list[i], list[i + 1], list[i + 2], list[i + 3]);
+      ctx.fill();
+    };
+    run(light, 'rgba(255,222,170,0.10)');
+    run(dark, 'rgba(70,42,16,0.13)');
+    run(joints, 'rgba(52,30,11,0.35)');
+    ctx.restore();
+  }
+
+  function grassFloor(ctx, d, base) {
+    ctx.fillStyle = base;
+    ctx.fillRect(d.x, d.y, d.w, d.h);
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(d.x, d.y, d.w, d.h);
+    ctx.clip();
+    // Mown stripes. A school field is cut in passes and it is the single thing
+    // that stops a green rectangle reading as a green rectangle.
+    const band = 46;
+    ctx.fillStyle = 'rgba(255,255,255,0.045)';
+    ctx.beginPath();
+    for (let y = Math.floor(d.y / (band * 2)) * band * 2; y < d.y + d.h; y += band * 2) {
+      ctx.rect(d.x, y, d.w, band);
+    }
+    ctx.fill();
+    // ...and clumps, so the stripes are not the only thing happening. Two tones,
+    // so two paths.
+    const pale = [];
+    const deep = [];
+    for (let y = d.y; y < d.y + d.h; y += 17) {
+      for (let x = d.x + ((y / 17) % 2 ? 8 : 0); x < d.x + d.w; x += 21) {
+        const r = hash(x, y);
+        (r > 0.62 ? pale : deep).push(x + r * 6, y + r * 5, 6 + r * 5, 2);
+      }
+    }
+    for (const [list, colour] of [[pale, 'rgba(96,140,74,0.30)'], [deep, 'rgba(44,68,34,0.22)']]) {
+      ctx.fillStyle = colour;
+      ctx.beginPath();
+      for (let i = 0; i < list.length; i += 4) ctx.rect(list[i], list[i + 1], list[i + 2], list[i + 3]);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function parquetFloor(ctx, d, base) {
+    const blk = 22;
+    ctx.fillStyle = base;
+    ctx.fillRect(d.x, d.y, d.w, d.h);
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(d.x, d.y, d.w, d.h);
+    ctx.clip();
+    const x0 = Math.floor(d.x / blk) * blk;
+    const y0 = Math.floor(d.y / blk) * blk;
+    const rects = emptyBuckets();
+    const fingers = [];
+    for (let y = y0; y < d.y + d.h; y += blk) {
+      for (let x = x0; x < d.x + d.w; x += blk) {
+        // Alternating block direction: the fingers of a parquet floor, and the
+        // reason a gym floor reads as sprung wood rather than as orange lino.
+        const across = ((x / blk) + (y / blk)) % 2 === 0;
+        rects[shadeBucket(x, y)].push(x, y, blk - 1, blk - 1);
+        for (let i = 1; i < 4; i++) {
+          if (across) fingers.push(x, y + i * (blk / 4), blk - 1, 1);
+          else fingers.push(x + i * (blk / 4), y, 1, blk - 1);
+        }
+      }
+    }
+    paintBuckets(ctx, rects, shadeTable(base, 0.12));
+    ctx.fillStyle = 'rgba(110,72,30,0.22)';
+    ctx.beginPath();
+    for (let i = 0; i < fingers.length; i += 4) {
+      ctx.rect(fingers[i], fingers[i + 1], fingers[i + 2], fingers[i + 3]);
+    }
+    ctx.fill();
+    ctx.fillStyle = 'rgba(96,62,26,0.26)';
+    ctx.beginPath();
+    for (let y = y0; y < d.y + d.h; y += blk) ctx.rect(d.x, y + blk - 1, d.w, 1);
+    for (let x = x0; x < d.x + d.w; x += blk) ctx.rect(x + blk - 1, d.y, 1, d.h);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // Carpet, concrete, gravel: no courses, just a surface that is not one colour.
+  function mottleFloor(ctx, d, base, fleck, warm) {
+    ctx.fillStyle = base;
+    ctx.fillRect(d.x, d.y, d.w, d.h);
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(d.x, d.y, d.w, d.h);
+    ctx.clip();
+    const a = [];
+    const b = [];
+    for (let y = d.y; y < d.y + d.h; y += 9) {
+      for (let x = d.x + ((y / 9) % 2 ? 5 : 0); x < d.x + d.w; x += 11) {
+        const r = hash(x, y);
+        (r > 0.5 ? b : a).push(x + r * 4, y + r * 3, 2 + r * 3, 2);
+      }
+    }
+    for (const [list, colour] of [[a, fleck], [b, warm]]) {
+      ctx.fillStyle = colour;
+      ctx.beginPath();
+      for (let i = 0; i < list.length; i += 4) ctx.rect(list[i], list[i + 1], list[i + 2], list[i + 3]);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
   // ---------------------------------------------------------------- solids
   // The thickness trick: a dark base fills the whole collider, the lit top face
   // covers all but the bottom lip. The silhouette still equals the collider
@@ -11795,7 +12195,141 @@ __mod.art = (function () {
 
   // A gym bench, or the one bolted to a corridor wall: a plank, two ends, no
   // upholstery. Runs along its longer side whichever way the map drew it.
+  // A school desk, in wood.
+  //
+  // Same construction as before — a top, a seam where two are pushed together,
+  // paper on it, chairs tucked under the near edge — with the two things a slab
+  // of orange was missing: grain running along the top, and an edge. A desk top
+  // is a board with a lipped edge and a shadowed underside, and drawing those is
+  // most of what tells the eye it is a piece of furniture at a height rather than
+  // a rectangle painted on the floor.
+  function drawDeskWood(ctx, c) {
+    groundShadow(ctx, c, 9, 0.34);
+    const base = '#b9803f';
+    // The carcass, dark, so the lit top can sit proud of it.
+    fillRound(ctx, c.x, c.y, c.w, c.h, 4, '#7d5227');
+    // The top, lit from the top-left the way everything else in the room is.
+    const top = ctx.createLinearGradient(c.x, c.y, c.x + c.w * 0.35, c.y + c.h);
+    top.addColorStop(0, tint(base, 0.20));
+    top.addColorStop(0.45, base);
+    top.addColorStop(1, tint(base, -0.12));
+    ctx.fillStyle = top;
+    roundRect(ctx, c.x + 0.8, c.y + 0.8, c.w - 1.6, c.h - 3.4, 3.4);
+    ctx.fill();
+    // Grain, along the length, deterministic from where the desk stands.
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(c.x + 1, c.y + 1, c.w - 2, c.h - 4);
+    ctx.clip();
+    const along = c.w >= c.h;
+    const runs = Math.max(2, Math.round((along ? c.h : c.w) / 5));
+    for (let i = 0; i < runs; i++) {
+      const t = (i + 0.5) / runs;
+      const r = hash(Math.round(c.x + i * 13), Math.round(c.y + i * 7));
+      ctx.fillStyle = r > 0.5 ? 'rgba(255,226,178,0.13)' : 'rgba(96,58,22,0.15)';
+      if (along) ctx.fillRect(c.x + 2 + r * 6, c.y + t * c.h, c.w - 4 - r * 10, 1);
+      else ctx.fillRect(c.x + t * c.w, c.y + 2 + r * 6, 1, c.h - 4 - r * 10);
+    }
+    ctx.restore();
+    // The lipped front edge, and the shadow under it.
+    ctx.fillStyle = 'rgba(70,42,16,0.42)';
+    ctx.fillRect(c.x + 1, c.y + c.h - 4.2, c.w - 2, 1.4);
+    ctx.fillStyle = tint(base, 0.10);
+    roundRect(ctx, c.x + 0.8, c.y + c.h - 3.4, c.w - 1.6, 2.6, 1.2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,236,200,0.22)';
+    ctx.fillRect(c.x + 1.6, c.y + 0.8, c.w - 3.2, 0.9);
+
+    // The seam between two desks pushed together, which is how a classroom is
+    // actually laid out and what stops a pair reading as one slab.
+    if (c.w >= c.h) {
+      ctx.fillStyle = 'rgba(88,54,20,0.55)';
+      ctx.fillRect(c.x + c.w / 2 - 0.6, c.y + 2, 1.2, c.h - 6);
+      ctx.fillStyle = 'rgba(255,236,200,0.16)';
+      ctx.fillRect(c.x + c.w / 2 + 0.6, c.y + 2, 0.6, c.h - 6);
+    }
+
+    // Paper, and sometimes a book. Deterministic from the position, so the same
+    // desk carries the same clutter every time the level is drawn.
+    const r = hash(c.x + 11, c.y + 5);
+    if (r > 0.30) {
+      ctx.fillStyle = 'rgba(60,38,14,0.30)';
+      roundRect(ctx, c.x + 4.8, c.y + c.h * 0.30 + 1, 9, 7, 1);
+      ctx.fill();
+      fillRound(ctx, c.x + 4, c.y + c.h * 0.30, 9, 7, 1, PALETTE.paper);
+      ctx.fillStyle = 'rgba(90,80,70,0.40)';
+      ctx.fillRect(c.x + 5.5, c.y + c.h * 0.30 + 2, 6, 1);
+      ctx.fillRect(c.x + 5.5, c.y + c.h * 0.30 + 4, 4, 1);
+    }
+    if (r > 0.68 && c.w > 26) {
+      const spines = ['#c2543f', '#3f7f88', '#6f5a94'];
+      const bx = c.x + c.w - 14;
+      const by = c.y + c.h * 0.34;
+      ctx.fillStyle = 'rgba(60,38,14,0.30)';
+      roundRect(ctx, bx + 0.8, by + 1, 9, 6, 1);
+      ctx.fill();
+      fillRound(ctx, bx, by, 9, 6, 1, spines[Math.floor(r * 3) % 3]);
+      ctx.fillStyle = 'rgba(255,255,255,0.22)';
+      ctx.fillRect(bx, by, 9, 1.2);
+    }
+
+    // Chairs, tucked under the near edge. Drawn rather than placed: a chair is
+    // not something you collide with in a game where you walk over the floor of
+    // a classroom, and putting one in the tile grid would cost a tile each and
+    // wall the room in. Two to a desk, which is what a paired desk means.
+    const seats = c.w >= 34 ? 2 : 1;
+    for (let i = 0; i < seats; i++) {
+      const cx = c.x + c.w * ((i + 0.5) / seats);
+      ctx.fillStyle = 'rgba(16,22,20,0.24)';
+      roundRect(ctx, cx - 7, c.y + c.h + 2, 14, 8, 3);
+      ctx.fill();
+      fillRound(ctx, cx - 7, c.y + c.h - 1, 14, 9, 3, '#8a5a30');
+      const seat = ctx.createLinearGradient(0, c.y + c.h - 1, 0, c.y + c.h + 8);
+      seat.addColorStop(0, '#b07c46');
+      seat.addColorStop(1, '#8a5a30');
+      ctx.fillStyle = seat;
+      roundRect(ctx, cx - 6, c.y + c.h, 12, 5, 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,236,200,0.20)';
+      ctx.fillRect(cx - 5, c.y + c.h + 0.4, 10, 0.8);
+    }
+  }
+
+  // A corridor bench, in the same wood. Slatted, on steel legs, with the gap
+  // between the slats actually reading as a gap.
+  function drawBenchWood(ctx, c) {
+    const along = c.w >= c.h;
+    groundShadow(ctx, c, 8, 0.32);
+    const base = '#a97644';
+    fillRound(ctx, c.x, c.y, c.w, c.h, 3, '#6d4a2a');
+    const slats = 3;
+    for (let i = 0; i < slats; i++) {
+      const t = i / slats;
+      const g = ctx.createLinearGradient(
+        along ? 0 : c.x + c.w * t, along ? c.y + c.h * t : 0,
+        along ? 0 : c.x + c.w * (t + 1 / slats), along ? c.y + c.h * (t + 1 / slats) : 0);
+      g.addColorStop(0, tint(base, 0.22));
+      g.addColorStop(1, tint(base, -0.10));
+      ctx.fillStyle = g;
+      if (along) {
+        ctx.fillRect(c.x + 1.5, c.y + 1.5 + t * (c.h - 3), c.w - 3, (c.h - 3) / slats - 1.1);
+      } else {
+        ctx.fillRect(c.x + 1.5 + t * (c.w - 3), c.y + 1.5, (c.w - 3) / slats - 1.1, c.h - 3);
+      }
+    }
+    // Steel legs at the ends, and the shadow they cast under the seat.
+    ctx.fillStyle = '#4a5259';
+    if (along) {
+      ctx.fillRect(c.x + 3, c.y + c.h - 2, 5, 4);
+      ctx.fillRect(c.x + c.w - 8, c.y + c.h - 2, 5, 4);
+    } else {
+      ctx.fillRect(c.x + c.w - 2, c.y + 3, 4, 5);
+      ctx.fillRect(c.x + c.w - 2, c.y + c.h - 8, 4, 5);
+    }
+  }
+
   function drawBench(ctx, c) {
+    if (polish) return drawBenchWood(ctx, c);
     const along = c.w >= c.h;
     ctx.fillStyle = SHADOW;
     roundRect(ctx, c.x + 2, c.y + 6, c.w, c.h, 4);
@@ -11825,6 +12359,151 @@ __mod.art = (function () {
     }
   }
 
+  // A bank of school lockers, in steel.
+  //
+  // The old one had the right parts — a plinth, a top rail, vents, a handle, a
+  // seam down each door — and painted every one of them a flat colour, which is
+  // how you get a diagram of a locker. What makes this metal is that no face is
+  // one colour: the carcass runs from a lit top edge down to a dark foot, each
+  // door carries a brushed gradient across it, and the seam between two doors is
+  // a dark line with a lit one beside it, because that is what a folded steel
+  // edge does to a corridor light.
+  //
+  // Every door also gets its own shade off `hash`, so a nine-tile bank is nine
+  // lockers sprayed in the same batch rather than one long box.
+  function drawLockersMetal(ctx, c) {
+    const along = c.w >= c.h;
+    groundShadow(ctx, c, along ? 8 : 6, 0.38);
+
+    // The carcass. The gradient runs across the depth of the bank — from the top
+    // edge that faces the ceiling lights to the foot that faces the floor.
+    const body = along
+      ? ctx.createLinearGradient(0, c.y, 0, c.y + c.h)
+      : ctx.createLinearGradient(c.x, 0, c.x + c.w, 0);
+    body.addColorStop(0, '#6f929b');
+    body.addColorStop(0.22, '#4d6f78');
+    body.addColorStop(1, '#33484f');
+    ctx.fillStyle = body;
+    roundRect(ctx, c.x, c.y, c.w, c.h, 2.5);
+    ctx.fill();
+
+    const span = along ? c.w : c.h;
+    const doors = Math.max(1, Math.round(span / 20));
+    const pitch = span / doors;
+    for (let i = 0; i < doors; i++) {
+      const a = (along ? c.x : c.y) + i * pitch;
+      const len = pitch;
+      const seed = Math.round(c.x + c.y + i * 37);
+      const face = tint('#577983', shade(seed, i * 11, 0.10));
+      if (along) {
+        const top = c.y + 4.2;
+        const deep = c.h - 8.4;
+        if (deep <= 1 || len <= 3) continue;
+        // The door itself: brushed down its height, lightest a third of the way
+        // in, which is where a steel pressing catches a strip light.
+        const g = ctx.createLinearGradient(0, top, 0, top + deep);
+        g.addColorStop(0, tint(face, 0.22));
+        g.addColorStop(0.34, face);
+        g.addColorStop(1, tint(face, -0.24));
+        ctx.fillStyle = g;
+        roundRect(ctx, a + 1.2, top, len - 2.4, deep, 1.4);
+        ctx.fill();
+        // Vents: louvre slots pressed into the top of the door, each a dark slot
+        // with a lit lip under it.
+        for (let v = 0; v < 3; v++) {
+          const y = top + 1.8 + v * 1.9;
+          if (y > top + deep - 3) break;
+          ctx.fillStyle = 'rgba(16,26,30,0.40)';
+          ctx.fillRect(a + 3.4, y, Math.max(1, len - 6.8), 0.9);
+          ctx.fillStyle = 'rgba(226,240,244,0.12)';
+          ctx.fillRect(a + 3.4, y + 0.9, Math.max(1, len - 6.8), 0.4);
+        }
+        // The handle: a recessed latch plate with a lever across it.
+        const hx = a + len - 5.2;
+        const hy = top + deep * 0.52;
+        ctx.fillStyle = 'rgba(10,16,20,0.55)';
+        roundRect(ctx, hx - 0.6, hy - 2.6, 3.4, 5.2, 1);
+        ctx.fill();
+        ctx.fillStyle = '#c9d8dc';
+        ctx.fillRect(hx + 0.3, hy - 1.9, 1.5, 3.8);
+        ctx.fillStyle = 'rgba(255,255,255,0.55)';
+        ctx.fillRect(hx + 0.3, hy - 1.9, 0.7, 3.8);
+        // A number plate on some of them, which is what says school rather than
+        // gym changing room.
+        if (hash(seed, 3) > 0.45 && len > 13) {
+          ctx.fillStyle = 'rgba(232,240,238,0.30)';
+          ctx.fillRect(a + 3.6, top + deep - 2.6, 4.2, 1.6);
+        }
+        // The gap to the next door: dark, with the lit edge of the next pressing
+        // beside it.
+        ctx.fillStyle = 'rgba(14,22,26,0.48)';
+        ctx.fillRect(a + len - 1.2, top, 1.2, deep);
+        ctx.fillStyle = 'rgba(210,230,236,0.20)';
+        ctx.fillRect(a + len, top, 0.7, deep);
+      } else {
+        const left = c.x + 4.2;
+        const deep = c.w - 8.4;
+        if (deep <= 1 || len <= 3) continue;
+        const g = ctx.createLinearGradient(left, 0, left + deep, 0);
+        g.addColorStop(0, tint(face, 0.22));
+        g.addColorStop(0.34, face);
+        g.addColorStop(1, tint(face, -0.24));
+        ctx.fillStyle = g;
+        roundRect(ctx, left, a + 1.2, deep, len - 2.4, 1.4);
+        ctx.fill();
+        for (let v = 0; v < 3; v++) {
+          const x = left + 1.8 + v * 1.9;
+          if (x > left + deep - 3) break;
+          ctx.fillStyle = 'rgba(16,26,30,0.40)';
+          ctx.fillRect(x, a + 3.4, 0.9, Math.max(1, len - 6.8));
+          ctx.fillStyle = 'rgba(226,240,244,0.12)';
+          ctx.fillRect(x + 0.9, a + 3.4, 0.4, Math.max(1, len - 6.8));
+        }
+        const hy2 = a + len - 5.2;
+        const hx2 = left + deep * 0.52;
+        ctx.fillStyle = 'rgba(10,16,20,0.55)';
+        roundRect(ctx, hx2 - 2.6, hy2 - 0.6, 5.2, 3.4, 1);
+        ctx.fill();
+        ctx.fillStyle = '#c9d8dc';
+        ctx.fillRect(hx2 - 1.9, hy2 + 0.3, 3.8, 1.5);
+        ctx.fillStyle = 'rgba(255,255,255,0.55)';
+        ctx.fillRect(hx2 - 1.9, hy2 + 0.3, 3.8, 0.7);
+        if (hash(seed, 3) > 0.45 && len > 13) {
+          ctx.fillStyle = 'rgba(232,240,238,0.30)';
+          ctx.fillRect(left + deep - 2.6, a + 3.6, 1.6, 4.2);
+        }
+        ctx.fillStyle = 'rgba(14,22,26,0.48)';
+        ctx.fillRect(left, a + len - 1.2, deep, 1.2);
+        ctx.fillStyle = 'rgba(210,230,236,0.20)';
+        ctx.fillRect(left, a + len, deep, 0.7);
+      }
+    }
+
+    // The top rail along the back and the plinth at the foot, last so they run
+    // unbroken across every door rather than being interrupted by them.
+    if (along) {
+      const rail = ctx.createLinearGradient(0, c.y, 0, c.y + 4.2);
+      rail.addColorStop(0, '#66888f');
+      rail.addColorStop(1, '#46666f');
+      ctx.fillStyle = rail;
+      ctx.fillRect(c.x, c.y + 0.6, c.w, 3.6);
+      ctx.fillStyle = '#2a3d43';
+      ctx.fillRect(c.x, c.y + c.h - 4.2, c.w, 4.2);
+      ctx.fillStyle = 'rgba(180,206,214,0.16)';
+      ctx.fillRect(c.x, c.y + c.h - 4.2, c.w, 0.8);
+    } else {
+      const rail = ctx.createLinearGradient(c.x, 0, c.x + 4.2, 0);
+      rail.addColorStop(0, '#66888f');
+      rail.addColorStop(1, '#46666f');
+      ctx.fillStyle = rail;
+      ctx.fillRect(c.x + 0.6, c.y, 3.6, c.h);
+      ctx.fillStyle = '#2a3d43';
+      ctx.fillRect(c.x + c.w - 4.2, c.y, 4.2, c.h);
+      ctx.fillStyle = 'rgba(180,206,214,0.16)';
+      ctx.fillRect(c.x + c.w - 4.2, c.y, 0.8, c.h);
+    }
+  }
+
   // A bank of lockers, installed against a wall rather than parked in front of
   // one.
   //
@@ -11834,6 +12513,7 @@ __mod.art = (function () {
   // floor, and a hairline of daylight down each door seam. None of that is
   // expensive and all of it is the difference between furniture and a rectangle.
   function drawLockers(ctx, c) {
+    if (polish) return drawLockersMetal(ctx, c);
     const along = c.w >= c.h;
     // Contact shadow under the front face only — a bank of lockers is bolted to
     // the wall behind it and there is nothing for a shadow to fall on that side.
@@ -11897,6 +12577,7 @@ __mod.art = (function () {
   // plants growing out of the desks is the sort of thing you only notice once you
   // look at the whole map at once. What sits on a school desk is paper.
   function drawDesk(ctx, c) {
+    if (polish) return drawDeskWood(ctx, c);
     ctx.fillStyle = SHADOW;
     roundRect(ctx, c.x + 3, c.y + 7, c.w, c.h, 4);
     ctx.fill();
@@ -12366,6 +13047,30 @@ __mod.art = (function () {
   // An interior wall: same material as the room's shell, with a lit top edge and
   // a soft shadow so it reads as standing up out of the floor.
   function drawPartition(ctx, c) {
+    if (polish) {
+      wallFoot(ctx, c);
+      const g = c.w > c.h
+        ? ctx.createLinearGradient(0, c.y, 0, c.y + c.h)
+        : ctx.createLinearGradient(c.x, 0, c.x + c.w, 0);
+      g.addColorStop(0, T.lip);
+      g.addColorStop(0.34, T.wall);
+      g.addColorStop(1, T.shade);
+      ctx.fillStyle = g;
+      roundRect(ctx, c.x, c.y, c.w, c.h, 3);
+      ctx.fill();
+      ctx.fillStyle = T.skirt;                                 // skirting, both faces
+      if (c.w > c.h) {
+        ctx.fillRect(c.x, c.y + c.h - 2.5, c.w, 2.5);
+        ctx.fillRect(c.x, c.y, c.w, 2);
+      } else {
+        ctx.fillRect(c.x, c.y, 2, c.h);
+        ctx.fillRect(c.x + c.w - 2, c.y, 2, c.h);
+      }
+      ctx.fillStyle = 'rgba(255,255,255,0.16)';
+      if (c.w > c.h) ctx.fillRect(c.x, c.y + c.h - 2.5, c.w, 0.8);
+      else ctx.fillRect(c.x + c.w - 2, c.y, 0.8, c.h);
+      return;
+    }
     ctx.fillStyle = 'rgba(30,16,26,0.34)';
     roundRect(ctx, c.x + 3, c.y + 6, c.w, c.h, 3);
     ctx.fill();
@@ -12394,6 +13099,7 @@ __mod.art = (function () {
   // the reference floorplans this is what makes a gap read as a way through
   // rather than as a hole where a wall should be.
   function drawDoorway(ctx, door) {
+    if (polish) return drawDoorwayLeaf(ctx, door);
     const horizontal = door.w > door.h;
     ctx.save();
     ctx.globalAlpha = 0.85;
@@ -12430,6 +13136,7 @@ __mod.art = (function () {
   // drawn as its own block: a dark base, a lit top edge, and skirting down the
   // faces that look into a room.
   function drawWallSlab(ctx, c) {
+    if (polish) return wallSlabLit(ctx, c);
     ctx.fillStyle = 'rgba(24,12,20,0.38)';
     roundRect(ctx, c.x + 2, c.y + 5, c.w, c.h, 2);
     ctx.fill();
@@ -12438,6 +13145,37 @@ __mod.art = (function () {
     fillRound(ctx, c.x, c.y, c.w, Math.min(4, c.h * 0.35), 1.5, T.lip);
     ctx.fillStyle = T.skirt;
     ctx.fillRect(c.x, c.y + c.h - 2.5, c.w, 2.5);
+  }
+
+  // The same wall with height in it.
+  //
+  // A wall seen from above is a band, and a band of one colour is a line on a
+  // plan. What makes it a wall is that the top of it catches the light, the face
+  // below it falls away, there is a skirting board where it meets the floor, and
+  // the floor darkens for a few units out from that. All four are here.
+  function wallSlabLit(ctx, c) {
+    wallFoot(ctx, c);
+    const g = ctx.createLinearGradient(0, c.y, 0, c.y + c.h);
+    g.addColorStop(0, T.lip);
+    g.addColorStop(0.30, T.wall);
+    g.addColorStop(1, T.shade);
+    ctx.fillStyle = g;
+    roundRect(ctx, c.x, c.y, c.w, c.h, 2);
+    ctx.fill();
+    // The rendered coat: fine vertical breaks so a long run is not one flat
+    // sweep of paint.
+    ctx.fillStyle = 'rgba(255,255,255,0.030)';
+    for (let x = Math.floor(c.x / 26) * 26; x < c.x + c.w; x += 26) {
+      if (x >= c.x) ctx.fillRect(x, c.y + 1, 1, c.h - 2);
+    }
+    // The lit cap along the top edge...
+    ctx.fillStyle = tint(T.lip, 0.16);
+    ctx.fillRect(c.x, c.y, c.w, 1.6);
+    // ...and the skirting, with its own highlight, at the bottom.
+    ctx.fillStyle = T.skirt;
+    ctx.fillRect(c.x, c.y + c.h - 3, c.w, 3);
+    ctx.fillStyle = 'rgba(255,255,255,0.20)';
+    ctx.fillRect(c.x, c.y + c.h - 3, c.w, 0.9);
   }
 
   // A fence: posts and two rails, drawn along whichever way the run goes. It
@@ -12468,9 +13206,142 @@ __mod.art = (function () {
     }
   }
 
+  // A school window: a frame with a sill, glass with a sky in it, and a transom.
+  //
+  // The flat pale-blue rectangle it replaces was the one place in the building
+  // that gave nothing back. Glass at night is the darkest thing on the wall with
+  // the brightest edge — a cold sky through it, a highlight running diagonally
+  // across the pane, and a painted timber frame round the lot. The moonlight it
+  // spills on the floor is unchanged; that part always worked.
+  function drawWindowGlass(ctx, c) {
+    const vertical = c.h > c.w;
+    // The frame, and the sill under it on the inward face.
+    fillRound(ctx, c.x, c.y, c.w, c.h, 2, T.shade);
+    ctx.fillStyle = T.skirt;
+    if (vertical) ctx.fillRect(c.x + c.w - 2.4, c.y, 2.4, c.h);
+    else ctx.fillRect(c.x, c.y + c.h - 2.4, c.w, 2.4);
+
+    // The glass. Dark at the top where it looks at the sky, lighter towards the
+    // sill where the room's own light comes back off it.
+    const g = vertical
+      ? ctx.createLinearGradient(c.x, 0, c.x + c.w, 0)
+      : ctx.createLinearGradient(0, c.y, 0, c.y + c.h);
+    g.addColorStop(0, '#2c4560');
+    g.addColorStop(0.55, '#41637f');
+    g.addColorStop(1, '#7f9db4');
+    ctx.fillStyle = g;
+    roundRect(ctx, c.x + 2, c.y + 2, c.w - 4, c.h - 4.4, 1.2);
+    ctx.fill();
+
+    // The streak of sky across it. Clipped to the pane, at a slant, which is
+    // what says glass rather than slate.
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(c.x + 2, c.y + 2, c.w - 4, c.h - 4.4);
+    ctx.clip();
+    ctx.fillStyle = 'rgba(206,230,255,0.20)';
+    const len = vertical ? c.h : c.w;
+    for (let d = -len; d < len * 2; d += 26) {
+      ctx.save();
+      ctx.translate(c.x + (vertical ? 0 : d), c.y + (vertical ? d : 0));
+      ctx.rotate(-0.5);
+      ctx.fillRect(0, 0, vertical ? c.w * 2 : 5, vertical ? 5 : c.h * 2);
+      ctx.restore();
+    }
+    ctx.restore();
+
+    // Glazing bars, and the transom across the middle of the run.
+    ctx.strokeStyle = 'rgba(232,240,248,0.42)';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    const bars = Math.max(1, Math.round((vertical ? c.h : c.w) / 34));
+    for (let i = 1; i < bars; i++) {
+      if (vertical) {
+        const y = c.y + (c.h / bars) * i;
+        ctx.moveTo(c.x + 1, y);
+        ctx.lineTo(c.x + c.w - 1, y);
+      } else {
+        const x = c.x + (c.w / bars) * i;
+        ctx.moveTo(x, c.y + 1);
+        ctx.lineTo(x, c.y + c.h - 1);
+      }
+    }
+    ctx.stroke();
+    // A catch on the middle bar: the one piece of ironmongery you can see from
+    // here, and the reason it reads as a window that opens.
+    ctx.fillStyle = '#b9c6cf';
+    if (vertical) ctx.fillRect(c.x + c.w * 0.5 - 0.9, c.y + c.h * 0.5 - 2.4, 1.8, 4.8);
+    else ctx.fillRect(c.x + c.w * 0.5 - 2.4, c.y + c.h * 0.5 - 0.9, 4.8, 1.8);
+
+    // A soft pool of moonlight spilling inward.
+    const cx = c.x + c.w / 2;
+    const cy = c.y + c.h / 2;
+    const reach = Math.max(c.w, c.h) * 1.5 + 40;
+    const pool = ctx.createRadialGradient(cx, cy, 4, cx, cy, reach);
+    pool.addColorStop(0, `rgba(${T.light},0.20)`);
+    pool.addColorStop(1, `rgba(${T.light},0)`);
+    ctx.fillStyle = pool;
+    ctx.beginPath();
+    ctx.arc(cx, cy, reach, 0, TAU);
+    ctx.fill();
+  }
+
+  // A doorway with a door in it. Same threshold and jambs as before, plus the
+  // two things section 12 asks for by name: a leaf you can see is a door, and a
+  // handle on it.
+  function drawDoorwayLeaf(ctx, door) {
+    const horizontal = door.w > door.h;
+    ctx.save();
+    ctx.globalAlpha = 0.85;
+    fillRound(ctx, door.x, door.y, door.w, door.h, 2, T.shade);
+    ctx.globalAlpha = 1;
+    // Threshold board.
+    fillRound(ctx, door.x + 1, door.y + 1, door.w - 2, door.h - 2, 1.5, '#8a6a44');
+    ctx.strokeStyle = 'rgba(255,232,190,0.22)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    if (horizontal) {
+      ctx.moveTo(door.x + 3, door.y + door.h / 2);
+      ctx.lineTo(door.x + door.w - 3, door.y + door.h / 2);
+    } else {
+      ctx.moveTo(door.x + door.w / 2, door.y + 3);
+      ctx.lineTo(door.x + door.w / 2, door.y + door.h - 3);
+    }
+    ctx.stroke();
+
+    // The leaf, standing open against the jamb it is hinged on — which is how
+    // every internal door in a school actually is at night, and how the player
+    // gets to walk through the opening the map says is open.
+    const leaf = 4.2;
+    const g = horizontal
+      ? ctx.createLinearGradient(0, door.y, 0, door.y + leaf)
+      : ctx.createLinearGradient(door.x, 0, door.x + leaf, 0);
+    g.addColorStop(0, '#9d7a4e');
+    g.addColorStop(1, '#6d5133');
+    ctx.fillStyle = g;
+    if (horizontal) ctx.fillRect(door.x + 1, door.y - leaf + 1, door.w * 0.46, leaf);
+    else ctx.fillRect(door.x - leaf + 1, door.y + 1, leaf, door.h * 0.46);
+    // ...and the handle on the swinging edge.
+    ctx.fillStyle = '#cfd8dc';
+    if (horizontal) ctx.fillRect(door.x + door.w * 0.42, door.y - leaf + 1.4, 3.4, 1.5);
+    else ctx.fillRect(door.x - leaf + 1.4, door.y + door.h * 0.42, 1.5, 3.4);
+
+    // Jambs at the open ends, so the wall reads as stopping rather than fading.
+    ctx.fillStyle = T.lip;
+    if (horizontal) {
+      ctx.fillRect(door.x - 2, door.y, 3, door.h);
+      ctx.fillRect(door.x + door.w - 1, door.y, 3, door.h);
+    } else {
+      ctx.fillRect(door.x, door.y - 2, door.w, 3);
+      ctx.fillRect(door.x, door.y + door.h - 1, door.w, 3);
+    }
+    ctx.restore();
+  }
+
   // A window: a lit pane in the wall, and the light it throws on the floor. On a
   // floorplan these are what tell you which side of the building you are on.
   function drawWindowPane(ctx, c) {
+    if (polish) return drawWindowGlass(ctx, c);
     const vertical = c.h > c.w;
     fillRound(ctx, c.x, c.y, c.w, c.h, 2, T.shade);
     fillRound(ctx, c.x + 2, c.y + 2, c.w - 4, c.h - 4, 1.5, '#cfe6ff');
@@ -12534,6 +13405,19 @@ __mod.art = (function () {
 
   function drawFloorPatch(ctx, d) {
     const f = FLOORS[d.tag] || FLOORS.tiles;
+    // The school lays its floors rather than ruling lines over a colour. Same
+    // rectangles, same tags, same palette: what changes is that tile has grout
+    // and a batch tone, boards have butt joints and grain, and the field is mown.
+    if (polish) {
+      if (d.tag === 'tiles' || d.tag === 'paving') return tileFloor(ctx, d, f.base);
+      if (d.tag === 'boards') return boardFloor(ctx, d, f.base);
+      if (d.tag === 'parquet') return parquetFloor(ctx, d, f.base);
+      if (d.tag === 'grass') return grassFloor(ctx, d, f.base);
+      if (d.tag === 'carpet') return mottleFloor(ctx, d, f.base, 'rgba(52,50,38,0.30)', 'rgba(150,146,120,0.16)');
+      if (d.tag === 'concrete' || d.tag === 'gravel' || d.tag === 'tarmac') {
+        return mottleFloor(ctx, d, f.base, 'rgba(34,32,28,0.26)', 'rgba(190,186,176,0.12)');
+      }
+    }
     ctx.fillStyle = f.base;
     ctx.fillRect(d.x, d.y, d.w, d.h);
     if (f.pitch) {
@@ -12862,8 +13746,116 @@ __mod.art = (function () {
     }
   }
 
+  // The school after hours, baked in.
+  //
+  // Darkness with holes in it, not light added on top. The first draft added
+  // pools in `lighter` and every place two fittings overlapped went white — an
+  // additive light is unbounded, and a corridor has a light every few tiles. So
+  // this builds the *dark* as its own layer, punches the lit patches out of it
+  // with `destination-out`, and lays the result over the room once. Nothing can
+  // blow out, because nothing is ever added: the brightest the floor can get is
+  // the colour it already was.
+  //
+  // What that buys is the thing the brief actually asks for — somewhere dark. A
+  // room with no fitting in it gets no hole punched in the layer and stays down,
+  // so the far end of a corridor and the middle of the field are genuinely
+  // gloomier than the stretch you are standing in. That is a fact about the
+  // building rather than a filter over the picture.
+  //
+  // The wash is deliberately gentle. Everything a player has to see — the loot,
+  // the cabinet they are about to open, the man asleep in the chair — is drawn
+  // live on top of this cache and is not dimmed by it at all; what dims is the
+  // architecture behind them, which is the contrast that makes them readable. A
+  // heavier wash looks better in a screenshot and plays worse.
+  function paintSchoolNight(ctx, level) {
+    // Built at half size and blown back up. Every edge in this layer is a soft
+    // gradient, so half the pixels are indistinguishable from all of them — and
+    // on the biggest school this is the single most expensive thing in the bake,
+    // so a quarter of the fill area is the difference between a level that loads
+    // and a level that hitches.
+    const SCALE = 0.5;
+    const mask = document.createElement('canvas');
+    mask.width = Math.ceil(W * SCALE);
+    mask.height = Math.ceil(H * SCALE);
+    const m = mask.getContext('2d');
+    if (!m) return;
+    m.scale(SCALE, SCALE);
+    m.fillStyle = '#0b1a24';
+    m.fillRect(0, 0, W, H);
+
+    // Punch a hole. `reach` is where the light has died away entirely; the middle
+    // is cleared completely, so the floor directly under a fitting is exactly the
+    // colour it was painted.
+    m.globalCompositeOperation = 'destination-out';
+    const lit = (cx, cy, reach, core = 0.30) => {
+      const g = m.createRadialGradient(cx, cy, reach * core, cx, cy, reach);
+      g.addColorStop(0, 'rgba(0,0,0,1)');
+      g.addColorStop(0.55, 'rgba(0,0,0,0.55)');
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      m.fillStyle = g;
+      m.beginPath();
+      m.arc(cx, cy, reach, 0, TAU);
+      m.fill();
+    };
+
+    for (const d of level.decor || []) {
+      const cx = d.x + d.w / 2;
+      const cy = d.y + d.h / 2;
+      if (d.kind === 'ceiling') {
+        // A strip light throws further along itself than across it, so a fitting
+        // in a corridor lights the corridor rather than a circle of it.
+        m.save();
+        m.translate(cx, cy);
+        m.scale(1.7, 1);
+        lit(0, 0, Math.max(d.w, d.h) * 1.15);
+        m.restore();
+      } else if (d.kind === 'lamp') {
+        lit(cx, cy, 66);
+      } else if (d.kind === 'desklamp') {
+        lit(cx, cy, 52);
+      } else if (d.kind === 'floor' && (d.tag === 'boards' || d.tag === 'parquet')) {
+        // A room the map has bothered to floor is a room in use, and a classroom
+        // with its lights off is a black rectangle you cannot plan a route
+        // through. Lift it most of the way — not all — so it reads as unlit but
+        // legible, and the corridor is still visibly the brighter place.
+        m.globalCompositeOperation = 'destination-out';
+        m.fillStyle = 'rgba(0,0,0,0.30)';
+        m.fillRect(d.x, d.y, d.w, d.h);
+      }
+    }
+
+    // The moon through the glass, falling *into* the building.
+    for (const c of level.colliders) {
+      if (!(c.type === 'wall' && c.window)) continue;
+      const cx = c.x + c.w / 2;
+      const cy = c.y + c.h / 2;
+      const vertical = c.h > c.w;
+      m.save();
+      m.translate(cx + (vertical ? (cx < W / 2 ? 20 : -20) : 0),
+        cy + (vertical ? 0 : (cy < H / 2 ? 20 : -20)));
+      m.scale(vertical ? 1 : 1.5, vertical ? 1.5 : 1);
+      lit(0, 0, Math.max(40, (vertical ? c.h : c.w) * 0.6), 0.12);
+      m.restore();
+    }
+
+    // ...and the sign over the way out, which is the one light in a school that
+    // is never switched off and the one the player most wants to find.
+    if (level.exit) {
+      lit(level.exit.x + level.exit.w / 2, level.exit.y + level.exit.h / 2, 58);
+    }
+
+    ctx.save();
+    ctx.globalAlpha = 0.52;
+    ctx.drawImage(mask, 0, 0, W, H);
+    ctx.restore();
+  }
+
   function paintStaticRoom(ctx, level) {
     T = THEMES[level.theme] || THEMES.bedroom;
+    // The school's finish, and only the school's. Everything gated on this is
+    // baked into the cache below, so the other ten locations paint exactly the
+    // pixels they painted before and pay nothing for the branch.
+    polish = level.location === 'School';
     W = level.width;
     H = level.height;
     lampPositions.length = 0;
@@ -12915,6 +13907,9 @@ __mod.art = (function () {
     // Whatever this level's person is asleep on — a bed, a couch, an armchair —
     // or nothing, when they are at a desk that is drawn live each frame.
     drawWatcherFurniture(ctx, level, watcherConfig(level.watcher.kind).pose || 'bed');
+
+    // The lights, and everything they do not reach.
+    if (polish) paintSchoolNight(ctx, level);
 
     // The vignette is sized to the map, so a wide floorplan is not darkened at
     // its ends the way a tall one is at its corners.
@@ -14666,7 +15661,7 @@ __mod.render = (function () {
   // stays smooth on any refresh rate.
   const { TUNING } = __mod.tuning;
   const { sleepStage, rarityOf, isBigScore, watcherConfig, gaitBlend, gaitOf, hash } = __mod.rules;
-  const { drawFigure, THIEF_LOOK, CARETAKER_LOOK } = __mod.figure;
+  const { drawFigure, THIEF_LOOK, CARETAKER_LOOK, SCHOOL_THIEF_LOOK, SCHOOL_CARETAKER_LOOK } = __mod.figure;
   const { playerOf } = __mod.sim;
   const { paintStaticRoom, drawSleeper, drawGuard, drawSlumped, drawThief, drawCaretakerWalking, drawGrabbedItem, roundRect, ITEM_ART, lampPositions, drawHideLabel, deskScreen } = __mod.art;
 
@@ -14681,7 +15676,10 @@ __mod.render = (function () {
 
   function createRenderer(canvas, options = {}) {
     const ctx = canvas.getContext('2d');
-    const debug = !!options.debug;
+    // The collision boxes and the readout. Mutable so a debug session can turn
+    // the overlay off and look at the room itself without losing the hooks that
+    // put it there; the release build never sets it in the first place.
+    let debug = !!options.debug;
     let scale = 1;
     let quality = TUNING.quality.high;
 
@@ -15245,7 +16243,10 @@ __mod.render = (function () {
         drive: drive(w) + (sim.rules.reacts
           ? (w.state === 'following' ? 0.20 : w.state === 'investigating' ? 0.07 : 0) : 0)
       };
-      if (sim.rules.figures) drawFigure(ctx, wx, wy, stance, CARETAKER_LOOK);
+      if (sim.rules.figures) {
+        drawFigure(ctx, wx, wy, stance,
+          sim.rules.reacts ? SCHOOL_CARETAKER_LOOK : CARETAKER_LOOK);
+      }
       else drawCaretakerWalking(ctx, wx, wy, stance);
     }
 
@@ -15312,6 +16313,8 @@ __mod.render = (function () {
       // player instead of sliding in from wherever the last level ended.
       snapCamera(level, x, y) { centreOn(level, x, y); },
       get camera() { return camera; },
+      set debug(on) { debug = !!on; },
+      get debug() { return debug; },
 
       draw(sim, alpha, time, pops, stats, sparks = [], flash = 0, dt = 1 / 60, fx = null) {
         ensureRoom(sim.level);
@@ -15513,7 +16516,8 @@ __mod.render = (function () {
             ctx.clip();
           }
           hand = sim.rules.figures
-            ? drawFigure(ctx, px, py, stance, THIEF_LOOK)
+            ? drawFigure(ctx, px, py, stance,
+              sim.rules.reacts ? SCHOOL_THIEF_LOOK : THIEF_LOOK)
             : drawThief(ctx, px, py, stance);
           if (mouth) ctx.restore();
         }
@@ -16470,6 +17474,11 @@ __mod.main = (function () {
     if (debug) {
       window.__dwhBoot = { machine, saveStore, startLevel, LEVELS, TUNING, SLEEP_LABELS, levelTotals };
       Object.defineProperty(window.__dwhBoot, 'sim', { get: () => sim });
+      // The overlay, so a browser check can look at the room rather than at a
+      // lattice of collision boxes drawn over it.
+      Object.defineProperty(window.__dwhBoot, 'overlay', {
+        get: () => renderer.debug, set: (on) => { renderer.debug = on; }
+      });
       // The camera is presentation, so it lives in the renderer — exposed here so
       // a test can assert it stays inside the map.
       Object.defineProperty(window.__dwhBoot, 'camera', { get: () => renderer.camera });

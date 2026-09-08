@@ -5,7 +5,9 @@ import { TUNING } from './tuning.js';
 import {
   sleepStage, rarityOf, isBigScore, watcherConfig, gaitBlend, gaitOf, hash
 } from './rules.js';
-import { drawFigure, THIEF_LOOK, CARETAKER_LOOK } from './figure.js';
+import {
+  drawFigure, THIEF_LOOK, CARETAKER_LOOK, SCHOOL_THIEF_LOOK, SCHOOL_CARETAKER_LOOK
+} from './figure.js';
 import { playerOf } from './sim.js';
 import {
   paintStaticRoom, drawSleeper, drawGuard, drawSlumped, drawThief, drawCaretakerWalking,
@@ -24,7 +26,10 @@ const SEATED_SHARE = 0.74;
 
 export function createRenderer(canvas, options = {}) {
   const ctx = canvas.getContext('2d');
-  const debug = !!options.debug;
+  // The collision boxes and the readout. Mutable so a debug session can turn
+  // the overlay off and look at the room itself without losing the hooks that
+  // put it there; the release build never sets it in the first place.
+  let debug = !!options.debug;
   let scale = 1;
   let quality = TUNING.quality.high;
 
@@ -588,7 +593,10 @@ export function createRenderer(canvas, options = {}) {
       drive: drive(w) + (sim.rules.reacts
         ? (w.state === 'following' ? 0.20 : w.state === 'investigating' ? 0.07 : 0) : 0)
     };
-    if (sim.rules.figures) drawFigure(ctx, wx, wy, stance, CARETAKER_LOOK);
+    if (sim.rules.figures) {
+      drawFigure(ctx, wx, wy, stance,
+        sim.rules.reacts ? SCHOOL_CARETAKER_LOOK : CARETAKER_LOOK);
+    }
     else drawCaretakerWalking(ctx, wx, wy, stance);
   }
 
@@ -655,6 +663,8 @@ export function createRenderer(canvas, options = {}) {
     // player instead of sliding in from wherever the last level ended.
     snapCamera(level, x, y) { centreOn(level, x, y); },
     get camera() { return camera; },
+    set debug(on) { debug = !!on; },
+    get debug() { return debug; },
 
     draw(sim, alpha, time, pops, stats, sparks = [], flash = 0, dt = 1 / 60, fx = null) {
       ensureRoom(sim.level);
@@ -856,7 +866,8 @@ export function createRenderer(canvas, options = {}) {
           ctx.clip();
         }
         hand = sim.rules.figures
-          ? drawFigure(ctx, px, py, stance, THIEF_LOOK)
+          ? drawFigure(ctx, px, py, stance,
+            sim.rules.reacts ? SCHOOL_THIEF_LOOK : THIEF_LOOK)
           : drawThief(ctx, px, py, stance);
         if (mouth) ctx.restore();
       }

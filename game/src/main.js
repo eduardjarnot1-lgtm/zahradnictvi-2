@@ -918,6 +918,11 @@ export function boot() {
   if (debug) {
     window.__dwhBoot = { machine, saveStore, startLevel, LEVELS, TUNING, SLEEP_LABELS, levelTotals };
     Object.defineProperty(window.__dwhBoot, 'sim', { get: () => sim });
+    // The overlay, so a browser check can look at the room rather than at a
+    // lattice of collision boxes drawn over it.
+    Object.defineProperty(window.__dwhBoot, 'overlay', {
+      get: () => renderer.debug, set: (on) => { renderer.debug = on; }
+    });
     // The camera is presentation, so it lives in the renderer — exposed here so
     // a test can assert it stays inside the map.
     Object.defineProperty(window.__dwhBoot, 'camera', { get: () => renderer.camera });

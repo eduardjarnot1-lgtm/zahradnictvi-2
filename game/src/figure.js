@@ -79,6 +79,25 @@ export const CARETAKER_LOOK = {
   build: 1.12
 };
 
+// --- the school's finish -----------------------------------------------------
+//
+// The same two people with one field added, and every extra pass in this file
+// is gated on it. `lit` is the colour of the light in the room they are
+// standing in — the school's cool strip lighting — and what it buys is the
+// three things a flat cartoon figure is missing at this size:
+//
+//   a rim along the top of the head and shoulders, which is what separates a
+//   dark figure from a dark bank of lockers behind him;
+//   a gradient down the sweater instead of a fill with a lit blob on it, so
+//   the body has a round side and a shadow side;
+//   a soft contact shadow rather than a grey disc.
+//
+// One gradient and three arcs per figure per frame, with two figures on the
+// screen. That is affordable in a way that lighting the room live is not, and
+// it is where the money shows.
+export const SCHOOL_THIEF_LOOK = { ...THIEF_LOOK, lit: '226,240,214' };
+export const SCHOOL_CARETAKER_LOOK = { ...CARETAKER_LOOK, lit: '226,240,214' };
+
 // --- small drawing helpers ---------------------------------------------------
 // A two-segment limb with a knee or elbow, drawn over a slightly fatter dark
 // copy of itself. That rim is the whole reason an arm reads as being in front
@@ -227,10 +246,30 @@ export function drawFigure(ctx, x, y, pose, look) {
   // and spreads as he sinks onto both feet. Cheap, and it is most of what sells
   // the feet being on the floor rather than above it.
   const low = 1 - Math.min(1, bobbed / 3);
-  ctx.fillStyle = 'rgba(16,8,22,0.28)';
-  ctx.beginPath();
-  ctx.ellipse(x, y + 18, (10.4 + low * 1.4) * build, 3.7 + low * 0.6, 0, 0, TAU);
-  ctx.fill();
+  const shadowW = (10.4 + low * 1.4) * build;
+  const shadowH = 3.7 + low * 0.6;
+  if (look.lit) {
+    // A shadow with an edge is a disc lying on the floor beside him. This one
+    // is darkest under the feet and gone by its rim, which is what a soft
+    // ceiling light actually casts and what makes him stand *on* the floor.
+    ctx.save();
+    ctx.translate(x, y + 18);
+    ctx.scale(1, shadowH / shadowW);
+    const g2 = ctx.createRadialGradient(0, 0, shadowW * 0.15, 0, 0, shadowW);
+    g2.addColorStop(0, 'rgba(14,18,16,0.52)');
+    g2.addColorStop(0.5, 'rgba(14,18,16,0.26)');
+    g2.addColorStop(1, 'rgba(14,18,16,0)');
+    ctx.fillStyle = g2;
+    ctx.beginPath();
+    ctx.arc(0, 0, shadowW, 0, TAU);
+    ctx.fill();
+    ctx.restore();
+  } else {
+    ctx.fillStyle = 'rgba(16,8,22,0.28)';
+    ctx.beginPath();
+    ctx.ellipse(x, y + 18, shadowW, shadowH, 0, 0, TAU);
+    ctx.fill();
+  }
 
   // --- legs ------------------------------------------------------------------
   const drawLeg = (side, foot, far) => {
@@ -410,15 +449,37 @@ function drawTorso(ctx, cx, cy, { acrossX, acrossY, faceX, faceY, sideOn, twist,
     ctx.closePath();
   };
 
-  ctx.fillStyle = look.coat;
-  path();
-  ctx.fill();
+  if (look.lit) {
+    // Lit at the shoulders, base through the chest, dark into the hem: the
+    // sweater as a rounded mass with a top and an underside rather than a
+    // colour with a lighter patch on it.
+    const g = ctx.createLinearGradient(0, top - 2, 0, bottom + 1);
+    g.addColorStop(0, look.coatLit);
+    g.addColorStop(0.34, look.coat);
+    g.addColorStop(1, look.coatDark);
+    ctx.fillStyle = g;
+    path();
+    ctx.fill();
+    // ...and the rim: a hairline of the room's own light along the top of the
+    // shoulders. This is the pass that lifts a dark figure off a dark bank of
+    // lockers, and it is one stroke.
+    ctx.strokeStyle = `rgba(${look.lit},0.30)`;
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(cx - shoulder * 0.86 + lead, top + 1.4 + leadY);
+    ctx.quadraticCurveTo(cx + lead, top - 2.4 + leadY, cx + shoulder * 0.86 + lead, top + 1.4 + leadY);
+    ctx.stroke();
+  } else {
+    ctx.fillStyle = look.coat;
+    path();
+    ctx.fill();
 
-  // Light from above, inset so it stays inside the sweater without a clip.
-  ctx.fillStyle = look.coatLit;
-  ctx.beginPath();
-  ctx.ellipse(cx + lead - shoulder * 0.16, top + 3.2, shoulder * 0.80, 4.4, 0, 0, TAU);
-  ctx.fill();
+    // Light from above, inset so it stays inside the sweater without a clip.
+    ctx.fillStyle = look.coatLit;
+    ctx.beginPath();
+    ctx.ellipse(cx + lead - shoulder * 0.16, top + 3.2, shoulder * 0.80, 4.4, 0, 0, TAU);
+    ctx.fill();
+  }
 
   // A shadow along the hem, where the sweater falls away from the hips.
   ctx.fillStyle = look.coatDark;
@@ -466,6 +527,28 @@ function drawHead(ctx, x, y, view, look) {
   ctx.beginPath();
   ctx.ellipse(x + shift * 0.22, y, r * 0.95, r, 0, 0, TAU);
   ctx.fill();
+
+  // ...and a face that is not one colour. The light comes from above and a
+  // little to the left everywhere else in this room, so the jaw and the right
+  // of the face fall away. Clipped to the face so it cannot spill onto the
+  // hair, which is the whole reason this is a clip and not an inset ellipse.
+  if (look.lit) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(x + shift * 0.22, y, r * 0.95, r, 0, 0, TAU);
+    ctx.clip();
+    ctx.fillStyle = look.skinDark;
+    ctx.globalAlpha = 0.34;
+    ctx.beginPath();
+    ctx.ellipse(x + shift * 0.22 + r * 0.74, y + r * 0.42, r * 0.78, r * 0.92, -0.4, 0, TAU);
+    ctx.fill();
+    ctx.globalAlpha = 0.30;
+    ctx.beginPath();
+    ctx.ellipse(x + shift * 0.22, y + r * 1.02, r * 1.1, r * 0.42, 0, 0, TAU);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
 
   if (away) {
     // Walking away: no face at all. The back of a head is a hair mass, plus an
@@ -560,6 +643,19 @@ function drawHead(ctx, x, y, view, look) {
 
   if (beanie) drawBeanie(ctx, x, y, r, turn, sideOn, look);
   else drawCrownLight(ctx, x, y, r, turn, look);
+
+  // The room's light, catching the top of the skull. Last, so it lies over the
+  // hat as well as the hair, and thin — a rim is an edge, and an edge that has
+  // width is a halo. Along with the shoulder rim below it, this is what stops a
+  // dark figure sinking into a dark bank of lockers.
+  if (look.lit) {
+    ctx.strokeStyle = `rgba(${look.lit},0.26)`;
+    ctx.lineWidth = 1.1;
+    ctx.beginPath();
+    ctx.ellipse(x, y - (beanie ? r * 0.30 : r * 0.06), r * 1.00, r * 0.94,
+      0, Math.PI * 1.12, Math.PI * 1.88);
+    ctx.stroke();
+  }
 }
 
 // The beanie. Its brim has to sit above the brows, which is higher than it
