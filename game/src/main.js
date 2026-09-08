@@ -15,6 +15,7 @@ import {
   objectivesFor, isBigScore, rarityOf, watcherConfig
 } from './rules.js';
 import { ITEM_ART, ITEM_NAMES } from './art.js';
+import { createEffects } from './effects.js';
 
 const $ = (id) => document.getElementById(id);
 const WAKE_BEAT = 0.9;         // seconds of wake-up animation before the fail screen
@@ -33,6 +34,9 @@ export function boot() {
   const saveStore = createSaveStore(window.localStorage);
   const audio = createAudio(saveStore);
   const renderer = createRenderer(canvas, { debug });
+  // What the room does back. Presentation only, and only where a location
+  // asks for it — everywhere but the school this stays empty all game.
+  const fx = createEffects();
 
   audio.setMuted(!saveStore.data.settings.sound);
 
@@ -60,6 +64,10 @@ export function boot() {
   let lastStepPhase = 0;
   let lastTick = -1;
   let flash = 0;
+  // The money on the HUD, chasing the money in the bank. A counter that jumps
+  // says a number changed; one that runs up says you earned something.
+  let shownMoney = 0;
+  let hudClock = 0;
   let lastHeartbeat = 0;
   const stats = { fps: 0, steps: 0 };
 
@@ -286,6 +294,8 @@ export function boot() {
     endHold = 0;
     pendingEnd = null;
     lastStepPhase = 0;
+    fx.clear();
+    shownMoney = 0;
     audio.unlock();
     if (setting('music')) audio.startMusic();
     hideCrash();
@@ -310,6 +320,10 @@ export function boot() {
   }
 
   function handleEvents() {
+    // Whether this location's room answers back. One flag, read once: the
+    // school does, and the other ten play exactly as they did.
+    const reacts = !!sim.rules.reacts;
+    const player = playerOf(sim);
     for (const event of sim.events) {
       if (event.type === 'took') {
         pops.push({
@@ -318,6 +332,10 @@ export function boot() {
         });
         spawnSparks(event.x, event.y, event.big ? 14 : event.fragile ? 10 : 6,
           event.big ? '#ffd98a' : event.fragile ? '#bfe6ff' : '#ffd34d');
+        // Lifting something off a shelf is the loudest ordinary thing in the
+        // game, and until now the only sign of that was a bar at the top of
+        // the screen moving.
+        if (reacts) fx.ring(event.x, event.y, event.noise);
         audio.take(event.noise, event.fragile);
         if (event.big) { flash = 1; audio.jackpot(); buzz([18, 40, 24]); }
         else buzz(event.fragile ? [12, 30, 12] : 14);
@@ -328,14 +346,22 @@ export function boot() {
           audio.warn();
         }
       } else if (event.type === 'searching') {
-        // The drawer coming open, before anyone knows what is in it.
+        // The drawer coming open, before anyone knows what is in it — and now
+        // the drawer actually comes open: a panel slides out of the face he is
+        // standing at, stays out while his hands are in it, and shuts itself.
+        if (reacts) {
+          fx.open(event.where, event.style, event.from, event.duration);
+          fx.ring(event.x, event.y, event.noise);
+        }
         audio.bump('soft', event.noise, 0.5);
         buzz(8);
       } else if (event.type === 'found') {
         if (event.empty) {
           // An empty cupboard is information, not a failure. It gets a word
-          // and nothing else — no sound, no shake, no punishment for looking.
+          // and the drawer shutting on it — no sound, no shake, no punishment
+          // for looking.
           pops.push({ x: event.x, y: event.y - 8, value: null, text: 'EMPTY', life: 1 });
+          if (reacts) fx.shut(event.where);
         } else {
           pops.push({
             x: event.x, y: event.y - 8, value: event.value, life: 1,
@@ -343,6 +369,13 @@ export function boot() {
           });
           spawnSparks(event.x, event.y, event.big ? 14 : 8,
             event.big ? '#ffd98a' : '#9fe0ff');
+          // What was in there, coming out of it and into his hand, and the
+          // noise it made on the way.
+          if (reacts) {
+            fx.shut(event.where);
+            fx.fly(event.x, event.y, event.itemType);
+            fx.ring(event.x, event.y, event.noise);
+          }
           audio.take(event.noise, false);
           if (event.big) { flash = 1; audio.jackpot(); buzz([18, 40, 24]); }
           else buzz(14);
@@ -358,17 +391,53 @@ export function boot() {
         // just paid without reading the meter.
         pops.push({ x: event.x, y: event.y - 6, value: null,
           text: event.say || 'CREAK', life: 1 });
+        // The paper shifts under the foot that stood on it, and the sound goes
+        // out from there rather than from the middle of the thief.
+        if (reacts) {
+          // ...carrying its own kind, or the litter painter falls through to
+          // the floorboards it started as and a sheet of paper is answered by a
+          // patch of planking.
+          fx.knock({ ...event.where, kind: event.kind }, 0, 1,
+            0.25 + event.noise * 0.06, fx.paintLitter, null);
+          fx.ring(event.x, event.y + 8, event.noise);
+        }
         audio.creak(event.noise);
         buzz(Math.min(30, 8 + event.noise * 2.5));
       } else if (event.type === 'bump') {
         pops.push({
           x: event.x, y: event.y - 6, value: null, text: `+${event.noise}`,
-          life: 1, big: event.force > 0.6, color: '#ff9c6e'
+          // Where the room answers a knock with the piece moving, a ring going
+          // out and a flash of contact, the number over the top does not also
+          // need to be the biggest thing on the screen.
+          life: 1, big: event.force > 0.6 && !reacts, color: '#ff9c6e'
         });
+        // The thing you walked into, rocking on its feet. Only furniture: a
+        // wall does not move, and a bed is drawn by the sleeper's own code.
+        if (reacts) {
+          if (event.piece && event.piece.type === 'furniture') {
+            fx.knock(event.piece, event.nx, event.ny, event.force, fx.paintFurniture,
+              { x: event.x, y: event.y });
+          }
+          fx.ring(event.x, event.y, event.noise + event.force * 6);
+        }
         audio.bump(event.what === 'bed' ? 'soft' : 'hard', event.noise, event.force);
         // A harder knock is felt as well as heard.
         buzz(event.force > 0.6 ? [18, 30, 22] : Math.round(8 + event.force * 14));
         if (event.force > 0.5) spawnSparks(event.x, event.y, 5, '#e8d5b8');
+      } else if (event.type === 'watcher') {
+        // The two moments worth a word over his head, and no others: the one
+        // where he decides something is worth getting up for, and the one
+        // where he picks you out of the room. Anything more and the school is
+        // a running commentary.
+        if (reacts && event.state === 'rising') fx.mark(event.x, event.y - 26, '?');
+        if (reacts && event.state === 'following') {
+          fx.mark(event.x, event.y - 30, '!', '#ff8a7a');
+          fx.ring(event.x, event.y, 14, '255,120,100');
+        }
+      } else if (event.type === 'hiding') {
+        // Getting in behind the lockers, and coming back out. A short breath of
+        // dust at his feet either way, so the animation has a beat under it.
+        if (reacts) fx.ring(event.x, event.y, 3, '190,214,228');
       } else if (event.type === 'won') {
         const level = LEVELS.find((l) => l.id === currentLevelId);
         const stars = starsFor(level, event.haul);
@@ -432,7 +501,18 @@ export function boot() {
 
   function paintHud() {
     if (!sim) return;
-    setText('money', hudEls.money, `$${sim.money.toLocaleString()}`);
+    // The counter runs up to the money rather than jumping to it: a number that
+    // jumps says something changed, one that runs up says you earned it. Eased
+    // per second of real time, and it snaps the last dollar so it can never sit
+    // one short of the bank.
+    if (sim.rules.reacts) {
+      const step = Math.max(0, Math.min(0.1, clock - hudClock));
+      const gap = sim.money - shownMoney;
+      shownMoney = Math.abs(gap) < 1 ? sim.money
+        : shownMoney + gap * (1 - Math.exp(-8 * step));
+    } else shownMoney = sim.money;
+    hudClock = clock;
+    setText('money', hudEls.money, `$${Math.round(shownMoney).toLocaleString()}`);
     setText('level', hudEls.level, `LV ${sim.level.id}`);
 
     const seconds = Math.max(0, sim.timeLeft);
@@ -620,6 +700,8 @@ export function boot() {
         }
       }
 
+      fx.update(elapsed);
+
       // Nothing to update most frames; skip the array churn entirely then.
       if (pops.length) {
         for (const pop of pops) pop.life -= elapsed * 1.2;
@@ -637,7 +719,8 @@ export function boot() {
 
       if (sim) {
         if (flash > 0) flash = Math.max(0, flash - elapsed * 2.4);
-        renderer.draw(sim, Math.min(1, accumulator / STEP_SECONDS), clock, pops, stats, sparks, flash, elapsed);
+        renderer.draw(sim, Math.min(1, accumulator / STEP_SECONDS), clock, pops, stats,
+          sparks, flash, elapsed, fx);
         paintHud();
       }
       consecutiveErrors = 0;
@@ -654,6 +737,20 @@ export function boot() {
     }
   }
 
+  // What he is standing on, from the floor treatments the map declared. A short
+  // linear scan of a few dozen rectangles, a couple of times a second, at a
+  // footfall — cheaper than any of the ways of caching it would be to write.
+  function surfaceUnder(level, x, y) {
+    let tag = null;
+    for (const d of level.decor) {
+      if (d.kind !== 'floor') continue;
+      // Later patches are painted over earlier ones, so the last match is the
+      // one actually underfoot.
+      if (x >= d.x && x < d.x + d.w && y >= d.y && y < d.y + d.h) tag = d.tag;
+    }
+    return tag;
+  }
+
   // A soft footfall each time the walk cycle passes a half stride.
   function footstepAudio() {
     const player = playerOf(sim);
@@ -662,8 +759,14 @@ export function boot() {
     if (Math.floor(player.walkPhase / half) !== Math.floor(lastStepPhase / half)) {
       // Footsteps land on the walk cycle, which is driven by distance, so they
       // stay in step at any speed — and get louder the faster you move.
-      audio.step(Math.floor(player.walkPhase / half) % 2 === 0,
-        Math.min(1, player.speed / TUNING.player.speed));
+      const share = Math.min(1, player.speed / TUNING.player.speed);
+      audio.step(Math.floor(player.walkPhase / half) % 2 === 0, share);
+      // ...and leave a mark on the floor. Faint, brief, and only once he is
+      // properly walking: a scuff under every careful step would be a man
+      // leaving a trail of breadcrumbs through the building he is robbing.
+      if (sim.rules.reacts && share > 0.32 && !sim.hidden) {
+        fx.scuff(player.x, player.y, share, surfaceUnder(sim.level, player.x, player.y));
+      }
     }
     lastStepPhase = player.walkPhase;
   }

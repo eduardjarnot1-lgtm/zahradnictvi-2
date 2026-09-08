@@ -247,6 +247,8 @@ function makeInvestigator(level, rules) {
     walkPhase: 0,
     gaitShare: 0,
     urge: 0,           // how hurried he is, eased rather than switched
+    // How long since he last placed a noise. Presentation only.
+    sinceFix: 99,
     // Following: how long you have been far enough away to be losing him, and
     // when he last re-read where you were.
     lostFor: 0,
@@ -444,6 +446,10 @@ function takeFix(sim, entity, player, alert) {
     entity.target = nearestStand(entity.nav, blended.x, blended.y) || guess;
   }
   entity.heard = sim.noise;
+  // How long ago that was. Published for the renderer: a man who has just
+  // placed a sound looks towards it, and the drawing cannot know a fix has
+  // happened by watching his feet.
+  entity.sinceFix = 0;
   return entity.target;
 }
 
@@ -453,6 +459,7 @@ function updateInvestigation(sim, player) {
   if (!entity || !rules) return;
 
   entity.stateFor += STEP_SECONDS;
+  if (entity.sinceFix !== undefined) entity.sinceFix += STEP_SECONDS;
 
   // How alert he is right now. Everything below reads off this rather than off
   // a state: how well he places you, how fast he gets up, how fast he walks,
@@ -1067,7 +1074,7 @@ function nearestStash(sim, player, reach) {
 // Opening it. The noise lands here, at the start, not when you find out what is
 // inside: the drawer rattles whether or not there is anything in it, and
 // charging on the result would let you learn a cabinet was empty for free.
-function beginSearch(sim, stash, rules) {
+function beginSearch(sim, stash, rules, player) {
   const amount = Math.max(1, Math.round(
     (rules.noise[stash.style] || 3) * sim.mods.hazardNoise * sim.proximity));
   sim.noise = addNoise(sim.noise, amount);
@@ -1081,7 +1088,12 @@ function beginSearch(sim, stash, rules) {
   };
   sim.events.push({
     type: 'searching', id: stash.id, noise: amount, style: stash.style,
-    x: sim.searching.x, y: sim.searching.y
+    x: sim.searching.x, y: sim.searching.y,
+    // The piece itself, so the host can animate the thing that opened rather
+    // than a puff of light where it happens to stand.
+    where: { x: stash.x, y: stash.y, w: stash.w, h: stash.h },
+    from: { x: player.x, y: player.y },
+    duration: rules.duration
   });
   if (endsAtCap(sim)) finish(sim, 'lost', 'awake');
 }
@@ -1096,7 +1108,8 @@ function finishSearch(sim) {
   stash.searched = true;
 
   if (!stash.item) {
-    sim.events.push({ type: 'found', id: stash.id, empty: true, x, y });
+    sim.events.push({ type: 'found', id: stash.id, empty: true, x, y,
+      where: { x: stash.x, y: stash.y, w: stash.w, h: stash.h }, style: stash.style });
     return;
   }
   const stats = itemStats(stash.item);
@@ -1110,7 +1123,8 @@ function finishSearch(sim) {
   sim.events.push({
     type: 'found', id: stash.id, empty: false, itemType: stash.item,
     value: paid, noise: Math.round(lifted), rarity: rarityOf(stash.item).name,
-    big: isBigScore(stats.value), x, y
+    big: isBigScore(stats.value), x, y, style: stash.style,
+    where: { x: stash.x, y: stash.y, w: stash.w, h: stash.h }
   });
   if (endsAtCap(sim)) finish(sim, 'lost', 'awake');
 }
@@ -1185,7 +1199,10 @@ export function stepSim(sim, input = EMPTY_INPUT) {
       if (amount > 0) {
         sim.noise = addNoise(sim.noise, amount);
         sim.events.push({ type: 'creak', kind, say: sound.say,
-          x: player.x, y: player.y, noise: amount });
+          x: player.x, y: player.y, noise: amount,
+          // What was underfoot, so the paper can be seen to shift rather than
+          // merely charged for.
+          where: { x: zone.x, y: zone.y, w: zone.w, h: zone.h } });
         if (endsAtCap(sim)) finish(sim, 'lost', 'awake');
       }
       zone.cooldown = TUNING.hazards.creakCooldown;
@@ -1273,7 +1290,12 @@ export function stepSim(sim, input = EMPTY_INPUT) {
       y: player.y,
       noise: amount,
       force,
-      what: player.bumped.type
+      what: player.bumped.type,
+      // The piece that was hit and which way it was hit, so it can be shown
+      // rocking on its feet rather than standing there while a number floats.
+      piece: player.bumped,
+      nx: player.bumpNormalX,
+      ny: player.bumpNormalY
     });
     if (endsAtCap(sim)) finish(sim, 'lost', 'awake');
     sim.bumpCooldown = TUNING.hazards.bumpCooldown;
@@ -1382,7 +1404,7 @@ export function stepSim(sim, input = EMPTY_INPUT) {
       sim.hideTargetId = hiding ? nook.spot.id : null;
       const pressed = input.search && !sim.prevSearch;
       if (pressed && hiding) enterHiding(sim, player, nook.spot, hideRules);
-      else if (pressed && stash) beginSearch(sim, stash, searchRules);
+      else if (pressed && stash) beginSearch(sim, stash, searchRules, player);
     }
   }
   // Out of sight, and out of every system that could find him.

@@ -1072,7 +1072,7 @@ const UNDERFOOT_PAINTERS = {
   }
 };
 
-function drawCreakZone(ctx, zone) {
+export function drawCreakZone(ctx, zone) {
   const paint = UNDERFOOT_PAINTERS[zone.kind];
   if (paint) {
     paint(ctx, zone);
@@ -2051,6 +2051,23 @@ export function drawDeskset(ctx, level, kind = 'worker') {
   // The mug.
   fillRound(ctx, desk.x + desk.w - 34, desk.y + desk.h * 0.62, 9, 9, 3, '#d8dde4');
   fillRound(ctx, desk.x + desk.w - 32, desk.y + desk.h * 0.64, 5, 5, 2, '#6b4a30');
+}
+
+// Where the caretaker's monitor is, if this level has one.
+//
+// His desk is painted into the room cache and stays there after he gets up,
+// which is right for the desk and wrong for the screen on it: a monitor that is
+// still on is the one thing in a dark school that should not be a photograph.
+// So the room paints the dark screen and the renderer paints the glow over it,
+// live, from the same two numbers.
+export function deskScreen(level, kind) {
+  const desk = level.bed;
+  if (kind !== 'caretaker' || !desk || desk.w < 90) return null;
+  return {
+    x: desk.x + desk.w * 0.63 - 11,
+    y: desk.y + desk.h * 0.28 - 7,
+    w: 22, h: 11
+  };
 }
 
 // Getting up out of a chair, drawn seated.

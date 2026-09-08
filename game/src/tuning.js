@@ -572,6 +572,13 @@ const PEOPLE = {
     // off the shared tables above.
     gait: SCHOOL_THIEF_GAIT,
     watcherGait: SCHOOL_WALKER_GAIT,
+    // The room answers. Every action that costs something — a knock, a drawer,
+    // a sheet of paper underfoot, being picked out across a hall — gets a
+    // short visible reaction where it happened, on top of the number it moves.
+    // School only: the flag is what the other ten locations do not have.
+    // Named for what it does rather than `feedback`, which is already the name
+    // of the screen-shake block at the bottom of this file.
+    reacts: true,
     // Mr. Vrána looks up. Everywhere else in the game a person on his feet
     // finds you by walking into you — `followAt`, a hard threshold under three
     // tiles. Here he has eyes, and they work continuously: how quickly he picks

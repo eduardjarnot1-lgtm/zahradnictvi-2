@@ -893,6 +893,13 @@ __mod.tuning = (function () {
       // off the shared tables above.
       gait: SCHOOL_THIEF_GAIT,
       watcherGait: SCHOOL_WALKER_GAIT,
+      // The room answers. Every action that costs something — a knock, a drawer,
+      // a sheet of paper underfoot, being picked out across a hall — gets a
+      // short visible reaction where it happened, on top of the number it moves.
+      // School only: the flag is what the other ten locations do not have.
+      // Named for what it does rather than `feedback`, which is already the name
+      // of the screen-shake block at the bottom of this file.
+      reacts: true,
       // Mr. Vrána looks up. Everywhere else in the game a person on his feet
       // finds you by walking into you — `followAt`, a hard threshold under three
       // tiles. Here he has eyes, and they work continuously: how quickly he picks
@@ -9217,6 +9224,8 @@ __mod.sim = (function () {
       walkPhase: 0,
       gaitShare: 0,
       urge: 0,           // how hurried he is, eased rather than switched
+      // How long since he last placed a noise. Presentation only.
+      sinceFix: 99,
       // Following: how long you have been far enough away to be losing him, and
       // when he last re-read where you were.
       lostFor: 0,
@@ -9414,6 +9423,10 @@ __mod.sim = (function () {
       entity.target = nearestStand(entity.nav, blended.x, blended.y) || guess;
     }
     entity.heard = sim.noise;
+    // How long ago that was. Published for the renderer: a man who has just
+    // placed a sound looks towards it, and the drawing cannot know a fix has
+    // happened by watching his feet.
+    entity.sinceFix = 0;
     return entity.target;
   }
 
@@ -9423,6 +9436,7 @@ __mod.sim = (function () {
     if (!entity || !rules) return;
 
     entity.stateFor += STEP_SECONDS;
+    if (entity.sinceFix !== undefined) entity.sinceFix += STEP_SECONDS;
 
     // How alert he is right now. Everything below reads off this rather than off
     // a state: how well he places you, how fast he gets up, how fast he walks,
@@ -10037,7 +10051,7 @@ __mod.sim = (function () {
   // Opening it. The noise lands here, at the start, not when you find out what is
   // inside: the drawer rattles whether or not there is anything in it, and
   // charging on the result would let you learn a cabinet was empty for free.
-  function beginSearch(sim, stash, rules) {
+  function beginSearch(sim, stash, rules, player) {
     const amount = Math.max(1, Math.round(
       (rules.noise[stash.style] || 3) * sim.mods.hazardNoise * sim.proximity));
     sim.noise = addNoise(sim.noise, amount);
@@ -10051,7 +10065,12 @@ __mod.sim = (function () {
     };
     sim.events.push({
       type: 'searching', id: stash.id, noise: amount, style: stash.style,
-      x: sim.searching.x, y: sim.searching.y
+      x: sim.searching.x, y: sim.searching.y,
+      // The piece itself, so the host can animate the thing that opened rather
+      // than a puff of light where it happens to stand.
+      where: { x: stash.x, y: stash.y, w: stash.w, h: stash.h },
+      from: { x: player.x, y: player.y },
+      duration: rules.duration
     });
     if (endsAtCap(sim)) finish(sim, 'lost', 'awake');
   }
@@ -10066,7 +10085,8 @@ __mod.sim = (function () {
     stash.searched = true;
 
     if (!stash.item) {
-      sim.events.push({ type: 'found', id: stash.id, empty: true, x, y });
+      sim.events.push({ type: 'found', id: stash.id, empty: true, x, y,
+        where: { x: stash.x, y: stash.y, w: stash.w, h: stash.h }, style: stash.style });
       return;
     }
     const stats = itemStats(stash.item);
@@ -10080,7 +10100,8 @@ __mod.sim = (function () {
     sim.events.push({
       type: 'found', id: stash.id, empty: false, itemType: stash.item,
       value: paid, noise: Math.round(lifted), rarity: rarityOf(stash.item).name,
-      big: isBigScore(stats.value), x, y
+      big: isBigScore(stats.value), x, y, style: stash.style,
+      where: { x: stash.x, y: stash.y, w: stash.w, h: stash.h }
     });
     if (endsAtCap(sim)) finish(sim, 'lost', 'awake');
   }
@@ -10155,7 +10176,10 @@ __mod.sim = (function () {
         if (amount > 0) {
           sim.noise = addNoise(sim.noise, amount);
           sim.events.push({ type: 'creak', kind, say: sound.say,
-            x: player.x, y: player.y, noise: amount });
+            x: player.x, y: player.y, noise: amount,
+            // What was underfoot, so the paper can be seen to shift rather than
+            // merely charged for.
+            where: { x: zone.x, y: zone.y, w: zone.w, h: zone.h } });
           if (endsAtCap(sim)) finish(sim, 'lost', 'awake');
         }
         zone.cooldown = TUNING.hazards.creakCooldown;
@@ -10243,7 +10267,12 @@ __mod.sim = (function () {
         y: player.y,
         noise: amount,
         force,
-        what: player.bumped.type
+        what: player.bumped.type,
+        // The piece that was hit and which way it was hit, so it can be shown
+        // rocking on its feet rather than standing there while a number floats.
+        piece: player.bumped,
+        nx: player.bumpNormalX,
+        ny: player.bumpNormalY
       });
       if (endsAtCap(sim)) finish(sim, 'lost', 'awake');
       sim.bumpCooldown = TUNING.hazards.bumpCooldown;
@@ -10352,7 +10381,7 @@ __mod.sim = (function () {
         sim.hideTargetId = hiding ? nook.spot.id : null;
         const pressed = input.search && !sim.prevSearch;
         if (pressed && hiding) enterHiding(sim, player, nook.spot, hideRules);
-        else if (pressed && stash) beginSearch(sim, stash, searchRules);
+        else if (pressed && stash) beginSearch(sim, stash, searchRules, player);
       }
     }
     // Out of sight, and out of every system that could find him.
@@ -13163,6 +13192,23 @@ __mod.art = (function () {
     fillRound(ctx, desk.x + desk.w - 32, desk.y + desk.h * 0.64, 5, 5, 2, '#6b4a30');
   }
 
+  // Where the caretaker's monitor is, if this level has one.
+  //
+  // His desk is painted into the room cache and stays there after he gets up,
+  // which is right for the desk and wrong for the screen on it: a monitor that is
+  // still on is the one thing in a dark school that should not be a photograph.
+  // So the room paints the dark screen and the renderer paints the glow over it,
+  // live, from the same two numbers.
+  function deskScreen(level, kind) {
+    const desk = level.bed;
+    if (kind !== 'caretaker' || !desk || desk.w < 90) return null;
+    return {
+      x: desk.x + desk.w * 0.63 - 11,
+      y: desk.y + desk.h * 0.28 - 7,
+      w: 22, h: 11
+    };
+  }
+
   // Getting up out of a chair, drawn seated.
   //
   // The beats, and where each one lives: he twitches (0.00), his head comes off
@@ -13860,7 +13906,437 @@ __mod.art = (function () {
     ctx.fillText(art, 0, 8);
     ctx.restore();
   }
-  return { PALETTE, sleeperLook, ITEM_ART, ITEM_NAMES, roundRect, lampPositions, drawFurniture, paintStaticRoom, drawHideLabel, drawWatcherFurniture, drawSleeper, drawDeskset, drawSlumped, drawGuard, drawWalker, drawThief, drawCaretakerWalking, drawGrabbedItem };
+  return { PALETTE, sleeperLook, ITEM_ART, ITEM_NAMES, roundRect, lampPositions, drawFurniture, drawCreakZone, paintStaticRoom, drawHideLabel, drawWatcherFurniture, drawSleeper, drawDeskset, deskScreen, drawSlumped, drawGuard, drawWalker, drawThief, drawCaretakerWalking, drawGrabbedItem };
+})();
+__mod.effects = (function () {
+  // What the room does back.
+  //
+  // Every important thing the player does already changes a number: the meter
+  // moves, the money goes up, a cupboard is marked searched. This file is the
+  // other half of that — the part where the *room* answers, so that the player
+  // learns what happened by watching the school rather than by watching the HUD.
+  //
+  // Six kinds of answer, and they are deliberately few:
+  //
+  //   ring    a sound spreading out from where it was made, sized by what it cost
+  //   knock   the thing you walked into, rocking on its feet
+  //   open    the drawer, door or locker you are actually searching
+  //   fly     what came out of it, on its way to your hand
+  //   mark    a '!' over a man who has just seen you
+  //   scuff   a footfall, on the floor, where the foot went down
+  //
+  // All of it is presentation. Nothing here is read by the simulation, nothing
+  // here can change an outcome, and a recorded run replays identically whether or
+  // not any of it was drawn — which is the only reason it can be this free with
+  // the frame.
+  //
+  // The cost model is the reason for the shapes chosen. The room is painted once
+  // into a cache and blitted; anything that moves has to be drawn live on top of
+  // it, and *erasing* the cached copy underneath is not something a blitted cache
+  // can do cheaply. So everything here is additive: a ring is drawn where there
+  // was floor, a drawer is drawn sliding out of a face that is still where it
+  // was, and a knock redraws its own piece a pixel or two off true — at that
+  // amplitude the sliver of the cached original showing along one edge reads as
+  // the shadow of something that just moved, which is what it is.
+  const { drawFurniture, drawCreakZone, roundRect, ITEM_ART } = __mod.art;
+
+  const TAU = Math.PI * 2;
+  const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+  const ease = (t) => t * t * (3 - 2 * t);
+
+  // How loud a thing was, as 0..1. The meter's own numbers: 2 is a sheet of
+  // paper underfoot, 8 is a bag, 16 is a jewel off a shelf, 30 is a television.
+  const loudness = (noise) => clamp01((noise - 1) / 22);
+
+  // Where the front of a piece is, from where the person interacting with it was
+  // standing. A bank of lockers has four faces and only one of them is the one
+  // you are at; without this a drawer opens into the wall half the time.
+  function facing(box, from) {
+    const cx = box.x + box.w / 2;
+    const cy = box.y + box.h / 2;
+    const dx = from ? from.x - cx : 0;
+    const dy = from ? from.y - cy : 1;
+    // Which face he is actually outside of: the separation on each axis measured
+    // from the box's edge rather than from its middle, so standing under a long
+    // bank of lockers opens the long side and standing off its end opens the end.
+    // Measuring from the middle gets the second of those wrong every time, which
+    // is a drawer sliding out through six feet of cabinet.
+    return Math.abs(dx) - box.w / 2 > Math.abs(dy) - box.h / 2
+      ? { x: Math.sign(dx) || 1, y: 0 }
+      : { x: 0, y: Math.sign(dy) || 1 };
+  }
+
+  function createEffects() {
+    const rings = [];
+    const knocks = [];
+    const opens = [];
+    const flies = [];
+    const marks = [];
+    const scuffs = [];
+    const all = [rings, knocks, opens, flies, marks, scuffs];
+
+    // A sound, spreading. Two rings for anything worth turning round for, one for
+    // a footfall on a sheet of paper.
+    function ring(x, y, noise, tint) {
+      const strength = loudness(noise);
+      rings.push({
+        x, y, t: 0, life: 0.42 + strength * 0.34, strength,
+        tint: tint || (strength > 0.5 ? '255,168,110' : '206,232,244'),
+        twin: strength > 0.42
+      });
+    }
+
+    // Something solid, reacting to being hit. `paint` is how to draw it — the
+    // furniture painter for a cabinet, the litter painter for what is on the
+    // floor — so the same wobble serves both without either knowing about it.
+    function knock(box, nx, ny, force, paint, at) {
+      if (!box || !paint) return;
+      const heft = clamp01(force);
+      knocks.push({
+        box, paint, t: 0,
+        life: 0.26 + heft * 0.22,
+        amp: 0.9 + heft * 2.4,
+        // Heavy things rock slowly; a bin rattles. Read off the box, so a bank of
+        // lockers and a stray backpack do not shudder at the same rate.
+        rate: 58 - Math.min(26, Math.sqrt(box.w * box.h) * 0.34),
+        nx: nx || 0,
+        ny: ny || 0,
+        // Where it was actually struck: the point on the box nearest whoever hit
+        // it. The shake alone does not read in a still frame — the piece is
+        // redrawn over its own cached copy, so a three-pixel offset looks like a
+        // piece three pixels longer rather than one that moved — and the flash of
+        // contact is what makes the hit legible the instant it happens.
+        hit: at ? {
+          x: Math.max(box.x, Math.min(box.x + box.w, at.x)),
+          y: Math.max(box.y, Math.min(box.y + box.h, at.y))
+        } : null,
+        heft
+      });
+    }
+
+    // The drawer, door or locker actually opening while he has his hands in it.
+    // Opens over a beat, stays open while he searches, and shuts itself.
+    function open(box, style, from, duration) {
+      if (!box) return;
+      opens.push({
+        box, style: style || 'table', out: facing(box, from),
+        t: 0, life: Math.max(0.5, duration) + 0.34, hold: Math.max(0.5, duration)
+      });
+    }
+
+    // Shut whatever is open on this piece early — what a search ending looks like
+    // when it ends in a hand coming out rather than in the clock.
+    function shut(box) {
+      for (const o of opens) {
+        if (o.box.x === box.x && o.box.y === box.y && o.t < o.hold) o.t = o.hold;
+      }
+    }
+
+    // What came out, on its way to a pocket.
+    function fly(x, y, type) {
+      flies.push({ x, y, art: ITEM_ART[type] || '?', t: 0, life: 0.46 });
+    }
+
+    // A word over somebody's head. Rare on purpose: this is for the moment he
+    // picks you out, not for a running commentary.
+    function mark(x, y, text, tint) {
+      marks.push({ x, y, text, tint: tint || '#ffcf6a', t: 0, life: 0.85 });
+    }
+
+    // What a footfall leaves on each kind of floor. Grass takes a green scuff,
+    // gravel and paving take dust, and a polished corridor takes a pale skid —
+    // which is most of what says the outside of the school is outside.
+    const SURFACE = {
+      grass: '#b6d99a',
+      gravel: '#ded4c2',
+      paving: '#e2e0d8',
+      tarmac: '#d8d6d0',
+      concrete: '#ded9d0'
+    };
+
+    // A foot going down. The smallest thing here and the one that runs most
+    // often, so it is one ellipse and no state.
+    function scuff(x, y, share, surface) {
+      scuffs.push({
+        x, y, t: 0, life: 0.30, share: clamp01(share),
+        tint: SURFACE[surface] || '#f6efe2'
+      });
+    }
+
+    function clear() {
+      for (const list of all) list.length = 0;
+    }
+
+    function update(dt) {
+      for (const list of all) {
+        let write = 0;
+        for (let i = 0; i < list.length; i++) {
+          const item = list[i];
+          item.t += dt;
+          if (item.t < item.life) list[write++] = item;
+        }
+        list.length = write;
+      }
+    }
+
+    // --- drawing ---------------------------------------------------------------
+    // Split in two: what belongs to the floor and the furniture goes down before
+    // the people, and what belongs over the whole scene goes on after. Nothing
+    // here reads the clock — every effect carries its own age — so the same frame
+    // drawn twice looks the same twice.
+
+    function drawScuff(ctx, s) {
+      const k = 1 - s.t / s.life;
+      ctx.globalAlpha = k * k * (0.06 + s.share * 0.10);
+      ctx.fillStyle = s.tint;
+      ctx.beginPath();
+      ctx.ellipse(s.x, s.y + 15, 5 + s.share * 3, 2.2, 0, 0, TAU);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    function drawRing(ctx, r) {
+      const draw = (delay) => {
+        const t = (r.t - delay) / (r.life - delay);
+        if (t < 0 || t > 1) return;
+        const radius = 5 + ease(t) * (16 + r.strength * 44);
+        ctx.globalAlpha = (1 - t) ** 1.5 * (0.20 + r.strength * 0.42);
+        ctx.strokeStyle = `rgb(${r.tint})`;
+        ctx.lineWidth = 0.8 + r.strength * 2.2 * (1 - t);
+        ctx.beginPath();
+        // Flattened, because the room is seen from above and in front: a circle
+        // on the floor is an ellipse on the screen, and the rest of the art has
+        // been foreshortening that way since the first floorplan.
+        ctx.ellipse(r.x, r.y + 6, radius, radius * 0.62, 0, 0, TAU);
+        ctx.stroke();
+      };
+      draw(0);
+      if (r.twin) draw(0.13);
+      ctx.globalAlpha = 1;
+    }
+
+    function drawKnock(ctx, k) {
+      const share = 1 - k.t / k.life;
+      const wob = Math.sin(k.t * k.rate) * k.amp * share * share;
+      ctx.save();
+      // Away from whatever hit it, along the axis it was hit on.
+      ctx.translate(-k.nx * wob, -k.ny * wob);
+      k.paint(ctx, k.box);
+      ctx.restore();
+    }
+
+    // The contact itself: a short bright scrape along the struck edge, gone in a
+    // fifth of a second, and a couple of flecks knocked off it.
+    //
+    // Drawn over the people rather than under them, which is the opposite of
+    // everything else here and is not a mistake: the thief is standing *on* the
+    // point he hit — that is what hitting it means — so under the figure it is a
+    // flash nobody ever sees.
+    function drawContact(ctx, k) {
+      if (!k.hit) return;
+      const flash = clamp01(1 - k.t / 0.2);
+      if (flash <= 0) return;
+      const along = k.nx !== 0;
+      const len = (5 + k.heft * 9) * flash;
+      ctx.save();
+      ctx.globalAlpha = flash * (0.35 + k.heft * 0.45);
+      ctx.strokeStyle = '#fff2dc';
+      ctx.lineWidth = 1 + k.heft * 1.4;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      if (along) {
+        ctx.moveTo(k.hit.x, k.hit.y - len);
+        ctx.lineTo(k.hit.x, k.hit.y + len);
+      } else {
+        ctx.moveTo(k.hit.x - len, k.hit.y);
+        ctx.lineTo(k.hit.x + len, k.hit.y);
+      }
+      ctx.stroke();
+      // Flecks, thrown back the way the thief came.
+      ctx.fillStyle = '#e8d5b8';
+      for (let i = 0; i < 3; i++) {
+        const spread = (i - 1) * 0.5;
+        const d = (3 + i * 2) + (1 - flash) * (10 + k.heft * 14);
+        ctx.globalAlpha = flash * 0.5;
+        ctx.beginPath();
+        ctx.arc(k.hit.x + (k.nx * Math.cos(spread) - k.ny * Math.sin(spread)) * d,
+          k.hit.y + (k.ny * Math.cos(spread) + k.nx * Math.sin(spread)) * d,
+          1.1, 0, TAU);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // How far open, 0 shut to 1 wide. Quick to open, held while the hands are in
+    // there, and shut a little more slowly than it opened.
+    function openShare(o) {
+      if (o.t < 0.18) return ease(o.t / 0.18);
+      if (o.t < o.hold) return 1;
+      return 1 - ease(clamp01((o.t - o.hold) / (o.life - o.hold)));
+    }
+
+    // A drawer, sliding out of the front face. The dark gap behind it is what
+    // makes it read as a drawer rather than as a plank appearing on the floor.
+    function drawDrawer(ctx, box, out, share, tone) {
+      const along = out.x !== 0;
+      const span = along ? box.h : box.w;
+      const w = Math.min(span - 6, 30);
+      const reach = 3 + share * 7;
+      const cx = box.x + box.w / 2;
+      const cy = box.y + box.h / 2;
+      const px = cx + out.x * (box.w / 2 + reach * 0.5);
+      const py = cy + out.y * (box.h / 2 + reach * 0.5);
+      const dw = along ? reach : w;
+      const dh = along ? w : reach;
+      ctx.fillStyle = 'rgba(10,7,14,0.55)';
+      roundRect(ctx, px - dw / 2 - out.x, py - dh / 2 - out.y, dw + 2, dh + 2, 2);
+      ctx.fill();
+      ctx.fillStyle = tone;
+      roundRect(ctx, px - dw / 2, py - dh / 2, dw, dh, 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.20)';
+      roundRect(ctx, px - dw / 2 + 1, py - dh / 2 + 1, Math.max(1, dw - 2),
+        Math.max(1, dh * 0.4), 1);
+      ctx.fill();
+      // The handle, on the leading edge.
+      ctx.fillStyle = '#cbd8d4';
+      if (along) ctx.fillRect(px + out.x * (dw / 2 - 1.6) - 0.8, py - 3, 1.6, 6);
+      else ctx.fillRect(px - 3, py + out.y * (dh / 2 - 1.6) - 0.8, 6, 1.6);
+    }
+
+    // A locker or cupboard door, seen from above.
+    //
+    // A door standing open is edge-on from up here, which is the trap: drawn
+    // honestly it is a two-pixel line sticking out of a cabinet and reads as a
+    // scratch on the screen. What says "open" from directly overhead is the dark
+    // inside of the thing — so the cavity does the work, and the door is a solid
+    // panel swung out beside it, thick enough to be a door rather than a mark.
+    function drawDoor(ctx, box, out, share, face, lit) {
+      const along = out.x !== 0;
+      const span = Math.min(along ? box.h : box.w, 26) * 0.82;
+      const cx = box.x + box.w / 2;
+      const cy = box.y + box.h / 2;
+      // The middle of the face he is standing at.
+      const fx = cx + out.x * box.w * 0.5;
+      const fy = cy + out.y * box.h * 0.5;
+      const deep = Math.min(along ? box.w : box.h, 16) * 0.55;
+      ctx.save();
+      ctx.translate(fx, fy);
+      // Work in the face's own frame: x out of the cabinet, y along its front.
+      ctx.rotate(along ? (out.x > 0 ? 0 : Math.PI) : (out.y > 0 ? Math.PI / 2 : -Math.PI / 2));
+
+      // The inside, cut back into the piece.
+      ctx.fillStyle = 'rgba(6,12,16,0.78)';
+      roundRect(ctx, -deep, -span / 2, deep, span, 1.5);
+      ctx.fill();
+      // A shelf in there, so it is a locker rather than a hole.
+      ctx.fillStyle = 'rgba(120,150,160,0.30)';
+      ctx.fillRect(-deep + 1, -span * 0.12, deep - 2, 1);
+
+      // The door, hinged at one edge of the opening and swung out over the floor.
+      ctx.translate(0, -span / 2);
+      ctx.rotate(-share * 1.15);
+      ctx.fillStyle = 'rgba(10,7,14,0.35)';
+      roundRect(ctx, 0.6, 1.4, 3.6, span, 1.4);
+      ctx.fill();
+      ctx.fillStyle = face;
+      roundRect(ctx, 0, 0, 3.6, span, 1.4);
+      ctx.fill();
+      ctx.fillStyle = lit;
+      ctx.fillRect(0.7, 1.4, 1.1, span - 2.8);
+      ctx.restore();
+    }
+
+    // Books, tipped out of a shelf and put back.
+    function drawSpines(ctx, box, out, share) {
+      const tints = ['#c25b4e', '#4f7fa8', '#d8a15c'];
+      const cx = box.x + box.w / 2;
+      const cy = box.y + box.h / 2;
+      for (let i = 0; i < 3; i++) {
+        const t = (i - 1) * 7;
+        const px = cx + (out.x ? out.x * (box.w / 2 + share * 4) : t);
+        const py = cy + (out.y ? out.y * (box.h / 2 + share * 4) : t);
+        ctx.save();
+        ctx.translate(px, py);
+        ctx.rotate(share * (0.4 + i * 0.16) * (out.x || out.y));
+        ctx.fillStyle = tints[i];
+        roundRect(ctx, -2, -4, 4, 9, 1);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function drawOpen(ctx, o) {
+      const share = openShare(o);
+      if (share <= 0.01) return;
+      if (o.style === 'chest') drawDoor(ctx, o.box, o.out, share, '#47646c', '#7ba3ad');
+      else if (o.style === 'wardrobe') drawDoor(ctx, o.box, o.out, share, '#a9663a', '#c48450');
+      else if (o.style === 'bookshelf') drawSpines(ctx, o.box, o.out, share);
+      else drawDrawer(ctx, o.box, o.out, share, '#c08450');
+    }
+
+    function drawFly(ctx, f, toX, toY) {
+      const t = ease(clamp01(f.t / f.life));
+      const x = f.x + (toX - f.x) * t;
+      const y = f.y - 10 + (toY - (f.y - 10)) * t - Math.sin(t * Math.PI) * 9;
+      ctx.save();
+      ctx.globalAlpha = 1 - t * 0.85;
+      ctx.translate(x, y);
+      ctx.scale(1 - t * 0.5, 1 - t * 0.5);
+      ctx.textAlign = 'center';
+      ctx.font = '19px system-ui';
+      ctx.fillText(f.art, 0, 6);
+      ctx.restore();
+    }
+
+    function drawMark(ctx, m) {
+      const t = clamp01(m.t / m.life);
+      const pop = m.t < 0.14 ? ease(m.t / 0.14) : 1;
+      ctx.save();
+      ctx.globalAlpha = t > 0.7 ? (1 - t) / 0.3 : 1;
+      ctx.translate(m.x, m.y - ease(t) * 5);
+      ctx.scale(pop * (1.25 - pop * 0.25), pop * (1.25 - pop * 0.25));
+      ctx.textAlign = 'center';
+      ctx.font = 'bold 15px system-ui';
+      ctx.lineWidth = 3.5;
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = 'rgba(18,10,24,0.85)';
+      ctx.strokeText(m.text, 0, 0);
+      ctx.fillStyle = m.tint;
+      ctx.fillText(m.text, 0, 0);
+      ctx.restore();
+    }
+
+    return {
+      ring,
+      knock,
+      open,
+      shut,
+      fly,
+      mark,
+      scuff,
+      clear,
+      update,
+      // Furniture and the floor, before the people are drawn over them.
+      under(ctx) {
+        for (const s of scuffs) drawScuff(ctx, s);
+        for (const k of knocks) drawKnock(ctx, k);
+        for (const o of opens) drawOpen(ctx, o);
+        for (const r of rings) drawRing(ctx, r);
+      },
+      // ...and what belongs over the top of everything.
+      over(ctx, toX, toY) {
+        for (const k of knocks) drawContact(ctx, k);
+        for (const f of flies) drawFly(ctx, f, toX, toY);
+        for (const m of marks) drawMark(ctx, m);
+      },
+      // Convenience for the callers that want the shared painters without
+      // importing the whole of art.js themselves.
+      paintFurniture: drawFurniture,
+      paintLitter: drawCreakZone
+    };
+  }
+  return { facing, createEffects };
 })();
 __mod.render = (function () {
   // Draws a simulation snapshot. Knows nothing about rules — it reads state and
@@ -13870,7 +14346,7 @@ __mod.render = (function () {
   const { sleepStage, rarityOf, isBigScore, watcherConfig, gaitBlend, gaitOf } = __mod.rules;
   const { drawFigure, THIEF_LOOK, CARETAKER_LOOK } = __mod.figure;
   const { playerOf } = __mod.sim;
-  const { paintStaticRoom, drawSleeper, drawGuard, drawSlumped, drawThief, drawCaretakerWalking, drawGrabbedItem, roundRect, ITEM_ART, lampPositions, drawHideLabel, drawFurniture } = __mod.art;
+  const { paintStaticRoom, drawSleeper, drawGuard, drawSlumped, drawThief, drawCaretakerWalking, drawGrabbedItem, roundRect, ITEM_ART, lampPositions, drawHideLabel, drawFurniture, deskScreen } = __mod.art;
 
   // W and H are the *window*, not the world: how much of a level fits on screen
   // at once. A level that is exactly this size never scrolls, which is every
@@ -14348,7 +14824,7 @@ __mod.render = (function () {
       const wy = w.prevY + (w.y - w.prevY) * alpha;
       const rules = sim.investigateRules;
       const seated = (watcherConfig(sim.level.watcher.kind).pose || 'bed') === 'desk';
-      const { stand, glance } = gettingUp(w, rules, time, seated);
+      const { stand, glance } = gettingUp(w, rules, time, seated, !!sim.rules.reacts);
       // The same speed-driven gait the thief uses, against his own top speed —
       // he is slower, so a brisk walk for him is not a run.
       const gait = gaitBlend(w.speed / rules.speed);
@@ -14380,15 +14856,28 @@ __mod.render = (function () {
     // decide what to do about it.
     //
     // `stand` is how upright he is; `glance` turns his head without turning him.
-    function gettingUp(w, rules, time, seated) {
+    function gettingUp(w, rules, time, seated, reacts) {
       const ease = (t) => t * t * (3 - 2 * t);
       if (w.state === 'settling') {
         return { stand: Math.max(0, 1 - w.stateFor / rules.settling), glance: 0 };
       }
       if (w.state !== 'rising') {
         // Standing at the spot he came to look at, turning his head over it.
-        const searching = w.state === 'searching';
-        return { stand: 1, glance: searching ? Math.sin(w.stateFor * 2.1) * 0.9 : 0 };
+        if (w.state === 'searching') {
+          return { stand: 1, glance: Math.sin(w.stateFor * 2.1) * 0.9 };
+        }
+        // ...or having just placed a sound: he looks that way first and turns his
+        // body after, which is what a person does — the difference between a
+        // person and a turret is that the head goes first. Eased in and out over
+        // the second after the fix, so it reads as a look and not as a snap.
+        if (reacts && w.target && w.sinceFix < 0.85) {
+          const k = Math.sin(Math.min(1, w.sinceFix / 0.85) * Math.PI);
+          let turn = Math.atan2(w.target.y - w.y, w.target.x - w.x) - w.facing;
+          while (turn > Math.PI) turn -= Math.PI * 2;
+          while (turn < -Math.PI) turn += Math.PI * 2;
+          return { stand: 1, glance: Math.max(-1.2, Math.min(1.2, turn)) * k };
+        }
+        return { stand: 1, glance: 0 };
       }
       const p = Math.min(1, w.stateFor / Math.max(0.01, w.riseFor || rules.rising));
       // Whatever share of getting up the seated drawing did not cover. For a man
@@ -14416,7 +14905,7 @@ __mod.render = (function () {
       snapCamera(level, x, y) { centreOn(level, x, y); },
       get camera() { return camera; },
 
-      draw(sim, alpha, time, pops, stats, sparks = [], flash = 0, dt = 1 / 60) {
+      draw(sim, alpha, time, pops, stats, sparks = [], flash = 0, dt = 1 / 60, fx = null) {
         ensureRoom(sim.level);
 
         // The thief is drawn between the last two simulation steps, and the
@@ -14458,6 +14947,19 @@ __mod.render = (function () {
         // and reacting to whatever woke him, so he is still the sleeping figure,
         // twitching. Cutting to a standing man on the frame the meter crosses 80
         // throws that moment away.
+        // The one thing in the room that is on. Two shifting sines rather than
+        // one, so it reads as a screen refreshing rather than as a light on a
+        // timer — and it keeps glowing after he has got up and walked off, which
+        // is what a monitor nobody turned off does.
+        const screen = sim.rules.reacts ? deskScreen(sim.level, kind) : null;
+        if (screen) {
+          const glow = 0.55 + 0.45 * Math.sin(time * 3.1) * (0.55 + 0.45 * Math.sin(time * 11.3));
+          ctx.globalAlpha = 0.10 + glow * 0.13;
+          ctx.fillStyle = '#8fd3ff';
+          ctx.fillRect(screen.x, screen.y, screen.w, screen.h);
+          ctx.globalAlpha = 1;
+        }
+
         const w = sim.investigator;
         // How far through getting up he is, on the simulation's own clock — which
         // stretches with how alarmed he is, so the drawing has to read it rather
@@ -14491,6 +14993,11 @@ __mod.render = (function () {
             Math.max(sim.startle || 0, jolt), kind, pose);
         }
         drawStashes(sim, time);
+        // What the room is doing about all this: the drawer that is open, the
+        // locker still rocking, the ring going out from the last noise. Under the
+        // people, because it is the room — a thief standing in front of the
+        // cabinet he just opened should be in front of it.
+        if (fx) fx.under(ctx);
         drawHideLabels(sim, time);
         drawItems(sim, time);
 
@@ -14604,6 +15111,9 @@ __mod.render = (function () {
           ctx.globalAlpha = 1;
         }
 
+        // ...and what belongs over the top: what came out of the drawer, on its
+        // way to his hand, and the word over a man who has just seen him.
+        if (fx) fx.over(ctx, px, py - 6);
         drawSparks(sparks);
         drawPops(pops);
         // A brief warm wash when something genuinely valuable comes off the shelf.
@@ -14633,6 +15143,7 @@ __mod.main = (function () {
   const { createRenderer } = __mod.render;
   const { sleepStage, starsFor, starThresholds, levelTotals, upgradeCost, SLEEP_LABELS, objectivesFor, isBigScore, rarityOf, watcherConfig } = __mod.rules;
   const { ITEM_ART, ITEM_NAMES } = __mod.art;
+  const { createEffects } = __mod.effects;
 
   const $ = (id) => document.getElementById(id);
   const WAKE_BEAT = 0.9;         // seconds of wake-up animation before the fail screen
@@ -14651,6 +15162,9 @@ __mod.main = (function () {
     const saveStore = createSaveStore(window.localStorage);
     const audio = createAudio(saveStore);
     const renderer = createRenderer(canvas, { debug });
+    // What the room does back. Presentation only, and only where a location
+    // asks for it — everywhere but the school this stays empty all game.
+    const fx = createEffects();
 
     audio.setMuted(!saveStore.data.settings.sound);
 
@@ -14678,6 +15192,10 @@ __mod.main = (function () {
     let lastStepPhase = 0;
     let lastTick = -1;
     let flash = 0;
+    // The money on the HUD, chasing the money in the bank. A counter that jumps
+    // says a number changed; one that runs up says you earned something.
+    let shownMoney = 0;
+    let hudClock = 0;
     let lastHeartbeat = 0;
     const stats = { fps: 0, steps: 0 };
 
@@ -14904,6 +15422,8 @@ __mod.main = (function () {
       endHold = 0;
       pendingEnd = null;
       lastStepPhase = 0;
+      fx.clear();
+      shownMoney = 0;
       audio.unlock();
       if (setting('music')) audio.startMusic();
       hideCrash();
@@ -14928,6 +15448,10 @@ __mod.main = (function () {
     }
 
     function handleEvents() {
+      // Whether this location's room answers back. One flag, read once: the
+      // school does, and the other ten play exactly as they did.
+      const reacts = !!sim.rules.reacts;
+      const player = playerOf(sim);
       for (const event of sim.events) {
         if (event.type === 'took') {
           pops.push({
@@ -14936,6 +15460,10 @@ __mod.main = (function () {
           });
           spawnSparks(event.x, event.y, event.big ? 14 : event.fragile ? 10 : 6,
             event.big ? '#ffd98a' : event.fragile ? '#bfe6ff' : '#ffd34d');
+          // Lifting something off a shelf is the loudest ordinary thing in the
+          // game, and until now the only sign of that was a bar at the top of
+          // the screen moving.
+          if (reacts) fx.ring(event.x, event.y, event.noise);
           audio.take(event.noise, event.fragile);
           if (event.big) { flash = 1; audio.jackpot(); buzz([18, 40, 24]); }
           else buzz(event.fragile ? [12, 30, 12] : 14);
@@ -14946,14 +15474,22 @@ __mod.main = (function () {
             audio.warn();
           }
         } else if (event.type === 'searching') {
-          // The drawer coming open, before anyone knows what is in it.
+          // The drawer coming open, before anyone knows what is in it — and now
+          // the drawer actually comes open: a panel slides out of the face he is
+          // standing at, stays out while his hands are in it, and shuts itself.
+          if (reacts) {
+            fx.open(event.where, event.style, event.from, event.duration);
+            fx.ring(event.x, event.y, event.noise);
+          }
           audio.bump('soft', event.noise, 0.5);
           buzz(8);
         } else if (event.type === 'found') {
           if (event.empty) {
             // An empty cupboard is information, not a failure. It gets a word
-            // and nothing else — no sound, no shake, no punishment for looking.
+            // and the drawer shutting on it — no sound, no shake, no punishment
+            // for looking.
             pops.push({ x: event.x, y: event.y - 8, value: null, text: 'EMPTY', life: 1 });
+            if (reacts) fx.shut(event.where);
           } else {
             pops.push({
               x: event.x, y: event.y - 8, value: event.value, life: 1,
@@ -14961,6 +15497,13 @@ __mod.main = (function () {
             });
             spawnSparks(event.x, event.y, event.big ? 14 : 8,
               event.big ? '#ffd98a' : '#9fe0ff');
+            // What was in there, coming out of it and into his hand, and the
+            // noise it made on the way.
+            if (reacts) {
+              fx.shut(event.where);
+              fx.fly(event.x, event.y, event.itemType);
+              fx.ring(event.x, event.y, event.noise);
+            }
             audio.take(event.noise, false);
             if (event.big) { flash = 1; audio.jackpot(); buzz([18, 40, 24]); }
             else buzz(14);
@@ -14976,17 +15519,53 @@ __mod.main = (function () {
           // just paid without reading the meter.
           pops.push({ x: event.x, y: event.y - 6, value: null,
             text: event.say || 'CREAK', life: 1 });
+          // The paper shifts under the foot that stood on it, and the sound goes
+          // out from there rather than from the middle of the thief.
+          if (reacts) {
+            // ...carrying its own kind, or the litter painter falls through to
+            // the floorboards it started as and a sheet of paper is answered by a
+            // patch of planking.
+            fx.knock({ ...event.where, kind: event.kind }, 0, 1,
+              0.25 + event.noise * 0.06, fx.paintLitter, null);
+            fx.ring(event.x, event.y + 8, event.noise);
+          }
           audio.creak(event.noise);
           buzz(Math.min(30, 8 + event.noise * 2.5));
         } else if (event.type === 'bump') {
           pops.push({
             x: event.x, y: event.y - 6, value: null, text: `+${event.noise}`,
-            life: 1, big: event.force > 0.6, color: '#ff9c6e'
+            // Where the room answers a knock with the piece moving, a ring going
+            // out and a flash of contact, the number over the top does not also
+            // need to be the biggest thing on the screen.
+            life: 1, big: event.force > 0.6 && !reacts, color: '#ff9c6e'
           });
+          // The thing you walked into, rocking on its feet. Only furniture: a
+          // wall does not move, and a bed is drawn by the sleeper's own code.
+          if (reacts) {
+            if (event.piece && event.piece.type === 'furniture') {
+              fx.knock(event.piece, event.nx, event.ny, event.force, fx.paintFurniture,
+                { x: event.x, y: event.y });
+            }
+            fx.ring(event.x, event.y, event.noise + event.force * 6);
+          }
           audio.bump(event.what === 'bed' ? 'soft' : 'hard', event.noise, event.force);
           // A harder knock is felt as well as heard.
           buzz(event.force > 0.6 ? [18, 30, 22] : Math.round(8 + event.force * 14));
           if (event.force > 0.5) spawnSparks(event.x, event.y, 5, '#e8d5b8');
+        } else if (event.type === 'watcher') {
+          // The two moments worth a word over his head, and no others: the one
+          // where he decides something is worth getting up for, and the one
+          // where he picks you out of the room. Anything more and the school is
+          // a running commentary.
+          if (reacts && event.state === 'rising') fx.mark(event.x, event.y - 26, '?');
+          if (reacts && event.state === 'following') {
+            fx.mark(event.x, event.y - 30, '!', '#ff8a7a');
+            fx.ring(event.x, event.y, 14, '255,120,100');
+          }
+        } else if (event.type === 'hiding') {
+          // Getting in behind the lockers, and coming back out. A short breath of
+          // dust at his feet either way, so the animation has a beat under it.
+          if (reacts) fx.ring(event.x, event.y, 3, '190,214,228');
         } else if (event.type === 'won') {
           const level = LEVELS.find((l) => l.id === currentLevelId);
           const stars = starsFor(level, event.haul);
@@ -15050,7 +15629,18 @@ __mod.main = (function () {
 
     function paintHud() {
       if (!sim) return;
-      setText('money', hudEls.money, `$${sim.money.toLocaleString()}`);
+      // The counter runs up to the money rather than jumping to it: a number that
+      // jumps says something changed, one that runs up says you earned it. Eased
+      // per second of real time, and it snaps the last dollar so it can never sit
+      // one short of the bank.
+      if (sim.rules.reacts) {
+        const step = Math.max(0, Math.min(0.1, clock - hudClock));
+        const gap = sim.money - shownMoney;
+        shownMoney = Math.abs(gap) < 1 ? sim.money
+          : shownMoney + gap * (1 - Math.exp(-8 * step));
+      } else shownMoney = sim.money;
+      hudClock = clock;
+      setText('money', hudEls.money, `$${Math.round(shownMoney).toLocaleString()}`);
       setText('level', hudEls.level, `LV ${sim.level.id}`);
 
       const seconds = Math.max(0, sim.timeLeft);
@@ -15238,6 +15828,8 @@ __mod.main = (function () {
           }
         }
 
+        fx.update(elapsed);
+
         // Nothing to update most frames; skip the array churn entirely then.
         if (pops.length) {
           for (const pop of pops) pop.life -= elapsed * 1.2;
@@ -15255,7 +15847,8 @@ __mod.main = (function () {
 
         if (sim) {
           if (flash > 0) flash = Math.max(0, flash - elapsed * 2.4);
-          renderer.draw(sim, Math.min(1, accumulator / STEP_SECONDS), clock, pops, stats, sparks, flash, elapsed);
+          renderer.draw(sim, Math.min(1, accumulator / STEP_SECONDS), clock, pops, stats,
+            sparks, flash, elapsed, fx);
           paintHud();
         }
         consecutiveErrors = 0;
@@ -15272,6 +15865,20 @@ __mod.main = (function () {
       }
     }
 
+    // What he is standing on, from the floor treatments the map declared. A short
+    // linear scan of a few dozen rectangles, a couple of times a second, at a
+    // footfall — cheaper than any of the ways of caching it would be to write.
+    function surfaceUnder(level, x, y) {
+      let tag = null;
+      for (const d of level.decor) {
+        if (d.kind !== 'floor') continue;
+        // Later patches are painted over earlier ones, so the last match is the
+        // one actually underfoot.
+        if (x >= d.x && x < d.x + d.w && y >= d.y && y < d.y + d.h) tag = d.tag;
+      }
+      return tag;
+    }
+
     // A soft footfall each time the walk cycle passes a half stride.
     function footstepAudio() {
       const player = playerOf(sim);
@@ -15280,8 +15887,14 @@ __mod.main = (function () {
       if (Math.floor(player.walkPhase / half) !== Math.floor(lastStepPhase / half)) {
         // Footsteps land on the walk cycle, which is driven by distance, so they
         // stay in step at any speed — and get louder the faster you move.
-        audio.step(Math.floor(player.walkPhase / half) % 2 === 0,
-          Math.min(1, player.speed / TUNING.player.speed));
+        const share = Math.min(1, player.speed / TUNING.player.speed);
+        audio.step(Math.floor(player.walkPhase / half) % 2 === 0, share);
+        // ...and leave a mark on the floor. Faint, brief, and only once he is
+        // properly walking: a scuff under every careful step would be a man
+        // leaving a trail of breadcrumbs through the building he is robbing.
+        if (sim.rules.reacts && share > 0.32 && !sim.hidden) {
+          fx.scuff(player.x, player.y, share, surfaceUnder(sim.level, player.x, player.y));
+        }
       }
       lastStepPhase = player.walkPhase;
     }

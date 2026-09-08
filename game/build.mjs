@@ -16,7 +16,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const ORDER = [
   'tuning', 'rng', 'rules', 'physics', 'nav', 'tilemap', 'maps', 'levels', 'validate',
   'gait', 'figure',
-  'sim', 'replay', 'save', 'fsm', 'audio', 'input', 'art', 'render', 'main'
+  'sim', 'replay', 'save', 'fsm', 'audio', 'input', 'art', 'effects', 'render', 'main'
 ];
 
 const IMPORT_RE = /^import\s*\{([^}]*)\}\s*from\s*'\.\/([\w-]+)\.js';?\s*$/;

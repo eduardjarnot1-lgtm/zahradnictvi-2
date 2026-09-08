@@ -8,7 +8,7 @@ import { playerOf } from './sim.js';
 import {
   paintStaticRoom, drawSleeper, drawGuard, drawSlumped, drawThief, drawCaretakerWalking,
   drawGrabbedItem,
-  roundRect, ITEM_ART, lampPositions, drawHideLabel, drawFurniture
+  roundRect, ITEM_ART, lampPositions, drawHideLabel, drawFurniture, deskScreen
 } from './art.js';
 
 // W and H are the *window*, not the world: how much of a level fits on screen
@@ -487,7 +487,7 @@ export function createRenderer(canvas, options = {}) {
     const wy = w.prevY + (w.y - w.prevY) * alpha;
     const rules = sim.investigateRules;
     const seated = (watcherConfig(sim.level.watcher.kind).pose || 'bed') === 'desk';
-    const { stand, glance } = gettingUp(w, rules, time, seated);
+    const { stand, glance } = gettingUp(w, rules, time, seated, !!sim.rules.reacts);
     // The same speed-driven gait the thief uses, against his own top speed —
     // he is slower, so a brisk walk for him is not a run.
     const gait = gaitBlend(w.speed / rules.speed);
@@ -519,15 +519,28 @@ export function createRenderer(canvas, options = {}) {
   // decide what to do about it.
   //
   // `stand` is how upright he is; `glance` turns his head without turning him.
-  function gettingUp(w, rules, time, seated) {
+  function gettingUp(w, rules, time, seated, reacts) {
     const ease = (t) => t * t * (3 - 2 * t);
     if (w.state === 'settling') {
       return { stand: Math.max(0, 1 - w.stateFor / rules.settling), glance: 0 };
     }
     if (w.state !== 'rising') {
       // Standing at the spot he came to look at, turning his head over it.
-      const searching = w.state === 'searching';
-      return { stand: 1, glance: searching ? Math.sin(w.stateFor * 2.1) * 0.9 : 0 };
+      if (w.state === 'searching') {
+        return { stand: 1, glance: Math.sin(w.stateFor * 2.1) * 0.9 };
+      }
+      // ...or having just placed a sound: he looks that way first and turns his
+      // body after, which is what a person does — the difference between a
+      // person and a turret is that the head goes first. Eased in and out over
+      // the second after the fix, so it reads as a look and not as a snap.
+      if (reacts && w.target && w.sinceFix < 0.85) {
+        const k = Math.sin(Math.min(1, w.sinceFix / 0.85) * Math.PI);
+        let turn = Math.atan2(w.target.y - w.y, w.target.x - w.x) - w.facing;
+        while (turn > Math.PI) turn -= Math.PI * 2;
+        while (turn < -Math.PI) turn += Math.PI * 2;
+        return { stand: 1, glance: Math.max(-1.2, Math.min(1.2, turn)) * k };
+      }
+      return { stand: 1, glance: 0 };
     }
     const p = Math.min(1, w.stateFor / Math.max(0.01, w.riseFor || rules.rising));
     // Whatever share of getting up the seated drawing did not cover. For a man
@@ -555,7 +568,7 @@ export function createRenderer(canvas, options = {}) {
     snapCamera(level, x, y) { centreOn(level, x, y); },
     get camera() { return camera; },
 
-    draw(sim, alpha, time, pops, stats, sparks = [], flash = 0, dt = 1 / 60) {
+    draw(sim, alpha, time, pops, stats, sparks = [], flash = 0, dt = 1 / 60, fx = null) {
       ensureRoom(sim.level);
 
       // The thief is drawn between the last two simulation steps, and the
@@ -597,6 +610,19 @@ export function createRenderer(canvas, options = {}) {
       // and reacting to whatever woke him, so he is still the sleeping figure,
       // twitching. Cutting to a standing man on the frame the meter crosses 80
       // throws that moment away.
+      // The one thing in the room that is on. Two shifting sines rather than
+      // one, so it reads as a screen refreshing rather than as a light on a
+      // timer — and it keeps glowing after he has got up and walked off, which
+      // is what a monitor nobody turned off does.
+      const screen = sim.rules.reacts ? deskScreen(sim.level, kind) : null;
+      if (screen) {
+        const glow = 0.55 + 0.45 * Math.sin(time * 3.1) * (0.55 + 0.45 * Math.sin(time * 11.3));
+        ctx.globalAlpha = 0.10 + glow * 0.13;
+        ctx.fillStyle = '#8fd3ff';
+        ctx.fillRect(screen.x, screen.y, screen.w, screen.h);
+        ctx.globalAlpha = 1;
+      }
+
       const w = sim.investigator;
       // How far through getting up he is, on the simulation's own clock — which
       // stretches with how alarmed he is, so the drawing has to read it rather
@@ -630,6 +656,11 @@ export function createRenderer(canvas, options = {}) {
           Math.max(sim.startle || 0, jolt), kind, pose);
       }
       drawStashes(sim, time);
+      // What the room is doing about all this: the drawer that is open, the
+      // locker still rocking, the ring going out from the last noise. Under the
+      // people, because it is the room — a thief standing in front of the
+      // cabinet he just opened should be in front of it.
+      if (fx) fx.under(ctx);
       drawHideLabels(sim, time);
       drawItems(sim, time);
 
@@ -743,6 +774,9 @@ export function createRenderer(canvas, options = {}) {
         ctx.globalAlpha = 1;
       }
 
+      // ...and what belongs over the top: what came out of the drawer, on its
+      // way to his hand, and the word over a man who has just seen him.
+      if (fx) fx.over(ctx, px, py - 6);
       drawSparks(sparks);
       drawPops(pops);
       // A brief warm wash when something genuinely valuable comes off the shelf.
