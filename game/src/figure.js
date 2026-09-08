@@ -441,6 +441,20 @@ function drawShoe(ctx, ax, ay, foot, g, look, build, faceX, faceY, cycling, cree
   ctx.beginPath();
   ctx.ellipse(0.8, tall * 0.58, long * 0.92, tall * 0.34, 0, 0, TAU);
   ctx.fill();
+  // The heel, and the line where the upper meets the sole. Two fills, and they
+  // are what turn a coloured ellipse into a shoe: a boot has a block under the
+  // back of it and a trainer has a stripe round it, and the shape says which.
+  //
+  // School only, like every other pass in this file — `lit` is the flag the
+  // school's looks carry. The other ten locations draw the shoe they always
+  // drew, down to the pixel.
+  if (!look.lit) { ctx.restore(); return; }
+  ctx.fillStyle = look.shoeDark || 'rgba(0,0,0,0.30)';
+  ctx.beginPath();
+  ctx.ellipse(-long * 0.55, tall * 0.22, long * 0.34, tall * 0.60, 0, 0, TAU);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.16)';
+  ctx.fillRect(-long * 0.72, tall * 0.10, long * 1.5, 0.5 * build);
   ctx.restore();
 }
 
@@ -554,6 +568,33 @@ function drawTorso(ctx, cx, cy, { acrossX, acrossY, faceX, faceY, sideOn, twist,
     ctx.beginPath();
     ctx.arc(cx + lead * 0.7, top + 6.2, 0.6, 0, TAU);
     ctx.fill();
+  }
+  // A belt across the hem. The pirate's is the widest thing on him after the
+  // hat, and a coat with no waist is a dressing gown.
+  if (look.belt) {
+    ctx.fillStyle = look.belt;
+    ctx.fillRect(cx - hem * 0.92, bottom - 4.6, hem * 1.84, 2.6);
+    ctx.fillStyle = 'rgba(0,0,0,0.28)';
+    ctx.fillRect(cx - hem * 0.92, bottom - 2.2, hem * 1.84, 0.7);
+    if (look.buckle) {
+      ctx.fillStyle = look.buckle;
+      ctx.fillRect(cx + lead * 0.4 - 1.9, bottom - 5.0, 3.8, 3.4);
+      ctx.fillStyle = 'rgba(255,255,255,0.45)';
+      ctx.fillRect(cx + lead * 0.4 - 1.9, bottom - 5.0, 3.8, 1.0);
+    }
+  }
+  // Lapels, folded back off a dress shirt. Two triangles, and the difference
+  // between a tailcoat and a black jumper.
+  if (look.lapel) {
+    ctx.fillStyle = look.lapel;
+    for (const side of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(cx + lead + side * shoulder * 0.66, top + 1.0);
+      ctx.lineTo(cx + lead + side * shoulder * 0.16, top + 2.2);
+      ctx.lineTo(cx + lead * 0.7 + side * shoulder * 0.30, top + 9.0);
+      ctx.closePath();
+      ctx.fill();
+    }
   }
   // A neckerchief, a cravat, a scarf: whatever a skin has round its throat.
   if (look.sash && look.crown !== 'hood') {
@@ -1151,6 +1192,18 @@ const THIEF_BODY = {
 
 export const SCHOOL_SKINS = [
   {
+    // The thief the game has always had, and still the one it starts you with.
+    // Everything below is an alternative to him, not a replacement: this entry
+    // is `THIEF_LOOK` with the school's own lighting on it and nothing else
+    // changed, which is what makes him the reference the other five are judged
+    // against — same body, same beanie, same navy sweater, same walk.
+    id: 'classic',
+    name: 'Classic',
+    blurb: 'The one who started it. Beanie, dark jumper, no fuss.',
+    ...THIEF_LOOK,
+    lit: '226,240,214'
+  },
+  {
     // Silent. Fast. Invisible. Black on black, hood up, and nothing on him
     // that catches a light — the one that reads as a thief before anything else.
     id: 'shadow',
@@ -1179,6 +1232,7 @@ export const SCHOOL_SKINS = [
     crown: 'tricorn', hat: '#1c1913', hatLit: '#2e281f',
     gold: '#d8a33c', goldTrim: 'rgba(216,163,60,0.55)',
     sash: '#b5342c',
+    belt: '#6b4a2c', buckle: '#d8a33c',
     front: 'stripes', frontTone: '#e6ddcb', frontDark: '#3a3630',
     cape: '#241f19', capeLit: 'rgba(216,163,60,0.55)',
     rim: '#171410'
@@ -1194,7 +1248,7 @@ export const SCHOOL_SKINS = [
     mask: null,
     coat: '#1d222b', coatLit: '#2c3340', coatDark: '#12161d',
     trouser: '#181c24', trouserLit: '#252b35',
-    shoe: '#e4e9f0', shoeLit: '#f4f7fb', sole: '#9fb6c6',
+    shoe: '#e4e9f0', shoeLit: '#f4f7fb', sole: '#9fb6c6', shoeDark: '#8fa6b8',
     hair: '#7c4a28', hairLit: 'rgba(214,150,90,0.55)',
     crown: 'mop',
     goggles: '#4fd0f5',
@@ -1215,6 +1269,7 @@ export const SCHOOL_SKINS = [
     crown: 'tophat', hat: '#16151a', hatLit: '#242229', hatDark: '#0e0d11',
     band: '#5a4632',
     front: 'shirt', frontTone: '#e8e4dc', frontDark: '#7a5a3a',
+    lapel: '#2a2831',
     cape: '#191820', capeLit: 'rgba(200,190,180,0.22)',
     cane: '#2a2118', caneKnob: '#c9a86a',
     rim: '#111016'
@@ -1229,7 +1284,7 @@ export const SCHOOL_SKINS = [
     ...THIEF_BODY,
     coat: '#222731', coatLit: '#30363f', coatDark: '#161a21',
     trouser: '#1b1f26', trouserLit: '#272c34',
-    shoe: '#cfd6df', shoeLit: '#e6ebf2', sole: '#98a3b0',
+    shoe: '#cfd6df', shoeLit: '#e6ebf2', sole: '#98a3b0', shoeDark: '#8a95a3',
     hair: '#2a2118',
     crown: 'hood', hat: '#e6e2d8', hatLit: '#f6f4ee', hatDark: '#bdb9ae',
     cape: '#ded9ce', capeLit: 'rgba(255,255,255,0.55)',
@@ -1239,7 +1294,8 @@ export const SCHOOL_SKINS = [
 ];
 
 // The one the game starts with, and the one anything that asks for a skin by a
-// name nobody has heard of falls back to.
+// name nobody has heard of falls back to. It is the original thief, deliberately
+// — a player who never opens the shop plays the character they always have.
 export const DEFAULT_SKIN = SCHOOL_SKINS[0].id;
 
 export function skinById(id) {

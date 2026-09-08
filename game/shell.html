@@ -143,6 +143,13 @@
   .card{display:flex;align-items:center;gap:11px;width:100%;background:#ffffff0f;
     border:1px solid #ffffff1a;border-radius:14px;padding:11px 13px;text-align:left}
   .card .ico{font-size:26px;width:34px;text-align:center}
+  /* The thief portraits. Wider than an emoji because a whole character has to
+     fit in one, on the room's own floor tone so he is not standing on nothing. */
+  .card .skinshot{width:58px;height:72px;display:flex;align-items:flex-end;
+    justify-content:center;border-radius:8px;flex:0 0 auto;
+    background:linear-gradient(180deg,#2b3340 0%,#39424f 62%,#4a545f 100%);
+    border:1px solid #ffffff1f;overflow:hidden}
+  .card .skinshot canvas{display:block}
   .card .body{flex:1;min-width:0}
   .card h3{font-size:14px;font-weight:800}
   .card p{font-size:11px;color:#a89bb5;margin-top:2px}
@@ -255,6 +262,12 @@
       <span class="money" id="shopBank">$0</span>
       <div id="shopList" style="display:flex;flex-direction:column;gap:9px;width:100%"></div>
       <p class="hint">Nothing here makes a stolen item quieter.<br>The decision stays yours.</p>
+      <!-- The thieves. Same card as the upgrades above so the screen reads as
+           one shop, with a drawing of the character instead of an emoji —
+           the preview is the real figure, painted by the game's own painter. -->
+      <div class="chapter">THIEF</div>
+      <div id="skinList" style="display:flex;flex-direction:column;gap:9px;width:100%"></div>
+      <p class="hint">Every thief moves and sounds exactly the same.<br>The difference is what he is wearing.</p>
       <button class="btn alt" id="bShopBack">BACK</button>
     </div>
   </div>
@@ -275,12 +288,6 @@
       <div class="row"><span>Music</span><button class="toggle" id="tMusic">ON</button></div>
       <div class="row"><span>Vibration</span><button class="toggle" id="tVibe">ON</button></div>
       <div class="row"><span>Unlock all levels</span><button class="toggle" id="tUnlock">ON</button></div>
-      <!-- Which thief you play as in the school. One row and one button rather
-           than a screen of its own: it is a cosmetic choice with five options,
-           and tapping through five names is quicker than opening a menu to make
-           one of them. The blurb under it is the skin's own. -->
-      <div class="row"><span>Thief</span><button class="toggle on" id="tSkin">SHADOW</button></div>
-      <p class="hint" id="skinBlurb">Silent. Fast. Invisible.</p>
       <div class="row"><span>Graphics</span>
         <div class="seg" id="segQuality">
           <button data-q="low">LOW</button><button data-q="medium">MED</button><button data-q="high">HIGH</button>

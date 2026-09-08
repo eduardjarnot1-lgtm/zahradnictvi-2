@@ -10,10 +10,10 @@ import { createMachine } from './fsm.js';
 import { createAudio } from './audio.js';
 import { createInput } from './input.js';
 import { createRenderer } from './render.js';
-import { SCHOOL_SKINS, skinById } from './figure.js';
+import { SCHOOL_SKINS, drawFigure } from './figure.js';
 import {
   sleepStage, starsFor, starThresholds, levelTotals, upgradeCost, SLEEP_LABELS,
-  objectivesFor, isBigScore, rarityOf, watcherConfig
+  objectivesFor, isBigScore, rarityOf, watcherConfig, gaitOf
 } from './rules.js';
 import { ITEM_ART, ITEM_NAMES } from './art.js';
 import { createEffects } from './effects.js';
@@ -248,6 +248,75 @@ export function boot() {
       card.appendChild(buy);
       list.appendChild(card);
     }
+    buildSkins();
+  }
+
+  // A portrait of a thief, painted by the same painter that draws him in the
+  // corridor. Not an icon of him — him: the shop preview is `drawFigure` at a
+  // standstill on a small canvas, so a skin cannot look like one thing on the
+  // card and another in the game, and there is no second set of art to keep in
+  // step. Drawn once per card when the shop is opened and never again.
+  const PREVIEW = { w: 58, h: 72, scale: 2 };
+  function paintPreview(skin) {
+    const canvas = document.createElement('canvas');
+    canvas.width = PREVIEW.w * PREVIEW.scale;
+    canvas.height = PREVIEW.h * PREVIEW.scale;
+    canvas.style.width = `${PREVIEW.w}px`;
+    canvas.style.height = `${PREVIEW.h}px`;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return canvas;
+    ctx.scale(PREVIEW.scale, PREVIEW.scale);
+    // Facing the camera and standing still, which is the pose a shop wants —
+    // and the same idle band the game blends into when the stick lets go.
+    const gait = gaitOf(0, TUNING.locations.School.gait);
+    // Turned a little rather than square on. Straight at the camera hides
+    // everything that hangs off a skin — a tricorn's brim, a cloak, a cane —
+    // behind the man wearing it, and those are the parts worth showing.
+    drawFigure(ctx, PREVIEW.w / 2 - 2, PREVIEW.h - 17, {
+      facing: Math.PI * 0.73,
+      walkPhase: 0.12,
+      clock: 0.8,
+      gait,
+      stand: 1,
+      glance: 0,
+      search: 0,
+      reach: 0,
+      drive: 0
+    }, skin);
+    return canvas;
+  }
+
+  function buildSkins() {
+    const list = $('skinList');
+    if (!list) return;
+    list.innerHTML = '';
+    const worn = saveStore.data.settings.skin;
+    for (const skin of SCHOOL_SKINS) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const frame = document.createElement('div');
+      frame.className = 'ico skinshot';
+      frame.appendChild(paintPreview(skin));
+      const body = document.createElement('div');
+      body.className = 'body';
+      body.innerHTML = `<h3>${skin.name}</h3><p>${skin.blurb}</p>`;
+      const pick = document.createElement('button');
+      const on = skin.id === worn;
+      pick.className = on ? 'buy max' : 'buy';
+      pick.textContent = on ? 'WORN' : 'WEAR';
+      pick.disabled = on;
+      pick.addEventListener('click', () => {
+        saveStore.setSetting('skin', skin.id);
+        renderer.skin = skin.id;
+        audio.purchase();
+        buzz(14);
+        buildSkins();
+      });
+      card.appendChild(frame);
+      card.appendChild(body);
+      card.appendChild(pick);
+      list.appendChild(card);
+    }
   }
 
   function buildCollection() {
@@ -276,24 +345,9 @@ export function boot() {
     paint('tMusic', setting('music'));
     paint('tVibe', setting('vibration'));
     paint('tUnlock', setting('unlockAll'));
-    // Tapping the thief row walks round the five. No confirm, no preview screen:
-  // the change is visible the next time a school level is drawn, and the label
-  // and the line under it say which one is on.
-  on('tSkin', () => {
-    const at = SCHOOL_SKINS.findIndex((k) => k.id === setting('skin'));
-    const next = SCHOOL_SKINS[(at + 1) % SCHOOL_SKINS.length];
-    saveStore.setSetting('skin', next.id);
-    renderer.skin = next.id;
-    paintSettings();
-    buzz(12);
-  });
-
-  for (const button of $('segQuality').children) {
+    for (const button of $('segQuality').children) {
       button.classList.toggle('on', button.dataset.q === setting('quality'));
     }
-    const worn = skinById(setting('skin'));
-    $('tSkin').textContent = worn.name.toUpperCase();
-    $('skinBlurb').textContent = worn.blurb;
   }
 
   // ---------------------------------------------------------------- level

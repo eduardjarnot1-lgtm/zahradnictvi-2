@@ -143,6 +143,13 @@
   .card{display:flex;align-items:center;gap:11px;width:100%;background:#ffffff0f;
     border:1px solid #ffffff1a;border-radius:14px;padding:11px 13px;text-align:left}
   .card .ico{font-size:26px;width:34px;text-align:center}
+  /* The thief portraits. Wider than an emoji because a whole character has to
+     fit in one, on the room's own floor tone so he is not standing on nothing. */
+  .card .skinshot{width:58px;height:72px;display:flex;align-items:flex-end;
+    justify-content:center;border-radius:8px;flex:0 0 auto;
+    background:linear-gradient(180deg,#2b3340 0%,#39424f 62%,#4a545f 100%);
+    border:1px solid #ffffff1f;overflow:hidden}
+  .card .skinshot canvas{display:block}
   .card .body{flex:1;min-width:0}
   .card h3{font-size:14px;font-weight:800}
   .card p{font-size:11px;color:#a89bb5;margin-top:2px}
@@ -255,6 +262,12 @@
       <span class="money" id="shopBank">$0</span>
       <div id="shopList" style="display:flex;flex-direction:column;gap:9px;width:100%"></div>
       <p class="hint">Nothing here makes a stolen item quieter.<br>The decision stays yours.</p>
+      <!-- The thieves. Same card as the upgrades above so the screen reads as
+           one shop, with a drawing of the character instead of an emoji —
+           the preview is the real figure, painted by the game's own painter. -->
+      <div class="chapter">THIEF</div>
+      <div id="skinList" style="display:flex;flex-direction:column;gap:9px;width:100%"></div>
+      <p class="hint">Every thief moves and sounds exactly the same.<br>The difference is what he is wearing.</p>
       <button class="btn alt" id="bShopBack">BACK</button>
     </div>
   </div>
@@ -275,12 +288,6 @@
       <div class="row"><span>Music</span><button class="toggle" id="tMusic">ON</button></div>
       <div class="row"><span>Vibration</span><button class="toggle" id="tVibe">ON</button></div>
       <div class="row"><span>Unlock all levels</span><button class="toggle" id="tUnlock">ON</button></div>
-      <!-- Which thief you play as in the school. One row and one button rather
-           than a screen of its own: it is a cosmetic choice with five options,
-           and tapping through five names is quicker than opening a menu to make
-           one of them. The blurb under it is the skin's own. -->
-      <div class="row"><span>Thief</span><button class="toggle on" id="tSkin">SHADOW</button></div>
-      <p class="hint" id="skinBlurb">Silent. Fast. Invisible.</p>
       <div class="row"><span>Graphics</span>
         <div class="seg" id="segQuality">
           <button data-q="low">LOW</button><button data-q="medium">MED</button><button data-q="high">HIGH</button>
@@ -8902,6 +8909,20 @@ __mod.figure = (function () {
     ctx.beginPath();
     ctx.ellipse(0.8, tall * 0.58, long * 0.92, tall * 0.34, 0, 0, TAU);
     ctx.fill();
+    // The heel, and the line where the upper meets the sole. Two fills, and they
+    // are what turn a coloured ellipse into a shoe: a boot has a block under the
+    // back of it and a trainer has a stripe round it, and the shape says which.
+    //
+    // School only, like every other pass in this file — `lit` is the flag the
+    // school's looks carry. The other ten locations draw the shoe they always
+    // drew, down to the pixel.
+    if (!look.lit) { ctx.restore(); return; }
+    ctx.fillStyle = look.shoeDark || 'rgba(0,0,0,0.30)';
+    ctx.beginPath();
+    ctx.ellipse(-long * 0.55, tall * 0.22, long * 0.34, tall * 0.60, 0, 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.16)';
+    ctx.fillRect(-long * 0.72, tall * 0.10, long * 1.5, 0.5 * build);
     ctx.restore();
   }
 
@@ -9015,6 +9036,33 @@ __mod.figure = (function () {
       ctx.beginPath();
       ctx.arc(cx + lead * 0.7, top + 6.2, 0.6, 0, TAU);
       ctx.fill();
+    }
+    // A belt across the hem. The pirate's is the widest thing on him after the
+    // hat, and a coat with no waist is a dressing gown.
+    if (look.belt) {
+      ctx.fillStyle = look.belt;
+      ctx.fillRect(cx - hem * 0.92, bottom - 4.6, hem * 1.84, 2.6);
+      ctx.fillStyle = 'rgba(0,0,0,0.28)';
+      ctx.fillRect(cx - hem * 0.92, bottom - 2.2, hem * 1.84, 0.7);
+      if (look.buckle) {
+        ctx.fillStyle = look.buckle;
+        ctx.fillRect(cx + lead * 0.4 - 1.9, bottom - 5.0, 3.8, 3.4);
+        ctx.fillStyle = 'rgba(255,255,255,0.45)';
+        ctx.fillRect(cx + lead * 0.4 - 1.9, bottom - 5.0, 3.8, 1.0);
+      }
+    }
+    // Lapels, folded back off a dress shirt. Two triangles, and the difference
+    // between a tailcoat and a black jumper.
+    if (look.lapel) {
+      ctx.fillStyle = look.lapel;
+      for (const side of [-1, 1]) {
+        ctx.beginPath();
+        ctx.moveTo(cx + lead + side * shoulder * 0.66, top + 1.0);
+        ctx.lineTo(cx + lead + side * shoulder * 0.16, top + 2.2);
+        ctx.lineTo(cx + lead * 0.7 + side * shoulder * 0.30, top + 9.0);
+        ctx.closePath();
+        ctx.fill();
+      }
     }
     // A neckerchief, a cravat, a scarf: whatever a skin has round its throat.
     if (look.sash && look.crown !== 'hood') {
@@ -9612,6 +9660,18 @@ __mod.figure = (function () {
 
   const SCHOOL_SKINS = [
     {
+      // The thief the game has always had, and still the one it starts you with.
+      // Everything below is an alternative to him, not a replacement: this entry
+      // is `THIEF_LOOK` with the school's own lighting on it and nothing else
+      // changed, which is what makes him the reference the other five are judged
+      // against — same body, same beanie, same navy sweater, same walk.
+      id: 'classic',
+      name: 'Classic',
+      blurb: 'The one who started it. Beanie, dark jumper, no fuss.',
+      ...THIEF_LOOK,
+      lit: '226,240,214'
+    },
+    {
       // Silent. Fast. Invisible. Black on black, hood up, and nothing on him
       // that catches a light — the one that reads as a thief before anything else.
       id: 'shadow',
@@ -9640,6 +9700,7 @@ __mod.figure = (function () {
       crown: 'tricorn', hat: '#1c1913', hatLit: '#2e281f',
       gold: '#d8a33c', goldTrim: 'rgba(216,163,60,0.55)',
       sash: '#b5342c',
+      belt: '#6b4a2c', buckle: '#d8a33c',
       front: 'stripes', frontTone: '#e6ddcb', frontDark: '#3a3630',
       cape: '#241f19', capeLit: 'rgba(216,163,60,0.55)',
       rim: '#171410'
@@ -9655,7 +9716,7 @@ __mod.figure = (function () {
       mask: null,
       coat: '#1d222b', coatLit: '#2c3340', coatDark: '#12161d',
       trouser: '#181c24', trouserLit: '#252b35',
-      shoe: '#e4e9f0', shoeLit: '#f4f7fb', sole: '#9fb6c6',
+      shoe: '#e4e9f0', shoeLit: '#f4f7fb', sole: '#9fb6c6', shoeDark: '#8fa6b8',
       hair: '#7c4a28', hairLit: 'rgba(214,150,90,0.55)',
       crown: 'mop',
       goggles: '#4fd0f5',
@@ -9676,6 +9737,7 @@ __mod.figure = (function () {
       crown: 'tophat', hat: '#16151a', hatLit: '#242229', hatDark: '#0e0d11',
       band: '#5a4632',
       front: 'shirt', frontTone: '#e8e4dc', frontDark: '#7a5a3a',
+      lapel: '#2a2831',
       cape: '#191820', capeLit: 'rgba(200,190,180,0.22)',
       cane: '#2a2118', caneKnob: '#c9a86a',
       rim: '#111016'
@@ -9690,7 +9752,7 @@ __mod.figure = (function () {
       ...THIEF_BODY,
       coat: '#222731', coatLit: '#30363f', coatDark: '#161a21',
       trouser: '#1b1f26', trouserLit: '#272c34',
-      shoe: '#cfd6df', shoeLit: '#e6ebf2', sole: '#98a3b0',
+      shoe: '#cfd6df', shoeLit: '#e6ebf2', sole: '#98a3b0', shoeDark: '#8a95a3',
       hair: '#2a2118',
       crown: 'hood', hat: '#e6e2d8', hatLit: '#f6f4ee', hatDark: '#bdb9ae',
       cape: '#ded9ce', capeLit: 'rgba(255,255,255,0.55)',
@@ -9700,7 +9762,8 @@ __mod.figure = (function () {
   ];
 
   // The one the game starts with, and the one anything that asks for a skin by a
-  // name nobody has heard of falls back to.
+  // name nobody has heard of falls back to. It is the original thief, deliberately
+  // — a player who never opens the shop plays the character they always have.
   const DEFAULT_SKIN = SCHOOL_SKINS[0].id;
 
   function skinById(id) {
@@ -17428,8 +17491,8 @@ __mod.main = (function () {
   const { createAudio } = __mod.audio;
   const { createInput } = __mod.input;
   const { createRenderer } = __mod.render;
-  const { SCHOOL_SKINS, skinById } = __mod.figure;
-  const { sleepStage, starsFor, starThresholds, levelTotals, upgradeCost, SLEEP_LABELS, objectivesFor, isBigScore, rarityOf, watcherConfig } = __mod.rules;
+  const { SCHOOL_SKINS, drawFigure } = __mod.figure;
+  const { sleepStage, starsFor, starThresholds, levelTotals, upgradeCost, SLEEP_LABELS, objectivesFor, isBigScore, rarityOf, watcherConfig, gaitOf } = __mod.rules;
   const { ITEM_ART, ITEM_NAMES } = __mod.art;
   const { createEffects } = __mod.effects;
 
@@ -17663,6 +17726,75 @@ __mod.main = (function () {
         card.appendChild(buy);
         list.appendChild(card);
       }
+      buildSkins();
+    }
+
+    // A portrait of a thief, painted by the same painter that draws him in the
+    // corridor. Not an icon of him — him: the shop preview is `drawFigure` at a
+    // standstill on a small canvas, so a skin cannot look like one thing on the
+    // card and another in the game, and there is no second set of art to keep in
+    // step. Drawn once per card when the shop is opened and never again.
+    const PREVIEW = { w: 58, h: 72, scale: 2 };
+    function paintPreview(skin) {
+      const canvas = document.createElement('canvas');
+      canvas.width = PREVIEW.w * PREVIEW.scale;
+      canvas.height = PREVIEW.h * PREVIEW.scale;
+      canvas.style.width = `${PREVIEW.w}px`;
+      canvas.style.height = `${PREVIEW.h}px`;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return canvas;
+      ctx.scale(PREVIEW.scale, PREVIEW.scale);
+      // Facing the camera and standing still, which is the pose a shop wants —
+      // and the same idle band the game blends into when the stick lets go.
+      const gait = gaitOf(0, TUNING.locations.School.gait);
+      // Turned a little rather than square on. Straight at the camera hides
+      // everything that hangs off a skin — a tricorn's brim, a cloak, a cane —
+      // behind the man wearing it, and those are the parts worth showing.
+      drawFigure(ctx, PREVIEW.w / 2 - 2, PREVIEW.h - 17, {
+        facing: Math.PI * 0.73,
+        walkPhase: 0.12,
+        clock: 0.8,
+        gait,
+        stand: 1,
+        glance: 0,
+        search: 0,
+        reach: 0,
+        drive: 0
+      }, skin);
+      return canvas;
+    }
+
+    function buildSkins() {
+      const list = $('skinList');
+      if (!list) return;
+      list.innerHTML = '';
+      const worn = saveStore.data.settings.skin;
+      for (const skin of SCHOOL_SKINS) {
+        const card = document.createElement('div');
+        card.className = 'card';
+        const frame = document.createElement('div');
+        frame.className = 'ico skinshot';
+        frame.appendChild(paintPreview(skin));
+        const body = document.createElement('div');
+        body.className = 'body';
+        body.innerHTML = `<h3>${skin.name}</h3><p>${skin.blurb}</p>`;
+        const pick = document.createElement('button');
+        const on = skin.id === worn;
+        pick.className = on ? 'buy max' : 'buy';
+        pick.textContent = on ? 'WORN' : 'WEAR';
+        pick.disabled = on;
+        pick.addEventListener('click', () => {
+          saveStore.setSetting('skin', skin.id);
+          renderer.skin = skin.id;
+          audio.purchase();
+          buzz(14);
+          buildSkins();
+        });
+        card.appendChild(frame);
+        card.appendChild(body);
+        card.appendChild(pick);
+        list.appendChild(card);
+      }
     }
 
     function buildCollection() {
@@ -17691,24 +17823,9 @@ __mod.main = (function () {
       paint('tMusic', setting('music'));
       paint('tVibe', setting('vibration'));
       paint('tUnlock', setting('unlockAll'));
-      // Tapping the thief row walks round the five. No confirm, no preview screen:
-    // the change is visible the next time a school level is drawn, and the label
-    // and the line under it say which one is on.
-    on('tSkin', () => {
-      const at = SCHOOL_SKINS.findIndex((k) => k.id === setting('skin'));
-      const next = SCHOOL_SKINS[(at + 1) % SCHOOL_SKINS.length];
-      saveStore.setSetting('skin', next.id);
-      renderer.skin = next.id;
-      paintSettings();
-      buzz(12);
-    });
-
-    for (const button of $('segQuality').children) {
+      for (const button of $('segQuality').children) {
         button.classList.toggle('on', button.dataset.q === setting('quality'));
       }
-      const worn = skinById(setting('skin'));
-      $('tSkin').textContent = worn.name.toUpperCase();
-      $('skinBlurb').textContent = worn.blurb;
     }
 
     // ---------------------------------------------------------------- level
