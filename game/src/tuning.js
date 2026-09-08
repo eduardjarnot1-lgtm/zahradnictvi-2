@@ -607,11 +607,17 @@ const PEOPLE = {
       // — which is the one thing a hiding place must never do. The button says
       // EXIT, in the same place the button that said HIDE was.
     },
-    // Getting out of a chair takes a beat longer than it did. There are now
-    // eight of them between the head coming off the desk and the first step —
-    // and a wake-up you can read is also a wake-up the player can use, which is
-    // the point of showing it rather than cutting to a man already walking.
-    alertness: { riseLow: 2.3, riseHigh: 1.1 },
+    // Getting out of a chair. Eight beats between the head coming off the desk
+    // and the first step, and the whole sequence is scripted to this number —
+    // so shortening it plays the same wake-up faster rather than cutting any of
+    // it out, and it is still a wake-up the player can read and use.
+    //
+    // Down from 2.3 and 1.1. A man who hears a cabinet go over three metres
+    // from his desk and takes two and a quarter seconds to stand up is a man
+    // the player has already walked away from. The bottom of the range is what
+    // a bang beside him gets; the top is a clatter at the far end of the
+    // building, which he is welcome to take his time over.
+    alertness: { riseLow: 1.7, riseHigh: 0.7 },
     investigate: {
       // Losing him has to cost more ground than being seen does, or he would
       // drop you while still watching you: the two numbers are one mechanism

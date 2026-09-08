@@ -668,7 +668,13 @@ test('he cannot catch you while he is getting up or lying down', () => {
   sim.noise = 81;
   tick(run);
   assert.equal(w.state, 'rising');
-  for (let i = 0; i < Math.floor(RULES.investigate.rising * 60) - 2; i++) {
+  // How long *this* get-up takes. It is decided by how loud the thing that woke
+  // him was and published on him for the renderer to draw to, so the guarantee
+  // is "the length of his get-up" rather than the length of some other man's:
+  // a bang beside his desk gets him up quicker than a clatter down the hall,
+  // and the beat you have to back away in shortens with it.
+  assert.ok(w.riseFor > 0.5, `a get-up of ${w.riseFor}s is not a beat`);
+  for (let i = 0; i < Math.floor(w.riseFor * 60) - 2; i++) {
     place(sim, sim.level.watcher.x, sim.level.watcher.y - 26);
     tick(run);
   }

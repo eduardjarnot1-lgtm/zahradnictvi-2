@@ -99,7 +99,21 @@ const UPDATERS = {
     // the renderer reads the very same number the phase was advanced with. If
     // those two ever disagreed the feet would slide by exactly the difference,
     // so they are not allowed to be computed twice.
-    entity.gaitShare = entity.speed / TUNING.player.speed;
+    // Followed rather than read raw, and for the same reason Mr. Vrána's is:
+    // `speed` is ground actually covered, so it collapses to nothing for a
+    // single frame every time a shoulder catches a doorway and the mover zeroes
+    // the velocity on the axis that hit. Measured over half a minute of walking
+    // a school, eight frames in a hundred moved his share further than his own
+    // acceleration could — every one of them a graze, and every one of them a
+    // frame where his gait restarted from a standstill.
+    //
+    // This does not let the legs keep going after he stops: the phase advances
+    // by ground covered, and ground covered is zero against a wall. What eases
+    // is only which band the pose is read from, and both the phase and the foot
+    // placement read the same one, so a turn of the cycle still buys exactly one
+    // stride of floor and nothing slides.
+    entity.gaitShare += (entity.speed / TUNING.player.speed - entity.gaitShare)
+      * Math.min(1, STEP_SECONDS / 0.14);
     entity.walkPhase += travelled * stridePerUnit(entity.gaitShare, sim.rules.gait);
     entity.idleSeconds = entity.moving ? 0 : entity.idleSeconds + STEP_SECONDS;
   },
@@ -125,7 +139,14 @@ const UPDATERS = {
       // out of a solid rectangle. So he swings his legs off to the nearest
       // place a person can stand, and the physics takes over from there.
       if (scripted && entity.stand) {
-        const duration = entity.state === 'rising' ? rules.rising : rules.settling;
+        // The same clock the state itself runs on. Getting up is timed by how
+        // loud the thing that woke him was, so a lerp on the tuning's flat
+        // `rising` either landed him at the chair's edge early and left him
+        // standing there, or was still halfway through when the state ended and
+        // snapped him the rest of the way. Both are visible, and the second one
+        // is the snap this whole sequence exists to avoid.
+        const duration = entity.state === 'rising'
+          ? (entity.riseFor || rules.rising) : rules.settling;
         const raw = Math.max(0, Math.min(1, entity.stateFor / duration));
         const t = raw * raw * (3 - 2 * raw);
         const share = entity.state === 'rising' ? t : 1 - t;
@@ -204,8 +225,32 @@ const UPDATERS = {
     // next — half a second of gathering himself, which is also long enough for
     // the player to read that something just changed.
     entity.urge += (urgency - entity.urge) * Math.min(1, STEP_SECONDS * 2.2);
-    entity.gaitShare = Math.max(0, Math.min(1,
-      entity.speed / TUNING.player.speed + (entity.moving ? entity.urge : 0)));
+    // Faded in with how fast he is actually going rather than switched on the
+    // frame he starts moving. `moving` is a boolean, and adding the whole of
+    // the urgency the instant it flips put a step change in his stride — a man
+    // going from a standstill to a hurried stride between two frames, which is
+    // the one thing this eased term exists to prevent. Under a fifth of his top
+    // speed there is no hurry in him to show; by half of it there is all of it.
+    const going = Math.max(0, Math.min(1,
+      (entity.speed / Math.max(1, rules.speed) - 0.18) / 0.32));
+    const want = Math.max(0, Math.min(1,
+      entity.speed / TUNING.player.speed + entity.urge * going));
+    // ...and the share the drawing reads follows that rather than being it.
+    //
+    // `speed` is ground actually covered, which is what keeps his feet honest —
+    // and it is also why it collapses to nothing for a single frame every time
+    // he grazes a corner, because the mover zeroes the velocity on the axis
+    // that hit. Read raw, his gait restarted from a standstill every time he
+    // rounded a doorway: the stutter that reads as robotic walking.
+    //
+    // Damping it costs nothing in accuracy, because both the things that could
+    // disagree read the *same* number: the phase advances by ground covered
+    // times the stride at this share, and the foot is placed by the band at
+    // this share, so one turn of the cycle still buys exactly one stride of
+    // floor whatever the share happens to be. What it buys is a man who slows
+    // down and speeds up over a tenth of a second rather than between frames.
+    const follow = Math.min(1, STEP_SECONDS / 0.16);
+    entity.gaitShare += (want - entity.gaitShare) * follow;
     entity.walkPhase += travelled * stridePerUnit(entity.gaitShare, gait);
   }
 };
@@ -474,6 +519,22 @@ function updateInvestigation(sim, player) {
   const jump = sim.noise - (entity.lastNoise === undefined ? sim.noise : entity.lastNoise);
   entity.lastNoise = sim.noise;
 
+  // A man half woken by a distant clatter takes his time; one woken by a
+  // bookcase going over is on his feet at once.
+  //
+  // Fixed at the moment the noise reaches him rather than read live every
+  // frame, and that is the whole of it: the meter falls while he is getting up,
+  // so a duration recomputed each step got *longer* the longer he took. A bang
+  // that should have had him moving in a second and a half took two and a
+  // quarter, and every frame of the delay bought another frame of delay. What
+  // decides how fast a man stands up is how loud the thing was when it
+  // happened, which is a fact about that moment and not about now.
+  const riseNow = () => (tune ? mix(tune.riseLow, tune.riseHigh, alert) : rules.rising);
+  // Published for the renderer, which draws the wake-up to this clock: an
+  // animation running to a different clock from the state it is animating is
+  // what makes a wake-up look like a cut.
+  if (entity.riseFor === undefined) entity.riseFor = riseNow();
+
   // Crossing the line gets him up, and his idea of where you are is a guess
   // whose error depends on how loud it was.
   //
@@ -495,6 +556,9 @@ function updateInvestigation(sim, player) {
     if (!entity.stand) entity.stand = nearestStand(entity.nav, entity.home.x, entity.home.y);
     entity.target = null;
     takeFix(sim, entity, player, alert);
+    // How long this particular wake-up takes, decided by how loud this
+    // particular noise was, and not revisited.
+    entity.riseFor = riseNow();
     // Already on his feet? Then he simply turns round; only a man sitting down
     // has to get up first.
     setState(sim, entity, entity.state === 'asleep' ? 'rising' : 'investigating');
@@ -515,8 +579,18 @@ function updateInvestigation(sim, player) {
       && sim.noise >= rules.wakeAt * tune.refixAt
       && jump >= tune.refix) {
     takeFix(sim, entity, player, alert);
-    if (entity.state === 'searching') setState(sim, entity, 'investigating');
-    routeTo(entity, sim.level, entity.target.x, entity.target.y);
+    if (entity.state === 'rising') {
+      // A second bang while he is still coming out of the chair. It cannot
+      // stand him up faster than a man stands up, but it decides where he goes
+      // when he does — and it shortens what is left of the getting up, because
+      // a second noise is louder news than the first. Without this the whole
+      // wake-up was deaf: everything the player did in those seconds was
+      // aimed at where the first sound came from.
+      entity.riseFor = Math.min(entity.riseFor, entity.stateFor + riseNow() * 0.45);
+    } else {
+      if (entity.state === 'searching') setState(sim, entity, 'investigating');
+      routeTo(entity, sim.level, entity.target.x, entity.target.y);
+    }
   }
 
   // --- picking you out, and losing you again ---------------------------------
@@ -647,19 +721,11 @@ function updateInvestigation(sim, player) {
     entity.notice = Math.max(0, entity.notice - STEP_SECONDS * 2);
   }
 
-  // A man half woken by a distant clatter takes his time; one woken by a
-  // bookcase going over is on his feet at once.
-  const risingFor = tune ? mix(tune.riseLow, tune.riseHigh, alert) : rules.rising;
-  // How long getting up is taking *this* time, published for the renderer. It
-  // depends on how alarmed he is, so the drawing cannot work it out from the
-  // tuning alone — and an animation that runs to a different clock from the
-  // state it is animating is the thing that makes a wake-up look like a cut.
-  entity.riseFor = risingFor;
   const searchFor = tune ? mix(tune.sweepLow, tune.sweepHigh, alert) : rules.searchFor;
 
   switch (entity.state) {
     case 'rising':
-      if (entity.stateFor >= risingFor) {
+      if (entity.stateFor >= entity.riseFor) {
         entity.x = entity.stand.x;
         entity.y = entity.stand.y;
         setState(sim, entity, 'investigating');

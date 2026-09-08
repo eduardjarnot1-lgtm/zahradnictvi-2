@@ -253,6 +253,34 @@ export function tileLevel(spec) {
     }
   }
 
+  // Which face of a cabinet is against something, and which is open to the room.
+  //
+  // A bank of lockers bolted to a wall shows one face and hides the other; a
+  // bank standing as an island down the middle of a corridor shows both, and
+  // has doors on both. Drawing the second as though it were the first gives it
+  // a blank back panel facing an aisle people walk down, which is the single
+  // thing that made three of the school's banks read as props rather than as
+  // fitted furniture.
+  //
+  // Worked out here rather than at paint time because it is a fact about the
+  // building, and because the renderer paints the room once and should not be
+  // scanning the collider list to do it.
+  for (const c of colliders) {
+    if (c.type !== 'furniture') continue;
+    const along = c.w >= c.h;
+    const gap = 1.5;                    // a hair, so "flush" survives rounding
+    const behind = (dx, dy) => colliders.some((o) => o !== c
+      && (o.type === 'wall' || o.type === 'partition' || o.type === 'furniture')
+      && o.x < c.x + c.w + (dx > 0 ? gap : 0) && o.x + o.w > c.x - (dx < 0 ? gap : 0)
+      && o.y < c.y + c.h + (dy > 0 ? gap : 0) && o.y + o.h > c.y - (dy < 0 ? gap : 0)
+      && (dx > 0 ? o.x >= c.x + c.w - gap : dx < 0 ? o.x + o.w <= c.x + gap : true)
+      && (dy > 0 ? o.y >= c.y + c.h - gap : dy < 0 ? o.y + o.h <= c.y + gap : true));
+    // Only the two long faces matter: nobody opens a locker from its end.
+    c.back = along
+      ? (behind(0, -1) ? 'n' : behind(0, 1) ? 's' : null)
+      : (behind(-1, 0) ? 'w' : behind(1, 0) ? 'e' : null);
+  }
+
   // What each hiding place is a doorstep to. A hiding place is not a patch of
   // floor, it is the tile you stand on to climb into the cabinet in front of
   // you — so the game needs to know which cabinet, to swing its door, to draw

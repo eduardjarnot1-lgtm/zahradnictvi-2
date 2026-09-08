@@ -261,7 +261,7 @@ let polish = false;
 // itself. The offset is down and very slightly right, which is where every
 // other shadow in this game falls, so the whole room agrees about where the
 // light is.
-function groundShadow(ctx, c, spread = 7, strength = 0.34) {
+function groundShadow(ctx, c, spread = 7, strength = 0.34, allRound = false) {
   const g = ctx.createLinearGradient(0, c.y + c.h - 2, 0, c.y + c.h + spread);
   g.addColorStop(0, `rgba(16,22,20,${strength})`);
   g.addColorStop(0.45, `rgba(16,22,20,${strength * 0.45})`);
@@ -275,6 +275,20 @@ function groundShadow(ctx, c, spread = 7, strength = 0.34) {
   side.addColorStop(1, 'rgba(16,22,20,0)');
   ctx.fillStyle = side;
   ctx.fillRect(c.x + c.w, c.y + 2, spread * 0.6, c.h);
+  // A piece standing as an island is walked all the way round, so it casts all
+  // the way round. One bolted to a wall has nothing on the far side to cast on.
+  if (allRound) {
+    const up = ctx.createLinearGradient(0, c.y, 0, c.y - spread * 0.7);
+    up.addColorStop(0, `rgba(16,22,20,${strength * 0.6})`);
+    up.addColorStop(1, 'rgba(16,22,20,0)');
+    ctx.fillStyle = up;
+    ctx.fillRect(c.x - spread * 0.3, c.y - spread * 0.7, c.w + spread * 0.6, spread * 0.7);
+    const left = ctx.createLinearGradient(c.x, 0, c.x - spread * 0.6, 0);
+    left.addColorStop(0, `rgba(16,22,20,${strength * 0.45})`);
+    left.addColorStop(1, 'rgba(16,22,20,0)');
+    ctx.fillStyle = left;
+    ctx.fillRect(c.x - spread * 0.6, c.y + 2, spread * 0.6, c.h);
+  }
 }
 
 // The dark that gathers where a wall meets the floor. Same idea as above and a
@@ -894,28 +908,64 @@ function drawDeskWood(ctx, c) {
     ctx.fillRect(c.x + c.w / 2 + 0.6, c.y + 2, 0.6, c.h - 6);
   }
 
-  // Paper, and sometimes a book. Deterministic from the position, so the same
-  // desk carries the same clutter every time the level is drawn.
+  // What is on the desk. Deterministic from where the desk stands, so the same
+  // one carries the same clutter every time the level is drawn — and varied,
+  // because a classroom where every desk has the same sheet of paper squared up
+  // on it is a classroom nobody has ever sat in.
+  //
+  // A worksheet lying at a slight angle, an exercise book, and a pencil beside
+  // one of them. Section 1's school supplies, and they are on the desk tops
+  // because from directly above that is the only surface there is.
   const r = hash(c.x + 11, c.y + 5);
-  if (r > 0.30) {
+  const lean = (hash(c.x + 3, c.y + 7) - 0.5) * 0.5;
+  if (r > 0.18) {
+    const px = c.x + 4 + hash(c.x, c.y + 1) * 3;
+    const py = c.y + c.h * 0.28 + hash(c.x + 5, c.y) * 3;
+    ctx.save();
+    ctx.translate(px + 4.5, py + 3.5);
+    ctx.rotate(lean);
     ctx.fillStyle = 'rgba(60,38,14,0.30)';
-    roundRect(ctx, c.x + 4.8, c.y + c.h * 0.30 + 1, 9, 7, 1);
+    roundRect(ctx, -3.7, -2.5, 9, 7, 1);
     ctx.fill();
-    fillRound(ctx, c.x + 4, c.y + c.h * 0.30, 9, 7, 1, PALETTE.paper);
+    fillRound(ctx, -4.5, -3.5, 9, 7, 1, PALETTE.paper);
     ctx.fillStyle = 'rgba(90,80,70,0.40)';
-    ctx.fillRect(c.x + 5.5, c.y + c.h * 0.30 + 2, 6, 1);
-    ctx.fillRect(c.x + 5.5, c.y + c.h * 0.30 + 4, 4, 1);
+    ctx.fillRect(-3, -1.5, 6, 1);
+    ctx.fillRect(-3, 0.5, 4, 1);
+    ctx.restore();
   }
-  if (r > 0.68 && c.w > 26) {
-    const spines = ['#c2543f', '#3f7f88', '#6f5a94'];
-    const bx = c.x + c.w - 14;
-    const by = c.y + c.h * 0.34;
+  if (r > 0.55 && c.w > 26) {
+    // An exercise book, shut, with its cover and a sliver of pages showing.
+    const spines = ['#c2543f', '#3f7f88', '#6f5a94', '#3f7f4e'];
+    const bx = c.x + c.w - 15;
+    const by = c.y + c.h * 0.32;
+    ctx.save();
+    ctx.translate(bx + 4.5, by + 3);
+    ctx.rotate(-lean * 0.7);
     ctx.fillStyle = 'rgba(60,38,14,0.30)';
-    roundRect(ctx, bx + 0.8, by + 1, 9, 6, 1);
+    roundRect(ctx, -3.7, -2, 9, 6, 1);
     ctx.fill();
-    fillRound(ctx, bx, by, 9, 6, 1, spines[Math.floor(r * 3) % 3]);
+    fillRound(ctx, -4.5, -3, 9, 6, 1, spines[Math.floor(r * 4) % 4]);
     ctx.fillStyle = 'rgba(255,255,255,0.22)';
-    ctx.fillRect(bx, by, 9, 1.2);
+    ctx.fillRect(-4.5, -3, 9, 1.2);
+    ctx.fillStyle = '#efe7d6';                       // the page edges
+    ctx.fillRect(4, -2.4, 1.1, 4.8);
+    ctx.restore();
+  }
+  if (r > 0.42) {
+    // A pencil. Two fills and it is the single cheapest thing on this list that
+    // says school rather than office.
+    const qx = c.x + c.w * 0.52 + hash(c.x + 9, c.y + 2) * 4;
+    const qy = c.y + c.h * 0.62;
+    ctx.save();
+    ctx.translate(qx, qy);
+    ctx.rotate(lean * 1.6 + 0.4);
+    ctx.fillStyle = '#e0a83c';
+    ctx.fillRect(-4.5, -0.55, 9, 1.1);
+    ctx.fillStyle = '#4a3a2a';
+    ctx.fillRect(4.1, -0.55, 1.4, 1.1);
+    ctx.fillStyle = 'rgba(255,255,255,0.30)';
+    ctx.fillRect(-4.5, -0.55, 9, 0.4);
+    ctx.restore();
   }
 
   // Chairs, tucked under the near edge. Drawn rather than placed: a chair is
@@ -1004,148 +1054,173 @@ function drawBench(ctx, c) {
   }
 }
 
+// One row of locker doors along one face of a bank.
+//
+// Split out because a bank has either one row or two. Bolted to a wall it shows
+// the room a single face; standing as an island down the middle of a corridor
+// it is two banks back to back and shows a face each way, and drawing the
+// second as though it were the first gives it a blank steel panel facing an
+// aisle people walk down.
+//
+// `a0/a1` are the run along the bank, `d0/d1` the strip of depth this row gets,
+// and `flip` says which side of that strip the doors open towards — which is
+// where the handles go and which way the seam highlights fall.
+function lockerDoors(ctx, c, along, a0, a1, d0, d1, flip, seed0) {
+  const deep = d1 - d0;
+  if (deep < 2.5) return;
+  const span = a1 - a0;
+  const doors = Math.max(1, Math.round(span / 20));
+  const pitch = span / doors;
+  // A shallow row — the two faces of an island splitting one tile between them
+  // — has no room for louvres, and three hairlines crammed into four units
+  // read as noise rather than as vents.
+  const vents = deep > 7 ? 3 : deep > 4.5 ? 2 : 0;
+  for (let i = 0; i < doors; i++) {
+    const a = a0 + i * pitch;
+    const len = pitch;
+    if (len <= 3) continue;
+    const seed = Math.round(seed0 + i * 37);
+    const face = tint('#577983', shade(seed, i * 11, 0.10));
+    // Brushed across the door, lightest a third of the way in, which is where
+    // a steel pressing catches a strip light.
+    const g = along
+      ? ctx.createLinearGradient(0, d0, 0, d1)
+      : ctx.createLinearGradient(d0, 0, d1, 0);
+    g.addColorStop(0, tint(face, flip ? -0.24 : 0.22));
+    g.addColorStop(0.34, face);
+    g.addColorStop(1, tint(face, flip ? 0.22 : -0.24));
+    ctx.fillStyle = g;
+    if (along) roundRect(ctx, a + 1.2, d0, len - 2.4, deep, 1.4);
+    else roundRect(ctx, d0, a + 1.2, deep, len - 2.4, 1.4);
+    ctx.fill();
+    // Louvres, pressed into the door nearest its hinge.
+    for (let v = 0; v < vents; v++) {
+      const t = d0 + (flip ? deep - 1.8 - v * 1.9 : 1.8 + v * 1.9);
+      ctx.fillStyle = 'rgba(16,26,30,0.40)';
+      ctx.fillStyle = 'rgba(16,26,30,0.40)';
+      if (along) ctx.fillRect(a + 3.4, t, Math.max(1, len - 6.8), 0.9);
+      else ctx.fillRect(t, a + 3.4, 0.9, Math.max(1, len - 6.8));
+      ctx.fillStyle = 'rgba(226,240,244,0.12)';
+      if (along) ctx.fillRect(a + 3.4, t + 0.9, Math.max(1, len - 6.8), 0.4);
+      else ctx.fillRect(t + 0.9, a + 3.4, 0.4, Math.max(1, len - 6.8));
+    }
+    // The handle: a recessed latch plate with a lever across it, on the edge
+    // the door swings from.
+    const hd = d0 + deep * 0.52;
+    const ha = a + len - 5.2;
+    ctx.fillStyle = 'rgba(10,16,20,0.55)';
+    if (along) roundRect(ctx, ha - 0.6, hd - 2.6, 3.4, Math.min(5.2, deep * 0.8), 1);
+    else roundRect(ctx, hd - 2.6, ha - 0.6, Math.min(5.2, deep * 0.8), 3.4, 1);
+    ctx.fill();
+    ctx.fillStyle = '#c9d8dc';
+    if (along) ctx.fillRect(ha + 0.3, hd - 1.6, 1.5, Math.min(3.2, deep * 0.5));
+    else ctx.fillRect(hd - 1.6, ha + 0.3, Math.min(3.2, deep * 0.5), 1.5);
+    // A number plate on some of them: what says school rather than changing room.
+    if (hash(seed, 3) > 0.45 && len > 13 && deep > 6) {
+      ctx.fillStyle = 'rgba(232,240,238,0.30)';
+      const nd = flip ? d0 + 1 : d1 - 2.6;
+      if (along) ctx.fillRect(a + 3.6, nd, 4.2, 1.6);
+      else ctx.fillRect(nd, a + 3.6, 1.6, 4.2);
+    }
+    // The gap to the next door: dark, with the lit edge of the next pressing
+    // beside it.
+    if (i < doors - 1) {
+      ctx.fillStyle = 'rgba(14,22,26,0.48)';
+      if (along) ctx.fillRect(a + len - 1.2, d0, 1.2, deep);
+      else ctx.fillRect(d0, a + len - 1.2, deep, 1.2);
+      ctx.fillStyle = 'rgba(210,230,236,0.20)';
+      if (along) ctx.fillRect(a + len, d0, 0.7, deep);
+      else ctx.fillRect(d0, a + len, deep, 0.7);
+    }
+  }
+}
+
 // A bank of school lockers, in steel.
 //
-// The old one had the right parts — a plinth, a top rail, vents, a handle, a
-// seam down each door — and painted every one of them a flat colour, which is
-// how you get a diagram of a locker. What makes this metal is that no face is
-// one colour: the carcass runs from a lit top edge down to a dark foot, each
-// door carries a brushed gradient across it, and the seam between two doors is
-// a dark line with a lit one beside it, because that is what a folded steel
-// edge does to a corridor light.
+// What makes it metal is that no face is one colour: the carcass runs from a
+// lit top edge down to a dark foot, each door carries a brushed gradient across
+// it, and the seam between two doors is a dark line with a lit one beside it,
+// because that is what a folded steel edge does to a corridor light. Every door
+// gets its own shade off `hash`, so a nine-tile bank is nine lockers sprayed in
+// the same batch rather than one long box.
 //
-// Every door also gets its own shade off `hash`, so a nine-tile bank is nine
-// lockers sprayed in the same batch rather than one long box.
+// `c.back` says which face is against the building, and the two layouts follow
+// from it. Against a wall: a top rail on the closed side, one row of doors, a
+// plinth at the foot. An island in a corridor: a row of doors each way with the
+// crest of the unit running down the middle between them.
 function drawLockersMetal(ctx, c) {
   const along = c.w >= c.h;
-  groundShadow(ctx, c, along ? 8 : 6, 0.38);
+  const island = !c.back;
+  // An island is walked round, so it is grounded all the way round; a bank
+  // bolted to a wall only casts where it meets open floor.
+  groundShadow(ctx, c, along ? 8 : 6, 0.38, island);
 
-  // The carcass. The gradient runs across the depth of the bank — from the top
-  // edge that faces the ceiling lights to the foot that faces the floor.
+  // The carcass, running from the lit edge to the dark foot.
+  const lo = along ? c.y : c.x;
+  const hi = along ? c.y + c.h : c.x + c.w;
   const body = along
-    ? ctx.createLinearGradient(0, c.y, 0, c.y + c.h)
-    : ctx.createLinearGradient(c.x, 0, c.x + c.w, 0);
-  body.addColorStop(0, '#6f929b');
-  body.addColorStop(0.22, '#4d6f78');
-  body.addColorStop(1, '#33484f');
+    ? ctx.createLinearGradient(0, lo, 0, hi)
+    : ctx.createLinearGradient(lo, 0, hi, 0);
+  if (island) {
+    // Two units back to back: dark at both open faces, lit along the crest.
+    body.addColorStop(0, '#33484f');
+    body.addColorStop(0.5, '#6f929b');
+    body.addColorStop(1, '#33484f');
+  } else if (c.back === 'n' || c.back === 'w') {
+    body.addColorStop(0, '#6f929b');
+    body.addColorStop(0.22, '#4d6f78');
+    body.addColorStop(1, '#33484f');
+  } else {
+    body.addColorStop(0, '#33484f');
+    body.addColorStop(0.78, '#4d6f78');
+    body.addColorStop(1, '#6f929b');
+  }
   ctx.fillStyle = body;
   roundRect(ctx, c.x, c.y, c.w, c.h, 2.5);
   ctx.fill();
 
-  const span = along ? c.w : c.h;
-  const doors = Math.max(1, Math.round(span / 20));
-  const pitch = span / doors;
-  for (let i = 0; i < doors; i++) {
-    const a = (along ? c.x : c.y) + i * pitch;
-    const len = pitch;
-    const seed = Math.round(c.x + c.y + i * 37);
-    const face = tint('#577983', shade(seed, i * 11, 0.10));
-    if (along) {
-      const top = c.y + 4.2;
-      const deep = c.h - 8.4;
-      if (deep <= 1 || len <= 3) continue;
-      // The door itself: brushed down its height, lightest a third of the way
-      // in, which is where a steel pressing catches a strip light.
-      const g = ctx.createLinearGradient(0, top, 0, top + deep);
-      g.addColorStop(0, tint(face, 0.22));
-      g.addColorStop(0.34, face);
-      g.addColorStop(1, tint(face, -0.24));
-      ctx.fillStyle = g;
-      roundRect(ctx, a + 1.2, top, len - 2.4, deep, 1.4);
-      ctx.fill();
-      // Vents: louvre slots pressed into the top of the door, each a dark slot
-      // with a lit lip under it.
-      for (let v = 0; v < 3; v++) {
-        const y = top + 1.8 + v * 1.9;
-        if (y > top + deep - 3) break;
-        ctx.fillStyle = 'rgba(16,26,30,0.40)';
-        ctx.fillRect(a + 3.4, y, Math.max(1, len - 6.8), 0.9);
-        ctx.fillStyle = 'rgba(226,240,244,0.12)';
-        ctx.fillRect(a + 3.4, y + 0.9, Math.max(1, len - 6.8), 0.4);
-      }
-      // The handle: a recessed latch plate with a lever across it.
-      const hx = a + len - 5.2;
-      const hy = top + deep * 0.52;
-      ctx.fillStyle = 'rgba(10,16,20,0.55)';
-      roundRect(ctx, hx - 0.6, hy - 2.6, 3.4, 5.2, 1);
-      ctx.fill();
-      ctx.fillStyle = '#c9d8dc';
-      ctx.fillRect(hx + 0.3, hy - 1.9, 1.5, 3.8);
-      ctx.fillStyle = 'rgba(255,255,255,0.55)';
-      ctx.fillRect(hx + 0.3, hy - 1.9, 0.7, 3.8);
-      // A number plate on some of them, which is what says school rather than
-      // gym changing room.
-      if (hash(seed, 3) > 0.45 && len > 13) {
-        ctx.fillStyle = 'rgba(232,240,238,0.30)';
-        ctx.fillRect(a + 3.6, top + deep - 2.6, 4.2, 1.6);
-      }
-      // The gap to the next door: dark, with the lit edge of the next pressing
-      // beside it.
-      ctx.fillStyle = 'rgba(14,22,26,0.48)';
-      ctx.fillRect(a + len - 1.2, top, 1.2, deep);
-      ctx.fillStyle = 'rgba(210,230,236,0.20)';
-      ctx.fillRect(a + len, top, 0.7, deep);
-    } else {
-      const left = c.x + 4.2;
-      const deep = c.w - 8.4;
-      if (deep <= 1 || len <= 3) continue;
-      const g = ctx.createLinearGradient(left, 0, left + deep, 0);
-      g.addColorStop(0, tint(face, 0.22));
-      g.addColorStop(0.34, face);
-      g.addColorStop(1, tint(face, -0.24));
-      ctx.fillStyle = g;
-      roundRect(ctx, left, a + 1.2, deep, len - 2.4, 1.4);
-      ctx.fill();
-      for (let v = 0; v < 3; v++) {
-        const x = left + 1.8 + v * 1.9;
-        if (x > left + deep - 3) break;
-        ctx.fillStyle = 'rgba(16,26,30,0.40)';
-        ctx.fillRect(x, a + 3.4, 0.9, Math.max(1, len - 6.8));
-        ctx.fillStyle = 'rgba(226,240,244,0.12)';
-        ctx.fillRect(x + 0.9, a + 3.4, 0.4, Math.max(1, len - 6.8));
-      }
-      const hy2 = a + len - 5.2;
-      const hx2 = left + deep * 0.52;
-      ctx.fillStyle = 'rgba(10,16,20,0.55)';
-      roundRect(ctx, hx2 - 2.6, hy2 - 0.6, 5.2, 3.4, 1);
-      ctx.fill();
-      ctx.fillStyle = '#c9d8dc';
-      ctx.fillRect(hx2 - 1.9, hy2 + 0.3, 3.8, 1.5);
-      ctx.fillStyle = 'rgba(255,255,255,0.55)';
-      ctx.fillRect(hx2 - 1.9, hy2 + 0.3, 3.8, 0.7);
-      if (hash(seed, 3) > 0.45 && len > 13) {
-        ctx.fillStyle = 'rgba(232,240,238,0.30)';
-        ctx.fillRect(left + deep - 2.6, a + 3.6, 1.6, 4.2);
-      }
-      ctx.fillStyle = 'rgba(14,22,26,0.48)';
-      ctx.fillRect(left, a + len - 1.2, deep, 1.2);
-      ctx.fillStyle = 'rgba(210,230,236,0.20)';
-      ctx.fillRect(left, a + len, deep, 0.7);
-    }
-  }
+  const a0 = along ? c.x : c.y;
+  const a1 = along ? c.x + c.w : c.y + c.h;
+  const depth = hi - lo;
+  const seed0 = Math.round(c.x + c.y);
+  const rail = (d0, d1, dark) => {
+    const g = along
+      ? ctx.createLinearGradient(0, d0, 0, d1)
+      : ctx.createLinearGradient(d0, 0, d1, 0);
+    g.addColorStop(0, dark ? '#2a3d43' : '#66888f');
+    g.addColorStop(1, dark ? '#1f2f34' : '#46666f');
+    ctx.fillStyle = g;
+    if (along) ctx.fillRect(c.x, d0, c.w, d1 - d0);
+    else ctx.fillRect(d0, c.y, d1 - d0, c.h);
+  };
 
-  // The top rail along the back and the plinth at the foot, last so they run
-  // unbroken across every door rather than being interrupted by them.
-  if (along) {
-    const rail = ctx.createLinearGradient(0, c.y, 0, c.y + 4.2);
-    rail.addColorStop(0, '#66888f');
-    rail.addColorStop(1, '#46666f');
-    ctx.fillStyle = rail;
-    ctx.fillRect(c.x, c.y + 0.6, c.w, 3.6);
-    ctx.fillStyle = '#2a3d43';
-    ctx.fillRect(c.x, c.y + c.h - 4.2, c.w, 4.2);
-    ctx.fillStyle = 'rgba(180,206,214,0.16)';
-    ctx.fillRect(c.x, c.y + c.h - 4.2, c.w, 0.8);
+  if (island) {
+    // Toe strip, doors, crest, doors, toe strip.
+    const toe = 1.6;
+    const half = depth / 2;
+    lockerDoors(ctx, c, along, a0, a1, lo + toe, lo + half - 1.1, false, seed0);
+    lockerDoors(ctx, c, along, a0, a1, lo + half + 1.1, hi - toe, true, seed0 + 500);
+    // The crest: the top of the unit, catching the light along its whole run.
+    ctx.fillStyle = '#86a9b2';
+    if (along) ctx.fillRect(c.x, lo + half - 1.1, c.w, 2.2);
+    else ctx.fillRect(lo + half - 1.1, c.y, 2.2, c.h);
+    ctx.fillStyle = 'rgba(255,255,255,0.18)';
+    if (along) ctx.fillRect(c.x, lo + half - 1.1, c.w, 0.8);
+    else ctx.fillRect(lo + half - 1.1, c.y, 0.8, c.h);
   } else {
-    const rail = ctx.createLinearGradient(c.x, 0, c.x + 4.2, 0);
-    rail.addColorStop(0, '#66888f');
-    rail.addColorStop(1, '#46666f');
-    ctx.fillStyle = rail;
-    ctx.fillRect(c.x + 0.6, c.y, 3.6, c.h);
-    ctx.fillStyle = '#2a3d43';
-    ctx.fillRect(c.x + c.w - 4.2, c.y, 4.2, c.h);
+    const backTop = c.back === 'n' || c.back === 'w';
+    const railD0 = backTop ? lo + 0.6 : hi - 4.2;
+    rail(railD0, railD0 + 3.6, false);
+    const plinthD0 = backTop ? hi - 4.2 : lo;
+    rail(plinthD0, plinthD0 + 4.2, true);
+    lockerDoors(ctx, c, along,
+      a0, a1,
+      backTop ? lo + 4.2 : lo + 4.2,
+      backTop ? hi - 4.2 : hi - 4.2,
+      !backTop, seed0);
     ctx.fillStyle = 'rgba(180,206,214,0.16)';
-    ctx.fillRect(c.x + c.w - 4.2, c.y, 0.8, c.h);
+    if (along) ctx.fillRect(c.x, plinthD0, c.w, 0.8);
+    else ctx.fillRect(plinthD0, c.y, 0.8, c.h);
   }
 }
 
@@ -2108,7 +2183,108 @@ function drawCourt(ctx, d) {
   ctx.restore();
 }
 
+// The blackboard, with the things that make it a blackboard someone teaches at.
+//
+// The slate, the ghost of yesterday's lesson and the tray were already here.
+// What section 1 asks for is the small stuff on top: chalk in the tray, a
+// duster beside it, and a wiped arc where an arm has been across the slate.
+function drawBoardKit(ctx, d) {
+  fillRound(ctx, d.x, d.y + 3, d.w, d.h + 7, 2, '#2b3a33');
+  const slate = ctx.createLinearGradient(0, d.y + 5, 0, d.y + d.h + 7);
+  slate.addColorStop(0, '#3a4f45');
+  slate.addColorStop(1, '#2c3d35');
+  ctx.fillStyle = slate;
+  roundRect(ctx, d.x + 2, d.y + 5, d.w - 4, d.h + 2, 1);
+  ctx.fill();
+  // Yesterday's lesson, most of the way rubbed out.
+  ctx.strokeStyle = 'rgba(226,232,214,0.22)';
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  for (let i = 0; i < 3; i++) {
+    const y = d.y + 9 + i * 4;
+    ctx.moveTo(d.x + 8 + (i % 2) * 6, y);
+    ctx.lineTo(d.x + d.w * (0.45 + 0.16 * i), y);
+  }
+  ctx.stroke();
+  // ...and the smear where a duster went over it.
+  ctx.fillStyle = 'rgba(232,238,222,0.07)';
+  ctx.beginPath();
+  ctx.ellipse(d.x + d.w * 0.68, d.y + d.h * 0.6 + 6, d.w * 0.22, d.h * 0.5 + 3, -0.2, 0, TAU);
+  ctx.fill();
+  // The tray, and what is lying in it.
+  const trayY = d.y + d.h + 8;
+  fillRound(ctx, d.x + 1, trayY, d.w - 2, 3, 1, '#8a6a44');
+  ctx.fillStyle = 'rgba(255,236,200,0.28)';
+  ctx.fillRect(d.x + 1, trayY, d.w - 2, 0.8);
+  const seed = Math.round(d.x + d.y);
+  // Two or three sticks of chalk, and a duster at one end.
+  for (let i = 0; i < 3; i++) {
+    const t = 0.18 + i * 0.2 + hash(seed + i, i) * 0.06;
+    if (t * d.w > d.w - 14) break;
+    ctx.fillStyle = i === 1 ? '#f2e6c8' : '#f6f2e6';
+    ctx.fillRect(d.x + t * d.w, trayY + 0.6, 5.5, 1.6);
+  }
+  ctx.fillStyle = '#5d6b73';
+  fillRound(ctx, d.x + d.w - 12, trayY + 0.3, 8, 2.4, 0.8, '#5d6b73');
+  ctx.fillStyle = 'rgba(255,255,255,0.22)';
+  ctx.fillRect(d.x + d.w - 12, trayY + 0.3, 8, 0.8);
+}
+
+// The noticeboard, with the sheets actually pinned to it.
+//
+// Cork, a frame, overlapping sheets at slight angles and a pin in each: a grid
+// of neat rectangles reads as a colour swatch, and what says noticeboard is
+// that nobody ever puts anything on one straight.
+function drawNoticePinned(ctx, d) {
+  fillRound(ctx, d.x, d.y + 4, d.w, d.h + 6, 2, '#6b4a2e');
+  const cork = ctx.createLinearGradient(0, d.y + 6, 0, d.y + d.h + 8);
+  cork.addColorStop(0, '#cbac80');
+  cork.addColorStop(1, '#b09269');
+  ctx.fillStyle = cork;
+  roundRect(ctx, d.x + 2, d.y + 6, d.w - 4, d.h + 2, 1);
+  ctx.fill();
+  // The grain of the cork.
+  ctx.fillStyle = 'rgba(96,68,38,0.16)';
+  for (let x = d.x + 4; x < d.x + d.w - 4; x += 5) {
+    for (let y = d.y + 7; y < d.y + d.h + 7; y += 4) {
+      if (hash(Math.round(x), Math.round(y)) > 0.55) ctx.fillRect(x, y, 1.4, 1.4);
+    }
+  }
+  const tints = ['#f4ece0', '#f0d9a8', '#cfe0ef', '#efc9c0'];
+  const pins = ['#c2543f', '#3f7f88', '#d8a33c', '#6f5a94'];
+  for (let i = 0; i * 13 < d.w - 10; i++) {
+    const seed = Math.round(d.x + i * 17);
+    const lean = (hash(seed, i) - 0.5) * 0.22;
+    const x = d.x + 5 + i * 13;
+    const y = d.y + 8 + (i % 2) * 3;
+    ctx.save();
+    ctx.translate(x + 4.5, y + 4);
+    ctx.rotate(lean);
+    ctx.fillStyle = 'rgba(70,48,24,0.30)';
+    roundRect(ctx, -4, -3.4, 9, 8, 0.6);
+    ctx.fill();
+    ctx.fillStyle = tints[i % tints.length];
+    roundRect(ctx, -4.5, -4, 9, 8, 0.6);
+    ctx.fill();
+    // A line or two of whatever it says.
+    ctx.fillStyle = 'rgba(90,80,70,0.30)';
+    ctx.fillRect(-3, -1.6, 6, 0.8);
+    ctx.fillRect(-3, 0.4, 4, 0.8);
+    // ...and the pin holding it up.
+    ctx.fillStyle = pins[i % pins.length];
+    ctx.beginPath();
+    ctx.arc(0, -3.2, 1.1, 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.45)';
+    ctx.beginPath();
+    ctx.arc(-0.35, -3.6, 0.4, 0, TAU);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
 function drawBoard(ctx, d) {
+  if (polish) return drawBoardKit(ctx, d);
   // A blackboard: dark slate, a chalk tray along the bottom, and the ghost of
   // whatever was last written on it.
   fillRound(ctx, d.x, d.y + 3, d.w, d.h + 7, 2, '#2b3a33');
@@ -2126,6 +2302,7 @@ function drawBoard(ctx, d) {
 }
 
 function drawNotice(ctx, d) {
+  if (polish) return drawNoticePinned(ctx, d);
   fillRound(ctx, d.x, d.y + 4, d.w, d.h + 6, 2, '#6b4a2e');
   fillRound(ctx, d.x + 2, d.y + 6, d.w - 4, d.h + 2, 1, '#c2a377');
   const tints = ['#f4ece0', '#f0d9a8', '#cfe0ef', '#efc9c0'];
