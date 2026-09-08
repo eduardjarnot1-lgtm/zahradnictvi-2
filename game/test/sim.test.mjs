@@ -265,10 +265,16 @@ test('screen shake settles instead of jittering forever', () => {
 // --- expansion: hazards, upgrades, stars ------------------------------------
 
 test('a creaky board costs noise once, then goes quiet', () => {
+  // Whatever is underfoot on the first level that has anything: a creaky board
+  // where the map lays boards, a sheet of paper where it drops paper. They are
+  // the same mechanic and only the price differs, so the test asks the tuning
+  // what this one costs rather than assuming it found a board.
   const level = LEVELS.find((l) => l.creaks.length > 0);
-  assert.ok(level, 'some level should have a creaky board');
+  assert.ok(level, 'some level should have something underfoot');
   const sim = createSim({ level, seed: 3 });
   const zone = level.creaks[0];
+  const priced = (TUNING.hazards.underfoot[zone.kind]
+    || TUNING.hazards.underfoot.boards).noise;
   const player = playerOf(sim);
 
   player.x = zone.x - 30;
@@ -281,8 +287,8 @@ test('a creaky board costs noise once, then goes quiet', () => {
   // The printed cost, times how near the person listening is: every location
   // scales its noise by distance now, so the flat number is the floor price
   // rather than the price.
-  assert.ok(Math.abs(sim.noise - TUNING.hazards.creakNoise * sim.proximity) < 0.5,
-    `a board cost ${sim.noise} at x${sim.proximity.toFixed(2)}`);
+  assert.ok(Math.abs(sim.noise - priced * sim.proximity) < 0.5,
+    `${zone.kind} cost ${sim.noise} at x${sim.proximity.toFixed(2)}, not ${priced}`);
 
   const events = [];
   for (let i = 0; i < 120; i++) {                     // stand on it

@@ -48,9 +48,32 @@ LOOT_CHARS = 'cwpkrmtnlvjdg'
 # only: hiding is new, and trying a new mechanic in one building is how the
 # rest of this game was built.
 HIDES = {'School': 2}
-# ...and which have things on the floor to tread on. The school, for the same
-# reason: one building at a time.
-LITTER_AT = {'School'}
+# ...and what each building has lying about on it, and how much of it.
+#
+# All eleven now. Standing on it costs noise, and how much depends on what it
+# is — paper is nearly free, a bag left across a doorway is most of a dropped
+# phone — which is a decision the player gets to make about their route, and
+# there is no reason a hotel corridor should not offer it. What differs is the
+# vocabulary and the sweeping. A shop floor is packaging, a museum is swept
+# every night and has almost nothing on it, and nobody drops a crisp packet in
+# a vault. The school's entry is what the school already had, so its five
+# levels come out of this tool unchanged.
+LITTER_AT = {
+    'Apartment': (('paper', 'clutter', 'bag'), 0.7),
+    'House':     (('paper', 'clutter'), 0.6),
+    'Hotel':     (('paper', 'plastic', 'bag'), 0.7),
+    'Office':    (('paper', 'clutter', 'plastic'), 0.9),
+    'School':    (('paper', 'clutter', 'plastic', 'bag'), 1.0),
+    'Hospital':  (('paper', 'plastic'), 0.8),
+    # The museum is swept every night, and it has to be: its top floor is the
+    # one level in the game that an efficient run cannot finish with four
+    # things underfoot on it. Three it can.
+    'Museum':    (('paper', 'clutter'), 0.2),
+    'Mansion':   (('paper', 'clutter'), 0.5),
+    'Penthouse': (('clutter',), 0.4),
+    'Shop':      (('paper', 'plastic', 'bag'), 1.0),
+    'Vault':     (('clutter',), 0.3),
+}
 # ...and which get their furniture pushed flush against the walls behind it.
 # All of them. A cabinet standing one tile proud of the wall behind it is the
 # single loudest tell that a room was generated rather than built, and the pass
@@ -2272,7 +2295,7 @@ LITTER = {
 LITTER_TIER = [0.6, 0.8, 1.0, 1.2, 1.4]
 
 
-def add_litter(g, tier):
+def add_litter(g, tier, kinds=('paper', 'clutter', 'plastic', 'bag'), scale=1.0):
     """Drop paper, pencils, packets and bags where they would actually be."""
     TILE = 20
     solid = set('#%OTSWNVCBPEYZ+H')
@@ -2304,8 +2327,10 @@ def add_litter(g, tier):
     }
     taken = []
     for kind in ('bag', 'plastic', 'paper', 'clutter'):
+        if kind not in kinds:
+            continue
         ch, per = LITTER[kind]
-        want = max(1, int(round(per * LITTER_TIER[tier])))
+        want = max(1, int(round(per * LITTER_TIER[tier] * scale)))
         fits = wants[kind]
         placed = 0
         # Walked on a coarse lattice so the litter is spread through the
@@ -2873,8 +2898,8 @@ def build():
                         break
             if name in HIDES:
                 add_hides(g, HIDES[name], into='C')
-            if name in LITTER_AT:
-                add_litter(g, tier)
+            underfoot, sweeping = LITTER_AT[name]
+            add_litter(g, tier, underfoot, sweeping)
             fittings, light_step = FITTINGS[name]
             add_fittings(g, tier, fittings, light_step)
             stashes = make_searchable(g, tier, name)

@@ -230,6 +230,32 @@ test('nothing stands one tile proud of the wall behind it', () => {
     `${proud} of ${total} pieces of furniture in the game stand a tile off the wall`);
 });
 
+test('every floor has something on it, in its own vocabulary', () => {
+  // Sections 11 and 12. Standing on something costs noise and how much depends
+  // on what it is — paper is nearly free, a bag left across a doorway is most
+  // of a dropped phone — and that is a decision about the player's route, not
+  // an effect. It was the school's alone; every building offers it now.
+  //
+  // What each one offers differs. A shop floor is packaging, a museum is swept
+  // every night, and nobody drops a crisp packet in a vault, so the set of
+  // materials must not come out the same everywhere.
+  const kindsAt = new Map();
+  for (const l of FLOORPLANS) {
+    assert.ok(l.creaks.length > 0, `${l.location} L${l.id} has nothing underfoot`);
+    for (const c of l.creaks) {
+      assert.ok(TUNING.hazards.underfoot[c.kind],
+        `${l.location} L${l.id}: ${c.kind} has no price`);
+    }
+    const set = kindsAt.get(l.location) || new Set();
+    for (const c of l.creaks) set.add(c.kind);
+    kindsAt.set(l.location, set);
+  }
+  const vocab = new Set([...kindsAt.values()].map(
+    (s) => [...s].sort().join(',')));
+  assert.ok(vocab.size >= 4,
+    `only ${vocab.size} distinct sets of materials across 11 buildings`);
+});
+
 test('a searchable piece is always furniture you would actually open', () => {
   const openable = new Set(['chest', 'bookshelf', 'wardrobe', 'table', 'tvBench']);
   for (const l of SCHOOL) {
