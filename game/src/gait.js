@@ -85,6 +85,71 @@ export function footStep(u, g) {
   };
 }
 
+/**
+ * One arm's swing along the direction of travel, as a share of the stride.
+ *
+ * Arms oppose legs — that is the sign, and it is the whole difference between
+ * walking and marching. What is here on top of the sign is that the two arms
+ * need not be a matched pair. A real pair does not swing the same distance and
+ * does not turn round at the same instant: one leads a little and one trails a
+ * little. The difference is small enough that nobody catches it and large
+ * enough that its absence is what makes an animated walk read as clockwork —
+ * two pendulums bolted to a box.
+ *
+ * How lopsided is the walker's own business, declared by his band table as
+ * `armLag` — a fraction of a cycle. Undeclared it is zero, and this collapses
+ * to exactly the symmetrical swing it always was, which is what keeps the
+ * asymmetry to the location that asked for it.
+ *
+ * Fixed per side rather than random: it has to be identical on every frame and
+ * in every replay, and a person's arms are lopsided the same way all day rather
+ * than differently every step.
+ *
+ * `u` is the cycle position of the leg this arm opposes.
+ */
+export function armSwing(side, u, g) {
+  const reach = footReach(g.step, g.duty) || 1;
+  const lag = g.armLag || 0;
+  if (lag <= 0) return -(footStep(u, g).along / reach);
+  const lead = side === -1;
+  // Sampled off that leg's own cycle a moment earlier, which is what "the arm
+  // trails the leg" means in a model driven by ground covered rather than time.
+  const foot = footStep((u - (lead ? lag : lag * 1.6) + 1) % 1, g);
+  return -(foot.along / reach) * (lead ? 1.07 : 0.91);
+}
+
+/**
+ * How far the shoe is rolled about its ankle, in radians. Negative is toe up.
+ *
+ * Most of what makes a foot look like it is on the floor rather than near it.
+ * Off the reference: the heel lands first with the toe up, the foot flattens as
+ * the weight arrives, the heel lifts again for the push, and the toe stays
+ * pointed through the first half of the swing before coming up to meet the
+ * ground for the next landing.
+ *
+ * `creep` is how careful the walk is, and `g.toeBias` is how far *this walker*
+ * rides up onto the ball of his foot when he is being careful — his own number
+ * rather than a constant. A character asked for a believable heel-to-toe
+ * pattern at every speed gets nearly none of it; one asked to creep on his toes
+ * gets the lot. Either way the cycle underneath still lands heel-first: the
+ * bias shifts the whole roll, it does not replace it.
+ */
+export function shoeRoll(foot, g, creep = 0, cycling = 1) {
+  const u = foot.u;
+  let roll;
+  if (foot.planted) {
+    const p = u / g.duty;
+    // Toe up at the landing, flat almost at once, then rising onto the toe for
+    // the push-off. The flat part is short: a foot is only flat in passing.
+    roll = p < 0.26 ? -0.36 * (1 - p / 0.26) : 0.52 * ((p - 0.26) / 0.74) ** 1.4;
+  } else {
+    const t = (u - g.duty) / (1 - g.duty);
+    // Still pointed as it leaves, levelling out, toe up again to land.
+    roll = 0.52 * (1 - t) ** 1.6 - 0.36 * t ** 2.2;
+  }
+  return (roll + creep * (g.toeBias === undefined ? 0.34 : g.toeBias)) * cycling;
+}
+
 // A little knee flexion in the middle of the stance, where the leg takes the
 // weight. Nothing at contact or at toe-off, which are the moments the leg is
 // straight. Small: this is a person walking, not doing squats.

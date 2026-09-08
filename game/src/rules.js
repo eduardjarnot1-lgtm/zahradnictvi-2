@@ -133,12 +133,29 @@ export function gaitOf(share, config) {
   const t = raw * raw * (3 - 2 * raw);
   const out = { legLen: config.legLen, seg: config.seg };
   for (const key of GAIT_FIELDS) out[key] = a[key] + (b[key] - a[key]) * t;
-  // Which of §4's gaits this is, for anything that wants to know rather than to
+  // How far onto the ball of the foot a careful walk goes. A property of the
+  // walker rather than of the speed: some people creep on their toes and some
+  // do not, and a character told not to should still land on his heel at every
+  // speed he moves at.
+  out.toeBias = config.toeBias === undefined ? 0.34 : config.toeBias;
+  // How far one arm trails the other, as a fraction of a cycle. Also the
+  // walker's own: undeclared, the arms are the matched pair they always were.
+  out.armLag = config.armLag === undefined ? 0 : config.armLag;
+  // Which of the gaits this is, for anything that wants to know rather than to
   // interpolate — the run weight drives the lean and the arm carriage, and the
-  // creep weight is what the tiptoe posture is built on.
-  out.creep = Math.max(0, 1 - s / bands[1].at);
-  out.run = bands.length > 3 && s > bands[2].at
-    ? Math.min(1, (s - bands[2].at) / (1 - bands[2].at)) : 0;
+  // creep weight is what a careful posture is built on.
+  //
+  // Where those two weights come from is declared by the table when it has an
+  // opinion, because a table with five bands does not have them in the same
+  // places as one with four: creep has faded by the time the normal walk
+  // starts, and the run ramps from wherever the run band is. Left undeclared,
+  // the old four-band reading applies exactly as it did.
+  const creepBy = config.creepBy === undefined ? bands[1].at : config.creepBy;
+  const runFrom = config.runFrom === undefined
+    ? (bands.length > 3 ? bands[2].at : null) : config.runFrom;
+  out.creep = creepBy > 0 ? Math.max(0, 1 - s / creepBy) : 0;
+  out.run = runFrom !== null && s > runFrom
+    ? Math.min(1, (s - runFrom) / Math.max(0.0001, 1 - runFrom)) : 0;
   // Whether the legs are cycling at all. Short ramp: a slow creep is a small
   // step, not a barely-visible twitch.
   out.moving = Math.min(1, s / 0.06);

@@ -502,6 +502,110 @@ __mod.tuning = (function () {
     urgency: { investigating: 0, searching: 0, returning: -0.04, following: 0.14 }
   };
 
+  // --- the school's own locomotion ---------------------------------------------
+  //
+  // The two tables above are the game's, and every location bends them. These two
+  // are the school's alone, and they exist because the school asked for a
+  // different thing: not a stealth posture that happens to move, but a body that
+  // walks, and walks *differently* the faster it goes.
+  //
+  // Five states rather than four, and they are named after what a leg is doing
+  // rather than after how sneaky the player is being:
+  //
+  //   IDLE       standing. Both feet on the floor, nothing cycling.
+  //   SLOW WALK  a careful walk. Short steps, low, quiet — but a walk: the heel
+  //              still lands first. This is the one that used to be a tiptoe.
+  //   WALK       the middle of the range. Heel strike, roll, toe-off, arms
+  //              hanging and swinging from the shoulder.
+  //   FAST WALK  longer and quicker, leaning in, arms working. Duty stays over a
+  //              half: a fast walk always has a foot on the floor, which is the
+  //              definition and not a preference.
+  //   RUN        duty under a half, so there is a moment with neither foot down
+  //              and `pelvisRise` throws the body through an arc. That moment is
+  //              the whole difference between a run and a hurry.
+  //
+  // The one number that is *not* a matter of taste is `duty` across that last
+  // boundary. Everything else is character.
+  //
+  // `toeBias` is what §3 is about. The old figure put a careful walker up on the
+  // balls of his feet and left him there — permanently on tiptoe at every speed
+  // under a stroll, which is a pose and not a gait. Here it is all but zero: the
+  // thief keeps a trace of it, because a man being quiet does roll onto his toes
+  // a little, and Mr. Vrána has none at all.
+  const SCHOOL_THIEF_GAIT = {
+    legLen: 13,
+    seg: 6.6,
+    // Careful posture has faded out by the time the normal walk starts, and the
+    // run weight ramps from the fast walk rather than from the middle band —
+    // five bands do not have their weights where four do.
+    creepBy: 0.42,
+    runFrom: 0.70,
+    toeBias: 0.06,
+    armLag: 0.042,
+    bands: [
+      // IDLE. Both feet down, weight even, nothing swinging. `moving` fades the
+      // cycle out under this anyway; what this band is for is the posture the
+      // figure settles into when it stops.
+      { at: 0.00, step: 6.0,  duty: 0.92, lift: 0.4, absorb: 0.12, flight: 0,
+        crouch: 0.35, lean: 0.0, armSwing: 0.08, armBend: 0.12, sway: 0.30,
+        headSteady: 0.85 },
+      // SLOW WALK. Lower than the others and quieter, and that is the whole of
+      // the thief's caution — no tiptoe, no bent-knee shuffle, a short walk.
+      { at: 0.18, step: 9.4,  duty: 0.66, lift: 1.5, absorb: 0.44, flight: 0,
+        crouch: 1.45, lean: 0.9, armSwing: 0.52, armBend: 0.32, sway: 0.70,
+        headSteady: 0.70 },
+      // WALK.
+      { at: 0.42, step: 13.0, duty: 0.60, lift: 2.4, absorb: 0.72, flight: 0,
+        crouch: 0.22, lean: 0.4, armSwing: 1.00, armBend: 0.20, sway: 1.00,
+        headSteady: 0.50 },
+      // FAST WALK.
+      { at: 0.68, step: 17.6, duty: 0.52, lift: 3.5, absorb: 1.00, flight: 0,
+        crouch: 0.0, lean: 1.5, armSwing: 1.42, armBend: 0.42, sway: 1.06,
+        headSteady: 0.45 },
+      // RUN.
+      { at: 0.87, step: 24.5, duty: 0.34, lift: 6.3, absorb: 1.55, flight: 1.4,
+        crouch: 0.0, lean: 3.6, armSwing: 1.95, armBend: 1.00, sway: 0.72,
+        headSteady: 0.32 }
+    ]
+  };
+
+  // Mr. Vrána, on the same five states and with the top one taken away. He is
+  // older, heavier and more relaxed: longer stance, more roll, less lift, and no
+  // run in him at all — `runFrom: null` says that outright rather than leaving it
+  // to a band boundary to imply. His fastest is a hurry, and a hurry keeps a foot
+  // on the floor.
+  const SCHOOL_WALKER_GAIT = {
+    legLen: 13.6,
+    seg: 6.95,
+    creepBy: 0.38,
+    runFrom: null,
+    toeBias: 0,
+    armLag: 0.052,
+    urgency: { investigating: 0, searching: 0, returning: -0.04, following: 0.14 },
+    bands: [
+      // IDLE.
+      { at: 0.00, step: 6.5,  duty: 0.94, lift: 0.4, absorb: 0.12, flight: 0,
+        crouch: 0.40, lean: 0.2, armSwing: 0.10, armBend: 0.16, sway: 0.55,
+        headSteady: 0.80 },
+      // SLOW WALK. An old man's amble: he is not being careful, he is being slow.
+      { at: 0.16, step: 9.8,  duty: 0.72, lift: 1.2, absorb: 0.34, flight: 0,
+        crouch: 0.55, lean: 0.4, armSwing: 0.50, armBend: 0.26, sway: 1.12,
+        headSteady: 0.60 },
+      // WALK.
+      { at: 0.38, step: 12.6, duty: 0.64, lift: 1.9, absorb: 0.65, flight: 0,
+        crouch: 0.12, lean: 0.5, armSwing: 0.92, armBend: 0.24, sway: 1.35,
+        headSteady: 0.50 },
+      // FAST WALK.
+      { at: 0.60, step: 15.4, duty: 0.57, lift: 2.6, absorb: 0.92, flight: 0,
+        crouch: 0.0, lean: 1.1, armSwing: 1.22, armBend: 0.40, sway: 1.45,
+        headSteady: 0.45 },
+      // HURRY. His run band, and it is not a run: duty over a half, no flight.
+      { at: 0.82, step: 18.0, duty: 0.51, lift: 3.3, absorb: 1.12, flight: 0,
+        crouch: 0.0, lean: 1.8, armSwing: 1.48, armBend: 0.56, sway: 1.32,
+        headSteady: 0.40 }
+    ]
+  };
+
   // Mr. Vrána, once he is awake.
   // What one person can see, as opposed to hear.
   //
@@ -776,6 +880,11 @@ __mod.tuning = (function () {
     // Mr. Vrána. The one the whole system was written for, and still the middle
     // of the range: slower than the guards, sharper than the sleepers.
     School: person({
+      // Five locomotion states instead of four, and no permanent tiptoe in
+      // either of them. School only, for now: the rest of the game still walks
+      // off the shared tables above.
+      gait: SCHOOL_THIEF_GAIT,
+      watcherGait: SCHOOL_WALKER_GAIT,
       // Mr. Vrána looks up. Everywhere else in the game a person on his feet
       // finds you by walking into you — `followAt`, a hard threshold under three
       // tiles. Here he has eyes, and they work continuously: how quickly he picks
@@ -1545,12 +1654,29 @@ __mod.rules = (function () {
     const t = raw * raw * (3 - 2 * raw);
     const out = { legLen: config.legLen, seg: config.seg };
     for (const key of GAIT_FIELDS) out[key] = a[key] + (b[key] - a[key]) * t;
-    // Which of §4's gaits this is, for anything that wants to know rather than to
+    // How far onto the ball of the foot a careful walk goes. A property of the
+    // walker rather than of the speed: some people creep on their toes and some
+    // do not, and a character told not to should still land on his heel at every
+    // speed he moves at.
+    out.toeBias = config.toeBias === undefined ? 0.34 : config.toeBias;
+    // How far one arm trails the other, as a fraction of a cycle. Also the
+    // walker's own: undeclared, the arms are the matched pair they always were.
+    out.armLag = config.armLag === undefined ? 0 : config.armLag;
+    // Which of the gaits this is, for anything that wants to know rather than to
     // interpolate — the run weight drives the lean and the arm carriage, and the
-    // creep weight is what the tiptoe posture is built on.
-    out.creep = Math.max(0, 1 - s / bands[1].at);
-    out.run = bands.length > 3 && s > bands[2].at
-      ? Math.min(1, (s - bands[2].at) / (1 - bands[2].at)) : 0;
+    // creep weight is what a careful posture is built on.
+    //
+    // Where those two weights come from is declared by the table when it has an
+    // opinion, because a table with five bands does not have them in the same
+    // places as one with four: creep has faded by the time the normal walk
+    // starts, and the run ramps from wherever the run band is. Left undeclared,
+    // the old four-band reading applies exactly as it did.
+    const creepBy = config.creepBy === undefined ? bands[1].at : config.creepBy;
+    const runFrom = config.runFrom === undefined
+      ? (bands.length > 3 ? bands[2].at : null) : config.runFrom;
+    out.creep = creepBy > 0 ? Math.max(0, 1 - s / creepBy) : 0;
+    out.run = runFrom !== null && s > runFrom
+      ? Math.min(1, (s - runFrom) / Math.max(0.0001, 1 - runFrom)) : 0;
     // Whether the legs are cycling at all. Short ramp: a slow creep is a small
     // step, not a barely-visible twitch.
     out.moving = Math.min(1, s / 0.06);
@@ -8108,6 +8234,71 @@ __mod.gait = (function () {
     };
   }
 
+  /**
+   * One arm's swing along the direction of travel, as a share of the stride.
+   *
+   * Arms oppose legs — that is the sign, and it is the whole difference between
+   * walking and marching. What is here on top of the sign is that the two arms
+   * need not be a matched pair. A real pair does not swing the same distance and
+   * does not turn round at the same instant: one leads a little and one trails a
+   * little. The difference is small enough that nobody catches it and large
+   * enough that its absence is what makes an animated walk read as clockwork —
+   * two pendulums bolted to a box.
+   *
+   * How lopsided is the walker's own business, declared by his band table as
+   * `armLag` — a fraction of a cycle. Undeclared it is zero, and this collapses
+   * to exactly the symmetrical swing it always was, which is what keeps the
+   * asymmetry to the location that asked for it.
+   *
+   * Fixed per side rather than random: it has to be identical on every frame and
+   * in every replay, and a person's arms are lopsided the same way all day rather
+   * than differently every step.
+   *
+   * `u` is the cycle position of the leg this arm opposes.
+   */
+  function armSwing(side, u, g) {
+    const reach = footReach(g.step, g.duty) || 1;
+    const lag = g.armLag || 0;
+    if (lag <= 0) return -(footStep(u, g).along / reach);
+    const lead = side === -1;
+    // Sampled off that leg's own cycle a moment earlier, which is what "the arm
+    // trails the leg" means in a model driven by ground covered rather than time.
+    const foot = footStep((u - (lead ? lag : lag * 1.6) + 1) % 1, g);
+    return -(foot.along / reach) * (lead ? 1.07 : 0.91);
+  }
+
+  /**
+   * How far the shoe is rolled about its ankle, in radians. Negative is toe up.
+   *
+   * Most of what makes a foot look like it is on the floor rather than near it.
+   * Off the reference: the heel lands first with the toe up, the foot flattens as
+   * the weight arrives, the heel lifts again for the push, and the toe stays
+   * pointed through the first half of the swing before coming up to meet the
+   * ground for the next landing.
+   *
+   * `creep` is how careful the walk is, and `g.toeBias` is how far *this walker*
+   * rides up onto the ball of his foot when he is being careful — his own number
+   * rather than a constant. A character asked for a believable heel-to-toe
+   * pattern at every speed gets nearly none of it; one asked to creep on his toes
+   * gets the lot. Either way the cycle underneath still lands heel-first: the
+   * bias shifts the whole roll, it does not replace it.
+   */
+  function shoeRoll(foot, g, creep = 0, cycling = 1) {
+    const u = foot.u;
+    let roll;
+    if (foot.planted) {
+      const p = u / g.duty;
+      // Toe up at the landing, flat almost at once, then rising onto the toe for
+      // the push-off. The flat part is short: a foot is only flat in passing.
+      roll = p < 0.26 ? -0.36 * (1 - p / 0.26) : 0.52 * ((p - 0.26) / 0.74) ** 1.4;
+    } else {
+      const t = (u - g.duty) / (1 - g.duty);
+      // Still pointed as it leaves, levelling out, toe up again to land.
+      roll = 0.52 * (1 - t) ** 1.6 - 0.36 * t ** 2.2;
+    }
+    return (roll + creep * (g.toeBias === undefined ? 0.34 : g.toeBias)) * cycling;
+  }
+
   // A little knee flexion in the middle of the stance, where the leg takes the
   // weight. Nothing at contact or at toe-off, which are the moments the leg is
   // straight. Small: this is a person walking, not doing squats.
@@ -8176,7 +8367,7 @@ __mod.gait = (function () {
     const mag = Math.hypot(ux, uy) || 1;
     return { x: midX + (ux / mag) * out, y: midY + (uy / mag) * out };
   }
-  return { legCycle, footReach, footStep, pelvisRise, kneeOf };
+  return { legCycle, footReach, footStep, armSwing, shoeRoll, pelvisRise, kneeOf };
 })();
 __mod.figure = (function () {
   // The people you can see walking about.
@@ -8198,7 +8389,7 @@ __mod.figure = (function () {
   //      single difference between "a person walking" and "a toy marching", and
   //      it is one sign in the code.
   const { TUNING } = __mod.tuning;
-  const { legCycle, footStep, pelvisRise, kneeOf } = __mod.gait;
+  const { legCycle, footStep, pelvisRise, kneeOf, armSwing: armSwingOf, shoeRoll } = __mod.gait;
 
   const TAU = Math.PI * 2;
 
@@ -8446,8 +8637,9 @@ __mod.figure = (function () {
     const armOf = (side, far) => {
       // Arms oppose legs. One sign, and it is the whole difference between a
       // person walking and a toy marching.
-      const mine = side === -1 ? footA : footB;
-      const swing = -(mine.along / reach);
+      // Opposed to its own leg, trailing it slightly, and not the mirror of the
+      // other arm. See `armSwing`.
+      const swing = armSwingOf(side, side === -1 ? uA : uB, step);
       const grab = pose.reach > 0 && !far ? Math.sin(Math.min(1, pose.reach) * Math.PI) : 0;
       const bend = Math.min(0.95, g.armBend + rummage * 0.5);
       const shoulderX = chestX + acrossX * SHOULDER_W * side * build * 0.92
@@ -8540,21 +8732,7 @@ __mod.figure = (function () {
     // Its heading, foreshortened the same way every other length is, so a shoe
     // seen from behind is a short stub and one seen side-on is a full profile.
     const heading = Math.atan2(faceY * FORESHORTEN, faceX);
-    const u = foot.u;
-    let roll;
-    if (foot.planted) {
-      const p = u / g.duty;
-      // Toe up at the landing, flat almost at once, then rising onto the toe for
-      // the push-off. The flat part is short: a foot is only flat in passing.
-      roll = p < 0.26 ? -0.36 * (1 - p / 0.26) : 0.52 * ((p - 0.26) / 0.74) ** 1.4;
-    } else {
-      const t = (u - g.duty) / (1 - g.duty);
-      // Still pointed as it leaves, levelling out, toe up again to land.
-      roll = 0.52 * (1 - t) ** 1.6 - 0.36 * t ** 2.2;
-    }
-    // Creeping, the heel never comes down at all: he is on the balls of his feet
-    // the whole way, which is both what tiptoeing looks like and why it is quiet.
-    roll = (roll + creep * 0.34) * cycling;
+    const roll = shoeRoll(foot, g, creep, cycling);
     ctx.save();
     ctx.translate(ax, ay + 3.4);
     ctx.rotate(heading + roll * (faceX >= 0 ? 1 : -1));
@@ -9332,7 +9510,9 @@ __mod.sim = (function () {
           const t = clamp01((gap - eye.sure) / Math.max(1, eye.range - eye.sure));
           let rate = gap > eye.range ? 0 : mix(eye.near, eye.far, t * t);
           if (!player.moving) rate *= eye.still;
-          if (sim.hidden) rate *= eye.hidden;
+          // Behind the lockers there is nothing to see, at any distance, for any
+          // length of time. Not a smaller number — none.
+          if (sim.undetectable) rate = 0;
           if (scanning && !player.moving) rate = 0;
           entity.notice = rate > 0
             ? Math.min(1, entity.notice + rate * STEP_SECONDS)
@@ -9341,6 +9521,7 @@ __mod.sim = (function () {
         } else {
           picked = gap <= rules.followAt && (!scanning || player.moving);
         }
+        if (sim.undetectable) picked = false;
         if (picked) {
           entity.lostFor = 0;
           entity.repathAt = 0;
@@ -9378,7 +9559,7 @@ __mod.sim = (function () {
         // them walking towards where you were: hide with him on top of you and he
         // arrives before the doubt does, which is the whole reason to break away
         // first.
-        const outOfSight = sim.hidden || gap >= rules.unfollowAt;
+        const outOfSight = sim.undetectable || gap >= rules.unfollowAt;
         entity.lostFor = outOfSight
           ? entity.lostFor + STEP_SECONDS
           : Math.max(0, entity.lostFor - STEP_SECONDS * 1.6);
@@ -9386,7 +9567,7 @@ __mod.sim = (function () {
         // open and drains while you are not, so coming back out of a hiding place
         // in front of him is picked up again from part way rather than from cold.
         const eye = sim.vision;
-        entity.notice = sim.hidden && eye
+        entity.notice = sim.undetectable && eye
           ? Math.max(0, entity.notice - eye.fade * STEP_SECONDS)
           : 1;
         if (entity.lostFor >= rules.unfollowFor) {
@@ -9404,7 +9585,7 @@ __mod.sim = (function () {
           // furniture you are behind every single time, which makes hiding while
           // chased worthless and makes him a cheat. So the goal freezes at the
           // last place he saw you, he goes there, and he looks around.
-          if (!sim.hidden) {
+          if (!sim.undetectable) {
             entity.repathAt += STEP_SECONDS;
             const drifted = !entity.goal
               || Math.hypot(entity.goal.x - player.x, entity.goal.y - player.y) > rules.repathAfter;
@@ -9546,7 +9727,11 @@ __mod.sim = (function () {
     // from, which is the only reason to put one in a level.
     if (entity.grace > 0) entity.grace = Math.max(0, entity.grace - STEP_SECONDS);
     const alerted = entity.state !== 'patrolling' && entity.state !== 'watching';
-    if (onFootNow && sim.status === 'running' && gap <= rules.catchAt) {
+    // ...and he cannot be walked into either. "Completely undetectable" has to
+    // include the crudest detector of the lot, or hiding behind the lockers ends
+    // with a man blundering into you and the state counting for nothing.
+    if (onFootNow && sim.status === 'running' && gap <= rules.catchAt
+        && !sim.undetectable) {
       if (alerted && entity.grace <= 0) finish(sim, 'lost', 'caught');
       else if (!alerted) {
         entity.lostFor = 0;
@@ -9601,7 +9786,14 @@ __mod.sim = (function () {
       // What this level's person can see, and whether the thief is currently out
       // of sight in one of the places the map says you can be.
       vision: visionOf(rules, level),
+      // Where he is in a hiding place, as a state rather than as a pair of
+      // booleans that have to agree: 'out', 'entering', 'hidden', 'leaving'.
+      hideState: 'out',
       hidden: false,
+      // The one thing every detector asks. True from the moment he is in to the
+      // moment he is fully back out — the emergence animation included, because a
+      // man half out from behind a cabinet has not emerged yet.
+      undetectable: false,
       hideIn: null,
       // Getting in and out of one: null, or an animation in progress.
       hiding: null,
@@ -9756,6 +9948,7 @@ __mod.sim = (function () {
       from: { x: player.x, y: player.y },
       to: { x: spot.x + spot.w / 2, y: spot.y + spot.h / 2 }
     };
+    sim.hideState = 'entering';
     sim.hideTargetId = null;
     sim.events.push({ type: 'hiding', x: player.x, y: player.y, spot: spot.id });
   }
@@ -9779,6 +9972,7 @@ __mod.sim = (function () {
     const out = { x: player.x + ax * 22, y: player.y + ay * 22 };
     sim.hidden = false;
     sim.hideIn = null;
+    sim.hideState = 'leaving';
     sim.hiding = {
       t: 0,
       duration: rules.leave,
@@ -10104,6 +10298,7 @@ __mod.sim = (function () {
         player.moving = false;
         if (k >= 1) {
           const going = sim.hiding.into;
+          sim.hideState = going ? 'hidden' : 'out';
           sim.hidden = !!going;
           sim.hideIn = going || null;
           sim.hiding = null;
@@ -10152,6 +10347,21 @@ __mod.sim = (function () {
         else if (pressed && stash) beginSearch(sim, stash, searchRules);
       }
     }
+    // Out of sight, and out of every system that could find him.
+    //
+    // Hidden is not "harder to see": it is a state in which the man looking is
+    // not consulted at all. Nothing about a movement update, a proximity check, a
+    // noise, or the moment he walks past can end it — only the player pressing
+    // LEAVE, and not until the emergence has finished.
+    //
+    // Read here rather than earlier in the step, and that placement is the whole
+    // of it: the state machine above has just run, and `updateInvestigation` —
+    // every detector there is — runs below. Computing it before the transitions
+    // left it a frame stale in both directions, so there was one frame on the way
+    // in where he could still be seen and one on the way out where he could not.
+    // A single frame is all a detector needs.
+    sim.undetectable = sim.hideState === 'hidden' || sim.hideState === 'leaving';
+
     // One button, and what it is offering. Leaving beats hiding beats searching:
     // the thing you are already doing comes first, and a cupboard you could open
     // is never more urgent than getting out from behind it.

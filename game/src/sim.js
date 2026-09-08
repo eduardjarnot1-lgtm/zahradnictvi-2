@@ -548,7 +548,9 @@ function updateInvestigation(sim, player) {
         const t = clamp01((gap - eye.sure) / Math.max(1, eye.range - eye.sure));
         let rate = gap > eye.range ? 0 : mix(eye.near, eye.far, t * t);
         if (!player.moving) rate *= eye.still;
-        if (sim.hidden) rate *= eye.hidden;
+        // Behind the lockers there is nothing to see, at any distance, for any
+        // length of time. Not a smaller number — none.
+        if (sim.undetectable) rate = 0;
         if (scanning && !player.moving) rate = 0;
         entity.notice = rate > 0
           ? Math.min(1, entity.notice + rate * STEP_SECONDS)
@@ -557,6 +559,7 @@ function updateInvestigation(sim, player) {
       } else {
         picked = gap <= rules.followAt && (!scanning || player.moving);
       }
+      if (sim.undetectable) picked = false;
       if (picked) {
         entity.lostFor = 0;
         entity.repathAt = 0;
@@ -594,7 +597,7 @@ function updateInvestigation(sim, player) {
       // them walking towards where you were: hide with him on top of you and he
       // arrives before the doubt does, which is the whole reason to break away
       // first.
-      const outOfSight = sim.hidden || gap >= rules.unfollowAt;
+      const outOfSight = sim.undetectable || gap >= rules.unfollowAt;
       entity.lostFor = outOfSight
         ? entity.lostFor + STEP_SECONDS
         : Math.max(0, entity.lostFor - STEP_SECONDS * 1.6);
@@ -602,7 +605,7 @@ function updateInvestigation(sim, player) {
       // open and drains while you are not, so coming back out of a hiding place
       // in front of him is picked up again from part way rather than from cold.
       const eye = sim.vision;
-      entity.notice = sim.hidden && eye
+      entity.notice = sim.undetectable && eye
         ? Math.max(0, entity.notice - eye.fade * STEP_SECONDS)
         : 1;
       if (entity.lostFor >= rules.unfollowFor) {
@@ -620,7 +623,7 @@ function updateInvestigation(sim, player) {
         // furniture you are behind every single time, which makes hiding while
         // chased worthless and makes him a cheat. So the goal freezes at the
         // last place he saw you, he goes there, and he looks around.
-        if (!sim.hidden) {
+        if (!sim.undetectable) {
           entity.repathAt += STEP_SECONDS;
           const drifted = !entity.goal
             || Math.hypot(entity.goal.x - player.x, entity.goal.y - player.y) > rules.repathAfter;
@@ -762,7 +765,11 @@ function updateInvestigation(sim, player) {
   // from, which is the only reason to put one in a level.
   if (entity.grace > 0) entity.grace = Math.max(0, entity.grace - STEP_SECONDS);
   const alerted = entity.state !== 'patrolling' && entity.state !== 'watching';
-  if (onFootNow && sim.status === 'running' && gap <= rules.catchAt) {
+  // ...and he cannot be walked into either. "Completely undetectable" has to
+  // include the crudest detector of the lot, or hiding behind the lockers ends
+  // with a man blundering into you and the state counting for nothing.
+  if (onFootNow && sim.status === 'running' && gap <= rules.catchAt
+      && !sim.undetectable) {
     if (alerted && entity.grace <= 0) finish(sim, 'lost', 'caught');
     else if (!alerted) {
       entity.lostFor = 0;
@@ -817,7 +824,14 @@ export function createSim({ level, seed = 1, upgrades = {} }) {
     // What this level's person can see, and whether the thief is currently out
     // of sight in one of the places the map says you can be.
     vision: visionOf(rules, level),
+    // Where he is in a hiding place, as a state rather than as a pair of
+    // booleans that have to agree: 'out', 'entering', 'hidden', 'leaving'.
+    hideState: 'out',
     hidden: false,
+    // The one thing every detector asks. True from the moment he is in to the
+    // moment he is fully back out — the emergence animation included, because a
+    // man half out from behind a cabinet has not emerged yet.
+    undetectable: false,
     hideIn: null,
     // Getting in and out of one: null, or an animation in progress.
     hiding: null,
@@ -972,6 +986,7 @@ function enterHiding(sim, player, spot, rules) {
     from: { x: player.x, y: player.y },
     to: { x: spot.x + spot.w / 2, y: spot.y + spot.h / 2 }
   };
+  sim.hideState = 'entering';
   sim.hideTargetId = null;
   sim.events.push({ type: 'hiding', x: player.x, y: player.y, spot: spot.id });
 }
@@ -995,6 +1010,7 @@ function leaveHiding(sim, player, rules) {
   const out = { x: player.x + ax * 22, y: player.y + ay * 22 };
   sim.hidden = false;
   sim.hideIn = null;
+  sim.hideState = 'leaving';
   sim.hiding = {
     t: 0,
     duration: rules.leave,
@@ -1320,6 +1336,7 @@ export function stepSim(sim, input = EMPTY_INPUT) {
       player.moving = false;
       if (k >= 1) {
         const going = sim.hiding.into;
+        sim.hideState = going ? 'hidden' : 'out';
         sim.hidden = !!going;
         sim.hideIn = going || null;
         sim.hiding = null;
@@ -1368,6 +1385,21 @@ export function stepSim(sim, input = EMPTY_INPUT) {
       else if (pressed && stash) beginSearch(sim, stash, searchRules);
     }
   }
+  // Out of sight, and out of every system that could find him.
+  //
+  // Hidden is not "harder to see": it is a state in which the man looking is
+  // not consulted at all. Nothing about a movement update, a proximity check, a
+  // noise, or the moment he walks past can end it — only the player pressing
+  // LEAVE, and not until the emergence has finished.
+  //
+  // Read here rather than earlier in the step, and that placement is the whole
+  // of it: the state machine above has just run, and `updateInvestigation` —
+  // every detector there is — runs below. Computing it before the transitions
+  // left it a frame stale in both directions, so there was one frame on the way
+  // in where he could still be seen and one on the way out where he could not.
+  // A single frame is all a detector needs.
+  sim.undetectable = sim.hideState === 'hidden' || sim.hideState === 'leaving';
+
   // One button, and what it is offering. Leaving beats hiding beats searching:
   // the thing you are already doing comes first, and a cupboard you could open
   // is never more urgent than getting out from behind it.

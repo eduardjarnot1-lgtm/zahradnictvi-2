@@ -17,7 +17,8 @@
 //      single difference between "a person walking" and "a toy marching", and
 //      it is one sign in the code.
 import { TUNING } from './tuning.js';
-import { legCycle, footStep, pelvisRise, kneeOf } from './gait.js';
+import { legCycle, footStep, pelvisRise, kneeOf, armSwing as armSwingOf, shoeRoll }
+  from './gait.js';
 
 const TAU = Math.PI * 2;
 
@@ -265,8 +266,9 @@ export function drawFigure(ctx, x, y, pose, look) {
   const armOf = (side, far) => {
     // Arms oppose legs. One sign, and it is the whole difference between a
     // person walking and a toy marching.
-    const mine = side === -1 ? footA : footB;
-    const swing = -(mine.along / reach);
+    // Opposed to its own leg, trailing it slightly, and not the mirror of the
+    // other arm. See `armSwing`.
+    const swing = armSwingOf(side, side === -1 ? uA : uB, step);
     const grab = pose.reach > 0 && !far ? Math.sin(Math.min(1, pose.reach) * Math.PI) : 0;
     const bend = Math.min(0.95, g.armBend + rummage * 0.5);
     const shoulderX = chestX + acrossX * SHOULDER_W * side * build * 0.92
@@ -359,21 +361,7 @@ function drawShoe(ctx, ax, ay, foot, g, look, build, faceX, faceY, cycling, cree
   // Its heading, foreshortened the same way every other length is, so a shoe
   // seen from behind is a short stub and one seen side-on is a full profile.
   const heading = Math.atan2(faceY * FORESHORTEN, faceX);
-  const u = foot.u;
-  let roll;
-  if (foot.planted) {
-    const p = u / g.duty;
-    // Toe up at the landing, flat almost at once, then rising onto the toe for
-    // the push-off. The flat part is short: a foot is only flat in passing.
-    roll = p < 0.26 ? -0.36 * (1 - p / 0.26) : 0.52 * ((p - 0.26) / 0.74) ** 1.4;
-  } else {
-    const t = (u - g.duty) / (1 - g.duty);
-    // Still pointed as it leaves, levelling out, toe up again to land.
-    roll = 0.52 * (1 - t) ** 1.6 - 0.36 * t ** 2.2;
-  }
-  // Creeping, the heel never comes down at all: he is on the balls of his feet
-  // the whole way, which is both what tiptoeing looks like and why it is quiet.
-  roll = (roll + creep * 0.34) * cycling;
+  const roll = shoeRoll(foot, g, creep, cycling);
   ctx.save();
   ctx.translate(ax, ay + 3.4);
   ctx.rotate(heading + roll * (faceX >= 0 ? 1 : -1));

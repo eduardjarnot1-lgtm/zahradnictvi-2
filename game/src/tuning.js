@@ -189,6 +189,110 @@ const WALKER_GAIT = {
   urgency: { investigating: 0, searching: 0, returning: -0.04, following: 0.14 }
 };
 
+// --- the school's own locomotion ---------------------------------------------
+//
+// The two tables above are the game's, and every location bends them. These two
+// are the school's alone, and they exist because the school asked for a
+// different thing: not a stealth posture that happens to move, but a body that
+// walks, and walks *differently* the faster it goes.
+//
+// Five states rather than four, and they are named after what a leg is doing
+// rather than after how sneaky the player is being:
+//
+//   IDLE       standing. Both feet on the floor, nothing cycling.
+//   SLOW WALK  a careful walk. Short steps, low, quiet — but a walk: the heel
+//              still lands first. This is the one that used to be a tiptoe.
+//   WALK       the middle of the range. Heel strike, roll, toe-off, arms
+//              hanging and swinging from the shoulder.
+//   FAST WALK  longer and quicker, leaning in, arms working. Duty stays over a
+//              half: a fast walk always has a foot on the floor, which is the
+//              definition and not a preference.
+//   RUN        duty under a half, so there is a moment with neither foot down
+//              and `pelvisRise` throws the body through an arc. That moment is
+//              the whole difference between a run and a hurry.
+//
+// The one number that is *not* a matter of taste is `duty` across that last
+// boundary. Everything else is character.
+//
+// `toeBias` is what §3 is about. The old figure put a careful walker up on the
+// balls of his feet and left him there — permanently on tiptoe at every speed
+// under a stroll, which is a pose and not a gait. Here it is all but zero: the
+// thief keeps a trace of it, because a man being quiet does roll onto his toes
+// a little, and Mr. Vrána has none at all.
+const SCHOOL_THIEF_GAIT = {
+  legLen: 13,
+  seg: 6.6,
+  // Careful posture has faded out by the time the normal walk starts, and the
+  // run weight ramps from the fast walk rather than from the middle band —
+  // five bands do not have their weights where four do.
+  creepBy: 0.42,
+  runFrom: 0.70,
+  toeBias: 0.06,
+  armLag: 0.042,
+  bands: [
+    // IDLE. Both feet down, weight even, nothing swinging. `moving` fades the
+    // cycle out under this anyway; what this band is for is the posture the
+    // figure settles into when it stops.
+    { at: 0.00, step: 6.0,  duty: 0.92, lift: 0.4, absorb: 0.12, flight: 0,
+      crouch: 0.35, lean: 0.0, armSwing: 0.08, armBend: 0.12, sway: 0.30,
+      headSteady: 0.85 },
+    // SLOW WALK. Lower than the others and quieter, and that is the whole of
+    // the thief's caution — no tiptoe, no bent-knee shuffle, a short walk.
+    { at: 0.18, step: 9.4,  duty: 0.66, lift: 1.5, absorb: 0.44, flight: 0,
+      crouch: 1.45, lean: 0.9, armSwing: 0.52, armBend: 0.32, sway: 0.70,
+      headSteady: 0.70 },
+    // WALK.
+    { at: 0.42, step: 13.0, duty: 0.60, lift: 2.4, absorb: 0.72, flight: 0,
+      crouch: 0.22, lean: 0.4, armSwing: 1.00, armBend: 0.20, sway: 1.00,
+      headSteady: 0.50 },
+    // FAST WALK.
+    { at: 0.68, step: 17.6, duty: 0.52, lift: 3.5, absorb: 1.00, flight: 0,
+      crouch: 0.0, lean: 1.5, armSwing: 1.42, armBend: 0.42, sway: 1.06,
+      headSteady: 0.45 },
+    // RUN.
+    { at: 0.87, step: 24.5, duty: 0.34, lift: 6.3, absorb: 1.55, flight: 1.4,
+      crouch: 0.0, lean: 3.6, armSwing: 1.95, armBend: 1.00, sway: 0.72,
+      headSteady: 0.32 }
+  ]
+};
+
+// Mr. Vrána, on the same five states and with the top one taken away. He is
+// older, heavier and more relaxed: longer stance, more roll, less lift, and no
+// run in him at all — `runFrom: null` says that outright rather than leaving it
+// to a band boundary to imply. His fastest is a hurry, and a hurry keeps a foot
+// on the floor.
+const SCHOOL_WALKER_GAIT = {
+  legLen: 13.6,
+  seg: 6.95,
+  creepBy: 0.38,
+  runFrom: null,
+  toeBias: 0,
+  armLag: 0.052,
+  urgency: { investigating: 0, searching: 0, returning: -0.04, following: 0.14 },
+  bands: [
+    // IDLE.
+    { at: 0.00, step: 6.5,  duty: 0.94, lift: 0.4, absorb: 0.12, flight: 0,
+      crouch: 0.40, lean: 0.2, armSwing: 0.10, armBend: 0.16, sway: 0.55,
+      headSteady: 0.80 },
+    // SLOW WALK. An old man's amble: he is not being careful, he is being slow.
+    { at: 0.16, step: 9.8,  duty: 0.72, lift: 1.2, absorb: 0.34, flight: 0,
+      crouch: 0.55, lean: 0.4, armSwing: 0.50, armBend: 0.26, sway: 1.12,
+      headSteady: 0.60 },
+    // WALK.
+    { at: 0.38, step: 12.6, duty: 0.64, lift: 1.9, absorb: 0.65, flight: 0,
+      crouch: 0.12, lean: 0.5, armSwing: 0.92, armBend: 0.24, sway: 1.35,
+      headSteady: 0.50 },
+    // FAST WALK.
+    { at: 0.60, step: 15.4, duty: 0.57, lift: 2.6, absorb: 0.92, flight: 0,
+      crouch: 0.0, lean: 1.1, armSwing: 1.22, armBend: 0.40, sway: 1.45,
+      headSteady: 0.45 },
+    // HURRY. His run band, and it is not a run: duty over a half, no flight.
+    { at: 0.82, step: 18.0, duty: 0.51, lift: 3.3, absorb: 1.12, flight: 0,
+      crouch: 0.0, lean: 1.8, armSwing: 1.48, armBend: 0.56, sway: 1.32,
+      headSteady: 0.40 }
+  ]
+};
+
 // Mr. Vrána, once he is awake.
 // What one person can see, as opposed to hear.
 //
@@ -463,6 +567,11 @@ const PEOPLE = {
   // Mr. Vrána. The one the whole system was written for, and still the middle
   // of the range: slower than the guards, sharper than the sleepers.
   School: person({
+    // Five locomotion states instead of four, and no permanent tiptoe in
+    // either of them. School only, for now: the rest of the game still walks
+    // off the shared tables above.
+    gait: SCHOOL_THIEF_GAIT,
+    watcherGait: SCHOOL_WALKER_GAIT,
     // Mr. Vrána looks up. Everywhere else in the game a person on his feet
     // finds you by walking into you — `followAt`, a hard threshold under three
     // tiles. Here he has eyes, and they work continuously: how quickly he picks

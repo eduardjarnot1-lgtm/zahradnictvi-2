@@ -10,7 +10,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { TUNING } from '../src/tuning.js';
 import { gaitOf, stridePerUnit } from '../src/rules.js';
-import { legCycle, footStep, pelvisRise, kneeOf, footReach } from '../src/gait.js';
+import { legCycle, footStep, pelvisRise, kneeOf, footReach, armSwing, shoeRoll }
+  from '../src/gait.js';
 
 const SCHOOL = TUNING.locations.School.gait;
 const VRANA = TUNING.locations.School.watcherGait;
@@ -203,15 +204,161 @@ test('a run is a different shape from a walk, not a faster one', () => {
   assert.ok(run.armBend > walk.armBend * 3, 'a run needs the elbows bent');
 });
 
-test('a tiptoe is short, low, quiet and crouched', () => {
-  // Section 10, and the whole reason the school is a stealth level.
+test('a careful walk is short, low and quiet — and still a walk', () => {
+  // Section 10, and the whole reason the school is a stealth level. What it is
+  // not, any more, is a tiptoe: §3 says in as many words that the thief must
+  // not spend his life on the balls of his feet, so the crouch is now a couple
+  // of centimetres of caution rather than a squat, and `toeBias` — the number
+  // that used to roll him forward onto his toes whenever he slowed down — is
+  // all but zero.
   const creep = bandOf(0.12);
-  const walk = bandOf(0.35);
-  assert.ok(creep.step < walk.step * 0.8, 'tiptoe steps must be short');
-  assert.ok(creep.lift < walk.lift, 'a tiptoe does not pick its feet up');
+  const walk = bandOf(0.42);
+  assert.ok(creep.step < walk.step * 0.8, 'careful steps must be short');
+  assert.ok(creep.lift < walk.lift, 'a careful foot does not get picked up high');
   assert.ok(creep.armSwing < walk.armSwing * 0.6, 'the arms stay in');
-  assert.ok(creep.crouch > 2, 'the whole body should be lower');
+  assert.ok(creep.crouch > walk.crouch + 0.6, 'the whole body should be lower');
+  assert.ok(creep.crouch < 2.4, 'but he is walking, not squatting');
   assert.ok(creep.duty > walk.duty, 'a careful foot stays down longer');
+  assert.ok(SCHOOL.toeBias < 0.12, 'and he lands on his heel while he does it');
+  assert.ok((VRANA.toeBias || 0) === 0, 'Mr. Vrána never goes up on his toes');
+});
+
+// --- the five states ---------------------------------------------------------
+
+test('the school walks in five states, and each one is a different walk', () => {
+  // The request, in one test: IDLE → SLOW WALK → WALK → FAST WALK → RUN, told
+  // apart by what the legs are doing rather than by a label.
+  const at = SCHOOL.bands.map((b) => b.at);
+  assert.equal(at.length, 5, 'five states');
+  for (let i = 1; i < at.length; i++) {
+    assert.ok(at[i] > at[i - 1], 'the states must be in speed order');
+  }
+  const [idle, slow, walk, fast, run] = at.map((a) => bandOf(a));
+  // Standing: no stride worth the name, and both feet on the floor.
+  assert.ok(idle.moving === 0, 'idle does not cycle');
+  assert.ok(idle.duty > 0.85, 'both feet are down when he is stood still');
+  // Every state up the range covers more ground per step than the one below.
+  const steps = [idle, slow, walk, fast, run].map((g) => g.step);
+  for (let i = 1; i < steps.length; i++) {
+    assert.ok(steps[i] > steps[i - 1] * 1.15,
+      `state ${i} has to be a visibly longer stride than state ${i - 1}`);
+  }
+  // And spends less of the cycle with that foot on the floor.
+  const duties = [idle, slow, walk, fast, run].map((g) => g.duty);
+  for (let i = 1; i < duties.length; i++) {
+    assert.ok(duties[i] < duties[i - 1], 'a faster gait is a shorter stance');
+  }
+  // The line between walking and running, which is not a matter of taste: a
+  // walk always has a foot down, a run has a moment where it does not.
+  assert.ok(fast.duty > 0.5, 'a fast walk is still a walk');
+  assert.ok(run.duty < 0.5, 'a run is not');
+  assert.ok(fast.flight === 0 && run.flight > 0.5, 'and only the run has air in it');
+});
+
+test('the walk gives way to the run rather than being sped up', () => {
+  // Section 9. Sweep the whole range and find where the model stops keeping a
+  // foot on the floor: that crossing must exist, must be up in the fast-walk
+  // end of the range, and everything below it must be a walk.
+  let crossed = null;
+  for (let i = 0; i <= 200; i++) {
+    const share = i / 200;
+    const g = bandOf(share);
+    if (g.duty < 0.5) { crossed = share; break; }
+    assert.ok(g.flight === 0 || g.duty >= 0.5,
+      `at ${share} there is air under a gait with both feet down`);
+  }
+  assert.ok(crossed !== null, 'the thief never breaks into a run');
+  assert.ok(crossed > 0.6 && crossed < 0.85,
+    `he broke into a run at ${crossed} of top speed`);
+  // Above the crossing the body actually leaves the floor, which is the thing
+  // that makes a run look like one.
+  const g = bandOf(0.95);
+  let air = 0;
+  for (let i = 0; i < 200; i++) if (!footStep(i / 200, g).planted
+    && !footStep((i / 200 + 0.5) % 1, g).planted) air++;
+  assert.ok(air > 20, `only ${air / 2} per cent of the run cycle was airborne`);
+});
+
+test('Mr. Vrána has no run in him at any speed', () => {
+  // Section 12. He hurries; he does not sprint. Nothing in his table may put
+  // both his feet off the floor, and his run weight stays flat at zero.
+  for (const band of VRANA.bands) {
+    assert.equal(band.flight, 0, 'the caretaker has a band with air under it');
+    assert.ok(band.duty > 0.5 || band.at === 0,
+      `a moving band of his keeps a foot down (${band.duty})`);
+  }
+  for (let i = 0; i <= 20; i++) assert.equal(bandOf(i / 20, VRANA).run, 0);
+});
+
+test('the arms are a pair of arms, not a pair of pendulums', () => {
+  // Section 7. The two arms must differ — in how far they swing and in when
+  // they turn round — and both differences must be small.
+  const g = bandOf(0.45);
+  let mostL = 0;
+  let mostR = 0;
+  const zero = { '-1': null, 1: null };
+  let last = { '-1': 0, 1: 0 };
+  for (let i = 0; i <= 1000; i++) {
+    const u = i / 1000;
+    // Both arms read off the *same* leg here, so anything that comes out
+    // different is the arm model and not the half-cycle offset between legs.
+    const l = armSwing(-1, u, g);
+    const r = armSwing(1, u, g);
+    mostL = Math.max(mostL, Math.abs(l));
+    mostR = Math.max(mostR, Math.abs(r));
+    if (zero['-1'] === null && last['-1'] < 0 && l >= 0) zero['-1'] = u;
+    if (zero[1] === null && last[1] < 0 && r >= 0) zero[1] = u;
+    last = { '-1': l, 1: r };
+  }
+  const ratio = mostL / mostR;
+  assert.ok(ratio > 1.05 && ratio < 1.35,
+    `the arms swing ${ratio.toFixed(2)}:1 — that is not a slight difference`);
+  const apart = Math.abs(zero['-1'] - zero[1]);
+  assert.ok(apart > 0.005 && apart < 0.12,
+    `the arms turn round ${apart.toFixed(3)} of a cycle apart`);
+  // And nowhere else: the lopsidedness is the school's, declared by its own
+  // table, so every other location's arms stay the matched pair they were.
+  const other = gaitOf(0.45, TUNING.locations.Apartment.gait);
+  for (let i = 0; i <= 40; i++) {
+    const u = i / 40;
+    assert.equal(armSwing(-1, u, other), armSwing(1, u, other),
+      'the apartment thief grew a lopsided arm swing');
+  }
+  // Still opposed to their own leg, which the asymmetry must not have broken.
+  for (let i = 0; i <= 100; i++) {
+    const u = i / 100;
+    const leg = footStep(u, g).along;
+    if (Math.abs(leg) < g.step * 0.35) continue;
+    for (const side of [-1, 1]) {
+      assert.ok(Math.sign(armSwing(side, u, g)) !== Math.sign(leg),
+        `at ${u} arm ${side} went the same way as its leg`);
+    }
+  }
+});
+
+test('he lands on his heel at every speed, and never walks on his toes', () => {
+  // Section 3, and the one thing the old model got flatly wrong: a careful
+  // walker was rolled forward onto the balls of his feet and left there, at
+  // every speed under a stroll, for the whole cycle. A heel strike is a
+  // negative roll — toe up — at the instant the foot is planted.
+  for (const [who, config] of [['the thief', SCHOOL], ['Mr. Vrána', VRANA]]) {
+    for (const share of [0.08, 0.15, 0.25, 0.4, 0.6, 0.75]) {
+      const g = bandOf(share, config);
+      const contact = shoeRoll(footStep(0, g), g, g.creep);
+      assert.ok(contact < -0.2,
+        `${who} at ${share} landed with his foot rolled ${contact.toFixed(2)}`);
+      // ...and pushes off over the toe, which is the other half of the roll.
+      const off = shoeRoll(footStep(g.duty * 0.97, g), g, g.creep);
+      assert.ok(off > 0.3, `${who} at ${share} pushed off at ${off.toFixed(2)}`);
+      // Flat in passing, somewhere between the two.
+      let flattest = Infinity;
+      for (let i = 0; i < 100; i++) {
+        const u = (i / 100) * g.duty;
+        flattest = Math.min(flattest, Math.abs(shoeRoll(footStep(u, g), g, g.creep)));
+      }
+      assert.ok(flattest < 0.06, `${who} at ${share} never put his foot flat`);
+    }
+  }
 });
 
 test('the bands blend rather than snap', () => {
@@ -347,13 +494,23 @@ test('following puts a bit of urgency into him without making him sprint', () =>
 
 test('every location has a gait, and the walkers are not all the same walker', () => {
   const steps = new Map();
+  const elsewhere = TUNING.locations.Apartment.gait;
   for (const [name, rules] of Object.entries(TUNING.locations)) {
     assert.ok(rules.gait, `${name} has no gait for the thief`);
     assert.ok(rules.watcherGait, `${name} has no gait for its own person`);
-    // The thief is the same man everywhere, so his band table is shared
-    // outright rather than copied.
-    assert.equal(rules.gait, TUNING.locations.School.gait,
-      `${name} has its own copy of the thief's walk`);
+    // The thief is the same man in the other ten, so his band table is shared
+    // outright rather than copied. The school is the exception, on purpose: the
+    // five-state locomotion was asked for there and nowhere else, so it must
+    // *not* be the shared object — and everywhere else must still be.
+    if (name === 'School') {
+      assert.notEqual(rules.gait, elsewhere,
+        'the school was supposed to have its own locomotion');
+      assert.equal(rules.gait.bands.length, 5,
+        'the school walks in five states');
+    } else {
+      assert.equal(rules.gait, elsewhere,
+        `${name} has its own copy of the thief's walk`);
+    }
     // A band with air under it needs a duty factor under a half or there is no
     // moment with both feet off the ground — and `pelvisRise` would be dividing
     // by a gap of nothing.
@@ -362,7 +519,10 @@ test('every location has a gait, and the walkers are not all the same walker', (
         assert.ok(band.duty < 0.5,
           `${name} has a band with air under it and both feet down (${band.duty})`);
       }
-      assert.ok(band.step > 0 && band.duty > 0.2 && band.duty <= 0.82,
+      // A standing band is allowed both feet flat on the floor; a moving one is
+      // not, or there is no swing in it.
+      const most = band.at === 0 ? 0.96 : 0.82;
+      assert.ok(band.step > 0 && band.duty > 0.2 && band.duty <= most,
         `${name} has a band out of range`);
     }
     steps.set(name, rules.watcherGait.bands.map((b) => b.step).join(','));

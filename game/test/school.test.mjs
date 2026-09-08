@@ -1929,28 +1929,83 @@ test('standing in a hiding place makes him far slower to pick you out', () => {
     `out in the open took ${exposed}s and hidden ${hidden}s — hiding should be worth far more`);
 });
 
-test('hiding is not invulnerability', () => {
+test('hidden is hidden: nothing finds him, including walking into him', () => {
+  // The state is absolute on purpose. Not a smaller number in the sight
+  // calculation — no sight, no threshold, no pursuit, and no being blundered
+  // into either, because the crudest detector of the lot would otherwise make
+  // the state count for nothing.
   const run = openSchool(25);
   const { sim } = run;
   const w = sim.investigator;
   const p = playerOf(sim);
   const spot = sim.level.hides[0];
   tuckInto(run, spot);
+  assert.equal(sim.hideState, 'hidden');
+  assert.ok(sim.undetectable);
 
-  // Noise still carries. Hiding is about being seen, not about being silent.
-  const before = sim.noise;
-  sim.noise = before + 20;
-  tick(run);
-  assert.ok(sim.noise > before, 'a hidden thief still makes noise');
-
-  // ...and he can still walk into you.
-  w.state = 'investigating';
-  w.x = p.x + RULES.investigate.catchAt - 6;
-  w.y = p.y;
-  w.prevX = w.x; w.prevY = w.y;
+  // Stand him on top of the thief, wide awake, for a long time.
+  w.state = 'following';
+  w.notice = 1;
   w.grace = 0;
-  tick(run);
-  assert.equal(sim.status, 'lost', 'walking into a hidden thief should still be walking into him');
+  for (let i = 0; i < 60 * 8; i++) {
+    w.x = p.x + 2;
+    w.y = p.y;
+    w.prevX = w.x;
+    w.prevY = w.y;
+    sim.noise = 99;
+    tick(run);
+    assert.equal(sim.status, 'running',
+      `he found the thief in a hiding place after ${(i / 60).toFixed(1)}s: ${sim.failReason}`);
+    assert.ok(sim.hidden, 'and the thief should still be hidden');
+  }
+  assert.notEqual(w.state, 'following', 'he should have given up on a thief he cannot detect');
+  assert.equal(w.notice, 0, 'and be certain of nothing');
+});
+
+test('hiding costs the clock, which is what stops it being free', () => {
+  const run = openSchool(25);
+  const { sim } = run;
+  const spot = sim.level.hides[0];
+  const before = sim.timeLeft;
+  tuckInto(run, spot);
+  for (let i = 0; i < 60 * 3; i++) tick(run);
+  assert.ok(sim.timeLeft < before - 2.5,
+    'the clock should run while he is behind the lockers');
+  // ...and what he did before he got there still stands.
+  assert.ok(sim.noise >= 0);
+});
+
+test('detection comes back only once he is all the way out', () => {
+  // Section 1: restore the normal system *after* the emergence animation, not
+  // when the button is pressed. Half out from behind a cabinet is not out.
+  const run = openSchool(25);
+  const { sim } = run;
+  const w = sim.investigator;
+  const p = playerOf(sim);
+  tuckInto(run, sim.level.hides[0]);
+  w.state = 'investigating';
+  w.notice = 0;
+  w.x = p.x + 30;
+  w.y = p.y;
+  w.prevX = w.x;
+  w.prevY = w.y;
+
+  // Press LEAVE, then watch every frame of coming out.
+  tick(run, { x: 0, y: 0, take: false, search: true });
+  assert.equal(sim.hideState, 'leaving');
+  let frames = 0;
+  while (sim.hideState === 'leaving' && frames < 120) {
+    assert.ok(sim.undetectable, 'he is still coming out and should still be safe');
+    w.x = p.x + 30;
+    w.y = p.y;
+    w.prevX = w.x;
+    w.prevY = w.y;
+    tick(run);
+    frames++;
+  }
+  assert.ok(frames > 8, `coming out took ${frames} frames — that is a teleport`);
+  assert.equal(sim.hideState, 'out');
+  assert.ok(!sim.undetectable, 'and now he can be seen again');
 });
 
 test('he does not know which hiding place you went into', () => {

@@ -1,0 +1,87 @@
+<!-- A bench for the walk cycle, not part of the game.
+     Serve the game directory and open it:
+         python3 -m http.server 8712
+         open http://localhost:8712/tools/walksheet.html          (every speed)
+         open http://localhost:8712/tools/walksheet.html?zoom=1    (close up)
+     Each row is one speed. The floor is ruled every 10 world units and scrolls
+     with the body, so a planted foot that drifts off its line is sliding, in
+     pixels, where you can see it. -->
+<meta charset=utf-8>
+<style>body{margin:0;background:#22252a;font:12px system-ui;color:#cfd6dd}
+h2{font:600 13px system-ui;margin:10px 0 2px 8px;color:#9fd}
+canvas{display:block;margin:0 0 4px 8px;background:#2c3036;border-radius:4px}</style>
+<div id=out></div>
+<script type="module">
+import { TUNING } from '../src/tuning.js';
+import { gaitOf, stridePerUnit } from '../src/rules.js';
+import { drawFigure, THIEF_LOOK, CARETAKER_LOOK } from '../src/figure.js';
+
+const SCHOOL = TUNING.locations.School;
+
+const out = document.getElementById('out');
+
+// A ruled floor that scrolls under him. A planted foot must stay pinned to a
+// line for the whole of its stance; anything else is sliding, in pixels.
+function sheet(title, config, look, shares, frames = 14, zoom = 3.2) {
+  const h = document.createElement('h2');
+  h.textContent = title;
+  out.appendChild(h);
+  for (const share of shares) {
+    const cv = document.createElement('canvas');
+    const cell = 74;
+    cv.width = cell * frames * zoom;
+    cv.height = 96 * zoom;
+    cv.style.width = `${cv.width / (zoom > 5 ? 1.35 : 2)}px`;
+    const ctx = cv.getContext('2d');
+    ctx.scale(zoom, zoom);
+    const speed = share * TUNING.player.speed;
+    const k = stridePerUnit(share, config);
+    const g = gaitOf(share, config);
+    let phase = 0;
+    let world = 0;
+    const dt = 1 / 60;
+    // Settle, so the first drawn frame is mid-cycle rather than at a plant.
+    for (let i = 0; i < 20; i++) { world += speed * dt; phase += speed * dt * k; }
+    for (let f = 0; f < frames; f++) {
+      const ox = f * cell + cell / 2;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(f * cell, 0, cell, 96);
+      ctx.clip();
+      // floor rules every 10 world units, scrolling with him
+      ctx.strokeStyle = '#3d434b';
+      ctx.lineWidth = 1;
+      for (let m = -80; m <= 80; m += 10) {
+        const x = ox + (m - (world % 10));
+        ctx.beginPath();
+        ctx.moveTo(x, 60);
+        ctx.lineTo(x, 92);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = '#525a63';
+      ctx.beginPath(); ctx.moveTo(f * cell, 76.5); ctx.lineTo(f * cell + cell, 76.5); ctx.stroke();
+      drawFigure(ctx, ox, 60, {
+        facing: 0, walkPhase: phase, clock: f * 0.2, gait: g, stand: 1
+      }, look);
+      ctx.restore();
+      for (let i = 0; i < 4; i++) { world += speed * dt; phase += speed * dt * k; }
+    }
+    out.appendChild(cv);
+    const lab = document.createElement('div');
+    lab.style.cssText = 'margin:0 0 6px 10px;color:#8fa';
+    lab.textContent = `share ${share.toFixed(2)} — step ${g.step.toFixed(1)}  duty ${g.duty.toFixed(2)}  lift ${g.lift.toFixed(1)}  flight ${g.flight.toFixed(2)}  crouch ${g.crouch.toFixed(2)}  run ${g.run.toFixed(2)}`;
+    out.appendChild(lab);
+  }
+}
+
+const q = new URLSearchParams(location.search);
+if (q.get('zoom')) {
+  sheet('THIEF close', SCHOOL.gait, THIEF_LOOK, [0.15, 0.30, 0.45], 9, 7);
+  sheet('THIEF close fast', SCHOOL.gait, THIEF_LOOK, [0.62, 0.80, 1.0], 9, 7);
+  sheet('VRANA close', SCHOOL.watcherGait, CARETAKER_LOOK, [0.20, 0.45, 0.70], 9, 7);
+} else {
+  sheet('THIEF', SCHOOL.gait, THIEF_LOOK, [0.10, 0.18, 0.30, 0.42, 0.55, 0.70, 0.80, 0.90, 1.0]);
+  sheet('MR VRANA', SCHOOL.watcherGait, CARETAKER_LOOK, [0.12, 0.24, 0.38, 0.50, 0.62, 0.75]);
+}
+window.__ready = true;
+</script>
