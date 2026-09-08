@@ -2342,13 +2342,240 @@ function drawCoats(ctx, d) {
   }
 }
 
+// ------------------------------------------------------ what happened here
+//
+// Section 16. A room full of correct furniture is a floorplan that has been
+// dressed; a room where somebody has left half a cup of tea is a room somebody
+// was in. These are the props that carry that, one or two per building, and
+// each one is the thing that could only be in this building: a rope barrier
+// belongs to the museum the way a drip stand belongs to the hospital and a
+// suitcase left by the lift belongs to the hotel.
+//
+// All of it is baked into the room cache with the rest of the dressing, so a
+// floor's worth costs nothing per frame, and none of it is collidable — the
+// grid is the building, and everything you can walk into is in the grid.
+
+// A suitcase somebody left standing by the lift, and the smaller bag beside it.
+function drawLuggage(ctx, d) {
+  const cx = d.x + d.w / 2;
+  const cy = d.y + d.h / 2;
+  drop(ctx, { x: cx - 8, y: cy - 6, w: 16, h: 13 }, 6);
+  fillRound(ctx, cx - 8, cy - 6, 15, 13, 2, '#5b4438');
+  fillRound(ctx, cx - 6.6, cy - 4.6, 12.2, 4.4, 1.4, '#6f5446');
+  ctx.fillStyle = 'rgba(24,16,12,0.45)';                      // the strap
+  ctx.fillRect(cx - 2.4, cy - 6, 2.6, 13);
+  ctx.fillStyle = '#c9b088';                                  // buckle
+  ctx.fillRect(cx - 2.6, cy - 1.4, 3, 2.2);
+  ctx.fillStyle = '#3a2c24';                                  // handle, laid flat
+  ctx.fillRect(cx - 4.4, cy - 8.4, 8, 2);
+  // ...and the overnight bag propped against it.
+  fillRound(ctx, cx + 6, cy + 1, 9, 6.5, 2, '#40506b');
+  fillRound(ctx, cx + 7, cy + 1.8, 7, 2.2, 1, '#55688a');
+}
+
+// Rope between two posts, which is the whole of what a museum uses to tell you
+// where you may not stand.
+function drawBarrier(ctx, d) {
+  const along = d.w >= d.h;
+  const x0 = d.x + 3;
+  const y0 = d.y + d.h / 2;
+  const x1 = d.x + d.w - 3;
+  const y1 = d.y + d.h / 2;
+  const ax = along ? x0 : d.x + d.w / 2;
+  const ay = along ? y0 : d.y + 3;
+  const bx = along ? x1 : d.x + d.w / 2;
+  const by = along ? y1 : d.y + d.h - 3;
+  // The rope, slung between them rather than ruled: a straight line between two
+  // posts is a fence, and a curve is a rope.
+  ctx.strokeStyle = '#8d2f34';
+  ctx.lineWidth = 2.2;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(ax, ay);
+  ctx.quadraticCurveTo((ax + bx) / 2 + (along ? 0 : 5), (ay + by) / 2 + (along ? 5 : 0), bx, by);
+  ctx.stroke();
+  ctx.strokeStyle = 'rgba(220,180,150,0.30)';
+  ctx.lineWidth = 0.8;
+  ctx.stroke();
+  for (const [px, py] of [[ax, ay], [bx, by]]) {
+    drop(ctx, { x: px - 3, y: py - 3, w: 6, h: 6 }, 5);
+    fillRound(ctx, px - 3, py - 3, 6, 6, 3, '#8f8a80');      // the base
+    fillRound(ctx, px - 2, py - 5, 4, 6, 2, '#c9b98d');      // the post
+    fillRound(ctx, px - 2.4, py - 6, 4.8, 2, 1, '#e0d3ac');  // the finial
+  }
+  ctx.lineCap = 'butt';
+}
+
+// A till on the counter, drawer out. Whoever cashed up has not been back.
+function drawTill(ctx, d) {
+  const cx = d.x + d.w / 2;
+  const cy = d.y + d.h / 2;
+  drop(ctx, { x: cx - 8, y: cy - 6, w: 17, h: 12 }, 5);
+  fillRound(ctx, cx - 8, cy - 6, 16, 11, 2, '#4a5259');
+  fillRound(ctx, cx - 6.6, cy - 4.8, 9, 5, 1.2, '#8fa4ad');   // the screen
+  ctx.fillStyle = 'rgba(20,28,32,0.55)';
+  for (let i = 0; i < 3; i++) ctx.fillRect(cx - 5.6, cy - 3.8 + i * 1.4, 6.4, 0.7);
+  ctx.fillStyle = '#39414a';                                   // keys
+  for (let i = 0; i < 3; i++) ctx.fillRect(cx + 2.4, cy - 4.4 + i * 2.2, 4.4, 1.4);
+  // The drawer, standing open and empty.
+  fillRound(ctx, cx - 7.4, cy + 5, 14.8, 5, 1.4, '#5c6670');
+  ctx.fillStyle = 'rgba(12,16,20,0.60)';
+  ctx.fillRect(cx - 6.2, cy + 6, 12.4, 3);
+  ctx.fillStyle = '#c9b98d';
+  for (let i = 0; i < 3; i++) ctx.fillRect(cx - 5.4 + i * 4.4, cy + 6.6, 2.6, 1.8);
+}
+
+// A drip stand, wheeled into the corridor and left there.
+function drawDrip(ctx, d) {
+  const cx = d.x + d.w / 2;
+  const cy = d.y + d.h / 2;
+  drop(ctx, { x: cx - 4, y: cy + 2, w: 8, h: 5 }, 5);
+  ctx.strokeStyle = '#9aa6b0';                                 // the pole
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy + 5);
+  ctx.lineTo(cx, cy - 7);
+  ctx.stroke();
+  ctx.strokeStyle = '#7d8892';                                 // the feet
+  ctx.lineWidth = 1.4;
+  for (const a of [0.4, 2.1, 3.8, 5.5]) {
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + 5);
+    ctx.lineTo(cx + Math.cos(a) * 4.6, cy + 5 + Math.sin(a) * 2.4);
+    ctx.stroke();
+  }
+  fillRound(ctx, cx - 1.4, cy - 9, 5.6, 7, 1.6, 'rgba(214,232,224,0.80)');  // the bag
+  fillRound(ctx, cx - 0.6, cy - 6.4, 4, 4, 1.2, 'rgba(150,196,180,0.75)');
+  ctx.fillStyle = '#c2ccd4';
+  ctx.fillRect(cx - 0.4, cy - 9.8, 3.4, 1.4);
+}
+
+// A plate and a mug, left on the side. Whoever was eating did not finish.
+function drawMeal(ctx, d) {
+  const cx = d.x + d.w / 2;
+  const cy = d.y + d.h / 2;
+  ctx.fillStyle = 'rgba(16,22,20,0.20)';
+  ctx.beginPath();
+  ctx.ellipse(cx + 0.6, cy + 1.6, 7, 3.4, 0, 0, TAU);
+  ctx.fill();
+  ctx.fillStyle = '#e8e2d6';                                   // the plate
+  ctx.beginPath();
+  ctx.ellipse(cx - 1, cy, 6.4, 4.4, 0, 0, TAU);
+  ctx.fill();
+  ctx.fillStyle = '#cfc6b4';
+  ctx.beginPath();
+  ctx.ellipse(cx - 1, cy, 4.4, 2.8, 0, 0, TAU);
+  ctx.fill();
+  ctx.fillStyle = '#9c6a44';                                   // what is left on it
+  ctx.beginPath();
+  ctx.ellipse(cx - 2.2, cy - 0.4, 2, 1.4, 0.6, 0, TAU);
+  ctx.fill();
+  ctx.strokeStyle = '#b8bec6';                                 // a fork across it
+  ctx.lineWidth = 0.9;
+  ctx.beginPath();
+  ctx.moveTo(cx - 4.4, cy + 2.2);
+  ctx.lineTo(cx + 2.6, cy - 1.6);
+  ctx.stroke();
+  // ...and the mug beside it, half drunk.
+  fillRound(ctx, cx + 5, cy - 3.4, 6, 6.4, 1.6, '#dfe6ea');
+  ctx.fillStyle = '#5e4632';
+  ctx.beginPath();
+  ctx.ellipse(cx + 8, cy - 2.6, 2, 1.3, 0, 0, TAU);
+  ctx.fill();
+  ctx.strokeStyle = '#dfe6ea';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.arc(cx + 11.4, cy - 0.4, 2, -1, 1.6);
+  ctx.stroke();
+}
+
+// A game left out on the floor, half put away. Somebody small lives here.
+function drawToys(ctx, d) {
+  const cx = d.x + d.w / 2;
+  const cy = d.y + d.h / 2;
+  const tints = ['#c2543f', '#3f7f88', '#e0a83c', '#6f5a94'];
+  const spots = [[-6, 1, 0.5], [-1, -2, 1.1], [3, 2, 0.2], [7, -1, 0.8], [1, 4, 1.5]];
+  ctx.fillStyle = 'rgba(16,22,20,0.18)';
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + 3, 10, 3.6, 0, 0, TAU);
+  ctx.fill();
+  for (let i = 0; i < spots.length; i++) {
+    const [dx, dy, turn] = spots[i];
+    ctx.save();
+    ctx.translate(cx + dx, cy + dy);
+    ctx.rotate(turn);
+    fillRound(ctx, -2.4, -2.4, 4.8, 4.8, 1, tints[i % tints.length]);
+    ctx.fillStyle = 'rgba(255,255,255,0.22)';
+    ctx.fillRect(-1.8, -1.8, 3.6, 1.2);
+    ctx.restore();
+  }
+}
+
+// A packing crate, one board levered off and the straw showing.
+function drawCrate(ctx, d) {
+  const cx = d.x + d.w / 2;
+  const cy = d.y + d.h / 2;
+  const box = { x: cx - 9, y: cy - 7, w: 18, h: 14 };
+  drop(ctx, box, 6);
+  fillRound(ctx, box.x, box.y, box.w, box.h, 1.6, '#8a6a44');
+  ctx.fillStyle = 'rgba(60,40,22,0.34)';                       // the boards
+  for (let i = 1; i < 3; i++) ctx.fillRect(box.x + 1, box.y + i * 4.4, box.w - 2, 1);
+  ctx.fillStyle = '#a3805a';
+  ctx.fillRect(box.x + 1, box.y + 1, box.w - 2, 3);
+  // The lid, prised off and leaning against it, and what is under it.
+  ctx.fillStyle = 'rgba(20,14,8,0.62)';
+  ctx.fillRect(box.x + 3, box.y + 4.6, box.w - 6, 5);
+  ctx.fillStyle = 'rgba(214,186,124,0.55)';                    // straw
+  for (let i = 0; i < 5; i++) {
+    ctx.fillRect(box.x + 4 + i * 2.2, box.y + 5.4 + (i % 2) * 1.6, 1.8, 0.9);
+  }
+  ctx.save();
+  ctx.translate(box.x + box.w + 1, box.y + box.h - 1);
+  ctx.rotate(-0.32);
+  fillRound(ctx, 0, -13, 4, 13, 1.2, '#7a5c3c');
+  ctx.restore();
+}
+
+// Two glasses and the bottle they came out of. Somebody had company.
+function drawGlasses(ctx, d) {
+  const cx = d.x + d.w / 2;
+  const cy = d.y + d.h / 2;
+  ctx.fillStyle = 'rgba(16,22,20,0.20)';
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + 2.4, 9, 3.2, 0, 0, TAU);
+  ctx.fill();
+  // The bottle, seen from over the top: a dark disc with a shoulder round it.
+  fillRound(ctx, cx - 3.4, cy - 4.4, 6.8, 8.8, 3.4, '#2f4433');
+  fillRound(ctx, cx - 2, cy - 3, 4, 4, 2, '#456350');
+  ctx.fillStyle = '#c9b98d';
+  fillRound(ctx, cx - 1.2, cy - 2.2, 2.4, 2.4, 1.2, '#d8c79c');
+  for (const [dx, dy] of [[6.4, -1.4], [-7, 1.6]]) {
+    ctx.fillStyle = 'rgba(226,238,240,0.55)';
+    ctx.beginPath();
+    ctx.ellipse(cx + dx, cy + dy, 3.2, 3.2, 0, 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(150,60,70,0.55)';
+    ctx.beginPath();
+    ctx.ellipse(cx + dx, cy + dy, 2.1, 2.1, 0, 0, TAU);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.34)';
+    ctx.lineWidth = 0.7;
+    ctx.beginPath();
+    ctx.arc(cx + dx, cy + dy, 3.2, 0, TAU);
+    ctx.stroke();
+  }
+}
+
 const DECOR_PROPS = {
   // Last of all, so the light falls over the room rather than under it.
   ceiling: drawCeilingLight,
   radiator: drawRadiator, extinguisher: drawExtinguisher, coats: drawCoats,
   bin: drawBin, plant: drawPotPlant, kettle: drawKettle,
   desklamp: drawDeskLamp, lamp: drawLightPool,
-  bike: drawBike, car: drawCar
+  bike: drawBike, car: drawCar,
+  // ...and the one thing in each building that could only be in that building.
+  luggage: drawLuggage, barrier: drawBarrier, till: drawTill, drip: drawDrip,
+  meal: drawMeal, toys: drawToys, crate: drawCrate, glasses: drawGlasses
 };
 
 function paintDecor(ctx, level, table) {

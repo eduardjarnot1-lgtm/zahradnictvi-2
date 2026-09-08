@@ -2295,6 +2295,115 @@ def add_fittings(g, tier, kinds=('radiator', 'extinguisher'), step=7):
     return put
 
 
+# --------------------------------------------------------- what happened here
+# Section 16. One or two props per building that could only be in that
+# building, placed where they would actually be rather than scattered.
+#
+# A room full of correct furniture is a floorplan that has been dressed. A room
+# where somebody has left half a cup of tea is a room somebody was in — and the
+# difference between those two is most of what separates a level from a level
+# you believe in. The school got this the long way round, with chalk in the
+# tray and a bag by the door and paper under the desks; this is the same idea
+# for the other ten, in one table.
+#
+# Each entry is (kind, where, how many per tier step). `where` is the rule for
+# what a sensible spot looks like:
+#
+#   'against'  next to furniture — a plate on the side, a suitcase by a chest
+#   'open'     out in the middle of a room, where you have to walk round it
+#   'door'     near a doorway, which is where people put things down
+#
+# A prop is one tile unless it is listed in STORY_SPAN. Only the rope barrier
+# is: a rope slung between two posts a single tile apart is not a barrier, it
+# is a pair of posts, and a museum uses these to close off half a gallery.
+STORY_SPAN = {'barrier': (2, 1)}
+# No two buildings may carry the same pair, or two of them tell the same story
+# in different wallpaper — which is what the first draft did, with the flat and
+# the house both on a plate and a scattered game, and the museum and the vault
+# both on a rope and a crate.
+STORY = {
+    'Apartment': [('meal', 'against', 1.0), ('toys', 'open', 0.8)],
+    # A bag half packed in the hall, and whatever the child left on the floor.
+    'House':     [('toys', 'open', 1.2), ('luggage', 'door', 0.7)],
+    'Hotel':     [('luggage', 'door', 1.2), ('meal', 'against', 0.6)],
+    'Office':    [('meal', 'against', 1.2), ('crate', 'open', 0.5)],
+    # The school already tells its own story, at length, and the whole of this
+    # pass is the other ten catching up with it.
+    'School':    [],
+    'Hospital':  [('drip', 'door', 1.4), ('meal', 'against', 0.5)],
+    'Museum':    [('barrier', 'open', 1.4), ('crate', 'against', 0.7)],
+    'Mansion':   [('glasses', 'against', 1.0), ('toys', 'open', 0.5)],
+    'Penthouse': [('glasses', 'against', 1.2)],
+    'Shop':      [('till', 'against', 1.0), ('crate', 'open', 1.2)],
+    # A bank: the rope that keeps a queue in line, and the counter it ends at.
+    'Vault':     [('barrier', 'door', 0.9), ('till', 'against', 0.7)],
+}
+
+
+def add_story(g, tier, wants):
+    """Place this building's own props. Returns how many went down."""
+    if not wants:
+        return 0
+    TILE = 20
+    reached = {(gx * 4 // TILE, gy * 4 // TILE) for (gx, gy) in g._reached()}
+    doors = [(x, y) for y in range(g.rows) for x in range(g.cols) if g.g[y][x] == 'D']
+    taken = [(d[1], d[2]) for d in g.decor if d[0] not in ('floor', 'court')]
+
+    def free(x, y, sw=1, sh=1):
+        for dy in range(sh):
+            for dx in range(sw):
+                cx, cy = x + dx, y + dy
+                if not (2 <= cx < g.cols - 2 and 2 <= cy < g.rows - 2):
+                    return False
+                if g.g[cy][cx] != '.' or (cx, cy) in g.keep or (cx, cy) not in reached:
+                    return False
+                if g._blocked(cx * TILE + TILE / 2, cy * TILE + TILE / 2):
+                    return False
+        return True
+
+    def beside(x, y):
+        # Two tiles out, not one, and forced rather than chosen: the player is
+        # 22 units wide and a tile is 20, so the tile immediately beside a
+        # cabinet is a tile nobody can stand on and every prop asked to go
+        # there was silently dropped. Two out is where "on the side" lives.
+        return any(0 <= x + dx < g.cols and 0 <= y + dy < g.rows
+                   and g.g[y + dy][x + dx] in 'TSWNVCBPE'
+                   for dy in range(-2, 3) for dx in range(-2, 3))
+
+    def near_door(x, y):
+        return any(3 <= max(abs(x - dx), abs(y - dy)) <= 6 for (dx, dy) in doors)
+
+    rules = {'against': beside,
+             'open': lambda x, y: not beside(x, y) and not near_door(x, y),
+             'door': near_door}
+    put = 0
+    for (kind, where, per) in wants:
+        want = max(1, int(round(per * LITTER_TIER[tier])))
+        fits = rules[where]
+        sw, sh = STORY_SPAN.get(kind, (1, 1))
+        placed = 0
+        # A coarse lattice first, so the props are spread through the building
+        # rather than piled in whichever room the scan reaches first.
+        for step in (5, 3, 2):
+            if placed >= want:
+                break
+            for y in range(2, g.rows - 2, step):
+                for x in range(2, g.cols - 2, step):
+                    if placed >= want:
+                        break
+                    if not free(x, y, sw, sh) or not fits(x, y):
+                        continue
+                    # Never on top of something else, and never so close to
+                    # another prop that the two read as one heap.
+                    if any(max(abs(x - px), abs(y - py)) < 5 for (px, py) in taken):
+                        continue
+                    g.deco(kind, x, y, sw, sh)
+                    taken.append((x, y))
+                    placed += 1
+                    put += 1
+    return put
+
+
 # ------------------------------------------------------------ things underfoot
 # What a school floor has on it, and what standing on it costs.
 #
@@ -2435,14 +2544,24 @@ SHAPES = {
 # purpose: a flat gains a hallway and an alcove, a hotel branches into wings, a
 # museum hangs side galleries off its hall, and the mansion ends up round a
 # court. Same machinery, and no two locations read alike from the walls.
+#
+# Which is what this comment said while the hotel, the hospital and the mansion
+# were climbing through exactly the same five — bar, ell, tee, wings, you —
+# so their third, fourth and fifth floors were the same building three times
+# over with different furniture in it. The hospital and the mansion have their
+# own now, and a test holds all ten sequences apart rather than the comment.
 FOOTPRINTS = {
     'Apartment': ['bar', 'ell', 'jag', 'tee', 'wings'],
     'House':     ['bar', 'ell', 'tee', 'cee', 'you'],
     'Hotel':     ['bar', 'ell', 'tee', 'wings', 'you'],
     'Office':    ['bar', 'ell', 'cee', 'tee', 'jag'],
-    'Hospital':  ['bar', 'ell', 'tee', 'wings', 'you'],
+    # Straight to a T and then out to both flanks: a hospital is a spine with
+    # wards hanging off it, and it never reads as a house that grew.
+    'Hospital':  ['bar', 'tee', 'wings', 'cee', 'you'],
     'Museum':    ['bar', 'ell', 'wings', 'cee', 'tee'],
-    'Mansion':   ['bar', 'ell', 'tee', 'wings', 'you'],
+    # ...and the mansion ends up round its court by way of an irregular wing,
+    # which is what a house that has been added to for two hundred years does.
+    'Mansion':   ['bar', 'tee', 'cee', 'jag', 'you'],
     'Penthouse': ['bar', 'ell', 'tee', 'cee', 'jag'],
     'Shop':      ['bar', 'ell', 'tee', 'wings', 'cee'],
     'Vault':     ['bar', 'ell', 'cee', 'tee', 'you'],
@@ -2922,6 +3041,10 @@ def build():
             add_litter(g, tier, underfoot, sweeping)
             fittings, light_step = FITTINGS[name]
             add_fittings(g, tier, fittings, light_step)
+            # ...and the one or two things that say who was here and what they
+            # were doing. Last of the dressing passes, so it can see everything
+            # already placed and avoid standing on top of it.
+            add_story(g, tier, STORY[name])
             stashes = make_searchable(g, tier, name)
             if g.bad:
                 problems.append(f'{name} L{tier + 1}: {g.bad}')

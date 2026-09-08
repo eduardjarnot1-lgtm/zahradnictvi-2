@@ -145,6 +145,62 @@ test('the clock tightens across the first four levels of every location', () => 
 // first seven locations.
 const HAND_DRAWN = [5, 10, 15, 20, 25, 30, 35];
 
+test('no two locations climb through the same five silhouettes', () => {
+  // Section 17. Read off the walls alone — every stick of furniture removed —
+  // the five levels of a location should be five buildings, and the five of one
+  // location should not be the five of another. The table that decides this
+  // carried a comment saying exactly that while the hotel, the hospital and the
+  // mansion all climbed through bar, ell, tee, wings, you: their top three
+  // floors were the same building three times over with different furniture in
+  // it, and nothing in the suite said so. This is what says so now.
+  //
+  // The silhouette is measured rather than read off the generator's table,
+  // because the table is not shipped — what ships is the grid, so that is what
+  // gets asked. A building's shape is which cells of a lattice over the whole
+  // plot any of its masonry falls in: windows and fences left out, because a
+  // window is a hole in a wall that is still a wall and a fence is the garden.
+  const shapeOf = (level) => {
+    const solid = level.colliders.filter(
+      (c) => c.type === 'wall' && !c.fence && !c.window);
+    // Fourteen a side. Coarser than that and a wing on a plot with no grounds
+    // round it falls inside one cell, so a C, a T and a U all come out as the
+    // same eight-by-eight block — which says the measure is too blunt, not that
+    // the buildings are the same.
+    const N = 14;
+    const out = [];
+    for (let gy = 0; gy < N; gy++) {
+      for (let gx = 0; gx < N; gx++) {
+        const x0 = (gx * level.width) / N;
+        const x1 = ((gx + 1) * level.width) / N;
+        const y0 = (gy * level.height) / N;
+        const y1 = ((gy + 1) * level.height) / N;
+        out.push(solid.some((c) => c.x < x1 && c.x + c.w > x0
+          && c.y < y1 && c.y + c.h > y0) ? '#' : '.');
+      }
+    }
+    return out.join('');
+  };
+  const climbs = new Map();
+  for (const [location, levels] of Object.entries(byLocation())) {
+    climbs.set(location, levels.map(shapeOf).join('/'));
+  }
+  const seen = new Map();
+  for (const [location, climb] of climbs) {
+    const twin = seen.get(climb);
+    assert.ok(!twin, `${location} is ${twin} with different furniture in it`);
+    seen.set(climb, location);
+  }
+  // ...and within a location, the five are five buildings rather than one at
+  // five sizes. The first is a plain rectangle everywhere on purpose — the
+  // level that teaches the building should be one you can hold in your head —
+  // so it is the other four that have to differ.
+  for (const [location, levels] of Object.entries(byLocation())) {
+    const shapes = levels.slice(1).map(shapeOf);
+    assert.ok(new Set(shapes).size >= 3,
+      `${location} has only ${new Set(shapes).size} shapes across levels 2 to 5`);
+  }
+});
+
 test('every hand-drawn floorplan is a real building, not one big room', () => {
   const plans = LEVELS.filter((l) => HAND_DRAWN.includes(l.id));
   assert.equal(plans.length, 7, 'expected the seven floorplans');

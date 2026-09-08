@@ -256,6 +256,33 @@ test('every floor has something on it, in its own vocabulary', () => {
     `only ${vocab.size} distinct sets of materials across 11 buildings`);
 });
 
+test('every building has something in it that says who was here', () => {
+  // Section 16. A room full of correct furniture is a floorplan that has been
+  // dressed; a room where somebody has left half a cup of tea is a room
+  // somebody was in. So each of the ten carries one or two props that could
+  // only be in that building — a rope barrier belongs to the museum the way a
+  // drip stand belongs to the hospital — and no two of them carry the same set.
+  //
+  // The school is exempt, and has been all along: it tells its own story at
+  // length, with chalk in the tray and a bag by the door, and this whole pass
+  // is the other ten catching up with it.
+  const STORY = new Set(['luggage', 'barrier', 'till', 'drip', 'meal', 'toys',
+    'crate', 'glasses']);
+  const kit = new Map();
+  for (const l of FLOORPLANS) {
+    if (l.location === 'School') continue;
+    const here = kit.get(l.location) || new Set();
+    for (const d of l.decor || []) if (STORY.has(d.kind)) here.add(d.kind);
+    kit.set(l.location, here);
+  }
+  for (const [location, here] of kit) {
+    assert.ok(here.size > 0, `${location} has nothing in it that says who was here`);
+  }
+  const sets = [...kit.values()].map((h) => [...h].sort().join(','));
+  assert.equal(new Set(sets).size, sets.length,
+    `two buildings tell the same story: ${sets.join(' | ')}`);
+});
+
 test('a searchable piece is always furniture you would actually open', () => {
   const openable = new Set(['chest', 'bookshelf', 'wardrobe', 'table', 'tvBench']);
   for (const l of SCHOOL) {
