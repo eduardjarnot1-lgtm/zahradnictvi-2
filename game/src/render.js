@@ -2,7 +2,9 @@
 // paints it, interpolating between the last two fixed steps so 60Hz sim motion
 // stays smooth on any refresh rate.
 import { TUNING } from './tuning.js';
-import { sleepStage, rarityOf, isBigScore, watcherConfig, gaitBlend, gaitOf } from './rules.js';
+import {
+  sleepStage, rarityOf, isBigScore, watcherConfig, gaitBlend, gaitOf, hash
+} from './rules.js';
 import { drawFigure, THIEF_LOOK, CARETAKER_LOOK } from './figure.js';
 import { playerOf } from './sim.js';
 import {
@@ -300,16 +302,33 @@ export function createRenderer(canvas, options = {}) {
     const right = camera.x + W + 40;
     const top = camera.y - 40;
     const bottom = camera.y + H + 40;
+    // Where a location asks for it, each thing on the floor gets its own idle
+    // rather than the one the whole level shares: its own rate, its own float,
+    // its own slow turn, and a shadow that tightens under it as it rises. All
+    // of it off its own position, so a given coin is the same coin every time
+    // the level is played. Everywhere else this is the single shared bob it has
+    // always been.
+    const polish = !!sim.rules.reacts;
     for (const item of sim.items) {
       if (item.taken) continue;
       if (item.x < left || item.x > right || item.y < top || item.y > bottom) continue;
-      const bob = Math.sin(time * 2.2 + item.x * 0.07) * 1.6;
+      const seed = polish ? hash(item.x, item.y) : 0;
+      const bob = polish
+        ? Math.sin(time * (1.7 + seed * 1.2) + seed * 9) * (1.2 + seed * 0.8)
+        : Math.sin(time * 2.2 + item.x * 0.07) * 1.6;
       const isTarget = sim.targetId === item.id;
-      const y = item.y + bob;
+      // In reach, it lifts a little further: the difference between a thing on
+      // the floor and the thing a press would take.
+      const y = item.y + bob - (polish && isTarget ? 1.4 : 0);
 
-      ctx.fillStyle = 'rgba(18,10,24,0.34)';
+      // The shadow answers the float — smaller and darker when the thing is
+      // low, wider and fainter when it is up — which is most of what stops a
+      // sprite reading as painted onto the floorboards.
+      const lift = polish ? (bob + 2) / 4 : 0.5;
+      ctx.fillStyle = `rgba(18,10,24,${(0.40 - lift * 0.12).toFixed(3)})`;
       ctx.beginPath();
-      ctx.ellipse(item.x, item.y + 15, 13, 4.5, 0, 0, TAU);
+      ctx.ellipse(item.x, item.y + 15, 13 - (polish ? 1.6 - lift * 2.4 : 0),
+        4.5 - (polish ? 0.5 - lift : 0), 0, 0, TAU);
       ctx.fill();
 
       const halo = ctx.createRadialGradient(item.x, y, 2, item.x, y, 21);
@@ -339,8 +358,38 @@ export function createRenderer(canvas, options = {}) {
         ctx.stroke();
       }
 
+      // A slow turn on the thing itself. A tenth of a radian either way: enough
+      // that a row of dropped objects is not a row of identical stamps, small
+      // enough that nothing looks like it is spinning.
       ctx.font = '23px system-ui';
-      ctx.fillText(ITEM_ART[item.type] || '?', item.x, y + 8);
+      if (polish) {
+        ctx.save();
+        ctx.translate(item.x, y + 8);
+        ctx.rotate(Math.sin(time * (0.7 + seed * 0.5) + seed * 12) * 0.085);
+        ctx.fillText(ITEM_ART[item.type] || '?', 0, 0);
+        ctx.restore();
+        // ...and, for the things actually worth crossing a room for, a glint
+        // that comes round every few seconds. Raised to a high power so it is a
+        // flash and not a pulse: most of the time there is nothing there.
+        const worth = item.bonus || isBigScore(item.rawValue || 0)
+          || rarityOf(item.type).name === 'Rare';
+        const glint = worth ? Math.max(0, Math.sin(time * 0.8 + seed * 7)) ** 14 : 0;
+        if (glint > 0.02) {
+          const arm = 5 + glint * 5;
+          ctx.save();
+          ctx.globalAlpha = glint * 0.8;
+          ctx.strokeStyle = '#fff6d8';
+          ctx.lineWidth = 1.2;
+          ctx.lineCap = 'round';
+          ctx.translate(item.x + 6, y - 4);
+          ctx.rotate(0.5);
+          ctx.beginPath();
+          ctx.moveTo(-arm, 0); ctx.lineTo(arm, 0);
+          ctx.moveTo(0, -arm * 0.7); ctx.lineTo(0, arm * 0.7);
+          ctx.stroke();
+          ctx.restore();
+        }
+      } else ctx.fillText(ITEM_ART[item.type] || '?', item.x, y + 8);
 
       ctx.font = 'bold 10px system-ui';
       ctx.lineWidth = 3;
@@ -506,7 +555,12 @@ export function createRenderer(canvas, options = {}) {
       stand,
       glance,
       gait: band,
-      drive: drive(w)
+      // How he is carrying himself, over and above how fast he is walking. A
+      // man who has seen you leans into it; a man walking towards a noise is
+      // only slightly forward of upright. It rides on the same channel the
+      // thief's acceleration does, so it is a lean and not a new pose.
+      drive: drive(w) + (sim.rules.reacts
+        ? (w.state === 'following' ? 0.20 : w.state === 'investigating' ? 0.07 : 0) : 0)
     };
     if (sim.rules.figures) drawFigure(ctx, wx, wy, stance, CARETAKER_LOOK);
     else drawCaretakerWalking(ctx, wx, wy, stance);
@@ -527,7 +581,15 @@ export function createRenderer(canvas, options = {}) {
     if (w.state !== 'rising') {
       // Standing at the spot he came to look at, turning his head over it.
       if (w.state === 'searching') {
-        return { stand: 1, glance: Math.sin(w.stateFor * 2.1) * 0.9 };
+        // Looking round, and not the same look every time: the rate, the reach
+        // and the phase all come off the place he is standing, so two searches
+        // in one level are two different men having a look about rather than
+        // one animation played twice.
+        const vary = reacts && w.target ? hash(Math.round(w.target.x), Math.round(w.target.y)) : 0;
+        return {
+          stand: 1,
+          glance: Math.sin(w.stateFor * (2.1 - vary * 0.6) + vary * 7) * (0.75 + vary * 0.45)
+        };
       }
       // ...or having just placed a sound: he looks that way first and turns his
       // body after, which is what a person does — the difference between a
@@ -637,7 +699,17 @@ export function createRenderer(canvas, options = {}) {
       // keeps every other location exactly as it was.
       const seatedUntil = pose === 'desk' ? SEATED_SHARE : 0.18;
       const reacting = w && w.state === 'rising' && risen < seatedUntil;
-      const up = w && w.state !== 'asleep' && !reacting;
+      // ...and sitting back down is that run backwards. Getting up used to be
+      // eight beats and sitting down was a cut: the standing figure folded
+      // towards the chair and then, on one frame, became a man face down on the
+      // desk. So the same handover happens in reverse — the standing figure
+      // covers the approach and the knees, and the seated drawing takes him
+      // from perched on the edge of the chair back down onto his own arm.
+      const settled = w && w.state === 'settling'
+        ? Math.min(1, w.stateFor / Math.max(0.01, sim.investigateRules.settling)) : 0;
+      const sitting = w && w.state === 'settling' && pose === 'desk'
+        && !!sim.rules.reacts && settled > 1 - SEATED_SHARE;
+      const up = w && w.state !== 'asleep' && !reacting && !sitting;
       if (w && w.target && !up) drawInvestigationMark(w, time);
       if (up) {
         drawInvestigation(sim, time, alpha);
@@ -645,8 +717,14 @@ export function createRenderer(canvas, options = {}) {
         drawGuard(ctx, sim.level, stage, time, sim.wakeSeconds || 0, sim.startle || 0,
           sim.seen || 0, sim.level.watcher.sees || config.sees, kind);
       } else if (pose === 'desk') {
+        // Whichever way he is going through it: up from nothing while he is
+        // waking, and back down from the top of the seated stretch while he is
+        // settling. One curve, read in two directions.
+        const through = sitting
+          ? SEATED_SHARE * (1 - (settled - (1 - SEATED_SHARE)) / SEATED_SHARE)
+          : reacting ? risen / seatedUntil : 0;
         drawSlumped(ctx, sim.level, stage, time, sim.wakeSeconds || 0, sim.startle || 0, kind,
-          reacting ? risen / seatedUntil : 0);
+          Math.max(0, Math.min(1, through)));
       } else {
         // Being woken is a startle in its own right, on top of any bang.
         const jolt = reacting
@@ -674,7 +752,12 @@ export function createRenderer(canvas, options = {}) {
       const band = sim.rules.gait
         ? gaitOf(player.gaitShare === undefined ? 0 : player.gaitShare, sim.rules.gait)
         : null;
+      // How far his hand is out: for something off the floor that is the grab
+      // the simulation is running, and for something out of a drawer it is the
+      // effects module's own — he has to reach for what he found in there, and
+      // the simulation has no idea that happened because it is not a pickup.
       const reachProgress = sim.reach ? sim.reach.t / sim.reach.duration : 0;
+      const reaching = fx ? Math.max(reachProgress, fx.grabbing()) : reachProgress;
 
       // While he is rummaging he faces what he is opening, whatever direction
       // he happened to arrive from. Presentation only — the simulation's own
@@ -699,7 +782,7 @@ export function createRenderer(canvas, options = {}) {
         moving: gait.moving,
         stride: gait.stride,
         clock: time,
-        reach: reachProgress,
+        reach: reaching,
         search: rummage,
         gait: band,
         // Positive while getting up to speed, negative while shedding it. This

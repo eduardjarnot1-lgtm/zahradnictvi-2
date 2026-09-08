@@ -28,6 +28,7 @@
 // amplitude the sliver of the cached original showing along one edge reads as
 // the shadow of something that just moved, which is what it is.
 import { drawFurniture, drawCreakZone, roundRect, ITEM_ART } from './art.js';
+import { hash } from './rules.js';
 
 const TAU = Math.PI * 2;
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
@@ -113,17 +114,43 @@ export function createEffects() {
     });
   }
 
-  // Shut whatever is open on this piece early — what a search ending looks like
-  // when it ends in a hand coming out rather than in the clock.
-  function shut(box) {
+  // Shut whatever is open on this piece — what a search ending looks like when
+  // it ends in a hand coming out rather than in the clock.
+  //
+  // `linger` is the beat before it swings shut, and it is what tells the two
+  // outcomes apart without a word being written on the screen. Finding
+  // something shuts the drawer briskly, because he has what he came for.
+  // Finding nothing gets a moment of looking at an empty drawer first.
+  function shut(box, linger = 0) {
     for (const o of opens) {
-      if (o.box.x === box.x && o.box.y === box.y && o.t < o.hold) o.t = o.hold;
+      if (o.box.x !== box.x || o.box.y !== box.y || o.t >= o.hold) continue;
+      o.hold = o.t + linger;
+      o.life = o.hold + 0.34;
+      // The last shove through the contents, so the pause is not a freeze: he
+      // is still moving things about while he decides there is nothing there.
+      o.rummageTo = o.hold;
     }
   }
 
   // What came out, on its way to a pocket.
+  //
+  // Two beats, not one. It sits in the open drawer for a fifth of a second
+  // first, growing, with a glint off it — that pause is the moment the player
+  // reads as *finding* something, and without it the sequence goes from a
+  // rummage straight to a number going up with nothing in between.
   function fly(x, y, type) {
-    flies.push({ x, y, art: ITEM_ART[type] || '?', t: 0, life: 0.46 });
+    flies.push({ x, y, art: ITEM_ART[type] || '?', t: 0, life: 0.62, wait: 0.20 });
+  }
+
+  // How much a hand is reaching for something right now, for whoever is drawing
+  // the thief: he sees what he has found before he picks it up.
+  function grabbing() {
+    let most = 0;
+    for (const f of flies) {
+      const t = clamp01((f.t - f.wait * 0.4) / 0.34);
+      most = Math.max(most, Math.sin(t * Math.PI));
+    }
+    return most;
   }
 
   // A word over somebody's head. Rare on purpose: this is for the moment he
@@ -256,41 +283,167 @@ export function createEffects() {
     ctx.restore();
   }
 
-  // How far open, 0 shut to 1 wide. Quick to open, held while the hands are in
-  // there, and shut a little more slowly than it opened.
+  // How far open, 0 shut to 1 wide.
+  //
+  // Not a straight ramp. A door that is pulled open overshoots a little and
+  // settles back — that is what a hand on a handle does to a hinge — and one
+  // that is pushed shut arrives with a small bounce rather than stopping dead.
+  // Those two beats are most of the difference between an animation and a
+  // number being drawn.
   function openShare(o) {
-    if (o.t < 0.18) return ease(o.t / 0.18);
+    if (o.t < 0.20) {
+      const t = o.t / 0.20;
+      // Ease out with a touch of overshoot: open, a little past the mark, and
+      // back. The two constants differ by exactly one, which is what makes this
+      // land on nought at the start and one at the end rather than jumping.
+      return 1 + 1.9 * (t - 1) ** 3 + 0.9 * (t - 1) ** 2;
+    }
     if (o.t < o.hold) return 1;
-    return 1 - ease(clamp01((o.t - o.hold) / (o.life - o.hold)));
+    const t = clamp01((o.t - o.hold) / (o.life - o.hold));
+    // Shutting: fast for most of it, then a small rebound off the frame.
+    const k = 1 - ease(t);
+    return t > 0.82 ? k - Math.sin((t - 0.82) / 0.18 * Math.PI) * 0.10 : k;
   }
 
-  // A drawer, sliding out of the front face. The dark gap behind it is what
-  // makes it read as a drawer rather than as a plank appearing on the floor.
-  function drawDrawer(ctx, box, out, share, tone) {
+  // How much his hands are moving about in there. Zero before it is open and
+  // zero once it is shutting, so the contents are only disturbed while he is
+  // actually rummaging.
+  function stirOf(o) {
+    if (o.t < 0.18 || o.t > o.hold) return 0;
+    const edge = Math.min(1, (o.t - 0.18) / 0.12, (o.hold - o.t) / 0.15);
+    return Math.sin(o.t * 12.5) * edge;
+  }
+
+  // What is in there.
+  //
+  // Drawn in the face's own frame — x back into the piece, y along its front —
+  // so the same four kinds of clutter serve a locker seen from below and a desk
+  // seen from the side without any of them knowing which way round they are.
+  //
+  // None of it is the loot. A locker full of school books that turns out to
+  // hold a phone is a search worth doing; one that shows you the phone through
+  // the open door before the search finishes is a search with no question in
+  // it, so what you can see in here is always junk.
+  function drawContents(ctx, style, deep, span, seed, stir) {
+    const jig = stir * 0.6;
+    if (style === 'wardrobe') {
+      // Coats on a rail, swinging a little as he pushes through them.
+      const coats = ['#4f6f9e', '#8a5a44', '#5c7a52', '#7a5470'];
+      const n = Math.max(2, Math.min(4, Math.round(span / 7)));
+      for (let i = 0; i < n; i++) {
+        const y = -span / 2 + span * ((i + 0.5) / n);
+        ctx.fillStyle = coats[Math.floor(hash(seed + i * 13, seed) * 4) % 4];
+        roundRect(ctx, -deep + 1.2, y - 1.6 + jig * (0.6 + i * 0.3), deep - 2.4, 3.2, 1.2);
+        ctx.fill();
+      }
+      ctx.fillStyle = 'rgba(190,200,210,0.45)';        // the rail they hang off
+      ctx.fillRect(-deep + 1, -span / 2 + 0.6, 0.9, span - 1.2);
+      return;
+    }
+    if (style === 'chest') {
+      // A locker: books stacked on the shelf, a bag shoved in below, a coat
+      // hook. Small, and all of it in silhouette — you are looking into a dark
+      // metal box from directly above.
+      const books = ['#c25b4e', '#4f7fa8', '#d8a15c'];
+      for (let i = 0; i < 3; i++) {
+        const y = -span * 0.34 + i * 2.6;
+        ctx.fillStyle = books[Math.floor(hash(seed + i * 7, seed + 3) * 3) % 3];
+        ctx.fillRect(-deep + 1.4 + jig * 0.5, y, deep * 0.55, 2);
+      }
+      ctx.fillStyle = '#3f5a8a';                        // the bag
+      roundRect(ctx, -deep + 1.2, span * 0.10 + jig, deep - 2.6, span * 0.30, 1.6);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.16)';
+      ctx.fillRect(-deep + 2, span * 0.14 + jig, deep - 4, 1);
+      return;
+    }
+    if (style === 'bookshelf') {
+      // A shelf has no door and no drawer, so what says "somebody is going
+      // through this" is the hole. Drawn dark and drawn over the shelf's own
+      // books — everything here is painted on top of a room that is already
+      // there, so a gap has to be added rather than taken away.
+      ctx.fillStyle = 'rgba(8,10,14,0.72)';
+      roundRect(ctx, -deep + 0.6, -span * 0.16 + jig * 0.5, deep * 0.72, span * 0.30, 1);
+      ctx.fill();
+      // ...and the books either side of it, leaning into the space.
+      ctx.fillStyle = 'rgba(20,14,10,0.35)';
+      ctx.fillRect(-deep + 0.6, -span * 0.20, deep * 0.72, 1);
+      ctx.fillRect(-deep + 0.6, span * 0.14 + jig * 0.5, deep * 0.72, 1);
+      return;
+    }
+    // A desk drawer: paper, a couple of pens, and whatever else lives in there.
+    ctx.fillStyle = 'rgba(240,236,226,0.9)';
+    roundRect(ctx, -deep + 1.4, -span * 0.30 + jig * 0.4, deep * 0.7, span * 0.42, 0.8);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(120,126,138,0.45)';
+    ctx.fillRect(-deep + 2.2, -span * 0.22, deep * 0.5, 0.7);
+    const inks = ['#d8b24a', '#4f7fbf', '#c4574f'];
+    for (let i = 0; i < 2; i++) {
+      ctx.fillStyle = inks[Math.floor(hash(seed + i * 17, seed + 9) * 3) % 3];
+      ctx.fillRect(-deep + 1.6, span * 0.18 + i * 2 + jig * 0.8, deep * 0.66, 1);
+    }
+  }
+
+  // Everything an opening piece needs, in the face's own frame: the mouth of
+  // it, its contents, and whatever is between them and the room.
+  function inFace(ctx, box, out, run) {
     const along = out.x !== 0;
-    const span = along ? box.h : box.w;
-    const w = Math.min(span - 6, 30);
-    const reach = 3 + share * 7;
-    const cx = box.x + box.w / 2;
-    const cy = box.y + box.h / 2;
-    const px = cx + out.x * (box.w / 2 + reach * 0.5);
-    const py = cy + out.y * (box.h / 2 + reach * 0.5);
-    const dw = along ? reach : w;
-    const dh = along ? w : reach;
-    ctx.fillStyle = 'rgba(10,7,14,0.55)';
-    roundRect(ctx, px - dw / 2 - out.x, py - dh / 2 - out.y, dw + 2, dh + 2, 2);
-    ctx.fill();
-    ctx.fillStyle = tone;
-    roundRect(ctx, px - dw / 2, py - dh / 2, dw, dh, 2);
-    ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,0.20)';
-    roundRect(ctx, px - dw / 2 + 1, py - dh / 2 + 1, Math.max(1, dw - 2),
-      Math.max(1, dh * 0.4), 1);
-    ctx.fill();
-    // The handle, on the leading edge.
-    ctx.fillStyle = '#cbd8d4';
-    if (along) ctx.fillRect(px + out.x * (dw / 2 - 1.6) - 0.8, py - 3, 1.6, 6);
-    else ctx.fillRect(px - 3, py + out.y * (dh / 2 - 1.6) - 0.8, 6, 1.6);
+    const span = Math.min(along ? box.h : box.w, 30) * 0.84;
+    const deep = Math.min(along ? box.w : box.h, 18) * 0.60;
+    ctx.save();
+    ctx.translate(box.x + box.w / 2 + out.x * box.w * 0.5,
+      box.y + box.h / 2 + out.y * box.h * 0.5);
+    ctx.rotate(along ? (out.x > 0 ? 0 : Math.PI) : (out.y > 0 ? Math.PI / 2 : -Math.PI / 2));
+    run(span, deep);
+    ctx.restore();
+  }
+
+  // A drawer, pulled out of the front face with its contents riding in it.
+  function drawDrawer(ctx, o, share, stir, tone) {
+    inFace(ctx, o.box, o.out, (span, deep) => {
+      const out = 2 + share * 8;
+      // The hole it came out of, cut back *into* the desk.
+      //
+      // This is the part that has to carry the read, because the drawer itself
+      // slides towards the person who opened it and he is standing in front of
+      // it — a drawer drawn only outside the front face is a drawer behind the
+      // thief. The recess is inside the piece's own footprint, so it is visible
+      // over his shoulder for the whole search.
+      ctx.fillStyle = 'rgba(6,8,12,0.68)';
+      roundRect(ctx, -deep * 0.95, -span / 2, deep * 0.95, span, 1.5);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,240,214,0.10)';
+      ctx.fillRect(-deep * 0.95, -span / 2, 1, span);
+      ctx.save();
+      ctx.translate(out, 0);
+      // The shadow it casts back over the gap.
+      ctx.fillStyle = 'rgba(10,7,14,0.5)';
+      roundRect(ctx, -out - 1, -span / 2 - 0.6, out + 2, span + 1.2, 1.5);
+      ctx.fill();
+      // The drawer box. Outlined, because it is drawn over a desk of very
+      // nearly its own colour and without the line it reads as a stain on the
+      // desk rather than as a box that has come out of it.
+      ctx.fillStyle = tone;
+      roundRect(ctx, -deep, -span / 2, deep, span, 1.8);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(24,14,6,0.75)';
+      ctx.lineWidth = 1;
+      roundRect(ctx, -deep, -span / 2, deep, span, 1.8);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(20,12,6,0.55)';
+      roundRect(ctx, -deep + 1.2, -span / 2 + 1.2, deep - 2.4, span - 2.4, 1.2);
+      ctx.fill();
+      drawContents(ctx, o.style, deep - 1, span - 2, o.box.x + o.box.y, stir);
+      // The face of it, and the handle across that.
+      ctx.fillStyle = tone;
+      roundRect(ctx, -1.6, -span / 2, 2.4, span, 1);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.22)';
+      ctx.fillRect(-1.2, -span / 2 + 0.8, 1, span - 1.6);
+      ctx.fillStyle = '#cbd8d4';
+      ctx.fillRect(-0.4, -3, 1.4, 6);
+      ctx.restore();
+    });
   }
 
   // A locker or cupboard door, seen from above.
@@ -298,80 +451,111 @@ export function createEffects() {
   // A door standing open is edge-on from up here, which is the trap: drawn
   // honestly it is a two-pixel line sticking out of a cabinet and reads as a
   // scratch on the screen. What says "open" from directly overhead is the dark
-  // inside of the thing — so the cavity does the work, and the door is a solid
-  // panel swung out beside it, thick enough to be a door rather than a mark.
-  function drawDoor(ctx, box, out, share, face, lit) {
-    const along = out.x !== 0;
-    const span = Math.min(along ? box.h : box.w, 26) * 0.82;
-    const cx = box.x + box.w / 2;
-    const cy = box.y + box.h / 2;
-    // The middle of the face he is standing at.
-    const fx = cx + out.x * box.w * 0.5;
-    const fy = cy + out.y * box.h * 0.5;
-    const deep = Math.min(along ? box.w : box.h, 16) * 0.55;
-    ctx.save();
-    ctx.translate(fx, fy);
-    // Work in the face's own frame: x out of the cabinet, y along its front.
-    ctx.rotate(along ? (out.x > 0 ? 0 : Math.PI) : (out.y > 0 ? Math.PI / 2 : -Math.PI / 2));
+  // inside of the thing — so the cavity and what is in it do the work, and the
+  // door is a solid panel swung out beside them.
+  function drawDoor(ctx, o, share, stir, face, lit, twin) {
+    inFace(ctx, o.box, o.out, (span, deep) => {
+      // The inside, cut back into the piece.
+      ctx.fillStyle = 'rgba(6,12,16,0.80)';
+      roundRect(ctx, -deep, -span / 2, deep, span, 1.5);
+      ctx.fill();
+      // What is in there, clipped to the mouth so nothing spills onto the floor
+      // as the door swings.
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(-deep, -span / 2, deep, span);
+      ctx.clip();
+      drawContents(ctx, o.style, deep, span, o.box.x + o.box.y, stir);
+      ctx.restore();
+      // A shelf across it, so it is a locker rather than a hole in the world.
+      ctx.fillStyle = 'rgba(150,175,185,0.22)';
+      ctx.fillRect(-deep + 1, -span * 0.06, deep - 2, 0.8);
 
-    // The inside, cut back into the piece.
-    ctx.fillStyle = 'rgba(6,12,16,0.78)';
-    roundRect(ctx, -deep, -span / 2, deep, span, 1.5);
-    ctx.fill();
-    // A shelf in there, so it is a locker rather than a hole.
-    ctx.fillStyle = 'rgba(120,150,160,0.30)';
-    ctx.fillRect(-deep + 1, -span * 0.12, deep - 2, 1);
-
-    // The door, hinged at one edge of the opening and swung out over the floor.
-    ctx.translate(0, -span / 2);
-    ctx.rotate(-share * 1.15);
-    ctx.fillStyle = 'rgba(10,7,14,0.35)';
-    roundRect(ctx, 0.6, 1.4, 3.6, span, 1.4);
-    ctx.fill();
-    ctx.fillStyle = face;
-    roundRect(ctx, 0, 0, 3.6, span, 1.4);
-    ctx.fill();
-    ctx.fillStyle = lit;
-    ctx.fillRect(0.7, 1.4, 1.1, span - 2.8);
-    ctx.restore();
+      // The door — or both of them, for a cupboard that opens down the middle.
+      const leaf = (hinge, sign) => {
+        ctx.save();
+        ctx.translate(0, hinge);
+        ctx.rotate(-sign * share * 1.15);
+        ctx.fillStyle = 'rgba(10,7,14,0.35)';
+        roundRect(ctx, 0.6, sign * 1.4, 3.6, sign * (twin ? span / 2 : span), 1.4);
+        ctx.fill();
+        ctx.fillStyle = face;
+        roundRect(ctx, 0, 0, 3.6, sign * (twin ? span / 2 : span), 1.4);
+        ctx.fill();
+        ctx.fillStyle = lit;
+        ctx.fillRect(0.7, sign * 1.4, 1.1, sign * ((twin ? span / 2 : span) - 2.8));
+        ctx.restore();
+      };
+      leaf(-span / 2, 1);
+      if (twin) leaf(span / 2, -1);
+    });
   }
 
-  // Books, tipped out of a shelf and put back.
-  function drawSpines(ctx, box, out, share) {
-    const tints = ['#c25b4e', '#4f7fa8', '#d8a15c'];
-    const cx = box.x + box.w / 2;
-    const cy = box.y + box.h / 2;
-    for (let i = 0; i < 3; i++) {
-      const t = (i - 1) * 7;
-      const px = cx + (out.x ? out.x * (box.w / 2 + share * 4) : t);
-      const py = cy + (out.y ? out.y * (box.h / 2 + share * 4) : t);
+  // A shelf: no door to open, so the hand goes in and the books come out. The
+  // gap left behind is drawn by `drawContents`; this is what was taken out of
+  // it, tipped forward and put back.
+  function drawSpines(ctx, o, share, stir) {
+    inFace(ctx, o.box, o.out, (span, deep) => {
       ctx.save();
-      ctx.translate(px, py);
-      ctx.rotate(share * (0.4 + i * 0.16) * (out.x || out.y));
-      ctx.fillStyle = tints[i];
-      roundRect(ctx, -2, -4, 4, 9, 1);
-      ctx.fill();
+      ctx.beginPath();
+      ctx.rect(-deep, -span / 2 - 1, deep + 8, span + 2);
+      ctx.clip();
+      drawContents(ctx, 'bookshelf', deep, span, o.box.x + o.box.y, stir);
       ctx.restore();
-    }
+      const tints = ['#c25b4e', '#4f7fa8', '#d8a15c'];
+      for (let i = 0; i < 3; i++) {
+        ctx.save();
+        ctx.translate(share * (3 + i * 1.4), -span * 0.16 + i * 3.4);
+        ctx.rotate(share * (0.22 + i * 0.14) + stir * 0.08);
+        ctx.fillStyle = 'rgba(10,7,14,0.30)';
+        roundRect(ctx, -deep * 0.5 + 0.8, -1.1, deep * 0.6, 2.6, 0.8);
+        ctx.fill();
+        ctx.fillStyle = tints[i];
+        roundRect(ctx, -deep * 0.5, -1.4, deep * 0.6, 2.6, 0.8);
+        ctx.fill();
+        ctx.restore();
+      }
+    });
   }
 
   function drawOpen(ctx, o) {
     const share = openShare(o);
-    if (share <= 0.01) return;
-    if (o.style === 'chest') drawDoor(ctx, o.box, o.out, share, '#47646c', '#7ba3ad');
-    else if (o.style === 'wardrobe') drawDoor(ctx, o.box, o.out, share, '#a9663a', '#c48450');
-    else if (o.style === 'bookshelf') drawSpines(ctx, o.box, o.out, share);
-    else drawDrawer(ctx, o.box, o.out, share, '#c08450');
+    if (share <= 0.005) return;
+    const stir = stirOf(o);
+    if (o.style === 'chest') drawDoor(ctx, o, share, stir, '#47646c', '#7ba3ad', false);
+    else if (o.style === 'wardrobe') drawDoor(ctx, o, share, stir, '#a9663a', '#c48450', true);
+    else if (o.style === 'bookshelf') drawSpines(ctx, o, share, stir);
+    else drawDrawer(ctx, o, share, stir, '#c08450');
   }
 
   function drawFly(ctx, f, toX, toY) {
-    const t = ease(clamp01(f.t / f.life));
-    const x = f.x + (toX - f.x) * t;
-    const y = f.y - 10 + (toY - (f.y - 10)) * t - Math.sin(t * Math.PI) * 9;
+    // The discovery: still in the drawer, coming up out of it, catching the
+    // light. Then the trip to his hand.
+    const held = f.t < f.wait;
+    const rise = clamp01(f.t / f.wait);
+    const t = held ? 0 : ease(clamp01((f.t - f.wait) / (f.life - f.wait)));
+    const from = { x: f.x, y: f.y - 4 - rise * 7 };
+    const x = from.x + (toX - from.x) * t;
+    const y = from.y + (toY - from.y) * t - Math.sin(t * Math.PI) * 9;
     ctx.save();
-    ctx.globalAlpha = 1 - t * 0.85;
+    ctx.globalAlpha = held ? rise : 1 - t * 0.85;
     ctx.translate(x, y);
-    ctx.scale(1 - t * 0.5, 1 - t * 0.5);
+    const size = held ? 0.5 + ease(rise) * 0.5 : 1 - t * 0.5;
+    ctx.scale(size, size);
+    if (held) {
+      // A four-point glint over it, opening as it comes up. Two strokes, and
+      // it is the whole of what says "worth something" — no particles.
+      const arm = 5 + ease(rise) * 7;
+      ctx.globalAlpha = Math.sin(rise * Math.PI) * 0.75;
+      ctx.strokeStyle = '#fff3c8';
+      ctx.lineWidth = 1.4;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(-arm, 0); ctx.lineTo(arm, 0);
+      ctx.moveTo(0, -arm); ctx.lineTo(0, arm);
+      ctx.stroke();
+      ctx.globalAlpha = rise;
+    }
     ctx.textAlign = 'center';
     ctx.font = '19px system-ui';
     ctx.fillText(f.art, 0, 6);
@@ -402,6 +586,7 @@ export function createEffects() {
     open,
     shut,
     fly,
+    grabbing,
     mark,
     scuff,
     clear,

@@ -52,6 +52,8 @@ function recorder() {
     fillText: note('fillText'),
     strokeText: note('strokeText'),
     setLineDash: note('setLineDash'),
+    rect: note('rect'),
+    clip: note('clip'),
     measureText: () => ({ width: 10 })
   };
 }
@@ -158,6 +160,65 @@ test('finding something shuts the drawer early rather than leaving it hanging', 
   ctx.calls.length = 0;
   fx.under(ctx);
   assert.equal(ctx.calls.length, 0, 'shut, well before its four seconds were up');
+});
+
+test('every kind of furniture opens in its own way', () => {
+  // Section 2: a locker, a cupboard, a shelf and a desk drawer are four
+  // different actions, and drawing all four with one animation is the thing
+  // this is supposed to have stopped doing.
+  const signature = (style) => {
+    const fx = createEffects();
+    const ctx = recorder();
+    fx.open(BOX, style, { x: 130, y: 140 }, 1.2);
+    fx.update(0.5);
+    fx.under(ctx);
+    return `${ctx.ops().join(',')}|${ctx.calls.length}`;
+  };
+  const seen = ['chest', 'wardrobe', 'bookshelf', 'table'].map(signature);
+  assert.equal(new Set(seen).size, 4, 'all four should draw something different');
+  for (const sig of seen) assert.ok(sig.length > 40, 'and none of them nothing');
+});
+
+test('an empty drawer is looked at before it is shut', () => {
+  // Section 7. The pause is the feedback; the word only names it.
+  const closesAt = (linger) => {
+    const fx = createEffects();
+    const ctx = recorder();
+    fx.open(BOX, 'chest', { x: 130, y: 140 }, 3);
+    fx.update(0.5);
+    fx.shut(BOX, linger);
+    for (let i = 0; i < 120; i++) {
+      fx.update(1 / 60);
+      ctx.calls.length = 0;
+      fx.under(ctx);
+      if (!ctx.calls.length) return i / 60;
+    }
+    return 99;
+  };
+  const found = closesAt(0.1);
+  const empty = closesAt(0.24);
+  assert.ok(empty > found + 0.1, 'nothing in there should hold the door a beat longer');
+  assert.ok(empty < 0.9, 'but only a beat');
+});
+
+test('what he found is held up before it is pocketed', () => {
+  // Section 6: the discovery is its own moment. Before that pause the sequence
+  // went from rummaging straight to a number going up with nothing between.
+  const fx = createEffects();
+  const ctx = recorder();
+  fx.fly(100, 100, 'diamond');
+  assert.equal(fx.grabbing(), 0, 'his hand has not moved yet');
+  fx.update(0.12);
+  const reach = fx.grabbing();
+  assert.ok(reach > 0.2, 'he reaches for it');
+  fx.under(ctx);
+  assert.equal(ctx.calls.length, 0, 'and it belongs over the room, not under it');
+  ctx.calls.length = 0;
+  fx.over(ctx, 140, 140);
+  assert.ok(ctx.ops().includes('stroke'), 'with a glint off it while it is held');
+  // ...and it is over when it is over.
+  fx.update(1);
+  assert.equal(fx.grabbing(), 0);
 });
 
 test('a drawer opens on the side the thief is standing on', () => {

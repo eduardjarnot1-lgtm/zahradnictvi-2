@@ -361,7 +361,10 @@ export function boot() {
           // and the drawer shutting on it — no sound, no shake, no punishment
           // for looking.
           pops.push({ x: event.x, y: event.y - 8, value: null, text: 'EMPTY', life: 1 });
-          if (reacts) fx.shut(event.where);
+          // A beat of looking at an empty drawer before it swings shut. That
+          // pause is the whole of "nothing in here" — the word on the screen
+          // only names what the animation already said.
+          if (reacts) fx.shut(event.where, 0.24);
         } else {
           pops.push({
             x: event.x, y: event.y - 8, value: event.value, life: 1,
@@ -372,7 +375,9 @@ export function boot() {
           // What was in there, coming out of it and into his hand, and the
           // noise it made on the way.
           if (reacts) {
-            fx.shut(event.where);
+            // Briskly, this one: he has what he came for. The drawer shuts
+            // while the thing that was in it is still on its way to his hand.
+            fx.shut(event.where, 0.1);
             fx.fly(event.x, event.y, event.itemType);
             fx.ring(event.x, event.y, event.noise);
           }
@@ -737,6 +742,21 @@ export function boot() {
     }
   }
 
+  // The nearest thing on the floor he is *not* standing on. Stepping on it is
+  // already a noise and already a reaction; this is for the one just beside it.
+  function nearestLitter(sim, player, reach) {
+    let best = null;
+    let nearest = reach;
+    for (const zone of sim.creaks) {
+      if (zone.active) continue;
+      const dx = Math.max(zone.x - player.x, 0, player.x - (zone.x + zone.w));
+      const dy = Math.max(zone.y - player.y, 0, player.y - (zone.y + zone.h));
+      const gap = Math.hypot(dx, dy);
+      if (gap < nearest) { nearest = gap; best = zone; }
+    }
+    return best;
+  }
+
   // What he is standing on, from the floor treatments the map declared. A short
   // linear scan of a few dozen rectangles, a couple of times a second, at a
   // footfall — cheaper than any of the ways of caching it would be to write.
@@ -766,6 +786,11 @@ export function boot() {
       // leaving a trail of breadcrumbs through the building he is robbing.
       if (sim.rules.reacts && share > 0.32 && !sim.hidden) {
         fx.scuff(player.x, player.y, share, surfaceUnder(sim.level, player.x, player.y));
+        // ...and whatever is lying on the floor beside him stirs in the draught
+        // of somebody going past. The nearest one only, and only a nudge: this
+        // is a sheet of paper noticing a person, not a gust of wind.
+        const near = nearestLitter(sim, player, 40);
+        if (near) fx.knock(near, 0, 1, 0.05 + share * 0.06, fx.paintLitter, null);
       }
     }
     lastStepPhase = player.walkPhase;
