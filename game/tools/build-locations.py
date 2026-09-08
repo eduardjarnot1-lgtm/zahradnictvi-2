@@ -2347,7 +2347,16 @@ def add_story(g, tier, wants):
     TILE = 20
     reached = {(gx * 4 // TILE, gy * 4 // TILE) for (gx, gy) in g._reached()}
     doors = [(x, y) for y in range(g.rows) for x in range(g.cols) if g.g[y][x] == 'D']
-    taken = [(d[1], d[2]) for d in g.decor if d[0] not in ('floor', 'court')]
+    # What a prop has to keep away from is other things standing on the floor,
+    # and nothing else. Counting the ceiling lights here — which is what the
+    # first draft did, and there is one every seven tiles now — left almost no
+    # tile in the building more than five from one, so the hotel got its
+    # suitcase and never its supper, and the bank got its rope and never its
+    # counter.
+    ON_FLOOR = ('plant', 'bin', 'lamp', 'kettle', 'bike', 'car', 'coats',
+                'luggage', 'barrier', 'till', 'drip', 'meal', 'toys', 'crate',
+                'glasses')
+    taken = [(d[1], d[2]) for d in g.decor if d[0] in ON_FLOOR]
 
     def free(x, y, sw=1, sh=1):
         for dy in range(sh):

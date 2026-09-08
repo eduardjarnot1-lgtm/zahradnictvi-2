@@ -64,6 +64,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 1, y: 19, w: 3, h: 3 },
       { kind: 'ceiling', x: 10, y: 19, w: 3, h: 3 },
       { kind: 'ceiling', x: 19, y: 19, w: 3, h: 3 },
+      { kind: 'meal', x: 23, y: 8 },
+      { kind: 'toys', x: 2, y: 22 },
     ],
     legend: LOOT,
     tiles: [
@@ -149,7 +151,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 10, y: 19, w: 3, h: 3 },
       { kind: 'ceiling', x: 19, y: 19, w: 3, h: 3 },
       { kind: 'ceiling', x: 28, y: 20, w: 3, h: 3 },
-      { kind: 'meal', x: 8, y: 14 },
+      { kind: 'meal', x: 7, y: 22 },
+      { kind: 'toys', x: 22, y: 2 },
     ],
     legend: LOOT,
     tiles: [
@@ -271,7 +274,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 29, y: 28, w: 3, h: 3 },
       { kind: 'ceiling', x: 37, y: 28, w: 3, h: 3 },
       { kind: 'ceiling', x: 46, y: 29, w: 3, h: 3 },
-      { kind: 'toys', x: 22, y: 34 },
+      { kind: 'meal', x: 36, y: 8 },
+      { kind: 'toys', x: 22, y: 32 },
     ],
     legend: LOOT,
     tiles: [
@@ -407,6 +411,7 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 28, y: 28, w: 3, h: 3 },
       { kind: 'ceiling', x: 37, y: 28, w: 3, h: 3 },
       { kind: 'ceiling', x: 46, y: 28, w: 3, h: 3 },
+      { kind: 'meal', x: 41, y: 11 },
       { kind: 'toys', x: 2, y: 37 },
     ],
     legend: LOOT,
@@ -533,7 +538,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 19, y: 64, w: 3, h: 3 },
       { kind: 'ceiling', x: 28, y: 64, w: 3, h: 3 },
       { kind: 'ceiling', x: 37, y: 64, w: 3, h: 3 },
-      { kind: 'meal', x: 24, y: 12 },
+      { kind: 'meal', x: 12, y: 22 },
+      { kind: 'toys', x: 22, y: 17 },
     ],
     legend: LOOT,
     tiles: [
@@ -648,7 +654,7 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 10, y: 19, w: 3, h: 3 },
       { kind: 'ceiling', x: 19, y: 19, w: 3, h: 3 },
       { kind: 'toys', x: 27, y: 22 },
-      { kind: 'luggage', x: 17, y: 7 },
+      { kind: 'luggage', x: 12, y: 7 },
     ],
     legend: LOOT,
     tiles: [
@@ -740,6 +746,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 9, y: 37, w: 3, h: 3 },
       { kind: 'ceiling', x: 19, y: 37, w: 3, h: 3 },
       { kind: 'ceiling', x: 28, y: 37, w: 3, h: 3 },
+      { kind: 'toys', x: 27, y: 27 },
+      { kind: 'luggage', x: 7, y: 17 },
     ],
     legend: LOOT,
     tiles: [
@@ -864,8 +872,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 19, y: 37, w: 3, h: 3 },
       { kind: 'ceiling', x: 28, y: 37, w: 3, h: 3 },
       { kind: 'ceiling', x: 37, y: 37, w: 3, h: 3 },
-      { kind: 'toys', x: 7, y: 42 },
-      { kind: 'luggage', x: 32, y: 42 },
+      { kind: 'toys', x: 7, y: 2 },
+      { kind: 'luggage', x: 17, y: 12 },
     ],
     legend: LOOT,
     tiles: [
@@ -1013,7 +1021,7 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 46, y: 28, w: 3, h: 3 },
       { kind: 'ceiling', x: 55, y: 28, w: 3, h: 3 },
       { kind: 'toys', x: 52, y: 37 },
-      { kind: 'luggage', x: 27, y: 7 },
+      { kind: 'luggage', x: 22, y: 7 },
     ],
     legend: LOOT,
     tiles: [
@@ -1130,8 +1138,9 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 28, y: 37, w: 3, h: 3 },
       { kind: 'ceiling', x: 37, y: 37, w: 3, h: 3 },
       { kind: 'ceiling', x: 46, y: 37, w: 3, h: 3 },
-      { kind: 'toys', x: 11, y: 44 },
-      { kind: 'toys', x: 41, y: 44 },
+      { kind: 'toys', x: 47, y: 2 },
+      { kind: 'toys', x: 27, y: 22 },
+      { kind: 'luggage', x: 27, y: 37 },
     ],
     legend: LOOT,
     tiles: [
@@ -1230,6 +1239,7 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 17, y: 17, w: 3, h: 3 },
       { kind: 'ceiling', x: 25, y: 18, w: 3, h: 3 },
       { kind: 'luggage', x: 12, y: 22 },
+      { kind: 'meal', x: 20, y: 2 },
     ],
     legend: LOOT,
     tiles: [
@@ -1316,7 +1326,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 8, y: 17, w: 3, h: 3 },
       { kind: 'ceiling', x: 25, y: 17, w: 3, h: 3 },
       { kind: 'ceiling', x: 33, y: 17, w: 3, h: 3 },
-      { kind: 'luggage', x: 22, y: 22 },
+      { kind: 'luggage', x: 22, y: 7 },
+      { kind: 'meal', x: 22, y: 22 },
     ],
     legend: LOOT,
     tiles: [
@@ -1427,6 +1438,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 25, y: 25, w: 3, h: 3 },
       { kind: 'ceiling', x: 33, y: 25, w: 3, h: 3 },
       { kind: 'ceiling', x: 40, y: 25, w: 3, h: 3 },
+      { kind: 'luggage', x: 14, y: 20 },
+      { kind: 'meal', x: 37, y: 27 },
     ],
     legend: LOOT,
     tiles: [
@@ -1564,6 +1577,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 33, y: 41, w: 3, h: 3 },
       { kind: 'ceiling', x: 41, y: 41, w: 3, h: 3 },
       { kind: 'ceiling', x: 49, y: 41, w: 3, h: 3 },
+      { kind: 'luggage', x: 41, y: 14 },
+      { kind: 'meal', x: 41, y: 35 },
     ],
     legend: LOOT,
     tiles: [
@@ -1709,7 +1724,9 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 33, y: 41, w: 3, h: 3 },
       { kind: 'ceiling', x: 41, y: 41, w: 3, h: 3 },
       { kind: 'ceiling', x: 49, y: 41, w: 3, h: 3 },
-      { kind: 'luggage', x: 20, y: 32 },
+      { kind: 'luggage', x: 12, y: 17 },
+      { kind: 'luggage', x: 22, y: 17 },
+      { kind: 'meal', x: 22, y: 12 },
     ],
     legend: LOOT,
     tiles: [
@@ -1812,6 +1829,7 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 8, y: 22, w: 3, h: 3 },
       { kind: 'ceiling', x: 15, y: 22, w: 3, h: 3 },
       { kind: 'ceiling', x: 22, y: 22, w: 3, h: 3 },
+      { kind: 'meal', x: 12, y: 2 },
     ],
     legend: LOOT,
     tiles: [
@@ -1905,6 +1923,7 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 15, y: 22, w: 3, h: 3 },
       { kind: 'ceiling', x: 22, y: 22, w: 3, h: 3 },
       { kind: 'ceiling', x: 30, y: 22, w: 3, h: 3 },
+      { kind: 'meal', x: 22, y: 7 },
     ],
     legend: LOOT,
     tiles: [
@@ -2032,7 +2051,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 22, y: 29, w: 3, h: 3 },
       { kind: 'ceiling', x: 29, y: 29, w: 3, h: 3 },
       { kind: 'ceiling', x: 36, y: 29, w: 3, h: 3 },
-      { kind: 'crate', x: 22, y: 34 },
+      { kind: 'meal', x: 5, y: 11 },
+      { kind: 'crate', x: 12, y: 2 },
     ],
     legend: LOOT,
     tiles: [
@@ -2182,6 +2202,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 29, y: 36, w: 3, h: 3 },
       { kind: 'ceiling', x: 36, y: 36, w: 3, h: 3 },
       { kind: 'ceiling', x: 44, y: 36, w: 3, h: 3 },
+      { kind: 'meal', x: 8, y: 5 },
+      { kind: 'crate', x: 27, y: 27 },
     ],
     legend: LOOT,
     tiles: [
@@ -2315,9 +2337,9 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 15, y: 36, w: 3, h: 3 },
       { kind: 'ceiling', x: 23, y: 36, w: 3, h: 3 },
       { kind: 'ceiling', x: 30, y: 36, w: 3, h: 3 },
-      { kind: 'meal', x: 41, y: 35 },
-      { kind: 'meal', x: 8, y: 34 },
-      { kind: 'crate', x: 47, y: 42 },
+      { kind: 'meal', x: 14, y: 8 },
+      { kind: 'meal', x: 38, y: 11 },
+      { kind: 'crate', x: 47, y: 2 },
     ],
     legend: LOOT,
     tiles: [
@@ -3138,7 +3160,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 8, y: 22, w: 3, h: 3 },
       { kind: 'ceiling', x: 15, y: 22, w: 3, h: 3 },
       { kind: 'ceiling', x: 22, y: 22, w: 3, h: 3 },
-      { kind: 'drip', x: 27, y: 7 },
+      { kind: 'drip', x: 17, y: 7 },
+      { kind: 'meal', x: 26, y: 2 },
     ],
     legend: LOOT,
     tiles: [
@@ -3233,6 +3256,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 15, y: 21, w: 3, h: 3 },
       { kind: 'ceiling', x: 22, y: 22, w: 3, h: 3 },
       { kind: 'ceiling', x: 30, y: 22, w: 3, h: 3 },
+      { kind: 'drip', x: 22, y: 7 },
+      { kind: 'meal', x: 30, y: 4 },
     ],
     legend: LOOT,
     tiles: [
@@ -3340,6 +3365,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 22, y: 29, w: 3, h: 3 },
       { kind: 'ceiling', x: 29, y: 29, w: 3, h: 3 },
       { kind: 'ceiling', x: 36, y: 29, w: 3, h: 3 },
+      { kind: 'drip', x: 12, y: 22 },
+      { kind: 'meal', x: 2, y: 28 },
     ],
     legend: LOOT,
     tiles: [
@@ -3470,6 +3497,9 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 22, y: 36, w: 3, h: 3 },
       { kind: 'ceiling', x: 29, y: 36, w: 3, h: 3 },
       { kind: 'ceiling', x: 36, y: 36, w: 3, h: 3 },
+      { kind: 'drip', x: 2, y: 32 },
+      { kind: 'drip', x: 17, y: 32 },
+      { kind: 'meal', x: 29, y: 14 },
     ],
     legend: LOOT,
     tiles: [
@@ -3576,7 +3606,9 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 15, y: 22, w: 3, h: 3 },
       { kind: 'ceiling', x: 30, y: 22, w: 3, h: 3 },
       { kind: 'ceiling', x: 37, y: 22, w: 3, h: 3 },
-      { kind: 'drip', x: 42, y: 17 },
+      { kind: 'drip', x: 2, y: 17 },
+      { kind: 'drip', x: 17, y: 17 },
+      { kind: 'meal', x: 42, y: 17 },
     ],
     legend: LOOT,
     tiles: [
@@ -3658,6 +3690,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 9, y: 18, w: 3, h: 3 },
       { kind: 'ceiling', x: 17, y: 16, w: 3, h: 3 },
       { kind: 'ceiling', x: 25, y: 16, w: 3, h: 3 },
+      { kind: 'barrier', x: 7, y: 2, w: 2 },
+      { kind: 'crate', x: 12, y: 2 },
     ],
     legend: LOOT,
     tiles: [
@@ -3739,8 +3773,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 1, y: 25, w: 3, h: 3 },
       { kind: 'ceiling', x: 9, y: 25, w: 3, h: 3 },
       { kind: 'ceiling', x: 25, y: 25, w: 3, h: 3 },
-      { kind: 'barrier', x: 16, y: 22, w: 2 },
-      { kind: 'crate', x: 30, y: 16 },
+      { kind: 'barrier', x: 7, y: 12, w: 2 },
+      { kind: 'crate', x: 22, y: 12 },
     ],
     legend: LOOT,
     tiles: [
@@ -3862,7 +3896,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 18, y: 41, w: 3, h: 3 },
       { kind: 'ceiling', x: 25, y: 41, w: 3, h: 3 },
       { kind: 'ceiling', x: 33, y: 41, w: 3, h: 3 },
-      { kind: 'barrier', x: 38, y: 20, w: 2 },
+      { kind: 'barrier', x: 35, y: 14, w: 2 },
+      { kind: 'crate', x: 17, y: 17 },
     ],
     legend: LOOT,
     tiles: [
@@ -4006,6 +4041,9 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 33, y: 33, w: 3, h: 3 },
       { kind: 'ceiling', x: 41, y: 33, w: 3, h: 3 },
       { kind: 'ceiling', x: 49, y: 33, w: 3, h: 3 },
+      { kind: 'barrier', x: 22, y: 2, w: 2 },
+      { kind: 'barrier', x: 42, y: 2, w: 2 },
+      { kind: 'crate', x: 17, y: 2 },
     ],
     legend: LOOT,
     tiles: [
@@ -4126,9 +4164,9 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 33, y: 41, w: 3, h: 3 },
       { kind: 'ceiling', x: 41, y: 41, w: 3, h: 3 },
       { kind: 'ceiling', x: 49, y: 41, w: 3, h: 3 },
-      { kind: 'barrier', x: 22, y: 27, w: 2 },
-      { kind: 'barrier', x: 7, y: 47, w: 2 },
-      { kind: 'crate', x: 11, y: 14 },
+      { kind: 'barrier', x: 47, y: 2, w: 2 },
+      { kind: 'barrier', x: 12, y: 27, w: 2 },
+      { kind: 'crate', x: 42, y: 37 },
     ],
     legend: LOOT,
     tiles: [
@@ -4231,7 +4269,7 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 1, y: 19, w: 3, h: 3 },
       { kind: 'ceiling', x: 10, y: 19, w: 3, h: 3 },
       { kind: 'ceiling', x: 19, y: 19, w: 3, h: 3 },
-      { kind: 'glasses', x: 26, y: 20 },
+      { kind: 'glasses', x: 7, y: 7 },
     ],
     legend: LOOT,
     tiles: [
@@ -4334,6 +4372,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 9, y: 37, w: 3, h: 3 },
       { kind: 'ceiling', x: 19, y: 37, w: 3, h: 3 },
       { kind: 'ceiling', x: 28, y: 37, w: 3, h: 3 },
+      { kind: 'glasses', x: 11, y: 11 },
+      { kind: 'toys', x: 27, y: 27 },
     ],
     legend: LOOT,
     tiles: [
@@ -4477,8 +4517,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 28, y: 28, w: 3, h: 3 },
       { kind: 'ceiling', x: 37, y: 28, w: 3, h: 3 },
       { kind: 'ceiling', x: 47, y: 28, w: 3, h: 3 },
-      { kind: 'glasses', x: 42, y: 27 },
-      { kind: 'toys', x: 47, y: 35 },
+      { kind: 'glasses', x: 22, y: 7 },
+      { kind: 'toys', x: 47, y: 32 },
     ],
     legend: LOOT,
     tiles: [
@@ -4633,7 +4673,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 28, y: 37, w: 3, h: 3 },
       { kind: 'ceiling', x: 37, y: 37, w: 3, h: 3 },
       { kind: 'ceiling', x: 46, y: 37, w: 3, h: 3 },
-      { kind: 'toys', x: 52, y: 2 },
+      { kind: 'glasses', x: 37, y: 22 },
+      { kind: 'toys', x: 7, y: 2 },
     ],
     legend: LOOT,
     tiles: [
@@ -4812,7 +4853,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 28, y: 46, w: 3, h: 3 },
       { kind: 'ceiling', x: 37, y: 46, w: 3, h: 3 },
       { kind: 'ceiling', x: 46, y: 46, w: 3, h: 3 },
-      { kind: 'toys', x: 53, y: 5 },
+      { kind: 'glasses', x: 27, y: 17 },
+      { kind: 'toys', x: 22, y: 7 },
     ],
     legend: LOOT,
     tiles: [
@@ -4914,6 +4956,7 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 1, y: 19, w: 3, h: 3 },
       { kind: 'ceiling', x: 10, y: 19, w: 3, h: 3 },
       { kind: 'ceiling', x: 19, y: 19, w: 3, h: 3 },
+      { kind: 'glasses', x: 2, y: 7 },
     ],
     legend: LOOT,
     tiles: [
@@ -4990,7 +5033,7 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 10, y: 19, w: 3, h: 3 },
       { kind: 'ceiling', x: 19, y: 19, w: 3, h: 3 },
       { kind: 'ceiling', x: 28, y: 19, w: 3, h: 3 },
-      { kind: 'glasses', x: 36, y: 22 },
+      { kind: 'glasses', x: 2, y: 7 },
     ],
     legend: LOOT,
     tiles: [
@@ -5075,6 +5118,7 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 10, y: 19, w: 3, h: 3 },
       { kind: 'ceiling', x: 19, y: 19, w: 3, h: 3 },
       { kind: 'ceiling', x: 37, y: 19, w: 3, h: 3 },
+      { kind: 'glasses', x: 2, y: 7 },
     ],
     legend: LOOT,
     tiles: [
@@ -5275,6 +5319,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 37, y: 28, w: 3, h: 3 },
       { kind: 'ceiling', x: 46, y: 28, w: 3, h: 3 },
       { kind: 'ceiling', x: 10, y: 37, w: 3, h: 3 },
+      { kind: 'glasses', x: 2, y: 7 },
+      { kind: 'glasses', x: 12, y: 7 },
     ],
     legend: LOOT,
     tiles: [
@@ -5366,6 +5412,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 9, y: 18, w: 3, h: 3 },
       { kind: 'ceiling', x: 17, y: 16, w: 3, h: 3 },
       { kind: 'ceiling', x: 25, y: 18, w: 3, h: 3 },
+      { kind: 'till', x: 12, y: 2 },
+      { kind: 'crate', x: 24, y: 4 },
     ],
     legend: LOOT,
     tiles: [
@@ -5450,7 +5498,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 10, y: 25, w: 3, h: 3 },
       { kind: 'ceiling', x: 17, y: 25, w: 3, h: 3 },
       { kind: 'ceiling', x: 25, y: 25, w: 3, h: 3 },
-      { kind: 'till', x: 7, y: 17 },
+      { kind: 'till', x: 7, y: 12 },
+      { kind: 'crate', x: 27, y: 17 },
     ],
     legend: LOOT,
     tiles: [
@@ -5550,8 +5599,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 9, y: 34, w: 3, h: 3 },
       { kind: 'ceiling', x: 17, y: 33, w: 3, h: 3 },
       { kind: 'ceiling', x: 26, y: 33, w: 3, h: 3 },
-      { kind: 'till', x: 32, y: 26 },
-      { kind: 'crate', x: 30, y: 16 },
+      { kind: 'till', x: 17, y: 12 },
+      { kind: 'crate', x: 30, y: 12 },
     ],
     legend: LOOT,
     tiles: [
@@ -5657,6 +5706,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 25, y: 33, w: 3, h: 3 },
       { kind: 'ceiling', x: 34, y: 33, w: 3, h: 3 },
       { kind: 'ceiling', x: 41, y: 33, w: 3, h: 3 },
+      { kind: 'till', x: 37, y: 12 },
+      { kind: 'crate', x: 12, y: 12 },
     ],
     legend: LOOT,
     tiles: [
@@ -5773,8 +5824,9 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 25, y: 33, w: 3, h: 3 },
       { kind: 'ceiling', x: 34, y: 33, w: 3, h: 3 },
       { kind: 'ceiling', x: 42, y: 33, w: 3, h: 3 },
-      { kind: 'till', x: 47, y: 7 },
-      { kind: 'crate', x: 46, y: 12 },
+      { kind: 'till', x: 12, y: 2 },
+      { kind: 'crate', x: 17, y: 2 },
+      { kind: 'crate', x: 27, y: 2 },
     ],
     legend: LOOT,
     tiles: [
@@ -5855,7 +5907,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 1, y: 17, w: 3, h: 3 },
       { kind: 'ceiling', x: 16, y: 17, w: 3, h: 3 },
       { kind: 'ceiling', x: 25, y: 17, w: 3, h: 3 },
-      { kind: 'barrier', x: 17, y: 22, w: 2 },
+      { kind: 'barrier', x: 12, y: 22, w: 2 },
+      { kind: 'till', x: 2, y: 7 },
     ],
     legend: LOOT,
     tiles: [
@@ -5929,7 +5982,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 1, y: 25, w: 3, h: 3 },
       { kind: 'ceiling', x: 17, y: 25, w: 3, h: 3 },
       { kind: 'ceiling', x: 25, y: 25, w: 3, h: 3 },
-      { kind: 'barrier', x: 11, y: 23, w: 2 },
+      { kind: 'barrier', x: 22, y: 22, w: 2 },
+      { kind: 'till', x: 23, y: 17 },
     ],
     legend: LOOT,
     tiles: [
@@ -6022,6 +6076,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 17, y: 25, w: 3, h: 3 },
       { kind: 'ceiling', x: 25, y: 25, w: 3, h: 3 },
       { kind: 'ceiling', x: 33, y: 25, w: 3, h: 3 },
+      { kind: 'barrier', x: 22, y: 22, w: 2 },
+      { kind: 'till', x: 20, y: 8 },
     ],
     legend: LOOT,
     tiles: [
@@ -6113,7 +6169,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 17, y: 33, w: 3, h: 3 },
       { kind: 'ceiling', x: 25, y: 33, w: 3, h: 3 },
       { kind: 'ceiling', x: 34, y: 33, w: 3, h: 3 },
-      { kind: 'barrier', x: 23, y: 38, w: 2 },
+      { kind: 'barrier', x: 17, y: 32, w: 2 },
+      { kind: 'till', x: 27, y: 27 },
     ],
     legend: LOOT,
     tiles: [
@@ -6224,7 +6281,8 @@ export const FLOORPLANS = [
       { kind: 'ceiling', x: 17, y: 41, w: 3, h: 3 },
       { kind: 'ceiling', x: 25, y: 41, w: 3, h: 3 },
       { kind: 'ceiling', x: 33, y: 41, w: 3, h: 3 },
-      { kind: 'barrier', x: 40, y: 14, w: 2 },
+      { kind: 'barrier', x: 2, y: 12, w: 2 },
+      { kind: 'till', x: 17, y: 22 },
     ],
     legend: LOOT,
     tiles: [
