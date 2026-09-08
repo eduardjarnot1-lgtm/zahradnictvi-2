@@ -6,7 +6,7 @@ import {
   sleepStage, rarityOf, isBigScore, watcherConfig, gaitBlend, gaitOf, hash
 } from './rules.js';
 import {
-  drawFigure, THIEF_LOOK, CARETAKER_LOOK, SCHOOL_THIEF_LOOK, SCHOOL_CARETAKER_LOOK
+  drawFigure, THIEF_LOOK, CARETAKER_LOOK, SCHOOL_CARETAKER_LOOK, skinById, DEFAULT_SKIN
 } from './figure.js';
 import { playerOf } from './sim.js';
 import {
@@ -32,6 +32,10 @@ export function createRenderer(canvas, options = {}) {
   let debug = !!options.debug;
   let scale = 1;
   let quality = TUNING.quality.high;
+  // Which thief is being worn. Cosmetic and school-only: everywhere else the
+  // game draws the character it has always drawn, and nothing the simulation
+  // does can read this.
+  let skin = skinById(DEFAULT_SKIN);
 
   // The room never moves, so it is painted once per level into an offscreen
   // canvas at device resolution and blitted — detailed *and* cheap.
@@ -664,6 +668,10 @@ export function createRenderer(canvas, options = {}) {
     snapCamera(level, x, y) { centreOn(level, x, y); },
     get camera() { return camera; },
     set debug(on) { debug = !!on; },
+    // The skin, by id. Set from the menu and kept across levels, because it is
+    // a property of the player rather than of the room they are in.
+    set skin(id) { skin = skinById(id); },
+    get skin() { return skin.id; },
     get debug() { return debug; },
 
     draw(sim, alpha, time, pops, stats, sparks = [], flash = 0, dt = 1 / 60, fx = null) {
@@ -866,8 +874,7 @@ export function createRenderer(canvas, options = {}) {
           ctx.clip();
         }
         hand = sim.rules.figures
-          ? drawFigure(ctx, px, py, stance,
-            sim.rules.reacts ? SCHOOL_THIEF_LOOK : THIEF_LOOK)
+          ? drawFigure(ctx, px, py, stance, sim.rules.reacts ? skin : THIEF_LOOK)
           : drawThief(ctx, px, py, stance);
         if (mouth) ctx.restore();
       }

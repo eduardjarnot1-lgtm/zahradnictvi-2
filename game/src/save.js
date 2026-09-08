@@ -1,5 +1,7 @@
 // Versioned save with an explicit migration chain. Adding a field later means
 // appending one migration, not breaking every existing player's progress.
+import { SCHOOL_SKINS, DEFAULT_SKIN } from './figure.js';
+
 export const SAVE_KEY = 'dwh_save';
 export const SAVE_VERSION = 5;
 
@@ -7,7 +9,10 @@ export function defaultSettings() {
   // unlockAll is a development switch: every level playable from the menu,
   // without touching the progression itself. Turning it back off restores
   // exactly the unlocks the player had actually earned.
-  return { sound: true, music: true, vibration: true, quality: 'high', unlockAll: true };
+  return {
+    sound: true, music: true, vibration: true, quality: 'high', unlockAll: true,
+    skin: DEFAULT_SKIN
+  };
 }
 
 export function defaultSave() {
@@ -50,6 +55,7 @@ const MIGRATIONS = {
 };
 
 const QUALITIES = ['low', 'medium', 'high'];
+const SKIN_IDS = SCHOOL_SKINS.map((s) => s.id);
 
 export function migrate(raw) {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return defaultSave();
@@ -91,7 +97,11 @@ export function migrate(raw) {
       quality: QUALITIES.includes(settings.quality) ? settings.quality : 'high',
       // Defaults on, and an older save that predates it simply gains it — the
       // stars and money it holds are untouched either way.
-      unlockAll: typeof settings.unlockAll === 'boolean' ? settings.unlockAll : true
+      unlockAll: typeof settings.unlockAll === 'boolean' ? settings.unlockAll : true,
+      // Which thief he is wearing. Cosmetic, so an unknown name — a save from a
+      // build with a skin this one has not got — falls back rather than
+      // throwing, and the save keeps everything else it holds.
+      skin: SKIN_IDS.includes(settings.skin) ? settings.skin : DEFAULT_SKIN
     }
   };
 }

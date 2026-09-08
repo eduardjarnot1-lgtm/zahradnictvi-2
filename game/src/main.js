@@ -10,6 +10,7 @@ import { createMachine } from './fsm.js';
 import { createAudio } from './audio.js';
 import { createInput } from './input.js';
 import { createRenderer } from './render.js';
+import { SCHOOL_SKINS, skinById } from './figure.js';
 import {
   sleepStage, starsFor, starThresholds, levelTotals, upgradeCost, SLEEP_LABELS,
   objectivesFor, isBigScore, rarityOf, watcherConfig
@@ -39,6 +40,7 @@ export function boot() {
   const fx = createEffects();
 
   audio.setMuted(!saveStore.data.settings.sound);
+  renderer.skin = saveStore.data.settings.skin;
 
   if (debug) {
     const report = validateAll(LEVELS);
@@ -274,9 +276,24 @@ export function boot() {
     paint('tMusic', setting('music'));
     paint('tVibe', setting('vibration'));
     paint('tUnlock', setting('unlockAll'));
-    for (const button of $('segQuality').children) {
+    // Tapping the thief row walks round the five. No confirm, no preview screen:
+  // the change is visible the next time a school level is drawn, and the label
+  // and the line under it say which one is on.
+  on('tSkin', () => {
+    const at = SCHOOL_SKINS.findIndex((k) => k.id === setting('skin'));
+    const next = SCHOOL_SKINS[(at + 1) % SCHOOL_SKINS.length];
+    saveStore.setSetting('skin', next.id);
+    renderer.skin = next.id;
+    paintSettings();
+    buzz(12);
+  });
+
+  for (const button of $('segQuality').children) {
       button.classList.toggle('on', button.dataset.q === setting('quality'));
     }
+    const worn = skinById(setting('skin'));
+    $('tSkin').textContent = worn.name.toUpperCase();
+    $('skinBlurb').textContent = worn.blurb;
   }
 
   // ---------------------------------------------------------------- level
@@ -920,6 +937,11 @@ export function boot() {
     Object.defineProperty(window.__dwhBoot, 'sim', { get: () => sim });
     // The overlay, so a browser check can look at the room rather than at a
     // lattice of collision boxes drawn over it.
+    // Wearing a skin, for a browser check that has no fingers to tap Settings.
+    window.__dwhBoot.setSkin = (id) => {
+      saveStore.setSetting('skin', id);
+      renderer.skin = id;
+    };
     Object.defineProperty(window.__dwhBoot, 'overlay', {
       get: () => renderer.debug, set: (on) => { renderer.debug = on; }
     });

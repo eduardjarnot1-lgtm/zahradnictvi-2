@@ -275,6 +275,12 @@
       <div class="row"><span>Music</span><button class="toggle" id="tMusic">ON</button></div>
       <div class="row"><span>Vibration</span><button class="toggle" id="tVibe">ON</button></div>
       <div class="row"><span>Unlock all levels</span><button class="toggle" id="tUnlock">ON</button></div>
+      <!-- Which thief you play as in the school. One row and one button rather
+           than a screen of its own: it is a cosmetic choice with five options,
+           and tapping through five names is quicker than opening a menu to make
+           one of them. The blurb under it is the skin's own. -->
+      <div class="row"><span>Thief</span><button class="toggle on" id="tSkin">SHADOW</button></div>
+      <p class="hint" id="skinBlurb">Silent. Fast. Invisible.</p>
       <div class="row"><span>Graphics</span>
         <div class="seg" id="segQuality">
           <button data-q="low">LOW</button><button data-q="medium">MED</button><button data-q="high">HIGH</button>
@@ -8550,7 +8556,8 @@ __mod.figure = (function () {
   // One gradient and three arcs per figure per frame, with two figures on the
   // screen. That is affordable in a way that lighting the room live is not, and
   // it is where the money shows.
-  const SCHOOL_THIEF_LOOK = { ...THIEF_LOOK, lit: '226,240,214' };
+  // The thief's own school look now comes from whichever skin is being worn — see
+  // SCHOOL_SKINS at the foot of this file. Mr. Vrána has one and only one.
   const SCHOOL_CARETAKER_LOOK = { ...CARETAKER_LOOK, lit: '226,240,214' };
 
   // --- small drawing helpers ---------------------------------------------------
@@ -8809,6 +8816,25 @@ __mod.figure = (function () {
       return { x: wristX, y: wristY };
     };
 
+    // What trails behind him, before anything of the body is drawn — a cloak is
+    // behind its wearer, and so is the fog a ghost drags about.
+    const gear = {
+      faceX, faceY, build, run, clock,
+      // How far through the stride his shoulders are, which the cape swings with.
+      swing: Math.sin(walkPhase * TAU) * cycling,
+      // ...and whether the cane's opposite foot is on the floor.
+      plant: Math.max(0, Math.sin(walkPhase * TAU + Math.PI))
+    };
+    if (look.aura) drawAura(ctx, chestX, chestY + 2, look, gear);
+    if (look.cape) {
+      // Set back from the chest, so the mantle reads as hanging off his shoulders
+      // rather than being worn under them.
+      const bx = -faceX;
+      const by = -faceY * FORESHORTEN;
+      const bl = Math.hypot(bx, by) || 1;
+      drawCape(ctx, chestX + (bx / bl) * 2.6, chestY - 3 + (by / bl) * 2.6, look, gear);
+    }
+
     const farArm = away ? turn : -turn;
     armOf(farArm, true);
 
@@ -8820,6 +8846,7 @@ __mod.figure = (function () {
     });
 
     const hand = armOf(-farArm, false);
+    if (look.cane) drawCane(ctx, hand, look, gear);
 
     // --- head ------------------------------------------------------------------
     // A head does not ride the hips. It is the steadiest thing on a walking
@@ -8941,6 +8968,75 @@ __mod.figure = (function () {
     ctx.beginPath();
     ctx.ellipse(cx, bottom - 1.4, hem * 0.94, 2.2, 0, 0, TAU);
     ctx.fill();
+
+    // What is on the front of it. Three skins have something and two do not, and
+    // each is two or three fills — at this size a shirt front is a shape, not a
+    // garment, and the shape is what has to be different.
+    if (look.front === 'stripes') {
+      // A pirate's jersey, under an open coat.
+      ctx.fillStyle = look.frontTone;
+      ctx.beginPath();
+      ctx.ellipse(cx + lead * 0.6, top + 6.4, shoulder * 0.40, 5.2, 0, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = look.frontDark;
+      for (let i = 0; i < 3; i++) {
+        ctx.fillRect(cx + lead * 0.6 - shoulder * 0.36, top + 4.2 + i * 2.0,
+          shoulder * 0.72, 0.9);
+      }
+    } else if (look.front === 'shirt') {
+      // A dress shirt and a tie, under a tailcoat.
+      ctx.fillStyle = look.frontTone;
+      ctx.beginPath();
+      ctx.moveTo(cx + lead - shoulder * 0.30, top + 1.6);
+      ctx.lineTo(cx + lead + shoulder * 0.30, top + 1.6);
+      ctx.lineTo(cx + lead * 0.5 + shoulder * 0.20, bottom - 2.6);
+      ctx.lineTo(cx + lead * 0.5 - shoulder * 0.20, bottom - 2.6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = look.frontDark;
+      ctx.fillRect(cx + lead * 0.7 - 0.9, top + 2.6, 1.8, 7.4);
+    } else if (look.front === 'trim') {
+      // Circuitry down a tactical suit: two lit runs and a node between them.
+      ctx.strokeStyle = look.frontTone;
+      ctx.lineWidth = 1.1;
+      ctx.lineCap = 'round';
+      for (const side of [-1, 1]) {
+        ctx.beginPath();
+        ctx.moveTo(cx + lead + side * shoulder * 0.52, top + 2.2);
+        ctx.quadraticCurveTo(cx + lead + side * shoulder * 0.30, top + 7.0,
+          cx + side * hem * 0.44, bottom - 2.0);
+        ctx.stroke();
+      }
+      ctx.fillStyle = look.frontTone;
+      ctx.beginPath();
+      ctx.arc(cx + lead * 0.7, top + 6.2, 1.5, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.beginPath();
+      ctx.arc(cx + lead * 0.7, top + 6.2, 0.6, 0, TAU);
+      ctx.fill();
+    }
+    // A neckerchief, a cravat, a scarf: whatever a skin has round its throat.
+    if (look.sash && look.crown !== 'hood') {
+      ctx.fillStyle = look.sash;
+      ctx.beginPath();
+      ctx.ellipse(cx + lead * 0.8, top + 1.4, shoulder * 0.34, 2.0, 0, 0, TAU);
+      ctx.fill();
+    }
+    // ...and the gold down the front edges of a coat.
+    if (look.gold) {
+      // Braid, not a rod. At full weight the near edge reads as something he is
+      // carrying, which on a screen that also has a man with a cane on it is the
+      // wrong thing to suggest.
+      ctx.strokeStyle = look.goldTrim || look.gold;
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(cx + lead - shoulder * 0.86, top + 3.0);
+      ctx.lineTo(cx - hem * 0.80, bottom - 1.6);
+      ctx.moveTo(cx + lead + shoulder * 0.86, top + 3.0);
+      ctx.lineTo(cx + hem * 0.80, bottom - 1.6);
+      ctx.stroke();
+    }
   }
 
   // The head, and everything on it that says which way he is looking.
@@ -8953,7 +9049,7 @@ __mod.figure = (function () {
   function drawHead(ctx, x, y, view, look) {
     const { sideOn, turn, away, faceShow, build } = view;
     const r = HEAD_R * build;
-    const beanie = look.crown === 'beanie';
+    const bare = look.crown === 'balding';
     // Everything on the face rides towards where he is going.
     const shift = turn * sideOn * 2.2 * build;
     const browY = y - r * 0.20;
@@ -9012,7 +9108,7 @@ __mod.figure = (function () {
       ctx.beginPath();
       ctx.ellipse(x, y + r * 0.10, r * 1.02, r * 0.96, 0, 0, TAU);
       ctx.fill();
-      if (!beanie) {
+      if (bare) {
         // Bald from behind too — the crown shows through the grey.
         ctx.fillStyle = look.skin;
         ctx.beginPath();
@@ -9025,8 +9121,7 @@ __mod.figure = (function () {
         ctx.ellipse(x + turn * r * 0.90, y + 1.2, 1.5 * build, 2.3 * sideOn * build, 0, 0, TAU);
         ctx.fill();
       }
-      if (beanie) drawBeanie(ctx, x, y, r, turn, sideOn, look, true);
-      else drawCrownLight(ctx, x, y, r, turn, look);
+      drawCrown(ctx, x, y, r, turn, sideOn, look, true);
       return;
     }
 
@@ -9050,6 +9145,26 @@ __mod.figure = (function () {
     ctx.save();
     ctx.globalAlpha = faceShow;
     const spread = 3.0 * build * (1 - sideOn * 0.44);
+    // The mask. Every thief in the game wears one — it is the one thing all five
+    // skins share, and the thing that says which of the two people on the screen
+    // is the one you are steering. Drawn before the eyes so they sit on it, and
+    // clipped to the face so it cannot ride up over a hood or a hat brim.
+    if (look.mask) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.ellipse(x + shift * 0.22, y, r * 0.95, r, 0, 0, TAU);
+      ctx.clip();
+      ctx.fillStyle = look.mask;
+      ctx.beginPath();
+      ctx.ellipse(x + shift, eyeY - r * 0.06, r * 1.10, r * 0.40, 0, 0, TAU);
+      ctx.fill();
+      // A lit top edge, so the band has a thickness rather than being a hole.
+      ctx.fillStyle = 'rgba(255,255,255,0.10)';
+      ctx.beginPath();
+      ctx.ellipse(x + shift, eyeY - r * 0.30, r * 1.02, r * 0.13, 0, 0, TAU);
+      ctx.fill();
+      ctx.restore();
+    }
     const eye = (dx) => {
       ctx.fillStyle = '#fdfdff';
       ctx.beginPath();
@@ -9077,6 +9192,33 @@ __mod.figure = (function () {
     brow(spread);
     if (sideOn < 0.74) brow(-spread);
 
+    // Goggles, for the one skin that plans rather than sneaks. Two lenses on a
+    // strap, drawn over the eyes because that is where a lens is.
+    if (look.goggles) {
+      const lens = (dx) => {
+        ctx.fillStyle = 'rgba(12,18,26,0.85)';
+        ctx.beginPath();
+        ctx.ellipse(x + shift + dx, eyeY - r * 0.04, 2.5 * build, 2.2 * build, 0, 0, TAU);
+        ctx.fill();
+        ctx.fillStyle = look.goggles;
+        ctx.beginPath();
+        ctx.ellipse(x + shift + dx, eyeY - r * 0.04, 1.9 * build, 1.6 * build, 0, 0, TAU);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.55)';
+        ctx.beginPath();
+        ctx.ellipse(x + shift + dx - 0.6, eyeY - r * 0.22, 0.8 * build, 0.5 * build, -0.4, 0, TAU);
+        ctx.fill();
+      };
+      lens(spread * 0.92);
+      if (sideOn < 0.74) lens(-spread * 0.92);
+      // The strap round the back of the head.
+      ctx.strokeStyle = 'rgba(16,22,30,0.9)';
+      ctx.lineWidth = 1.5 * build;
+      ctx.beginPath();
+      ctx.ellipse(x + shift * 0.4, eyeY - r * 0.04, r * 1.0, r * 0.44, 0, 0, TAU);
+      ctx.stroke();
+    }
+
     if (look.moustache) {
       // A thick grey moustache is Mr. Vrána's face in one shape — recognisable
       // before anything else about him is legible.
@@ -9096,8 +9238,7 @@ __mod.figure = (function () {
     }
     ctx.restore();
 
-    if (beanie) drawBeanie(ctx, x, y, r, turn, sideOn, look);
-    else drawCrownLight(ctx, x, y, r, turn, look);
+    drawCrown(ctx, x, y, r, turn, sideOn, look, false);
 
     // The room's light, catching the top of the skull. Last, so it lies over the
     // hat as well as the hair, and thin — a rim is an edge, and an edge that has
@@ -9107,10 +9248,312 @@ __mod.figure = (function () {
       ctx.strokeStyle = `rgba(${look.lit},0.26)`;
       ctx.lineWidth = 1.1;
       ctx.beginPath();
-      ctx.ellipse(x, y - (beanie ? r * 0.30 : r * 0.06), r * 1.00, r * 0.94,
+      // Where the top of the head is, which is higher when something is on it.
+      // Read off the crown rather than off one hat, so a skin that adds a sixth
+      // gets a rim in the right place instead of one round its ears.
+      const lift = CROWN_LIFT[look.crown] === undefined ? 0.06 : CROWN_LIFT[look.crown];
+      ctx.ellipse(x, y - r * lift, r * 1.00, r * 0.94,
         0, Math.PI * 1.12, Math.PI * 1.88);
       ctx.stroke();
     }
+  }
+
+  // How far above the head's middle each crown puts the top of the silhouette,
+  // which is where the room's light catches it.
+  const CROWN_LIFT = {
+    beanie: 0.30, hood: 0.26, tricorn: 0.46, tophat: 0.52, mop: 0.34, balding: 0.06
+  };
+
+  // What a look wears on its head. One switch, so the face-on and the walking-away
+  // drawings can never disagree about which hat a skin has on.
+  function drawCrown(ctx, x, y, r, turn, sideOn, look, deep) {
+    switch (look.crown) {
+      case 'beanie': return drawBeanie(ctx, x, y, r, turn, sideOn, look, deep);
+      case 'hood': return drawHood(ctx, x, y, r, turn, sideOn, look, deep);
+      case 'tricorn': return drawTricorn(ctx, x, y, r, turn, sideOn, look, deep);
+      case 'tophat': return drawTopHat(ctx, x, y, r, turn, sideOn, look, deep);
+      case 'mop': return drawMop(ctx, x, y, r, turn, sideOn, look, deep);
+      default: return drawCrownLight(ctx, x, y, r, turn, look);
+    }
+  }
+
+  // --- what hangs off a skin ---------------------------------------------------
+
+  // A cloak, cape or coat-tail, trailing behind whoever is wearing it.
+  //
+  // Drawn behind the body and driven by the walk rather than by a clock: it
+  // streams out along the *back* of the direction he is travelling, further the
+  // faster he goes, and it swings with the same phase his shoulders do. A cape on
+  // a timer is a flag; a cape on the gait is a cape.
+  function drawCape(ctx, cx, cy, look, { faceX, faceY, build, run, swing }) {
+    // Trailing straight at or away from the camera, a cape is edge-on and there is
+    // nothing to see — which from directly above is most of the time. So it is
+    // drawn as a mantle first and a tail second: wide enough over the shoulders to
+    // hold a silhouette from any heading, flaring to a point behind. The travel
+    // along the screen's y axis is only half foreshortened for the same reason —
+    // a cloak is not a foot, and it does not have to touch the floor honestly.
+    // Unit vectors, and that matters more than it looks: foreshortening the y
+    // travel shortens the *vector*, so an un-normalised `back` — and the `side`
+    // taken square off it — collapsed the whole cape to two thirds of its width
+    // whenever he faced up or down the screen, which from directly above is half
+    // the time. It vanished behind his own shoulders and looked like a bug in the
+    // skin rather than in the arithmetic.
+    const bl = Math.hypot(faceX, faceY * (FORESHORTEN + 0.34)) || 1;
+    const back = { x: -faceX / bl, y: -faceY * (FORESHORTEN + 0.34) / bl };
+    const len = (11.5 + run * 7.5) * build;
+    const side = { x: -back.y, y: back.x };
+    const sway = swing * (2.4 + run * 2.2) * build;
+    const tip = { x: cx + back.x * len + side.x * sway, y: cy + back.y * len + side.y * sway };
+    const wide = (9.2 + run * 1.6) * build;
+    ctx.fillStyle = look.cape;
+    ctx.beginPath();
+    ctx.moveTo(cx - side.x * wide, cy - side.y * wide);
+    ctx.quadraticCurveTo(
+      cx + back.x * len * 0.55 - side.x * (wide * 0.5 - sway * 0.6),
+      cy + back.y * len * 0.55 - side.y * (wide * 0.5 - sway * 0.6),
+      tip.x, tip.y);
+    ctx.quadraticCurveTo(
+      cx + back.x * len * 0.55 + side.x * (wide * 0.9 + sway * 0.6),
+      cy + back.y * len * 0.55 + side.y * (wide * 0.9 + sway * 0.6),
+      cx + side.x * wide, cy + side.y * wide);
+    ctx.closePath();
+    ctx.fill();
+    // A fold down the middle, and a lit edge along the trailing side.
+    if (look.capeLit) {
+      ctx.strokeStyle = look.capeLit;
+      ctx.lineWidth = 0.9 * build;
+      ctx.beginPath();
+      ctx.moveTo(cx - side.x * wide * 0.5, cy - side.y * wide * 0.5);
+      ctx.quadraticCurveTo(cx + back.x * len * 0.6, cy + back.y * len * 0.6, tip.x, tip.y);
+      ctx.stroke();
+    }
+  }
+
+  // The wisps a ghost trails. Three arcs off the shoulders, on the walk phase, so
+  // they gather when he stops and stream when he runs.
+  function drawAura(ctx, cx, cy, look, { faceX, faceY, build, run, swing, clock }) {
+    const back = { x: -faceX, y: -faceY * FORESHORTEN };
+    ctx.save();
+    ctx.strokeStyle = look.aura;
+    ctx.lineCap = 'round';
+    for (let i = 0; i < 3; i++) {
+      const t = i / 3;
+      const puff = 0.5 + 0.5 * Math.sin(clock * 2.4 + i * 2.1);
+      const len = (9 + run * 10 + puff * 5) * build;
+      const off = (i - 1) * 3.4 * build + swing * 1.6 * build;
+      ctx.globalAlpha = 0.26 + puff * 0.24;
+      ctx.lineWidth = (3.4 - t * 1.3) * build;
+      ctx.beginPath();
+      ctx.moveTo(cx - back.y * off, cy + back.x * off);
+      ctx.quadraticCurveTo(
+        cx + back.x * len * 0.5 - back.y * (off + puff * 3),
+        cy + back.y * len * 0.5 + back.x * (off + puff * 3),
+        cx + back.x * len - back.y * off * 0.4,
+        cy + back.y * len + back.x * off * 0.4);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // A walking cane, held in the trailing hand and planted every other step. Its
+  // tip goes down when the opposite foot does, which is what a cane is for.
+  function drawCane(ctx, hand, look, { faceX, faceY, build, plant }) {
+    if (!hand) return;
+    const ahead = { x: faceX, y: faceY * FORESHORTEN };
+    const len = 13 * build;
+    const lean = 0.30 + plant * 0.34;
+    const tipX = hand.x + ahead.x * len * lean;
+    const tipY = hand.y + ahead.y * len * lean + len * (0.62 + plant * 0.24);
+    ctx.strokeStyle = look.cane;
+    ctx.lineCap = 'round';
+    ctx.lineWidth = 1.9 * build;
+    ctx.beginPath();
+    ctx.moveTo(hand.x, hand.y);
+    ctx.lineTo(tipX, tipY);
+    ctx.stroke();
+    // The knob, catching the light.
+    ctx.fillStyle = look.caneKnob || '#c9a86a';
+    ctx.beginPath();
+    ctx.arc(hand.x, hand.y - 0.6 * build, 1.7 * build, 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.40)';
+    ctx.beginPath();
+    ctx.arc(hand.x - 0.5 * build, hand.y - 1.1 * build, 0.6 * build, 0, TAU);
+    ctx.fill();
+  }
+
+  // --- headwear ----------------------------------------------------------------
+  //
+  // One painter per crown, all to the same contract: draw over a head of radius
+  // `r` centred at x,y, seen from above and slightly in front, with `turn` saying
+  // which way the face points and `deep` meaning he is walking away from the
+  // camera and the hat should sit further down the skull.
+  //
+  // They are separate functions rather than one parameterised hat because the
+  // only thing a top hat and a tricorn have in common is that they are on a head.
+  // The silhouette is what tells five skins apart at this size — the trim and the
+  // badges are for when the camera is close.
+
+  // A hood, up. Shadow's is black and Ghost's is bone, and both are the same
+  // shape: a mass behind the head wider than the skull, an opening the face sits
+  // in, and a shaded fold where the cowl gathers at the neck.
+  function drawHood(ctx, x, y, r, turn, sideOn, look, deep = false) {
+    if (deep) {
+      // From behind there is no opening: a hood is the back of a head.
+      ctx.fillStyle = look.hat;
+      ctx.beginPath();
+      ctx.ellipse(x, y + r * 0.10, r * 1.26, r * 1.20, 0, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = look.hatDark || look.hat;
+      ctx.beginPath();
+      ctx.ellipse(x, y + r * 0.62, r * 1.06, r * 0.66, 0, 0, TAU);
+      ctx.fill();
+    } else {
+      // Face on it is a ring, and it has to actually be a ring: the crown is
+      // painted after the face, so a filled ellipse here is a bag over his head.
+      // Two subpaths and the even-odd rule cut the opening out of the cowl in one
+      // fill, which is cheaper than clipping and does not soften the edge.
+      const ox = x + turn * sideOn * 1.1;
+      const oy = y + r * 0.10;
+      ctx.fillStyle = look.hat;
+      ctx.beginPath();
+      ctx.ellipse(x, y + r * 0.06, r * 1.30, r * 1.24, 0, 0, TAU);
+      ctx.ellipse(ox, oy, r * 0.86, r * 0.90, 0, 0, TAU);
+      ctx.fill('evenodd');
+      // The fold where the cowl gathers at the neck, under the chin.
+      ctx.fillStyle = look.hatDark || look.hat;
+      ctx.beginPath();
+      ctx.ellipse(x, y + r * 1.06, r * 1.12, r * 0.44, 0, 0, TAU);
+      ctx.fill();
+      // ...and the shadow the opening casts onto the face inside it.
+      ctx.save();
+      ctx.beginPath();
+      ctx.ellipse(ox, oy, r * 0.86, r * 0.90, 0, 0, TAU);
+      ctx.clip();
+      ctx.fillStyle = 'rgba(10,14,20,0.30)';
+      ctx.beginPath();
+      ctx.ellipse(ox, oy - r * 0.62, r * 0.92, r * 0.46, 0, 0, TAU);
+      ctx.fill();
+      ctx.restore();
+    }
+    // A lit edge along the top of the cowl, so a black hood on a dark corridor
+    // still has an outline and a bone one does not glare.
+    ctx.strokeStyle = look.hatLit;
+    ctx.lineWidth = 1.7;
+    ctx.beginPath();
+    ctx.ellipse(x, y + (deep ? r * 0.10 : r * 0.06), r * 1.24, r * 1.18,
+      0, Math.PI * 1.04, Math.PI * 1.96);
+    ctx.stroke();
+  }
+
+  // A pirate's tricorn: wide, three-cornered, with a gold edge, a skull badge on
+  // the front, and the tail of a red bandana coming out from under the back of it.
+  function drawTricorn(ctx, x, y, r, turn, sideOn, look, deep = false) {
+    const brim = y - r * (deep ? 0.06 : 0.30);
+    // The bandana under it, trailing off the back.
+    if (look.sash) {
+      ctx.fillStyle = look.sash;
+      ctx.beginPath();
+      ctx.moveTo(x - turn * r * 0.5, brim + r * 0.30);
+      ctx.quadraticCurveTo(x - turn * r * 1.7, brim + r * 0.20,
+        x - turn * r * 2.0, brim + r * 0.86);
+      ctx.quadraticCurveTo(x - turn * r * 1.3, brim + r * 0.52,
+        x - turn * r * 0.4, brim + r * 0.70);
+      ctx.closePath();
+      ctx.fill();
+    }
+    // The brim: a wide three-pointed sweep.
+    ctx.fillStyle = look.hat;
+    ctx.beginPath();
+    ctx.moveTo(x - r * 1.55, brim + r * 0.34);
+    ctx.quadraticCurveTo(x - r * 0.90, brim - r * 0.72, x, brim - r * 0.80);
+    ctx.quadraticCurveTo(x + r * 0.90, brim - r * 0.72, x + r * 1.55, brim + r * 0.34);
+    ctx.quadraticCurveTo(x, brim + r * 0.86, x - r * 1.55, brim + r * 0.34);
+    ctx.closePath();
+    ctx.fill();
+    // The crown of it, sitting proud.
+    ctx.fillStyle = look.hatLit;
+    ctx.beginPath();
+    ctx.ellipse(x, brim - r * 0.06, r * 0.86, r * 0.44, 0, 0, TAU);
+    ctx.fill();
+    // Gold along the brim's edge.
+    ctx.strokeStyle = look.gold || '#d8a33c';
+    ctx.lineWidth = 1.3;
+    ctx.beginPath();
+    ctx.moveTo(x - r * 1.50, brim + r * 0.32);
+    ctx.quadraticCurveTo(x - r * 0.88, brim - r * 0.66, x, brim - r * 0.74);
+    ctx.quadraticCurveTo(x + r * 0.88, brim - r * 0.66, x + r * 1.50, brim + r * 0.32);
+    ctx.stroke();
+    // ...and the skull on the front, which is the whole badge at this size: two
+    // eyes and a jaw in bone white.
+    if (!deep) {
+      const bx = x + turn * sideOn * 1.2;
+      const by = brim + r * 0.06;
+      ctx.fillStyle = '#f2efe6';
+      ctx.beginPath();
+      ctx.ellipse(bx, by, r * 0.26, r * 0.24, 0, 0, TAU);
+      ctx.fill();
+      ctx.fillRect(bx - r * 0.16, by + r * 0.16, r * 0.32, r * 0.12);
+      ctx.fillStyle = look.hat;
+      ctx.beginPath();
+      ctx.arc(bx - r * 0.10, by - r * 0.02, r * 0.07, 0, TAU);
+      ctx.arc(bx + r * 0.10, by - r * 0.02, r * 0.07, 0, TAU);
+      ctx.fill();
+    }
+  }
+
+  // A gentleman's top hat, from above: a brim, a crown, and a band round it.
+  function drawTopHat(ctx, x, y, r, turn, sideOn, look, deep = false) {
+    // High enough that the brim clears the brows: a hat over the eyes reads as
+    // a blindfold, which is the trap the beanie already fell into once.
+    const brim = y - r * (deep ? 0.24 : 0.62);
+    ctx.fillStyle = look.hatDark || look.hat;
+    ctx.beginPath();
+    ctx.ellipse(x, brim + r * 0.20, r * 1.26, r * 0.52, 0, 0, TAU);
+    ctx.fill();
+    // The crown, offset the way he leans, which is what gives it height.
+    ctx.fillStyle = look.hat;
+    ctx.beginPath();
+    ctx.ellipse(x + turn * sideOn * 0.9, brim - r * 0.16, r * 0.82, r * 0.62, 0, 0, TAU);
+    ctx.fill();
+    // The band.
+    ctx.strokeStyle = look.band || '#5a4632';
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    ctx.ellipse(x + turn * sideOn * 0.7, brim + r * 0.06, r * 0.82, r * 0.54,
+      0, Math.PI * 0.06, Math.PI * 0.94);
+    ctx.stroke();
+    // A sheen off the top of the crown: silk, not felt.
+    ctx.fillStyle = 'rgba(255,255,255,0.14)';
+    ctx.beginPath();
+    ctx.ellipse(x + turn * sideOn * 0.9 - 1.4, brim - r * 0.34, r * 0.36, r * 0.16, -0.3, 0, TAU);
+    ctx.fill();
+  }
+
+  // A mop of hair, for the one skin that wears no hat. Spikes rather than a
+  // smooth cap: the silhouette has to say "no hat" from across the corridor.
+  function drawMop(ctx, x, y, r, turn, sideOn, look, deep = false) {
+    ctx.fillStyle = look.hair;
+    ctx.beginPath();
+    ctx.ellipse(x, y - r * (deep ? 0.10 : 0.28), r * 1.06, r * 0.80, 0, 0, TAU);
+    ctx.fill();
+    // Five spikes off the top, leaning the way he is going.
+    for (let i = 0; i < 5; i++) {
+      const t = (i - 2) / 2;
+      const px = x + t * r * 0.80 + turn * sideOn * 1.2;
+      const py = y - r * (deep ? 0.50 : 0.70);
+      ctx.beginPath();
+      ctx.moveTo(px - r * 0.26, py + r * 0.34);
+      ctx.quadraticCurveTo(px + turn * r * 0.22, py - r * 0.62,
+        px + turn * r * 0.50, py - r * 0.16);
+      ctx.quadraticCurveTo(px + r * 0.18, py + r * 0.14, px + r * 0.26, py + r * 0.34);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.fillStyle = look.hairLit || 'rgba(255,255,255,0.13)';
+    ctx.beginPath();
+    ctx.ellipse(x - turn * 1.4, y - r * (deep ? 0.24 : 0.44), r * 0.42, r * 0.20, -0.3, 0, TAU);
+    ctx.fill();
   }
 
   // The beanie. Its brim has to sit above the brows, which is higher than it
@@ -9141,7 +9584,129 @@ __mod.figure = (function () {
   }
 
   const figureHeight = GROUND + Math.abs(HEAD_Y) + HEAD_R;
-  return { THIEF_LOOK, CARETAKER_LOOK, SCHOOL_THIEF_LOOK, SCHOOL_CARETAKER_LOOK, drawFigure, figureHeight };
+
+  // --- the five thief skins ----------------------------------------------------
+  //
+  // A skin is a look, and a look is data. That is the whole of the integration:
+  // `drawFigure` reads clothes, hats and gear off the object it is handed and
+  // knows nothing else about who is wearing them, so every one of these gets the
+  // idle, the five walking states, the turn, the search, the grab and the climb
+  // into a locker for free — and gets them *right*, because the pose comes off
+  // the speed the simulation measured and none of it comes off the skin.
+  //
+  // They are cosmetic in the strict sense: nothing here is read by the
+  // simulation, which never sees this file. There is no field one of them could
+  // set that would make it quieter, faster or harder to spot.
+  //
+  // Same body, different person. The build is 1 for all five and the proportions
+  // are the thief's — what tells them apart at the distance the game is actually
+  // played at is the silhouette: what is on the head, and what trails behind.
+  const THIEF_BODY = {
+    skin: '#f0c9a4', skinDark: '#d6a97f',
+    mask: '#14161d',
+    brow: '#3a2c22',
+    mouth: '#8a5f4d',
+    build: 1,
+    lit: '226,240,214'
+  };
+
+  const SCHOOL_SKINS = [
+    {
+      // Silent. Fast. Invisible. Black on black, hood up, and nothing on him
+      // that catches a light — the one that reads as a thief before anything else.
+      id: 'shadow',
+      name: 'Shadow',
+      blurb: 'Silent. Fast. Invisible.',
+      ...THIEF_BODY,
+      coat: '#252a33', coatLit: '#333945', coatDark: '#171b22',
+      trouser: '#1e2229', trouserLit: '#2b3038',
+      shoe: '#33383f', shoeLit: '#454b54', sole: '#7b828c',
+      hair: '#2a2118',
+      crown: 'hood', hat: '#282e37', hatLit: '#3d4552', hatDark: '#1a1e25',
+      rim: '#14171d'
+    },
+    {
+      // Treasure hunter of the night. Tricorn, skull, red bandana trailing, a
+      // striped jersey under a gold-edged coat, and the coat itself streaming out
+      // behind him when he runs.
+      id: 'pirate',
+      name: 'Pirate',
+      blurb: 'Treasure hunter of the night.',
+      ...THIEF_BODY,
+      coat: '#2f2a22', coatLit: '#413a2f', coatDark: '#1e1a15',
+      trouser: '#26231d', trouserLit: '#343029',
+      shoe: '#5c3f26', shoeLit: '#74522f', sole: '#8a6a44',
+      hair: '#3a2a1c',
+      crown: 'tricorn', hat: '#1c1913', hatLit: '#2e281f',
+      gold: '#d8a33c', goldTrim: 'rgba(216,163,60,0.55)',
+      sash: '#b5342c',
+      front: 'stripes', frontTone: '#e6ddcb', frontDark: '#3a3630',
+      cape: '#241f19', capeLit: 'rgba(216,163,60,0.55)',
+      rim: '#171410'
+    },
+    {
+      // Hacker. Planner. No alarms for him. No hat at all, which is the point:
+      // spiked hair and a lit strip down a tactical suit, and the only skin whose
+      // eyes you cannot see.
+      id: 'tech',
+      name: 'Tech',
+      blurb: 'Hacker. Planner. No alarms for him.',
+      ...THIEF_BODY,
+      mask: null,
+      coat: '#1d222b', coatLit: '#2c3340', coatDark: '#12161d',
+      trouser: '#181c24', trouserLit: '#252b35',
+      shoe: '#e4e9f0', shoeLit: '#f4f7fb', sole: '#9fb6c6',
+      hair: '#7c4a28', hairLit: 'rgba(214,150,90,0.55)',
+      crown: 'mop',
+      goggles: '#4fd0f5',
+      front: 'trim', frontTone: '#38c6f0',
+      rim: '#101419'
+    },
+    {
+      // Classy. Calm. Always one step ahead. Top hat, tailcoat over a dress shirt,
+      // and a cane that plants itself on the off beat of his own walk.
+      id: 'gentleman',
+      name: 'Gentleman',
+      blurb: 'Classy. Calm. Always one step ahead.',
+      ...THIEF_BODY,
+      coat: '#201e25', coatLit: '#2e2b34', coatDark: '#141319',
+      trouser: '#1c1b21', trouserLit: '#28262e',
+      shoe: '#4d3520', shoeLit: '#654529', sole: '#8a6a44',
+      hair: '#2a2018',
+      crown: 'tophat', hat: '#16151a', hatLit: '#242229', hatDark: '#0e0d11',
+      band: '#5a4632',
+      front: 'shirt', frontTone: '#e8e4dc', frontDark: '#7a5a3a',
+      cape: '#191820', capeLit: 'rgba(200,190,180,0.22)',
+      cane: '#2a2118', caneKnob: '#c9a86a',
+      rim: '#111016'
+    },
+    {
+      // A shadow that leaves no trace. Bone-white hood and cloak over the same
+      // black clothes, and a cold light coming off him that gathers when he stops
+      // and streams when he runs.
+      id: 'ghost',
+      name: 'Ghost',
+      blurb: 'A shadow that leaves no trace.',
+      ...THIEF_BODY,
+      coat: '#222731', coatLit: '#30363f', coatDark: '#161a21',
+      trouser: '#1b1f26', trouserLit: '#272c34',
+      shoe: '#cfd6df', shoeLit: '#e6ebf2', sole: '#98a3b0',
+      hair: '#2a2118',
+      crown: 'hood', hat: '#e6e2d8', hatLit: '#f6f4ee', hatDark: '#bdb9ae',
+      cape: '#ded9ce', capeLit: 'rgba(255,255,255,0.55)',
+      aura: '#8fd4ff',
+      rim: '#171b22'
+    }
+  ];
+
+  // The one the game starts with, and the one anything that asks for a skin by a
+  // name nobody has heard of falls back to.
+  const DEFAULT_SKIN = SCHOOL_SKINS[0].id;
+
+  function skinById(id) {
+    return SCHOOL_SKINS.find((s) => s.id === id) || SCHOOL_SKINS[0];
+  }
+  return { THIEF_LOOK, CARETAKER_LOOK, SCHOOL_CARETAKER_LOOK, drawFigure, figureHeight, SCHOOL_SKINS, DEFAULT_SKIN, skinById };
 })();
 __mod.sim = (function () {
   // The simulation. Pure in the sense that matters: no document, no ctx, no Date,
@@ -10857,6 +11422,8 @@ __mod.replay = (function () {
 __mod.save = (function () {
   // Versioned save with an explicit migration chain. Adding a field later means
   // appending one migration, not breaking every existing player's progress.
+  const { SCHOOL_SKINS, DEFAULT_SKIN } = __mod.figure;
+
   const SAVE_KEY = 'dwh_save';
   const SAVE_VERSION = 5;
 
@@ -10864,7 +11431,10 @@ __mod.save = (function () {
     // unlockAll is a development switch: every level playable from the menu,
     // without touching the progression itself. Turning it back off restores
     // exactly the unlocks the player had actually earned.
-    return { sound: true, music: true, vibration: true, quality: 'high', unlockAll: true };
+    return {
+      sound: true, music: true, vibration: true, quality: 'high', unlockAll: true,
+      skin: DEFAULT_SKIN
+    };
   }
 
   function defaultSave() {
@@ -10907,6 +11477,7 @@ __mod.save = (function () {
   };
 
   const QUALITIES = ['low', 'medium', 'high'];
+  const SKIN_IDS = SCHOOL_SKINS.map((s) => s.id);
 
   function migrate(raw) {
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return defaultSave();
@@ -10948,7 +11519,11 @@ __mod.save = (function () {
         quality: QUALITIES.includes(settings.quality) ? settings.quality : 'high',
         // Defaults on, and an older save that predates it simply gains it — the
         // stars and money it holds are untouched either way.
-        unlockAll: typeof settings.unlockAll === 'boolean' ? settings.unlockAll : true
+        unlockAll: typeof settings.unlockAll === 'boolean' ? settings.unlockAll : true,
+        // Which thief he is wearing. Cosmetic, so an unknown name — a save from a
+        // build with a skin this one has not got — falls back rather than
+        // throwing, and the save keeps everything else it holds.
+        skin: SKIN_IDS.includes(settings.skin) ? settings.skin : DEFAULT_SKIN
       }
     };
   }
@@ -15938,7 +16513,7 @@ __mod.render = (function () {
   // stays smooth on any refresh rate.
   const { TUNING } = __mod.tuning;
   const { sleepStage, rarityOf, isBigScore, watcherConfig, gaitBlend, gaitOf, hash } = __mod.rules;
-  const { drawFigure, THIEF_LOOK, CARETAKER_LOOK, SCHOOL_THIEF_LOOK, SCHOOL_CARETAKER_LOOK } = __mod.figure;
+  const { drawFigure, THIEF_LOOK, CARETAKER_LOOK, SCHOOL_CARETAKER_LOOK, skinById, DEFAULT_SKIN } = __mod.figure;
   const { playerOf } = __mod.sim;
   const { paintStaticRoom, drawSleeper, drawGuard, drawSlumped, drawThief, drawCaretakerWalking, drawGrabbedItem, roundRect, ITEM_ART, lampPositions, drawHideLabel, deskScreen } = __mod.art;
 
@@ -15959,6 +16534,10 @@ __mod.render = (function () {
     let debug = !!options.debug;
     let scale = 1;
     let quality = TUNING.quality.high;
+    // Which thief is being worn. Cosmetic and school-only: everywhere else the
+    // game draws the character it has always drawn, and nothing the simulation
+    // does can read this.
+    let skin = skinById(DEFAULT_SKIN);
 
     // The room never moves, so it is painted once per level into an offscreen
     // canvas at device resolution and blitted — detailed *and* cheap.
@@ -16591,6 +17170,10 @@ __mod.render = (function () {
       snapCamera(level, x, y) { centreOn(level, x, y); },
       get camera() { return camera; },
       set debug(on) { debug = !!on; },
+      // The skin, by id. Set from the menu and kept across levels, because it is
+      // a property of the player rather than of the room they are in.
+      set skin(id) { skin = skinById(id); },
+      get skin() { return skin.id; },
       get debug() { return debug; },
 
       draw(sim, alpha, time, pops, stats, sparks = [], flash = 0, dt = 1 / 60, fx = null) {
@@ -16793,8 +17376,7 @@ __mod.render = (function () {
             ctx.clip();
           }
           hand = sim.rules.figures
-            ? drawFigure(ctx, px, py, stance,
-              sim.rules.reacts ? SCHOOL_THIEF_LOOK : THIEF_LOOK)
+            ? drawFigure(ctx, px, py, stance, sim.rules.reacts ? skin : THIEF_LOOK)
             : drawThief(ctx, px, py, stance);
           if (mouth) ctx.restore();
         }
@@ -16846,6 +17428,7 @@ __mod.main = (function () {
   const { createAudio } = __mod.audio;
   const { createInput } = __mod.input;
   const { createRenderer } = __mod.render;
+  const { SCHOOL_SKINS, skinById } = __mod.figure;
   const { sleepStage, starsFor, starThresholds, levelTotals, upgradeCost, SLEEP_LABELS, objectivesFor, isBigScore, rarityOf, watcherConfig } = __mod.rules;
   const { ITEM_ART, ITEM_NAMES } = __mod.art;
   const { createEffects } = __mod.effects;
@@ -16872,6 +17455,7 @@ __mod.main = (function () {
     const fx = createEffects();
 
     audio.setMuted(!saveStore.data.settings.sound);
+    renderer.skin = saveStore.data.settings.skin;
 
     if (debug) {
       const report = validateAll(LEVELS);
@@ -17107,9 +17691,24 @@ __mod.main = (function () {
       paint('tMusic', setting('music'));
       paint('tVibe', setting('vibration'));
       paint('tUnlock', setting('unlockAll'));
-      for (const button of $('segQuality').children) {
+      // Tapping the thief row walks round the five. No confirm, no preview screen:
+    // the change is visible the next time a school level is drawn, and the label
+    // and the line under it say which one is on.
+    on('tSkin', () => {
+      const at = SCHOOL_SKINS.findIndex((k) => k.id === setting('skin'));
+      const next = SCHOOL_SKINS[(at + 1) % SCHOOL_SKINS.length];
+      saveStore.setSetting('skin', next.id);
+      renderer.skin = next.id;
+      paintSettings();
+      buzz(12);
+    });
+
+    for (const button of $('segQuality').children) {
         button.classList.toggle('on', button.dataset.q === setting('quality'));
       }
+      const worn = skinById(setting('skin'));
+      $('tSkin').textContent = worn.name.toUpperCase();
+      $('skinBlurb').textContent = worn.blurb;
     }
 
     // ---------------------------------------------------------------- level
@@ -17753,6 +18352,11 @@ __mod.main = (function () {
       Object.defineProperty(window.__dwhBoot, 'sim', { get: () => sim });
       // The overlay, so a browser check can look at the room rather than at a
       // lattice of collision boxes drawn over it.
+      // Wearing a skin, for a browser check that has no fingers to tap Settings.
+      window.__dwhBoot.setSkin = (id) => {
+        saveStore.setSetting('skin', id);
+        renderer.skin = id;
+      };
       Object.defineProperty(window.__dwhBoot, 'overlay', {
         get: () => renderer.debug, set: (on) => { renderer.debug = on; }
       });

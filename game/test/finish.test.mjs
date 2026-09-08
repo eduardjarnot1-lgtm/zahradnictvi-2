@@ -9,7 +9,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { LEVELS } from '../src/levels.js';
-import { THIEF_LOOK, CARETAKER_LOOK, SCHOOL_THIEF_LOOK, SCHOOL_CARETAKER_LOOK }
+import { THIEF_LOOK, CARETAKER_LOOK, SCHOOL_CARETAKER_LOOK, SCHOOL_SKINS }
   from '../src/figure.js';
 import { createSim } from '../src/sim.js';
 
@@ -50,26 +50,24 @@ test('only the school hands its people the lit look', () => {
   // `lit` colour on it, so the gate is which object the renderer reaches for.
   assert.equal(THIEF_LOOK.lit, undefined, 'the shared thief is lit');
   assert.equal(CARETAKER_LOOK.lit, undefined, 'the shared caretaker is lit');
-  assert.ok(SCHOOL_THIEF_LOOK.lit, 'the school thief is not lit');
   assert.ok(SCHOOL_CARETAKER_LOOK.lit, 'the school caretaker is not lit');
-  // ...and the lit ones are the same people, not a redesign. Section 2 asks for
-  // their identities kept: same clothes, same build, same silhouette.
-  for (const [base, school] of [
-    [THIEF_LOOK, SCHOOL_THIEF_LOOK], [CARETAKER_LOOK, SCHOOL_CARETAKER_LOOK]
-  ]) {
-    for (const key of Object.keys(base)) {
-      assert.deepEqual(school[key], base[key], `the school changed ${key}`);
-    }
+  for (const skin of SCHOOL_SKINS) {
+    assert.ok(skin.lit, `the ${skin.id} skin is not lit`);
   }
-  // Every use of a lit look in the renderer is behind the school's own flag.
-  for (const name of ['SCHOOL_THIEF_LOOK', 'SCHOOL_CARETAKER_LOOK']) {
-    const uses = render.split(name).length - 1;
-    // Once in the import, once at the call site.
-    assert.equal(uses, 2, `${name} is used ${uses} times`);
-    const at = render.lastIndexOf(name);
-    assert.match(render.slice(Math.max(0, at - 120), at), /sim\.rules\.reacts \?/,
-      `${name} is not gated on the school's flag`);
+  // Mr. Vrána is the same man in the school as everywhere else, just lit.
+  for (const key of Object.keys(CARETAKER_LOOK)) {
+    assert.deepEqual(SCHOOL_CARETAKER_LOOK[key], CARETAKER_LOOK[key],
+      `the school changed the caretaker's ${key}`);
   }
+  // The skins are the school's alone, and both places the renderer can reach
+  // for one are behind the school's own flag.
+  assert.equal(render.split('SCHOOL_CARETAKER_LOOK').length - 1, 2);
+  for (const at of [render.lastIndexOf('SCHOOL_CARETAKER_LOOK'), render.lastIndexOf('? skin :')]) {
+    assert.match(render.slice(Math.max(0, at - 120), at + 20), /sim\.rules\.reacts \?/,
+      'a school-only look is not gated on the school');
+  }
+  // ...and everywhere else still gets the character it always had.
+  assert.match(render, /sim\.rules\.reacts \? skin : THIEF_LOOK/);
 });
 
 test('the school is the only location with a finish to lose', () => {
