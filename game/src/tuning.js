@@ -411,6 +411,34 @@ const SHARED = {
   gait: SCHOOL_THIEF_GAIT,
   watcherGait: SCHOOL_WALKER_GAIT,
   reacts: true,
+  // Getting behind something, and coming back out.
+  //
+  // A hiding place is a piece of furniture with a gap behind it, not a square
+  // on the floor: you walk up to the cupboard, the button says HIDE, and he
+  // tucks himself in. Coming out is quicker than going in, because coming out
+  // is usually urgent.
+  //
+  // Shared, like the walk. It was tried in the school first — which is how
+  // everything in this game gets built — and what it turned out to be about is
+  // a corridor with someone coming down it, which every one of these buildings
+  // has. A location whose map found nowhere worth hiding simply never offers
+  // the button; nothing here forces a level to have one.
+  hide: {
+    reach: 44,        // how close the cupboard has to be to offer itself
+    // Seconds spent climbing into it, and rather fewer getting back
+    // out. Both are longer than they were, and deliberately so: what happens
+    // in them is a walk to the door, the door swinging open, a step inside
+    // and the door swinging shut, and none of those four beats is legible if
+    // the whole thing is over in six tenths of a second.
+    enter: 1.05,
+    leave: 0.85
+    // There is no stick shortcut out any more. It was a way out you could
+    // find without reading anything, and it was also a way out you could take
+    // by accident with a thumb resting on the pad while Mr. Vrána walks past
+    // — which is the one thing a hiding place must never do. The button says
+    // EXIT, in the same place the button that said HIDE was.
+  },
+
   figures: true,
   investigate: INVESTIGATE
 };
@@ -594,27 +622,6 @@ const PEOPLE = {
     // far edge of his attention is somewhere you can cross if you are quick and
     // quiet, and his elbow is not.
     vision: VISION,
-    // Getting behind something, and coming back out.
-    //
-    // A hiding place is a piece of furniture with a gap behind it, not a square
-    // on the floor: you walk up to the lockers, the button says HIDE, and he
-    // tucks himself in over half a second. Coming out is quicker than going in,
-    // because coming out is usually urgent.
-    hide: {
-      reach: 44,        // how close the locker has to be to offer itself
-      // Seconds spent climbing into a locker, and rather fewer getting back
-      // out. Both are longer than they were, and deliberately so: what happens
-      // in them is a walk to the door, the door swinging open, a step inside
-      // and the door swinging shut, and none of those four beats is legible if
-      // the whole thing is over in six tenths of a second.
-      enter: 1.05,
-      leave: 0.85
-      // There is no stick shortcut out any more. It was a way out you could
-      // find without reading anything, and it was also a way out you could take
-      // by accident with a thumb resting on the pad while Mr. Vrána walks past
-      // — which is the one thing a hiding place must never do. The button says
-      // EXIT, in the same place the button that said HIDE was.
-    },
     // Getting out of a chair. Eight beats between the head coming off the desk
     // and the first step, and the whole sequence is scripted to this number —
     // so shortening it plays the same wake-up faster rather than cutting any of

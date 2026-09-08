@@ -1617,12 +1617,20 @@ test('what he is walking towards keeps up with where the thief actually is', () 
 
 // --- sections 14 to 17: somewhere to hide -----------------------------------
 
-test('every school level offers a few places to be out of sight, and only the school does', () => {
-  for (const level of SCHOOL) {
-    // Two. Not three, and never one: two is enough to be a choice — a corner
-    // to duck into on each half of the building — and few enough that finding
-    // them is part of learning the level rather than a thing you fall over.
-    assert.equal(level.hides.length, 2,
+test('every building offers a few places to be out of sight', () => {
+  for (const level of LEVELS) {
+    // Two, wherever the map could find two. Not three, and never one where two
+    // exist: two is enough to be a choice — a corner to duck into on each half
+    // of the building — and few enough that finding them is part of learning
+    // the level rather than a thing you fall over.
+    //
+    // At most two, rather than exactly two, because the rule that picks them is
+    // a definition and not a quota: a hiding place has to be genuinely tucked
+    // in, squarely in front of something a person fits inside, and off the
+    // spawn and the way out. A floorplan with nowhere that qualifies gets
+    // nowhere, which is the right answer — a nook painted on a level that has
+    // none would be a promise the building does not keep.
+    assert.ok(level.hides.length <= 2,
       `L${level.id} has ${level.hides.length} hiding places`);
     for (const spot of level.hides) {
       // Somewhere a person can actually stand, and somewhere they have to go to
@@ -1633,20 +1641,38 @@ test('every school level offers a few places to be out of sight, and only the sc
         level.colliders), `L${level.id}: nobody can stand in the hiding place at ${cx},${cy}`);
       assert.ok(Math.hypot(cx - level.spawn.x, cy - level.spawn.y) > 90,
         `L${level.id}: a hiding place on the spawn`);
+      // ...and something you climb inside, not a patch of carpet. A wardrobe or
+      // a cupboard — which the school's theme paints as a bank of lockers — and
+      // never a bookshelf or a table, because a person does not fit in those.
+      assert.ok(spot.anchor && spot.anchor.type === 'furniture',
+        `L${level.id}: a hiding place with nothing to climb into`);
+      assert.ok(['wardrobe', 'chest'].includes(spot.anchor.style),
+        `L${level.id}: you cannot get inside a ${spot.anchor.style}`);
     }
   }
+  // The school proved it, so the school still has to have both of its own.
+  for (const level of SCHOOL) {
+    assert.equal(level.hides.length, 2,
+      `L${level.id} has ${level.hides.length} hiding places`);
+  }
+  // ...and every building has somewhere, or the mechanic is the school's again
+  // by accident rather than by decision.
+  const bare = [...new Set(LEVELS.filter((l) => !l.hides.length).map((l) => l.location))];
+  const has = new Set(LEVELS.filter((l) => l.hides.length).map((l) => l.location));
+  for (const location of bare) {
+    assert.ok(has.has(location), `${location} has nowhere to hide on any of its levels`);
+  }
+});
+
+test('the button never offers HIDE where there is nothing to hide in', () => {
+  // The other half of what used to be an isolation test. Hiding is every
+  // building's now, so what has to hold is not that ten of them are shut out
+  // but that the button tells the truth: a level the generator found nowhere in
+  // must never offer it, however close the player stands to the furniture.
   for (const level of LEVELS) {
-    if (level.location === 'School') continue;
-    assert.equal(level.hides.length, 0,
-      `L${level.id} (${level.location}) has hiding places, and hiding is a school beta`);
-    // Belt and braces: no maps *and* no rules. Either one alone would keep the
-    // button off the screen, and the mechanic is meant to be off in these
-    // buildings rather than merely unreachable in them.
+    if (level.hides.length) continue;
     const sim = createSim({ level });
-    assert.equal(sim.rules.hide, undefined,
-      `L${level.id} (${level.location}) has the hiding rules loaded`);
     const p = playerOf(sim);
-    // Stand him everywhere a stash is and confirm the button never offers it.
     for (const stash of sim.stashes.slice(0, 6)) {
       p.x = stash.x + stash.w / 2;
       p.y = stash.y + stash.h + 16;

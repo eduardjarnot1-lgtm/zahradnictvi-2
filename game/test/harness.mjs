@@ -512,11 +512,31 @@ export function ransack(run) {
   if (!run.sim.rules.search) return;
   for (const stash of run.sim.stashes) {
     if (run.sim.status !== 'running' || stash.searched) continue;
-    const target = { x: stash.x + stash.w / 2, y: stash.y + stash.h + 18 };
-    if (!walkTo(run, target, 60 * 12)) continue;
-    tick(run, { x: 0, y: 0, take: false, search: true });
-    let guard = 0;
-    while (run.sim.searching && run.sim.status === 'running' && guard++ < 300) tick(run);
+    // Try each face in turn, and only press when the button actually says
+    // SEARCH.
+    //
+    // Both mechanics share one button and the cupboard you would search is
+    // frequently the cupboard you would hide in, so walking up to one face of
+    // it can offer HIDE — which a player answers by taking a step round it,
+    // and which this used to answer by climbing in and staying there for the
+    // rest of the level. That is not a greedy run, it is a bot that cannot
+    // read its own screen, and it made a level the greed test is supposed to
+    // fail look like a quiet clean sweep.
+    const faces = [
+      { x: stash.x + stash.w / 2, y: stash.y + stash.h + 18 },
+      { x: stash.x + stash.w / 2, y: stash.y - 18 },
+      { x: stash.x + stash.w + 18, y: stash.y + stash.h / 2 },
+      { x: stash.x - 18, y: stash.y + stash.h / 2 }
+    ];
+    for (const target of faces) {
+      if (run.sim.status !== 'running' || stash.searched) break;
+      if (!walkTo(run, target, 60 * 12)) continue;
+      tick(run, { x: 0, y: 0, take: false, search: false });
+      if (run.sim.searchTargetId !== stash.id) continue;
+      tick(run, { x: 0, y: 0, take: false, search: true });
+      let guard = 0;
+      while (run.sim.searching && run.sim.status === 'running' && guard++ < 300) tick(run);
+    }
   }
 }
 

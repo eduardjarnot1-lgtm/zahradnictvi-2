@@ -44,10 +44,30 @@ TIER_SIZE = [(30, 26), (33, 28), (36, 31), (40, 34), (44, 38)]
 
 LOOT_CHARS = 'cwpkrmtnlvjdg'
 
-# Which locations offer somewhere to hide, and how many places. The school
-# only: hiding is new, and trying a new mechanic in one building is how the
-# rest of this game was built.
-HIDES = {'School': 2}
+# Which locations offer somewhere to hide, how many places, and what the player
+# actually climbs into.
+#
+# All of them now. Hiding was tried in one building first, which is how the rest
+# of this game was built, and it works — so the question stops being whether a
+# corridor should offer somewhere to be when he is coming and becomes what you
+# get into when it does. That is the second half of each entry: the tile
+# character of the piece that has to be standing squarely in front of the spot.
+# The school's is 'C', which its theme paints as a bank of lockers. Elsewhere the
+# same character is a cupboard and 'W' is a wardrobe, and both are things a
+# person fits inside; a bookshelf and a table are not, so neither is listed.
+HIDES = {
+    'Apartment': (2, 'WC'),
+    'House':     (2, 'WC'),
+    'Hotel':     (2, 'WC'),
+    'Office':    (2, 'C'),
+    'School':    (2, 'C'),
+    'Hospital':  (2, 'C'),
+    'Museum':    (2, 'C'),
+    'Mansion':   (2, 'WC'),
+    'Penthouse': (2, 'WC'),
+    'Shop':      (2, 'WC'),
+    'Vault':     (2, 'C'),
+}
 # ...and what each building has lying about on it, and how much of it.
 #
 # All eleven now. Standing on it costs noise, and how much depends on what it
@@ -2896,8 +2916,8 @@ def build():
                 for _ in range(20):
                     if not snug_to_walls(g):
                         break
-            if name in HIDES:
-                add_hides(g, HIDES[name], into='C')
+            spots, climb_into = HIDES[name]
+            add_hides(g, spots, into=climb_into)
             underfoot, sweeping = LITTER_AT[name]
             add_litter(g, tier, underfoot, sweeping)
             fittings, light_step = FITTINGS[name]
