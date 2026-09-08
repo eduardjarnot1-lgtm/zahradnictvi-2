@@ -1562,13 +1562,21 @@ def vault(g, tier):
 # How many sides of the building are grounds, per tier. Nought is an indoor
 # level; one is a yard along the side the way out is already on; four is a plot
 # with the building standing in the middle of it.
+# How many sides of the plot the grounds wrap, per tier.
+#
+# Every side that is not wrapped is a side where the building's silhouette runs
+# to the edge of the map, and the part of that edge the building does not fill
+# is left as a slab of masonry — a flat dark rectangle at the top of the map
+# with nothing in it and nothing to do with it. The school reaches all four
+# sides by its top floor and never shows one; six of the ten stopped at three
+# and did. They all climb the school's curve now.
 YARDS = {
     'School':    [0, 1, 2, 3, 4],
-    'Apartment': [0, 0, 1, 2, 3],
+    'Apartment': [0, 1, 2, 3, 4],
     'House':     [0, 1, 2, 3, 4],
-    'Hotel':     [0, 0, 1, 2, 3],
-    'Office':    [0, 0, 1, 2, 3],
-    'Museum':    [0, 0, 1, 2, 4],
+    'Hotel':     [0, 1, 2, 3, 4],
+    'Office':    [0, 1, 2, 3, 4],
+    'Museum':    [0, 1, 2, 3, 4],
     'Mansion':   [0, 1, 2, 3, 4],
     # The four that had none, and read as a building dropped on a dark
     # rectangle because of it. A shop has a pavement and a yard the deliveries
@@ -1576,9 +1584,11 @@ YARDS = {
     # behind it. The penthouse's outside is the one that is not at ground
     # level at all, and is the better for it.
     'Hospital':  [0, 1, 2, 3, 4],
-    'Shop':      [0, 0, 1, 2, 3],
-    'Penthouse': [0, 0, 1, 2, 3],
-    'Vault':     [0, 0, 1, 2, 2],
+    'Shop':      [0, 1, 2, 3, 4],
+    'Penthouse': [0, 1, 2, 3, 4],
+    # A strongroom keeps its yard small: a service road and a turning circle,
+    # not grounds. Three sides is a bank behind a building, which is what it is.
+    'Vault':     [0, 0, 1, 2, 3],
 }
 # ...and how deep, in tiles. Deep enough to be a place rather than a verge: a
 # yard you cross in one step is the "patch of grass outside the building" the
@@ -1606,7 +1616,7 @@ GROUNDS = {
                       sign='Ambulances', shed='C'),
     # A pavement out front and the yard the deliveries come into.
     'Shop':      dict(surface='paving', path='tarmac', props=('bin', 'car'),
-                      sign='Deliveries', shed='C'),
+                      sign='Deliveries', shed='C', yard=('C', 'B')),
     # Not a garden: a roof. Paving, planters, and the lights of a city you
     # cannot see from a floorplan — which is why the surface is the flat grey
     # of a terrace rather than the green of a lawn.
@@ -1614,7 +1624,7 @@ GROUNDS = {
                       sign='Terrace', shed='W'),
     # Concrete, a van's worth of turning room, and a shutter.
     'Vault':     dict(surface='concrete', path='tarmac', props=('car',),
-                      sign='Loading bay', shed='C'),
+                      sign='Loading bay', shed='C', yard=('C', 'B')),
 }
 
 # Which sides get grounds, and in what order they are added. The side the
@@ -1748,7 +1758,7 @@ def reachable_yards(g, yards, pad):
     return [rect for i, rect in enumerate(yards) if i in found]
 
 
-def add_grounds(inner, sides, deep, flavour, loot, bite=True, voids=(), plant_yards=False):
+def add_grounds(inner, sides, deep, flavour, loot, bite=True, voids=()):
     """Wrap a finished building in its own grounds, and move the way out into
     them. Returns the new grid."""
     found = find_exit(inner)
@@ -1861,28 +1871,34 @@ def add_grounds(inner, sides, deep, flavour, loot, bite=True, voids=(), plant_ya
     for (yx, yy, yw, yh) in yards:
         g.deco('floor', yx, yy, yw, yh, style['surface'])
         # ...and something in it. A corner the building does not fill is still
-        # part of the campus, and an acre of unbroken lawn reads as the place
-        # the map ran out rather than as anywhere. Trees in from the corners, a
-        # bench to sit on, a lamp — laid strictly, so nothing lands in a lane or
-        # across the path out.
+        # part of the place, and an acre of unbroken lawn reads as where the map
+        # ran out rather than as anywhere. Planting in from the corners, a seat
+        # in the middle, a lamp over it and something worth the walk — laid
+        # strictly, so nothing lands in a lane or across the path out.
         #
-        # Asked for rather than assumed: this went in for the school, and a
-        # school-only pass has no business rearranging the other ten locations'
-        # gardens on its way past.
-        if not plant_yards:
-            continue
+        # This was the school's alone, on the reasoning that a school-only pass
+        # had no business rearranging the other ten locations' gardens on its
+        # way past. It is asked for now, and the ten needed it more than the
+        # school did: theirs were the biggest outdoor spaces in the game and
+        # every one of them was bare surface with nothing on it at all.
+        #
+        # What goes in differs. Most places plant a tree and put a bench under
+        # it; a delivery yard behind a shop and the service yard behind a bank
+        # are hard standing, so they get crates stacked against the fence and
+        # something to sit on rather than an orchard.
+        bulk, seat = style.get('yard', ('Y', 'S'))
         if yw >= 7 and yh >= 7:
             for (tx, ty) in ((yx + 2, yy + 2), (yx + yw - 4, yy + 2),
                              (yx + 2, yy + yh - 4), (yx + yw - 4, yy + yh - 4)):
-                g.lay(tx, ty, 2, 2, 'Y', shift=1, strict=True)
+                g.lay(tx, ty, 2, 2, bulk, shift=1, strict=True)
             if yw >= yh:
-                g.lay(yx + yw // 2 - 2, yy + yh // 2, 4, 1, 'S', shift=2, strict=True)
+                g.lay(yx + yw // 2 - 2, yy + yh // 2, 4, 1, seat, shift=2, strict=True)
             else:
-                g.lay(yx + yw // 2, yy + yh // 2 - 2, 1, 4, 'S', shift=2, strict=True)
+                g.lay(yx + yw // 2, yy + yh // 2 - 2, 1, 4, seat, shift=2, strict=True)
             g.deco('lamp', yx + yw // 2, yy + yh // 2)
             g.drop(yx + yw // 2, yy + 2 + yh // 3, loot.next(), radius=4, box=True)
         elif yw >= 5 and yh >= 5:
-            g.lay(yx + yw // 2 - 1, yy + yh // 2 - 1, 2, 2, 'Y', shift=1, strict=True)
+            g.lay(yx + yw // 2 - 1, yy + yh // 2 - 1, 2, 2, bulk, shift=1, strict=True)
     # The path: a run of hard standing from the door out to the gate, drawn as
     # dressing rather than built as geometry — it is a surface, not a wall, and
     # the player can step off it wherever they like.
@@ -3224,8 +3240,7 @@ def build():
                     # The corners the drawing left out become campus rather than
                     # masonry: an L-shaped school has an L-shaped playground.
                     g = add_grounds(g, pad, YARD_DEEP[tier], name, Loot(tier),
-                                    bite=False, voids=list(g.solids),
-                                    plant_yards=True)
+                                    bite=False, voids=list(g.solids))
                 g.clear_landings(); draft.clear_exit(g)
                 top_up_loot(g, tier)
                 promote_prize(g, tier)

@@ -228,10 +228,14 @@ test('every hand-drawn floorplan is a real building, not one big room', () => {
 // bare drawing.
 test('each floorplan is exactly the size it was drawn at', () => {
   // Apartment 5, House 5, Hotel 5, Office 5, School 5, Hospital 5, Museum 5.
+  // The drawn plan and the plot round it. Every one of these grew when its
+  // location's grounds were brought up to the school's — the school reaches
+  // all four sides of its plot by its top floor, and the other ten stopped
+  // short and left a slab of masonry where the yard should have been. The
+  // plans themselves are untouched; what changed is how much garden is round
+  // them.
   const SIZES = {
-    5: [42, 69], 10: [55, 48], 15: [55, 46], 20: [50, 45],
-    // Level 30 grew when the hospital got its ambulance bay: the drawn plan
-    // is the same plan, with a plot round it, exactly as the school's is.
+    5: [48, 69], 10: [55, 48], 15: [61, 46], 20: [56, 45],
     25: [61, 48], 30: [57, 44], 35: [55, 52]
   };
   for (const [id, [cols, rows]] of Object.entries(SIZES)) {
