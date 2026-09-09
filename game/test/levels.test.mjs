@@ -226,6 +226,96 @@ test('every hand-drawn floorplan is a real building, not one big room', () => {
 // tile, and `surround` is the only thing that touched it. Only the hospital,
 // which is a ward at night and has no outside worth walking into, is still the
 // bare drawing.
+test('most buildings have a way round, not just a way through', () => {
+  // The route decision the whole game is made of: the short way past the man
+  // asleep in the corridor, or the long way round the outside. It needs the
+  // building's room graph to have a cycle in it — a graph with none has exactly
+  // one route from any room to any other, so there is no risky way and no safe
+  // way, only the way.
+  //
+  // Every generated level with grounds gets a second door onto its plot for
+  // this. The hand-drawn seven do not: their circulation is the drawing's, and
+  // cutting a second opening through one wedged an item on the hotel's top
+  // floor into a one-tile channel. The school does not either — it is the
+  // benchmark and is left alone.
+  const TILE = TUNING.world.tile;
+  const waysRound = (level) => {
+    const cols = Math.ceil(level.width / TILE);
+    const rows = Math.ceil(level.height / TILE);
+    const shut = Array.from({ length: rows }, () => new Array(cols).fill(false));
+    const mark = (b) => {
+      for (let ty = Math.floor(b.y / TILE); ty < Math.ceil((b.y + b.h) / TILE); ty++) {
+        for (let tx = Math.floor(b.x / TILE); tx < Math.ceil((b.x + b.w) / TILE); tx++) {
+          if (ty >= 0 && ty < rows && tx >= 0 && tx < cols) shut[ty][tx] = true;
+        }
+      }
+    };
+    for (const c of level.colliders) {
+      if (c.type === 'wall' || c.type === 'partition' || c.fence) mark(c);
+    }
+    // Rooms are what is left when the doorways are shut.
+    for (const d of level.doors) mark(d);
+    const room = Array.from({ length: rows }, () => new Array(cols).fill(-1));
+    let n = 0;
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        if (shut[y][x] || room[y][x] >= 0) continue;
+        const stack = [[x, y]];
+        let size = 0;
+        while (stack.length) {
+          const [cx, cy] = stack.pop();
+          if (cx < 0 || cy < 0 || cx >= cols || cy >= rows) continue;
+          if (shut[cy][cx] || room[cy][cx] >= 0) continue;
+          room[cy][cx] = n;
+          size++;
+          stack.push([cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]);
+        }
+        if (size >= 2) n++;
+      }
+    }
+    const edges = new Set();
+    const adj = new Map();
+    for (const d of level.doors) {
+      const near = new Set();
+      for (let y = Math.floor(d.y / TILE) - 1; y <= Math.ceil((d.y + d.h) / TILE); y++) {
+        for (let x = Math.floor(d.x / TILE) - 1; x <= Math.ceil((d.x + d.w) / TILE); x++) {
+          if (x >= 0 && y >= 0 && x < cols && y < rows && room[y][x] >= 0) near.add(room[y][x]);
+        }
+      }
+      const list = [...near].sort((a, b) => a - b);
+      for (let i = 0; i < list.length; i++) {
+        for (let j = i + 1; j < list.length; j++) {
+          edges.add(`${list[i]}-${list[j]}`);
+          if (!adj.has(list[i])) adj.set(list[i], []);
+          if (!adj.has(list[j])) adj.set(list[j], []);
+          adj.get(list[i]).push(list[j]);
+          adj.get(list[j]).push(list[i]);
+        }
+      }
+    }
+    const seen = new Set();
+    let comps = 0;
+    for (let i = 0; i < n; i++) {
+      if (seen.has(i)) continue;
+      comps++;
+      const stack = [i];
+      while (stack.length) {
+        const v = stack.pop();
+        if (seen.has(v)) continue;
+        seen.add(v);
+        for (const w of adj.get(v) || []) stack.push(w);
+      }
+    }
+    return edges.size - n + comps;
+  };
+  for (const [location, levels] of Object.entries(byLocation())) {
+    if (location === 'School') continue;
+    const round = levels.map(waysRound);
+    assert.ok(round.some((r) => r > 0),
+      `${location} is a tree on all five of its levels: ${round}`);
+  }
+});
+
 test('each floorplan is exactly the size it was drawn at', () => {
   // Apartment 5, House 5, Hotel 5, Office 5, School 5, Hospital 5, Museum 5.
   // The drawn plan and the plot round it. Every one of these grew when its

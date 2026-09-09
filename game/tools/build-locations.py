@@ -1758,7 +1758,113 @@ def reachable_yards(g, yards, pad):
     return [rect for i, rect in enumerate(yards) if i in found]
 
 
-def add_grounds(inner, sides, deep, flavour, loot, bite=True, voids=()):
+def back_door(g, front, outside):
+    """A second way between the building and its plot, on another face.
+
+    The point is a decision. With one door, the room graph of every one of
+    these buildings is a tree: there is exactly one route from any room to any
+    other, so there is no shorter riskier way and no longer safer way, only the
+    way. A back door onto the yard makes the outside of the building a route —
+    through the corridor past the man asleep in it, or out the back and round —
+    which is the choice the whole game is made of, and it costs one doorway.
+
+    Cut where the building's own outer wall has a room on one side and the plot
+    on the other, as far from the front door as the wall allows. Every tile of
+    the opening has to give onto floor both ways, not just the middle one: three
+    tiles of wall with a room behind the middle and masonry behind the ends is a
+    doorway you cannot walk through, which is what the validator said about the
+    first draft of this. And the whole thing goes back if the map came off worse
+    for it, the same way every other pass that moves masonry works.
+    """
+    # Three tiles of clear wall with floor behind both faces is rarer than it
+    # sounds — a room grammar puts furniture against its outer walls, which is
+    # where furniture goes — so a narrower opening is tried when the wide one
+    # finds nowhere. Two tiles is forty units and the validator wants
+    # thirty-four, so it is a door rather than a squeeze.
+    best = None
+    for width in (3, 2):
+        best = _cut_for(g, front, outside, width)
+        if best:
+            break
+    if not best:
+        return False
+    _, across, inside, out_tile = best
+    # Whether the map was whole *before* the cut, because this runs while the
+    # grounds are being built and the repair passes that finish the job have not
+    # run yet — so it frequently is not, and asking only whether it is whole
+    # afterwards reverted every door this ever cut.
+    was = g.connected()
+    for (cx, cy) in across:
+        g.g[cy][cx] = 'D'
+    if was and not g.connected():
+        for (cx, cy) in across:
+            g.g[cy][cx] = '#'
+        return False
+    g.lane(max(1, min(inside[0], out_tile[0]) - 2),
+           max(1, min(inside[1], out_tile[1]) - 2), 5, 5)
+    return True
+
+
+def _cut_for(g, front, outside, width):
+    """The best place to cut an opening this many tiles wide, or None.
+
+    Furthest from the front door *and* from the person asleep in the building,
+    scored as whichever of the two is nearer. The way round is meant to be the
+    long safe one — the short risky one already exists, and it goes past him —
+    so a second door that opens where he is standing is not a second route, it
+    is a trap. The mansion's top floor is what taught this: with the door cut
+    purely as far from the front as the wall allowed, it landed near the owner
+    and the level stopped being winnable on four seeds in ten.
+    """
+    span = range(-1, 2) if width == 3 else range(0, 2)
+    him = None
+    for y in range(g.rows):
+        for x in range(g.cols):
+            if g.g[y][x] == 'E':
+                him = (x, y)
+                break
+        if him:
+            break
+    best = None
+    for y in range(1, g.rows - 1):
+        for x in range(1, g.cols - 1):
+            if g.g[y][x] != '#':
+                continue
+            for (dx, dy) in ((0, 1), (0, -1), (1, 0), (-1, 0)):
+                across = ([(x + k, y) for k in span] if dy
+                          else [(x, y + k) for k in span])
+                if not all(0 <= cx < g.cols and 0 <= cy < g.rows
+                           and g.g[cy][cx] == '#' for (cx, cy) in across):
+                    continue
+                ok = True
+                for (cx, cy) in across:
+                    ix, iy = cx + dx, cy + dy
+                    ox, oy = cx - dx, cy - dy
+                    if not (0 <= ix < g.cols and 0 <= iy < g.rows
+                            and 0 <= ox < g.cols and 0 <= oy < g.rows):
+                        ok = False
+                        break
+                    if g.g[iy][ix] != '.' or g.g[oy][ox] != '.':
+                        ok = False
+                        break
+                    # A room on the inside face and the plot on the outside.
+                    if (ix, iy) in outside or (ox, oy) not in outside:
+                        ok = False
+                        break
+                    if (cx, cy) in g.keep:
+                        ok = False
+                        break
+                if not ok:
+                    continue
+                far = max(abs(x - front[0]), abs(y - front[1]))
+                if him:
+                    far = min(far, max(abs(x - him[0]), abs(y - him[1])))
+                if best is None or far > best[0]:
+                    best = (far, across, (x + dx, y + dy), (x - dx, y - dy))
+    return best
+
+
+def add_grounds(inner, sides, deep, flavour, loot, bite=True, voids=(), back=False):
     """Wrap a finished building in its own grounds, and move the way out into
     them. Returns the new grid."""
     found = find_exit(inner)
@@ -1969,6 +2075,12 @@ def add_grounds(inner, sides, deep, flavour, loot, bite=True, voids=()):
         for i, kind in enumerate(style['props']):
             g.deco(kind, min(cols - 5, bx + 2 + i * 5), min(rows - 3, by + bh - 3), 4, 2)
         g.deco('lamp', bx + bw // 2, by + bh // 2)
+
+    # ...and the way round. Last, so it is cut through the outer wall as the
+    # building finally stands rather than as it stood before the yards grew
+    # into it.
+    if back:
+        back_door(g, door, outdoors(g))
 
     # ...and something to find out here. The grounds are playable or they are
     # scenery, and scenery is exactly what the brief says not to build.
@@ -2418,8 +2530,12 @@ ISLAND_CLEAR = 7
 FILL_LANE = 2
 
 
-def indoors(g):
-    """Which tiles are inside the building rather than out on the plot.
+def outdoors(g):
+    """Which tiles are out on the plot rather than inside the building.
+
+    Returns the outside, not the inside — the name said the opposite for a
+    while and the pass that cuts a back door read it at face value, so it spent
+    its time looking for a wall with the garden on the inside of it.
 
     Flood in from the edge of the map over everything that is not the
     building's own masonry: whatever that reaches is outdoors, and whatever it
@@ -2460,7 +2576,7 @@ def furnish_empty(g, tier, kit, clear=4, islands=False, outside=None):
     """Put something in the parts of the building nobody furnished."""
     if not kit:
         return 0
-    outside = indoors(g) if outside is None else outside
+    outside = outdoors(g) if outside is None else outside
     solid = set('#%OTSWNVCBPEYZ+')
     pieces = set('TSWNVCBPE')
     doors = [(x, y) for y in range(g.rows) for x in range(g.cols) if g.g[y][x] == 'D']
@@ -3253,6 +3369,11 @@ def build():
                 floor_under(g, theme)
                 dress_corners(g, every=3)
                 if pad:
+                    # No back door in a hand-drawn plan. These seven are
+                    # recreations of reference drawings and their circulation
+                    # is the drawing's, not the generator's; cutting a second
+                    # opening through one wedged an item on the hotel's top
+                    # floor into a one-tile channel between two stash blocks.
                     g = add_grounds(g, pad, YARD_DEEP[tier], name, Loot(tier),
                                     bite=False)
                 g.clear_landings(); draft.clear_exit(g)
@@ -3270,7 +3391,7 @@ def build():
                                   grammar, Loot(tier))
                 if pad:
                     g = add_grounds(g, pad, YARD_DEEP[tier], name, Loot(tier),
-                                    bite=False, voids=voids)
+                                    bite=False, voids=voids, back=name != 'School')
                 g.clear_landings()
                 draft.clear_exit(g)
                 top_up_loot(g, tier)
@@ -3310,7 +3431,7 @@ def build():
             # of them opens all have to see the room as it will actually ship —
             # and a hiding place chosen before this ran got a cupboard put down
             # on top of it.
-            plot = indoors(g)
+            plot = outdoors(g)
             for gap in FILL_CLEAR:
                 furnish_empty(g, tier, FILLER.get(name, []), gap, outside=plot)
             furnish_empty(g, tier, FILLER.get(name, []), ISLAND_CLEAR,
