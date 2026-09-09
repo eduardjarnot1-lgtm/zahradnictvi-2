@@ -1601,30 +1601,36 @@ GROUNDS = {
     'School':    dict(surface='grass', path='paving', props=('bike', 'bin'),
                       court=True, sign='Playground', shed='K'),
     'Apartment': dict(surface='grass', path='paving', props=('car', 'bin'),
-                      sign='Parking', shed='C'),
+                      sign='Parking', shed='C', yard=('Y', 'T')),
     'House':     dict(surface='grass', path='gravel', props=('bin',),
-                      sign='Garden', shed='B'),
+                      sign='Garden', shed='B', yard=('Y', 'T')),
     'Hotel':     dict(surface='grass', path='tarmac', props=('car',),
-                      sign='Reception', shed='W'),
+                      sign='Reception', shed='W', yard=('Y', 'T')),
     'Office':    dict(surface='gravel', path='tarmac', props=('car', 'bin'),
-                      sign='Car park', shed='C'),
+                      sign='Car park', shed='C', yard=('Y', 'T')),
     'Museum':    dict(surface='paving', path='paving', props=('bin',),
-                      plinths=True, sign='Sculpture garden', shed='C'),
+                      plinths=True, sign='Sculpture garden', shed='C', yard=('Y', 'T')),
     'Mansion':   dict(surface='grass', path='gravel', props=('car',),
-                      sign='Grounds', shed='W'),
+                      sign='Grounds', shed='W', yard=('Y', 'T')),
     'Hospital':  dict(surface='grass', path='tarmac', props=('car', 'bin'),
-                      sign='Ambulances', shed='C'),
+                      sign='Ambulances', shed='C', yard=('Y', 'T')),
     # A pavement out front and the yard the deliveries come into.
     'Shop':      dict(surface='paving', path='tarmac', props=('bin', 'car'),
-                      sign='Deliveries', shed='C', yard=('C', 'B')),
+                      sign='Deliveries', shed='C', yard=('C', 'T')),
+    # A garden seat, not the sofa out of the sitting room. The yard's seating
+    # takes the location's own 'wide' furniture character, which in a hospital
+    # is a bright red three-cushion sofa and on a lawn looks exactly like a
+    # sofa somebody has left on a lawn. A table reads as garden furniture in
+    # every one of these palettes. The school keeps its own — its theme already
+    # turns that character into a bench, which is what a playground has.
     # Not a garden: a roof. Paving, planters, and the lights of a city you
     # cannot see from a floorplan — which is why the surface is the flat grey
     # of a terrace rather than the green of a lawn.
     'Penthouse': dict(surface='paving', path='paving', props=('plant', 'bin'),
-                      sign='Terrace', shed='W'),
+                      sign='Terrace', shed='W', yard=('Y', 'T')),
     # Concrete, a van's worth of turning room, and a shutter.
     'Vault':     dict(surface='concrete', path='tarmac', props=('car',),
-                      sign='Loading bay', shed='C', yard=('C', 'B')),
+                      sign='Loading bay', shed='C', yard=('C', 'T')),
 }
 
 # Which sides get grounds, and in what order they are added. The side the
@@ -1878,6 +1884,17 @@ def add_grounds(inner, sides, deep, flavour, loot, bite=True, voids=(), back=Fal
     g = draft.surround(inner, l, t, r, b)
     cols, rows = g.cols, g.rows
     style = GROUNDS[flavour]
+    # What this plot furnishes itself with: what goes in the corners of a yard,
+    # and what there is to sit on. Both the corners the building does not fill
+    # and the band round the outside want it, so it is read once, here.
+    #
+    # The seat used to be the location's own 'wide' furniture character wherever
+    # it was placed, which in a hospital is a bright red three-cushion sofa — and
+    # a sofa on a lawn looks exactly like a sofa somebody has left on a lawn. A
+    # table reads as garden furniture in every one of these palettes. The school
+    # keeps the old character, because its own theme already turns that into a
+    # bench, which is what a playground has.
+    bulk, seat = style.get('yard', ('Y', 'S'))
 
     # The building's own way out becomes a door into the yard: you are not out
     # of the place until you are off the plot.
@@ -1992,7 +2009,6 @@ def add_grounds(inner, sides, deep, flavour, loot, bite=True, voids=(), back=Fal
         # it; a delivery yard behind a shop and the service yard behind a bank
         # are hard standing, so they get crates stacked against the fence and
         # something to sit on rather than an orchard.
-        bulk, seat = style.get('yard', ('Y', 'S'))
         if yw >= 7 and yh >= 7:
             for (tx, ty) in ((yx + 2, yy + 2), (yx + yw - 4, yy + 2),
                              (yx + 2, yy + yh - 4), (yx + yw - 4, yy + yh - 4)):
@@ -2047,12 +2063,12 @@ def add_grounds(inner, sides, deep, flavour, loot, bite=True, voids=(), back=Fal
     if biggest:
         bx, by, bw, bh = biggest
         if bw >= bh:
-            g.lay(bx + bw // 3, by + bh // 2, 4, 1, 'S', shift=2, strict=True)
-            g.lay(bx + 2 * bw // 3, by + bh // 2, 4, 1, 'S', shift=2, strict=True)
+            g.lay(bx + bw // 3, by + bh // 2, 4, 1, seat, shift=2, strict=True)
+            g.lay(bx + 2 * bw // 3, by + bh // 2, 4, 1, seat, shift=2, strict=True)
             sx, sy = bx + (bw - 4) // 2, by + 1
         else:
-            g.lay(bx + bw // 2, by + bh // 3, 1, 4, 'S', shift=2, strict=True)
-            g.lay(bx + bw // 2, by + 2 * bh // 3, 1, 4, 'S', shift=2, strict=True)
+            g.lay(bx + bw // 2, by + bh // 3, 1, 4, seat, shift=2, strict=True)
+            g.lay(bx + bw // 2, by + 2 * bh // 3, 1, 4, seat, shift=2, strict=True)
             sx, sy = bx + 1, by + (bh - 4) // 2
         # An outbuilding: a store, a garage, a bin shed. Somewhere outside
         # actually worth walking to, and something the search system can offer.
