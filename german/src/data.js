@@ -49,6 +49,13 @@ export async function loadVocabulary() {
   return db;
 }
 
+/** Used by the single-file bundle, which embeds the JSON instead of fetching. */
+export function setVocabularyData(data) {
+  db = data;
+  buildIndex();
+  return db;
+}
+
 export const getMeta = () => db.meta;
 export const getCategories = () => db.categories;
 export const getWordTypes = () => db.wordTypes;

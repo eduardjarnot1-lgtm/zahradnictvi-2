@@ -7,23 +7,13 @@ import {
   getCategories, getCategory, getSubcategory, getWordType, getAllWords, getMeta,
   wordsInCategory, wordsInSubcategory, wordsOfType, typesInSubcategory,
 } from './data.js';
-import { summarise, getStatus, STATUS } from './progress.js';
+import { summarise } from './progress.js';
 import { fukaBubble } from './fuka.js';
-import { circleButton, escapeHtml, progressBar, progressRing, wordCard, percent } from './ui.js';
-
-const crumbs = (items) => `
-  <nav class="crumbs">
-    ${items
-      .map((item, i) =>
-        i === items.length - 1
-          ? `<span aria-current="page">${escapeHtml(item.label)}</span>`
-          : `<a href="${item.href}">${escapeHtml(item.label)}</a><span class="crumbs__sep">›</span>`)
-      .join('')}
-  </nav>`;
+import { circleButton, crumbs, escapeHtml, progressBar, progressRing, wordCard, percent } from './ui.js';
 
 // --- home -------------------------------------------------------------------
 
-export function homeView() {
+export function vocabIndexView() {
   const all = getAllWords();
   const stats = summarise(all);
   const started = stats.learned + stats.learning > 0;
@@ -38,6 +28,7 @@ export function homeView() {
     .join('');
 
   return `
+    ${crumbs([{ label: 'German Learning', href: '#/' }, { label: 'Vocabulary' }])}
     ${fukaBubble(started ? 'homeStarted' : 'home')}
 
     <section class="overall">
@@ -48,10 +39,10 @@ export function homeView() {
       <div class="overall__text">
         <h2>${escapeHtml(getMeta().source.replace(/ \(.*\)$/, ''))}</h2>
         <p class="overall__count"><strong>${stats.learned}</strong> / ${stats.total} words learned</p>
-        <p class="overall__sub">${stats.learning} in practice · ${stats.new} not started</p>
+        <p class="overall__sub">${stats.learning} in practice · ${stats.new} not started${stats.due ? ` · <a href="#/learn/review">${stats.due} due</a>` : ''}</p>
         ${progressBar(stats)}
       </div>
-      <a class="cta" href="#/practice">Practise now</a>
+      <a class="cta" href="#/learn/lesson">Practise now</a>
     </section>
 
     <h2 class="section-title">Topics</h2>
@@ -75,13 +66,13 @@ export function categoryView(catId) {
     .join('');
 
   return `
-    ${crumbs([{ label: 'Topics', href: '#/' }, { label: category.name }])}
+    ${crumbs([{ label: 'Vocabulary', href: '#/vocab' }, { label: category.name }])}
     ${fukaBubble('category')}
     <header class="page-head">
       <h1>${category.emoji} ${escapeHtml(category.name)}</h1>
-      <p class="page-head__meta">${stats.learned} / ${stats.total} words learned</p>
+      <p class="page-head__meta">${stats.learned} / ${stats.total} words learned${stats.due ? ` · ${stats.due} due` : ''}</p>
       ${progressBar(stats)}
-      <a class="cta cta--small" href="#/practice/${catId}">Practise this topic</a>
+      <a class="cta cta--small" href="#/learn/lesson/${catId}">Practise this topic</a>
     </header>
     <div class="circles">${circles}</div>`;
 }
@@ -105,14 +96,14 @@ export function subcategoryView(catId, subId) {
 
   return `
     ${crumbs([
-      { label: 'Topics', href: '#/' },
+      { label: 'Vocabulary', href: '#/vocab' },
       { label: category.name, href: `#/c/${catId}` },
       { label: sub.name },
     ])}
     ${fukaBubble('subcategory')}
     <header class="page-head">
       <h1>${sub.emoji} ${escapeHtml(sub.name)}</h1>
-      <p class="page-head__meta">${stats.learned} / ${stats.total} words learned</p>
+      <p class="page-head__meta">${stats.learned} / ${stats.total} words learned${stats.due ? ` · ${stats.due} due` : ''}</p>
       ${progressBar(stats)}
       <p class="page-head__source">In the source list: “${escapeHtml(sub.documentName)}”</p>
     </header>
@@ -133,7 +124,7 @@ export function wordListView(catId, subId, typeId) {
 
   return `
     ${crumbs([
-      { label: 'Topics', href: '#/' },
+      { label: 'Vocabulary', href: '#/vocab' },
       { label: category.name, href: `#/c/${catId}` },
       { label: sub.name, href: `#/c/${catId}/${subId}` },
       { label: type.name },
@@ -165,63 +156,6 @@ export function searchResultsView(query, results) {
     <div class="cards">${results.map((word) => wordCard(word, { revealed: true })).join('')}</div>`;
 }
 
-// --- practice ---------------------------------------------------------------
-
-export function practiceIntroView(scope) {
-  return `
-    ${crumbs([{ label: 'Topics', href: '#/' }, { label: 'Practice' }])}
-    ${fukaBubble(scope.pool.length ? 'practiceStart' : 'practiceEmpty')}
-    <header class="page-head">
-      <h1>🔄 Practice</h1>
-      <p class="page-head__meta">${escapeHtml(scope.label)} · ${scope.pool.length} words available</p>
-    </header>
-    <div class="practice" id="practice"></div>`;
-}
-
-export function practiceQuestionView(session, question) {
-  const total = session.questions.length;
-  const number = session.position + 1;
-  const word = question.word;
-  const prompt = question.kind === 'article'
-    ? `<p class="quiz__word"><span class="quiz__blank">_____</span> ${escapeHtml(word.word)}</p>
-       <p class="quiz__ask">What is the correct article?</p>`
-    : `<p class="quiz__word">${escapeHtml(word.word)}</p>
-       <p class="quiz__ask">What does this word mean?</p>`;
-
-  const controls = question.kind === 'article'
-    ? `<div class="quiz__articles">
-         ${['der', 'die', 'das'].map((a) => `<button class="btn btn--article" type="button" data-article="${a}">${a}</button>`).join('')}
-       </div>`
-    : `<button class="btn btn--ghost" type="button" data-action="show-answer">Show the answer</button>`;
-
-  return `
-    <div class="quiz">
-      <p class="quiz__count">Question ${number} of ${total}</p>
-      <div class="quiz__prompt">${prompt}</div>
-      <div class="quiz__controls">${controls}</div>
-      <div class="quiz__feedback" hidden></div>
-    </div>`;
-}
-
-export function practiceSummaryView(session, scope) {
-  const total = session.questions.length;
-  const good = session.correct;
-  return `
-    <div class="summary">
-      ${fukaBubble(good >= Math.ceil(total * 0.7) ? 'practiceGood' : 'practiceMixed')}
-      <p class="summary__score">${good} / ${total}</p>
-      <p class="summary__text">You marked ${good} of ${total} words as known.</p>
-      <div class="summary__actions">
-        <button class="cta" type="button" data-action="practice-again">Practise again</button>
-        <a class="btn btn--ghost" href="${scope.backHref}">Back</a>
-      </div>
-    </div>`;
-}
-
-export function practiceEmptyView(scope) {
-  return `<p class="empty">There are no words to practise here yet. <a href="${scope.backHref}">Go back</a> and open a topic first.</p>`;
-}
-
 // --- misc -------------------------------------------------------------------
 
 export function notFoundView() {
@@ -234,13 +168,15 @@ export function aboutView() {
   const stats = summarise(all);
   const flagged = all.filter((w) => w.needsReview);
   return `
-    ${crumbs([{ label: 'Topics', href: '#/' }, { label: 'About the data' }])}
+    ${crumbs([{ label: 'Vocabulary', href: '#/vocab' }, { label: 'About the data' }])}
     <header class="page-head">
       <h1>About this vocabulary</h1>
     </header>
     <div class="prose">
-      <p><strong>Source:</strong> ${escapeHtml(meta.source)}</p>
+      <p><strong>Vocabulary source:</strong> ${escapeHtml(meta.source)}</p>
       <p>${escapeHtml(meta.sourceNote)}</p>
+      <p><strong>Level:</strong> the document grades entries by Foundation/Higher tier, not by CEFR.
+         ${escapeHtml(meta.cefrNote)}</p>
       <ul>
         <li>${meta.sourceEntryCount} entries read from the document</li>
         <li>${meta.wordCount} vocabulary cards after merging repeated entries</li>
@@ -257,6 +193,3 @@ export function aboutView() {
       <button class="btn btn--ghost" type="button" data-action="reset-progress">Reset all progress</button>
     </div>`;
 }
-
-export const statusOf = getStatus;
-export { STATUS };

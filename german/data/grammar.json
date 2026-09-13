@@ -1,0 +1,5902 @@
+{
+ "meta": {
+  "source": "Sicher! C1 Grammatikübersicht",
+  "credit": "Erweiterte Darstellung der Grammatikseiten zu Sicher! C1 Kursbuch, © Hueber Verlag; Autorinnen: Michaela Perlmann-Balme, Susanne Schwalb, Magdalena Matussek.",
+  "level": "C1",
+  "topicCount": 32,
+  "exerciseCount": 183,
+  "exampleCount": 205
+ },
+ "lektionen": [
+  {
+   "lektion": 1,
+   "topics": [
+    "g-l01-1",
+    "g-l01-2"
+   ]
+  },
+  {
+   "lektion": 2,
+   "topics": [
+    "g-l02-1",
+    "g-l02-2"
+   ]
+  },
+  {
+   "lektion": 3,
+   "topics": [
+    "g-l03-1",
+    "g-l03-2",
+    "g-l03-3"
+   ]
+  },
+  {
+   "lektion": 4,
+   "topics": [
+    "g-l04-1",
+    "g-l04-2"
+   ]
+  },
+  {
+   "lektion": 5,
+   "topics": [
+    "g-l05-1",
+    "g-l05-2",
+    "g-l05-3"
+   ]
+  },
+  {
+   "lektion": 6,
+   "topics": [
+    "g-l06-1",
+    "g-l06-2",
+    "g-l06-3"
+   ]
+  },
+  {
+   "lektion": 7,
+   "topics": [
+    "g-l07-1",
+    "g-l07-2",
+    "g-l07-3"
+   ]
+  },
+  {
+   "lektion": 8,
+   "topics": [
+    "g-l08-1",
+    "g-l08-2"
+   ]
+  },
+  {
+   "lektion": 9,
+   "topics": [
+    "g-l09-1",
+    "g-l09-2",
+    "g-l09-3"
+   ]
+  },
+  {
+   "lektion": 10,
+   "topics": [
+    "g-l10-1",
+    "g-l10-2",
+    "g-l10-3"
+   ]
+  },
+  {
+   "lektion": 11,
+   "topics": [
+    "g-l11-1",
+    "g-l11-2",
+    "g-l11-3"
+   ]
+  },
+  {
+   "lektion": 12,
+   "topics": [
+    "g-l12-1",
+    "g-l12-2",
+    "g-l12-3"
+   ]
+  }
+ ],
+ "topics": [
+  {
+   "id": "g-l01-1",
+   "language": "de",
+   "level": "C1",
+   "lektion": 1,
+   "number": 1,
+   "title": "Subjektive Bedeutung der Modalverben",
+   "titleEn": "Subjective meaning of the modal verbs",
+   "summary": "müssen, dürfen and können express how certain the speaker is; sollen and wollen report a claim.",
+   "category": "Modalverben",
+   "tags": [
+    "Modalverben",
+    "Vermutung",
+    "Redewiedergabe"
+   ],
+   "difficulty": 3,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "Objective and subjective meaning",
+     "text": "Modal verbs have a subjective meaning alongside their objective one. In the present tense only the context tells you which of the two is meant; in the past the two are told apart by their different forms."
+    },
+    {
+     "heading": "Degrees of certainty",
+     "text": "müssen, dürfen and können say how sure the speaker is about the statement: muss = absolutely sure (100 %), müsste = almost sure (90 %), dürfte = probable (75 %), könnte = possible (50 %)."
+    },
+    {
+     "heading": "Reporting a claim",
+     "text": "sollen and wollen express claims. sollen reports someone else's claim; wollen reports a claim the speaker has made about themselves."
+    }
+   ],
+   "rules": [
+    "muss = the speaker is sure it is so, but has no proof and has not checked it.",
+    "müsste = the speaker supposes it.",
+    "dürfte = the speaker thinks it probable.",
+    "könnte = the speaker thinks it possible; the uncertainty is relatively high.",
+    "sollen = it is reported by others, e.g. in the media.",
+    "wollen = the person claims it about themselves.",
+    "For the past, the modal verb is followed by the Infinitiv Perfekt: muss ... gehandelt haben, soll ... geschwommen sein."
+   ],
+   "examples": [
+    {
+     "de": "Es muss sich um eine Sucht handeln.",
+     "note": "100 % — the speaker is sure, but has no proof."
+    },
+    {
+     "de": "Auch beim letzten Fall muss es sich um die neue Sucht gehandelt haben.",
+     "note": "Past: muss + Infinitiv Perfekt."
+    },
+    {
+     "de": "Er müsste den Zug eigentlich noch bekommen, da er glücklicherweise Verspätung hat.",
+     "note": "90 % — the speaker supposes it."
+    },
+    {
+     "de": "Die Sucht dürfte besonders junge Leute betreffen.",
+     "note": "75 % — probable."
+    },
+    {
+     "de": "Die Nervosität könnte von der Handysucht kommen.",
+     "note": "50 % — possible."
+    },
+    {
+     "de": "Der Täter soll sich zurzeit im Ausland aufhalten.",
+     "note": "sollen — reported by others."
+    },
+    {
+     "de": "Eine 56-Jährige will durch den Ärmelkanal geschwommen sein.",
+     "note": "wollen — she claims it about herself."
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l01-1-e1",
+     "topicId": "g-l01-1",
+     "type": "fill",
+     "prompt": "The speaker is completely certain. Which modal verb?",
+     "text": "Es ___ sich um eine Sucht handeln.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "muss"
+     ],
+     "tokens": [],
+     "hint": "100 %",
+     "explain": "muss = the speaker is sure, but has no proof.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l01-1-e2",
+     "topicId": "g-l01-1",
+     "type": "fill",
+     "prompt": "The speaker thinks this is probable (75 %).",
+     "text": "Die Sucht ___ besonders junge Leute betreffen.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "dürfte"
+     ],
+     "tokens": [],
+     "hint": "75 %",
+     "explain": "dürfte expresses probability.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l01-1-e3",
+     "topicId": "g-l01-1",
+     "type": "choice",
+     "prompt": "Which sentence reports what the media say, not what the person claims?",
+     "text": "",
+     "from": "",
+     "options": [
+      "Der Täter soll sich zurzeit im Ausland aufhalten.",
+      "Der Täter will sich zurzeit im Ausland aufhalten.",
+      "Der Täter dürfte sich zurzeit im Ausland aufhalten."
+     ],
+     "answers": [
+      "Der Täter soll sich zurzeit im Ausland aufhalten."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "sollen reports someone else's claim; wollen would be the man's own claim.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l01-1-e4",
+     "topicId": "g-l01-1",
+     "type": "choice",
+     "prompt": "Order the four by certainty: which is the least certain?",
+     "text": "",
+     "from": "",
+     "options": [
+      "könnte",
+      "dürfte",
+      "müsste",
+      "muss"
+     ],
+     "answers": [
+      "könnte"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "muss 100 % > müsste 90 % > dürfte 75 % > könnte 50 %.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l01-1-e5",
+     "topicId": "g-l01-1",
+     "type": "transform",
+     "prompt": "Put the claim into the past. (wollen + Infinitiv Perfekt)",
+     "text": "",
+     "from": "Eine 56-Jährige will durch den Ärmelkanal schwimmen.",
+     "options": [],
+     "answers": [
+      "Eine 56-Jährige will durch den Ärmelkanal geschwommen sein."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "For the past, wollen takes the Infinitiv Perfekt: geschwommen sein.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l01-1-e6",
+     "topicId": "g-l01-1",
+     "type": "error",
+     "prompt": "The modal verb contradicts the meaning. Correct the sentence.",
+     "text": "Sie will dafür über 28 Stunden gebraucht haben — so berichten es alle Zeitungen.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Sie soll dafür über 28 Stunden gebraucht haben — so berichten es alle Zeitungen.",
+      "Sie soll dafür über 28 Stunden gebraucht haben."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "If the newspapers report it, it is someone else's claim, so sollen, not wollen.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l01-1-e7",
+     "topicId": "g-l01-1",
+     "type": "context",
+     "prompt": "Complete with the modal verb that fits the certainty stated in brackets.",
+     "text": "Die Nervosität ___ von der Handysucht kommen. (nur möglich, 50 %)",
+     "from": "",
+     "options": [],
+     "answers": [
+      "könnte"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "könnte = the speaker holds it possible; the uncertainty is relatively high.",
+     "fromSource": true
+    }
+   ],
+   "kursbuch": "",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 1,
+   "sourcePages": [
+    1
+   ],
+   "subtopics": [
+    {
+     "letter": "a",
+     "title": "müssen, dürfen und können",
+     "kursbuch": "S. 15/1"
+    },
+    {
+     "letter": "b",
+     "title": "sollen und wollen",
+     "kursbuch": "S. 17/4"
+    }
+   ]
+  },
+  {
+   "id": "g-l01-2",
+   "language": "de",
+   "level": "C1",
+   "lektion": 1,
+   "number": 2,
+   "title": "Wortbildung: Vorsilben miss-, zer-, ent- und de-",
+   "titleEn": "Word formation: the prefixes miss-, zer-, ent- and de-",
+   "summary": "Four inseparable prefixes that give the base verb a different, often negative meaning.",
+   "category": "Wortbildung",
+   "tags": [
+    "Wortbildung",
+    "Vorsilben",
+    "Verben"
+   ],
+   "difficulty": 2,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "What they do",
+     "text": "The inseparable prefixes miss-, zer-, ent- and de- give the base verb a different, frequently negative meaning."
+    },
+    {
+     "heading": "Verbs already carrying ge-",
+     "text": "If the base verb has the prefix ge-, that prefix drops and is replaced by miss-, e.g. gelingen – misslingen."
+    }
+   ],
+   "rules": [
+    "miss- reverses or negates the base verb: gefallen → missfallen, trauen → misstrauen.",
+    "zer- expresses destruction or something going to pieces: reden → zerreden, laufen → zerlaufen.",
+    "ent- expresses removal or taking away: kleiden → entkleiden, sorgen → entsorgen.",
+    "de- reverses a technical or formal process, mostly with Latinate verbs: installieren → deinstallieren, stabilisieren → destabilisieren.",
+    "All four prefixes are inseparable and unstressed; the Partizip II has no ge-: missfallen, zerredet, entsorgt, deinstalliert."
+   ],
+   "examples": [
+    {
+     "de": "Max misstraut den Berichten über solche Rekordversuche.",
+     "note": "miss- — trauen becomes its opposite."
+    },
+    {
+     "de": "Man sollte die Glücksmomente aber nicht zerreden.",
+     "note": "zer- — talking something to pieces."
+    },
+    {
+     "de": "Dem Modell ist das Make-up total zerlaufen.",
+     "note": "zer- — running and coming apart."
+    },
+    {
+     "de": "Bei manchen beginnt die Entspannung bereits, wenn sie sich entkleiden.",
+     "note": "ent- — taking clothes off."
+    },
+    {
+     "de": "Plastikabfall wurde in speziellen Containern entsorgt.",
+     "note": "ent- — getting rid of."
+    },
+    {
+     "de": "Ein Kollege hilft mir, das alte Programm auf dem Computer zu deinstallieren.",
+     "note": "de- — undoing the installation."
+    },
+    {
+     "de": "Durch das viele Laufen wurden die Wirbel wieder leicht destabilisiert.",
+     "note": "de- — undoing the stabilisation."
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l01-2-e1",
+     "topicId": "g-l01-2",
+     "type": "fill",
+     "prompt": "Which prefix turns trauen into its opposite?",
+     "text": "Max ___traut den Berichten über solche Rekordversuche.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "miss"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "miss- negates the base verb: trauen → misstrauen.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l01-2-e2",
+     "topicId": "g-l01-2",
+     "type": "fill",
+     "prompt": "Complete the verb of disposal.",
+     "text": "Plastikabfall wurde in speziellen Containern ___sorgt.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "ent"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "ent- expresses removal: sorgen → entsorgen.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l01-2-e3",
+     "topicId": "g-l01-2",
+     "type": "choice",
+     "prompt": "gelingen has the prefix ge-. What is its negative form?",
+     "text": "",
+     "from": "",
+     "options": [
+      "misslingen",
+      "missgelingen",
+      "gemisslingen",
+      "zergelingen"
+     ],
+     "answers": [
+      "misslingen"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "With base verbs carrying ge-, that prefix drops and is replaced by miss-: gelingen – misslingen.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l01-2-e4",
+     "topicId": "g-l01-2",
+     "type": "choice",
+     "prompt": "Which prefix undoes a technical process such as installieren?",
+     "text": "",
+     "from": "",
+     "options": [
+      "de-",
+      "zer-",
+      "ent-",
+      "miss-"
+     ],
+     "answers": [
+      "de-"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "de- reverses a technical or formal process: installieren → deinstallieren.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l01-2-e5",
+     "topicId": "g-l01-2",
+     "type": "transform",
+     "prompt": "Rewrite with a zer- verb: the make-up ran and came apart completely.",
+     "text": "",
+     "from": "Dem Modell ist das Make-up total verlaufen.",
+     "options": [],
+     "answers": [
+      "Dem Modell ist das Make-up total zerlaufen."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "zer- expresses that something goes to pieces.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l01-2-e6",
+     "topicId": "g-l01-2",
+     "type": "error",
+     "prompt": "The Partizip II is wrong — these prefixes are inseparable. Correct it.",
+     "text": "Ein Kollege hat das alte Programm gedeinstalliert.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Ein Kollege hat das alte Programm deinstalliert."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "miss-, zer-, ent- and de- are inseparable and unstressed, so the Partizip II takes no ge-.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "S. 19/1; 21/1 + 3",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 2,
+   "sourcePages": [
+    2
+   ],
+   "subtopics": []
+  },
+  {
+   "id": "g-l02-1",
+   "language": "de",
+   "level": "C1",
+   "lektion": 2,
+   "number": 1,
+   "title": "Zweiteilige Konnektoren",
+   "titleEn": "Two-part connectors",
+   "summary": "Concessive wenn … auch / wie … auch, and restrictive es sei denn, außer, außer dass, nur dass.",
+   "category": "Konnektoren",
+   "tags": [
+    "Konnektoren",
+    "Konzessiv",
+    "Restriktiv",
+    "Nebensatz"
+   ],
+   "difficulty": 4,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "Concessive two-part connectors",
+     "text": "wenn … auch, (so) and wie … auch express a condition or cause that does not have the effect you would expect. They correspond to obwohl, or to zwar … aber / trotzdem / dennoch."
+    },
+    {
+     "heading": "Restrictive two-part connectors",
+     "text": "es sei denn, (dass) …; außer, (wenn) …; außer dass … and nur dass … express a restriction. You use them when something only holds in a particular case or a particular situation."
+    }
+   ],
+   "rules": [
+    "wenn … auch is often taken up by so in the main clause: Wenn Samira auch …, so hat sie …",
+    "wie … auch is usually intensified: Wie sehr sich die Auszubildende auch bemüht, …",
+    "es sei denn (dass) and außer (wenn) name the one case in which the statement does not hold.",
+    "außer dass and nur dass name the single difference between two otherwise equal things.",
+    "The clause with nur dass is always the second clause."
+   ],
+   "examples": [
+    {
+     "de": "Wenn Samira auch oft abends oder am Wochenende Dienst hat, so hat sie ihre Entscheidung noch nicht bereut.",
+     "note": "concessive wenn … auch, taken up by so."
+    },
+    {
+     "de": "Obwohl Samira oft abends oder am Wochenende Dienst hat, hat sie ihre Entscheidung noch nicht bereut.",
+     "note": "the same content with obwohl."
+    },
+    {
+     "de": "Wie sehr sich die Auszubildende auch bemüht, alles richtig zu machen, manche Tätigkeiten fallen ihr noch schwer.",
+     "note": "concessive wie … auch."
+    },
+    {
+     "de": "es sei denn, dass unser Kind krank wird.",
+     "note": "restrictive — the one case that cancels the plan."
+    },
+    {
+     "de": "außer wenn unser Kind krank wird.",
+     "note": "the same restriction with außer wenn."
+    },
+    {
+     "de": "Die beiden Hotelzimmer sind fast gleich, außer dass Sie im teureren Zimmer Alpenblick haben.",
+     "note": "außer dass names the single difference."
+    },
+    {
+     "de": "Die beiden Hotelzimmer sind fast gleich, nur dass Sie im teureren Zimmer Alpenblick haben.",
+     "note": "nur dass — always the second clause."
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l02-1-e1",
+     "topicId": "g-l02-1",
+     "type": "fill",
+     "prompt": "Complete the concessive connector (two words, one at each end).",
+     "text": "Wenn Samira ___ oft abends oder am Wochenende Dienst hat, so hat sie ihre Entscheidung noch nicht bereut.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "auch"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "wenn … auch is the concessive pair; the main clause is often introduced by so.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l02-1-e2",
+     "topicId": "g-l02-1",
+     "type": "transform",
+     "prompt": "Rewrite with obwohl.",
+     "text": "",
+     "from": "Wenn Samira auch oft abends oder am Wochenende Dienst hat, so hat sie ihre Entscheidung noch nicht bereut.",
+     "options": [],
+     "answers": [
+      "Obwohl Samira oft abends oder am Wochenende Dienst hat, hat sie ihre Entscheidung noch nicht bereut."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "wenn … auch and obwohl carry the same meaning; with obwohl the auch and the so drop.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l02-1-e3",
+     "topicId": "g-l02-1",
+     "type": "choice",
+     "prompt": "Which connector names the one case in which the plan does NOT hold?",
+     "text": "Wahrscheinlich reisen wir am Freitag an, ___ unser Kind wird krank.",
+     "from": "",
+     "options": [
+      "es sei denn,",
+      "außer dass",
+      "nur dass",
+      "wie sehr"
+     ],
+     "answers": [
+      "es sei denn,"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "es sei denn (dass) / außer (wenn) name the exception that cancels the statement.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l02-1-e4",
+     "topicId": "g-l02-1",
+     "type": "choice",
+     "prompt": "Two rooms are almost the same; one has a mountain view. Which is correct?",
+     "text": "",
+     "from": "",
+     "options": [
+      "Die beiden Hotelzimmer sind fast gleich, außer dass Sie im teureren Zimmer Alpenblick haben.",
+      "Außer dass die beiden Hotelzimmer fast gleich sind, haben Sie im teureren Zimmer Alpenblick.",
+      "Nur dass Sie im teureren Zimmer Alpenblick haben, sind die Hotelzimmer fast gleich."
+     ],
+     "answers": [
+      "Die beiden Hotelzimmer sind fast gleich, außer dass Sie im teureren Zimmer Alpenblick haben."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "außer dass may stand first or second; nur dass is always the second clause, so the third option is wrong.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l02-1-e5",
+     "topicId": "g-l02-1",
+     "type": "reorder",
+     "prompt": "Put the concessive clause in the right order.",
+     "text": "",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Wie sehr sich die Auszubildende auch bemüht, alles richtig zu machen,"
+     ],
+     "tokens": [
+      "Wie",
+      "sehr",
+      "sich",
+      "die",
+      "Auszubildende",
+      "auch",
+      "bemüht,",
+      "alles",
+      "richtig",
+      "zu",
+      "machen,"
+     ],
+     "hint": "",
+     "explain": "wie + intensifier + subject … auch + verb: the auch sits before the finite verb at the end.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l02-1-e6",
+     "topicId": "g-l02-1",
+     "type": "error",
+     "prompt": "nur dass is in the wrong position. Correct the sentence.",
+     "text": "Nur dass Sie im teureren Zimmer Alpenblick haben, sind die beiden Hotelzimmer fast gleich.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Die beiden Hotelzimmer sind fast gleich, nur dass Sie im teureren Zimmer Alpenblick haben."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "The clause with nur dass is always the second clause.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 3,
+   "sourcePages": [
+    3
+   ],
+   "subtopics": [
+    {
+     "letter": "a",
+     "title": "Zweiteilige konzessive Konnektoren",
+     "kursbuch": "S. 28/3"
+    },
+    {
+     "letter": "b",
+     "title": "Zweiteilige restriktive Konnektoren",
+     "kursbuch": "S. 29/2"
+    }
+   ]
+  },
+  {
+   "id": "g-l02-2",
+   "language": "de",
+   "level": "C1",
+   "lektion": 2,
+   "number": 2,
+   "title": "Feste Nomen-Verb-Verbindungen",
+   "titleEn": "Fixed noun–verb combinations",
+   "summary": "Nouns combine with verbs (sometimes with an article or preposition) into set expressions with their own meaning.",
+   "category": "Wortschatzstrukturen",
+   "tags": [
+    "Nomen-Verb-Verbindungen",
+    "Funktionsverbgefüge",
+    "Schriftsprache"
+   ],
+   "difficulty": 3,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "What they are",
+     "text": "Nouns can stand with various verbs, sometimes with articles or prepositions, in noun–verb combinations. These combinations then carry meanings of their own, and each one corresponds to a simple verb."
+    },
+    {
+     "heading": "Active and passive verbs",
+     "text": "Verbs such as bringen or stellen often express an 'active' meaning, while kommen, geraten and stehen express a 'passive' one."
+    }
+   ],
+   "rules": [
+    "zur Auswahl stehen = ausgewählt werden können.",
+    "zur Verfügung stehen = über etwas verfügen können; zur Verfügung stellen = bereitstellen.",
+    "Vorbereitungen treffen = etwas vorbereiten; der Ansicht / Meinung sein = meinen.",
+    "Freude bereiten = jemandem gefallen; Schwierigkeiten bereiten = schwierig sein.",
+    "zur Sprache bringen = etwas ansprechen; zur Sprache kommen = angesprochen / thematisiert werden.",
+    "Kritik üben = etwas kritisieren; auf Kritik stoßen = kritisiert werden.",
+    "in Kauf nehmen = akzeptieren; einen Kompromiss finden = sich einigen; infrage kommen = möglich, denkbar sein.",
+    "'Active' bringen / stellen against 'passive' kommen / geraten / stehen: zur Sprache bringen – zur Sprache kommen, zur Verfügung stellen – zur Verfügung stehen."
+   ],
+   "examples": [
+    {
+     "de": "zur Auswahl stehen",
+     "note": "= ausgewählt werden können"
+    },
+    {
+     "de": "zur Verfügung stellen",
+     "note": "= bereitstellen"
+    },
+    {
+     "de": "Vorbereitungen treffen",
+     "note": "= etwas vorbereiten"
+    },
+    {
+     "de": "das Verständnis vertiefen",
+     "note": "= besser verstehen"
+    },
+    {
+     "de": "in Kauf nehmen",
+     "note": "= akzeptieren"
+    },
+    {
+     "de": "auf Kritik stoßen",
+     "note": "= kritisiert werden"
+    },
+    {
+     "de": "infrage kommen",
+     "note": "= möglich, denkbar sein"
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l02-2-e1",
+     "topicId": "g-l02-2",
+     "type": "choice",
+     "prompt": "Which simple verb matches 'in Kauf nehmen'?",
+     "text": "",
+     "from": "",
+     "options": [
+      "akzeptieren",
+      "einkaufen",
+      "bezahlen",
+      "kritisieren"
+     ],
+     "answers": [
+      "akzeptieren"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "in Kauf nehmen = akzeptieren.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l02-2-e2",
+     "topicId": "g-l02-2",
+     "type": "choice",
+     "prompt": "Which simple verb matches 'auf Kritik stoßen'?",
+     "text": "",
+     "from": "",
+     "options": [
+      "kritisiert werden",
+      "etwas kritisieren",
+      "sich einigen",
+      "besser verstehen"
+     ],
+     "answers": [
+      "kritisiert werden"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "stoßen belongs to the 'passive' group: auf Kritik stoßen = kritisiert werden. Kritik üben would be the active one.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l02-2-e3",
+     "topicId": "g-l02-2",
+     "type": "fill",
+     "prompt": "'Active' meaning: the company makes the data available.",
+     "text": "Die Firma ___ den Mitarbeitern die Daten zur Verfügung.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "stellt"
+     ],
+     "tokens": [],
+     "hint": "bringen / stellen = aktiv",
+     "explain": "zur Verfügung stellen = bereitstellen (active). zur Verfügung stehen would be the passive counterpart.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l02-2-e4",
+     "topicId": "g-l02-2",
+     "type": "fill",
+     "prompt": "'Passive' meaning: the topic gets raised.",
+     "text": "In der Sitzung ___ das Problem endlich zur Sprache.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "kam",
+      "kommt"
+     ],
+     "tokens": [],
+     "hint": "kommen / geraten / stehen = passiv",
+     "explain": "zur Sprache kommen = angesprochen / thematisiert werden.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l02-2-e5",
+     "topicId": "g-l02-2",
+     "type": "transform",
+     "prompt": "Rewrite in the nominal style with a fixed noun–verb combination (zur Sprache …).",
+     "text": "",
+     "from": "Der Betriebsrat hat das Problem angesprochen.",
+     "options": [],
+     "answers": [
+      "Der Betriebsrat hat das Problem zur Sprache gebracht."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "etwas ansprechen = etwas zur Sprache bringen ('active' bringen).",
+     "fromSource": false
+    },
+    {
+     "id": "g-l02-2-e6",
+     "topicId": "g-l02-2",
+     "type": "error",
+     "prompt": "Active and passive have been swapped. Correct the sentence.",
+     "text": "Drei Termine stellen zur Auswahl.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Drei Termine stehen zur Auswahl."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "zur Auswahl stehen = ausgewählt werden können; stellen would need someone doing the offering.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "S. 31/1",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 3,
+   "sourcePages": [
+    3,
+    4
+   ],
+   "subtopics": []
+  },
+  {
+   "id": "g-l03-1",
+   "language": "de",
+   "level": "C1",
+   "lektion": 3,
+   "number": 1,
+   "title": "Modalverben und ihre Alternativen",
+   "titleEn": "Modal verbs and their alternatives",
+   "summary": "Paraphrases for können, müssen, wollen, dürfen and sollen with adjectives, nouns and set constructions.",
+   "category": "Modalverben",
+   "tags": [
+    "Modalverben",
+    "Alternativen",
+    "Schriftsprache",
+    "Infinitivsatz"
+   ],
+   "difficulty": 4,
+   "prerequisites": [
+    "g-l01-1"
+   ],
+   "explanation": [
+    {
+     "heading": "Why paraphrase a modal verb",
+     "text": "Each modal verb can be replaced by a construction with an adjective, a noun or a set expression. These alternatives are typical of written and formal German and let you vary your style."
+    },
+    {
+     "heading": "Structure",
+     "text": "Most alternatives take an Infinitivsatz with zu; some take a dass-clause instead, e.g. Es war nötig, dass sie ihr Gehirn anstrengten."
+    }
+   ],
+   "rules": [
+    "können → in der Lage / imstande / fähig sein, vermögen, die Fähigkeit / das Vermögen haben; for opportunity: die Möglichkeit / die Gelegenheit / die Chance haben; for permission: das Recht / die Erlaubnis / die Genehmigung haben.",
+    "müssen → nötig / notwendig / entscheidend / erforderlich / unumgänglich sein, gezwungen sein, etwas zu tun haben, es besteht die Notwendigkeit, verpflichtet sein, die Pflicht / die Aufgabe haben, es bleibt nichts anderes übrig, als.",
+    "With negations or restrictions, brauchen + zu is used instead of müssen, together with nicht / kein / nur.",
+    "wollen → vorhaben, beabsichtigen, bestrebt sein, die Absicht / die Intention haben, den Wunsch haben, Lust haben; negated: sich weigern.",
+    "dürfen → das Recht / die Erlaubnis haben, es ist erlaubt / gestattet; negated: es ist verboten / untersagt / nicht erlaubt.",
+    "sollen → jemand erwartet, dass …, den Auftrag / die Aufgabe haben; sollte → es wäre empfehlenswert / ratsam / besser."
+   ],
+   "examples": [
+    {
+     "de": "Der Mensch kann sich der Außenwelt anpassen.",
+     "note": "können — the starting sentence."
+    },
+    {
+     "de": "Er hat das Recht / die Erlaubnis / die Genehmigung,",
+     "note": "können / dürfen as permission."
+    },
+    {
+     "de": "Sie waren immer schon gezwungen, ihr Gehirn anzustrengen.",
+     "note": "müssen → gezwungen sein."
+    },
+    {
+     "de": "Er hat die Arbeit rechtzeitig zu erledigen.",
+     "note": "müssen → haben + zu + Infinitiv."
+    },
+    {
+     "de": "Ich habe den Wunsch, mehr Zeit für mich zu haben.",
+     "note": "wollen → den Wunsch haben."
+    },
+    {
+     "de": "Er weigerte sich, unsere Entscheidung zu akzeptieren.",
+     "note": "nicht wollen → sich weigern."
+    },
+    {
+     "de": "Man sollte flexibel sein.",
+     "note": "sollte — recommendation."
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l03-1-e1",
+     "topicId": "g-l03-1",
+     "type": "choice",
+     "prompt": "Which alternative expresses ability (können)?",
+     "text": "Er ___, sich der Außenwelt anzupassen.",
+     "from": "",
+     "options": [
+      "ist in der Lage",
+      "hat die Pflicht",
+      "hat die Absicht",
+      "ist gezwungen"
+     ],
+     "answers": [
+      "ist in der Lage"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "in der Lage / imstande / fähig sein expresses ability, i.e. können.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l03-1-e2",
+     "topicId": "g-l03-1",
+     "type": "choice",
+     "prompt": "Which alternative expresses a prohibition (nicht dürfen)?",
+     "text": "Es ist bei Tests ___, beim Nachbarn abzuschreiben.",
+     "from": "",
+     "options": [
+      "verboten",
+      "empfehlenswert",
+      "erforderlich",
+      "beabsichtigt"
+     ],
+     "answers": [
+      "verboten"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "nicht dürfen → es ist verboten / untersagt / nicht erlaubt.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l03-1-e3",
+     "topicId": "g-l03-1",
+     "type": "transform",
+     "prompt": "Replace the modal verb with haben + zu + Infinitiv.",
+     "text": "",
+     "from": "Er muss die Arbeit rechtzeitig erledigen.",
+     "options": [],
+     "answers": [
+      "Er hat die Arbeit rechtzeitig zu erledigen."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "müssen can be expressed with haben + zu + Infinitiv — typical of formal written German.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l03-1-e4",
+     "topicId": "g-l03-1",
+     "type": "transform",
+     "prompt": "Replace wollen with a noun construction (der Wunsch).",
+     "text": "",
+     "from": "Ich will mehr Zeit für mich haben.",
+     "options": [],
+     "answers": [
+      "Ich habe den Wunsch, mehr Zeit für mich zu haben."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "wollen → den Wunsch haben + Infinitivsatz mit zu.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l03-1-e5",
+     "topicId": "g-l03-1",
+     "type": "transform",
+     "prompt": "Replace 'wollte nicht' with the verb sich weigern.",
+     "text": "",
+     "from": "Er wollte unsere Entscheidung nicht akzeptieren.",
+     "options": [],
+     "answers": [
+      "Er weigerte sich, unsere Entscheidung zu akzeptieren.",
+      "Er hat sich geweigert, unsere Entscheidung zu akzeptieren."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "nicht wollen → sich weigern + Infinitivsatz mit zu.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l03-1-e6",
+     "topicId": "g-l03-1",
+     "type": "fill",
+     "prompt": "With a negation, müssen is replaced by this verb (+ zu).",
+     "text": "Die Menschen ___ ihr Gehirn heute nicht weniger oder mehr anzustrengen als früher.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "brauchen"
+     ],
+     "tokens": [],
+     "hint": "nicht / kein / nur",
+     "explain": "With negations or restrictions, brauchen + zu replaces müssen.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l03-1-e7",
+     "topicId": "g-l03-1",
+     "type": "context",
+     "prompt": "A recommendation, not an obligation. Complete it.",
+     "text": "Es wäre ___, flexibel zu sein.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "empfehlenswert",
+      "ratsam",
+      "besser"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "sollte → es wäre empfehlenswert / ratsam / besser.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "S. 39/3; 41/4",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 5,
+   "sourcePages": [
+    5,
+    6
+   ],
+   "subtopics": []
+  },
+  {
+   "id": "g-l03-2",
+   "language": "de",
+   "level": "C1",
+   "lektion": 3,
+   "number": 2,
+   "title": "Irreale Folgesätze",
+   "titleEn": "Unreal consequence clauses",
+   "summary": "zu + adjective, als dass + Konjunktiv II, and zu + adjective, um … zu, for a consequence that does not happen.",
+   "category": "Satzstrukturen",
+   "tags": [
+    "Konsekutiv",
+    "Konjunktiv II",
+    "Infinitivsatz",
+    "irreal"
+   ],
+   "difficulty": 4,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "What they express",
+     "text": "With the constructions zu + adjective, als dass + Konjunktiv II and zu + adjective, um … zu you formulate an unreal consequence, that is, a consequence that does not happen or has not happened."
+    },
+    {
+     "heading": "When um … zu is possible",
+     "text": "The um … zu construction is possible when the subject of the main clause and of the subordinate clause are the same, or when the subject of the main clause and the accusative object of the subordinate clause are the same. The modal verb können then frequently drops."
+    }
+   ],
+   "rules": [
+    "als dass is always followed by Konjunktiv II: … als dass man sie schnell erklären könnte.",
+    "For the past, als dass takes the Konjunktiv II of the past: … als dass ich hätte aufhören können.",
+    "um … zu needs matching subjects (or main-clause subject = subordinate accusative object).",
+    "In the um … zu variant können usually drops: um sie schnell zu erklären (or: erklären zu können)."
+   ],
+   "examples": [
+    {
+     "de": "Der Büroalltag ist zu stressig, als dass man gute Vorsätze für die Gesundheit umsetzen könnte.",
+     "note": "zu + Adjektiv, als dass + Konjunktiv II."
+    },
+    {
+     "de": "Das Buch war zu interessant, als dass ich mit dem Lesen hätte aufhören können.",
+     "note": "past: hätte … können."
+    },
+    {
+     "de": "Die Vorgänge im Körper sind zu komplex, als dass man sie schnell erklären könnte.",
+     "note": "als dass variant."
+    },
+    {
+     "de": "Die Vorgänge im Körper sind zu komplex, um sie schnell zu erklären.",
+     "note": "the same content with um … zu; können drops."
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l03-2-e1",
+     "topicId": "g-l03-2",
+     "type": "fill",
+     "prompt": "als dass requires which mood? Complete the verb.",
+     "text": "Die Vorgänge im Körper sind zu komplex, als dass man sie schnell erklären ___.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "könnte"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "als dass is always followed by Konjunktiv II.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l03-2-e2",
+     "topicId": "g-l03-2",
+     "type": "transform",
+     "prompt": "Rewrite the als-dass clause with um … zu.",
+     "text": "",
+     "from": "Die Vorgänge im Körper sind zu komplex, als dass man sie schnell erklären könnte.",
+     "options": [],
+     "answers": [
+      "Die Vorgänge im Körper sind zu komplex, um sie schnell zu erklären.",
+      "Die Vorgänge im Körper sind zu komplex, um sie schnell erklären zu können."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "The accusative object sie matches, so um … zu is possible; können usually drops.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l03-2-e3",
+     "topicId": "g-l03-2",
+     "type": "choice",
+     "prompt": "Which past form is correct after als dass?",
+     "text": "Das Buch war zu interessant, als dass ich mit dem Lesen ___.",
+     "from": "",
+     "options": [
+      "hätte aufhören können",
+      "aufhören gekonnt hätte",
+      "aufhören könnte haben",
+      "hatte aufhören können"
+     ],
+     "answers": [
+      "hätte aufhören können"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "The past of als dass + Konjunktiv II with a modal verb is hätte + Infinitiv + Modalverb-Infinitiv.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l03-2-e4",
+     "topicId": "g-l03-2",
+     "type": "error",
+     "prompt": "The mood after als dass is wrong. Correct it.",
+     "text": "Der Büroalltag ist zu stressig, als dass man gute Vorsätze für die Gesundheit umsetzen kann.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Der Büroalltag ist zu stressig, als dass man gute Vorsätze für die Gesundheit umsetzen könnte."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "The consequence is unreal, so als dass takes Konjunktiv II: könnte.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l03-2-e5",
+     "topicId": "g-l03-2",
+     "type": "context",
+     "prompt": "The subjects differ (der Büroalltag / man). Which construction is possible here?",
+     "text": "",
+     "from": "",
+     "options": [
+      "nur als dass + Konjunktiv II",
+      "nur um … zu",
+      "beide gleichermaßen"
+     ],
+     "answers": [
+      "nur als dass + Konjunktiv II"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "um … zu needs the same subject (or main subject = subordinate accusative object); otherwise only als dass works.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "S. 43/3",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 6,
+   "sourcePages": [
+    6
+   ],
+   "subtopics": []
+  },
+  {
+   "id": "g-l03-3",
+   "language": "de",
+   "level": "C1",
+   "lektion": 3,
+   "number": 3,
+   "title": "Adjektivendungen nach Artikelwörtern und nach Adjektiven / unbestimmten Zahlwörtern",
+   "titleEn": "Adjective endings after article words and after adjectives / indefinite numerals",
+   "summary": "Which declension an adjective takes depends on the word in front of it.",
+   "category": "Deklination",
+   "tags": [
+    "Adjektivendungen",
+    "Deklination",
+    "Artikelwörter"
+   ],
+   "difficulty": 5,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "Two patterns",
+     "text": "After some article words the adjective is declined as after the definite article; after others — the indefinite numerals — it is declined as after the zero article in the plural."
+    },
+    {
+     "heading": "The singular exception",
+     "text": "viel and wenig behave differently in the singular: viel neues Wissen, wenig freier Platz."
+    }
+   ],
+   "rules": [
+    "Like after the definite article: alle / sämtliche, keine, solche / welche.",
+    "Like after the zero article in the plural: einige / mehrere / verschiedene / etliche, viele / wenige, folgende / zahlreiche.",
+    "But when the definite article stands in front of them, those numerals themselves take -en and the adjective follows suit: die vielen, wenigen, verschiedenen, zahlreichen, folgenden aktuellen Fragestellungen.",
+    "In the singular viel and wenig take no ending and the adjective declines strongly: viel neues Wissen, wenig freier Platz."
+   ],
+   "examples": [
+    {
+     "de": "alle / sämtliche interessierten Mitarbeiter",
+     "note": "wie nach bestimmtem Artikel"
+    },
+    {
+     "de": "keine größeren Enttäuschungen",
+     "note": "wie nach bestimmtem Artikel"
+    },
+    {
+     "de": "solche / welche standardisierten Tests",
+     "note": "wie nach bestimmtem Artikel"
+    },
+    {
+     "de": "renommierte Unternehmen",
+     "note": "nach einige / mehrere / verschiedene / etliche — wie nach Nullartikel im Plural"
+    },
+    {
+     "de": "anspruchsvolle Aufgaben",
+     "note": "nach viele / wenige — wie nach Nullartikel im Plural"
+    },
+    {
+     "de": "aktuelle Fragestellungen",
+     "note": "nach folgende / zahlreiche — wie nach Nullartikel im Plural"
+    },
+    {
+     "de": "die vielen, wenigen, verschiedenen, zahlreichen, folgenden",
+     "note": "with the definite article in front, everything takes -en"
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l03-3-e1",
+     "topicId": "g-l03-3",
+     "type": "fill",
+     "prompt": "After 'alle' the adjective declines like after the definite article.",
+     "text": "alle interessiert___ Mitarbeiter",
+     "from": "",
+     "options": [],
+     "answers": [
+      "en"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "alle / sämtliche behave like the definite article, so the adjective takes -en.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l03-3-e2",
+     "topicId": "g-l03-3",
+     "type": "fill",
+     "prompt": "After 'mehrere' the adjective declines like after the zero article in the plural.",
+     "text": "mehrere renommiert___ Unternehmen",
+     "from": "",
+     "options": [],
+     "answers": [
+      "e"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "einige / mehrere / verschiedene / etliche behave like the zero article in the plural, so the adjective takes -e in the nominative/accusative.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l03-3-e3",
+     "topicId": "g-l03-3",
+     "type": "choice",
+     "prompt": "Which is correct?",
+     "text": "",
+     "from": "",
+     "options": [
+      "die vielen aktuellen Fragestellungen",
+      "die viele aktuelle Fragestellungen",
+      "die vielen aktuelle Fragestellungen"
+     ],
+     "answers": [
+      "die vielen aktuellen Fragestellungen"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "With the definite article in front, the numeral and the adjective both take -en.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l03-3-e4",
+     "topicId": "g-l03-3",
+     "type": "choice",
+     "prompt": "Singular with viel — which is correct?",
+     "text": "",
+     "from": "",
+     "options": [
+      "viel neues Wissen",
+      "viel neue Wissen",
+      "vieles neues Wissen"
+     ],
+     "answers": [
+      "viel neues Wissen"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "In the singular viel takes no ending and the adjective declines strongly: viel neues Wissen, wenig freier Platz.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l03-3-e5",
+     "topicId": "g-l03-3",
+     "type": "error",
+     "prompt": "The adjective ending after 'keine' is wrong. Correct the phrase.",
+     "text": "keine größere Enttäuschungen",
+     "from": "",
+     "options": [],
+     "answers": [
+      "keine größeren Enttäuschungen"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "keine belongs to the group that behaves like the definite article, so the adjective takes -en.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l03-3-e6",
+     "topicId": "g-l03-3",
+     "type": "context",
+     "prompt": "Complete: 'wenig' in the singular.",
+     "text": "In der Wohnung gab es wenig frei___ Platz.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "er"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "In the singular wenig takes no ending, so the adjective declines strongly: wenig freier Platz.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "S. 45/4",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 6,
+   "sourcePages": [
+    6
+   ],
+   "subtopics": []
+  },
+  {
+   "id": "g-l04-1",
+   "language": "de",
+   "level": "C1",
+   "lektion": 4,
+   "number": 1,
+   "title": "Funktionen des Pronomens es",
+   "titleEn": "Functions of the pronoun es",
+   "summary": "es as an optional placeholder, as a real pronoun, and as an impersonal subject or object.",
+   "category": "Pronomen",
+   "tags": [
+    "es",
+    "Pronomen",
+    "Satzbau",
+    "Korrelat"
+   ],
+   "difficulty": 4,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "Two kinds of es",
+     "text": "The pronoun es fulfils several functions in German. In some sentences es is an obligatory element of the sentence; in others it is not obligatory and can drop."
+    },
+    {
+     "heading": "es as a placeholder",
+     "text": "As a non-obligatory element es stands for a following subordinate clause or infinitive clause: a dass-clause, an infinitive clause or an indirect question. If that clause is placed first, es drops or is replaced by das."
+    },
+    {
+     "heading": "es as an obligatory element",
+     "text": "As an obligatory element es either replaces something (a noun in the nominative or accusative, an adjective or participle, a part of a sentence or a whole sentence) or serves as an impersonal subject or object."
+    }
+   ],
+   "rules": [
+    "Placeholder es represents a dass-clause, an infinitive clause or an indirect question.",
+    "If the subordinate or infinitive clause is placed first, es drops or is replaced by das.",
+    "As a pronoun es can replace a noun in the nominative or accusative, an adjective or participle, or a whole part of a sentence.",
+    "When es replaces an adjective, a participle or a whole clause, it cannot stand in position 1.",
+    "Impersonal es is used for weather, time, personal well-being, sense impressions, noises, topic, and as a nominative complement with sein.",
+    "Impersonal es also appears as an object in set expressions: es eilig haben, es darauf ankommen lassen, es ernst meinen."
+   ],
+   "examples": [
+    {
+     "de": "Es ist wunderbar, dass sich so viele Möglichkeiten bieten.",
+     "note": "es represents a dass-clause."
+    },
+    {
+     "de": "Für diese Menschen ist es sinnvoller, eine vielseitige Tätigkeit anzustreben.",
+     "note": "es represents an infinitive clause."
+    },
+    {
+     "de": "Es ist fraglich, ob das stimmt.",
+     "note": "es represents an indirect question."
+    },
+    {
+     "de": "Sie besorgt nicht nur das Geschenk, sie verpackt es auch.",
+     "note": "es replaces a noun in the accusative."
+    },
+    {
+     "de": "Meine Kolleginnen sind topfit, ich bin es leider nicht.",
+     "note": "es replaces an adjective; it cannot stand in position 1."
+    },
+    {
+     "de": "Es regnet. Es schneit. Es donnert.",
+     "note": "impersonal es — weather."
+    },
+    {
+     "de": "Er hat es eilig.",
+     "note": "impersonal es as an object in a set expression."
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l04-1-e1",
+     "topicId": "g-l04-1",
+     "type": "choice",
+     "prompt": "The dass-clause is placed first. What happens to es?",
+     "text": "___ sich so viele Möglichkeiten bieten, ist wunderbar.",
+     "from": "",
+     "options": [
+      "Dass",
+      "Es dass",
+      "Es, dass",
+      "Dass es"
+     ],
+     "answers": [
+      "Dass"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "When the subordinate clause comes first, es drops (or is replaced by das): Dass sich so viele Möglichkeiten bieten, (das) ist wunderbar.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l04-1-e2",
+     "topicId": "g-l04-1",
+     "type": "fill",
+     "prompt": "Complete the placeholder for the following infinitive clause.",
+     "text": "Für diese Menschen ist ___ sinnvoller, eine vielseitige Tätigkeit anzustreben.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "es"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "es represents the following infinitive clause.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l04-1-e3",
+     "topicId": "g-l04-1",
+     "type": "choice",
+     "prompt": "What does es replace here?",
+     "text": "Meine Kolleginnen sind topfit, ich bin es leider nicht.",
+     "from": "",
+     "options": [
+      "ein Adjektiv",
+      "ein Nomen im Nominativ",
+      "ein Nomen im Akkusativ",
+      "das Wetter"
+     ],
+     "answers": [
+      "ein Adjektiv"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "es stands for the adjective topfit — and in this use it cannot stand in position 1.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l04-1-e4",
+     "topicId": "g-l04-1",
+     "type": "error",
+     "prompt": "This es cannot stand in position 1. Correct the sentence.",
+     "text": "Es bin ich leider nicht.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Ich bin es leider nicht."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "When es replaces an adjective, a participle or a whole clause, it cannot occupy position 1.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l04-1-e5",
+     "topicId": "g-l04-1",
+     "type": "context",
+     "prompt": "Which use of es is this?",
+     "text": "Es klopft. Es klingelt. Es läutet.",
+     "from": "",
+     "options": [
+      "Geräusche",
+      "Wetter",
+      "Zeit",
+      "Persönliches Befinden"
+     ],
+     "answers": [
+      "Geräusche"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Impersonal es is used for noises: Es klopft. Es klingelt. Es läutet. Es pfeift. Es raschelt.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l04-1-e6",
+     "topicId": "g-l04-1",
+     "type": "fill",
+     "prompt": "Set expression: he is in a hurry.",
+     "text": "Er hat ___ eilig.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "es"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Impersonal es appears as an object in fixed expressions such as es eilig haben.",
+     "fromSource": true
+    }
+   ],
+   "kursbuch": "",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 7,
+   "sourcePages": [
+    7
+   ],
+   "subtopics": [
+    {
+     "letter": "a",
+     "title": "Es als nicht-obligatorisches Satzelement",
+     "kursbuch": "S. 51/4"
+    },
+    {
+     "letter": "b",
+     "title": "Es als obligatorisches Satzelement",
+     "kursbuch": "S. 57/4"
+    }
+   ]
+  },
+  {
+   "id": "g-l04-2",
+   "language": "de",
+   "level": "C1",
+   "lektion": 4,
+   "number": 2,
+   "title": "Wortbildung: Graduierung von Adjektiven",
+   "titleEn": "Word formation: grading of adjectives",
+   "summary": "Intensifying prefixes such as brand-, tod-, top- and voll- in advertising, youth and colloquial language.",
+   "category": "Wortbildung",
+   "tags": [
+    "Wortbildung",
+    "Adjektive",
+    "Graduierung",
+    "Umgangssprache"
+   ],
+   "difficulty": 2,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "Where they occur",
+     "text": "In the language of advertising, in youth language and in colloquial German, adjectives are frequently graded with an intensifying first element."
+    },
+    {
+     "heading": "Not freely combinable",
+     "text": "Gradings and adjectives cannot be combined at will: affenstark (youth language) exists, but not affenbreit; bildschön exists, but not bildnett; nagelneu exists, but not nagelaktuell."
+    }
+   ],
+   "rules": [
+    "brand + neu / aktuell / gefährlich; extra + stark / breit; hyper + aktiv / modern / nervös.",
+    "riesen + groß; super + aktuell / nett / schnell / schön; tief + blau / traurig.",
+    "tod + schick / traurig; top + aktuell / fit / modisch; voll + automatisch / funktionsfähig.",
+    "Which grading goes with which adjective is fixed by usage and has to be learned."
+   ],
+   "examples": [
+    {
+     "de": "brand neu / aktuell / gefährlich",
+     "note": "brand- as an intensifier"
+    },
+    {
+     "de": "hyper aktiv / modern / nervös",
+     "note": "hyper- as an intensifier"
+    },
+    {
+     "de": "tod schick / traurig",
+     "note": "tod- as an intensifier"
+    },
+    {
+     "de": "top aktuell / fit / modisch",
+     "note": "top- as an intensifier"
+    },
+    {
+     "de": "voll automatisch / funktionsfähig",
+     "note": "voll- as an intensifier"
+    },
+    {
+     "de": "bildschön, aber nicht bildnett",
+     "note": "the combinations are fixed"
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l04-2-e1",
+     "topicId": "g-l04-2",
+     "type": "choice",
+     "prompt": "Which combination is actually used?",
+     "text": "",
+     "from": "",
+     "options": [
+      "nagelneu",
+      "nagelaktuell",
+      "bildnett",
+      "affenbreit"
+     ],
+     "answers": [
+      "nagelneu"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Gradings and adjectives cannot be combined freely: nagelneu and bildschön exist, nagelaktuell, bildnett and affenbreit do not.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l04-2-e2",
+     "topicId": "g-l04-2",
+     "type": "fill",
+     "prompt": "Very fashionable, in the language of advertising (___ + modisch).",
+     "text": "___ modisch",
+     "from": "",
+     "options": [],
+     "answers": [
+      "top"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "top- grades aktuell, fit and modisch.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l04-2-e3",
+     "topicId": "g-l04-2",
+     "type": "fill",
+     "prompt": "Completely automatic (___ + automatisch).",
+     "text": "___ automatisch",
+     "from": "",
+     "options": [],
+     "answers": [
+      "voll"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "voll- grades automatisch and funktionsfähig.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l04-2-e4",
+     "topicId": "g-l04-2",
+     "type": "choice",
+     "prompt": "Which grading goes with 'nervös'?",
+     "text": "___ nervös",
+     "from": "",
+     "options": [
+      "hyper",
+      "riesen",
+      "brand",
+      "voll"
+     ],
+     "answers": [
+      "hyper"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "hyper- grades aktiv, modern and nervös.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l04-2-e5",
+     "topicId": "g-l04-2",
+     "type": "error",
+     "prompt": "This grading is not used with this adjective. Replace it.",
+     "text": "Das Kleid ist bildnett.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Das Kleid ist bildschön."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "bild- goes with schön, not with nett.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "S. 58/2",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 8,
+   "sourcePages": [
+    8
+   ],
+   "subtopics": []
+  },
+  {
+   "id": "g-l05-1",
+   "language": "de",
+   "level": "C1",
+   "lektion": 5,
+   "number": 1,
+   "title": "Wortbildung: Vorsilben be- und ver-",
+   "titleEn": "Word formation: the prefixes be- and ver-",
+   "summary": "be- makes a verb transitive; ver- carries three quite different meanings.",
+   "category": "Wortbildung",
+   "tags": [
+    "Wortbildung",
+    "Vorsilben",
+    "Verben",
+    "Akkusativ"
+   ],
+   "difficulty": 3,
+   "prerequisites": [
+    "g-l01-2"
+   ],
+   "explanation": [
+    {
+     "heading": "Verbs with the inseparable prefix be-",
+     "text": "These verbs always take an accusative object. Frequently there is a corresponding verb without the prefix that takes a preposition instead."
+    },
+    {
+     "heading": "Verbs with the inseparable prefix ver-",
+     "text": "The prefix ver- can carry different meanings: the result of the action is unwanted, the result of the action is a changed state, or the prefix is simply neutral."
+    }
+   ],
+   "rules": [
+    "be- + verb always has an accusative object; the plain verb takes a preposition: arbeiten an → bearbeiten + Akkusativ, urteilen über → beurteilen + Akkusativ.",
+    "ver- meaning 1 — the result of the action is unwanted: sich verwählen, sich verfahren, sich verhören, sich verirren, sich verzählen, sich verrechnen.",
+    "ver- meaning 2 — the result is a changed state: verschönern, vergrößern, verbessern, verlängern, (sich) verändern.",
+    "ver- meaning 3 — neutral meaning: verbringen, verstehen, verschicken, sich vergnügen, sich verhalten.",
+    "Both prefixes are inseparable and unstressed, so the Partizip II has no ge-: bearbeitet, verbracht."
+   ],
+   "examples": [
+    {
+     "de": "Der Bildhauer bearbeitet die Skulptur.",
+     "note": "be- + Akkusativ"
+    },
+    {
+     "de": "Der Bildhauer arbeitet an der Skulptur.",
+     "note": "the plain verb with a preposition"
+    },
+    {
+     "de": "Der Kritiker beurteilt die Kunstwerke.",
+     "note": "be- + Akkusativ"
+    },
+    {
+     "de": "Der Kritiker urteilt über die Kunstwerke.",
+     "note": "the plain verb with a preposition"
+    },
+    {
+     "de": "Dann habe ich mich auch noch am Telefon verwählt.",
+     "note": "ver- — the result is unwanted"
+    },
+    {
+     "de": "Mit ein paar Bildern kann man ein Zimmer verschönern.",
+     "note": "ver- — a changed state"
+    },
+    {
+     "de": "Der Bildhauer verbringt viel Zeit in seinem Atelier.",
+     "note": "ver- — neutral meaning"
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l05-1-e1",
+     "topicId": "g-l05-1",
+     "type": "transform",
+     "prompt": "Rewrite with the be- verb and an accusative object.",
+     "text": "",
+     "from": "Der Kritiker urteilt über die Kunstwerke.",
+     "options": [],
+     "answers": [
+      "Der Kritiker beurteilt die Kunstwerke."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "be- verbs always take an accusative object; the preposition drops.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l05-1-e2",
+     "topicId": "g-l05-1",
+     "type": "transform",
+     "prompt": "Rewrite with the plain verb and its preposition.",
+     "text": "",
+     "from": "Der Bildhauer bearbeitet die Skulptur.",
+     "options": [],
+     "answers": [
+      "Der Bildhauer arbeitet an der Skulptur."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Without be-, the verb needs a preposition: arbeiten an + Dativ.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l05-1-e3",
+     "topicId": "g-l05-1",
+     "type": "choice",
+     "prompt": "Which meaning does ver- carry in 'sich verwählen'?",
+     "text": "",
+     "from": "",
+     "options": [
+      "Das Resultat der Handlung ist unerwünscht.",
+      "Das Resultat ist ein veränderter Zustand.",
+      "neutrale Bedeutung"
+     ],
+     "answers": [
+      "Das Resultat der Handlung ist unerwünscht."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Like sich verfahren, sich verhören, sich verirren — the action went wrong.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l05-1-e4",
+     "topicId": "g-l05-1",
+     "type": "choice",
+     "prompt": "Which meaning does ver- carry in 'vergrößern'?",
+     "text": "",
+     "from": "",
+     "options": [
+      "Das Resultat ist ein veränderter Zustand.",
+      "Das Resultat der Handlung ist unerwünscht.",
+      "neutrale Bedeutung"
+     ],
+     "answers": [
+      "Das Resultat ist ein veränderter Zustand."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Like verschönern, verbessern, verlängern, (sich) verändern.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l05-1-e5",
+     "topicId": "g-l05-1",
+     "type": "fill",
+     "prompt": "The result went wrong — he dialled the wrong number.",
+     "text": "Dann habe ich mich auch noch am Telefon ___.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "verwählt"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "sich verwählen — the result of the action is unwanted.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l05-1-e6",
+     "topicId": "g-l05-1",
+     "type": "error",
+     "prompt": "be- verbs take no preposition. Correct the sentence.",
+     "text": "Der Bildhauer bearbeitet an der Skulptur.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Der Bildhauer bearbeitet die Skulptur."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Verbs with be- always take a direct accusative object.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 9,
+   "sourcePages": [
+    9
+   ],
+   "subtopics": [
+    {
+     "letter": "a",
+     "title": "Verben mit der untrennbaren Vorsilbe be-",
+     "kursbuch": "S. 63/1"
+    },
+    {
+     "letter": "b",
+     "title": "Verben mit der untrennbaren Vorsilbe ver-",
+     "kursbuch": "S. 63/2"
+    }
+   ]
+  },
+  {
+   "id": "g-l05-2",
+   "language": "de",
+   "level": "C1",
+   "lektion": 5,
+   "number": 2,
+   "title": "Indirekte Rede: Fragen und Imperativ",
+   "titleEn": "Indirect speech: questions and imperatives",
+   "summary": "Indirect questions with a question word or ob; indirect imperatives with sollen, mögen, müssen.",
+   "category": "Indirekte Rede",
+   "tags": [
+    "Indirekte Rede",
+    "Konjunktiv I",
+    "Fragen",
+    "Imperativ"
+   ],
+   "difficulty": 4,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "Questions in indirect speech",
+     "text": "Indirect questions are introduced by a verb such as fragt or will wissen together with a question word (wer, wie, …) or with the connector ob. The conjugated verb stands at the end of the clause and, above all in written language, in Konjunktiv I or II."
+    },
+    {
+     "heading": "Imperatives in indirect speech",
+     "text": "For imperatives in indirect speech, written German uses the modal verbs sollen (neutral request), mögen (polite request), müssen (urgent request) or nicht dürfen / nicht sollen (negative request) in Konjunktiv I or II."
+    }
+   ],
+   "rules": [
+    "A question with a question word keeps that word: „Warum heißt die documenta so?“ → …, warum die documenta eigentlich so heiße.",
+    "A yes/no question is introduced by ob: „Sind dort die weltbesten Künstler vertreten?“ → …, ob dort die weltbesten Künstler vertreten seien.",
+    "The conjugated verb moves to the end of the clause.",
+    "Konjunktiv I or II is used above all in written language; the Indikativ is also possible.",
+    "Imperative → sollen for a neutral request, mögen for a polite one, müssen for an urgent one.",
+    "A negative imperative → nicht sollen or nicht dürfen."
+   ],
+   "examples": [
+    {
+     "de": "Die Leute fragten,",
+     "note": "the introducing verb"
+    },
+    {
+     "de": "warum die documenta eigentlich so heiße.",
+     "note": "question word + Konjunktiv I at the end"
+    },
+    {
+     "de": "ob dort die weltbesten Künstler vertreten seien.",
+     "note": "yes/no question → ob"
+    },
+    {
+     "de": "ich solle eine Bewerbungsmappe schicken.",
+     "note": "imperative → sollen (neutral request)"
+    },
+    {
+     "de": "ich möge die Studienordnung lesen.",
+     "note": "imperative → mögen (polite request)"
+    },
+    {
+     "de": "ich müsse mich bis März anmelden.",
+     "note": "imperative → müssen (urgent request)"
+    },
+    {
+     "de": "ich solle / dürfe mich nicht verunsichern lassen.",
+     "note": "negative request"
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l05-2-e1",
+     "topicId": "g-l05-2",
+     "type": "transform",
+     "prompt": "Put the question into indirect speech (Die Leute fragten, …).",
+     "text": "",
+     "from": "„Sind dort die weltbesten Künstler vertreten?“",
+     "options": [],
+     "answers": [
+      "Die Leute fragten, ob dort die weltbesten Künstler vertreten seien.",
+      "ob dort die weltbesten Künstler vertreten seien."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "A yes/no question takes ob; the conjugated verb goes to the end, in Konjunktiv I.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l05-2-e2",
+     "topicId": "g-l05-2",
+     "type": "fill",
+     "prompt": "Complete the connector for a yes/no question in indirect speech.",
+     "text": "Die Leute fragten, ___ dort die weltbesten Künstler vertreten seien.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "ob"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Without a question word, indirect questions are introduced by ob.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l05-2-e3",
+     "topicId": "g-l05-2",
+     "type": "choice",
+     "prompt": "„Lesen Sie bitte die Studienordnung.“ — which modal verb renders this polite request?",
+     "text": "Die Studienberaterin sagte, ich ___ die Studienordnung lesen.",
+     "from": "",
+     "options": [
+      "möge",
+      "müsse",
+      "dürfe nicht",
+      "wolle"
+     ],
+     "answers": [
+      "möge"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "mögen renders a polite request; sollen would be neutral, müssen urgent.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l05-2-e4",
+     "topicId": "g-l05-2",
+     "type": "choice",
+     "prompt": "„Melden Sie sich unbedingt bis März an!“ — which modal verb?",
+     "text": "Sie riet mir, ich ___ mich bis März anmelden.",
+     "from": "",
+     "options": [
+      "müsse",
+      "möge",
+      "solle nicht",
+      "dürfe"
+     ],
+     "answers": [
+      "müsse"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "unbedingt makes it an urgent request, so müssen.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l05-2-e5",
+     "topicId": "g-l05-2",
+     "type": "transform",
+     "prompt": "Put the negative imperative into indirect speech (Sie riet mir, …).",
+     "text": "",
+     "from": "„Lassen Sie sich nicht verunsichern!“",
+     "options": [],
+     "answers": [
+      "Sie riet mir, ich solle mich nicht verunsichern lassen.",
+      "ich solle mich nicht verunsichern lassen.",
+      "Sie riet mir, ich dürfe mich nicht verunsichern lassen.",
+      "ich dürfe mich nicht verunsichern lassen."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "A negative request takes nicht sollen or nicht dürfen in Konjunktiv I.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l05-2-e6",
+     "topicId": "g-l05-2",
+     "type": "error",
+     "prompt": "The word order of the indirect question is wrong. Correct it.",
+     "text": "Die Leute fragten, warum heiße die documenta eigentlich so.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Die Leute fragten, warum die documenta eigentlich so heiße."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "In an indirect question the conjugated verb stands at the end of the clause.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 9,
+   "sourcePages": [
+    9
+   ],
+   "subtopics": [
+    {
+     "letter": "a",
+     "title": "Fragen in der indirekten Rede",
+     "kursbuch": "S. 65/3"
+    },
+    {
+     "letter": "b",
+     "title": "Imperativ in der indirekten Rede",
+     "kursbuch": "S. 69/2"
+    }
+   ]
+  },
+  {
+   "id": "g-l05-3",
+   "language": "de",
+   "level": "C1",
+   "lektion": 5,
+   "number": 3,
+   "title": "Redewiedergabe mit nach, laut, zufolge und wie",
+   "titleEn": "Reporting speech with nach, laut, zufolge and wie",
+   "summary": "Prepositional ways of attributing a statement, plus the wie-clause.",
+   "category": "Indirekte Rede",
+   "tags": [
+    "Redewiedergabe",
+    "Präpositionen",
+    "Quellenangabe"
+   ],
+   "difficulty": 3,
+   "prerequisites": [
+    "g-l05-2"
+   ],
+   "explanation": [
+    {
+     "heading": "Prepositions",
+     "text": "A statement can be attributed to its author with the prepositions nach, laut and zufolge, either with the person's name or with a noun such as Meinung or Aussage."
+    },
+    {
+     "heading": "Position",
+     "text": "nach and laut precede the phrase; nach can also follow it; zufolge always follows the name it refers to."
+    }
+   ],
+   "rules": [
+    "Nach (der) Meinung / Aussage von + Dativ, or Max Liebermanns Meinung / Aussage nach — nach may precede or follow.",
+    "Laut (der) Meinung / Aussage von + Dativ, or simply Laut + name.",
+    "zufolge always follows the noun or name: Max Liebermann zufolge …",
+    "A subordinate clause with wie does the same job: Wie Max Liebermann meinte / sagte, …"
+   ],
+   "examples": [
+    {
+     "de": "Nach (der) Meinung /Aussage von Max Liebermann …",
+     "note": "nach + Dativ, preceding"
+    },
+    {
+     "de": "Max Liebermanns Meinung /Aussage nach …",
+     "note": "nach following the phrase"
+    },
+    {
+     "de": "Laut (der) Meinung /Aussage von Max Liebermann …",
+     "note": "laut + Dativ"
+    },
+    {
+     "de": "Laut Max Liebermann …",
+     "note": "laut + name alone"
+    },
+    {
+     "de": "Max Liebermann zufolge …",
+     "note": "zufolge always follows"
+    },
+    {
+     "de": "Wie Max Liebermann meinte / sagte,",
+     "note": "a wie-clause does the same job"
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l05-3-e1",
+     "topicId": "g-l05-3",
+     "type": "choice",
+     "prompt": "Which preposition must follow the name rather than precede it?",
+     "text": "",
+     "from": "",
+     "options": [
+      "zufolge",
+      "laut",
+      "nach",
+      "wie"
+     ],
+     "answers": [
+      "zufolge"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "zufolge always follows the noun or name: Max Liebermann zufolge …",
+     "fromSource": false
+    },
+    {
+     "id": "g-l05-3-e2",
+     "topicId": "g-l05-3",
+     "type": "fill",
+     "prompt": "Attribute the statement with a preposition placed before the name.",
+     "text": "___ Max Liebermann hat Kunst mit Können zu tun.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Laut"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Laut + name attributes the statement; nach would need der Meinung / Aussage von.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l05-3-e3",
+     "topicId": "g-l05-3",
+     "type": "transform",
+     "prompt": "Rewrite the attribution as a wie-clause.",
+     "text": "",
+     "from": "Laut Max Liebermann hat Kunst mit Können zu tun.",
+     "options": [],
+     "answers": [
+      "Wie Max Liebermann meinte, hat Kunst mit Können zu tun.",
+      "Wie Max Liebermann sagte, hat Kunst mit Können zu tun."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "A subordinate clause with wie is the clausal equivalent of the prepositional attribution.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l05-3-e4",
+     "topicId": "g-l05-3",
+     "type": "error",
+     "prompt": "zufolge is in the wrong position. Correct the sentence.",
+     "text": "Zufolge Max Liebermann hat Kunst mit Können zu tun.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Max Liebermann zufolge hat Kunst mit Können zu tun."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "zufolge is postpositioned — it always follows the name it refers to.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l05-3-e5",
+     "topicId": "g-l05-3",
+     "type": "context",
+     "prompt": "Which variant puts nach after the phrase?",
+     "text": "",
+     "from": "",
+     "options": [
+      "Max Liebermanns Meinung nach …",
+      "Nach Max Liebermanns Meinung …",
+      "Max Liebermann zufolge …"
+     ],
+     "answers": [
+      "Max Liebermanns Meinung nach …"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "nach can either precede (Nach der Meinung von …) or follow (… Meinung nach).",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "S. 71/5",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 10,
+   "sourcePages": [
+    10
+   ],
+   "subtopics": []
+  },
+  {
+   "id": "g-l06-1",
+   "language": "de",
+   "level": "C1",
+   "lektion": 6,
+   "number": 1,
+   "title": "Präpositionen mit Dativ",
+   "titleEn": "Prepositions with the dative",
+   "summary": "entsprechend, samt, fern and zuliebe — elevated, written register.",
+   "category": "Präpositionen",
+   "tags": [
+    "Präpositionen",
+    "Dativ",
+    "Schriftsprache"
+   ],
+   "difficulty": 3,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "Register",
+     "text": "The following prepositions belong to elevated usage, that is, to the written language."
+    }
+   ],
+   "rules": [
+    "entsprechend = in accordance with: entsprechend der neuen Studienordnung.",
+    "samt = together with: den Namen samt der E-Mail-Adresse.",
+    "fern = far from; it can also be used with the genitive: fern des Alltags.",
+    "zuliebe = for the sake of; it is postpositioned, i.e. it follows the noun.",
+    "All four govern the dative unless noted otherwise."
+   ],
+   "examples": [
+    {
+     "de": "Doppelstudiengänge sind entsprechend der neuen Studienordnung möglich.",
+     "note": "entsprechend + Dativ"
+    },
+    {
+     "de": "Im Vorlesungsverzeichnis findet man den Namen samt der E-Mail-Adresse.",
+     "note": "samt + Dativ"
+    },
+    {
+     "de": "Sie studiert fern (von) ihrer Heimatstadt.",
+     "note": "fern + Dativ; also possible with the genitive"
+    },
+    {
+     "de": "Seinen Eltern zuliebe hat er Jura studiert.",
+     "note": "zuliebe follows the noun"
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l06-1-e1",
+     "topicId": "g-l06-1",
+     "type": "choice",
+     "prompt": "Which of these prepositions is postpositioned?",
+     "text": "",
+     "from": "",
+     "options": [
+      "zuliebe",
+      "entsprechend",
+      "samt",
+      "fern"
+     ],
+     "answers": [
+      "zuliebe"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "zuliebe follows the noun: Seinen Eltern zuliebe hat er Jura studiert.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l06-1-e2",
+     "topicId": "g-l06-1",
+     "type": "fill",
+     "prompt": "Complete: 'in accordance with the new study regulations'.",
+     "text": "Doppelstudiengänge sind ___ der neuen Studienordnung möglich.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "entsprechend"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "entsprechend + Dativ = in accordance with.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l06-1-e3",
+     "topicId": "g-l06-1",
+     "type": "fill",
+     "prompt": "Complete: the name 'together with' the e-mail address.",
+     "text": "Im Vorlesungsverzeichnis findet man den Namen ___ der E-Mail-Adresse.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "samt"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "samt + Dativ = together with.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l06-1-e4",
+     "topicId": "g-l06-1",
+     "type": "choice",
+     "prompt": "Which case follows these prepositions by default?",
+     "text": "",
+     "from": "",
+     "options": [
+      "Dativ",
+      "Genitiv",
+      "Akkusativ",
+      "Nominativ"
+     ],
+     "answers": [
+      "Dativ"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "entsprechend, samt, fern and zuliebe take the dative; fern is additionally possible with the genitive.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l06-1-e5",
+     "topicId": "g-l06-1",
+     "type": "error",
+     "prompt": "zuliebe is in the wrong position. Correct the sentence.",
+     "text": "Zuliebe seinen Eltern hat er Jura studiert.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Seinen Eltern zuliebe hat er Jura studiert."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "zuliebe is postpositioned and follows the dative noun.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "S. 75/2",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 11,
+   "sourcePages": [
+    11
+   ],
+   "subtopics": []
+  },
+  {
+   "id": "g-l06-2",
+   "language": "de",
+   "level": "C1",
+   "lektion": 6,
+   "number": 2,
+   "title": "Wortbildung: Nachsilben bei Nomen",
+   "titleEn": "Word formation: noun suffixes",
+   "summary": "Nouns with the same suffix usually share the same article.",
+   "category": "Wortbildung",
+   "tags": [
+    "Wortbildung",
+    "Nachsilben",
+    "Nomen",
+    "Artikel"
+   ],
+   "difficulty": 3,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "Suffix and article",
+     "text": "Nouns with the same suffixes mostly have the same article, which makes the suffix a reliable clue to the gender."
+    },
+    {
+     "heading": "Where the suffixes come from",
+     "text": "With the endings -ar and -är you can build job titles such as Bibliothek → Bibliothekar, Sekretariat → Sekretär, or collectives such as Vokabel → Vokabular. Adjectives ending in -ant and -ent give nouns in -anz and -enz: elegant → Eleganz, intelligent → Intelligenz. Verbs in -ieren give nouns in -enz: existieren → Existenz."
+    }
+   ],
+   "rules": [
+    "der: -asmus / -ismus (Enthusiasmus, Feminismus, Optimismus, Mechanismus, Aktivismus, Sarkasmus).",
+    "der: -ar / -är for male job titles (Bibliothekar, Kommissar, Sekretär, Volontär).",
+    "das: -ment (Dokument, Experiment, Instrument, Management, Medikament).",
+    "die: -anz (Bilanz, Distanz, Eleganz, Resonanz) and -enz (Existenz, Intelligenz, Kompetenz, Konkurrenz, Präferenz).",
+    "Careful: -ar is der only for male job titles; words taken from Latin are neuter, e.g. das Seminar, das Vokabular, das Exemplar."
+   ],
+   "examples": [
+    {
+     "de": "Enthusiasmus",
+     "note": "der — suffix -asmus"
+    },
+    {
+     "de": "Mechanismus",
+     "note": "der — suffix -ismus"
+    },
+    {
+     "de": "Bibliothekar",
+     "note": "der — male job title in -ar"
+    },
+    {
+     "de": "Experiment",
+     "note": "das — suffix -ment"
+    },
+    {
+     "de": "Eleganz",
+     "note": "die — suffix -anz, from elegant"
+    },
+    {
+     "de": "Intelligenz",
+     "note": "die — suffix -enz, from intelligent"
+    },
+    {
+     "de": "das Vokabular",
+     "note": "das — a Latin word in -ar, not a job title"
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l06-2-e1",
+     "topicId": "g-l06-2",
+     "type": "choice",
+     "prompt": "Which article goes with 'Kompetenz'?",
+     "text": "___ Kompetenz",
+     "from": "",
+     "options": [
+      "die",
+      "der",
+      "das"
+     ],
+     "answers": [
+      "die"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Nouns in -enz are feminine: Existenz, Intelligenz, Kompetenz, Konkurrenz, Präferenz.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l06-2-e2",
+     "topicId": "g-l06-2",
+     "type": "choice",
+     "prompt": "Which article goes with 'Medikament'?",
+     "text": "___ Medikament",
+     "from": "",
+     "options": [
+      "das",
+      "der",
+      "die"
+     ],
+     "answers": [
+      "das"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Nouns in -ment are neuter: Dokument, Experiment, Instrument, Management, Medikament.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l06-2-e3",
+     "topicId": "g-l06-2",
+     "type": "choice",
+     "prompt": "Careful — which article goes with 'Seminar'?",
+     "text": "___ Seminar",
+     "from": "",
+     "options": [
+      "das",
+      "der",
+      "die"
+     ],
+     "answers": [
+      "das"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "-ar is der only for male job titles; Latin words such as das Seminar, das Vokabular, das Exemplar are neuter.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l06-2-e4",
+     "topicId": "g-l06-2",
+     "type": "transform",
+     "prompt": "Form the noun from the adjective 'intelligent'.",
+     "text": "",
+     "from": "intelligent",
+     "options": [],
+     "answers": [
+      "Intelligenz",
+      "die Intelligenz"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Adjectives in -ent give nouns in -enz.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l06-2-e5",
+     "topicId": "g-l06-2",
+     "type": "transform",
+     "prompt": "Form the noun from the adjective 'elegant'.",
+     "text": "",
+     "from": "elegant",
+     "options": [],
+     "answers": [
+      "Eleganz",
+      "die Eleganz"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Adjectives in -ant give nouns in -anz.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l06-2-e6",
+     "topicId": "g-l06-2",
+     "type": "fill",
+     "prompt": "Complete the article.",
+     "text": "___ Optimismus meiner Kollegin ist ansteckend.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Der"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Nouns in -ismus / -asmus are masculine.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "S. 76/2",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 11,
+   "sourcePages": [
+    11
+   ],
+   "subtopics": []
+  },
+  {
+   "id": "g-l06-3",
+   "language": "de",
+   "level": "C1",
+   "lektion": 6,
+   "number": 3,
+   "title": "Verweiswörter",
+   "titleEn": "Reference words",
+   "summary": "Adverbs such as das, dem, da, stattdessen, dadurch and infolgedessen that tie sentences into a coherent text.",
+   "category": "Textgrammatik",
+   "tags": [
+    "Verweiswörter",
+    "Kohärenz",
+    "Textgrammatik"
+   ],
+   "difficulty": 3,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "What they do",
+     "text": "To join sentences into coherent, logically built and stylistically good texts, German uses reference words. Each one points back to something already said."
+    }
+   ],
+   "rules": [
+    "Das points back to a whole statement: Das kannte ich so nicht.",
+    "Dem picks up a dative complement: Dem stimme ich zu (zustimmen + Dativ).",
+    "Da points back to a place or a situation: Da habe ich immer Ansprechpartner gefunden.",
+    "Stattdessen / Dafür express a replacement or a counterpart.",
+    "Dadurch expresses the means or the cause of what follows.",
+    "Dementsprechend / Infolgedessen / Demzufolge express a consequence."
+   ],
+   "examples": [
+    {
+     "de": "Das kannte ich so nicht.",
+     "note": "das points back to the whole previous statement"
+    },
+    {
+     "de": "Dem stimme ich zu.",
+     "note": "dem — zustimmen takes the dative"
+    },
+    {
+     "de": "Da habe ich immer Ansprechpartner gefunden.",
+     "note": "da points back to a place or situation"
+    },
+    {
+     "de": "Stattdessen / Dafür lernen wir in den Ferien umso mehr.",
+     "note": "replacement / counterpart"
+    },
+    {
+     "de": "Dadurch bleibt leider wenig Energie für anderes.",
+     "note": "means or cause"
+    },
+    {
+     "de": "Dementsprechend / Infolgedessen / Demzufolge ist man fachlich nicht auf dem neuesten Stand.",
+     "note": "consequence"
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l06-3-e1",
+     "topicId": "g-l06-3",
+     "type": "fill",
+     "prompt": "zustimmen takes the dative. Complete the reference word.",
+     "text": "In Deutschland kommt es darauf an, dass man einen Überblick bekommt. ___ stimme ich zu.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Dem"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "The reference word takes the case the verb requires — zustimmen + Dativ, so dem.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l06-3-e2",
+     "topicId": "g-l06-3",
+     "type": "choice",
+     "prompt": "Which reference word expresses a consequence?",
+     "text": "Leider bleibt keine Zeit, Fachzeitschriften zu lesen. ___ ist man fachlich nicht auf dem neuesten Stand.",
+     "from": "",
+     "options": [
+      "Infolgedessen",
+      "Stattdessen",
+      "Da",
+      "Das"
+     ],
+     "answers": [
+      "Infolgedessen"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Dementsprechend / Infolgedessen / Demzufolge express a consequence; stattdessen would express a replacement.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l06-3-e3",
+     "topicId": "g-l06-3",
+     "type": "choice",
+     "prompt": "Which reference word expresses a replacement?",
+     "text": "In Belgrad studieren wir fast nie im Semester. ___ lernen wir in den Ferien umso mehr.",
+     "from": "",
+     "options": [
+      "Stattdessen",
+      "Dementsprechend",
+      "Dem",
+      "Dadurch"
+     ],
+     "answers": [
+      "Stattdessen"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Stattdessen / Dafür express that something happens in place of something else.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l06-3-e4",
+     "topicId": "g-l06-3",
+     "type": "choice",
+     "prompt": "Which reference word expresses the means or cause of what follows?",
+     "text": "Ich finde das Studium ziemlich anstrengend. ___ bleibt leider wenig Energie für anderes.",
+     "from": "",
+     "options": [
+      "Dadurch",
+      "Stattdessen",
+      "Dem",
+      "Da"
+     ],
+     "answers": [
+      "Dadurch"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Dadurch names the means or the cause.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l06-3-e5",
+     "topicId": "g-l06-3",
+     "type": "error",
+     "prompt": "The case of the reference word is wrong. Correct the sentence.",
+     "text": "Das stimme ich zu.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Dem stimme ich zu."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "zustimmen governs the dative, so the reference word is dem, not das.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "S. 79/3",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 11,
+   "sourcePages": [
+    11
+   ],
+   "subtopics": []
+  },
+  {
+   "id": "g-l07-1",
+   "language": "de",
+   "level": "C1",
+   "lektion": 7,
+   "number": 1,
+   "title": "Verbalstil – Nominalstil",
+   "titleEn": "Verbal style – nominal style",
+   "summary": "Turning verbs into nouns, the standard move of formal written German.",
+   "category": "Stil",
+   "tags": [
+    "Nominalstil",
+    "Verbalstil",
+    "Schriftsprache",
+    "Genitivattribut"
+   ],
+   "difficulty": 5,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "Why it matters",
+     "text": "In written German the nominal style — using nouns in place of verbs — is widespread. It lets you build longer and more complex sentences."
+    },
+    {
+     "heading": "Vowel change",
+     "text": "When a verb is turned into a noun, strong verbs frequently change their stem vowel: brechen → der Bruch, denken → der Gedanke, verstehen → das Verständnis, finden → der Fund, sehen → die Sicht, aussteigen → der Ausstieg."
+    }
+   ],
+   "rules": [
+    "Adverb → declined adjective: Die Menschen reagieren unterschiedlich → Die unterschiedliche Reaktion der Menschen …",
+    "Subject → genitive attribute: Die Gesellschaft verändert sich → Die Veränderung der Gesellschaft …",
+    "Object → genitive attribute: Raphael analysierte die Gesellschaft → Seine Analyse der Gesellschaft …",
+    "Noun without an article → von + Dativ: Man gibt ihm Kleidung → Die Gabe von Kleidung …",
+    "Verb + preposition → noun + preposition: Junge Leute suchen nach Ferienjobs → Die Suche junger Leute nach Ferienjobs …",
+    "Personal pronoun → possessive article: Er arbeitet am Wochenende → Seine Arbeit am Wochenende …",
+    "The causing person or thing → durch + Akkusativ: Manche Eltern bessern das Taschengeld auf → Die Aufbesserung des Taschengeldes durch manche Eltern …",
+    "Verb + Dativ → noun + preposition: Die Schuldnerberatung hilft dem Jugendlichen → Die Hilfe der Schuldnerberatung für den Jugendlichen …"
+   ],
+   "examples": [
+    {
+     "de": "Die unterschiedliche Reaktion der Menschen",
+     "note": "Adverb → dekliniertes Adjektiv"
+    },
+    {
+     "de": "Die Veränderung der Gesellschaft",
+     "note": "Subjekt → Genitivattribut"
+    },
+    {
+     "de": "Seine Analyse der Gesellschaft machte ihn unzufrieden.",
+     "note": "Objekt → Genitivattribut"
+    },
+    {
+     "de": "Die freiwillige Gabe von Kleidung freut ihn.",
+     "note": "Nomen ohne Artikel → von + Dativ"
+    },
+    {
+     "de": "Ihr Interesse an Ferienjobs",
+     "note": "Verb + Präposition → Nomen + Präposition"
+    },
+    {
+     "de": "Die Aufbesserung des Taschengeldes durch manche Eltern",
+     "note": "verursachende Person → durch + Akkusativ"
+    },
+    {
+     "de": "Die Hilfe der Schuldnerberatung für den Jugendlichen",
+     "note": "Verb + Dativ → Nomen + Präposition"
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l07-1-e1",
+     "topicId": "g-l07-1",
+     "type": "transform",
+     "prompt": "Turn into the nominal style (subject → genitive attribute).",
+     "text": "",
+     "from": "Die Gesellschaft verändert sich.",
+     "options": [],
+     "answers": [
+      "Die Veränderung der Gesellschaft",
+      "die Veränderung der Gesellschaft"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "The subject of the verbal sentence becomes a genitive attribute of the noun.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l07-1-e2",
+     "topicId": "g-l07-1",
+     "type": "transform",
+     "prompt": "Turn into the nominal style (adverb → declined adjective).",
+     "text": "",
+     "from": "Die Menschen reagieren unterschiedlich.",
+     "options": [],
+     "answers": [
+      "Die unterschiedliche Reaktion der Menschen",
+      "die unterschiedliche Reaktion der Menschen"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "The adverb unterschiedlich becomes the declined adjective unterschiedliche.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l07-1-e3",
+     "topicId": "g-l07-1",
+     "type": "choice",
+     "prompt": "Which noun belongs to 'brechen'?",
+     "text": "",
+     "from": "",
+     "options": [
+      "der Bruch",
+      "die Brechung",
+      "das Brechnis",
+      "der Brach"
+     ],
+     "answers": [
+      "der Bruch"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Strong verbs frequently change their stem vowel: brechen → der Bruch.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l07-1-e4",
+     "topicId": "g-l07-1",
+     "type": "choice",
+     "prompt": "Which noun belongs to 'verstehen'?",
+     "text": "",
+     "from": "",
+     "options": [
+      "das Verständnis",
+      "der Verstand",
+      "die Verstehung",
+      "der Verstoß"
+     ],
+     "answers": [
+      "das Verständnis"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "verstehen → das Verständnis, with a vowel change.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l07-1-e5",
+     "topicId": "g-l07-1",
+     "type": "fill",
+     "prompt": "The causing person is added with which preposition?",
+     "text": "Die Aufbesserung des Taschengeldes ___ manche Eltern …",
+     "from": "",
+     "options": [],
+     "answers": [
+      "durch"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "The causing person or thing is added with durch + Akkusativ.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l07-1-e6",
+     "topicId": "g-l07-1",
+     "type": "error",
+     "prompt": "A noun without an article needs von + Dativ, not a genitive. Correct it.",
+     "text": "Die freiwillige Gabe Kleidung freut ihn.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Die freiwillige Gabe von Kleidung freut ihn."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "A bare noun without an article is attached with von + Dativ.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "S. 87/4; 89/4",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 12,
+   "sourcePages": [
+    12
+   ],
+   "subtopics": []
+  },
+  {
+   "id": "g-l07-2",
+   "language": "de",
+   "level": "C1",
+   "lektion": 7,
+   "number": 2,
+   "title": "Satzstrukturen: Kausale Zusammenhänge",
+   "titleEn": "Sentence structures: causal relations",
+   "summary": "Reasons expressed by subordinate connectors, main-clause connectors and prepositions.",
+   "category": "Satzstrukturen",
+   "tags": [
+    "Kausal",
+    "Konnektoren",
+    "Präpositionen",
+    "Genitiv"
+   ],
+   "difficulty": 4,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "Same meaning, different structure",
+     "text": "Reasons can be expressed with different structures. The sentences are equal in meaning but differ in structure and in register."
+    }
+   ],
+   "rules": [
+    "Subordinate connectors: weil / da / zumal — the verb goes to the end.",
+    "zumal (or besonders weil) adds a reason that reinforces an already given one.",
+    "Main-clause connectors: deshalb / deswegen / daher / aus diesem Grund / denn.",
+    "nämlich and eben are main-clause connectors that stand in position 3, never in position 1.",
+    "Prepositions with the genitive: wegen, mangels, angesichts, aufgrund, dank, kraft.",
+    "aus / vor express an inner cause: aus Angst, vor Wut."
+   ],
+   "examples": [
+    {
+     "de": "Herr Müller hat sich verschuldet , weil / da seine Scheidung teuer war.",
+     "note": "Nebensatz mit weil / da"
+    },
+    {
+     "de": "Ihm ist das nicht so wichtig, zumal / besonders weil er inzwischen eine neue Stelle hat.",
+     "note": "zumal reinforces a reason"
+    },
+    {
+     "de": "Er ist enttäuscht, denn er hat schon zweimal Schiffbruch erlitten.",
+     "note": "Hauptsatzkonnektor denn"
+    },
+    {
+     "de": "Wegen seiner Scheidung hat Herr Müller sich verschuldet.",
+     "note": "wegen + Genitiv"
+    },
+    {
+     "de": "Viele verschulden sich mangels Erfahrung im Umgang mit Geld.",
+     "note": "mangels + Genitiv"
+    },
+    {
+     "de": "Er kocht vor Wut.",
+     "note": "vor — inner cause"
+    },
+    {
+     "de": "Dank neuer technischer Entwicklungen gibt es Hoffnung für die Städte der Zukunft.",
+     "note": "dank + Genitiv, positive cause"
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l07-2-e1",
+     "topicId": "g-l07-2",
+     "type": "transform",
+     "prompt": "Rewrite the weil-clause with the preposition wegen + Genitiv.",
+     "text": "",
+     "from": "Herr Müller hat sich verschuldet, weil seine Scheidung teuer war.",
+     "options": [],
+     "answers": [
+      "Wegen seiner Scheidung hat Herr Müller sich verschuldet.",
+      "Wegen seiner teuren Scheidung hat Herr Müller sich verschuldet."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "The subordinate clause becomes a prepositional phrase with wegen + Genitiv.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l07-2-e2",
+     "topicId": "g-l07-2",
+     "type": "choice",
+     "prompt": "Which connector adds a reinforcing second reason?",
+     "text": "Ihm ist das nicht so wichtig, ___ er inzwischen eine neue Stelle hat.",
+     "from": "",
+     "options": [
+      "zumal",
+      "deshalb",
+      "nämlich",
+      "dank"
+     ],
+     "answers": [
+      "zumal"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "zumal (= besonders weil) adds a reason that reinforces the one already given.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l07-2-e3",
+     "topicId": "g-l07-2",
+     "type": "choice",
+     "prompt": "Where does 'nämlich' stand in the sentence?",
+     "text": "",
+     "from": "",
+     "options": [
+      "auf Position 3",
+      "auf Position 1",
+      "am Satzende",
+      "vor dem Subjekt"
+     ],
+     "answers": [
+      "auf Position 3"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "The main-clause connectors nämlich and eben stand in position 3.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l07-2-e4",
+     "topicId": "g-l07-2",
+     "type": "fill",
+     "prompt": "A positive cause takes which preposition?",
+     "text": "___ neuer technischer Entwicklungen gibt es Hoffnung für die Städte der Zukunft.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Dank"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "dank + Genitiv names a cause with a positive outcome.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l07-2-e5",
+     "topicId": "g-l07-2",
+     "type": "fill",
+     "prompt": "An inner cause — he is boiling with rage.",
+     "text": "Er kocht ___ Wut.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "vor"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "aus and vor express an inner cause: aus Angst, vor Wut.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l07-2-e6",
+     "topicId": "g-l07-2",
+     "type": "error",
+     "prompt": "'nämlich' cannot stand in position 1. Correct the sentence.",
+     "text": "Nämlich wissen sie nicht, dass man seine Ausgaben ständig beobachten muss.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Sie wissen nämlich nicht, dass man seine Ausgaben ständig beobachten muss."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "nämlich and eben always stand in position 3, never at the front.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "S. 91/4",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 12,
+   "sourcePages": [
+    12,
+    13
+   ],
+   "subtopics": []
+  },
+  {
+   "id": "g-l07-3",
+   "language": "de",
+   "level": "C1",
+   "lektion": 7,
+   "number": 3,
+   "title": "Wortbildung: Adjektive",
+   "titleEn": "Word formation: adjectives from adverbs with -ig",
+   "summary": "The suffix -ig turns adverbs into attributive adjectives, common in written German.",
+   "category": "Wortbildung",
+   "tags": [
+    "Wortbildung",
+    "Adjektive",
+    "Nachsilben",
+    "Schriftsprache"
+   ],
+   "difficulty": 2,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "What -ig does",
+     "text": "With the ending -ig, adverbs become attributive adjectives, which occur frequently in written German. They can be temporal, local or modal."
+    }
+   ],
+   "rules": [
+    "Temporal: bald → das baldige Wiedersehen, morgen → der morgige Tag, gestern → die gestrige Sitzung.",
+    "Local: dort → das dortige Bürgerbüro, oben → der obige Absender, hier → die hiesige Situation.",
+    "Modal: sonst → die sonstigen Kosten.",
+    "Likewise: heute → heutig, jetzt → jetzig, sofort → sofortig, vorher → vorherig, damals → damalig, abseits → abseitig, rückwärts → rückwärtig, mehrmals → mehrmalig, ehemals → ehemalig.",
+    "Some forms change their stem: hier → hiesig, oben → obig."
+   ],
+   "examples": [
+    {
+     "de": "das baldige Wiedersehen",
+     "note": "temporal — from bald"
+    },
+    {
+     "de": "der morgige Tag",
+     "note": "temporal — from morgen"
+    },
+    {
+     "de": "die gestrige Sitzung",
+     "note": "temporal — from gestern"
+    },
+    {
+     "de": "das dortige Bürgerbüro",
+     "note": "local — from dort"
+    },
+    {
+     "de": "die hiesige Situation",
+     "note": "local — from hier, with a stem change"
+    },
+    {
+     "de": "die sonstigen Kosten",
+     "note": "modal — from sonst"
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l07-3-e1",
+     "topicId": "g-l07-3",
+     "type": "transform",
+     "prompt": "Form the attributive adjective from 'gestern' (+ Sitzung).",
+     "text": "",
+     "from": "gestern",
+     "options": [],
+     "answers": [
+      "gestrig",
+      "die gestrige Sitzung",
+      "gestrige"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "gestern → gestrig: die gestrige Sitzung.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l07-3-e2",
+     "topicId": "g-l07-3",
+     "type": "transform",
+     "prompt": "Form the attributive adjective from 'hier' (+ Situation).",
+     "text": "",
+     "from": "hier",
+     "options": [],
+     "answers": [
+      "hiesig",
+      "die hiesige Situation",
+      "hiesige"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "hier → hiesig, with a stem change: die hiesige Situation.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l07-3-e3",
+     "topicId": "g-l07-3",
+     "type": "choice",
+     "prompt": "Which adjective belongs to 'oben'?",
+     "text": "der ___ Absender",
+     "from": "",
+     "options": [
+      "obige",
+      "obene",
+      "obenige",
+      "oberige"
+     ],
+     "answers": [
+      "obige"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "oben → obig: der obige Absender.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l07-3-e4",
+     "topicId": "g-l07-3",
+     "type": "fill",
+     "prompt": "Form the adjective from 'morgen'.",
+     "text": "der ___ Tag",
+     "from": "",
+     "options": [],
+     "answers": [
+      "morgige"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "morgen → morgig, declined here as morgige.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l07-3-e5",
+     "topicId": "g-l07-3",
+     "type": "choice",
+     "prompt": "Which of these is NOT formed with -ig in the list?",
+     "text": "",
+     "from": "",
+     "options": [
+      "weil",
+      "damals",
+      "mehrmals",
+      "ehemals"
+     ],
+     "answers": [
+      "weil"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "damals → damalig, mehrmals → mehrmalig, ehemals → ehemalig; weil is a connector, not an adverb of this kind.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "S. 92/2",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 13,
+   "sourcePages": [
+    13
+   ],
+   "subtopics": []
+  },
+  {
+   "id": "g-l08-1",
+   "language": "de",
+   "level": "C1",
+   "lektion": 8,
+   "number": 1,
+   "title": "Rund um das Passiv",
+   "titleEn": "All about the passive",
+   "summary": "The Gerundiv as a passive substitute, the wollen/sollen aspect shift, and bekommen + Partizip II.",
+   "category": "Passiv",
+   "tags": [
+    "Passiv",
+    "Gerundiv",
+    "Modalverben",
+    "Schriftsprache"
+   ],
+   "difficulty": 5,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "Gerundiv as a passive substitute",
+     "text": "The passive can also be expressed with the Gerundiv or with a relative clause. The Gerundiv is used predominantly in written language; in spoken language people prefer the passive with können, müssen or sollen, or a relative clause with Infinitiv + zu. Which modal verb fits depends on the context."
+    },
+    {
+     "heading": "How the Gerundiv is formed",
+     "text": "The Gerundiv is formed with zu + Partizip I + adjective ending and stands attributively in front of the noun."
+    },
+    {
+     "heading": "Aspect shift with modal verbs",
+     "text": "An intention can be expressed in two ways: as an active sentence with the modal verb wollen, or as a passive construction with sollen."
+    },
+    {
+     "heading": "bekommen + Partizip II",
+     "text": "A passive sentence without modal character can be expressed actively with a construction using bekommen + Partizip II. The dative object of the passive sentence becomes the subject of the active sentence."
+    }
+   ],
+   "rules": [
+    "Gerundiv = zu + Partizip I + Adjektivendung, attributive: ein dringend zu lösendes Problem.",
+    "It corresponds to a passive with a modal verb: ein Problem, das dringend gelöst werden muss.",
+    "It also corresponds to a relative clause with Infinitiv + zu: ein Problem, das dringend zu lösen ist.",
+    "Where possibility is meant, sich lassen + Infinitiv and adjectives in -bar are further variants: ein Test, der sich einfach durchführen lässt / ein einfach durchführbarer Test.",
+    "Aktiv mit wollen ↔ Passiv mit sollen express the same intention.",
+    "In bekommen + Partizip II the dative object of the passive becomes the subject."
+   ],
+   "examples": [
+    {
+     "de": "ein dringend zu lösendes Problem",
+     "note": "Gerundiv"
+    },
+    {
+     "de": "ein Problem, das dringend gelöst werden muss (soll)",
+     "note": "Passiv mit Modalverb"
+    },
+    {
+     "de": "ein Problem, das dringend zu lösen ist",
+     "note": "Infinitiv + zu"
+    },
+    {
+     "de": "ein einfach durchzuführender Test",
+     "note": "Gerundiv expressing possibility"
+    },
+    {
+     "de": "ein Test, der sich einfach durchführen lässt",
+     "note": "sich lassen + Infinitiv"
+    },
+    {
+     "de": "Die Autorin will Eltern in die Lage versetzen, mit Auffälligkeiten ihrer Kinder umzugehen.",
+     "note": "Aktiv mit wollen"
+    },
+    {
+     "de": "Der Leser bekommt anschaulich dargelegt, wie ein Umdenken gelingen kann.",
+     "note": "bekommen + Partizip II"
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l08-1-e1",
+     "topicId": "g-l08-1",
+     "type": "transform",
+     "prompt": "Turn the Gerundiv into a passive with a modal verb.",
+     "text": "",
+     "from": "ein dringend zu lösendes Problem",
+     "options": [],
+     "answers": [
+      "ein Problem, das dringend gelöst werden muss",
+      "ein Problem, das dringend gelöst werden soll"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "The Gerundiv corresponds to a passive with müssen or sollen — context decides which.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l08-1-e2",
+     "topicId": "g-l08-1",
+     "type": "transform",
+     "prompt": "Turn the Gerundiv into a relative clause with Infinitiv + zu.",
+     "text": "",
+     "from": "ein dringend zu lösendes Problem",
+     "options": [],
+     "answers": [
+      "ein Problem, das dringend zu lösen ist"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "sein + zu + Infinitiv is the other standard equivalent of the Gerundiv.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l08-1-e3",
+     "topicId": "g-l08-1",
+     "type": "choice",
+     "prompt": "How is the Gerundiv formed?",
+     "text": "",
+     "from": "",
+     "options": [
+      "zu + Partizip I + Adjektivendung",
+      "zu + Partizip II + Adjektivendung",
+      "Partizip I + zu",
+      "werden + Partizip II"
+     ],
+     "answers": [
+      "zu + Partizip I + Adjektivendung"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "zu + Partizip I + ending, standing attributively before the noun.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l08-1-e4",
+     "topicId": "g-l08-1",
+     "type": "transform",
+     "prompt": "Express the same intention as a passive with sollen.",
+     "text": "",
+     "from": "Die Autorin will Eltern in die Lage versetzen, mit Auffälligkeiten ihrer Kinder umzugehen.",
+     "options": [],
+     "answers": [
+      "Eltern sollen in die Lage versetzt werden, mit Auffälligkeiten ihrer Kinder umzugehen.",
+      "Eltern sollen (nach Vorstellung der Autorin) in die Lage versetzt werden, mit Auffälligkeiten ihrer Kinder umzugehen."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Aktiv mit wollen and Passiv mit sollen express the same intention.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l08-1-e5",
+     "topicId": "g-l08-1",
+     "type": "transform",
+     "prompt": "Rewrite actively with bekommen + Partizip II.",
+     "text": "",
+     "from": "Dem Leser wird anschaulich dargelegt, wie ein Umdenken gelingen kann.",
+     "options": [],
+     "answers": [
+      "Der Leser bekommt anschaulich dargelegt, wie ein Umdenken gelingen kann."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "The dative object dem Leser becomes the subject der Leser.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l08-1-e6",
+     "topicId": "g-l08-1",
+     "type": "error",
+     "prompt": "The participle in the Gerundiv is the wrong one. Correct it.",
+     "text": "ein dringend zu gelöstes Problem",
+     "from": "",
+     "options": [],
+     "answers": [
+      "ein dringend zu lösendes Problem"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "The Gerundiv uses Partizip I (lösend), not Partizip II.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 14,
+   "sourcePages": [
+    14
+   ],
+   "subtopics": [
+    {
+     "letter": "a",
+     "title": "Gerundiv als Passiversatz",
+     "kursbuch": "S. 99/2"
+    },
+    {
+     "letter": "b",
+     "title": "Aspektverschiebung mit Modalverben: Aktiv – Passiv",
+     "kursbuch": "S. 106/2"
+    },
+    {
+     "letter": "c",
+     "title": "Passiversatz mit bekommen + Partizip II",
+     "kursbuch": "S. 106/3"
+    }
+   ]
+  },
+  {
+   "id": "g-l08-2",
+   "language": "de",
+   "level": "C1",
+   "lektion": 8,
+   "number": 2,
+   "title": "Wortbildung: Nachsilben bei Adjektiven",
+   "titleEn": "Word formation: adjective suffixes",
+   "summary": "-(i)al vs -(i)ell change the meaning; -(a/i)bel and -(i)ös come from Latin.",
+   "category": "Wortbildung",
+   "tags": [
+    "Wortbildung",
+    "Adjektive",
+    "Nachsilben",
+    "Bedeutungsunterschied"
+   ],
+   "difficulty": 4,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "-(i)al and -(i)ell",
+     "text": "Some adjectives with the same stem but the endings -(i)al or -(i)ell have different meanings, so the suffix is not interchangeable."
+    },
+    {
+     "heading": "-(a/i)bel and -(i)ös",
+     "text": "Adjectives ending in -(a/i)bel and -(i)ös mostly come from Latin. The suffix -(a/i)bel usually means that something can be done, so it corresponds to a passive substitute."
+    }
+   ],
+   "rules": [
+    "real = konkret; reell = sehr gut (reelle Chancen).",
+    "ideal = bestmöglich; ideell = nicht ökonomisch (ideelle Werte).",
+    "rational = vernunftgesteuert; rationell = rasch, effizient.",
+    "-(a/i)bel usually means 'can be done': inakzeptabel = kann nicht akzeptiert werden; praktikabel = kann praktiziert werden; tolerabel = kann toleriert werden.",
+    "But not always: sensibel = empfindsam, penibel = genau.",
+    "-(i)ös: nervös, seriös."
+   ],
+   "examples": [
+    {
+     "de": "der reale Austausch =",
+     "note": "= der konkrete Austausch"
+    },
+    {
+     "de": "reelle Chancen auf mehr Erfolg =",
+     "note": "= sehr gute Chancen"
+    },
+    {
+     "de": "die ideale Entscheidung =",
+     "note": "= die bestmögliche Entscheidung"
+    },
+    {
+     "de": "ideelle Werte =",
+     "note": "= keine ökonomischen Werte"
+    },
+    {
+     "de": "rationelle Arbeitsabläufe =",
+     "note": "= rasche, effiziente Arbeitsabläufe"
+    },
+    {
+     "de": "Der Vorschlag ist nicht praktikabel.",
+     "note": "-bel = kann praktiziert werden"
+    },
+    {
+     "de": "Menschen mit einem Putzzwang sind extrem penibel.",
+     "note": "penibel = genau — the -bel rule does not apply here"
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l08-2-e1",
+     "topicId": "g-l08-2",
+     "type": "choice",
+     "prompt": "Good chances of success — which adjective?",
+     "text": "___ Chancen auf mehr Erfolg",
+     "from": "",
+     "options": [
+      "reelle",
+      "reale",
+      "rationelle",
+      "ideelle"
+     ],
+     "answers": [
+      "reelle"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "reell = sehr gut; real would mean konkret.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l08-2-e2",
+     "topicId": "g-l08-2",
+     "type": "choice",
+     "prompt": "Values that are not economic — which adjective?",
+     "text": "___ Werte",
+     "from": "",
+     "options": [
+      "ideelle",
+      "ideale",
+      "reale",
+      "rationale"
+     ],
+     "answers": [
+      "ideelle"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "ideell = nicht ökonomisch; ideal would mean bestmöglich.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l08-2-e3",
+     "topicId": "g-l08-2",
+     "type": "choice",
+     "prompt": "Fast, efficient workflows — which adjective?",
+     "text": "___ Arbeitsabläufe",
+     "from": "",
+     "options": [
+      "rationelle",
+      "rationale",
+      "reale",
+      "reelle"
+     ],
+     "answers": [
+      "rationelle"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "rationell = rasch, effizient; rational would mean vernunftgesteuert.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l08-2-e4",
+     "topicId": "g-l08-2",
+     "type": "transform",
+     "prompt": "Paraphrase with a passive: 'Der Vorschlag ist nicht praktikabel.'",
+     "text": "",
+     "from": "Der Vorschlag ist nicht praktikabel.",
+     "options": [],
+     "answers": [
+      "Der Vorschlag kann nicht praktiziert werden."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "-(a/i)bel corresponds to a passive substitute: kann (nicht) … werden.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l08-2-e5",
+     "topicId": "g-l08-2",
+     "type": "choice",
+     "prompt": "Which -bel adjective does NOT mean 'can be done'?",
+     "text": "",
+     "from": "",
+     "options": [
+      "penibel",
+      "praktikabel",
+      "tolerabel",
+      "inakzeptabel"
+     ],
+     "answers": [
+      "penibel"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "penibel = genau and sensibel = empfindsam are exceptions to the rule.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l08-2-e6",
+     "topicId": "g-l08-2",
+     "type": "error",
+     "prompt": "The suffix carries the wrong meaning here. Correct the sentence.",
+     "text": "Nach langem Nachdenken traf sie eine ideelle Entscheidung — die bestmögliche.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Nach langem Nachdenken traf sie eine ideale Entscheidung — die bestmögliche."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "ideal = bestmöglich; ideell would mean 'not economic'.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 15,
+   "sourcePages": [
+    15
+   ],
+   "subtopics": [
+    {
+     "letter": "a",
+     "title": "-(i)al und -(i)ell",
+     "kursbuch": "S. 100/3"
+    },
+    {
+     "letter": "b",
+     "title": "-(a / i)bel und -(i)ös",
+     "kursbuch": "S. 101/3"
+    }
+   ]
+  },
+  {
+   "id": "g-l09-1",
+   "language": "de",
+   "level": "C1",
+   "lektion": 9,
+   "number": 1,
+   "title": "Satzstrukturen: Konditionale und konzessive Zusammenhänge",
+   "titleEn": "Sentence structures: conditional and concessive relations",
+   "summary": "Conditions and counter-arguments through connectors, main clauses and prepositions.",
+   "category": "Satzstrukturen",
+   "tags": [
+    "Konditional",
+    "Konzessiv",
+    "Konnektoren",
+    "Präpositionen"
+   ],
+   "difficulty": 4,
+   "prerequisites": [
+    "g-l02-1"
+   ],
+   "explanation": [
+    {
+     "heading": "Same meaning, different structure",
+     "text": "Conditions and counter-arguments can be expressed with different structures. The sentences are equal in meaning but differ in structure and register. Expressions with prepositions are typical of written language."
+    }
+   ],
+   "rules": [
+    "Conditional subordinate connectors: im Falle, dass / unter der Bedingung, dass / angenommen, dass / vorausgesetzt, dass / wenn / falls / sofern / je nachdem, ob / je nachdem, wie.",
+    "vorausgesetzt can also be used as a main-clause connector: Wir können noch vieles ändern, vorausgesetzt wir beginnen sofort.",
+    "Conditional main-clause connectors: sonst / andernfalls.",
+    "Conditional prepositions: bei + Dativ, im Falle + Genitiv, ohne + Akkusativ, je nach + Dativ.",
+    "Concessive subordinate connectors: obwohl / obgleich / obschon / wenn auch / auch wenn / selbst wenn / ungeachtet der Tatsache, dass.",
+    "Concessive main-clause connectors: trotzdem / dennoch / allerdings.",
+    "Concessive prepositions: trotz + Genitiv, ungeachtet + Genitiv, selbst bei + Dativ.",
+    "In spoken German trotz is used more and more with the dative."
+   ],
+   "examples": [
+    {
+     "de": "Wenn / Falls / Sofern wir viele Schadstoffe produzieren, werden wir schlechte Luft einatmen.",
+     "note": "konditionaler Nebensatz"
+    },
+    {
+     "de": "Je nachdem, wie es mir gefällt, bleibe ich einen Tag länger.",
+     "note": "je nachdem, wie"
+    },
+    {
+     "de": "Bei / Im Falle hoher Schadstoffproduktion atmen wir schlechte Luft ein.",
+     "note": "konditionale Präposition"
+    },
+    {
+     "de": "Ohne den Einsatz von Glashaus-Techniken funktioniert die vertikale Landwirtschaft nicht.",
+     "note": "ohne + Akkusativ"
+    },
+    {
+     "de": "Auch wenn / Selbst wenn er wohlhabend war, war Wolfgang mit seinem Leben nicht zufrieden.",
+     "note": "konzessiver Nebensatz"
+    },
+    {
+     "de": "Es ist ein Ort mit Tradition. Trotzdem / Dennoch / Allerdings haben sich die Kreßberger an die neuen Bewohner gewöhnt.",
+     "note": "konzessiver Hauptsatzkonnektor"
+    },
+    {
+     "de": "Selbst bei einer alternativen Lebensweise kann man von traditionsbewussten Dorfbewohnern akzeptiert werden.",
+     "note": "selbst bei + Dativ"
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l09-1-e1",
+     "topicId": "g-l09-1",
+     "type": "transform",
+     "prompt": "Rewrite the conditional clause with the preposition bei + Dativ.",
+     "text": "",
+     "from": "Wenn wir viele Schadstoffe produzieren, atmen wir schlechte Luft ein.",
+     "options": [],
+     "answers": [
+      "Bei hoher Schadstoffproduktion atmen wir schlechte Luft ein.",
+      "Bei einer hohen Schadstoffproduktion atmen wir schlechte Luft ein."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "The conditional clause becomes a prepositional phrase with bei + Dativ.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l09-1-e2",
+     "topicId": "g-l09-1",
+     "type": "choice",
+     "prompt": "Which main-clause connector expresses the negative condition ('otherwise')?",
+     "text": "Wir dürfen nicht mehr so viele Schadstoffe produzieren, ___ atmen wir noch schlechtere Luft ein.",
+     "from": "",
+     "options": [
+      "sonst",
+      "trotzdem",
+      "sofern",
+      "ungeachtet"
+     ],
+     "answers": [
+      "sonst"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "sonst / andernfalls are the conditional main-clause connectors.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l09-1-e3",
+     "topicId": "g-l09-1",
+     "type": "choice",
+     "prompt": "Which connector is concessive, not conditional?",
+     "text": "",
+     "from": "",
+     "options": [
+      "obschon",
+      "sofern",
+      "falls",
+      "angenommen, dass"
+     ],
+     "answers": [
+      "obschon"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "obwohl / obgleich / obschon are concessive; sofern, falls and angenommen, dass are conditional.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l09-1-e4",
+     "topicId": "g-l09-1",
+     "type": "transform",
+     "prompt": "Rewrite the concessive clause with the preposition trotz + Genitiv.",
+     "text": "",
+     "from": "Obwohl die Lebensweise ganz anders ist, akzeptieren die Kreßberger die neuen Bewohner.",
+     "options": [],
+     "answers": [
+      "Trotz der ganz anderen Lebensweise akzeptieren die Kreßberger die neuen Bewohner.",
+      "Ungeachtet der ganz anderen Lebensweise akzeptieren die Kreßberger die neuen Bewohner."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "trotz / ungeachtet + Genitiv is the prepositional concessive.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l09-1-e5",
+     "topicId": "g-l09-1",
+     "type": "fill",
+     "prompt": "Complete the conditional preposition + Akkusativ ('without').",
+     "text": "___ den Einsatz von Glashaus-Techniken funktioniert die vertikale Landwirtschaft nicht.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Ohne"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "ohne + Akkusativ expresses a negative condition.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l09-1-e6",
+     "topicId": "g-l09-1",
+     "type": "error",
+     "prompt": "A concessive connector has been used where a conditional one is meant. Correct it.",
+     "text": "Obwohl wir die Mittel bekommen, schaffen wir die neue Technik an.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Vorausgesetzt, dass wir die Mittel bekommen, schaffen wir die neue Technik an.",
+      "Wenn wir die Mittel bekommen, schaffen wir die neue Technik an.",
+      "Falls wir die Mittel bekommen, schaffen wir die neue Technik an."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "The purchase depends on the funding, so the relation is conditional, not concessive.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 16,
+   "sourcePages": [
+    16
+   ],
+   "subtopics": [
+    {
+     "letter": "a",
+     "title": "Bedingungen ausdrücken: Konditionalsätze",
+     "kursbuch": "S. 112/3"
+    },
+    {
+     "letter": "b",
+     "title": "Kontroverses ausdrücken: Konzessivsätze",
+     "kursbuch": "S. 116/2"
+    }
+   ]
+  },
+  {
+   "id": "g-l09-2",
+   "language": "de",
+   "level": "C1",
+   "lektion": 9,
+   "number": 2,
+   "title": "Adjektive und Partizipien mit Präpositionen",
+   "titleEn": "Adjectives and participles with prepositions",
+   "summary": "Fixed adjective + preposition pairs, governing the accusative or the dative.",
+   "category": "Präpositionen",
+   "tags": [
+    "Adjektive",
+    "Partizipien",
+    "Präpositionen",
+    "Rektion"
+   ],
+   "difficulty": 3,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "Fixed pairs",
+     "text": "Some adjectives and participles are used together with particular prepositions. The preposition and the case it governs belong to the adjective and have to be learned with it."
+    }
+   ],
+   "rules": [
+    "With the accusative: angewiesen auf, bemüht um, dankbar für, entscheidend für, erfreut über, gespannt auf, glücklich über, verwundert über.",
+    "With the dative: aufgeschlossen gegenüber, erfahren in, überzeugt von, zufrieden mit.",
+    "When the complement is a clause, the preposition appears as a da(r)-form: überzeugt davon, dass …"
+   ],
+   "examples": [
+    {
+     "de": "Er ist auf seine Leser angewiesen.",
+     "note": "angewiesen auf + Akkusativ"
+    },
+    {
+     "de": "Den Lesern gefällt, dass er um aktuelle Bezüge bemüht ist.",
+     "note": "bemüht um + Akkusativ"
+    },
+    {
+     "de": "Ich bin schon gespannt auf seinen nächsten Roman.",
+     "note": "gespannt auf + Akkusativ"
+    },
+    {
+     "de": "Die Kreßberger sind verwundert über die alternative Lebensweise der Aussteiger.",
+     "note": "verwundert über + Akkusativ"
+    },
+    {
+     "de": "Sie ist stets aufgeschlossen gegenüber Neuem.",
+     "note": "aufgeschlossen gegenüber + Dativ"
+    },
+    {
+     "de": "Er ist erfahren im Verfassen von Bestsellern.",
+     "note": "erfahren in + Dativ"
+    },
+    {
+     "de": "Ich bin überzeugt davon, dass Kleinstädte einiges zu bieten haben.",
+     "note": "überzeugt von, here as davon + dass-Satz"
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l09-2-e1",
+     "topicId": "g-l09-2",
+     "type": "fill",
+     "prompt": "Complete the preposition that belongs to 'angewiesen'.",
+     "text": "Er ist ___ seine Leser angewiesen.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "auf"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "angewiesen auf + Akkusativ.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l09-2-e2",
+     "topicId": "g-l09-2",
+     "type": "fill",
+     "prompt": "Complete the preposition that belongs to 'zufrieden'.",
+     "text": "Viele Leser sind zufrieden ___ dem Angebot.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "mit"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "zufrieden mit + Dativ.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l09-2-e3",
+     "topicId": "g-l09-2",
+     "type": "choice",
+     "prompt": "Which case does 'gespannt auf' govern?",
+     "text": "",
+     "from": "",
+     "options": [
+      "Akkusativ",
+      "Dativ",
+      "Genitiv",
+      "Nominativ"
+     ],
+     "answers": [
+      "Akkusativ"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "angewiesen auf, bemüht um, dankbar für, gespannt auf and the others in that group take the accusative.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l09-2-e4",
+     "topicId": "g-l09-2",
+     "type": "choice",
+     "prompt": "Which adjective goes with the dative?",
+     "text": "",
+     "from": "",
+     "options": [
+      "aufgeschlossen gegenüber",
+      "dankbar für",
+      "erfreut über",
+      "entscheidend für"
+     ],
+     "answers": [
+      "aufgeschlossen gegenüber"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "aufgeschlossen gegenüber, erfahren in, überzeugt von and zufrieden mit take the dative.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l09-2-e5",
+     "topicId": "g-l09-2",
+     "type": "error",
+     "prompt": "The case after the preposition is wrong. Correct the sentence.",
+     "text": "Ich bin schon gespannt auf seinem nächsten Roman.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Ich bin schon gespannt auf seinen nächsten Roman."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "gespannt auf governs the accusative: auf seinen nächsten Roman.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l09-2-e6",
+     "topicId": "g-l09-2",
+     "type": "context",
+     "prompt": "The complement is a dass-clause. Complete the da(r)-form.",
+     "text": "Ich bin überzeugt ___, dass Kleinstädte einiges zu bieten haben.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "davon"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "überzeugt von + dass-Satz becomes überzeugt davon, dass …",
+     "fromSource": true
+    }
+   ],
+   "kursbuch": "S. 115/3",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 17,
+   "sourcePages": [
+    17
+   ],
+   "subtopics": []
+  },
+  {
+   "id": "g-l09-3",
+   "language": "de",
+   "level": "C1",
+   "lektion": 9,
+   "number": 3,
+   "title": "Präzisierende Verbindungsadverbien",
+   "titleEn": "Specifying linking adverbs",
+   "summary": "beziehungsweise / respektive, und zwar and vielmehr make a statement more precise.",
+   "category": "Textgrammatik",
+   "tags": [
+    "Verbindungsadverbien",
+    "Präzisierung",
+    "Textgrammatik"
+   ],
+   "difficulty": 3,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "Making a statement precise",
+     "text": "These adverbs add precision to what has just been said: an alternative name, a narrowing specification, or a correction."
+    }
+   ],
+   "rules": [
+    "beziehungsweise (bzw.) and respektive give an alternative designation, or say 'or, more exactly'.",
+    "und zwar narrows what has been said down to a specific case.",
+    "vielmehr corrects the previous statement and replaces it with a more accurate one."
+   ],
+   "examples": [
+    {
+     "de": "Städtische Landwirtschaft, Urban beziehungsweise (bzw.) / respektive Guerilla Gardening genannt, liegt im Trend.",
+     "note": "bzw. — an alternative name"
+    },
+    {
+     "de": "Ich war mit ihm bekannt beziehungsweise befreundet.",
+     "note": "bzw. — 'or, more exactly'"
+    },
+    {
+     "de": "Sie fand die Aufgaben schwierig respektive unmöglich.",
+     "note": "respektive"
+    },
+    {
+     "de": "Die Zukunft gehört ökologischen Lebensformen, und zwar speziell Projekten wie dem Prinzessinnengarten.",
+     "note": "und zwar narrows down"
+    },
+    {
+     "de": "Es geht nicht nur um Fassaden, vielmehr geht es um die Stadtlandschaft.",
+     "note": "vielmehr corrects"
+    },
+    {
+     "de": "Er ist nicht dumm, vielmehr weiß er gut Bescheid.",
+     "note": "vielmehr corrects"
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l09-3-e1",
+     "topicId": "g-l09-3",
+     "type": "choice",
+     "prompt": "Which adverb narrows the statement down to a specific case?",
+     "text": "Die Zukunft gehört ökologischen Lebensformen, ___ speziell Projekten wie dem Prinzessinnengarten.",
+     "from": "",
+     "options": [
+      "und zwar",
+      "vielmehr",
+      "beziehungsweise",
+      "respektive"
+     ],
+     "answers": [
+      "und zwar"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "und zwar narrows the preceding statement down.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l09-3-e2",
+     "topicId": "g-l09-3",
+     "type": "choice",
+     "prompt": "Which adverb corrects the previous statement?",
+     "text": "Er ist nicht dumm, ___ weiß er gut Bescheid.",
+     "from": "",
+     "options": [
+      "vielmehr",
+      "und zwar",
+      "beziehungsweise",
+      "bzw."
+     ],
+     "answers": [
+      "vielmehr"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "vielmehr replaces the rejected statement with a more accurate one.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l09-3-e3",
+     "topicId": "g-l09-3",
+     "type": "fill",
+     "prompt": "Give the alternative name (abbreviated form).",
+     "text": "Ich war mit ihm bekannt ___ befreundet.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "beziehungsweise",
+      "bzw."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "beziehungsweise (bzw.) = 'or, more exactly'.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l09-3-e4",
+     "topicId": "g-l09-3",
+     "type": "choice",
+     "prompt": "Which word is the formal synonym of 'beziehungsweise'?",
+     "text": "",
+     "from": "",
+     "options": [
+      "respektive",
+      "vielmehr",
+      "und zwar",
+      "dennoch"
+     ],
+     "answers": [
+      "respektive"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "respektive is the more formal equivalent of beziehungsweise.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l09-3-e5",
+     "topicId": "g-l09-3",
+     "type": "error",
+     "prompt": "The linking adverb does not fit the meaning. Correct it.",
+     "text": "Es geht nicht nur um Fassaden, und zwar geht es um die Stadtlandschaft.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Es geht nicht nur um Fassaden, vielmehr geht es um die Stadtlandschaft."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "The second clause corrects the first, so vielmehr, not und zwar.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "S. 119/3",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 17,
+   "sourcePages": [
+    17
+   ],
+   "subtopics": []
+  },
+  {
+   "id": "g-l10-1",
+   "language": "de",
+   "level": "C1",
+   "lektion": 10,
+   "number": 1,
+   "title": "Variationen der Satzstellung",
+   "titleEn": "Variations of word order",
+   "summary": "Moving parts of the sentence into the Vorfeld or out into the Nachfeld.",
+   "category": "Satzstellung",
+   "tags": [
+    "Satzstellung",
+    "Vorfeld",
+    "Nachfeld",
+    "Verbklammer"
+   ],
+   "difficulty": 4,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "Infinitive and Partizip II in the Vorfeld",
+     "text": "For emphasis, single parts of the sentence can be placed in the Vorfeld, the position before the finite verb. You can, for instance, put the second part of the Verbklammer there — the infinitive belonging to a modal verb, or the Partizip II in the perfect or the passive."
+    },
+    {
+     "heading": "Moving out into the Nachfeld",
+     "text": "Single parts of the sentence can be placed after the second part of the Verbklammer. This usually makes the sentence clearer, and in speech it lets you add something you had forgotten."
+    }
+   ],
+   "rules": [
+    "Vorfeld: the infinitive belonging to a modal verb — Vorkommen kann es immer wieder.",
+    "Vorfeld: the Partizip II in the perfect or passive — Verstanden habe ich den Roman sofort.",
+    "Nachfeld: comparisons with wie and als — Lesen mag anstrengender sein als Fernsehen.",
+    "Nachfeld: clauses with sondern and oder, and infinitives with zu — Der Autor hat gerade angefangen zu schreiben.",
+    "Nachfeld: afterthoughts and explanations — Man ist nicht immer einverstanden mit der Meinung des Autors."
+   ],
+   "examples": [
+    {
+     "de": "Vorkommen kann es immer wieder.",
+     "note": "infinitive to the modal verb in the Vorfeld"
+    },
+    {
+     "de": "Verstanden habe ich den Roman sofort.",
+     "note": "Partizip II in the Vorfeld (perfect)"
+    },
+    {
+     "de": "Übersetzt wurde er in mehrere Sprachen.",
+     "note": "Partizip II in the Vorfeld (passive)"
+    },
+    {
+     "de": "Lesen mag anstrengender sein als Fernsehen.",
+     "note": "comparison moved into the Nachfeld"
+    },
+    {
+     "de": "Der Autor hat gerade angefangen zu schreiben.",
+     "note": "infinitive with zu in the Nachfeld"
+    },
+    {
+     "de": "Man ist nicht immer einverstanden mit der Meinung des Autors.",
+     "note": "afterthought in the Nachfeld"
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l10-1-e1",
+     "topicId": "g-l10-1",
+     "type": "transform",
+     "prompt": "Emphasise the Partizip II by putting it in the Vorfeld.",
+     "text": "",
+     "from": "Ich habe den Roman sofort verstanden.",
+     "options": [],
+     "answers": [
+      "Verstanden habe ich den Roman sofort."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "The Partizip II moves to position 1; the finite verb stays in position 2.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l10-1-e2",
+     "topicId": "g-l10-1",
+     "type": "transform",
+     "prompt": "Emphasise the infinitive by putting it in the Vorfeld.",
+     "text": "",
+     "from": "Es kann immer wieder vorkommen.",
+     "options": [],
+     "answers": [
+      "Vorkommen kann es immer wieder."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "The infinitive belonging to the modal verb moves into the Vorfeld.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l10-1-e3",
+     "topicId": "g-l10-1",
+     "type": "transform",
+     "prompt": "Move the comparison out into the Nachfeld.",
+     "text": "",
+     "from": "Lesen mag anstrengender als Fernsehen sein.",
+     "options": [],
+     "answers": [
+      "Lesen mag anstrengender sein als Fernsehen."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Comparisons with wie and als are readily moved behind the second part of the Verbklammer.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l10-1-e4",
+     "topicId": "g-l10-1",
+     "type": "transform",
+     "prompt": "Move the infinitive clause out into the Nachfeld.",
+     "text": "",
+     "from": "Der Autor hat gerade zu schreiben angefangen.",
+     "options": [],
+     "answers": [
+      "Der Autor hat gerade angefangen zu schreiben."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Infinitives with zu are commonly placed in the Nachfeld; the sentence becomes clearer.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l10-1-e5",
+     "topicId": "g-l10-1",
+     "type": "choice",
+     "prompt": "What is the effect of moving something into the Nachfeld?",
+     "text": "",
+     "from": "",
+     "options": [
+      "Der Satz wird meist übersichtlicher.",
+      "Der Satz wird zur Frage.",
+      "Der Satz wird passiv.",
+      "Das Verb verliert seine Endung."
+     ],
+     "answers": [
+      "Der Satz wird meist übersichtlicher."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "It usually makes the sentence clearer, and in speech lets you add a forgotten element.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l10-1-e6",
+     "topicId": "g-l10-1",
+     "type": "reorder",
+     "prompt": "Put the Partizip II into the Vorfeld and order the sentence.",
+     "text": "",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Übersetzt wurde er in mehrere Sprachen."
+     ],
+     "tokens": [
+      "Übersetzt",
+      "wurde",
+      "er",
+      "in",
+      "mehrere",
+      "Sprachen."
+     ],
+     "hint": "",
+     "explain": "Partizip II in position 1, finite verb in position 2, subject third.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "S. 123/3",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 18,
+   "sourcePages": [
+    18
+   ],
+   "subtopics": [
+    {
+     "letter": "a",
+     "title": "Infinitiv und Partizip II im Vorfeld",
+     "kursbuch": ""
+    },
+    {
+     "letter": "b",
+     "title": "Ausklammerung ins Nachfeld",
+     "kursbuch": ""
+    }
+   ]
+  },
+  {
+   "id": "g-l10-2",
+   "language": "de",
+   "level": "C1",
+   "lektion": 10,
+   "number": 2,
+   "title": "Wortbildung: Nachsilben bei Nomen",
+   "titleEn": "Word formation: noun suffixes (die and das)",
+   "summary": "-(a)tion, -ie, -ität, -ur are feminine; -tum and -ium are neuter.",
+   "category": "Wortbildung",
+   "tags": [
+    "Wortbildung",
+    "Nachsilben",
+    "Nomen",
+    "Artikel"
+   ],
+   "difficulty": 2,
+   "prerequisites": [
+    "g-l06-2"
+   ],
+   "explanation": [
+    {
+     "heading": "Suffix and article",
+     "text": "As with the suffixes in Lektion 6, the ending of the noun tells you its article — with one well-known exception."
+    }
+   ],
+   "rules": [
+    "die: -(a)tion (Manipulation, Intention, Kreation).",
+    "die: -ie (Fantasie, Harmonie, Ökonomie).",
+    "die: -ität (Aktivität, Kreativität, Stabilität).",
+    "die: -ur (Figur, Statur, Fraktur).",
+    "das: -tum (Wachstum, Eigentum, Brauchtum) — but der Reichtum.",
+    "das: -ium (Medium, Stadium, Studium)."
+   ],
+   "examples": [
+    {
+     "de": "Manipulation, Intention, Kreation",
+     "note": "die — suffix -(a)tion"
+    },
+    {
+     "de": "Fantasie, Harmonie, Ökonomie",
+     "note": "die — suffix -ie"
+    },
+    {
+     "de": "Aktivität, Kreativität, Stabilität",
+     "note": "die — suffix -ität"
+    },
+    {
+     "de": "Figur, Statur, Fraktur",
+     "note": "die — suffix -ur"
+    },
+    {
+     "de": "Wachstum, Eigentum",
+     "note": "das — suffix -tum"
+    },
+    {
+     "de": "Medium, Stadium, Studium",
+     "note": "das — suffix -ium"
+    },
+    {
+     "de": "aber: der Reichtum",
+     "note": "the exception to -tum"
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l10-2-e1",
+     "topicId": "g-l10-2",
+     "type": "choice",
+     "prompt": "Which article goes with 'Stabilität'?",
+     "text": "___ Stabilität",
+     "from": "",
+     "options": [
+      "die",
+      "der",
+      "das"
+     ],
+     "answers": [
+      "die"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Nouns in -ität are feminine.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l10-2-e2",
+     "topicId": "g-l10-2",
+     "type": "choice",
+     "prompt": "Which article goes with 'Studium'?",
+     "text": "___ Studium",
+     "from": "",
+     "options": [
+      "das",
+      "die",
+      "der"
+     ],
+     "answers": [
+      "das"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Nouns in -ium are neuter: Medium, Stadium, Studium.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l10-2-e3",
+     "topicId": "g-l10-2",
+     "type": "choice",
+     "prompt": "Which noun in -tum is the exception?",
+     "text": "",
+     "from": "",
+     "options": [
+      "Reichtum",
+      "Wachstum",
+      "Eigentum",
+      "Brauchtum"
+     ],
+     "answers": [
+      "Reichtum"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "-tum is otherwise neuter, but it is der Reichtum.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l10-2-e4",
+     "topicId": "g-l10-2",
+     "type": "fill",
+     "prompt": "Complete the article.",
+     "text": "___ Ökonomie eines Landes hängt von vielen Faktoren ab.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Die"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Nouns in -ie are feminine: Fantasie, Harmonie, Ökonomie.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l10-2-e5",
+     "topicId": "g-l10-2",
+     "type": "fill",
+     "prompt": "Complete the article.",
+     "text": "___ Wachstum der Stadt war nicht geplant.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Das"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Nouns in -tum are neuter — apart from der Reichtum.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "S. 123/4",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 18,
+   "sourcePages": [
+    18
+   ],
+   "subtopics": []
+  },
+  {
+   "id": "g-l10-3",
+   "language": "de",
+   "level": "C1",
+   "lektion": 10,
+   "number": 3,
+   "title": "Satzstrukturen: Temporale und finale Zusammenhänge",
+   "titleEn": "Sentence structures: temporal and final relations",
+   "summary": "Time relations and purposes through connectors, main clauses and prepositions.",
+   "category": "Satzstrukturen",
+   "tags": [
+    "Temporal",
+    "Final",
+    "Konnektoren",
+    "Präpositionen"
+   ],
+   "difficulty": 4,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "Expressing time relations",
+     "text": "Temporal clauses are introduced by wenn, als, bevor, ehe, sobald, nachdem, während or woraufhin; the corresponding main-clause connectors are daraufhin and währenddessen."
+    },
+    {
+     "heading": "Time relations as prepositional phrases",
+     "text": "The same content can be expressed with a preposition plus a nominalised infinitive or a noun: im / beim + nominalisierter Infinitiv, am + nominalisierter Infinitiv + sein, vor + Dativ, während + Genitiv, (gleich) nach + Dativ."
+    },
+    {
+     "heading": "Expressing purposes",
+     "text": "Final clauses are introduced by um zu, damit, wozu or wofür; the main-clause connectors are dazu and dafür; the prepositions are für + Akkusativ, zu + Dativ, zwecks + Genitiv and zum Zweck(e) + Genitiv."
+    }
+   ],
+   "rules": [
+    "wenn = repeated or general; als = one single event in the past.",
+    "bevor / ehe precede, sobald / nachdem follow, während is simultaneous.",
+    "woraufhin is a subordinate connector; daraufhin the corresponding main-clause one.",
+    "For a state use im + nominalised infinitive; for an action rather beim.",
+    "am + nominalised infinitive + sein is frequent in colloquial speech.",
+    "um zu needs the same subject in both clauses; damit does not."
+   ],
+   "examples": [
+    {
+     "de": "Wenn der Wecker klingelt, steht Dr. Kauter auf.",
+     "note": "wenn — repeated event"
+    },
+    {
+     "de": "Als der Wecker gestern Morgen klingelte, wollte Fredi nicht aufstehen.",
+     "note": "als — one single past event"
+    },
+    {
+     "de": "Bevor / Ehe Dr. Kauter ins Bad geht, nimmt er Ballaststoffe ein.",
+     "note": "bevor / ehe"
+    },
+    {
+     "de": "Im Stehen trank er eine Tasse Kaffee.",
+     "note": "im + nominalised infinitive — a state"
+    },
+    {
+     "de": "Beim Telefonieren macht er sich Notizen.",
+     "note": "beim + nominalised infinitive — an action"
+    },
+    {
+     "de": "Um sich von seiner Frau zu verabschieden, geht er ins Schlafzimmer.",
+     "note": "final clause with um zu"
+    },
+    {
+     "de": "Dr. Kauter verlässt das Schlafzimmer leise, damit seine Frau nicht aufwacht.",
+     "note": "damit — different subjects"
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l10-3-e1",
+     "topicId": "g-l10-3",
+     "type": "choice",
+     "prompt": "One single event in the past — which connector?",
+     "text": "___ der Wecker gestern Morgen klingelte, wollte Fredi nicht aufstehen.",
+     "from": "",
+     "options": [
+      "Als",
+      "Wenn",
+      "Sobald",
+      "Während"
+     ],
+     "answers": [
+      "Als"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "als is used for one single event in the past; wenn for repeated or general ones.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l10-3-e2",
+     "topicId": "g-l10-3",
+     "type": "transform",
+     "prompt": "Rewrite with a preposition + nominalised infinitive (an action).",
+     "text": "",
+     "from": "Während er telefoniert, macht er sich Notizen.",
+     "options": [],
+     "answers": [
+      "Beim Telefonieren macht er sich Notizen."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "For an action you use beim + nominalised infinitive; im would suggest a state.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l10-3-e3",
+     "topicId": "g-l10-3",
+     "type": "choice",
+     "prompt": "Both clauses have the same subject. Which final connector?",
+     "text": "___ sich von seiner Frau zu verabschieden, geht er ins Schlafzimmer.",
+     "from": "",
+     "options": [
+      "Um",
+      "Damit",
+      "Wozu",
+      "Dafür"
+     ],
+     "answers": [
+      "Um"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "um zu requires the same subject in both clauses; damit does not.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l10-3-e4",
+     "topicId": "g-l10-3",
+     "type": "error",
+     "prompt": "The subjects differ, so um zu is impossible. Correct the sentence.",
+     "text": "Dr. Kauter verlässt das Schlafzimmer leise, um seine Frau nicht aufzuwecken zu lassen.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Dr. Kauter verlässt das Schlafzimmer leise, damit seine Frau nicht aufwacht."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "With different subjects you need damit.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l10-3-e5",
+     "topicId": "g-l10-3",
+     "type": "fill",
+     "prompt": "Complete the subordinate connector meaning 'whereupon'.",
+     "text": "Der Wecker fiept, ___ sich Fred tot stellt.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "woraufhin"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "woraufhin is the subordinate connector; daraufhin the main-clause one.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l10-3-e6",
+     "topicId": "g-l10-3",
+     "type": "transform",
+     "prompt": "Rewrite the final clause with the preposition zu + Dativ.",
+     "text": "",
+     "from": "Viele Schriftsteller brauchen Ruhe und Abgeschiedenheit, um zu schreiben.",
+     "options": [],
+     "answers": [
+      "Zum Schreiben brauchen viele Schriftsteller Ruhe und Abgeschiedenheit."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "zu + nominalised infinitive is the prepositional equivalent of the final clause.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 18,
+   "sourcePages": [
+    18,
+    19
+   ],
+   "subtopics": [
+    {
+     "letter": "a",
+     "title": "Zeitverhältnisse ausdrücken: Temporalsätze",
+     "kursbuch": "S. 127/2; 129/2"
+    },
+    {
+     "letter": "b",
+     "title": "Absichten ausdrücken: Finalsätze",
+     "kursbuch": "S. 131/3"
+    }
+   ]
+  },
+  {
+   "id": "g-l11-1",
+   "language": "de",
+   "level": "C1",
+   "lektion": 11,
+   "number": 1,
+   "title": "Satzstrukturen: Konsekutive und modale Zusammenhänge",
+   "titleEn": "Sentence structures: consecutive and modal relations",
+   "summary": "Consequences and manner through connectors, main clauses and prepositions.",
+   "category": "Satzstrukturen",
+   "tags": [
+    "Konsekutiv",
+    "Modal",
+    "Konnektoren",
+    "Präpositionen"
+   ],
+   "difficulty": 4,
+   "prerequisites": [
+    "g-l07-2"
+   ],
+   "explanation": [
+    {
+     "heading": "Same meaning, different structure",
+     "text": "Consequences as well as manner can be expressed with different structures. The sentences are equal in meaning but differ in structure and register. Expressions with prepositions are typical of written language."
+    },
+    {
+     "heading": "Consecutive clauses",
+     "text": "With solch ein / ein solch / ein derartig …, dass the intensity sits in the noun phrase; with so / derartig …, dass it sits in the adjective; sodass simply attaches the consequence."
+    },
+    {
+     "heading": "Modal clauses",
+     "text": "indem and dadurch, dass name the means by which something is achieved; womit and wodurch attach the result to the whole preceding clause."
+    }
+   ],
+   "rules": [
+    "Consecutive subordinate connectors: solch ein / ein solch / ein derartig …, dass; sodass; so / derartig …, dass; weshalb / weswegen.",
+    "Consecutive main-clause connectors: deshalb / demnach / demzufolge / folglich / infolgedessen.",
+    "Consecutive prepositions: infolge von + Dativ, infolge + Genitiv.",
+    "Modal subordinate connectors: indem, dadurch dass, womit, wodurch.",
+    "Modal main-clause connectors: dadurch / damit / so / auf diese Weise.",
+    "Modal prepositions: durch + Akkusativ, mittels + Genitiv, mithilfe + Genitiv."
+   ],
+   "examples": [
+    {
+     "de": "Schweizer haben ein Gefühl für Höflichkeit, sodass sie sensibel auf Zwischentöne reagieren.",
+     "note": "sodass attaches the consequence"
+    },
+    {
+     "de": "Deutsche sind eine direktere Kommunikation gewöhnt, weshalb / weswegen sie auf Schweizer oft arrogant wirken.",
+     "note": "weshalb / weswegen"
+    },
+    {
+     "de": "Infolge eines Missverständnisses habe ich den Geschäftspartner falsch angesprochen.",
+     "note": "infolge + Genitiv"
+    },
+    {
+     "de": "Ich bereite mich auf eine Geschäftsreise vor, indem ich mich bei Freunden nach ihren Erfahrungen erkundige.",
+     "note": "indem names the means"
+    },
+    {
+     "de": "Eric macht ein Auslandspraktikum, womit sein Lebenslauf attraktiver für Arbeitgeber wird.",
+     "note": "womit attaches the result"
+    },
+    {
+     "de": "Durch häufigen Kontakt mit anderen Kulturen erwirbt man interkulturelle Kompetenz.",
+     "note": "durch + Akkusativ"
+    },
+    {
+     "de": "Mittels / Mithilfe neuer Techniken kann man Kontakt halten.",
+     "note": "mittels / mithilfe + Genitiv"
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l11-1-e1",
+     "topicId": "g-l11-1",
+     "type": "transform",
+     "prompt": "Rewrite the modal clause with the preposition durch + Akkusativ.",
+     "text": "",
+     "from": "Man erwirbt interkulturelle Kompetenz, indem man häufig Kontakt mit anderen Kulturen hat.",
+     "options": [],
+     "answers": [
+      "Durch häufigen Kontakt mit anderen Kulturen erwirbt man interkulturelle Kompetenz."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "indem-clauses correspond to durch + Akkusativ in the written register.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l11-1-e2",
+     "topicId": "g-l11-1",
+     "type": "choice",
+     "prompt": "Which connector names the means of achieving something?",
+     "text": "Ich bereite mich auf eine Geschäftsreise vor, ___ ich mich bei Freunden nach ihren Erfahrungen erkundige.",
+     "from": "",
+     "options": [
+      "indem",
+      "sodass",
+      "weshalb",
+      "folglich"
+     ],
+     "answers": [
+      "indem"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "indem and dadurch, dass name the means; sodass and weshalb name a consequence.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l11-1-e3",
+     "topicId": "g-l11-1",
+     "type": "choice",
+     "prompt": "Which is a main-clause connector for a consequence?",
+     "text": "In Deutschland heißt Wissen Macht. ___ wird sie nicht gern geteilt.",
+     "from": "",
+     "options": [
+      "Folglich",
+      "Indem",
+      "Sodass",
+      "Weshalb"
+     ],
+     "answers": [
+      "Folglich"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "deshalb / demnach / demzufolge / folglich / infolgedessen are the main-clause consecutive connectors.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l11-1-e4",
+     "topicId": "g-l11-1",
+     "type": "fill",
+     "prompt": "Complete the consecutive preposition (+ Genitiv).",
+     "text": "___ eines Missverständnisses habe ich den Geschäftspartner falsch angesprochen.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Infolge"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "infolge + Genitiv (or infolge von + Dativ) expresses a consequence.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l11-1-e5",
+     "topicId": "g-l11-1",
+     "type": "transform",
+     "prompt": "Rewrite with the subordinate connector womit.",
+     "text": "",
+     "from": "Eric macht ein Auslandspraktikum. Dadurch wird sein Lebenslauf attraktiver für Arbeitgeber.",
+     "options": [],
+     "answers": [
+      "Eric macht ein Auslandspraktikum, womit sein Lebenslauf attraktiver für Arbeitgeber wird."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "womit and wodurch attach the result to the whole preceding clause.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l11-1-e6",
+     "topicId": "g-l11-1",
+     "type": "error",
+     "prompt": "The connector expresses the wrong relation. Correct the sentence.",
+     "text": "Schweizer sind so sensibel, indem sie auch auf Zwischentöne reagieren.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Schweizer sind so sensibel, dass sie auch auf Zwischentöne reagieren."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "so / derartig … requires dass — it names a consequence, not a means.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 20,
+   "sourcePages": [
+    20
+   ],
+   "subtopics": [
+    {
+     "letter": "a",
+     "title": "Folgen ausdrücken: Konsekutivsätze",
+     "kursbuch": "S. 135/2"
+    },
+    {
+     "letter": "b",
+     "title": "Art und Weise ausdrücken: Modalsätze",
+     "kursbuch": "S. 141/5"
+    }
+   ]
+  },
+  {
+   "id": "g-l11-2",
+   "language": "de",
+   "level": "C1",
+   "lektion": 11,
+   "number": 2,
+   "title": "Vergleiche",
+   "titleEn": "Comparisons",
+   "summary": "The implicit comparative and the relative superlative.",
+   "category": "Komparation",
+   "tags": [
+    "Vergleiche",
+    "Komparativ",
+    "Superlativ",
+    "Deklination"
+   ],
+   "difficulty": 3,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "Implicit comparison",
+     "text": "In an implicit comparison the point of comparison is not named explicitly — the comparative simply implies 'compared with what is usual'."
+    },
+    {
+     "heading": "Relative superlative",
+     "text": "The relative superlative picks one item out of a group: einer / eines / eine der elegantesten Anzüge, die ich je hatte."
+    }
+   ],
+   "rules": [
+    "Implicit comparative: ein eleganterer Anzug (maskulin), ein eleganteres Hemd (neutral), eine elegantere Hose (feminin).",
+    "The point of comparison — 'compared with what is usual' — stays unnamed.",
+    "Relative superlative: einer / eines / eine + der + Superlativ im Genitiv Plural.",
+    "The gender of einer / eines / eine follows the noun that is picked out."
+   ],
+   "examples": [
+    {
+     "de": "eleganterer Anzug",
+     "note": "impliziter Vergleich, maskulin"
+    },
+    {
+     "de": "ein eleganteres Hemd",
+     "note": "impliziter Vergleich, neutral"
+    },
+    {
+     "de": "eine elegantere Hose",
+     "note": "impliziter Vergleich, feminin"
+    },
+    {
+     "de": "der elegantesten",
+     "note": "relativer Superlativ im Genitiv Plural"
+    },
+    {
+     "de": "die ich je hatte",
+     "note": "the relative clause that delimits the group"
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l11-2-e1",
+     "topicId": "g-l11-2",
+     "type": "choice",
+     "prompt": "Which form is the implicit comparative, neuter?",
+     "text": "",
+     "from": "",
+     "options": [
+      "ein eleganteres Hemd",
+      "ein eleganter Hemd",
+      "eine elegantere Hemd",
+      "ein elegantestes Hemd"
+     ],
+     "answers": [
+      "ein eleganteres Hemd"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Neuter takes -es: ein eleganteres Hemd.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l11-2-e2",
+     "topicId": "g-l11-2",
+     "type": "fill",
+     "prompt": "Complete the relative superlative, masculine.",
+     "text": "Das war ___ der elegantesten Anzüge, die ich je hatte.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "einer"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "The masculine form is einer; the neuter eines, the feminine eine.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l11-2-e3",
+     "topicId": "g-l11-2",
+     "type": "fill",
+     "prompt": "Complete the relative superlative, feminine.",
+     "text": "Das war ___ der elegantesten Hosen, die ich je hatte.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "eine"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "The gender of einer / eines / eine follows the noun picked out — die Hose, so eine.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l11-2-e4",
+     "topicId": "g-l11-2",
+     "type": "choice",
+     "prompt": "What is special about the implicit comparison?",
+     "text": "",
+     "from": "",
+     "options": [
+      "Der Vergleichspunkt wird nicht genannt.",
+      "Es gibt keinen Artikel.",
+      "Das Adjektiv bleibt undekliniert.",
+      "Es steht immer im Plural."
+     ],
+     "answers": [
+      "Der Vergleichspunkt wird nicht genannt."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "The point of comparison stays implicit — 'im Vergleich zum Üblichen'.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l11-2-e5",
+     "topicId": "g-l11-2",
+     "type": "error",
+     "prompt": "The case after the relative superlative is wrong. Correct it.",
+     "text": "Das war einer der eleganteste Anzüge, die ich je hatte.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Das war einer der elegantesten Anzüge, die ich je hatte."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "The superlative stands in the genitive plural: der elegantesten Anzüge.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "S. 137/3",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 20,
+   "sourcePages": [
+    20
+   ],
+   "subtopics": []
+  },
+  {
+   "id": "g-l11-3",
+   "language": "de",
+   "level": "C1",
+   "lektion": 11,
+   "number": 3,
+   "title": "Wortbildung: Vorsilben er- und re-",
+   "titleEn": "Word formation: the prefixes er- and re-",
+   "summary": "er- marks a change of state or an achieved result; re- means 'back' or 'again'.",
+   "category": "Wortbildung",
+   "tags": [
+    "Wortbildung",
+    "Vorsilben",
+    "Verben"
+   ],
+   "difficulty": 2,
+   "prerequisites": [
+    "g-l01-2"
+   ],
+   "explanation": [
+    {
+     "heading": "Why prefixes help",
+     "text": "Knowing the meanings of prefixes helps you work out unknown words. The prefix er- gives the base verb a different meaning."
+    }
+   ],
+   "rules": [
+    "er- meaning 1 — a change of state: eröffnen, erröten, erkälten, erschrecken.",
+    "er- meaning 2 — achieving something through an action: erarbeiten, erbauen, ersetzen.",
+    "re- meaning 1 — back: reflektieren, reimportieren.",
+    "re- meaning 2 — again: reagieren, reanimieren."
+   ],
+   "examples": [
+    {
+     "de": "eröffnen, erröten, erkälten, erschrecken",
+     "note": "er- — Veränderung eines Zustands"
+    },
+    {
+     "de": "erarbeiten, erbauen, ersetzen",
+     "note": "er- — etwas durch eine Handlung erreichen"
+    },
+    {
+     "de": "reflektieren, reimportieren",
+     "note": "re- — zurück"
+    },
+    {
+     "de": "reagieren, reanimieren",
+     "note": "re- — wieder"
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l11-3-e1",
+     "topicId": "g-l11-3",
+     "type": "choice",
+     "prompt": "Which meaning does er- carry in 'erröten'?",
+     "text": "",
+     "from": "",
+     "options": [
+      "Veränderung eines Zustands",
+      "etwas durch eine Handlung erreichen",
+      "zurück",
+      "wieder"
+     ],
+     "answers": [
+      "Veränderung eines Zustands"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Like eröffnen, erkälten, erschrecken — a state changes.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l11-3-e2",
+     "topicId": "g-l11-3",
+     "type": "choice",
+     "prompt": "Which meaning does er- carry in 'erarbeiten'?",
+     "text": "",
+     "from": "",
+     "options": [
+      "etwas durch eine Handlung erreichen",
+      "Veränderung eines Zustands",
+      "zurück",
+      "wieder"
+     ],
+     "answers": [
+      "etwas durch eine Handlung erreichen"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Like erbauen and ersetzen — the result is achieved through the action.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l11-3-e3",
+     "topicId": "g-l11-3",
+     "type": "choice",
+     "prompt": "Which meaning does re- carry in 'reimportieren'?",
+     "text": "",
+     "from": "",
+     "options": [
+      "zurück",
+      "wieder",
+      "nicht",
+      "sehr"
+     ],
+     "answers": [
+      "zurück"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "re- meaning 1 is 'back': reflektieren, reimportieren.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l11-3-e4",
+     "topicId": "g-l11-3",
+     "type": "choice",
+     "prompt": "Which meaning does re- carry in 'reanimieren'?",
+     "text": "",
+     "from": "",
+     "options": [
+      "wieder",
+      "zurück",
+      "nicht",
+      "gegen"
+     ],
+     "answers": [
+      "wieder"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "re- meaning 2 is 'again': reagieren, reanimieren.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l11-3-e5",
+     "topicId": "g-l11-3",
+     "type": "fill",
+     "prompt": "Form the verb: to open (a shop) for the first time.",
+     "text": "Nächste Woche wird das neue Café ___öffnet.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "er"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "er- marks the change of state: eröffnen.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "S. 139/2, 3",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 21,
+   "sourcePages": [
+    21
+   ],
+   "subtopics": []
+  },
+  {
+   "id": "g-l12-1",
+   "language": "de",
+   "level": "C1",
+   "lektion": 12,
+   "number": 1,
+   "title": "Präpositionen mit Genitiv",
+   "titleEn": "Prepositions with the genitive",
+   "summary": "Eight genitive prepositions of technical and legal register, each with a plain paraphrase.",
+   "category": "Präpositionen",
+   "tags": [
+    "Präpositionen",
+    "Genitiv",
+    "Fachsprache"
+   ],
+   "difficulty": 3,
+   "prerequisites": [
+    "g-l06-1"
+   ],
+   "explanation": [
+    {
+     "heading": "Register",
+     "text": "These prepositions occur above all in technical or legal specialist language. Each of them can be paraphrased by a plainer clause or phrase."
+    }
+   ],
+   "rules": [
+    "angesichts = wenn man … betrachtet.",
+    "anlässlich = weil … stattfindet.",
+    "hinsichtlich = in Bezug auf.",
+    "mithilfe = indem man … verwendet.",
+    "mittels = unter Verwendung von.",
+    "oberhalb = über.",
+    "ungeachtet = wobei man … nicht berücksichtigt.",
+    "unweit = in der Nähe von."
+   ],
+   "examples": [
+    {
+     "de": "angesichts des hohen Preisgeldes",
+     "note": "= wenn man das hohe Preisgeld betrachtet"
+    },
+    {
+     "de": "anlässlich eines spannenden Wettbewerbs",
+     "note": "= weil ein spannender Wettbewerb stattfindet"
+    },
+    {
+     "de": "hinsichtlich der gesammelten Kriterien",
+     "note": "= in Bezug auf die gesammelten Kriterien"
+    },
+    {
+     "de": "mithilfe spezieller 3D-Drucker",
+     "note": "= indem man 3D-Drucker verwendet"
+    },
+    {
+     "de": "mittels einer Matratze",
+     "note": "= unter Verwendung einer Matratze"
+    },
+    {
+     "de": "oberhalb der Einkommensgrenze",
+     "note": "= über der Einkommensgrenze"
+    },
+    {
+     "de": "unweit seines Trägers",
+     "note": "= in der Nähe seines Trägers"
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l12-1-e1",
+     "topicId": "g-l12-1",
+     "type": "choice",
+     "prompt": "Which preposition means 'in der Nähe von'?",
+     "text": "",
+     "from": "",
+     "options": [
+      "unweit",
+      "oberhalb",
+      "ungeachtet",
+      "anlässlich"
+     ],
+     "answers": [
+      "unweit"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "unweit + Genitiv = in der Nähe von.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l12-1-e2",
+     "topicId": "g-l12-1",
+     "type": "choice",
+     "prompt": "Which preposition means 'in Bezug auf'?",
+     "text": "",
+     "from": "",
+     "options": [
+      "hinsichtlich",
+      "mittels",
+      "angesichts",
+      "unweit"
+     ],
+     "answers": [
+      "hinsichtlich"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "hinsichtlich + Genitiv = in Bezug auf.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l12-1-e3",
+     "topicId": "g-l12-1",
+     "type": "transform",
+     "prompt": "Rewrite with a genitive preposition: 'indem man spezielle 3D-Drucker verwendet'.",
+     "text": "",
+     "from": "indem man spezielle 3D-Drucker verwendet",
+     "options": [],
+     "answers": [
+      "mithilfe spezieller 3D-Drucker",
+      "mittels spezieller 3D-Drucker"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "mithilfe / mittels + Genitiv name the means.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l12-1-e4",
+     "topicId": "g-l12-1",
+     "type": "fill",
+     "prompt": "Complete the preposition: 'weil ein spannender Wettbewerb stattfindet'.",
+     "text": "___ eines spannenden Wettbewerbs",
+     "from": "",
+     "options": [],
+     "answers": [
+      "anlässlich"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "anlässlich + Genitiv = weil … stattfindet.",
+     "fromSource": true
+    },
+    {
+     "id": "g-l12-1-e5",
+     "topicId": "g-l12-1",
+     "type": "error",
+     "prompt": "These prepositions take the genitive. Correct the case.",
+     "text": "oberhalb der Einkommensgrenze liegt das Einkommen von wenigen — mittels einer Matratze wurde geschlafen, angesichts dem hohen Preisgeld.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "oberhalb der Einkommensgrenze liegt das Einkommen von wenigen — mittels einer Matratze wurde geschlafen, angesichts des hohen Preisgeldes."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "angesichts governs the genitive: angesichts des hohen Preisgeldes.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "S. 147/3",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 22,
+   "sourcePages": [
+    22
+   ],
+   "subtopics": []
+  },
+  {
+   "id": "g-l12-2",
+   "language": "de",
+   "level": "C1",
+   "lektion": 12,
+   "number": 2,
+   "title": "Partizipialsätze",
+   "titleEn": "Participial clauses",
+   "summary": "Shortened relative and adverbial clauses with Partizip I or II, without a subject of their own.",
+   "category": "Satzstrukturen",
+   "tags": [
+    "Partizipialsätze",
+    "Partizip I",
+    "Partizip II",
+    "Schriftsprache"
+   ],
+   "difficulty": 5,
+   "prerequisites": [
+    "g-l08-1"
+   ],
+   "explanation": [
+    {
+     "heading": "What they are",
+     "text": "These clauses produce brevity and concision in written language, because they are shortened relative or adverbial clauses without a subject of their own. They can be formed with Partizip I or Partizip II."
+    },
+    {
+     "heading": "Position",
+     "text": "The participle carries no ending and usually stands at the end of the participial clause."
+    }
+   ],
+   "rules": [
+    "Partizip II has a passive or completed meaning and resolves to weil / obwohl / während + passive: Vom sinnvollen Einsatz überzeugt … = Weil sie vom sinnvollen Einsatz überzeugt sind, …",
+    "Partizip I has an active, simultaneous meaning and resolves to während / wenn / indem: Mit Mund und Augen lächelnd … = Indem er mit Mund und Augen lächelt, …",
+    "The participial clause has no subject of its own — it takes the subject of the main clause.",
+    "The participial clause can stand before the main clause or be inserted into it."
+   ],
+   "examples": [
+    {
+     "de": "Vom sinnvollen Einsatz überzeugt entwickelten die Wissenschaftler einen Roboter, der Gefühle zeigen kann.",
+     "note": "Partizip II, resolves with weil"
+    },
+    {
+     "de": "Der erste Versuch, obwohl gut durchdacht, war ein Misserfolg, denn der Roboter konnte nicht lächeln.",
+     "note": "Partizip II inserted into the main clause"
+    },
+    {
+     "de": "Den munteren Kaspar auf dem Arm tragend entscheiden die Kinder selbst, wann und wie sie mit der Puppe kommunizieren wollen.",
+     "note": "Partizip I, resolves with während / wenn"
+    },
+    {
+     "de": "Mit Mund und Augen lächelnd wendet sich der Roboter seinen Kommunikationspartnern zu.",
+     "note": "Partizip I, resolves with indem"
+    },
+    {
+     "de": "Indem er mit Mund und Augen lächelt, wendet sich der Roboter seinen Kommunikationspartnern zu.",
+     "note": "the resolved variant"
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l12-2-e1",
+     "topicId": "g-l12-2",
+     "type": "transform",
+     "prompt": "Resolve the participial clause into a full clause with indem.",
+     "text": "",
+     "from": "Mit Mund und Augen lächelnd wendet sich der Roboter seinen Kommunikationspartnern zu.",
+     "options": [],
+     "answers": [
+      "Indem er mit Mund und Augen lächelt, wendet sich der Roboter seinen Kommunikationspartnern zu."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Partizip I is active and simultaneous, so it resolves with indem / während / wenn.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l12-2-e2",
+     "topicId": "g-l12-2",
+     "type": "transform",
+     "prompt": "Resolve the participial clause into a full clause with weil.",
+     "text": "",
+     "from": "Vom sinnvollen Einsatz überzeugt entwickelten die Wissenschaftler einen Roboter, der Gefühle zeigen kann.",
+     "options": [],
+     "answers": [
+      "Weil sie vom sinnvollen Einsatz überzeugt sind, entwickelten die Wissenschaftler einen Roboter, der Gefühle zeigen kann."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Partizip II here carries a causal, passive sense and resolves with weil.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l12-2-e3",
+     "topicId": "g-l12-2",
+     "type": "choice",
+     "prompt": "Which participle has an active, simultaneous meaning?",
+     "text": "",
+     "from": "",
+     "options": [
+      "Partizip I",
+      "Partizip II",
+      "beide gleich",
+      "keines von beiden"
+     ],
+     "answers": [
+      "Partizip I"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Partizip I is active and simultaneous; Partizip II is passive or completed.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l12-2-e4",
+     "topicId": "g-l12-2",
+     "type": "choice",
+     "prompt": "What does a participial clause lack?",
+     "text": "",
+     "from": "",
+     "options": [
+      "ein eigenes Subjekt",
+      "ein Verb",
+      "ein Objekt",
+      "eine Präposition"
+     ],
+     "answers": [
+      "ein eigenes Subjekt"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Participial clauses are shortened clauses without a subject of their own; they take the subject of the main clause.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l12-2-e5",
+     "topicId": "g-l12-2",
+     "type": "error",
+     "prompt": "The participle should carry no ending here. Correct it.",
+     "text": "Mit Mund und Augen lächelnde wendet sich der Roboter seinen Kommunikationspartnern zu.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Mit Mund und Augen lächelnd wendet sich der Roboter seinen Kommunikationspartnern zu."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "The participle in a participial clause is endingless and usually stands at the end of that clause.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l12-2-e6",
+     "topicId": "g-l12-2",
+     "type": "reorder",
+     "prompt": "Order the participial clause (Partizip II, inserted).",
+     "text": "",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Der erste Versuch, obwohl gut durchdacht, war ein Misserfolg"
+     ],
+     "tokens": [
+      "Der",
+      "erste",
+      "Versuch,",
+      "obwohl",
+      "gut",
+      "durchdacht,",
+      "war",
+      "ein",
+      "Misserfolg"
+     ],
+     "hint": "",
+     "explain": "The participial clause is inserted between subject and finite verb, framed by commas.",
+     "fromSource": false
+    }
+   ],
+   "kursbuch": "S. 153/3",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 22,
+   "sourcePages": [
+    22
+   ],
+   "subtopics": []
+  },
+  {
+   "id": "g-l12-3",
+   "language": "de",
+   "level": "C1",
+   "lektion": 12,
+   "number": 3,
+   "title": "Wortbildung: Vorsilben durch-, über-, um- und unter-",
+   "titleEn": "Word formation: the prefixes durch-, über-, um- and unter-",
+   "summary": "The same prefix separable and stressed, or inseparable and unstressed — with different meanings.",
+   "category": "Wortbildung",
+   "tags": [
+    "Wortbildung",
+    "Vorsilben",
+    "trennbar",
+    "untrennbar",
+    "Betonung"
+   ],
+   "difficulty": 4,
+   "prerequisites": [
+    "g-l01-2"
+   ],
+   "explanation": [
+    {
+     "heading": "One prefix, two verbs",
+     "text": "These prefixes can form both separable and inseparable verbs. Depending on whether the verb is separable or not, it has a different meaning and a different stress."
+    },
+    {
+     "heading": "Which meaning goes with which",
+     "text": "Verbs with the separable, stressed prefix are mostly used with the original meaning of the prefix; the inseparable, unstressed prefixes mostly have a more abstract, figurative meaning."
+    }
+   ],
+   "rules": [
+    "Separable and stressed → the literal, original meaning of the prefix.",
+    "Inseparable and unstressed → an abstract, figurative meaning.",
+    "durch-: Man schaut durch ein Mikroskop durch (literal) / Man durchschaut einen Kartentrick (figurative).",
+    "über-: einen Pulli überziehen (literal) / sein Konto überziehen (figurative).",
+    "um-: ein Straßenschild umfahren — knock it down (literal) / das Stadtzentrum umfahren — drive around it (figurative).",
+    "unter-: sich bei Regen unterstellen (literal) / jemandem böse Absichten unterstellen (figurative).",
+    "Separable verbs form the Partizip II with ge- in the middle (umgefahren); inseparable ones take no ge- (umfahren)."
+   ],
+   "examples": [
+    {
+     "de": "Man schaut durch ein Mikroskop durch.",
+     "note": "trennbar, betont — wörtlich"
+    },
+    {
+     "de": "Man durchschaut einen Kartentrick.",
+     "note": "untrennbar, unbetont — übertragen"
+    },
+    {
+     "de": "Ich rate dir, einen Pulli überzuziehen.",
+     "note": "trennbar — wörtlich"
+    },
+    {
+     "de": "Es kostet etwas, sein Konto zu überziehen.",
+     "note": "untrennbar — übertragen"
+    },
+    {
+     "de": "Wir haben ein Straßenschild umgefahren.",
+     "note": "trennbar — das Schild fiel um"
+    },
+    {
+     "de": "Wir haben das Stadtzentrum umfahren.",
+     "note": "untrennbar — wir fuhren darum herum"
+    },
+    {
+     "de": "Ich unterstelle dir keine bösen Absichten.",
+     "note": "untrennbar — übertragen"
+    }
+   ],
+   "exercises": [
+    {
+     "id": "g-l12-3-e1",
+     "topicId": "g-l12-3",
+     "type": "choice",
+     "prompt": "'Wir haben das Stadtzentrum umfahren.' — what happened?",
+     "text": "",
+     "from": "",
+     "options": [
+      "Wir sind darum herumgefahren.",
+      "Wir haben es beschädigt.",
+      "Wir sind hindurchgefahren.",
+      "Wir haben dort geparkt."
+     ],
+     "answers": [
+      "Wir sind darum herumgefahren."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Inseparable umfahren (unstressed) means to drive around; the separable umfahren means to knock down.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l12-3-e2",
+     "topicId": "g-l12-3",
+     "type": "choice",
+     "prompt": "'Wir haben ein Straßenschild umgefahren.' — separable or inseparable?",
+     "text": "",
+     "from": "",
+     "options": [
+      "trennbar",
+      "untrennbar",
+      "beides möglich",
+      "weder noch"
+     ],
+     "answers": [
+      "trennbar"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "The ge- inside the participle (um-ge-fahren) shows it is separable — and it means the sign was knocked over.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l12-3-e3",
+     "topicId": "g-l12-3",
+     "type": "transform",
+     "prompt": "Use the inseparable verb: to see through a card trick.",
+     "text": "",
+     "from": "Man schaut einen Kartentrick durch.",
+     "options": [],
+     "answers": [
+      "Man durchschaut einen Kartentrick."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "The figurative meaning takes the inseparable, unstressed prefix: durchschauen.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l12-3-e4",
+     "topicId": "g-l12-3",
+     "type": "choice",
+     "prompt": "Which meaning goes with the inseparable, unstressed prefix?",
+     "text": "",
+     "from": "",
+     "options": [
+      "eine abstraktere, übertragene Bedeutung",
+      "die ursprüngliche Bedeutung",
+      "immer eine negative Bedeutung",
+      "eine zeitliche Bedeutung"
+     ],
+     "answers": [
+      "eine abstraktere, übertragene Bedeutung"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "Separable and stressed keeps the original meaning; inseparable and unstressed is abstract and figurative.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l12-3-e5",
+     "topicId": "g-l12-3",
+     "type": "error",
+     "prompt": "The Partizip II is wrong for the intended meaning (to overdraw an account). Correct it.",
+     "text": "Er hat sein Konto umgezogen.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "Er hat sein Konto überzogen."
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "sein Konto überziehen is inseparable, so the Partizip II is überzogen, with no ge-.",
+     "fromSource": false
+    },
+    {
+     "id": "g-l12-3-e6",
+     "topicId": "g-l12-3",
+     "type": "fill",
+     "prompt": "Literal meaning — take shelter from the rain.",
+     "text": "Wir stellen uns bei Regen ___.",
+     "from": "",
+     "options": [],
+     "answers": [
+      "unter"
+     ],
+     "tokens": [],
+     "hint": "",
+     "explain": "The separable, stressed prefix keeps the original meaning: sich unterstellen.",
+     "fromSource": true
+    }
+   ],
+   "kursbuch": "S. 154/2",
+   "source": "Sicher! C1 Grammatikübersicht",
+   "sourcePage": 22,
+   "sourcePages": [
+    22
+   ],
+   "subtopics": []
+  }
+ ]
+}

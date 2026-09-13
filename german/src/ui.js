@@ -16,6 +16,14 @@ export function escapeHtml(value) {
 
 export const percent = (done, total) => (total ? Math.round((done / total) * 100) : 0);
 
+/** Breadcrumb trail; the last item is the current page. */
+export const crumbs = (items) => `
+  <nav class="crumbs">
+    ${items.map((item, i) => (i === items.length - 1
+      ? `<span aria-current="page">${escapeHtml(item.label)}</span>`
+      : `<a href="${item.href}">${escapeHtml(item.label)}</a><span class="crumbs__sep">›</span>`)).join('')}
+  </nav>`;
+
 /** An SVG progress ring. `size` is the outer diameter in px. */
 export function progressRing(stats, size = 96) {
   const radius = size / 2 - 5;

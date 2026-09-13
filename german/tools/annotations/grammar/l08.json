@@ -1,0 +1,124 @@
+{
+ "topics": [
+  {
+   "id": "g-l08-1",
+   "titleEn": "All about the passive",
+   "summary": "The Gerundiv as a passive substitute, the wollen/sollen aspect shift, and bekommen + Partizip II.",
+   "category": "Passiv",
+   "tags": ["Passiv", "Gerundiv", "Modalverben", "Schriftsprache"],
+   "difficulty": 5,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "Gerundiv as a passive substitute",
+     "text": "The passive can also be expressed with the Gerundiv or with a relative clause. The Gerundiv is used predominantly in written language; in spoken language people prefer the passive with können, müssen or sollen, or a relative clause with Infinitiv + zu. Which modal verb fits depends on the context."},
+    {"heading": "How the Gerundiv is formed",
+     "text": "The Gerundiv is formed with zu + Partizip I + adjective ending and stands attributively in front of the noun."},
+    {"heading": "Aspect shift with modal verbs",
+     "text": "An intention can be expressed in two ways: as an active sentence with the modal verb wollen, or as a passive construction with sollen."},
+    {"heading": "bekommen + Partizip II",
+     "text": "A passive sentence without modal character can be expressed actively with a construction using bekommen + Partizip II. The dative object of the passive sentence becomes the subject of the active sentence."}
+   ],
+   "rules": [
+    "Gerundiv = zu + Partizip I + Adjektivendung, attributive: ein dringend zu lösendes Problem.",
+    "It corresponds to a passive with a modal verb: ein Problem, das dringend gelöst werden muss.",
+    "It also corresponds to a relative clause with Infinitiv + zu: ein Problem, das dringend zu lösen ist.",
+    "Where possibility is meant, sich lassen + Infinitiv and adjectives in -bar are further variants: ein Test, der sich einfach durchführen lässt / ein einfach durchführbarer Test.",
+    "Aktiv mit wollen ↔ Passiv mit sollen express the same intention.",
+    "In bekommen + Partizip II the dative object of the passive becomes the subject."
+   ],
+   "examples": [
+    {"de": "ein dringend zu lösendes Problem", "note": "Gerundiv"},
+    {"de": "ein Problem, das dringend gelöst werden muss (soll)", "note": "Passiv mit Modalverb"},
+    {"de": "ein Problem, das dringend zu lösen ist", "note": "Infinitiv + zu"},
+    {"de": "ein einfach durchzuführender Test", "note": "Gerundiv expressing possibility"},
+    {"de": "ein Test, der sich einfach durchführen lässt", "note": "sich lassen + Infinitiv"},
+    {"de": "Die Autorin will Eltern in die Lage versetzen, mit Auffälligkeiten ihrer Kinder umzugehen.", "note": "Aktiv mit wollen"},
+    {"de": "Der Leser bekommt anschaulich dargelegt, wie ein Umdenken gelingen kann.", "note": "bekommen + Partizip II"}
+   ],
+   "exercises": [
+    {"type": "transform", "prompt": "Turn the Gerundiv into a passive with a modal verb.",
+     "from": "ein dringend zu lösendes Problem",
+     "answers": ["ein Problem, das dringend gelöst werden muss", "ein Problem, das dringend gelöst werden soll"],
+     "explain": "The Gerundiv corresponds to a passive with müssen or sollen — context decides which."},
+    {"type": "transform", "prompt": "Turn the Gerundiv into a relative clause with Infinitiv + zu.",
+     "from": "ein dringend zu lösendes Problem",
+     "answers": ["ein Problem, das dringend zu lösen ist"],
+     "explain": "sein + zu + Infinitiv is the other standard equivalent of the Gerundiv."},
+    {"type": "choice", "prompt": "How is the Gerundiv formed?",
+     "text": "", "options": ["zu + Partizip I + Adjektivendung", "zu + Partizip II + Adjektivendung", "Partizip I + zu", "werden + Partizip II"],
+     "answers": ["zu + Partizip I + Adjektivendung"],
+     "explain": "zu + Partizip I + ending, standing attributively before the noun."},
+    {"type": "transform", "prompt": "Express the same intention as a passive with sollen.",
+     "from": "Die Autorin will Eltern in die Lage versetzen, mit Auffälligkeiten ihrer Kinder umzugehen.",
+     "answers": ["Eltern sollen in die Lage versetzt werden, mit Auffälligkeiten ihrer Kinder umzugehen.", "Eltern sollen (nach Vorstellung der Autorin) in die Lage versetzt werden, mit Auffälligkeiten ihrer Kinder umzugehen."],
+     "explain": "Aktiv mit wollen and Passiv mit sollen express the same intention."},
+    {"type": "transform", "prompt": "Rewrite actively with bekommen + Partizip II.",
+     "from": "Dem Leser wird anschaulich dargelegt, wie ein Umdenken gelingen kann.",
+     "answers": ["Der Leser bekommt anschaulich dargelegt, wie ein Umdenken gelingen kann."],
+     "explain": "The dative object dem Leser becomes the subject der Leser."},
+    {"type": "error", "prompt": "The participle in the Gerundiv is the wrong one. Correct it.",
+     "text": "ein dringend zu gelöstes Problem",
+     "answers": ["ein dringend zu lösendes Problem"],
+     "explain": "The Gerundiv uses Partizip I (lösend), not Partizip II."}
+   ]
+  },
+  {
+   "id": "g-l08-2",
+   "titleEn": "Word formation: adjective suffixes",
+   "summary": "-(i)al vs -(i)ell change the meaning; -(a/i)bel and -(i)ös come from Latin.",
+   "category": "Wortbildung",
+   "tags": ["Wortbildung", "Adjektive", "Nachsilben", "Bedeutungsunterschied"],
+   "difficulty": 4,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "-(i)al and -(i)ell",
+     "text": "Some adjectives with the same stem but the endings -(i)al or -(i)ell have different meanings, so the suffix is not interchangeable."},
+    {"heading": "-(a/i)bel and -(i)ös",
+     "text": "Adjectives ending in -(a/i)bel and -(i)ös mostly come from Latin. The suffix -(a/i)bel usually means that something can be done, so it corresponds to a passive substitute."}
+   ],
+   "rules": [
+    "real = konkret; reell = sehr gut (reelle Chancen).",
+    "ideal = bestmöglich; ideell = nicht ökonomisch (ideelle Werte).",
+    "rational = vernunftgesteuert; rationell = rasch, effizient.",
+    "-(a/i)bel usually means 'can be done': inakzeptabel = kann nicht akzeptiert werden; praktikabel = kann praktiziert werden; tolerabel = kann toleriert werden.",
+    "But not always: sensibel = empfindsam, penibel = genau.",
+    "-(i)ös: nervös, seriös."
+   ],
+   "examples": [
+    {"de": "der reale Austausch =", "note": "= der konkrete Austausch"},
+    {"de": "reelle Chancen auf mehr Erfolg =", "note": "= sehr gute Chancen"},
+    {"de": "die ideale Entscheidung =", "note": "= die bestmögliche Entscheidung"},
+    {"de": "ideelle Werte =", "note": "= keine ökonomischen Werte"},
+    {"de": "rationelle Arbeitsabläufe =", "note": "= rasche, effiziente Arbeitsabläufe"},
+    {"de": "Der Vorschlag ist nicht praktikabel.", "note": "-bel = kann praktiziert werden"},
+    {"de": "Menschen mit einem Putzzwang sind extrem penibel.", "note": "penibel = genau — the -bel rule does not apply here"}
+   ],
+   "exercises": [
+    {"type": "choice", "prompt": "Good chances of success — which adjective?",
+     "text": "___ Chancen auf mehr Erfolg", "options": ["reelle", "reale", "rationelle", "ideelle"],
+     "answers": ["reelle"],
+     "explain": "reell = sehr gut; real would mean konkret."},
+    {"type": "choice", "prompt": "Values that are not economic — which adjective?",
+     "text": "___ Werte", "options": ["ideelle", "ideale", "reale", "rationale"],
+     "answers": ["ideelle"],
+     "explain": "ideell = nicht ökonomisch; ideal would mean bestmöglich."},
+    {"type": "choice", "prompt": "Fast, efficient workflows — which adjective?",
+     "text": "___ Arbeitsabläufe", "options": ["rationelle", "rationale", "reale", "reelle"],
+     "answers": ["rationelle"],
+     "explain": "rationell = rasch, effizient; rational would mean vernunftgesteuert."},
+    {"type": "transform", "prompt": "Paraphrase with a passive: 'Der Vorschlag ist nicht praktikabel.'",
+     "from": "Der Vorschlag ist nicht praktikabel.",
+     "answers": ["Der Vorschlag kann nicht praktiziert werden."],
+     "explain": "-(a/i)bel corresponds to a passive substitute: kann (nicht) … werden."},
+    {"type": "choice", "prompt": "Which -bel adjective does NOT mean 'can be done'?",
+     "text": "", "options": ["penibel", "praktikabel", "tolerabel", "inakzeptabel"],
+     "answers": ["penibel"],
+     "explain": "penibel = genau and sensibel = empfindsam are exceptions to the rule."},
+    {"type": "error", "prompt": "The suffix carries the wrong meaning here. Correct the sentence.",
+     "text": "Nach langem Nachdenken traf sie eine ideelle Entscheidung — die bestmögliche.",
+     "answers": ["Nach langem Nachdenken traf sie eine ideale Entscheidung — die bestmögliche."],
+     "explain": "ideal = bestmöglich; ideell would mean 'not economic'."}
+   ]
+  }
+ ]
+}

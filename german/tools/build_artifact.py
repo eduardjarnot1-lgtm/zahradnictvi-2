@@ -5,10 +5,11 @@ The app normally runs as separate files served over HTTP. Some places to put it
 — a published Artifact, an email attachment, a USB stick — need a single file
 with no network access at all, so this inlines everything:
 
-    styles.css            -> <style>
-    src/*.js              -> one inline module (imports/exports stripped)
-    data/vocabulary.json  -> <script type="application/json">
-    assets/master-fuka.jpg-> a data: URI
+    styles.css             -> <style>
+    src/*.js               -> one inline module (imports/exports stripped)
+    data/vocabulary.json   -> <script type="application/json">
+    data/grammar.json      -> <script type="application/json">
+    assets/master-fuka.jpg -> a data: URI
 
 Output is written to dist/master-fuka-german.html and is byte-for-byte
 reproducible from the sources — edit the sources, never the bundle.
@@ -29,8 +30,16 @@ OUT = APP / "dist" / "master-fuka-german.html"
 
 # Concatenation order matters: a module may only use names declared above it.
 MODULE_ORDER = [
-    "data.js", "progress.js", "fuka.js", "search.js",
-    "practice.js", "ui.js", "views.js", "app.js",
+    "data.js", "grammar.js", "db.js", "srs.js", "progress.js", "search.js",
+    "exercises.js", "lessons.js", "coach.js", "fuka.js", "ui.js", "runner.js",
+    "views.js", "learnViews.js", "app.js",
+]
+
+# Each data file becomes a <script type="application/json"> block that the
+# corresponding module reads instead of fetching.
+DATA_FILES = [
+    ("vocabulary", "vocabulary.json"),
+    ("grammar", "grammar.json"),
 ]
 
 FONTS = "https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Source+Sans+3:wght@400;600&display=swap"
@@ -40,8 +49,21 @@ EXPORT_BLOCK_RE = re.compile(r"^export\s*\{[^}]*\};\s*$", re.MULTILINE)
 EXPORT_KEYWORD_RE = re.compile(r"^export\s+(?=const|let|var|function|async|class)", re.MULTILINE)
 
 
+ALIAS_RE = re.compile(r"^import\s*\{[^}]*\bas\b[^}]*\}\s*from", re.MULTILINE | re.DOTALL)
+
+
 def strip_module_syntax(source: str, name: str) -> str:
-    """Turn an ES module into plain top-level code for one shared scope."""
+    """Turn an ES module into plain top-level code for one shared scope.
+
+    Everything ends up in one scope, so an aliased import ("advance as
+    advanceRun") would leave the alias undefined once the import line is
+    stripped. Rename at the source instead; this guard makes that failure loud
+    at build time rather than at runtime in the bundle only.
+    """
+    if ALIAS_RE.search(source):
+        raise SystemExit(
+            f"{name}: aliased import ('x as y') cannot be flattened into one scope — "
+            "rename the export at its source instead")
     source = IMPORT_RE.sub("", source)
     source = EXPORT_BLOCK_RE.sub("", source)
     source = EXPORT_KEYWORD_RE.sub("", source)
@@ -59,11 +81,14 @@ def data_uri(path: Path) -> str:
 
 def main() -> int:
     css = (APP / "styles.css").read_text(encoding="utf-8")
-    vocabulary = (APP / "data" / "vocabulary.json").read_text(encoding="utf-8")
     avatar = data_uri(APP / "assets" / "master-fuka.jpg")
 
-    if "</" in vocabulary:
-        raise SystemExit("vocabulary.json contains '</' and cannot be embedded verbatim")
+    payloads = {}
+    for name, filename in DATA_FILES:
+        text = (APP / "data" / filename).read_text(encoding="utf-8")
+        if "</" in text:
+            raise SystemExit(f"{filename} contains '</' and cannot be embedded verbatim")
+        payloads[name] = text
 
     script = "\n".join(
         strip_module_syntax((APP / "src" / name).read_text(encoding="utf-8"), name)
@@ -71,21 +96,31 @@ def main() -> int:
     )
 
     # The bundle has no server to fetch from: read the embedded JSON instead.
-    fetch_call = "const response = await fetch(new URL('../data/vocabulary.json', import.meta.url));"
-    if fetch_call not in script:
-        raise SystemExit("data.js no longer contains the expected fetch call — update this script")
-    script = script.replace(
-        fetch_call
-        + "\n  if (!response.ok) throw new Error(`Could not load vocabulary (${response.status})`);"
-        + "\n  db = await response.json();",
-        "db = JSON.parse(document.getElementById('vocabulary-data').textContent);",
-    )
+    fetch_block = re.compile(
+        r"const response = await fetch\(new URL\('\.\./data/(\w+)\.json', import\.meta\.url\)\);\n"
+        r"\s*if \(!response\.ok\) throw new Error\(`[^`]*`\);\n"
+        r"\s*(\w+) = await response\.json\(\);")
+
+    def inline_data(match: re.Match) -> str:
+        name, variable = match.group(1), match.group(2)
+        if name not in payloads:
+            raise SystemExit(f"module fetches data/{name}.json, which this script does not embed")
+        return f"{variable} = JSON.parse(document.getElementById('{name}-data').textContent);"
+
+    script, replaced = fetch_block.subn(inline_data, script)
+    if replaced != len(DATA_FILES):
+        raise SystemExit(
+            f"expected {len(DATA_FILES)} data fetches to inline, found {replaced} — update this script")
     script = script.replace("./assets/master-fuka.jpg", avatar)
 
     body_html = (APP / "index.html").read_text(encoding="utf-8")
     body_html = body_html.split("<body class=\"is-loading\">", 1)[1].split("</body>", 1)[0]
     body_html = body_html.replace("./assets/master-fuka.jpg", avatar)
     body_html = re.sub(r'\s*<script type="module"[^>]*></script>', "", body_html)
+
+    data_blocks = "\n".join(
+        f'<script type="application/json" id="{name}-data">{payloads[name]}</script>'
+        for name, _ in DATA_FILES)
 
     page = f"""<title>Master Fuka German</title>
 <style>
@@ -100,7 +135,7 @@ body {{ margin: 0; }}
 {body_html.strip()}
 </div>
 
-<script type="application/json" id="vocabulary-data">{vocabulary}</script>
+{data_blocks}
 <script type="module">
 {script}
 </script>

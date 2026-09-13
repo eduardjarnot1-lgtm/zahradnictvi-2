@@ -30,6 +30,13 @@ SOURCE = ROOT / "source-entries.json"
 ANNOTATIONS = ROOT / "annotations"
 
 SOURCE_TITLE = "OCR GCSE German Vocabulary List (General and Topic Areas 1 to 5)"
+
+# The document grades its entries by tier, not by CEFR level. The mapping below
+# is the usual approximation and is labelled as such everywhere it is shown —
+# the document itself never states a CEFR level.
+TIER_TO_CEFR = {"Foundation": "A2", "Higher": "B1"}
+CEFR_NOTE = ("Approximate mapping of the document's Foundation/Higher tier. "
+             "The OCR list does not state CEFR levels itself.")
 SOURCE_NOTE = (
     "All vocabulary items and all categories come from the OCR GCSE German "
     "Vocabulary List. Articles, example sentences and example translations were "
@@ -289,6 +296,9 @@ def main() -> int:
                 w = words[dedup_key]
                 if placement not in w["categories"]:
                     w["categories"].append(placement)
+                # A word listed in both tiers keeps the easier of the two.
+                if src["tier"] == "Foundation":
+                    w["cefrApprox"] = TIER_TO_CEFR["Foundation"]
                 continue
 
             note = ann["note"] or EXTRA_NOTES.get(term, "")
@@ -301,8 +311,17 @@ def main() -> int:
                 note = (note + " " if note else "") + \
                     "Listed in the plural, so “die” here is the plural article."
 
+            tiers = {placement["tier"]}
             word = {
                 "id": "",
+                "language": "de",
+                "level": "GCSE",
+                "cefrApprox": TIER_TO_CEFR.get(src["tier"], ""),
+                "source": SOURCE_TITLE,
+                "sourcePage": src["page"],
+                "regionalVariant": "",
+                "pluralForm": "",
+                "verbForms": {},
                 "word": head,
                 "term": term,
                 "variants": variants_of(term, head),
@@ -340,8 +359,11 @@ def main() -> int:
 
     db = {
         "meta": {
+            "language": "de",
             "source": SOURCE_TITLE,
             "sourceNote": SOURCE_NOTE,
+            "level": "GCSE",
+            "cefrNote": CEFR_NOTE,
             "wordCount": len(word_list),
             "sourceEntryCount": sum(len(v) for v in groups.values()),
         },

@@ -5,7 +5,7 @@
 
 import { getAllWords } from './data.js';
 
-const fold = (text) =>
+const foldForSearch = (text) =>
   text
     .toLowerCase()
     .replaceAll('ä', 'a')
@@ -14,19 +14,19 @@ const fold = (text) =>
     .replaceAll('ß', 'ss');
 
 export function searchWords(query, limit = 60) {
-  const needle = fold(query.trim());
+  const needle = foldForSearch(query.trim());
   if (needle.length < 2) return [];
 
   const results = [];
   for (const word of getAllWords()) {
-    const german = fold(`${word.term} ${word.word}`);
-    const english = fold(word.translation);
+    const german = foldForSearch(`${word.term} ${word.word}`);
+    const english = foldForSearch(word.translation);
     // "table" should find "der Tisch" before "das Tablett", so an exact meaning
     // (or an exact part of a "a / b" gloss) outranks a mere prefix match.
     const englishParts = english.split(/\s*[/,]\s*/).map((p) => p.replace(/\s*\(.*?\)\s*/g, '').trim());
 
     let score = 0;
-    if (fold(word.word) === needle) score = 6;
+    if (foldForSearch(word.word) === needle) score = 6;
     else if (englishParts.includes(needle)) score = 5;
     else if (german.startsWith(needle)) score = 4;
     else if (english.startsWith(needle)) score = 3;

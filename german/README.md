@@ -1,10 +1,11 @@
-# Master Fuka — German Vocabulary (beta)
+# Master Fuka — German Learning (beta)
 
-A small learning app for the vocabulary in the attached PDF,
-**OCR GCSE German Vocabulary List — General and Topic Areas 1 to 5** (52 pages).
+A learning app built on two imported source documents. It is not a PDF reader:
+the documents are extracted, normalised, validated and turned into vocabulary
+cards, grammar units, exercises, spaced review and progress tracking.
 
-Open `german/index.html` through a web server (the app uses ES modules and
-`fetch`, so `file://` will not work):
+Open `german/index.html` through a web server (ES modules and `fetch` do not
+work over `file://`):
 
 ```bash
 python3 -m http.server 8000     # from the repository root
@@ -14,111 +15,197 @@ python3 -m http.server 8000     # from the repository root
 On Netlify the site publishes the repository root, so the app is served at
 `/german/`.
 
-## What it does
+## Sources
 
-* **Topics** – six large circular buttons, one per section of the document
-  (General + Topic Areas 1–5), then the document's sub-topics, then word type.
-* **Vocabulary cards** – German word with its article, English meaning, word
-  type, a German example sentence and its English translation. The meaning is
-  hidden until you ask for it, so browsing is also recall practice.
-* **Learning status** – every word is *Not learned*, *Learning* or *Learned*.
-  Press "I know this ✅" or "Practise 🔄"; press the same button again to clear.
-* **Practice** – a ten-question round from the whole list, one topic, one
-  sub-topic or one word type. Words marked "practise" come first, then unseen
-  words, then revision. Nouns are asked as an article question
-  (`_____ Tisch` → der / die / das); everything else reveals the card and you
-  say whether you knew it.
-* **Progress** – per category, per sub-topic, per word type and overall,
-  calculated from the actual data. Nothing is invented.
-* **Search** – German or English, over the imported words only.
-* **Master Fuka** – short guidance and encouragement, kept out of the way.
+| Content | Source | Status |
+|---|---|---|
+| Vocabulary — 2 047 items | OCR GCSE German Vocabulary List (General and Topic Areas 1–5) | imported |
+| Grammar — 32 C1 topics | Sicher! C1 Grammatikübersicht, © Hueber Verlag | imported |
+| Goethe-Zertifikat B1 Wortliste | **not supplied** — see below | **missing** |
 
-Progress lives in this browser's `localStorage`. No accounts, no server, no
-tracking.
+### The Goethe B1 Wortliste is not in the repository
 
-## The data
+The task named two PDFs. Only one arrived: `Sicher_C1_Grammatikuebersicht.pdf`.
+In place of the Goethe B1 Wortliste there was a text file containing a
+fliphtml5 link, and that host is blocked by this environment's network egress
+policy, so the list could not be fetched.
 
-| | |
-|---|---|
-| Entries read from the PDF | 2060 |
-| Vocabulary cards (after merging repeated entries) | 2047 |
-| Nouns (all with an article) | 1202 |
-| Articles flagged for review | 11 |
+Roughly 2 400 B1 lexical units are therefore **not** in the app. No substitute
+was invented: the existing OCR GCSE vocabulary is carried under its own real
+name, and the level picker states plainly that B1 holds no Goethe content.
 
-Every word and every category comes from the document. Nothing was added.
-What *was* added, as metadata on existing entries: the word type, the noun
-article, a German example sentence and its English translation, and a note
-where the document's own spelling or the article needs a caveat. The 11
-entries whose article cannot be given as a single certain answer (adjectival
-nouns such as *Verwandte*, words with two accepted genders such as *Cola*) are
-flagged in the app under **Data** and marked on their card, rather than
-presented as certain.
-
-### How the data is built
-
-```
-dbf540a1-68532vocabularylistbytopic.pdf     (the attached source document)
-        │  tools/extract_pdf.py
-        ▼
-tools/source-entries.json                   German term, English gloss, topic,
-        │                                   sub-topic, tier, page — 2060 rows
-        │  tools/annotations/*.tsv          one row per source entry, in order:
-        │                                   type, article, example, translation, note
-        ▼  tools/build_vocabulary.py
-data/vocabulary.json                        what the app loads
-```
-
-Rebuild after editing an annotation:
+Everything needed to ingest it is already built. When the PDF is available:
 
 ```bash
-python3 german/tools/build_vocabulary.py
+python3 german/tools/extract_goethe_b1.py <Goethe-Zertifikat_B1_Wortliste.pdf>
 ```
 
-The build **fails** if an annotation file has a different number of rows than
-the source, or if a row's German term does not match the source term — so no
-vocabulary item can be added or lost by accident. It also warns when a noun has
-no article or an example sentence looks like it does not use its word.
+That script is a stub that documents the target record shape (article, plural,
+gender, verb forms, regional D/A/CH labels, cross-references, thematic
+category, source page) and exits with a clear message. Fill in its parser, then
+the existing `build_vocabulary.py` → `validate_content.py` chain and the whole
+learning engine pick the new items up unchanged.
 
-`tools/extract_pdf.py` regenerates `source-entries.json` from the PDF
-(`pip install pypdf`); the PDF itself is not committed.
+## What the app does
+
+* **German Learning hub** — the coach, the four sections, the target level.
+* **Vocabulary** — the document's own topics → sub-topics → word type → cards
+  with article, meaning, example sentence and English translation.
+* **Grammar** — 32 C1 topics by Lektion, each with an English summary, the
+  rules, the source's own examples, and 4–7 exercises.
+* **Lessons** — a personalised mix of new words, weak words, overdue reviews
+  and one grammar exercise, composed from your own records.
+* **Review** — everything the spaced-repetition schedule says is due.
+* **Progress** — per topic, per grammar unit, streak, XP, weak words, recent
+  mistakes, recent sessions.
+* **Search** — German, English and grammar topics in one box.
+* **Learning Coach** — recommendations computed from the database.
+
+### Exercise types
+
+Vocabulary: German→English, English→German, multiple choice, article
+(`der/die/das`), sentence context (the word blanked out of its own example),
+sentence reading, word recognition.
+Grammar: fill in the blank, multiple choice, transformation, sentence
+reconstruction, error correction, context selection.
+
+Two types are deliberately **switched off**: plural forms and verb tables. The
+OCR list prints neither, so `exercises.js#availability()` reports them as
+unavailable rather than generating questions from data that does not exist.
+They turn themselves on for any word that arrives with `pluralForm` or
+`verbForms` populated — which the Goethe list would supply.
+
+Typed answers are checked leniently: case, punctuation, ß/ss and whitespace are
+ignored, several answers can be accepted, and a near miss is reported as
+"almost" rather than wrong.
+
+## Data integrity
+
+`build_grammar.py` refuses to build unless **every example sentence occurs
+verbatim in the source text of its own topic** (whitespace-normalised, footnote
+markers removed). Exercises that use a source sentence are checked the same
+way; anything written for practice is marked `fromSource: false`. The same rule
+caught two mistakes while this was being written — a phrase that was not in the
+document and a sentence with a footnote marker — which is exactly what it is
+for.
+
+`validate_content.py` runs 32 000+ checks over both databases: duplicate ids,
+duplicate entries, near-duplicate variants, missing German words, malformed
+articles and plurals, invalid levels, missing source attribution, malformed
+grammar topics, unknown or circular prerequisites.
+
+```bash
+python3 german/tools/validate_content.py
+# vocabulary: 2047 words checked
+# grammar: 32 topics, 183 exercises checked
+# PASSED — 0 errors, 1 warning
+```
+
+The one warning is genuine and left standing: the OCR list prints *einwerfen —
+to post* in the Foundation tier and *einwerfen — to post (a letter)* in the
+Higher tier, so both are kept and flagged for a human.
+
+### Levels
+
+The app has A1–C2 as structure. It does **not** claim to hold an A1–C2
+curriculum. C1 has grammar; the vocabulary is labelled `GCSE`, because that is
+what the document is, with an *approximate* CEFR mapping of its
+Foundation/Higher tiers (`cefrApprox`) that is labelled as approximate
+everywhere it appears. The other levels are empty and say so.
+
+## The pipeline
+
+```
+Sicher_C1_Grammatikuebersicht.pdf        OCR GCSE vocabulary PDF
+        │ tools/extract_c1_grammar.py            │ tools/extract_pdf.py
+        ▼                                        ▼
+tools/c1-source.json                     tools/source-entries.json
+  32 topics + raw source text              2060 entries
+        │ tools/annotations/grammar/l*.json      │ tools/annotations/*.tsv
+        │   summary, rules, examples,            │   type, article, example,
+        │   exercises                            │   translation, note
+        ▼ tools/build_grammar.py                 ▼ tools/build_vocabulary.py
+data/grammar.json                        data/vocabulary.json
+        └──────────────┬─────────────────────────┘
+                       ▼  tools/validate_content.py
+                  the learning engine
+```
+
+Rebuild everything:
+
+```bash
+python3 german/tools/extract_c1_grammar.py <Sicher_C1_Grammatikuebersicht.pdf>
+python3 german/tools/build_grammar.py
+python3 german/tools/build_vocabulary.py
+python3 german/tools/validate_content.py
+python3 german/tools/build_artifact.py          # single-file bundle
+```
+
+Both builds fail loudly rather than silently dropping content: the vocabulary
+build fails if an annotation row count or German term diverges from the source;
+the grammar build fails on an ungrounded example, a missing answer, a choice
+whose answer is not among its options, or an unannotated topic.
+
+Source PDFs are not committed — only the extracted structured data, so the
+imported text stays limited to what the app needs and is traceable to a page
+number.
 
 ## Code layout
 
 ```
 german/
-  index.html          shell: top bar, search, main region
-  styles.css          light + dark theme, no framework
-  data/vocabulary.json
-  assets/master-fuka.jpg
+  index.html            shell: top bar, search, main region
+  styles.css            light + dark theme, no framework
+  data/vocabulary.json  2047 items
+  data/grammar.json     32 topics, 205 examples, 183 exercises
   src/
-    data.js           loading + indexing (the only module that reads the JSON)
-    progress.js       learning status, persistence, summaries
-    practice.js       session building and scoring — pure logic, no DOM
-    search.js         German/English search
-    fuka.js           Master Fuka's lines
-    ui.js             progress rings, circles, the vocabulary card
-    views.js          screens
-    app.js            hash router + event wiring
-  tools/              the data pipeline described above
+    data.js         vocabulary loading + indexing
+    grammar.js      grammar loading + indexing
+    db.js           the learner database: profile, progress, sessions, events
+    srs.js          spaced repetition (SM-2 style) — pure functions
+    progress.js     vocabulary status façade over db.js
+    exercises.js    exercise generation + lenient answer checking
+    lessons.js      the personalised lesson engine
+    coach.js        the Learning Coach — reads records, invents nothing
+    runner.js       one state machine for every activity
+    search.js       German/English search
+    fuka.js         Master Fuka's lines
+    ui.js           rings, circles, cards, breadcrumbs
+    views.js        vocabulary screens
+    learnViews.js   hub, progress, grammar screens
+    app.js          hash router + event wiring
+  tools/            the pipeline above
 ```
 
-The separation is deliberate so the beta can grow: spaced repetition slots into
-`practice.js` (it already orders a pool by need), audio and pronunciation onto
-the card in `ui.js`, and accounts or cloud sync behind `progress.js` and
-`data.js` without touching any screen.
+### The database
 
-### A note on the GraphQL starter kit
+There is no server and no account system, so the store is `localStorage` — but
+the *schema* is the real one, keyed by user id, so the adapter can be swapped
+for a server without touching a call site:
 
-The brief linked `kriasoft/graphql-starter-kit`. It was not used: it is a
-full-stack monorepo built around a database, user accounts and a GraphQL API,
-all of which the brief explicitly rules out for this beta (no accounts, no
-cloud sync, no server). A dependency-free static app loads instantly, deploys
-to the existing Netlify site as-is, and keeps `data.js` / `progress.js` as the
-seams where a GraphQL backend can be added later without rewriting the UI.
+| Collection | Fields |
+|---|---|
+| `profile` | userId, displayName, targetLevel, createdAt, streakDays, lastActiveDay, xp |
+| `vocabProgress` | userId, vocabularyItemId, status, seen, correctCount, incorrectCount, repetitionCount, lastSeen, nextReview, difficulty |
+| `grammarProgress` | userId, grammarTopicId, completion, correctCount, incorrectCount, masteryScore, lastPracticed, nextReview |
+| `sessions` | id, userId, startedAt, finishedAt, kind, items, correct, total |
+| `events` | id, userId, at, kind, itemId, itemKind, correct, given, expected |
+
+Progress saved by the previous version of the app is migrated on first load,
+non-destructively, and given a real place in the review schedule.
+
+### The Learning Coach
+
+Deterministic and data-driven. The app is a static page with no server, so
+there is no language model at runtime; the coach computes every statement from
+the records above and names the numbers behind it ("you have answered 3 of 8
+questions on this topic correctly"). It never asserts progress the database
+does not show, and when there is nothing recorded it says so.
 
 ## Single-file build
 
-`python3 german/tools/build_artifact.py` inlines the CSS, the modules, the
-vocabulary and Master Fuka's picture into `dist/master-fuka-german.html` — one
+`python3 german/tools/build_artifact.py` inlines the CSS, the modules, both
+databases and Master Fuka's picture into `dist/master-fuka-german.html` — one
 file that runs with no server and no network. Edit the sources, never the
-bundle.
+bundle. The modules are flattened into one scope, so the bundler rejects
+aliased imports (`x as y`) that cannot survive flattening.

@@ -1,0 +1,161 @@
+{
+ "topics": [
+  {
+   "id": "g-l11-1",
+   "titleEn": "Sentence structures: consecutive and modal relations",
+   "summary": "Consequences and manner through connectors, main clauses and prepositions.",
+   "category": "Satzstrukturen",
+   "tags": ["Konsekutiv", "Modal", "Konnektoren", "Präpositionen"],
+   "difficulty": 4,
+   "prerequisites": ["g-l07-2"],
+   "explanation": [
+    {"heading": "Same meaning, different structure",
+     "text": "Consequences as well as manner can be expressed with different structures. The sentences are equal in meaning but differ in structure and register. Expressions with prepositions are typical of written language."},
+    {"heading": "Consecutive clauses",
+     "text": "With solch ein / ein solch / ein derartig …, dass the intensity sits in the noun phrase; with so / derartig …, dass it sits in the adjective; sodass simply attaches the consequence."},
+    {"heading": "Modal clauses",
+     "text": "indem and dadurch, dass name the means by which something is achieved; womit and wodurch attach the result to the whole preceding clause."}
+   ],
+   "rules": [
+    "Consecutive subordinate connectors: solch ein / ein solch / ein derartig …, dass; sodass; so / derartig …, dass; weshalb / weswegen.",
+    "Consecutive main-clause connectors: deshalb / demnach / demzufolge / folglich / infolgedessen.",
+    "Consecutive prepositions: infolge von + Dativ, infolge + Genitiv.",
+    "Modal subordinate connectors: indem, dadurch dass, womit, wodurch.",
+    "Modal main-clause connectors: dadurch / damit / so / auf diese Weise.",
+    "Modal prepositions: durch + Akkusativ, mittels + Genitiv, mithilfe + Genitiv."
+   ],
+   "examples": [
+    {"de": "Schweizer haben ein Gefühl für Höflichkeit, sodass sie sensibel auf Zwischentöne reagieren.", "note": "sodass attaches the consequence"},
+    {"de": "Deutsche sind eine direktere Kommunikation gewöhnt, weshalb / weswegen sie auf Schweizer oft arrogant wirken.", "note": "weshalb / weswegen"},
+    {"de": "Infolge eines Missverständnisses habe ich den Geschäftspartner falsch angesprochen.", "note": "infolge + Genitiv"},
+    {"de": "Ich bereite mich auf eine Geschäftsreise vor, indem ich mich bei Freunden nach ihren Erfahrungen erkundige.", "note": "indem names the means"},
+    {"de": "Eric macht ein Auslandspraktikum, womit sein Lebenslauf attraktiver für Arbeitgeber wird.", "note": "womit attaches the result"},
+    {"de": "Durch häufigen Kontakt mit anderen Kulturen erwirbt man interkulturelle Kompetenz.", "note": "durch + Akkusativ"},
+    {"de": "Mittels / Mithilfe neuer Techniken kann man Kontakt halten.", "note": "mittels / mithilfe + Genitiv"}
+   ],
+   "exercises": [
+    {"type": "transform", "prompt": "Rewrite the modal clause with the preposition durch + Akkusativ.",
+     "from": "Man erwirbt interkulturelle Kompetenz, indem man häufig Kontakt mit anderen Kulturen hat.",
+     "answers": ["Durch häufigen Kontakt mit anderen Kulturen erwirbt man interkulturelle Kompetenz."],
+     "explain": "indem-clauses correspond to durch + Akkusativ in the written register."},
+    {"type": "choice", "prompt": "Which connector names the means of achieving something?",
+     "text": "Ich bereite mich auf eine Geschäftsreise vor, ___ ich mich bei Freunden nach ihren Erfahrungen erkundige.",
+     "options": ["indem", "sodass", "weshalb", "folglich"],
+     "answers": ["indem"],
+     "explain": "indem and dadurch, dass name the means; sodass and weshalb name a consequence."},
+    {"type": "choice", "prompt": "Which is a main-clause connector for a consequence?",
+     "text": "In Deutschland heißt Wissen Macht. ___ wird sie nicht gern geteilt.",
+     "options": ["Folglich", "Indem", "Sodass", "Weshalb"],
+     "answers": ["Folglich"],
+     "explain": "deshalb / demnach / demzufolge / folglich / infolgedessen are the main-clause consecutive connectors."},
+    {"type": "fill", "prompt": "Complete the consecutive preposition (+ Genitiv).",
+     "text": "___ eines Missverständnisses habe ich den Geschäftspartner falsch angesprochen.",
+     "answers": ["Infolge"],
+     "sentence": "Infolge eines Missverständnisses habe ich den Geschäftspartner falsch angesprochen.", "source": true,
+     "explain": "infolge + Genitiv (or infolge von + Dativ) expresses a consequence."},
+    {"type": "transform", "prompt": "Rewrite with the subordinate connector womit.",
+     "from": "Eric macht ein Auslandspraktikum. Dadurch wird sein Lebenslauf attraktiver für Arbeitgeber.",
+     "answers": ["Eric macht ein Auslandspraktikum, womit sein Lebenslauf attraktiver für Arbeitgeber wird."],
+     "explain": "womit and wodurch attach the result to the whole preceding clause."},
+    {"type": "error", "prompt": "The connector expresses the wrong relation. Correct the sentence.",
+     "text": "Schweizer sind so sensibel, indem sie auch auf Zwischentöne reagieren.",
+     "answers": ["Schweizer sind so sensibel, dass sie auch auf Zwischentöne reagieren."],
+     "explain": "so / derartig … requires dass — it names a consequence, not a means."}
+   ]
+  },
+  {
+   "id": "g-l11-2",
+   "titleEn": "Comparisons",
+   "summary": "The implicit comparative and the relative superlative.",
+   "category": "Komparation",
+   "tags": ["Vergleiche", "Komparativ", "Superlativ", "Deklination"],
+   "difficulty": 3,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "Implicit comparison",
+     "text": "In an implicit comparison the point of comparison is not named explicitly — the comparative simply implies 'compared with what is usual'."},
+    {"heading": "Relative superlative",
+     "text": "The relative superlative picks one item out of a group: einer / eines / eine der elegantesten Anzüge, die ich je hatte."}
+   ],
+   "rules": [
+    "Implicit comparative: ein eleganterer Anzug (maskulin), ein eleganteres Hemd (neutral), eine elegantere Hose (feminin).",
+    "The point of comparison — 'compared with what is usual' — stays unnamed.",
+    "Relative superlative: einer / eines / eine + der + Superlativ im Genitiv Plural.",
+    "The gender of einer / eines / eine follows the noun that is picked out."
+   ],
+   "examples": [
+    {"de": "eleganterer Anzug", "note": "impliziter Vergleich, maskulin"},
+    {"de": "ein eleganteres Hemd", "note": "impliziter Vergleich, neutral"},
+    {"de": "eine elegantere Hose", "note": "impliziter Vergleich, feminin"},
+    {"de": "der elegantesten", "note": "relativer Superlativ im Genitiv Plural"},
+    {"de": "die ich je hatte", "note": "the relative clause that delimits the group"}
+   ],
+   "exercises": [
+    {"type": "choice", "prompt": "Which form is the implicit comparative, neuter?",
+     "text": "", "options": ["ein eleganteres Hemd", "ein eleganter Hemd", "eine elegantere Hemd", "ein elegantestes Hemd"],
+     "answers": ["ein eleganteres Hemd"],
+     "explain": "Neuter takes -es: ein eleganteres Hemd."},
+    {"type": "fill", "prompt": "Complete the relative superlative, masculine.",
+     "text": "Das war ___ der elegantesten Anzüge, die ich je hatte.", "answers": ["einer"],
+     "explain": "The masculine form is einer; the neuter eines, the feminine eine."},
+    {"type": "fill", "prompt": "Complete the relative superlative, feminine.",
+     "text": "Das war ___ der elegantesten Hosen, die ich je hatte.", "answers": ["eine"],
+     "explain": "The gender of einer / eines / eine follows the noun picked out — die Hose, so eine."},
+    {"type": "choice", "prompt": "What is special about the implicit comparison?",
+     "text": "", "options": ["Der Vergleichspunkt wird nicht genannt.", "Es gibt keinen Artikel.", "Das Adjektiv bleibt undekliniert.", "Es steht immer im Plural."],
+     "answers": ["Der Vergleichspunkt wird nicht genannt."],
+     "explain": "The point of comparison stays implicit — 'im Vergleich zum Üblichen'."},
+    {"type": "error", "prompt": "The case after the relative superlative is wrong. Correct it.",
+     "text": "Das war einer der eleganteste Anzüge, die ich je hatte.",
+     "answers": ["Das war einer der elegantesten Anzüge, die ich je hatte."],
+     "explain": "The superlative stands in the genitive plural: der elegantesten Anzüge."}
+   ]
+  },
+  {
+   "id": "g-l11-3",
+   "titleEn": "Word formation: the prefixes er- and re-",
+   "summary": "er- marks a change of state or an achieved result; re- means 'back' or 'again'.",
+   "category": "Wortbildung",
+   "tags": ["Wortbildung", "Vorsilben", "Verben"],
+   "difficulty": 2,
+   "prerequisites": ["g-l01-2"],
+   "explanation": [
+    {"heading": "Why prefixes help",
+     "text": "Knowing the meanings of prefixes helps you work out unknown words. The prefix er- gives the base verb a different meaning."}
+   ],
+   "rules": [
+    "er- meaning 1 — a change of state: eröffnen, erröten, erkälten, erschrecken.",
+    "er- meaning 2 — achieving something through an action: erarbeiten, erbauen, ersetzen.",
+    "re- meaning 1 — back: reflektieren, reimportieren.",
+    "re- meaning 2 — again: reagieren, reanimieren."
+   ],
+   "examples": [
+    {"de": "eröffnen, erröten, erkälten, erschrecken", "note": "er- — Veränderung eines Zustands"},
+    {"de": "erarbeiten, erbauen, ersetzen", "note": "er- — etwas durch eine Handlung erreichen"},
+    {"de": "reflektieren, reimportieren", "note": "re- — zurück"},
+    {"de": "reagieren, reanimieren", "note": "re- — wieder"}
+   ],
+   "exercises": [
+    {"type": "choice", "prompt": "Which meaning does er- carry in 'erröten'?",
+     "text": "", "options": ["Veränderung eines Zustands", "etwas durch eine Handlung erreichen", "zurück", "wieder"],
+     "answers": ["Veränderung eines Zustands"],
+     "explain": "Like eröffnen, erkälten, erschrecken — a state changes."},
+    {"type": "choice", "prompt": "Which meaning does er- carry in 'erarbeiten'?",
+     "text": "", "options": ["etwas durch eine Handlung erreichen", "Veränderung eines Zustands", "zurück", "wieder"],
+     "answers": ["etwas durch eine Handlung erreichen"],
+     "explain": "Like erbauen and ersetzen — the result is achieved through the action."},
+    {"type": "choice", "prompt": "Which meaning does re- carry in 'reimportieren'?",
+     "text": "", "options": ["zurück", "wieder", "nicht", "sehr"],
+     "answers": ["zurück"],
+     "explain": "re- meaning 1 is 'back': reflektieren, reimportieren."},
+    {"type": "choice", "prompt": "Which meaning does re- carry in 'reanimieren'?",
+     "text": "", "options": ["wieder", "zurück", "nicht", "gegen"],
+     "answers": ["wieder"],
+     "explain": "re- meaning 2 is 'again': reagieren, reanimieren."},
+    {"type": "fill", "prompt": "Form the verb: to open (a shop) for the first time.",
+     "text": "Nächste Woche wird das neue Café ___öffnet.", "answers": ["er"],
+     "explain": "er- marks the change of state: eröffnen."}
+   ]
+  }
+ ]
+}

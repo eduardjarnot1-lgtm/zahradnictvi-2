@@ -1,0 +1,121 @@
+{
+ "topics": [
+  {
+   "id": "g-l02-1",
+   "titleEn": "Two-part connectors",
+   "summary": "Concessive wenn … auch / wie … auch, and restrictive es sei denn, außer, außer dass, nur dass.",
+   "category": "Konnektoren",
+   "tags": ["Konnektoren", "Konzessiv", "Restriktiv", "Nebensatz"],
+   "difficulty": 4,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "Concessive two-part connectors",
+     "text": "wenn … auch, (so) and wie … auch express a condition or cause that does not have the effect you would expect. They correspond to obwohl, or to zwar … aber / trotzdem / dennoch."},
+    {"heading": "Restrictive two-part connectors",
+     "text": "es sei denn, (dass) …; außer, (wenn) …; außer dass … and nur dass … express a restriction. You use them when something only holds in a particular case or a particular situation."}
+   ],
+   "rules": [
+    "wenn … auch is often taken up by so in the main clause: Wenn Samira auch …, so hat sie …",
+    "wie … auch is usually intensified: Wie sehr sich die Auszubildende auch bemüht, …",
+    "es sei denn (dass) and außer (wenn) name the one case in which the statement does not hold.",
+    "außer dass and nur dass name the single difference between two otherwise equal things.",
+    "The clause with nur dass is always the second clause."
+   ],
+   "examples": [
+    {"de": "Wenn Samira auch oft abends oder am Wochenende Dienst hat, so hat sie ihre Entscheidung noch nicht bereut.", "note": "concessive wenn … auch, taken up by so."},
+    {"de": "Obwohl Samira oft abends oder am Wochenende Dienst hat, hat sie ihre Entscheidung noch nicht bereut.", "note": "the same content with obwohl."},
+    {"de": "Wie sehr sich die Auszubildende auch bemüht, alles richtig zu machen, manche Tätigkeiten fallen ihr noch schwer.", "note": "concessive wie … auch."},
+    {"de": "es sei denn, dass unser Kind krank wird.", "note": "restrictive — the one case that cancels the plan."},
+    {"de": "außer wenn unser Kind krank wird.", "note": "the same restriction with außer wenn."},
+    {"de": "Die beiden Hotelzimmer sind fast gleich, außer dass Sie im teureren Zimmer Alpenblick haben.", "note": "außer dass names the single difference."},
+    {"de": "Die beiden Hotelzimmer sind fast gleich, nur dass Sie im teureren Zimmer Alpenblick haben.", "note": "nur dass — always the second clause."}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Complete the concessive connector (two words, one at each end).",
+     "text": "Wenn Samira ___ oft abends oder am Wochenende Dienst hat, so hat sie ihre Entscheidung noch nicht bereut.",
+     "answers": ["auch"],
+     "sentence": "Wenn Samira auch oft abends oder am Wochenende Dienst hat, so hat sie ihre Entscheidung noch nicht bereut.", "source": true,
+     "explain": "wenn … auch is the concessive pair; the main clause is often introduced by so."},
+    {"type": "transform", "prompt": "Rewrite with obwohl.",
+     "from": "Wenn Samira auch oft abends oder am Wochenende Dienst hat, so hat sie ihre Entscheidung noch nicht bereut.",
+     "answers": ["Obwohl Samira oft abends oder am Wochenende Dienst hat, hat sie ihre Entscheidung noch nicht bereut."],
+     "explain": "wenn … auch and obwohl carry the same meaning; with obwohl the auch and the so drop."},
+    {"type": "choice", "prompt": "Which connector names the one case in which the plan does NOT hold?",
+     "text": "Wahrscheinlich reisen wir am Freitag an, ___ unser Kind wird krank.",
+     "options": ["es sei denn,", "außer dass", "nur dass", "wie sehr"],
+     "answers": ["es sei denn,"],
+     "explain": "es sei denn (dass) / außer (wenn) name the exception that cancels the statement."},
+    {"type": "choice", "prompt": "Two rooms are almost the same; one has a mountain view. Which is correct?",
+     "text": "",
+     "options": ["Die beiden Hotelzimmer sind fast gleich, außer dass Sie im teureren Zimmer Alpenblick haben.", "Außer dass die beiden Hotelzimmer fast gleich sind, haben Sie im teureren Zimmer Alpenblick.", "Nur dass Sie im teureren Zimmer Alpenblick haben, sind die Hotelzimmer fast gleich."],
+     "answers": ["Die beiden Hotelzimmer sind fast gleich, außer dass Sie im teureren Zimmer Alpenblick haben."],
+     "explain": "außer dass may stand first or second; nur dass is always the second clause, so the third option is wrong."},
+    {"type": "reorder", "prompt": "Put the concessive clause in the right order.",
+     "tokens": ["Wie", "sehr", "sich", "die", "Auszubildende", "auch", "bemüht,", "alles", "richtig", "zu", "machen,"],
+     "answers": ["Wie sehr sich die Auszubildende auch bemüht, alles richtig zu machen,"],
+     "explain": "wie + intensifier + subject … auch + verb: the auch sits before the finite verb at the end."},
+    {"type": "error", "prompt": "nur dass is in the wrong position. Correct the sentence.",
+     "text": "Nur dass Sie im teureren Zimmer Alpenblick haben, sind die beiden Hotelzimmer fast gleich.",
+     "answers": ["Die beiden Hotelzimmer sind fast gleich, nur dass Sie im teureren Zimmer Alpenblick haben."],
+     "explain": "The clause with nur dass is always the second clause."}
+   ]
+  },
+  {
+   "id": "g-l02-2",
+   "titleEn": "Fixed noun–verb combinations",
+   "summary": "Nouns combine with verbs (sometimes with an article or preposition) into set expressions with their own meaning.",
+   "category": "Wortschatzstrukturen",
+   "tags": ["Nomen-Verb-Verbindungen", "Funktionsverbgefüge", "Schriftsprache"],
+   "difficulty": 3,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "What they are",
+     "text": "Nouns can stand with various verbs, sometimes with articles or prepositions, in noun–verb combinations. These combinations then carry meanings of their own, and each one corresponds to a simple verb."},
+    {"heading": "Active and passive verbs",
+     "text": "Verbs such as bringen or stellen often express an 'active' meaning, while kommen, geraten and stehen express a 'passive' one."}
+   ],
+   "rules": [
+    "zur Auswahl stehen = ausgewählt werden können.",
+    "zur Verfügung stehen = über etwas verfügen können; zur Verfügung stellen = bereitstellen.",
+    "Vorbereitungen treffen = etwas vorbereiten; der Ansicht / Meinung sein = meinen.",
+    "Freude bereiten = jemandem gefallen; Schwierigkeiten bereiten = schwierig sein.",
+    "zur Sprache bringen = etwas ansprechen; zur Sprache kommen = angesprochen / thematisiert werden.",
+    "Kritik üben = etwas kritisieren; auf Kritik stoßen = kritisiert werden.",
+    "in Kauf nehmen = akzeptieren; einen Kompromiss finden = sich einigen; infrage kommen = möglich, denkbar sein.",
+    "'Active' bringen / stellen against 'passive' kommen / geraten / stehen: zur Sprache bringen – zur Sprache kommen, zur Verfügung stellen – zur Verfügung stehen."
+   ],
+   "examples": [
+    {"de": "zur Auswahl stehen", "note": "= ausgewählt werden können"},
+    {"de": "zur Verfügung stellen", "note": "= bereitstellen"},
+    {"de": "Vorbereitungen treffen", "note": "= etwas vorbereiten"},
+    {"de": "das Verständnis vertiefen", "note": "= besser verstehen"},
+    {"de": "in Kauf nehmen", "note": "= akzeptieren"},
+    {"de": "auf Kritik stoßen", "note": "= kritisiert werden"},
+    {"de": "infrage kommen", "note": "= möglich, denkbar sein"}
+   ],
+   "exercises": [
+    {"type": "choice", "prompt": "Which simple verb matches 'in Kauf nehmen'?",
+     "text": "", "options": ["akzeptieren", "einkaufen", "bezahlen", "kritisieren"],
+     "answers": ["akzeptieren"], "explain": "in Kauf nehmen = akzeptieren."},
+    {"type": "choice", "prompt": "Which simple verb matches 'auf Kritik stoßen'?",
+     "text": "", "options": ["kritisiert werden", "etwas kritisieren", "sich einigen", "besser verstehen"],
+     "answers": ["kritisiert werden"],
+     "explain": "stoßen belongs to the 'passive' group: auf Kritik stoßen = kritisiert werden. Kritik üben would be the active one."},
+    {"type": "fill", "prompt": "'Active' meaning: the company makes the data available.",
+     "text": "Die Firma ___ den Mitarbeitern die Daten zur Verfügung.", "answers": ["stellt"],
+     "hint": "bringen / stellen = aktiv", "explain": "zur Verfügung stellen = bereitstellen (active). zur Verfügung stehen would be the passive counterpart."},
+    {"type": "fill", "prompt": "'Passive' meaning: the topic gets raised.",
+     "text": "In der Sitzung ___ das Problem endlich zur Sprache.", "answers": ["kam", "kommt"],
+     "hint": "kommen / geraten / stehen = passiv", "explain": "zur Sprache kommen = angesprochen / thematisiert werden."},
+    {"type": "transform", "prompt": "Rewrite in the nominal style with a fixed noun–verb combination (zur Sprache …).",
+     "from": "Der Betriebsrat hat das Problem angesprochen.",
+     "answers": ["Der Betriebsrat hat das Problem zur Sprache gebracht."],
+     "explain": "etwas ansprechen = etwas zur Sprache bringen ('active' bringen)."},
+    {"type": "error", "prompt": "Active and passive have been swapped. Correct the sentence.",
+     "text": "Drei Termine stellen zur Auswahl.",
+     "answers": ["Drei Termine stehen zur Auswahl."],
+     "explain": "zur Auswahl stehen = ausgewählt werden können; stellen would need someone doing the offering."}
+   ]
+  }
+ ]
+}
