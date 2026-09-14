@@ -101,15 +101,23 @@ def validate_vocabulary(report: Report) -> None:
 def validate_grammar(report: Report) -> None:
     db = json.loads(GRAMMAR.read_text(encoding="utf-8"))
     topics = db["topics"]
-    report.check(bool(db["meta"].get("source")), "grammar: meta has no source")
+    sources = db["meta"].get("sources") or []
+    report.check(bool(sources), "grammar: meta names no source document")
+    for source in sources:
+        report.check(bool(source.get("title")), "grammar: a source has no title")
+        report.check(bool(source.get("credit")), f"grammar: source {source.get('key')} has no credit line")
 
     ids = Counter(t["id"] for t in topics)
     for tid, count in ids.items():
         report.check(count == 1, f"grammar: duplicate topic id {tid} ({count}x)")
 
-    titles = Counter((t["lektion"], t["title"].lower()) for t in topics)
+    # A heading may legitimately recur at a different level — DaF kompakt prints
+    # "Prepositions of place" once for A1 and again for A2 — so the level is part
+    # of the key. Two topics sharing a title AND a level in one group would be a
+    # double annotation.
+    titles = Counter((t["sourceKey"], t["group"], t["level"], t["title"].lower()) for t in topics)
     for key, count in titles.items():
-        report.check(count == 1, f"grammar: duplicate title in Lektion {key[0]}: {key[1]!r}")
+        report.check(count == 1, f"grammar: duplicate {key[2]} title in {key[0]} / {key[1]}: {key[3]!r}")
 
     known = {t["id"] for t in topics}
     exercise_ids: Counter = Counter()

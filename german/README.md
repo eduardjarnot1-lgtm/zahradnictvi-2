@@ -1,6 +1,6 @@
 # Master Fuka — German Learning (beta)
 
-A learning app built on two imported source documents. It is not a PDF reader:
+A learning app built on three imported source documents. It is not a PDF reader:
 the documents are extracted, normalised, validated and turned into vocabulary
 cards, grammar units, exercises, spaced review and progress tracking.
 
@@ -20,15 +20,17 @@ On Netlify the site publishes the repository root, so the app is served at
 | Content | Source | Status |
 |---|---|---|
 | Vocabulary — 2 047 items | OCR GCSE German Vocabulary List (General and Topic Areas 1–5) | imported |
+| Grammar — 87 A1/A2/B1 topics | DaF kompakt neu A1/A2/B1, Grammatikerklärungen, © Ernst Klett Sprachen GmbH, Stuttgart 2018 | imported |
 | Grammar — 32 C1 topics | Sicher! C1 Grammatikübersicht, © Hueber Verlag | imported |
 | Goethe-Zertifikat B1 Wortliste | **not supplied** — see below | **missing** |
 
 ### The Goethe B1 Wortliste is not in the repository
 
-The task named two PDFs. Only one arrived: `Sicher_C1_Grammatikuebersicht.pdf`.
-In place of the Goethe B1 Wortliste there was a text file containing a
-fliphtml5 link, and that host is blocked by this environment's network egress
-policy, so the list could not be fetched.
+That task named two PDFs. Only one arrived: `Sicher_C1_Grammatikuebersicht.pdf`
+(the DaF kompakt grammar PDF came later, with a separate request). In place of
+the Goethe B1 Wortliste there was a text file containing a fliphtml5 link, and
+that host is blocked by this environment's network egress policy, so the list
+could not be fetched.
 
 Roughly 2 400 B1 lexical units are therefore **not** in the app. No substitute
 was invented: the existing OCR GCSE vocabulary is carried under its own real
@@ -51,8 +53,10 @@ learning engine pick the new items up unchanged.
 * **German Learning hub** — the coach, the four sections, the target level.
 * **Vocabulary** — the document's own topics → sub-topics → word type → cards
   with article, meaning, example sentence and English translation.
-* **Grammar** — 32 C1 topics by Lektion, each with an English summary, the
-  rules, the source's own examples, and 4–7 exercises.
+* **Grammar** — 119 topics from A1 to C1, grouped by level and then by the
+  source's own section (DaF kompakt's Roman-numbered chapters, Sicher!'s
+  Lektionen), each with an English summary, the rules, the source's own
+  examples, and 4–7 exercises.
 * **Lessons** — a personalised mix of new words, weak words, overdue reviews
   and one grammar exercise, composed from your own records.
 * **Review** — everything the spaced-repetition schedule says is due.
@@ -89,7 +93,7 @@ caught two mistakes while this was being written — a phrase that was not in th
 document and a sentence with a footnote marker — which is exactly what it is
 for.
 
-`validate_content.py` runs 32 000+ checks over both databases: duplicate ids,
+`validate_content.py` runs 35 000+ checks over both databases: duplicate ids,
 duplicate entries, near-duplicate variants, missing German words, malformed
 articles and plurals, invalid levels, missing source attribution, malformed
 grammar topics, unknown or circular prerequisites.
@@ -97,7 +101,7 @@ grammar topics, unknown or circular prerequisites.
 ```bash
 python3 german/tools/validate_content.py
 # vocabulary: 2047 words checked
-# grammar: 32 topics, 183 exercises checked
+# grammar: 119 topics, 602 exercises checked
 # PASSED — 0 errors, 1 warning
 ```
 
@@ -108,33 +112,48 @@ Higher tier, so both are kept and flagged for a human.
 ### Levels
 
 The app has A1–C2 as structure. It does **not** claim to hold an A1–C2
-curriculum. C1 has grammar; the vocabulary is labelled `GCSE`, because that is
-what the document is, with an *approximate* CEFR mapping of its
-Foundation/Higher tiers (`cefrApprox`) that is labelled as approximate
-everywhere it appears. The other levels are empty and say so.
+curriculum.
+
+A1, A2, B1 and C1 hold grammar, and those labels are the documents' own: DaF
+kompakt prints `(A1)`, `(A2)` or `(B1)` beside every block, and the extractor
+reads the level off the heading rather than guessing it. B2 and C2 are empty
+and say so.
+
+The vocabulary is labelled `GCSE`, because that is what the document is, with
+an *approximate* CEFR mapping of its Foundation/Higher tiers (`cefrApprox`)
+that is labelled as approximate everywhere it appears.
 
 ## The pipeline
 
 ```
-Sicher_C1_Grammatikuebersicht.pdf        OCR GCSE vocabulary PDF
-        │ tools/extract_c1_grammar.py            │ tools/extract_pdf.py
-        ▼                                        ▼
-tools/c1-source.json                     tools/source-entries.json
-  32 topics + raw source text              2060 entries
-        │ tools/annotations/grammar/l*.json      │ tools/annotations/*.tsv
-        │   summary, rules, examples,            │   type, article, example,
-        │   exercises                            │   translation, note
-        ▼ tools/build_grammar.py                 ▼ tools/build_vocabulary.py
-data/grammar.json                        data/vocabulary.json
-        └──────────────┬─────────────────────────┘
-                       ▼  tools/validate_content.py
-                  the learning engine
+Sicher_C1_...pdf     DaF_kompakt_neu_...pdf      OCR GCSE vocabulary PDF
+  │ extract_c1_         │ extract_daf_             │ tools/extract_pdf.py
+  │   grammar.py        │   grammar.py             ▼
+  ▼                     ▼                        tools/source-entries.json
+tools/c1-source.json  tools/daf-source.json        2060 entries
+  32 topics             87 topics                   │ tools/annotations/*.tsv
+  + raw source text     + raw source text           │   type, article, example,
+  │                     │                           │   translation, note
+  │ tools/annotations/grammar/*.json                │
+  │   summary, rules, examples, exercises           │
+  ▼ tools/build_grammar.py                          ▼ tools/build_vocabulary.py
+data/grammar.json                                 data/vocabulary.json
+        └──────────────────────┬─────────────────────────┘
+                               ▼  tools/validate_content.py
+                          the learning engine
 ```
+
+`build_grammar.py` is source-agnostic: each document is one entry in its
+`SOURCES` table, saying where its level comes from (Sicher! is C1 throughout;
+DaF kompakt prints a level per block) and how its topics are grouped for
+display. Adding a fourth document means writing an extractor and one table
+entry, not touching the app.
 
 Rebuild everything:
 
 ```bash
 python3 german/tools/extract_c1_grammar.py <Sicher_C1_Grammatikuebersicht.pdf>
+python3 german/tools/extract_daf_grammar.py <DaF_kompakt_neu_A1_A2_B1_Grammar_English.pdf>
 python3 german/tools/build_grammar.py
 python3 german/tools/build_vocabulary.py
 python3 german/tools/validate_content.py
@@ -157,10 +176,10 @@ german/
   index.html            shell: top bar, search, main region
   styles.css            light + dark theme, no framework
   data/vocabulary.json  2047 items
-  data/grammar.json     32 topics, 205 examples, 183 exercises
+  data/grammar.json     119 topics, 599 examples, 602 exercises
   src/
     data.js         vocabulary loading + indexing
-    grammar.js      grammar loading + indexing
+    grammar.js      grammar loading + indexing (by level, group, category)
     db.js           the learner database: profile, progress, sessions, events
     srs.js          spaced repetition (SM-2 style) — pure functions
     progress.js     vocabulary status façade over db.js

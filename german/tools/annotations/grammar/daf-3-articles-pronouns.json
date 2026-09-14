@@ -1,0 +1,1724 @@
+{
+ "topics": [
+  {
+   "id": "g-daf-a1-personal-pronouns-in-the-accusative-case",
+   "titleEn": "Personal pronouns in the accusative",
+   "summary": "The accusative forms of ich, du, er/es/sie, wir, ihr, sie/Sie.",
+   "category": "Artikel und Pronomen",
+   "tags": [
+    "Pronomen",
+    "Akkusativ",
+    "Personalpronomen"
+   ],
+   "difficulty": 1,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "Two columns per number",
+     "text": "The table prints the nominative beside the accusative for the singular and again for the plural, so every nominative pronoun has exactly one accusative partner."
+    },
+    {
+     "heading": "Only er and sie really change",
+     "text": "es and the plural sie / Sie keep their shape; ich, du, wir, ihr and er change form."
+    }
+   ],
+   "rules": [
+    "Singular: ich → mich, du → dich, er → ihn, es → es, sie → sie.",
+    "Plural: wir → uns, ihr → euch, sie / Sie → sie / Sie.",
+    "es and sie / Sie look the same in the nominative and the accusative."
+   ],
+   "examples": [
+    {
+     "de": "ich mich",
+     "note": "nominative → accusative, 1st person singular"
+    },
+    {
+     "de": "du dich",
+     "note": "2nd person singular"
+    },
+    {
+     "de": "ihn / es / sie",
+     "note": "the accusative of er / es / sie"
+    },
+    {
+     "de": "wir uns",
+     "note": "1st person plural"
+    },
+    {
+     "de": "ihr euch",
+     "note": "2nd person plural"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Put the pronoun in the accusative.",
+     "text": "ich → ___",
+     "answers": [
+      "mich"
+     ],
+     "explain": "ich becomes mich in the accusative."
+    },
+    {
+     "type": "fill",
+     "prompt": "Put the pronoun in the accusative.",
+     "text": "wir → ___",
+     "answers": [
+      "uns"
+     ],
+     "explain": "wir becomes uns."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which form is the accusative of er?",
+     "text": "",
+     "options": [
+      "ihn",
+      "er",
+      "ihm",
+      "es"
+     ],
+     "answers": [
+      "ihn"
+     ],
+     "explain": "er → ihn; ihm would be the dative, which this A1 table does not show."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which pronoun does NOT change between nominative and accusative?",
+     "text": "",
+     "options": [
+      "es",
+      "ich",
+      "du",
+      "wir"
+     ],
+     "answers": [
+      "es"
+     ],
+     "explain": "es and sie / Sie keep the same form."
+    },
+    {
+     "type": "fill",
+     "prompt": "Put the pronoun in the accusative.",
+     "text": "ihr → ___",
+     "answers": [
+      "euch"
+     ],
+     "explain": "ihr becomes euch."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a2-personal-pronouns-in-nominative-accusati",
+   "titleEn": "Personal pronouns: nominative, accusative and dative",
+   "summary": "The full three-case table of the personal pronouns.",
+   "category": "Artikel und Pronomen",
+   "tags": [
+    "Pronomen",
+    "Nominativ",
+    "Akkusativ",
+    "Dativ",
+    "Personalpronomen"
+   ],
+   "difficulty": 2,
+   "prerequisites": [
+    "g-daf-a1-personal-pronouns-in-the-accusative-case"
+   ],
+   "explanation": [
+    {
+     "heading": "One row per case",
+     "text": "The document prints three rows — Nom., Akk., Dat. — each running across all eight persons, so read down a column to get one person's three forms."
+    },
+    {
+     "heading": "The dative is the new row",
+     "text": "The accusative was already known from A1; A2 adds mir, dir, ihm, ihr, uns, euch, ihnen / Ihnen."
+    },
+    {
+     "heading": "Overlaps",
+     "text": "uns and euch serve as both accusative and dative, and ihm is the dative of both er and es."
+    }
+   ],
+   "rules": [
+    "Dative singular: ich → mir, du → dir, er → ihm, es → ihm, sie → ihr.",
+    "Dative plural: wir → uns, ihr → euch, sie / Sie → ihnen / Ihnen.",
+    "uns and euch are identical in the accusative and the dative.",
+    "The polite Sie keeps its capital letter in every case: Sie, Sie, Ihnen."
+   ],
+   "examples": [
+    {
+     "de": "mir dir ihm",
+     "note": "the start of the dative row: ich, du, er"
+    },
+    {
+     "de": "ihnen / Ihnen",
+     "note": "dative of sie (plural) and of the polite Sie"
+    },
+    {
+     "de": "mich dich ihn",
+     "note": "the start of the accusative row"
+    },
+    {
+     "de": "uns euch",
+     "note": "the plural forms, identical in the accusative and the dative"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Give the dative form.",
+     "text": "ich → ___",
+     "answers": [
+      "mir"
+     ],
+     "explain": "ich → mich (Akk.) → mir (Dat.)."
+    },
+    {
+     "type": "fill",
+     "prompt": "Give the dative form.",
+     "text": "sie (Singular) → ___",
+     "answers": [
+      "ihr"
+     ],
+     "explain": "The dative of sie in the singular is ihr."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which is the dative of the polite Sie?",
+     "text": "",
+     "options": [
+      "Ihnen",
+      "Sie",
+      "Ihr",
+      "Euch"
+     ],
+     "answers": [
+      "Ihnen"
+     ],
+     "explain": "sie / Sie → ihnen / Ihnen in the dative."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which pair is the same in the accusative and the dative?",
+     "text": "",
+     "options": [
+      "uns / euch",
+      "mich / mir",
+      "dich / dir",
+      "ihn / ihm"
+     ],
+     "answers": [
+      "uns / euch"
+     ],
+     "explain": "The table prints uns and euch in both rows."
+    },
+    {
+     "type": "fill",
+     "prompt": "Give the dative form.",
+     "text": "es → ___",
+     "answers": [
+      "ihm"
+     ],
+     "explain": "er and es share the dative ihm."
+    },
+    {
+     "type": "error",
+     "prompt": "One pronoun is in the wrong case. Write the sentence correctly.",
+     "text": "Ich helfe dich.",
+     "answers": [
+      "Ich helfe dir.",
+      "Ich helfe dir"
+     ],
+     "hint": "helfen takes the dative.",
+     "explain": "dich is the accusative; the dative of du is dir."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a1-possessive-articles-in-nominative",
+   "titleEn": "Possessive articles in the nominative",
+   "summary": "mein, dein, sein/ihr, unser, euer, ihr/Ihr and the endings they take.",
+   "category": "Artikel und Pronomen",
+   "tags": [
+    "Possessivartikel",
+    "Nominativ",
+    "Endungen"
+   ],
+   "difficulty": 2,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "No ending before M and N",
+     "text": "In the nominative the possessive article has no ending before a masculine or neuter noun: mein Sohn, mein Kind."
+    },
+    {
+     "heading": "-e before F and plural",
+     "text": "Before a feminine noun and before any plural it ends in -e: meine Tochter, meine Söhne."
+    },
+    {
+     "heading": "The same endings as (k)ein",
+     "text": "The document states it explicitly: the endings on possessive articles are the same as on the indefinite article and the negative article."
+    },
+    {
+     "heading": "euer loses its e",
+     "text": "euer keeps its full form before M and N but becomes eure before a feminine noun and in the plural."
+    }
+   ],
+   "rules": [
+    "ich → mein, du → dein, er/es → sein, sie → ihr, wir → unser, ihr → euer, sie/Sie → ihr/Ihr.",
+    "Masculine and neuter nominative: no ending.",
+    "Feminine and plural nominative: -e.",
+    "The endings are identical to those of the indefinite article ein and the negative article kein.",
+    "euer → eure when an ending is added."
+   ],
+   "examples": [
+    {
+     "de": "mein Sohn",
+     "note": "masculine, no ending"
+    },
+    {
+     "de": "mein Kind",
+     "note": "neuter, no ending"
+    },
+    {
+     "de": "meine Tochter",
+     "note": "feminine, -e"
+    },
+    {
+     "de": "meine Söhne, Töchter, Kinder",
+     "note": "plural, -e for all three genders"
+    },
+    {
+     "de": "du dein dein deine deine",
+     "note": "the du row: M, N, F, plural"
+    },
+    {
+     "de": "seine / ihre",
+     "note": "feminine and plural forms for er/es and for sie"
+    },
+    {
+     "de": "The endings on possessive articles are the same as the indefinite article and the negative article.",
+     "note": "the document's own summary of the pattern"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Complete the possessive article.",
+     "text": "mein___ Tochter",
+     "answers": [
+      "e"
+     ],
+     "explain": "Feminine nominative takes -e."
+    },
+    {
+     "type": "transform",
+     "prompt": "Write the phrase with the possessive article for ich.",
+     "from": "das Kind",
+     "answers": [
+      "mein Kind"
+     ],
+     "explain": "Neuter nominative takes no ending at all: mein Kind."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which form goes before a feminine noun?",
+     "text": "___ Tochter",
+     "options": [
+      "meine",
+      "mein",
+      "meinem",
+      "meinen"
+     ],
+     "answers": [
+      "meine"
+     ],
+     "explain": "Feminine nominative: meine."
+    },
+    {
+     "type": "choice",
+     "prompt": "What is the plural form of euer?",
+     "text": "___ Kinder",
+     "options": [
+      "eure",
+      "euer",
+      "euere",
+      "eurer"
+     ],
+     "answers": [
+      "eure"
+     ],
+     "explain": "euer loses its e when an ending is added: eure."
+    },
+    {
+     "type": "transform",
+     "prompt": "Rewrite with the possessive article for wir.",
+     "from": "die Tochter",
+     "answers": [
+      "unsere Tochter"
+     ],
+     "explain": "wir → unser, plus -e before a feminine noun."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which articles share their endings with the possessive articles?",
+     "text": "",
+     "options": [
+      "the indefinite and the negative article",
+      "the definite article only",
+      "the demonstrative article",
+      "no other article"
+     ],
+     "answers": [
+      "the indefinite and the negative article"
+     ],
+     "explain": "The document says so directly under the table."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a2-possessive-pronouns",
+   "titleEn": "Possessive pronouns",
+   "summary": "Standing alone instead of before a noun, meiner/meins/meine take the definite article's endings.",
+   "category": "Artikel und Pronomen",
+   "tags": [
+    "Possessivpronomen",
+    "Endungen",
+    "Nominativ",
+    "Akkusativ",
+    "Dativ"
+   ],
+   "difficulty": 3,
+   "prerequisites": [
+    "g-daf-a1-possessive-articles-in-nominative"
+   ],
+   "explanation": [
+    {
+     "heading": "Article or pronoun",
+     "text": "Before a noun mein is an article and may have no ending (mein Sohn). Used on its own, replacing the noun, it is a pronoun and always carries an ending."
+    },
+    {
+     "heading": "The ending copies the definite article",
+     "text": "The document sets each definite article beside the pronoun it produces: der → meiner, das → meins, die → meine, dem → meinem, den → meinen."
+    },
+    {
+     "heading": "The one short form",
+     "text": "das → meins is shortened; the other forms simply take the article's own ending."
+    }
+   ],
+   "rules": [
+    "Nominative: der → meiner (M), das → meins (N), die → meine (F and plural).",
+    "Accusative: den → meinen (M); the N, F and plural forms are the same as in the nominative.",
+    "Dative: dem → meinem (M and N), der → meiner (F), den → meinen (plural).",
+    "The same endings apply to dein-, sein-, ihr-, unser-, euer- and Ihr-."
+   ],
+   "examples": [
+    {
+     "de": "der → meiner",
+     "note": "nominative masculine"
+    },
+    {
+     "de": "das → meins",
+     "note": "nominative and accusative neuter, shortened"
+    },
+    {
+     "de": "den → meinen",
+     "note": "accusative masculine"
+    },
+    {
+     "de": "dem → meinem",
+     "note": "dative masculine and neuter"
+    },
+    {
+     "de": "der → meiner",
+     "note": "dative feminine — the same shape as the nominative masculine"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Complete the possessive pronoun.",
+     "text": "Das ist nicht dein Wagen, das ist mein___.",
+     "answers": [
+      "er"
+     ],
+     "hint": "der Wagen → …",
+     "explain": "Nominative masculine: der → meiner."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which pronoun replaces das Fahrrad?",
+     "text": "Wo ist dein Fahrrad? ___ steht draußen.",
+     "options": [
+      "Meins",
+      "Meiner",
+      "Meine",
+      "Meinem"
+     ],
+     "answers": [
+      "Meins"
+     ],
+     "explain": "das → meins."
+    },
+    {
+     "type": "fill",
+     "prompt": "Complete the dative form.",
+     "text": "Ich fahre mit dein___ Auto, nicht mit mein___.",
+     "answers": [
+      "em"
+     ],
+     "explain": "dem → meinem for masculine and neuter in the dative."
+    },
+    {
+     "type": "transform",
+     "prompt": "Replace the noun with a possessive pronoun.",
+     "from": "Ich nehme meinen Mantel.",
+     "answers": [
+      "Ich nehme meinen.",
+      "Ich nehme meinen"
+     ],
+     "explain": "Accusative masculine: den → meinen."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which endings do possessive pronouns copy?",
+     "text": "",
+     "options": [
+      "those of the definite article",
+      "those of the indefinite article",
+      "those of the adjective after ein",
+      "they take no endings"
+     ],
+     "answers": [
+      "those of the definite article"
+     ],
+     "explain": "The table is built by setting each definite article next to the pronoun it produces."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a2-dies-der-das-die",
+   "titleEn": "welch-, dies- and der / das / die as pointers",
+   "summary": "Ask with welch-, answer by pointing with dies- or with der / das / die.",
+   "category": "Artikel und Pronomen",
+   "tags": [
+    "Demonstrativartikel",
+    "Fragewort",
+    "welch-",
+    "dies-"
+   ],
+   "difficulty": 3,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "The question",
+     "text": "welch- asks about things and people and takes the same endings as the definite article: welcher Pullover, welches Modell, welche Jacke."
+    },
+    {
+     "heading": "The answer",
+     "text": "dies- and der / das / die point at the thing chosen. The document's answers are pairs — dieser / der, dieses / das, diese / die — where the second option is the plain definite article used as a pronoun."
+    },
+    {
+     "heading": "After a preposition",
+     "text": "The preposition decides the case: zu takes the dative, so the question is zu welchem Pullover and the answer zu diesem / dem."
+    }
+   ],
+   "rules": [
+    "welch- asks about things and people; dies- and der / das / die refer to them.",
+    "welch- and dies- carry the endings of the definite article.",
+    "Nominative and accusative are identical except in the masculine: welcher → welchen, dieser → diesen.",
+    "A preposition sets the case of the whole phrase."
+   ],
+   "examples": [
+    {
+     "de": "Welchen Pullover findest du besser? → Diesen / Den hier.",
+     "note": "accusative masculine"
+    },
+    {
+     "de": "Zu welcher Bluse passt der Rock?",
+     "note": "zu takes the dative, feminine welcher"
+    },
+    {
+     "de": "Schau die Kleider. Welches gefällt dir am besten? → Dieses / Das da.",
+     "note": "nominative neuter"
+    },
+    {
+     "de": "Und da die Hosen. Welche ist schicker?",
+     "note": "die Hose is feminine, so welche"
+    },
+    {
+     "de": "Welcher Pullover? → dieser / der",
+     "note": "nominative masculine, from the table"
+    },
+    {
+     "de": "Zu welchem Modell? → zu diesem / dem",
+     "note": "dative neuter, from the table"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Complete the question word.",
+     "text": "Welch___ Pullover findest du besser?",
+     "answers": [
+      "en"
+     ],
+     "hint": "finden takes the accusative.",
+     "explain": "Accusative masculine: welchen.",
+     "source": true,
+     "sentence": "Welchen Pullover findest du besser?"
+    },
+    {
+     "type": "choice",
+     "prompt": "Choose the answer that matches the question.",
+     "text": "Schau die Kleider. Welches gefällt dir am besten?",
+     "options": [
+      "Dieses / Das da.",
+      "Diesen / Den da.",
+      "Dieser / Der da.",
+      "Diesem / Dem da."
+     ],
+     "answers": [
+      "Dieses / Das da."
+     ],
+     "explain": "das Kleid is neuter and the subject of gefällt, so the nominative neuter form is used.",
+     "source": true,
+     "sentence": "Schau die Kleider. Welches gefällt dir am besten? → Dieses / Das da."
+    },
+    {
+     "type": "fill",
+     "prompt": "Complete the preposition phrase.",
+     "text": "Zu welch___ Bluse passt der Rock?",
+     "answers": [
+      "er"
+     ],
+     "explain": "zu takes the dative; die Bluse is feminine, so welcher."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which ending pattern do welch- and dies- follow?",
+     "text": "",
+     "options": [
+      "the definite article",
+      "the indefinite article",
+      "the possessive pronoun",
+      "no pattern"
+     ],
+     "answers": [
+      "the definite article"
+     ],
+     "explain": "welcher / dieser mirror der, welches / dieses mirror das, and so on."
+    },
+    {
+     "type": "transform",
+     "prompt": "Answer the question by pointing, using dies-.",
+     "from": "Welchen Pullover findest du besser?",
+     "answers": [
+      "Diesen",
+      "Diesen."
+     ],
+     "explain": "The accusative masculine of dies- is diesen."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-b1-reference-to-something-identical-demonst",
+   "titleEn": "derselbe, dasselbe, dieselbe — the very same one",
+   "summary": "A two-part word: der- carries the case, -selb- takes the adjective ending.",
+   "category": "Artikel und Pronomen",
+   "tags": [
+    "Demonstrativpronomen",
+    "derselbe",
+    "Identität",
+    "Adjektivendung"
+   ],
+   "difficulty": 4,
+   "prerequisites": [
+    "g-daf-a2-dies-der-das-die"
+   ],
+   "explanation": [
+    {
+     "heading": "What it means",
+     "text": "derselbe, dasselbe, dieselbe describe a thing or a person identical to one mentioned earlier or later — not merely a similar one."
+    },
+    {
+     "heading": "Two parts, two jobs",
+     "text": "The first part (der- / das- / die-) follows the article and case of the noun; the second part (-selb-) takes the same ending an adjective would take after a definite article."
+    },
+    {
+     "heading": "The pattern to remember",
+     "text": "der große Platz → derselbe Platz. Wherever the adjective would end in -e, so does -selb-."
+    }
+   ],
+   "rules": [
+    "It works as both a demonstrative pronoun and a demonstrative article.",
+    "Part one is declined like the definite article: der-, das-, die-, den-, dem-.",
+    "Part two takes the weak adjective ending: -selbe, -selben, -selbem, -selber.",
+    "The two parts are written as one word."
+   ],
+   "examples": [
+    {
+     "de": "Dasselbe habe ich auch gedacht.",
+     "note": "used as a pronoun, standing for a whole statement"
+    },
+    {
+     "de": "Das ist nicht mehr dieselbe Stadt, in der wir vor 30 Jahren studiert haben.",
+     "note": "used as an article before Stadt"
+    },
+    {
+     "de": "der große Platz → derselbe Platz",
+     "note": "the document's own comparison with the adjective ending"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Complete the word.",
+     "text": "Das ist nicht mehr ___selbe Stadt, in der wir vor 30 Jahren studiert haben.",
+     "answers": [
+      "die"
+     ],
+     "explain": "die Stadt is feminine nominative, so the first part is die-.",
+     "source": true,
+     "sentence": "Das ist nicht mehr dieselbe Stadt, in der wir vor 30 Jahren studiert haben."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which form belongs after in?",
+     "text": "Wir wohnen in ___ Haus wie früher.",
+     "options": [
+      "demselben",
+      "dasselbe",
+      "derselbe",
+      "denselben"
+     ],
+     "answers": [
+      "demselben"
+     ],
+     "explain": "in + dative, das Haus → dem-, and the adjective ending is -en."
+    },
+    {
+     "type": "transform",
+     "prompt": "Rewrite using derselbe instead of the adjective.",
+     "from": "der große Platz",
+     "answers": [
+      "derselbe Platz"
+     ],
+     "explain": "The endings line up exactly: der große → derselbe.",
+     "source": true,
+     "sentence": "der groß e Platz → der selb e Platz"
+    },
+    {
+     "type": "choice",
+     "prompt": "What does derselbe express?",
+     "text": "",
+     "options": [
+      "something identical to what was mentioned",
+      "something similar but different",
+      "something new",
+      "something plural"
+     ],
+     "answers": [
+      "something identical to what was mentioned"
+     ],
+     "explain": "The document defines it as identical to a thing or person mentioned previously or later."
+    },
+    {
+     "type": "error",
+     "prompt": "The word is split in two. Write it correctly.",
+     "text": "Ich habe der selbe Film gesehen.",
+     "answers": [
+      "Ich habe denselben Film gesehen.",
+      "Ich habe denselben Film gesehen"
+     ],
+     "hint": "sehen takes the accusative, and it is one word.",
+     "explain": "Accusative masculine: den- plus the weak ending -en."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a1-indefinite-pronouns",
+   "titleEn": "Indefinite pronouns: nichts, etwas, man, alle",
+   "summary": "Four pronouns for unspecified things and unspecified people.",
+   "category": "Artikel und Pronomen",
+   "tags": [
+    "Indefinitpronomen",
+    "man",
+    "nichts",
+    "etwas",
+    "alle"
+   ],
+   "difficulty": 1,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "Things",
+     "text": "nichts means no things at all; etwas means one unspecified thing, a little of something — you do not yet know what."
+    },
+    {
+     "heading": "People",
+     "text": "man means people in general, a particular group; alle means everyone, the whole set."
+    },
+    {
+     "heading": "man is a subject only",
+     "text": "The document's example shows man as the subject of a general statement — a rule that holds for people in general: Man bringt zu einer Party ein Geschenk mit."
+    }
+   ],
+   "rules": [
+    "nichts = keine Sachen — nothing at all.",
+    "etwas = eine unbestimmte Sache, ein bisschen — an unspecified thing.",
+    "man = die Leute, eine bestimmte Gruppe — people, one particular group.",
+    "alle = jeder, die Gesamtheit — everyone.",
+    "man always takes the 3rd person singular verb form: man bringt."
+   ],
+   "examples": [
+    {
+     "de": "Ich bringe nichts zur Party mit (z. B. keine Wurst, kein Geschenk).",
+     "note": "nichts — no things at all"
+    },
+    {
+     "de": "Ich bringe etwas zur Party mit.",
+     "note": "etwas — something, not yet specified"
+    },
+    {
+     "de": "Man bringt zu einer Party ein Geschenk mit",
+     "note": "man — what people generally do"
+    },
+    {
+     "de": "Alle (hier: Gäste) haben einen Salat mitgebracht.",
+     "note": "alle — the whole group"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Complete with the right pronoun.",
+     "text": "Ich bringe ___ zur Party mit (z. B. keine Wurst, kein Geschenk).",
+     "answers": [
+      "nichts"
+     ],
+     "explain": "No things at all → nichts.",
+     "source": true,
+     "sentence": "Ich bringe nichts zur Party mit (z. B. keine Wurst, kein Geschenk)."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which pronoun means an unspecified thing?",
+     "text": "Ich bringe ___ zur Party mit. (Ich weiß noch nicht was.)",
+     "options": [
+      "etwas",
+      "nichts",
+      "man",
+      "alle"
+     ],
+     "answers": [
+      "etwas"
+     ],
+     "explain": "etwas = eine unbestimmte Sache."
+    },
+    {
+     "type": "fill",
+     "prompt": "Complete the verb form after man.",
+     "text": "Man ___ zu einer Party ein Geschenk mit.",
+     "answers": [
+      "bringt"
+     ],
+     "explain": "man takes the same verb form as er / sie / es.",
+     "source": true,
+     "sentence": "Man bringt zu einer Party ein Geschenk mit"
+    },
+    {
+     "type": "choice",
+     "prompt": "Which word means the whole group?",
+     "text": "___ (hier: Gäste) haben einen Salat mitgebracht.",
+     "options": [
+      "Alle",
+      "Man",
+      "Etwas",
+      "Nichts"
+     ],
+     "answers": [
+      "Alle"
+     ],
+     "explain": "alle = jeder, die Gesamtheit."
+    },
+    {
+     "type": "context",
+     "prompt": "Choose the pronoun that fits.",
+     "text": "In Deutschland ___ zum Geburtstag ein Geschenk mit.",
+     "options": [
+      "bringt man",
+      "bringen man",
+      "bringt alle",
+      "bringt nichts"
+     ],
+     "answers": [
+      "bringt man"
+     ],
+     "explain": "man is a singular subject and takes bringt."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a2-indefinite-pronouns-and-indefinite-artic",
+   "titleEn": "jed-, kein-, all-, viel-, wenig-",
+   "summary": "The declension table for the commonest indefinite articles and pronouns.",
+   "category": "Artikel und Pronomen",
+   "tags": [
+    "Indefinitpronomen",
+    "Indefinitartikel",
+    "jed-",
+    "kein-",
+    "Deklination"
+   ],
+   "difficulty": 3,
+   "prerequisites": [
+    "g-daf-a1-indefinite-pronouns"
+   ],
+   "explanation": [
+    {
+     "heading": "Article or pronoun",
+     "text": "The table prints both at once: (k)ein Mann is the article before a noun, (k)einer is the pronoun standing in its place."
+    },
+    {
+     "heading": "jed- has only a singular",
+     "text": "jeder, jedes, jede cover the three genders in the singular; in the plural their place is taken by alle, viele, wenige."
+    },
+    {
+     "heading": "The pronoun always shows the gender",
+     "text": "Where the article has no ending — (k)ein Mann, (k)ein Fest — the pronoun adds one: (k)einer, (k)eins."
+    }
+   ],
+   "rules": [
+    "Nominative singular: jeder / (k)einer (M), jedes / (k)eins (N), jede / (k)eine (F).",
+    "Accusative singular: jeden / (k)einen (M); the neuter and feminine forms are unchanged.",
+    "Dative singular: jedem / (k)einem (M and N), jeder / (k)einer (F).",
+    "Plural: alle / viele / wenige in the nominative and accusative, allen / vielen / wenigen in the dative.",
+    "jed- has no plural form of its own."
+   ],
+   "examples": [
+    {
+     "de": "jeder (k)ein Mann / (k)einer",
+     "note": "nominative masculine: article and pronoun side by side"
+    },
+    {
+     "de": "jedes (k)ein Fest / (k)eins",
+     "note": "nominative and accusative neuter"
+    },
+    {
+     "de": "alle / viele / wenige",
+     "note": "the plural, nominative and accusative"
+    },
+    {
+     "de": "allen / vielen / wenigen",
+     "note": "the plural, dative"
+    },
+    {
+     "de": "jedem (k)einem",
+     "note": "dative masculine and neuter"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Complete the pronoun.",
+     "text": "Hast du einen Stift? – Nein, ich habe kein___.",
+     "answers": [
+      "en"
+     ],
+     "explain": "Accusative masculine pronoun: (k)einen."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which form stands alone for das Fest?",
+     "text": "Gibt es heute ein Fest? – Nein, heute gibt es ___.",
+     "options": [
+      "keins",
+      "kein",
+      "keiner",
+      "keinem"
+     ],
+     "answers": [
+      "keins"
+     ],
+     "explain": "The neuter pronoun is (k)eins, shortened from keines."
+    },
+    {
+     "type": "fill",
+     "prompt": "Complete the dative plural.",
+     "text": "Ich habe mit viel___ Leuten gesprochen.",
+     "answers": [
+      "en"
+     ],
+     "explain": "Dative plural: vielen."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which words replace jed- in the plural?",
+     "text": "",
+     "options": [
+      "alle / viele / wenige",
+      "jeden / jedem",
+      "keiner / keins",
+      "man / etwas"
+     ],
+     "answers": [
+      "alle / viele / wenige"
+     ],
+     "explain": "The table's plural column holds alle, viele and wenige; jed- has no plural."
+    },
+    {
+     "type": "transform",
+     "prompt": "Rewrite in the dative.",
+     "from": "jeder Mann",
+     "answers": [
+      "jedem Mann"
+     ],
+     "explain": "Dative masculine: jedem."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-b1-indefinite-pronouns-and-adverbs-with-irg",
+   "titleEn": "irgend- : any at all",
+   "summary": "A prefix that stresses that it does not matter which one.",
+   "category": "Artikel und Pronomen",
+   "tags": [
+    "Indefinitpronomen",
+    "irgend-",
+    "Adverbien",
+    "Wortbildung"
+   ],
+   "difficulty": 3,
+   "prerequisites": [
+    "g-daf-a2-indefinite-pronouns-and-indefinite-artic"
+   ],
+   "explanation": [
+    {
+     "heading": "What it adds",
+     "text": "irgend- reinforces the fact that it is not important which one — English any at all."
+    },
+    {
+     "heading": "Three hosts",
+     "text": "It attaches to question words (wann, wie, wo), to the indefinite article ein, and to indefinite pronouns (jemand, wer / wen / wem, etwas)."
+    },
+    {
+     "heading": "The colloquial pair",
+     "text": "irgendetwas has the everyday form irgendwas, built on the spoken was."
+    }
+   ],
+   "rules": [
+    "irgend- + question word: wann → irgendwann, wie → irgendwie, wo → irgendwo.",
+    "irgend- + indefinite article: ein → irgendein.",
+    "irgend- + indefinite pronoun: jemand → irgendjemand; wer / wen / wem → irgendwer / irgendwen / irgendwem.",
+    "etwas → irgendetwas, colloquially irgendwas.",
+    "irgendein and irgendwer keep the endings of the word they are built on."
+   ],
+   "examples": [
+    {
+     "de": "wann --> irgendwann",
+     "note": "question word → adverb"
+    },
+    {
+     "de": "wo --> irgendwo",
+     "note": "question word → adverb"
+    },
+    {
+     "de": "ein --> irgendein",
+     "note": "indefinite article"
+    },
+    {
+     "de": "jemand --> irgendjemand",
+     "note": "indefinite pronoun"
+    },
+    {
+     "de": "etwas --> irgendetwas (colloquially: was --> irgendwas)",
+     "note": "the written form and the spoken one"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Build the irgend- form.",
+     "text": "wann → ___",
+     "answers": [
+      "irgendwann"
+     ],
+     "explain": "irgend- goes straight in front of the question word."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which form is the colloquial one?",
+     "text": "",
+     "options": [
+      "irgendwas",
+      "irgendetwas",
+      "irgendwer",
+      "irgendwo"
+     ],
+     "answers": [
+      "irgendwas"
+     ],
+     "explain": "The document marks irgendwas as colloquial beside irgendetwas."
+    },
+    {
+     "type": "fill",
+     "prompt": "Build the irgend- form.",
+     "text": "wem → ___",
+     "answers": [
+      "irgendwem"
+     ],
+     "explain": "The case ending of wer / wen / wem is kept: irgendwem."
+    },
+    {
+     "type": "context",
+     "prompt": "Choose what fits.",
+     "text": "Ruf mich ___ an, es ist egal wann.",
+     "options": [
+      "irgendwann",
+      "irgendwo",
+      "irgendwer",
+      "irgendein"
+     ],
+     "answers": [
+      "irgendwann"
+     ],
+     "explain": "The sentence is about time, so the host word is wann."
+    },
+    {
+     "type": "choice",
+     "prompt": "What does irgend- add to a word?",
+     "text": "",
+     "options": [
+      "that it does not matter which one",
+      "that there is none",
+      "that there are many",
+      "that it is the only one"
+     ],
+     "answers": [
+      "that it does not matter which one"
+     ],
+     "explain": "The document's definition: irgend- reinforces the fact that it is not important which one; any."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-b1-n-words",
+   "titleEn": "n-words: negating an adverb with n-",
+   "summary": "nirgendwo, nirgends, nirgendwohin, nirgendwoher — the negative side of irgend-.",
+   "category": "Artikel und Pronomen",
+   "tags": [
+    "Negation",
+    "Adverbien",
+    "nirgendwo",
+    "Wortbildung"
+   ],
+   "difficulty": 2,
+   "prerequisites": [
+    "g-daf-b1-indefinite-pronouns-and-adverbs-with-irg"
+   ],
+   "explanation": [
+    {
+     "heading": "The rule in one line",
+     "text": "Some adverbs are made negative by putting n- at the beginning of the word."
+    },
+    {
+     "heading": "The set the document names",
+     "text": "nirgendwo — with the short form nirgends — plus the directional pair nirgendwohin (to nowhere) and nirgendwoher (from nowhere)."
+    }
+   ],
+   "rules": [
+    "n- + irgendwo → nirgendwo, with the equivalent short form nirgends.",
+    "n- + irgendwohin → nirgendwohin (direction to).",
+    "n- + irgendwoher → nirgendwoher (direction from).",
+    "nirgendwo and nirgends mean the same thing."
+   ],
+   "examples": [
+    {
+     "de": "nirgendwo = nirgends, nirgendwohin, nirgendwoher",
+     "note": "the document's full list, with the equals sign marking the two equivalents"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Negate the adverb by adding n-.",
+     "text": "irgendwo → ___",
+     "answers": [
+      "nirgendwo"
+     ],
+     "explain": "The n- simply goes in front."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which word means the same as nirgendwo?",
+     "text": "",
+     "options": [
+      "nirgends",
+      "nirgendwohin",
+      "nirgendwoher",
+      "irgendwo"
+     ],
+     "answers": [
+      "nirgends"
+     ],
+     "explain": "The document writes nirgendwo = nirgends."
+    },
+    {
+     "type": "context",
+     "prompt": "Choose the form that expresses direction away from a place.",
+     "text": "Der Zug kommt ___, er stand die ganze Nacht hier.",
+     "options": [
+      "nirgendwoher",
+      "nirgendwohin",
+      "nirgends",
+      "irgendwo"
+     ],
+     "answers": [
+      "nirgendwoher"
+     ],
+     "explain": "-her marks the direction from."
+    },
+    {
+     "type": "fill",
+     "prompt": "Negate the adverb by adding n-.",
+     "text": "irgendwohin → ___",
+     "answers": [
+      "nirgendwohin"
+     ],
+     "explain": "-hin marks the direction to; the n- negates it."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-b1-indefinite-numbers-quantity-indefinite-p",
+   "titleEn": "manch- and einig-",
+   "summary": "Indefinite quantities that take the endings of the definite article.",
+   "category": "Artikel und Pronomen",
+   "tags": [
+    "Indefinitpronomen",
+    "manch-",
+    "einig-",
+    "Menge",
+    "Deklination"
+   ],
+   "difficulty": 3,
+   "prerequisites": [
+    "g-daf-a2-indefinite-pronouns-and-indefinite-artic"
+   ],
+   "explanation": [
+    {
+     "heading": "What they say",
+     "text": "Both express an indefinite number or quantity — some, a few — without naming it."
+    },
+    {
+     "heading": "The endings",
+     "text": "The document states it plainly under the table: the endings match those of the definite article. mancher works like der, manches like das, manche like die."
+    },
+    {
+     "heading": "einig- in the table",
+     "text": "einig- appears in the neuter and in the plural — einiges, einige, einigem, einigen — with the same endings."
+    }
+   ],
+   "rules": [
+    "The endings match those of the definite article.",
+    "Nominative: mancher (M), manches / einiges (N), manche (F), manche / einige (plural).",
+    "Accusative: manchen (M); the neuter, feminine and plural forms are as in the nominative.",
+    "Dative: manchem / einigem (M and N), mancher (F), manchen / einigen (plural)."
+   ],
+   "examples": [
+    {
+     "de": "mancher",
+     "note": "nominative masculine, like der"
+    },
+    {
+     "de": "manchen",
+     "note": "accusative masculine, like den"
+    },
+    {
+     "de": "manchem",
+     "note": "dative masculine and neuter, like dem"
+    },
+    {
+     "de": "einige",
+     "note": "nominative and accusative plural"
+    },
+    {
+     "de": "einigen",
+     "note": "dative plural"
+    },
+    {
+     "de": "The endings match those of the definite article.",
+     "note": "the document's own rule under the table"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Complete the ending.",
+     "text": "Manch___ Student arbeitet nebenbei.",
+     "answers": [
+      "er"
+     ],
+     "explain": "Nominative masculine, like der: mancher."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which form belongs in the dative plural?",
+     "text": "Ich habe mit ___ Kollegen gesprochen.",
+     "options": [
+      "einigen",
+      "einige",
+      "einiges",
+      "einigem"
+     ],
+     "answers": [
+      "einigen"
+     ],
+     "explain": "Dative plural takes -en, like den."
+    },
+    {
+     "type": "fill",
+     "prompt": "Complete the ending.",
+     "text": "Ich kenne manch___ Kollegen schon lange.",
+     "answers": [
+      "en"
+     ],
+     "explain": "Accusative masculine, like den: manchen."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which article's endings do manch- and einig- copy?",
+     "text": "",
+     "options": [
+      "the definite article",
+      "the indefinite article",
+      "the possessive article",
+      "none — they are invariable"
+     ],
+     "answers": [
+      "the definite article"
+     ],
+     "explain": "The document says the endings match those of the definite article."
+    },
+    {
+     "type": "transform",
+     "prompt": "Put the phrase into the dative.",
+     "from": "einige Freunde",
+     "answers": [
+      "einigen Freunden",
+      "einigen Freunde"
+     ],
+     "explain": "Dative plural: einigen (and the noun adds -n)."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-b1-reflexive-pronouns-reciprocal-meaning",
+   "titleEn": "Reflexive pronouns with a reciprocal meaning",
+   "summary": "sich, uns and euch can mean each other, not oneself.",
+   "category": "Artikel und Pronomen",
+   "tags": [
+    "Reflexivpronomen",
+    "reziprok",
+    "einander",
+    "gegenseitig"
+   ],
+   "difficulty": 4,
+   "prerequisites": [
+    "g-daf-a2-personal-pronouns-in-nominative-accusati"
+   ],
+   "explanation": [
+    {
+     "heading": "Two or more people, the same action",
+     "text": "When two or more people do the same thing to one another, the reflexive pronoun means each other — einander, gegenseitig — rather than oneself."
+    },
+    {
+     "heading": "Which subjects",
+     "text": "Use man for singular subjects, and all the plural subjects wir, ihr, sie / Sie."
+    },
+    {
+     "heading": "Separable verbs keep their prefix at the end",
+     "text": "The second row of the table shows zunicken: man nickt sich zu, wir nicken uns zu — the pronoun stands before the separated zu."
+    }
+   ],
+   "rules": [
+    "The reciprocal sense can be spelled out with einander or gegenseitig.",
+    "man + sich, wir + uns, ihr + euch, sie / Sie + sich.",
+    "man stands in for a singular subject in this construction.",
+    "The reflexive pronoun is the same word as in the ordinary reflexive use; only the meaning differs."
+   ],
+   "examples": [
+    {
+     "de": "man begrüßt sich",
+     "note": "singular subject man — people greet one another"
+    },
+    {
+     "de": "wir begrüßen uns",
+     "note": "1st person plural"
+    },
+    {
+     "de": "ihr begrüßt euch",
+     "note": "2nd person plural"
+    },
+    {
+     "de": "sie / Sie begrüßen sich",
+     "note": "3rd person plural and the polite form"
+    },
+    {
+     "de": "man nickt sich zu",
+     "note": "the separable verb zunicken"
+    },
+    {
+     "de": "wir nicken uns zu",
+     "note": "the pronoun comes before the separated prefix"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Complete the reflexive pronoun.",
+     "text": "Wir begrüßen ___.",
+     "answers": [
+      "uns"
+     ],
+     "explain": "wir takes uns.",
+     "source": true,
+     "sentence": "wir begrüßen uns"
+    },
+    {
+     "type": "fill",
+     "prompt": "Complete the reflexive pronoun.",
+     "text": "Ihr begrüßt ___.",
+     "answers": [
+      "euch"
+     ],
+     "explain": "ihr takes euch.",
+     "source": true,
+     "sentence": "ihr begrüßt euch"
+    },
+    {
+     "type": "choice",
+     "prompt": "Which words spell out the reciprocal meaning?",
+     "text": "",
+     "options": [
+      "einander / gegenseitig",
+      "selbst / allein",
+      "irgendwie / irgendwo",
+      "jeder / alle"
+     ],
+     "answers": [
+      "einander / gegenseitig"
+     ],
+     "explain": "The document names both as the reciprocal markers."
+    },
+    {
+     "type": "reorder",
+     "prompt": "Put the sentence in order.",
+     "tokens": [
+      "Wir",
+      "nicken",
+      "uns",
+      "zu"
+     ],
+     "answers": [
+      "Wir nicken uns zu",
+      "Wir nicken uns zu."
+     ],
+     "explain": "The separable prefix zu goes last; the pronoun comes before it.",
+     "source": true,
+     "sentence": "wir nicken uns zu"
+    },
+    {
+     "type": "choice",
+     "prompt": "Which subject does the document use for the singular?",
+     "text": "___ begrüßt sich.",
+     "options": [
+      "Man",
+      "Er",
+      "Sie",
+      "Ich"
+     ],
+     "answers": [
+      "Man"
+     ],
+     "explain": "In this construction man stands for a singular subject."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-b1-question-word-wo-r-prepositional-pronoun",
+   "titleEn": "wo(r)- questions and da(r)- pronouns",
+   "summary": "Ask about a thing with wofür, worin, worauf; refer back to it with dafür, darin, darauf.",
+   "category": "Artikel und Pronomen",
+   "tags": [
+    "Fragewort",
+    "Präpositionalpronomen",
+    "wo(r)-",
+    "da(r)-"
+   ],
+   "difficulty": 4,
+   "prerequisites": [
+    "g-daf-a2-personal-pronouns-in-nominative-accusati"
+   ],
+   "explanation": [
+    {
+     "heading": "Asking about a thing",
+     "text": "A question built on was plus a preposition becomes one word beginning wo-, or wor- before a vowel: für was → wofür, in was → worin."
+    },
+    {
+     "heading": "Asking about a person",
+     "text": "People keep the preposition and the pronoun apart: wer, wen, wem with the preposition in front — Auf wen freut sich Bernd?"
+    },
+    {
+     "heading": "Referring back",
+     "text": "The prepositional pronoun da(r)- refers to a noun, or even to a whole sentence, through a preposition: Darin stehen wenig Möbel = in dem Zimmer."
+    },
+    {
+     "heading": "Backwards and forwards",
+     "text": "It can point back to something already said (anaphora) or forward to what comes next (cataphora) — Frau Egger kann sich darauf verlassen, dass Bernd drei Monate bleibt."
+    }
+   ],
+   "rules": [
+    "Questions with was + preposition become wo(r)-: für was → wofür, in was → worin.",
+    "The r appears before a vowel: worin, worauf, worüber; but wofür, womit, wovon.",
+    "da(r)- works the same way for statements: darin, darüber, darauf.",
+    "da(r)- can refer back (anaphora) or forward (cataphora), typically to a dass-clause.",
+    "For people use wer / wen / wem with the preposition kept separate."
+   ],
+   "examples": [
+    {
+     "de": "Wofür dankt Frau Egger Bernd?",
+     "note": "für + was → wofür"
+    },
+    {
+     "de": "Sie dankt Bernd für die Bewerbung.",
+     "note": "the answer keeps the preposition für"
+    },
+    {
+     "de": "Worin möchte Bernd Erfahrungen sammeln?",
+     "note": "in + was → worin, with r before the vowel"
+    },
+    {
+     "de": "Bernd hat ein kleines Zimmer. Darin stehen wenig Möbel.",
+     "note": "darin = in dem Zimmer"
+    },
+    {
+     "de": "Bernd arbeitet bei Frau Egger. Er freut sich darüber.",
+     "note": "darüber points at the whole previous sentence"
+    },
+    {
+     "de": "Frau Egger kann sich darauf verlassen, dass Bernd drei Monate bleibt.",
+     "note": "cataphora — darauf points forward to the dass-clause"
+    },
+    {
+     "de": "Bernd bleibt drei Monate. Darauf kann sich Frau Egger verlassen.",
+     "note": "anaphora — darauf points back"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Complete the question word.",
+     "text": "___ dankt Frau Egger Bernd? → Sie dankt Bernd für die Bewerbung.",
+     "answers": [
+      "Wofür",
+      "wofür"
+     ],
+     "explain": "danken für + was → wofür.",
+     "source": true,
+     "sentence": "Wofür dankt Frau Egger Bernd? → Sie dankt Bernd für die Bewerbung."
+    },
+    {
+     "type": "choice",
+     "prompt": "Why is it worin and not woin?",
+     "text": "___ möchte Bernd Erfahrungen sammeln?",
+     "options": [
+      "Worin",
+      "Woin",
+      "Wofür",
+      "Wobei"
+     ],
+     "answers": [
+      "Worin"
+     ],
+     "explain": "An r is inserted when the preposition begins with a vowel.",
+     "source": true,
+     "sentence": "Worin möchte Bernd Erfahrungen sammeln?"
+    },
+    {
+     "type": "transform",
+     "prompt": "Replace the preposition phrase with a da(r)- pronoun.",
+     "from": "Bernd hat ein kleines Zimmer. In dem Zimmer stehen wenig Möbel.",
+     "answers": [
+      "Bernd hat ein kleines Zimmer. Darin stehen wenig Möbel.",
+      "Darin stehen wenig Möbel.",
+      "Darin stehen wenig Möbel"
+     ],
+     "explain": "in + dem Zimmer → darin.",
+     "source": true,
+     "sentence": "Bernd hat ein kleines Zimmer. Darin stehen wenig Möbel."
+    },
+    {
+     "type": "fill",
+     "prompt": "Complete the prepositional pronoun.",
+     "text": "Frau Egger kann sich ___ verlassen, dass Bernd drei Monate bleibt.",
+     "answers": [
+      "darauf"
+     ],
+     "hint": "sich verlassen auf",
+     "explain": "auf + a following dass-clause → darauf, pointing forward.",
+     "source": true,
+     "sentence": "Frau Egger kann sich darauf verlassen, dass Bernd drei Monate bleibt."
+    },
+    {
+     "type": "choice",
+     "prompt": "How do you ask about a person rather than a thing?",
+     "text": "___ freut sich Bernd? – Er freut sich auf seine Freunde.",
+     "options": [
+      "Auf wen",
+      "Worauf",
+      "Darauf",
+      "Auf was"
+     ],
+     "answers": [
+      "Auf wen"
+     ],
+     "explain": "People take wer / wen / wem with the preposition kept separate."
+    },
+    {
+     "type": "error",
+     "prompt": "Fix the prepositional pronoun.",
+     "text": "Bernd arbeitet bei Frau Egger. Er freut sich daüber.",
+     "answers": [
+      "Bernd arbeitet bei Frau Egger. Er freut sich darüber.",
+      "Er freut sich darüber.",
+      "Er freut sich darüber"
+     ],
+     "explain": "über begins with a vowel, so the r is inserted: darüber."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-b1-relative-pronouns-was-wo-r",
+   "titleEn": "Relative pronouns was and wo(r)-",
+   "summary": "The relative pronoun for a whole clause or for words like alles, nichts, etwas.",
+   "category": "Artikel und Pronomen",
+   "tags": [
+    "Relativpronomen",
+    "was",
+    "wo(r)-",
+    "Nebensatz"
+   ],
+   "difficulty": 4,
+   "prerequisites": [
+    "g-daf-b1-question-word-wo-r-prepositional-pronoun"
+   ],
+   "explanation": [
+    {
+     "heading": "When was is the relative pronoun",
+     "text": "was refers to a whole sentence, or to a pronoun such as das, nichts, alles, etwas, einiges, vieles — not to an ordinary noun, which takes der / das / die."
+    },
+    {
+     "heading": "With a preposition",
+     "text": "was does not contract with a preposition. Use wo(r)- plus the preposition instead: wofür, worauf, worüber, womit."
+    },
+    {
+     "heading": "Where the preposition comes from",
+     "text": "The document shows the verb behind each form: einverstanden sein mit → womit; aufmerksam machen auf → worauf."
+    }
+   ],
+   "rules": [
+    "was refers back to a whole clause or to das, nichts, alles, etwas, einiges, vieles.",
+    "A preposition never combines with was; use wo(r)- + preposition.",
+    "The r is inserted before a vowel: worauf, worüber — but wofür, womit.",
+    "Which preposition appears is decided by the verb of the relative clause."
+   ],
+   "examples": [
+    {
+     "de": "Ich studiere in Berlin, und es gibt vieles, was super funktioniert.",
+     "note": "was after vieles"
+    },
+    {
+     "de": "Es gibt politisch nichts mehr, was mich wirklich beeindruckt.",
+     "note": "was after nichts"
+    },
+    {
+     "de": "Man kann damit auf etwas aufmerksam machen, womit man nicht einverstanden ist.",
+     "note": "einverstanden sein mit → womit"
+    },
+    {
+     "de": "Das ist etwas, worauf wir vom Asta aufmerksam machen wollten.",
+     "note": "aufmerksam machen auf → worauf"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Complete the relative pronoun.",
+     "text": "Es gibt politisch nichts mehr, ___ mich wirklich beeindruckt.",
+     "answers": [
+      "was"
+     ],
+     "explain": "nichts takes was, not das.",
+     "source": true,
+     "sentence": "Es gibt politisch nichts mehr, was mich wirklich beeindruckt."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which form replaces mit + was?",
+     "text": "Man kann damit auf etwas aufmerksam machen, ___ man nicht einverstanden ist.",
+     "options": [
+      "womit",
+      "mit was",
+      "worauf",
+      "was mit"
+     ],
+     "answers": [
+      "womit"
+     ],
+     "explain": "einverstanden sein mit, and was never follows a preposition.",
+     "source": true,
+     "sentence": "Man kann damit auf etwas aufmerksam machen, womit man nicht einverstanden ist."
+    },
+    {
+     "type": "fill",
+     "prompt": "Complete the relative pronoun.",
+     "text": "Das ist etwas, ___ wir vom Asta aufmerksam machen wollten.",
+     "answers": [
+      "worauf"
+     ],
+     "hint": "aufmerksam machen auf",
+     "explain": "auf begins with a vowel, so wor- + auf → worauf.",
+     "source": true,
+     "sentence": "Das ist etwas, worauf wir vom Asta aufmerksam machen wollten."
+    },
+    {
+     "type": "choice",
+     "prompt": "After which word does was stand as the relative pronoun?",
+     "text": "",
+     "options": [
+      "alles",
+      "der Mann",
+      "die Stadt",
+      "das Zimmer"
+     ],
+     "answers": [
+      "alles"
+     ],
+     "explain": "was follows das, nichts, alles, etwas, einiges, vieles; ordinary nouns take der / das / die."
+    },
+    {
+     "type": "error",
+     "prompt": "Fix the relative pronoun.",
+     "text": "Ich studiere in Berlin, und es gibt vieles, das super funktioniert.",
+     "answers": [
+      "Ich studiere in Berlin, und es gibt vieles, was super funktioniert.",
+      "es gibt vieles, was super funktioniert"
+     ],
+     "explain": "vieles takes was."
+    }
+   ]
+  }
+ ]
+}

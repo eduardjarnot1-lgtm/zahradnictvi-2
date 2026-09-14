@@ -1,0 +1,1455 @@
+{
+ "topics": [
+  {
+   "id": "g-daf-a1-regular-verbs-in-the-present-tense",
+   "titleEn": "Regular verbs in the present tense",
+   "summary": "The present-tense endings -e, -st, -t, -en, -t, -en, plus the spelling rules for stems in -d/-t and -z/-s/-ß.",
+   "category": "Verben",
+   "tags": [
+    "Präsens",
+    "Konjugation",
+    "regelmäßig"
+   ],
+   "difficulty": 1,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "The endings",
+     "text": "A regular verb takes the stem plus -e, -st, -t, -en, -t, -en for ich, du, er/sie/es, wir, ihr, sie/Sie."
+    },
+    {
+     "heading": "Two spelling rules",
+     "text": "Verbs ending in -d or -t add an extra -e before the ending (arbeiten → du arbeitest). Verbs ending in -z, -s or -ß lose the -s of the du-ending (heißen → du heißt)."
+    }
+   ],
+   "rules": [
+    "kommen: ich komme, du kommst, er/sie/es kommt, wir kommen, ihr kommt, sie/Sie kommen.",
+    "Verbs ending in -d, -t insert -e: arbeiten → du arbeitest, er arbeitet, ihr arbeitet.",
+    "Verbs ending in -z, -s, -ß: the du-form ends in -t only: heißen → du heißt.",
+    "sein is irregular: ich bin, du bist, er ist, wir sind, ihr seid, sie sind."
+   ],
+   "examples": [
+    {
+     "de": "ich komme",
+     "note": "regular ending -e"
+    },
+    {
+     "de": "du kommst",
+     "note": "regular ending -st"
+    },
+    {
+     "de": "arbeitest",
+     "note": "du-form; the stem ends in -t, so -est"
+    },
+    {
+     "de": "heißt",
+     "note": "du-form; the stem ends in -ß, so just -t"
+    },
+    {
+     "de": "bin",
+     "note": "sein, ich-form"
+    },
+    {
+     "de": "sind",
+     "note": "sein, wir-form"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Complete the du-form of kommen.",
+     "text": "Woher ___ du?",
+     "answers": [
+      "kommst"
+     ],
+     "explain": "Regular du-ending is -st: du kommst."
+    },
+    {
+     "type": "fill",
+     "prompt": "arbeiten ends in -t, so the du-form takes an extra -e.",
+     "text": "Wo ___ du?",
+     "answers": [
+      "arbeitest"
+     ],
+     "explain": "Verbs ending in -d or -t insert -e: du arbeitest."
+    },
+    {
+     "type": "choice",
+     "prompt": "heißen ends in -ß. Which du-form is right?",
+     "text": "Wie ___ du?",
+     "options": [
+      "heißt",
+      "heißst",
+      "heißest",
+      "heißen"
+     ],
+     "answers": [
+      "heißt"
+     ],
+     "explain": "After -z, -s, -ß the du-ending is just -t."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which form of sein goes with ihr?",
+     "text": "___ ihr aus Berlin?",
+     "options": [
+      "Seid",
+      "Sind",
+      "Bist",
+      "Ist"
+     ],
+     "answers": [
+      "Seid"
+     ],
+     "explain": "sein: ich bin, du bist, er ist, wir sind, ihr seid, sie sind."
+    },
+    {
+     "type": "error",
+     "prompt": "The ending is wrong. Correct the sentence.",
+     "text": "Du wohnt in Tübingen.",
+     "answers": [
+      "Du wohnst in Tübingen."
+     ],
+     "explain": "The du-form takes -st: du wohnst."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a2-modal-verbs-and-their-uses",
+   "titleEn": "Modal verbs and their uses",
+   "summary": "Which modal verb expresses an instruction, permission, necessity, possibility or ability.",
+   "category": "Verben",
+   "tags": [
+    "Modalverben",
+    "Bedeutung"
+   ],
+   "difficulty": 2,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "One verb per meaning",
+     "text": "Each modal verb carries a particular meaning: an instruction, something allowed or not allowed, something necessary or not, something possible, or an ability."
+    },
+    {
+     "heading": "Negating necessity",
+     "text": "To say something is not necessary, German uses müssen … nicht or brauchen … nicht/kein … zu rather than a different modal verb."
+    }
+   ],
+   "rules": [
+    "Instruction: sollen — Beate soll viel schlafen.",
+    "(Not) allowed: dürfen / können — Beate darf nicht arbeiten.",
+    "(Not) necessary: müssen, or brauchen … nicht / kein … zu.",
+    "(Not) possible: können — Beate kann verreisen.",
+    "Ability: können — Beate kann lange arbeiten."
+   ],
+   "examples": [
+    {
+     "de": "Beate soll viel schlafen.",
+     "note": "instruction"
+    },
+    {
+     "de": "Beate darf nicht arbeiten.",
+     "note": "not allowed"
+    },
+    {
+     "de": "Beate muss sich ausruhen.",
+     "note": "necessary"
+    },
+    {
+     "de": "Beate braucht keine Diät zu machen.",
+     "note": "not necessary — brauchen … kein … zu"
+    },
+    {
+     "de": "Beate kann verreisen.",
+     "note": "possible"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "choice",
+     "prompt": "The doctor gives an instruction. Which modal verb?",
+     "text": "Beate ___ viel schlafen.",
+     "options": [
+      "soll",
+      "darf",
+      "kann",
+      "will"
+     ],
+     "answers": [
+      "soll"
+     ],
+     "explain": "sollen expresses an instruction from someone else."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which sentence says it is NOT necessary?",
+     "text": "",
+     "options": [
+      "Beate braucht keine Diät zu machen.",
+      "Beate muss eine Diät machen.",
+      "Beate darf keine Diät machen.",
+      "Beate soll eine Diät machen."
+     ],
+     "answers": [
+      "Beate braucht keine Diät zu machen."
+     ],
+     "explain": "brauchen … kein … zu expresses that something is not necessary."
+    },
+    {
+     "type": "fill",
+     "prompt": "It is not allowed. Complete the modal verb.",
+     "text": "Beate ___ nicht arbeiten.",
+     "answers": [
+      "darf"
+     ],
+     "sentence": "Beate darf nicht arbeiten.",
+     "source": true,
+     "explain": "dürfen + nicht = not allowed."
+    },
+    {
+     "type": "fill",
+     "prompt": "She is able to. Complete the modal verb.",
+     "text": "Beate ___ lange arbeiten.",
+     "answers": [
+      "kann"
+     ],
+     "explain": "können expresses ability as well as possibility."
+    },
+    {
+     "type": "error",
+     "prompt": "This says the opposite of what is meant (it is simply not necessary). Correct it.",
+     "text": "Beate darf sich nicht ausruhen.",
+     "answers": [
+      "Beate muss sich nicht ausruhen.",
+      "Beate braucht sich nicht auszuruhen."
+     ],
+     "explain": "dürfen … nicht forbids; müssen … nicht only says it is not necessary."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a1-present-verbs-with-a-stem-vowel-change",
+   "titleEn": "Present tense: verbs with a stem-vowel change",
+   "summary": "In the du- and er/sie/es-forms some verbs change e→ie/i or a→ä, au→äu.",
+   "category": "Verben",
+   "tags": [
+    "Präsens",
+    "Vokalwechsel",
+    "unregelmäßig"
+   ],
+   "difficulty": 2,
+   "prerequisites": [
+    "g-daf-a1-regular-verbs-in-the-present-tense"
+   ],
+   "explanation": [
+    {
+     "heading": "Where the change happens",
+     "text": "The vowel changes only in the du-form and the er/sie/es-form. The other four forms keep the plain stem."
+    }
+   ],
+   "rules": [
+    "e → ie: lesen → du liest, er liest.",
+    "e → i: sprechen → du sprichst, er spricht; treffen → du triffst, er trifft.",
+    "a → ä: fahren → du fährst, er fährt; schlafen → du schläfst, er schläft.",
+    "au → äu: laufen → du läufst, er läuft.",
+    "wissen is special: ich weiß, du weißt, er weiß.",
+    "wir, ihr and sie/Sie never change the vowel: wir lesen, ihr lest, sie lesen."
+   ],
+   "examples": [
+    {
+     "de": "du liest",
+     "note": "e → ie"
+    },
+    {
+     "de": "er/sie/es lie st",
+     "note": "e → ie in the er-form"
+    },
+    {
+     "de": "sprichst",
+     "note": "du-form, e → i"
+    },
+    {
+     "de": "fährst",
+     "note": "du-form, a → ä"
+    },
+    {
+     "de": "läufst",
+     "note": "du-form, au → äu"
+    },
+    {
+     "de": "weiß",
+     "note": "wissen, ich-form"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "fahren, er-form.",
+     "text": "Er ___ jeden Tag mit dem Rad.",
+     "answers": [
+      "fährt"
+     ],
+     "explain": "a → ä in the du- and er-forms: du fährst, er fährt."
+    },
+    {
+     "type": "fill",
+     "prompt": "sprechen, du-form.",
+     "text": "___ du Deutsch?",
+     "answers": [
+      "Sprichst"
+     ],
+     "explain": "e → i: du sprichst."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which form is correct?",
+     "text": "Ihr ___ ein Buch.",
+     "options": [
+      "lest",
+      "liest",
+      "läst",
+      "lesst"
+     ],
+     "answers": [
+      "lest"
+     ],
+     "explain": "The ihr-form keeps the plain stem: ihr lest."
+    },
+    {
+     "type": "choice",
+     "prompt": "laufen, er-form?",
+     "text": "Er ___ sehr schnell.",
+     "options": [
+      "läuft",
+      "lauft",
+      "laufet",
+      "liuft"
+     ],
+     "answers": [
+      "läuft"
+     ],
+     "explain": "au → äu: du läufst, er läuft."
+    },
+    {
+     "type": "error",
+     "prompt": "The vowel should not change here. Correct the sentence.",
+     "text": "Wir fähren nach Berlin.",
+     "answers": [
+      "Wir fahren nach Berlin."
+     ],
+     "explain": "Only du and er/sie/es change the vowel."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a1-present-verbs-with-a-separable-prefix",
+   "titleEn": "Present tense: verbs with a separable prefix",
+   "summary": "The prefix leaves the verb and goes to the end of the sentence.",
+   "category": "Verben",
+   "tags": [
+    "trennbare Verben",
+    "Präsens",
+    "Satzklammer"
+   ],
+   "difficulty": 2,
+   "prerequisites": [
+    "g-daf-a1-regular-verbs-in-the-present-tense"
+   ],
+   "explanation": [
+    {
+     "heading": "The bracket",
+     "text": "In a main clause the conjugated verb stands in position 2 and the separable prefix goes right to the end of the sentence. Together they frame everything in between."
+    }
+   ],
+   "rules": [
+    "anrufen → Ich rufe dich an.",
+    "aufstehen → Wann stehst du auf?",
+    "The prefix carries the stress: ANrufen, AUFstehen.",
+    "In a question the verb still takes position 2 (W-question) or 1 (yes/no question); the prefix still goes last."
+   ],
+   "examples": [
+    {
+     "de": "Ich rufe dich an.",
+     "note": "anrufen"
+    },
+    {
+     "de": "Wann stehst du auf?",
+     "note": "aufstehen"
+    },
+    {
+     "de": "Wir probieren das Lauftraining aus",
+     "note": "ausprobieren"
+    },
+    {
+     "de": "Ihr kommt zum Leonardo-Campus-Run mit.",
+     "note": "mitkommen"
+    },
+    {
+     "de": "Annika und Tobias machen beim Lauftraining mit.",
+     "note": "mitmachen"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "anrufen — where does the prefix go?",
+     "text": "Ich rufe dich ___.",
+     "answers": [
+      "an"
+     ],
+     "sentence": "Ich rufe dich an.",
+     "source": true,
+     "explain": "The separable prefix goes to the end of the sentence."
+    },
+    {
+     "type": "reorder",
+     "prompt": "Put the sentence in the right order.",
+     "tokens": [
+      "Wann",
+      "stehst",
+      "du",
+      "auf?"
+     ],
+     "answers": [
+      "Wann stehst du auf?"
+     ],
+     "explain": "W-word, verb in position 2, subject, prefix at the end."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which sentence is correct?",
+     "text": "",
+     "options": [
+      "Ihr kommt zum Leonardo-Campus-Run mit.",
+      "Ihr mitkommt zum Leonardo-Campus-Run.",
+      "Mit ihr kommt zum Leonardo-Campus-Run.",
+      "Ihr kommt mit zum Leonardo-Campus-Run auf."
+     ],
+     "answers": [
+      "Ihr kommt zum Leonardo-Campus-Run mit."
+     ],
+     "explain": "The prefix separates and goes last."
+    },
+    {
+     "type": "error",
+     "prompt": "The prefix has not separated. Correct the sentence.",
+     "text": "Annika und Tobias mitmachen beim Lauftraining.",
+     "answers": [
+      "Annika und Tobias machen beim Lauftraining mit."
+     ],
+     "explain": "In the present tense the prefix separates and goes to the end."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a1-present-verbs-with-a-separable-prefix-an",
+   "titleEn": "Separable verbs together with a modal verb",
+   "summary": "With a modal verb the separable verb stays whole, in the infinitive, at the end.",
+   "category": "Verben",
+   "tags": [
+    "trennbare Verben",
+    "Modalverben",
+    "Infinitiv"
+   ],
+   "difficulty": 2,
+   "prerequisites": [
+    "g-daf-a1-present-verbs-with-a-separable-prefix"
+   ],
+   "explanation": [
+    {
+     "heading": "No separation",
+     "text": "When a modal verb is present, it takes position 2 and the separable verb goes to the end of the sentence as a whole infinitive — the prefix does not come off."
+    }
+   ],
+   "rules": [
+    "Modal verb in position 2, separable infinitive at the end, written as one word.",
+    "mitmachen → Ich möchte unbedingt beim Lauftraining mitmachen.",
+    "mitnehmen → Tim kann uns im Auto mitnehmen."
+   ],
+   "examples": [
+    {
+     "de": "Ich möchte unbedingt beim Lauftraining mitmachen.",
+     "note": "mitmachen stays whole"
+    },
+    {
+     "de": "Tim kann uns im Auto mitnehmen.",
+     "note": "mitnehmen stays whole"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "choice",
+     "prompt": "Which sentence is correct?",
+     "text": "",
+     "options": [
+      "Tim kann uns im Auto mitnehmen.",
+      "Tim kann uns im Auto nehmen mit.",
+      "Tim mitkann uns im Auto nehmen.",
+      "Tim nimmt uns im Auto mitkann."
+     ],
+     "answers": [
+      "Tim kann uns im Auto mitnehmen."
+     ],
+     "explain": "With a modal verb the separable verb stays whole at the end."
+    },
+    {
+     "type": "transform",
+     "prompt": "Add the modal verb möchte.",
+     "from": "Ich mache beim Lauftraining mit.",
+     "answers": [
+      "Ich möchte beim Lauftraining mitmachen.",
+      "Ich möchte unbedingt beim Lauftraining mitmachen."
+     ],
+     "explain": "The prefix rejoins the verb, which goes to the end as an infinitive."
+    },
+    {
+     "type": "error",
+     "prompt": "The separable verb should not be split here. Correct it.",
+     "text": "Ich möchte beim Lauftraining machen mit.",
+     "answers": [
+      "Ich möchte beim Lauftraining mitmachen."
+     ],
+     "explain": "With a modal verb the infinitive stays in one piece."
+    },
+    {
+     "type": "reorder",
+     "prompt": "Order the sentence.",
+     "tokens": [
+      "Tim",
+      "kann",
+      "uns",
+      "im",
+      "Auto",
+      "mitnehmen."
+     ],
+     "answers": [
+      "Tim kann uns im Auto mitnehmen."
+     ],
+     "explain": "Subject, modal verb, middle field, infinitive last."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a1-use-of-the-present-tense",
+   "titleEn": "Use of the present tense",
+   "summary": "The present also expresses the future, and haben/sein prefer the preterite over the perfect.",
+   "category": "Verben",
+   "tags": [
+    "Präsens",
+    "Futur",
+    "Gebrauch"
+   ],
+   "difficulty": 2,
+   "prerequisites": [
+    "g-daf-a1-regular-verbs-in-the-present-tense"
+   ],
+   "explanation": [
+    {
+     "heading": "Present for the future",
+     "text": "German uses the present tense plus a time expression pointing forward to talk about the future — no special future form is needed."
+    },
+    {
+     "heading": "haben and sein",
+     "text": "For haben and sein German mainly uses the preterite rather than the perfect."
+    }
+   ],
+   "rules": [
+    "Present + a future time expression = future: Morgen gehe ich ins Zentrum Paul Klee.",
+    "For haben and sein use mainly the preterite instead of the perfect.",
+    "sitzen takes haben in the perfect, but in southern Germany and Switzerland sein is used."
+   ],
+   "examples": [
+    {
+     "de": "Morgen gehe ich ins Zentrum Paul Klee.",
+     "note": "present tense, future meaning"
+    },
+    {
+     "de": "For haben and sein use mainly preterite instead of perfect!",
+     "note": "the document's own note"
+    },
+    {
+     "de": "sitzen : use haben for the perfect tense, but in south Germany and CH use sein .",
+     "note": "a regional difference the document points out"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "choice",
+     "prompt": "How does German usually express this future plan?",
+     "text": "___ ich ins Zentrum Paul Klee.",
+     "options": [
+      "Morgen gehe",
+      "Morgen werde gehen",
+      "Morgen bin gegangen",
+      "Morgen ging"
+     ],
+     "answers": [
+      "Morgen gehe"
+     ],
+     "explain": "The present tense plus a future time expression is the normal way."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which region uses sein in the perfect of sitzen?",
+     "text": "",
+     "options": [
+      "South Germany and Switzerland",
+      "North Germany only",
+      "Austria only",
+      "Nowhere"
+     ],
+     "answers": [
+      "South Germany and Switzerland"
+     ],
+     "explain": "The document notes that sitzen takes haben, but south Germany and CH use sein."
+    },
+    {
+     "type": "choice",
+     "prompt": "For haben and sein, which past tense does German mainly use?",
+     "text": "",
+     "options": [
+      "the preterite",
+      "the perfect",
+      "the past perfect",
+      "the future"
+     ],
+     "answers": [
+      "the preterite"
+     ],
+     "explain": "haben and sein mainly appear in the preterite: ich hatte, ich war."
+    },
+    {
+     "type": "fill",
+     "prompt": "Use the preterite of sein.",
+     "text": "Gestern ___ ich in Bern.",
+     "answers": [
+      "war"
+     ],
+     "explain": "For sein the preterite is preferred over the perfect."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a1-perfect-regular-verbs",
+   "titleEn": "Perfect tense: regular verbs",
+   "summary": "ge-…-(e)t with haben or sein; verbs in -ieren take no ge-.",
+   "category": "Verben",
+   "tags": [
+    "Perfekt",
+    "Partizip II",
+    "regelmäßig"
+   ],
+   "difficulty": 2,
+   "prerequisites": [
+    "g-daf-a1-regular-verbs-in-the-present-tense"
+   ],
+   "explanation": [
+    {
+     "heading": "The participle",
+     "text": "A regular past participle is ge- + stem + -(e)t. Verbs ending in -ieren take no ge-: trainieren → trainiert."
+    },
+    {
+     "heading": "haben or sein",
+     "text": "Most verbs form the perfect with haben. Verbs of movement or change of state take sein: starten → ist gestartet, passieren → ist passiert."
+    }
+   ],
+   "rules": [
+    "Regular participle: ge- + stem + -t (schaffen → geschafft).",
+    "Stems in -t or -d add -et: starten → gestartet.",
+    "Verbs in -ieren take no ge-: trainieren → trainiert.",
+    "haben for most verbs; sein for movement and change of state: ist gestartet, ist passiert."
+   ],
+   "examples": [
+    {
+     "de": "ich habe geschafft",
+     "note": "haben + ge-…-t"
+    },
+    {
+     "de": "bin gestartet",
+     "note": "sein, stem in -t so -et"
+    },
+    {
+     "de": "habe trainiert",
+     "note": "-ieren verb, no ge-"
+    },
+    {
+     "de": "ist passiert",
+     "note": "sein + no ge-"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Form the participle of schaffen (regular).",
+     "text": "Ich habe es ___.",
+     "answers": [
+      "geschafft"
+     ],
+     "explain": "ge- + stem + -t."
+    },
+    {
+     "type": "choice",
+     "prompt": "trainieren ends in -ieren. Which participle is right?",
+     "text": "Ich habe gestern ___.",
+     "options": [
+      "trainiert",
+      "getrainiert",
+      "getrainert",
+      "trainiertet"
+     ],
+     "answers": [
+      "trainiert"
+     ],
+     "explain": "Verbs in -ieren form the participle without ge-."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which auxiliary goes with starten?",
+     "text": "Ich ___ gestartet.",
+     "options": [
+      "bin",
+      "habe",
+      "werde",
+      "will"
+     ],
+     "answers": [
+      "bin"
+     ],
+     "explain": "Verbs of movement or change of state take sein."
+    },
+    {
+     "type": "fill",
+     "prompt": "The stem ends in -t, so an -e is inserted.",
+     "text": "Es ist etwas ___.",
+     "answers": [
+      "passiert"
+     ],
+     "sentence": "ist passier t",
+     "source": true,
+     "explain": "passieren is an -ieren verb taking sein: ist passiert."
+    },
+    {
+     "type": "error",
+     "prompt": "This -ieren verb should not take ge-. Correct it.",
+     "text": "Wir haben zwei Stunden getrainiert.",
+     "answers": [
+      "Wir haben zwei Stunden trainiert."
+     ],
+     "explain": "No ge- on verbs ending in -ieren."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a1-perfect-irregular-and-mixed-verbs",
+   "titleEn": "Perfect tense: irregular and mixed verbs",
+   "summary": "Irregular participles end in -en, mixed ones in -t with a vowel change.",
+   "category": "Verben",
+   "tags": [
+    "Perfekt",
+    "Partizip II",
+    "unregelmäßig",
+    "gemischt"
+   ],
+   "difficulty": 3,
+   "prerequisites": [
+    "g-daf-a1-perfect-regular-verbs"
+   ],
+   "explanation": [
+    {
+     "heading": "Two groups",
+     "text": "Irregular verbs form the participle with ge- + (often changed) stem + -en. Mixed verbs combine an irregular stem change with the regular ending -t."
+    }
+   ],
+   "rules": [
+    "Irregular: ge- + stem + -en — getroffen, gefunden, geschlafen, gelesen, geholfen, gesprochen.",
+    "Movement verbs take sein: ist gefahren, ist gekommen, ist gegangen, ist gelaufen.",
+    "Mixed: irregular stem + -t — gewusst, gedacht.",
+    "sein itself: ich bin gewesen, du bist gewesen, wir sind gewesen."
+   ],
+   "examples": [
+    {
+     "de": "ich habe getroffen",
+     "note": "irregular, -en ending"
+    },
+    {
+     "de": "bin gefahren",
+     "note": "movement verb, sein"
+    },
+    {
+     "de": "habe gewusst",
+     "note": "mixed verb: vowel change + -t"
+    },
+    {
+     "de": "haben gedacht",
+     "note": "mixed verb"
+    },
+    {
+     "de": "bin gewesen",
+     "note": "the perfect of sein"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "choice",
+     "prompt": "Which is the participle of denken?",
+     "text": "Ich habe an dich ___.",
+     "options": [
+      "gedacht",
+      "gedenkt",
+      "gedenken",
+      "denkte"
+     ],
+     "answers": [
+      "gedacht"
+     ],
+     "explain": "denken is a mixed verb: vowel change plus the regular -t."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which auxiliary goes with gehen?",
+     "text": "Wir ___ gegangen.",
+     "options": [
+      "sind",
+      "haben",
+      "werden",
+      "wollen"
+     ],
+     "answers": [
+      "sind"
+     ],
+     "explain": "Verbs of movement take sein."
+    },
+    {
+     "type": "fill",
+     "prompt": "Form the participle of schlafen.",
+     "text": "Er hat gut ___.",
+     "answers": [
+      "geschlafen"
+     ],
+     "explain": "Irregular verbs end in -en: geschlafen."
+    },
+    {
+     "type": "fill",
+     "prompt": "The perfect of sein.",
+     "text": "Ich bin in Berlin ___.",
+     "answers": [
+      "gewesen"
+     ],
+     "explain": "sein → gewesen, with sein as the auxiliary."
+    },
+    {
+     "type": "error",
+     "prompt": "The participle ending is wrong for this irregular verb. Correct it.",
+     "text": "Wir haben das Buch gelest.",
+     "answers": [
+      "Wir haben das Buch gelesen."
+     ],
+     "explain": "lesen is irregular, so the participle ends in -en: gelesen."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a1-perfect-verbs-with-separable-prefixes-e-",
+   "titleEn": "Perfect tense: verbs with separable prefixes",
+   "summary": "The ge- sits between the prefix and the stem: angerufen, aufgestanden.",
+   "category": "Verben",
+   "tags": [
+    "Perfekt",
+    "trennbare Verben",
+    "Partizip II"
+   ],
+   "difficulty": 2,
+   "prerequisites": [
+    "g-daf-a1-perfect-regular-verbs",
+    "g-daf-a1-present-verbs-with-a-separable-prefix"
+   ],
+   "explanation": [
+    {
+     "heading": "Where ge- goes",
+     "text": "With a separable prefix the ge- of the participle is placed between the prefix and the stem, and the whole participle stands at the end of the sentence."
+    }
+   ],
+   "rules": [
+    "prefix + ge + stem: an|ge|rufen, zurück|ge|rufen, aus|ge|füllt, mit|ge|nommen, runter|ge|bracht, weg|ge|fahren, auf|ge|standen.",
+    "The auxiliary stands in position 2, the participle at the end.",
+    "Movement verbs still take sein: sind weggefahren, bin aufgestanden."
+   ],
+   "examples": [
+    {
+     "de": "Ich habe dich heute mehrmals angerufen.",
+     "note": "an + ge + rufen"
+    },
+    {
+     "de": "Du hast leider nicht zurückgerufen.",
+     "note": "zurück + ge + rufen"
+    },
+    {
+     "de": "Er hat den Antrag vom Studierendenwohnheim ausgefüllt.",
+     "note": "aus + ge + füllt"
+    },
+    {
+     "de": "Sie sind heute Morgen weggefahren.",
+     "note": "movement verb, sein"
+    },
+    {
+     "de": "Am Sonntag bin ich erst um 11.00 Uhr aufgestanden.",
+     "note": "movement verb, sein"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Form the participle of anrufen.",
+     "text": "Ich habe dich heute mehrmals ___.",
+     "answers": [
+      "angerufen"
+     ],
+     "sentence": "Ich habe dich heute mehrmals an ge rufen.",
+     "source": true,
+     "explain": "The ge- goes between prefix and stem: an-ge-rufen."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which participle is correct?",
+     "text": "Er hat den Antrag ___.",
+     "options": [
+      "ausgefüllt",
+      "geausfüllt",
+      "ausfüllte",
+      "gefülltaus"
+     ],
+     "answers": [
+      "ausgefüllt"
+     ],
+     "explain": "aus + ge + füllt."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which auxiliary goes with aufstehen?",
+     "text": "Ich ___ um 11.00 Uhr aufgestanden.",
+     "options": [
+      "bin",
+      "habe",
+      "werde",
+      "will"
+     ],
+     "answers": [
+      "bin"
+     ],
+     "explain": "aufstehen is a change-of-state verb, so it takes sein."
+    },
+    {
+     "type": "error",
+     "prompt": "The ge- is in the wrong place. Correct it.",
+     "text": "Wir haben Leon nach Frankfurt genommen mit.",
+     "answers": [
+      "Wir haben Leon nach Frankfurt mitgenommen."
+     ],
+     "explain": "The participle is one word with ge- in the middle: mitgenommen."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a1-perfect-verbs-with-inseparable-prefixes-",
+   "titleEn": "Perfect tense: verbs with inseparable prefixes",
+   "summary": "Verbs with er-, be-, ver-, hinter- form the participle without ge-.",
+   "category": "Verben",
+   "tags": [
+    "Perfekt",
+    "untrennbare Verben",
+    "Partizip II"
+   ],
+   "difficulty": 2,
+   "prerequisites": [
+    "g-daf-a1-perfect-regular-verbs"
+   ],
+   "explanation": [
+    {
+     "heading": "No ge-",
+     "text": "Verbs whose prefix cannot separate — er-, be-, ver-, hinter- and others — take no ge- in the participle. The prefix is unstressed."
+    }
+   ],
+   "rules": [
+    "ver- → vergessen; er- → erreicht; hinter- → hinterlassen; be- → besucht.",
+    "No ge- at all, and the participle still stands at the end of the sentence.",
+    "Whether the ending is -t or -en still depends on whether the verb is regular or irregular."
+   ],
+   "examples": [
+    {
+     "de": "Ich habe euch nicht vergessen .",
+     "note": "ver-, irregular, no ge-"
+    },
+    {
+     "de": "Du hast den Hausmeister nicht erreicht.",
+     "note": "er-, regular, no ge-"
+    },
+    {
+     "de": "Er hat keine Notiz hinterlassen .",
+     "note": "hinter-, no ge-"
+    },
+    {
+     "de": "Wir haben unsere Eltern besucht.",
+     "note": "be-, regular, no ge-"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Form the participle of besuchen.",
+     "text": "Wir haben unsere Eltern ___.",
+     "answers": [
+      "besucht"
+     ],
+     "sentence": "Wir haben unsere Eltern be such t.",
+     "source": true,
+     "explain": "Inseparable prefixes take no ge-: besucht."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which participle is correct?",
+     "text": "Ich habe euch nicht ___.",
+     "options": [
+      "vergessen",
+      "gevergessen",
+      "vergesst",
+      "gevergisst"
+     ],
+     "answers": [
+      "vergessen"
+     ],
+     "explain": "ver- is inseparable, so no ge-."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which prefix takes ge- in the participle?",
+     "text": "",
+     "options": [
+      "an-",
+      "be-",
+      "ver-",
+      "er-"
+     ],
+     "answers": [
+      "an-"
+     ],
+     "explain": "an- is separable (angerufen); be-, ver- and er- are inseparable and take no ge-."
+    },
+    {
+     "type": "error",
+     "prompt": "This inseparable verb should not take ge-. Correct it.",
+     "text": "Du hast den Hausmeister nicht geerreicht.",
+     "answers": [
+      "Du hast den Hausmeister nicht erreicht."
+     ],
+     "explain": "er- is inseparable, so the participle is erreicht."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a2-preterite",
+   "titleEn": "Preterite (simple past)",
+   "summary": "Regular -te endings, irregular stem changes, and mixed verbs combining both.",
+   "category": "Verben",
+   "tags": [
+    "Präteritum",
+    "Konjugation"
+   ],
+   "difficulty": 3,
+   "prerequisites": [
+    "g-daf-a1-perfect-irregular-and-mixed-verbs"
+   ],
+   "explanation": [
+    {
+     "heading": "Three groups",
+     "text": "Regular verbs insert -te- before the ending. Irregular verbs change the stem vowel and take no -te-. Mixed verbs change the stem and still take -te-."
+    },
+    {
+     "heading": "Separable verbs",
+     "text": "In the preterite the prefix still separates and goes to the end: ankommen → ich kam … an."
+    }
+   ],
+   "rules": [
+    "Regular: suchen → suchte, suchtest, suchte, suchten, suchtet, suchten.",
+    "Stems in -t or -d insert -e-: warten → wartete.",
+    "Irregular: gehen → ging, laufen → lief; the ich- and er-forms have no ending.",
+    "Mixed: rennen → rannte, denken → dachte.",
+    "Separable verbs split: ankommen → ich kam … an."
+   ],
+   "examples": [
+    {
+     "de": "ich suchte",
+     "note": "regular"
+    },
+    {
+     "de": "wartete",
+     "note": "regular; stem in -t, so -ete"
+    },
+    {
+     "de": "ging",
+     "note": "gehen, irregular"
+    },
+    {
+     "de": "lief",
+     "note": "laufen, irregular"
+    },
+    {
+     "de": "rannte",
+     "note": "rennen, mixed verb"
+    },
+    {
+     "de": "dachte",
+     "note": "denken, mixed verb"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Preterite of suchen, ich-form.",
+     "text": "Ich ___ meinen Schlüssel.",
+     "answers": [
+      "suchte"
+     ],
+     "explain": "Regular verbs insert -te-: ich suchte."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which is the preterite of gehen?",
+     "text": "Er ___ nach Hause.",
+     "options": [
+      "ging",
+      "gingte",
+      "gehte",
+      "gegangen"
+     ],
+     "answers": [
+      "ging"
+     ],
+     "explain": "Irregular verbs change the stem and take no -te-."
+    },
+    {
+     "type": "fill",
+     "prompt": "The stem ends in -t, so an -e- is inserted.",
+     "text": "Wir ___ eine Stunde.",
+     "answers": [
+      "warteten"
+     ],
+     "explain": "warten → wartete, warteten."
+    },
+    {
+     "type": "choice",
+     "prompt": "denken is a mixed verb. Which preterite?",
+     "text": "Ich ___ an dich.",
+     "options": [
+      "dachte",
+      "denkte",
+      "dankte",
+      "gedacht"
+     ],
+     "answers": [
+      "dachte"
+     ],
+     "explain": "Mixed verbs change the stem and still take -te: dachte."
+    },
+    {
+     "type": "error",
+     "prompt": "The separable prefix has to move. Correct the sentence.",
+     "text": "Ich ankam um acht Uhr.",
+     "answers": [
+      "Ich kam um acht Uhr an."
+     ],
+     "explain": "In the preterite the prefix separates and goes to the end."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a2-modal-verbs",
+   "titleEn": "Modal verbs in the preterite",
+   "summary": "können, wollen, müssen, dürfen take regular -te endings and lose the umlaut.",
+   "category": "Verben",
+   "tags": [
+    "Modalverben",
+    "Präteritum"
+   ],
+   "difficulty": 2,
+   "prerequisites": [
+    "g-daf-a2-preterite"
+   ],
+   "explanation": [
+    {
+     "heading": "Regular endings, changed stem",
+     "text": "Modal verbs in the preterite take the same endings as regular verbs and sometimes change their vowel — the umlaut disappears."
+    },
+    {
+     "heading": "möchte",
+     "text": "möchte exists only in the present tense. For the past, use wollen."
+    }
+   ],
+   "rules": [
+    "können → konnte, wollen → wollte, müssen → musste, dürfen → durfte.",
+    "The endings are the regular ones: -e, -est, -e, -en, -et, -en.",
+    "The umlaut of können, müssen and dürfen disappears in the preterite.",
+    "möchte is only used in the present tense; use wollen for the preterite."
+   ],
+   "examples": [
+    {
+     "de": "ich konnte",
+     "note": "können, umlaut gone"
+    },
+    {
+     "de": "wollte",
+     "note": "wollen, preterite"
+    },
+    {
+     "de": "musste",
+     "note": "müssen, preterite — no umlaut"
+    },
+    {
+     "de": "durfte",
+     "note": "dürfen, preterite — no umlaut"
+    },
+    {
+     "de": "wir konnten",
+     "note": "regular plural ending"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Preterite of müssen, ich-form.",
+     "text": "Ich ___ gestern lange arbeiten.",
+     "answers": [
+      "musste"
+     ],
+     "explain": "müssen → musste; the umlaut disappears."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which is the preterite of dürfen?",
+     "text": "Wir ___ nicht ins Kino.",
+     "options": [
+      "durften",
+      "dürften",
+      "durfen",
+      "gedurft"
+     ],
+     "answers": [
+      "durften"
+     ],
+     "explain": "dürfen → durfte, durften — no umlaut."
+    },
+    {
+     "type": "choice",
+     "prompt": "How do you put möchte into the past?",
+     "text": "",
+     "options": [
+      "use wollen",
+      "use möchtete",
+      "use mochte nicht",
+      "möchte has no past"
+     ],
+     "answers": [
+      "use wollen"
+     ],
+     "explain": "möchte is present-tense only; the preterite is wollte."
+    },
+    {
+     "type": "error",
+     "prompt": "The umlaut does not belong in the preterite. Correct it.",
+     "text": "Ich könnte gestern nicht kommen.",
+     "answers": [
+      "Ich konnte gestern nicht kommen."
+     ],
+     "explain": "konnte is the preterite; könnte would be the second conditional."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-b1-modal-verbs-in-the-perfect",
+   "titleEn": "Modal verbs in the perfect",
+   "summary": "haben + the second verb's infinitive + the modal verb's infinitive at the very end.",
+   "category": "Verben",
+   "tags": [
+    "Modalverben",
+    "Perfekt",
+    "Doppelinfinitiv"
+   ],
+   "difficulty": 4,
+   "prerequisites": [
+    "g-daf-a2-modal-verbs"
+   ],
+   "explanation": [
+    {
+     "heading": "The double infinitive",
+     "text": "Modal verbs in the perfect tense are formed with haben plus the infinitive of the modal verb. The modal verb is placed at the end of the sentence, after the infinitive form of the second verb."
+    }
+   ],
+   "rules": [
+    "haben + Infinitiv (main verb) + Infinitiv (modal verb).",
+    "The modal verb comes last, not the main verb.",
+    "There is no participle: it is arbeiten müssen, never gemusst."
+   ],
+   "examples": [
+    {
+     "de": "In der ersten Zeit in Dresden hat Christian viel arbeiten müssen .",
+     "note": "arbeiten + müssen at the end"
+    },
+    {
+     "de": "Er hat daher das Schloss noch nicht besuchen können .",
+     "note": "besuchen + können at the end"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "choice",
+     "prompt": "Which word order is correct?",
+     "text": "",
+     "options": [
+      "Er hat das Schloss nicht besuchen können.",
+      "Er hat das Schloss nicht können besuchen.",
+      "Er hat das Schloss nicht gekonnt besuchen.",
+      "Er ist das Schloss nicht besuchen können."
+     ],
+     "answers": [
+      "Er hat das Schloss nicht besuchen können."
+     ],
+     "explain": "Main-verb infinitive first, modal-verb infinitive last."
+    },
+    {
+     "type": "transform",
+     "prompt": "Put into the perfect.",
+     "from": "Christian musste viel arbeiten.",
+     "answers": [
+      "Christian hat viel arbeiten müssen."
+     ],
+     "explain": "haben + arbeiten + müssen, with the modal verb last."
+    },
+    {
+     "type": "fill",
+     "prompt": "Which auxiliary do modal verbs take in the perfect?",
+     "text": "Er ___ das Schloss noch nicht besuchen können.",
+     "answers": [
+      "hat"
+     ],
+     "explain": "Modal verbs always form the perfect with haben."
+    },
+    {
+     "type": "error",
+     "prompt": "A modal verb takes no participle here. Correct it.",
+     "text": "Christian hat viel arbeiten gemusst.",
+     "answers": [
+      "Christian hat viel arbeiten müssen."
+     ],
+     "explain": "The double infinitive is used: arbeiten müssen."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-b1-past-perfect-for-active-verbs",
+   "titleEn": "Past perfect (Plusquamperfekt)",
+   "summary": "hatte/war in the preterite + past participle, for what happened before something else in the past.",
+   "category": "Verben",
+   "tags": [
+    "Plusquamperfekt",
+    "Vorzeitigkeit",
+    "nachdem"
+   ],
+   "difficulty": 3,
+   "prerequisites": [
+    "g-daf-a2-preterite",
+    "g-daf-a1-perfect-irregular-and-mixed-verbs"
+   ],
+   "explanation": [
+    {
+     "heading": "What it is for",
+     "text": "The past perfect expresses an action in the past which happened before something else in the past."
+    },
+    {
+     "heading": "How it is formed",
+     "text": "haben or sein in the preterite plus the past participle — hatte geschafft, war herumgelaufen."
+    },
+    {
+     "heading": "Where it appears",
+     "text": "It is used in the subordinate clause with nachdem; the main clause then contains verbs in the preterite or the perfect."
+    }
+   ],
+   "rules": [
+    "hatte / war (preterite) + Partizip II.",
+    "The choice of hatte or war follows the same rule as the perfect.",
+    "nachdem + past perfect in the subordinate clause, preterite or perfect in the main clause.",
+    "The two clauses never both use the past perfect."
+   ],
+   "examples": [
+    {
+     "de": "Nachdem wir es bis zum Bahnhof Zoo geschafft hatten , fing es an zu regnen.",
+     "note": "past perfect in the nachdem-clause, preterite in the main clause"
+    },
+    {
+     "de": "Nachdem wir ein bisschen herumgelaufen waren , haben wir dort gegessen .",
+     "note": "war-form, then the perfect in the main clause"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Complete the past perfect (schaffen, wir-form).",
+     "text": "Nachdem wir es bis zum Bahnhof Zoo geschafft ___, fing es an zu regnen.",
+     "answers": [
+      "hatten"
+     ],
+     "sentence": "Nachdem wir es bis zum Bahnhof Zoo geschafft hatten , fing es an zu regnen.",
+     "source": true,
+     "explain": "The past perfect uses haben or sein in the preterite: hatten geschafft."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which auxiliary goes with herumlaufen?",
+     "text": "Nachdem wir ein bisschen herumgelaufen ___, haben wir dort gegessen.",
+     "options": [
+      "waren",
+      "hatten",
+      "wurden",
+      "sind"
+     ],
+     "answers": [
+      "waren"
+     ],
+     "explain": "A movement verb takes sein, here in the preterite: waren."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which connector introduces the past perfect clause?",
+     "text": "",
+     "options": [
+      "nachdem",
+      "während",
+      "obwohl",
+      "damit"
+     ],
+     "answers": [
+      "nachdem"
+     ],
+     "explain": "nachdem marks that one action happened before the other."
+    },
+    {
+     "type": "transform",
+     "prompt": "Join the two sentences with nachdem and the past perfect.",
+     "from": "Wir schafften es bis zum Bahnhof Zoo. Dann fing es an zu regnen.",
+     "answers": [
+      "Nachdem wir es bis zum Bahnhof Zoo geschafft hatten, fing es an zu regnen."
+     ],
+     "explain": "The earlier action goes into the nachdem-clause in the past perfect."
+    },
+    {
+     "type": "error",
+     "prompt": "Both clauses cannot be in the past perfect. Correct the main clause.",
+     "text": "Nachdem wir gegessen hatten, hatten wir nach Hause gegangen.",
+     "answers": [
+      "Nachdem wir gegessen hatten, gingen wir nach Hause.",
+      "Nachdem wir gegessen hatten, sind wir nach Hause gegangen."
+     ],
+     "explain": "The main clause takes the preterite or the perfect."
+    }
+   ]
+  }
+ ]
+}

@@ -13,7 +13,7 @@
  */
 
 import { getAllWords, wordsInCategory, getWordById } from './data.js';
-import { getTopics, getTopic } from './grammar.js';
+import { getTopics, getTopic, levelIndex } from './grammar.js';
 import { vocabProgress, grammarProgress, getProfile } from './db.js';
 import { priority, isDue } from './srs.js';
 import { chooseVocabType, buildVocabExercise, grammarExercisesFor } from './exercises.js';
@@ -52,11 +52,16 @@ function take(list, count, used) {
 
 /**
  * Which grammar topic deserves attention next: the weakest practised topic,
- * otherwise the easiest topic whose prerequisites are already met.
+ * otherwise the easiest unstarted topic whose prerequisites are already met.
+ *
+ * New topics are drawn at or below the learner's target level, so someone
+ * aiming at B1 is not handed a C1 unit. If everything at or below that level
+ * is already practised, the search widens rather than returning nothing.
  */
 export function nextGrammarTopic(now = Date.now()) {
   const topics = getTopics();
   if (!topics.length) return null;
+  const ceiling = levelIndex(getProfile().targetLevel);
 
   const withProgress = topics.map((topic) => ({ topic, record: grammarProgress(topic.id) }));
   const practised = withProgress.filter((t) => t.record.correctCount + t.record.incorrectCount > 0);
@@ -72,11 +77,18 @@ export function nextGrammarTopic(now = Date.now()) {
   if (overdue.length) return overdue[0].topic;
 
   const masteryOf = (id) => grammarProgress(id).masteryScore;
-  const ready = withProgress
+  const inOrder = (a, b) => levelIndex(a.topic.level) - levelIndex(b.topic.level)
+    || a.topic.difficulty - b.topic.difficulty
+    || a.topic.groupOrder - b.topic.groupOrder
+    || a.topic.order - b.topic.order;
+  const unstarted = withProgress
     .filter((t) => t.record.correctCount + t.record.incorrectCount === 0)
     .filter((t) => t.topic.prerequisites.every((p) => masteryOf(p) >= 0.4 || !getTopic(p)))
-    .sort((a, b) => a.topic.difficulty - b.topic.difficulty
-      || a.topic.lektion - b.topic.lektion || a.topic.number - b.topic.number);
+    .sort(inOrder);
+
+  const atLevel = ceiling < 0 ? unstarted
+    : unstarted.filter((t) => levelIndex(t.topic.level) <= ceiling);
+  const ready = atLevel.length ? atLevel : unstarted;
   return ready.length ? ready[0].topic : withProgress[0].topic;
 }
 

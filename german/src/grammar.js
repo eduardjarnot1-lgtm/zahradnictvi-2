@@ -5,7 +5,7 @@
 
 let grammarDb = null;
 const byId = new Map();
-const byLektion = new Map();
+const byLevel = new Map();
 const exerciseById = new Map();
 
 export async function loadGrammar() {
@@ -26,23 +26,37 @@ export function setGrammarData(data) {
 
 function indexGrammar() {
   byId.clear();
-  byLektion.clear();
+  byLevel.clear();
   exerciseById.clear();
   for (const topic of grammarDb.topics) {
     byId.set(topic.id, topic);
-    if (!byLektion.has(topic.lektion)) byLektion.set(topic.lektion, []);
-    byLektion.get(topic.lektion).push(topic);
+    if (!byLevel.has(topic.level)) byLevel.set(topic.level, []);
+    byLevel.get(topic.level).push(topic);
     for (const exercise of topic.exercises) exerciseById.set(exercise.id, exercise);
   }
 }
+
+const CEFR_ORDER = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+/** Where a level sits in the CEFR order; -1 for anything unknown. */
+export const levelIndex = (level) => CEFR_ORDER.indexOf(level);
 
 export const grammarLoaded = () => grammarDb !== null;
 export const getGrammarMeta = () => grammarDb.meta;
 export const getTopics = () => grammarDb.topics;
 export const getTopic = (id) => byId.get(id) || null;
 export const getExercise = (id) => exerciseById.get(id) || null;
-export const getLektionen = () => [...byLektion.keys()].sort((a, b) => a - b);
-export const topicsInLektion = (lektion) => byLektion.get(lektion) || [];
+/** The levels that actually hold grammar, in CEFR order, with their groups. */
+export const getGrammarLevels = () => grammarDb.levels;
+export const topicsAtLevel = (level) => byLevel.get(level) || [];
+/** The groups of one level, each with its topic objects resolved. */
+export const groupsAtLevel = (level) => {
+  const entry = grammarDb.levels.find((item) => item.level === level);
+  if (!entry) return [];
+  return entry.groups.map((group) => ({
+    name: group.name,
+    topics: group.topics.map((id) => byId.get(id)).filter(Boolean),
+  }));
+};
 
 export const getGrammarCategories = () => {
   const counts = new Map();

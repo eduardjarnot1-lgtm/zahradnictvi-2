@@ -5,7 +5,7 @@
  */
 
 import { getAllWords, getCategories, wordsInCategory } from './data.js';
-import { getTopics, getTopic, getLektionen, topicsInLektion, getGrammarMeta } from './grammar.js';
+import { getTopics, getTopic, getGrammarLevels, groupsAtLevel, topicsAtLevel, getGrammarMeta } from './grammar.js';
 import { summarise, countDue } from './progress.js';
 import { getProfile, setTargetLevel, LEVELS, grammarProgress, recentSessions, storageAvailable } from './db.js';
 import { recommendations, problemWords, recentMistakes, snapshot } from './coach.js';
@@ -89,8 +89,9 @@ function levelContents() {
   for (const [level, count] of vocabByLevel) {
     if (contents[level]) contents[level].push(`${count} words (approx.)`);
   }
-  const topics = getTopics().length;
-  if (topics && contents.C1) contents.C1.push(`${topics} grammar topics`);
+  for (const entry of getGrammarLevels()) {
+    if (contents[entry.level]) contents[entry.level].push(`${entry.topicCount} grammar topics`);
+  }
   return contents;
 }
 
@@ -108,11 +109,12 @@ function levelPicker(profile) {
               ? escapeHtml(contents[level].join(' · ')) : 'no content yet'}</span>
           </button>`).join('')}
       </div>
-      <p class="levels__note">Grammar comes from the Sicher!&nbsp;C1 Grammatikübersicht, so only C1 has
-        grammar content. The vocabulary comes from the OCR GCSE list, which grades its entries by
+      <p class="levels__note">Grammar comes from two documents: DaF kompakt neu, which prints an
+        A1/A2/B1 level beside every block, and the Sicher!&nbsp;C1 Grammatikübersicht. Those levels are
+        the documents' own. The vocabulary comes from the OCR GCSE list, which grades its entries by
         Foundation/Higher tier rather than by CEFR — the A2/B1 split shown here is the usual
-        approximation of those tiers, not a statement from the document. The remaining levels are part
-        of the structure and hold no content yet; the app does not claim an A1–C2 curriculum.</p>
+        approximation of those tiers, not a statement from the document. B2 and C2 are part of the
+        structure and hold no content yet; the app does not claim an A1–C2 curriculum.</p>
     </section>`;
 }
 
@@ -166,7 +168,7 @@ export function progressView() {
       </div>
       <div class="stat">
         <p class="stat__big">${data.grammar.mastered}</p>
-        <p class="stat__label">C1 grammar topics at 70%+ mastery</p>
+        <p class="stat__label">Grammar topics at 70%+ mastery</p>
         <p class="stat__value">${data.grammar.practised} of ${data.grammar.total} started</p>
       </div>
       <div class="stat">
@@ -218,7 +220,7 @@ export function progressView() {
 
 export function grammarIndexView() {
   const meta = getGrammarMeta();
-  const topics = getTopics();
+  const profile = getProfile();
   const data = snapshot();
   const started = data.grammar.practised;
 
@@ -227,41 +229,64 @@ export function grammarIndexView() {
     .sort((a, b) => a.record.masteryScore - b.record.masteryScore)
     .slice(0, 3);
 
-  const lektionen = getLektionen().map((lektion) => {
-    const items = topicsInLektion(lektion).map((topic) => {
+  const topicCard = (topic) => {
+    const record = grammarProgress(topic.id);
+    const attempts = record.correctCount + record.incorrectCount;
+    const mastery = Math.round(record.masteryScore * 100);
+    return `
+      <a class="topic" href="#/grammar/${topic.id}">
+        <span class="topic__head">
+          <span class="topic__title">${escapeHtml(topic.title)}</span>
+          <span class="topic__diff" title="Difficulty ${topic.difficulty} of 5">${'●'.repeat(topic.difficulty)}${'○'.repeat(5 - topic.difficulty)}</span>
+        </span>
+        <span class="topic__en">${escapeHtml(topic.titleEn)}</span>
+        <span class="topic__meta">
+          <span class="tag">${escapeHtml(topic.category)}</span>
+          ${attempts ? `<span class="topic__mastery${mastery >= 70 ? ' is-good' : mastery < 50 ? ' is-weak' : ''}">${mastery}% mastery</span>`
+            : `<span class="topic__mastery is-new">not started</span>`}
+          <span class="topic__count">${topic.exercises.length} exercises</span>
+        </span>
+      </a>`;
+  };
+
+  const levels = getGrammarLevels();
+  const rail = levels.map((entry) => `
+    <a class="level-chip${entry.level === profile.targetLevel ? ' is-active' : ''}" href="#level-${entry.level}">
+      ${entry.level}<span class="level-chip__count">${entry.topicCount}</span></a>`).join('');
+
+  const blocks = levels.map((entry) => {
+    const topics = topicsAtLevel(entry.level);
+    const practised = topics.filter((topic) => {
       const record = grammarProgress(topic.id);
-      const attempts = record.correctCount + record.incorrectCount;
-      const mastery = Math.round(record.masteryScore * 100);
-      return `
-        <a class="topic" href="#/grammar/${topic.id}">
-          <span class="topic__head">
-            <span class="topic__title">${escapeHtml(topic.title)}</span>
-            <span class="topic__diff" title="Difficulty ${topic.difficulty} of 5">${'●'.repeat(topic.difficulty)}${'○'.repeat(5 - topic.difficulty)}</span>
-          </span>
-          <span class="topic__en">${escapeHtml(topic.titleEn)}</span>
-          <span class="topic__meta">
-            <span class="tag">${escapeHtml(topic.category)}</span>
-            ${attempts ? `<span class="topic__mastery${mastery >= 70 ? ' is-good' : mastery < 50 ? ' is-weak' : ''}">${mastery}% mastery</span>`
-              : `<span class="topic__mastery is-new">not started</span>`}
-            <span class="topic__count">${topic.exercises.length} exercises</span>
-          </span>
-        </a>`;
-    }).join('');
-    return `<section class="lektion">
-      <h2 class="lektion__title">Lektion ${lektion}</h2>
-      <div class="topics">${items}</div>
-    </section>`;
+      return record.correctCount + record.incorrectCount > 0;
+    }).length;
+    const groups = groupsAtLevel(entry.level).map((group) => `
+      <section class="lektion">
+        <h3 class="lektion__title">${escapeHtml(group.name)}</h3>
+        <div class="topics">${group.topics.map(topicCard).join('')}</div>
+      </section>`).join('');
+    return `
+      <section class="level-block" id="level-${entry.level}">
+        <h2 class="section-title">${entry.level}
+          ${entry.level === profile.targetLevel ? '<span class="tag">your target level</span>' : ''}
+          <span class="muted">${entry.topicCount} topics · ${practised} started</span></h2>
+        <p class="level-block__source">${entry.sources.map(escapeHtml).join(' · ')}</p>
+        ${groups}
+      </section>`;
   }).join('');
 
   return `
     ${crumbs([{ label: 'German Learning', href: '#/' }, { label: 'Grammar' }])}
-    ${fukaBubble('subcategory', 'C1 grammar — pick a topic, read the rules, then practise.')}
+    ${fukaBubble('subcategory', 'Grammar from A1 to C1 — pick a topic, read the rules, then practise.')}
     <header class="page-head">
-      <h1>🧠 C1 Grammar</h1>
+      <h1>🧠 Grammar</h1>
       <p class="page-head__meta">${meta.topicCount} topics · ${meta.exerciseCount} exercises ·
         ${started} started</p>
-      <p class="page-head__source">Source: ${escapeHtml(meta.source)}</p>
+      <p class="page-head__source">Sources: ${meta.sources.map((source) =>
+        `${escapeHtml(source.title)} (${source.topicCount})`).join(' · ')}</p>
     </header>
+
+    <nav class="level-rail" aria-label="Grammar levels">${rail}</nav>
 
     ${weak.length ? `<section class="weakspots">
       <h2 class="section-title">Your weak areas</h2>
@@ -274,7 +299,7 @@ export function grammarIndexView() {
       </div>
     </section>` : ''}
 
-    ${lektionen}`;
+    ${blocks}`;
 }
 
 export function grammarTopicView(topicId) {
@@ -294,6 +319,7 @@ export function grammarTopicView(topicId) {
       <h1>${escapeHtml(topic.title)}</h1>
       <p class="page-head__meta">${escapeHtml(topic.titleEn)}</p>
       <p class="topic__meta">
+        <span class="tag tag--level">${escapeHtml(topic.level)}</span>
         <span class="tag">${escapeHtml(topic.category)}</span>
         ${topic.tags.map((tag) => `<span class="tag tag--soft">${escapeHtml(tag)}</span>`).join('')}
         <span class="topic__diff">Difficulty ${topic.difficulty}/5</span>
@@ -336,7 +362,8 @@ export function grammarTopicView(topicId) {
         `<li><strong>${escapeHtml(sub.letter)}</strong> ${escapeHtml(sub.title)}${sub.kursbuch ? ` <span class="muted">(${escapeHtml(sub.kursbuch)})</span>` : ''}</li>`).join('')}</ul>
     </section>` : ''}
 
-    <p class="source-line">${escapeHtml(topic.source)}, p.&nbsp;${topic.sourcePage}${topic.kursbuch ? ` · Kursbuch ${escapeHtml(topic.kursbuch)}` : ''}</p>`;
+    <p class="source-line">${escapeHtml(topic.source)}, p.&nbsp;${topic.sourcePage} ·
+      ${escapeHtml(topic.group)}${topic.subsection ? ` · ${escapeHtml(topic.subsection)}` : ''}${topic.kursbuch ? ` · Kursbuch ${escapeHtml(topic.kursbuch)}` : ''}</p>`;
 }
 
 export function grammarSearchSection(topics) {
@@ -349,7 +376,7 @@ export function grammarSearchSection(topics) {
           <span class="topic__title">${escapeHtml(topic.title)}</span>
           <span class="topic__en">${escapeHtml(topic.titleEn)}</span>
           <span class="topic__meta"><span class="tag">${escapeHtml(topic.category)}</span>
-            <span class="topic__count">Lektion ${topic.lektion}</span></span>
+            <span class="topic__count">${escapeHtml(topic.level)} · ${escapeHtml(topic.group)}</span></span>
         </a>`).join('')}
     </div>`;
 }

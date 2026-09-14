@@ -1,0 +1,1471 @@
+{
+ "topics": [
+  {
+   "id": "g-daf-b1-future-i",
+   "titleEn": "Future I (Futur I)",
+   "summary": "werden + infinitive for intentions and predictions; particles shift it between assumption and certainty.",
+   "category": "Verben",
+   "tags": [
+    "Futur I",
+    "werden",
+    "Vermutung",
+    "Partikeln"
+   ],
+   "difficulty": 3,
+   "prerequisites": [
+    "g-daf-a1-use-of-the-present-tense"
+   ],
+   "explanation": [
+    {
+     "heading": "Form and use",
+     "text": "The simple future tense is used to express intentions and predictions where the outcome is certain. It is formed using werden in the present tense and the infinitive, which goes to the end of the sentence."
+    },
+    {
+     "heading": "Particles change the meaning",
+     "text": "Adverbs and particles decide whether Futur I reads as an assumption, an assurance or a certainty."
+    }
+   ],
+   "rules": [
+    "werden in position 2, infinitive at the end of the sentence.",
+    "Assumption: vermutlich, wohl, wahrscheinlich.",
+    "Assurance: schon.",
+    "Certainty: bestimmt, sicherlich, sicher.",
+    "The particle may also stand in position 1, with werden still in position 2."
+   ],
+   "examples": [
+    {
+     "de": "Zur Vorbereitung werde ich einen Schwedischkurs machen.",
+     "note": "intention"
+    },
+    {
+     "de": "Wir werden ab August zusammen in Berlin wohnen.",
+     "note": "prediction with a certain outcome"
+    },
+    {
+     "de": "Ich werde vermutlich / wohl / wahrscheinlich Portugal vermissen.",
+     "note": "assumption"
+    },
+    {
+     "de": "Es wird schon klappen.",
+     "note": "assurance — schon"
+    },
+    {
+     "de": "Ich werde als Dolmetscher bestimmt / sicherlich / sicher gute Chancen haben.",
+     "note": "certainty"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Complete the auxiliary of Futur I.",
+     "text": "Zur Vorbereitung ___ ich einen Schwedischkurs machen.",
+     "answers": [
+      "werde"
+     ],
+     "sentence": "Zur Vorbereitung werde ich einen Schwedischkurs machen.",
+     "source": true,
+     "explain": "werden in position 2, infinitive at the end."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which particle turns Futur I into an assumption?",
+     "text": "Ich werde ___ Portugal vermissen.",
+     "options": [
+      "wahrscheinlich",
+      "bestimmt",
+      "sicher",
+      "schon"
+     ],
+     "answers": [
+      "wahrscheinlich"
+     ],
+     "explain": "vermutlich, wohl and wahrscheinlich mark an assumption; bestimmt and sicher mark certainty."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which particle expresses assurance?",
+     "text": "Es wird ___ klappen.",
+     "options": [
+      "schon",
+      "vermutlich",
+      "sicherlich",
+      "wohl"
+     ],
+     "answers": [
+      "schon"
+     ],
+     "explain": "schon is the particle of assurance."
+    },
+    {
+     "type": "transform",
+     "prompt": "Put into Futur I.",
+     "from": "Wir wohnen ab August zusammen in Berlin.",
+     "answers": [
+      "Wir werden ab August zusammen in Berlin wohnen."
+     ],
+     "explain": "werden in position 2, the infinitive last."
+    },
+    {
+     "type": "reorder",
+     "prompt": "Order the sentence, starting with the particle.",
+     "tokens": [
+      "Vermutlich",
+      "werde",
+      "ich",
+      "Portugal",
+      "vermissen."
+     ],
+     "answers": [
+      "Vermutlich werde ich Portugal vermissen."
+     ],
+     "explain": "The particle may take position 1; werden stays in position 2."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-b1-sich-lassen-verb",
+   "titleEn": "“(sich) lassen” + verb",
+   "summary": "lassen with a second infinitive, and where lassen goes in the perfect or with a modal verb.",
+   "category": "Verben",
+   "tags": [
+    "lassen",
+    "Infinitiv",
+    "Perfekt",
+    "Wortstellung"
+   ],
+   "difficulty": 4,
+   "prerequisites": [
+    "g-daf-b1-modal-verbs-in-the-perfect"
+   ],
+   "explanation": [
+    {
+     "heading": "lassen plus an infinitive",
+     "text": "The verb (sich) lassen is often used with the infinitive of a second verb — you have something done, or you let something happen."
+    },
+    {
+     "heading": "In the perfect",
+     "text": "The perfect of lassen + verb is formed with haben plus lassen in the infinitive, not as a participle."
+    },
+    {
+     "heading": "Word order",
+     "text": "In sentences in the perfect tense or with modal verbs, lassen goes after the infinitive of the second verb."
+    }
+   ],
+   "rules": [
+    "lassen + Infinitiv of the second verb.",
+    "Perfect: haben + Infinitiv + lassen (not gelassen).",
+    "With a modal verb: modal verb in position 2, then the second infinitive, then lassen."
+   ],
+   "examples": [
+    {
+     "de": "Christian lässt sich in der Informatikabteilung das Passwort vom Computer geben .",
+     "note": "present tense"
+    },
+    {
+     "de": "Christian hat sich schon das Intranet zeigen lassen .",
+     "note": "perfect: haben + zeigen + lassen"
+    },
+    {
+     "de": "Christian muss den Urlaubsantrag der Personalabteilung zukommen lassen .",
+     "note": "with a modal verb"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "choice",
+     "prompt": "Which perfect form is correct?",
+     "text": "Christian hat sich schon das Intranet ___.",
+     "options": [
+      "zeigen lassen",
+      "gezeigt gelassen",
+      "lassen zeigen",
+      "zeigen gelassen"
+     ],
+     "answers": [
+      "zeigen lassen"
+     ],
+     "explain": "The perfect uses haben + infinitive + lassen, never gelassen."
+    },
+    {
+     "type": "transform",
+     "prompt": "Put into the perfect.",
+     "from": "Christian lässt sich das Intranet zeigen.",
+     "answers": [
+      "Christian hat sich schon das Intranet zeigen lassen.",
+      "Christian hat sich das Intranet zeigen lassen."
+     ],
+     "explain": "haben + zeigen + lassen."
+    },
+    {
+     "type": "fill",
+     "prompt": "Complete the word order with a modal verb.",
+     "text": "Christian muss den Urlaubsantrag der Personalabteilung zukommen ___.",
+     "answers": [
+      "lassen"
+     ],
+     "sentence": "Christian muss den Urlaubsantrag der Personalabteilung zukommen lassen .",
+     "source": true,
+     "explain": "lassen comes after the infinitive of the second verb."
+    },
+    {
+     "type": "error",
+     "prompt": "lassen takes no participle here. Correct it.",
+     "text": "Christian hat sich das Passwort geben gelassen.",
+     "answers": [
+      "Christian hat sich das Passwort geben lassen."
+     ],
+     "explain": "The perfect of lassen + verb uses the infinitive lassen."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-b1-lassen-nouns",
+   "titleEn": "“lassen” + noun",
+   "summary": "With a noun or pronoun, lassen means to leave something — and then it does take a participle.",
+   "category": "Verben",
+   "tags": [
+    "lassen",
+    "Perfekt",
+    "Partizip II"
+   ],
+   "difficulty": 3,
+   "prerequisites": [
+    "g-daf-b1-sich-lassen-verb"
+   ],
+   "explanation": [
+    {
+     "heading": "A different lassen",
+     "text": "The verb lassen can also be used with a noun or a pronoun rather than a second verb. It then means to leave something somewhere."
+    },
+    {
+     "heading": "The perfect",
+     "text": "The perfect of lassen + noun is formed with haben and the past participle of lassen — gelassen, not the infinitive."
+    }
+   ],
+   "rules": [
+    "lassen + noun or pronoun = to leave something somewhere.",
+    "Perfect: haben + gelassen (the ordinary participle).",
+    "Contrast with lassen + verb, which keeps the infinitive lassen in the perfect."
+   ],
+   "examples": [
+    {
+     "de": "Christian lässt sein Handy im Büro.",
+     "note": "lassen + noun"
+    },
+    {
+     "de": "Christian lässt es im Büro.",
+     "note": "lassen + pronoun"
+    },
+    {
+     "de": "Christian hat sein Handy im Büro gelassen .",
+     "note": "perfect with the participle gelassen"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "choice",
+     "prompt": "lassen + noun in the perfect — which form?",
+     "text": "Christian hat sein Handy im Büro ___.",
+     "options": [
+      "gelassen",
+      "lassen",
+      "geliessen",
+      "lässt"
+     ],
+     "answers": [
+      "gelassen"
+     ],
+     "explain": "With a noun, lassen takes the ordinary participle gelassen."
+    },
+    {
+     "type": "transform",
+     "prompt": "Replace the noun with a pronoun.",
+     "from": "Christian lässt sein Handy im Büro.",
+     "answers": [
+      "Christian lässt es im Büro."
+     ],
+     "explain": "das Handy → es."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which sentence uses lassen + verb (not + noun)?",
+     "text": "",
+     "options": [
+      "Christian hat sich das Intranet zeigen lassen.",
+      "Christian hat sein Handy im Büro gelassen.",
+      "Christian lässt es im Büro.",
+      "Christian lässt sein Handy im Büro."
+     ],
+     "answers": [
+      "Christian hat sich das Intranet zeigen lassen."
+     ],
+     "explain": "Only the first has a second infinitive, so it keeps lassen rather than gelassen."
+    },
+    {
+     "type": "error",
+     "prompt": "This is lassen + noun, so it needs the participle. Correct it.",
+     "text": "Christian hat sein Handy im Büro lassen.",
+     "answers": [
+      "Christian hat sein Handy im Büro gelassen."
+     ],
+     "explain": "With a noun the perfect is gelassen."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-b1-brauchen-zu-infinitive",
+   "titleEn": "“brauchen … zu” + infinitive",
+   "summary": "brauchen nur zu = you only have to; brauchen nicht/kein … zu = you don't have to.",
+   "category": "Verben",
+   "tags": [
+    "brauchen",
+    "Infinitiv mit zu",
+    "Negation",
+    "Modalverbalternative"
+   ],
+   "difficulty": 3,
+   "prerequisites": [
+    "g-daf-a2-modal-verbs-and-their-uses"
+   ],
+   "explanation": [
+    {
+     "heading": "Only that and nothing more",
+     "text": "brauchen … nur zu + infinitive expresses that you don't need to do anything else but that."
+    },
+    {
+     "heading": "Not necessary",
+     "text": "brauchen … nicht zu and brauchen … kein … zu + infinitive have the same meaning as nicht müssen."
+    }
+   ],
+   "rules": [
+    "brauchen … nur zu + Infinitiv = you only have to do that.",
+    "brauchen … nicht zu + Infinitiv = nicht müssen.",
+    "brauchen … kein … zu + Infinitiv = also nicht müssen.",
+    "The zu stands directly before the infinitive at the end of the sentence."
+   ],
+   "examples": [
+    {
+     "de": "Sie brauchen nur die Broschüre „Länderinformationsschrift Österreich“ zu bestellen .",
+     "note": "nur zu — nothing else is needed"
+    },
+    {
+     "de": "Sie brauchen nicht lange zu warten .",
+     "note": "= Sie müssen nicht lange warten"
+    },
+    {
+     "de": "Sie brauchen keine weiteren Informationen im Internet zu suchen .",
+     "note": "kein … zu"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "transform",
+     "prompt": "Rewrite with brauchen … nicht zu.",
+     "from": "Sie müssen nicht lange warten.",
+     "answers": [
+      "Sie brauchen nicht lange zu warten."
+     ],
+     "explain": "nicht müssen = brauchen … nicht zu + infinitive."
+    },
+    {
+     "type": "fill",
+     "prompt": "Complete the particle before the infinitive.",
+     "text": "Sie brauchen nicht lange ___ warten.",
+     "answers": [
+      "zu"
+     ],
+     "sentence": "Sie brauchen nicht lange zu warten .",
+     "source": true,
+     "explain": "brauchen takes zu before the infinitive."
+    },
+    {
+     "type": "choice",
+     "prompt": "What does brauchen … nur zu express?",
+     "text": "",
+     "options": [
+      "You don't need to do anything else but that.",
+      "You are not allowed to do it.",
+      "You must do it immediately.",
+      "Someone else will do it."
+     ],
+     "answers": [
+      "You don't need to do anything else but that."
+     ],
+     "explain": "nur zu limits what is required to that one thing."
+    },
+    {
+     "type": "error",
+     "prompt": "brauchen needs zu here. Correct the sentence.",
+     "text": "Sie brauchen nicht lange warten.",
+     "answers": [
+      "Sie brauchen nicht lange zu warten."
+     ],
+     "explain": "In this construction brauchen is followed by zu + infinitive."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a2-active-passive",
+   "titleEn": "Active → Passive",
+   "summary": "werden + Partizip II; the agent is optional and added with von + dative.",
+   "category": "Passiv",
+   "tags": [
+    "Passiv",
+    "werden",
+    "Agens",
+    "Präsens",
+    "Präteritum"
+   ],
+   "difficulty": 3,
+   "prerequisites": [
+    "g-daf-a1-perfect-regular-verbs"
+   ],
+   "explanation": [
+    {
+     "heading": "What changes",
+     "text": "The agent is important in an active sentence — who is doing the action. In a passive sentence the action itself is important — what is being done. The accusative object of the active sentence becomes the subject of the passive one."
+    },
+    {
+     "heading": "Naming the agent",
+     "text": "If it is important to mention the agent, this is done by adding von + dative. When man appears in the active sentence there is no agent in the passive sentence."
+    },
+    {
+     "heading": "Tenses",
+     "text": "Present: werde/wirst/wird … + Partizip II. Preterite: wurde/wurdest/wurde … + Partizip II."
+    }
+   ],
+   "rules": [
+    "Passive = werden + Partizip II, with the participle at the end of the sentence.",
+    "Active accusative object → passive subject.",
+    "The agent, when named, is added with von + Dativ.",
+    "man in the active = no agent in the passive.",
+    "Passive sentences without an agent are used for general information or rules."
+   ],
+   "examples": [
+    {
+     "de": "Die Eheleute gründen 1912 die Fabrik .",
+     "note": "active"
+    },
+    {
+     "de": "Die Fabrik wird 1912 (von den Eheleuten) gegründet.",
+     "note": "passive, agent optional"
+    },
+    {
+     "de": "Im Museumsshop verkauft man Bücher und Plakate.",
+     "note": "active with man"
+    },
+    {
+     "de": "Im Museumsshop werden Bücher und Plakate verkauft.",
+     "note": "passive, no agent"
+    },
+    {
+     "de": "Die Fabrik wurde 1912 von den Eheleuten gegründet.",
+     "note": "preterite passive"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "transform",
+     "prompt": "Turn into the passive (present tense, keep the agent).",
+     "from": "Die Eheleute gründen 1912 die Fabrik.",
+     "answers": [
+      "Die Fabrik wird 1912 von den Eheleuten gegründet.",
+      "Die Fabrik wird 1912 (von den Eheleuten) gegründet."
+     ],
+     "explain": "The accusative object becomes the subject; the agent takes von + Dativ."
+    },
+    {
+     "type": "transform",
+     "prompt": "Turn into the passive — man disappears.",
+     "from": "Im Museumsshop verkauft man Bücher und Plakate.",
+     "answers": [
+      "Im Museumsshop werden Bücher und Plakate verkauft."
+     ],
+     "explain": "man in the active means no agent in the passive."
+    },
+    {
+     "type": "fill",
+     "prompt": "Complete the preterite passive auxiliary.",
+     "text": "Die Fabrik ___ 1912 von den Eheleuten gegründet.",
+     "answers": [
+      "wurde"
+     ],
+     "sentence": "Die Fabrik wurde 1912 von den Eheleuten gegründet.",
+     "source": true,
+     "explain": "The preterite of werden is wurde."
+    },
+    {
+     "type": "choice",
+     "prompt": "How is the agent added?",
+     "text": "",
+     "options": [
+      "von + Dativ",
+      "mit + Dativ",
+      "durch + Nominativ",
+      "für + Akkusativ"
+     ],
+     "answers": [
+      "von + Dativ"
+     ],
+     "explain": "The agent is named with von + dative."
+    },
+    {
+     "type": "error",
+     "prompt": "The passive needs werden, not sein. Correct it.",
+     "text": "Die Fabrik ist 1912 gegründet.",
+     "answers": [
+      "Die Fabrik wird 1912 gegründet.",
+      "Die Fabrik wurde 1912 gegründet."
+     ],
+     "explain": "The passive of the action uses werden + Partizip II."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-b1-past-perfect-passive",
+   "titleEn": "Past perfect passive",
+   "summary": "war + Partizip II + worden, for a passive action completed before another past event.",
+   "category": "Passiv",
+   "tags": [
+    "Passiv",
+    "Plusquamperfekt",
+    "worden",
+    "nachdem"
+   ],
+   "difficulty": 5,
+   "prerequisites": [
+    "g-daf-a2-active-passive",
+    "g-daf-b1-past-perfect-for-active-verbs"
+   ],
+   "explanation": [
+    {
+     "heading": "How it is formed",
+     "text": "The past perfect passive is formed with sein in the preterite and the past participle plus worden — war gekrönt worden."
+    },
+    {
+     "heading": "worden, not geworden",
+     "text": "In the passive the participle of werden is worden, without the ge-."
+    }
+   ],
+   "rules": [
+    "war / waren + Partizip II + worden.",
+    "The participle of werden in the passive is worden, never geworden.",
+    "It typically appears in a nachdem-clause, with the main clause in the preterite."
+   ],
+   "examples": [
+    {
+     "de": "gekrönt worden war",
+     "note": "war + Partizip II + worden"
+    },
+    {
+     "de": "Nachdem 1871 der erste deutsche Nationalstaat gegründet worden war , wurde Berlin",
+     "note": "nachdem-clause, main clause in the preterite passive"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Complete the passive participle of werden.",
+     "text": "Nachdem der Nationalstaat gegründet ___ war, wurde Berlin zum Zentrum.",
+     "answers": [
+      "worden"
+     ],
+     "explain": "In the passive the participle of werden is worden, without ge-."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which auxiliary does the past perfect passive use?",
+     "text": "",
+     "options": [
+      "sein in the preterite",
+      "haben in the preterite",
+      "werden in the present",
+      "sein in the present"
+     ],
+     "answers": [
+      "sein in the preterite"
+     ],
+     "explain": "war/waren + Partizip II + worden."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which form is correct?",
+     "text": "Berlin war zur Hauptstadt ___ ___.",
+     "options": [
+      "gekrönt worden",
+      "gekrönt geworden",
+      "krönen worden",
+      "gekrönt gewesen"
+     ],
+     "answers": [
+      "gekrönt worden"
+     ],
+     "explain": "The passive participle is worden."
+    },
+    {
+     "type": "error",
+     "prompt": "The participle of werden is wrong in a passive. Correct it.",
+     "text": "Nachdem die Fabrik gegründet geworden war, kamen viele Arbeiter.",
+     "answers": [
+      "Nachdem die Fabrik gegründet worden war, kamen viele Arbeiter."
+     ],
+     "explain": "geworden is used when werden is a full verb; the passive takes worden."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a1-imperative-sentences",
+   "titleEn": "The imperative",
+   "summary": "Three forms — du, ihr and Sie — built from the present tense.",
+   "category": "Verben",
+   "tags": [
+    "Imperativ",
+    "Aufforderung",
+    "du/ihr/Sie"
+   ],
+   "difficulty": 2,
+   "prerequisites": [
+    "g-daf-a1-regular-verbs-in-the-present-tense"
+   ],
+   "explanation": [
+    {
+     "heading": "From the present tense",
+     "text": "The du-imperative drops the -st ending and the pronoun. The ihr-imperative is simply the ihr-form without the pronoun. The Sie-imperative keeps the verb and puts Sie after it."
+    },
+    {
+     "heading": "Verbs with a vowel change",
+     "text": "Verbs that change e → ie/i keep that change in the du-imperative (lies!), but verbs that change a → ä lose the umlaut (fahr!)."
+    }
+   ],
+   "rules": [
+    "du: drop -st and the pronoun — du kommst → Komm!",
+    "Stems in -d, -t and some others add -e: du redest → Rede!, du wartest → Warte!",
+    "ihr: the plain ihr-form — ihr kommt → Kommt!",
+    "Sie: verb first, then Sie — Sie kommen → Kommen Sie!",
+    "e → ie/i is kept: du liest → Lies!  a → ä is dropped: du fährst → Fahr!",
+    "Separable verbs split: du passt auf → Pass auf!",
+    "haben and sein are irregular: Hab keine Angst! / Sei vorsichtig! / Seien Sie vorsichtig!"
+   ],
+   "examples": [
+    {
+     "de": "du kommst →Komm!",
+     "note": "du-imperative"
+    },
+    {
+     "de": "ihr kommt → Kommt!",
+     "note": "ihr-imperative"
+    },
+    {
+     "de": "Sie kommen → Kommen Sie!",
+     "note": "formal imperative"
+    },
+    {
+     "de": "du wartest → Warte!",
+     "note": "stem in -t, so -e is added"
+    },
+    {
+     "de": "du liest → Lies!",
+     "note": "e → ie kept"
+    },
+    {
+     "de": "du fährst → F ahr!",
+     "note": "a → ä dropped"
+    },
+    {
+     "de": "du passt auf → Pass auf!",
+     "note": "separable verb"
+    },
+    {
+     "de": "du bist → Sei vorsichtig!",
+     "note": "sein is irregular"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "du-imperative of kommen.",
+     "text": "___! Wir warten auf dich.",
+     "answers": [
+      "Komm"
+     ],
+     "explain": "Drop the -st and the pronoun: Komm!"
+    },
+    {
+     "type": "choice",
+     "prompt": "fahren changes a → ä. Which du-imperative is right?",
+     "text": "___ bitte langsamer!",
+     "options": [
+      "Fahr",
+      "Fähr",
+      "Fahrst",
+      "Fahre du"
+     ],
+     "answers": [
+      "Fahr"
+     ],
+     "explain": "The a → ä change is dropped in the imperative: Fahr!"
+    },
+    {
+     "type": "choice",
+     "prompt": "lesen changes e → ie. Which du-imperative is right?",
+     "text": "___ den Text noch einmal!",
+     "options": [
+      "Lies",
+      "Les",
+      "Lese",
+      "Liest"
+     ],
+     "answers": [
+      "Lies"
+     ],
+     "explain": "The e → ie change is kept: Lies!"
+    },
+    {
+     "type": "fill",
+     "prompt": "Formal imperative of öffnen.",
+     "text": "___ Sie bitte das Fenster!",
+     "answers": [
+      "Öffnen"
+     ],
+     "explain": "Sie-imperative: verb first, then Sie."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which is the du-imperative of sein?",
+     "text": "___ vorsichtig!",
+     "options": [
+      "Sei",
+      "Bist",
+      "Sein",
+      "Seie"
+     ],
+     "answers": [
+      "Sei"
+     ],
+     "explain": "sein is irregular: Sei! / Seid! / Seien Sie!"
+    },
+    {
+     "type": "error",
+     "prompt": "The pronoun does not belong in the du-imperative. Correct it.",
+     "text": "Komm du bitte um acht!",
+     "answers": [
+      "Komm bitte um acht!"
+     ],
+     "explain": "The du-imperative drops the pronoun."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a1-suggestions-with-sollen-wollen-wir-soll-",
+   "titleEn": "Making suggestions",
+   "summary": "Sollen/Wollen wir …?, Soll ich …? and the wir-form as an invitation.",
+   "category": "Verben",
+   "tags": [
+    "Vorschlag",
+    "Modalverben",
+    "Imperativ"
+   ],
+   "difficulty": 2,
+   "prerequisites": [
+    "g-daf-a1-imperative-sentences"
+   ],
+   "explanation": [
+    {
+     "heading": "Asking the other person",
+     "text": "Sollen / Wollen wir …? proposes something and asks whether the other person wants it too. Soll ich …? offers your own help and asks whether that is wanted."
+    },
+    {
+     "heading": "The wir-form",
+     "text": "A sentence starting with the wir-form of the verb, often with doch, is an invitation: Gehen wir doch ins Kino! means Ich schlage vor, wir gehen ins Kino."
+    }
+   ],
+   "rules": [
+    "Sollen / Wollen wir …? = Ich schlage das vor. Möchtest du das auch?",
+    "Soll ich …? = Ich kann helfen. Möchtest du das?",
+    "Verb + wir + doch …! = Ich schlage vor, …",
+    "The particle doch makes the invitation friendlier."
+   ],
+   "examples": [
+    {
+     "de": "Sollen / wollen wir einen Kaffee trinken?",
+     "note": "proposal"
+    },
+    {
+     "de": "Soll ich helfen?",
+     "note": "offering help"
+    },
+    {
+     "de": "Gehen wir doch ins Kino!",
+     "note": "invitation with the wir-form"
+    },
+    {
+     "de": "Kochen wir doch mal zusammen!",
+     "note": "invitation with doch"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "choice",
+     "prompt": "You want to offer your help. Which is right?",
+     "text": "",
+     "options": [
+      "Soll ich helfen?",
+      "Sollen wir helfen?",
+      "Hilf!",
+      "Helfen wir doch!"
+     ],
+     "answers": [
+      "Soll ich helfen?"
+     ],
+     "explain": "Soll ich …? offers your own help and asks whether it is wanted."
+    },
+    {
+     "type": "transform",
+     "prompt": "Turn the proposal into an invitation with the wir-form.",
+     "from": "Sollen wir ins Kino gehen?",
+     "answers": [
+      "Gehen wir doch ins Kino!",
+      "Gehen wir ins Kino!"
+     ],
+     "explain": "Verb first, then wir, often with doch."
+    },
+    {
+     "type": "fill",
+     "prompt": "Complete the particle that softens the invitation.",
+     "text": "Kochen wir ___ mal zusammen!",
+     "answers": [
+      "doch"
+     ],
+     "sentence": "Kochen wir doch mal zusammen!",
+     "source": true,
+     "explain": "doch makes the suggestion friendlier."
+    },
+    {
+     "type": "choice",
+     "prompt": "What does Sollen wir einen Kaffee trinken? mean?",
+     "text": "",
+     "options": [
+      "Ich schlage das vor. Möchtest du das auch?",
+      "Ich muss einen Kaffee trinken.",
+      "Du darfst keinen Kaffee trinken.",
+      "Ich habe schon Kaffee getrunken."
+     ],
+     "answers": [
+      "Ich schlage das vor. Möchtest du das auch?"
+     ],
+     "explain": "It proposes something and asks whether the other person agrees."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a2-second-conditional-haben-sein-werden-k-n",
+   "titleEn": "Second conditional: the common forms",
+   "summary": "hätte, wäre, würde, könnte, dürfte, müsste, möchte, sollte — and which take an umlaut.",
+   "category": "Verben",
+   "tags": [
+    "Konjunktiv II",
+    "höfliche Bitte",
+    "Wunsch"
+   ],
+   "difficulty": 3,
+   "prerequisites": [
+    "g-daf-a2-preterite"
+   ],
+   "explanation": [
+    {
+     "heading": "Built on the preterite",
+     "text": "The second conditional is formed using the preterite. haben and werden, and the modal verbs können, dürfen and müssen, take an umlaut; sollen and wollen do not."
+    },
+    {
+     "heading": "What it is for",
+     "text": "The second conditional expresses polite questions and requests, and also wishes and dreams about the future. They do not always have to be realistic."
+    },
+    {
+     "heading": "möchte",
+     "text": "möcht- is the conditional form of mögen, but it replaces the modal verb wollen for polite requests and wishes in the present indicative."
+    }
+   ],
+   "rules": [
+    "haben → hätte; sein → wäre; werden → würde.",
+    "können → könnte; dürfen → dürfte; müssen → müsste — all with an umlaut.",
+    "sollen → sollte and wollen have no umlaut in the second conditional.",
+    "Use it for polite questions, requests, wishes and dreams."
+   ],
+   "examples": [
+    {
+     "de": "ich hätte",
+     "note": "haben, with umlaut"
+    },
+    {
+     "de": "wäre",
+     "note": "sein"
+    },
+    {
+     "de": "würde",
+     "note": "werden, with umlaut"
+    },
+    {
+     "de": "könnte",
+     "note": "können, with umlaut"
+    },
+    {
+     "de": "dürfte",
+     "note": "dürfen, with umlaut"
+    },
+    {
+     "de": "sollte",
+     "note": "sollen — no umlaut"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "choice",
+     "prompt": "Which modal verb has NO umlaut in the second conditional?",
+     "text": "",
+     "options": [
+      "sollen",
+      "können",
+      "dürfen",
+      "müssen"
+     ],
+     "answers": [
+      "sollen"
+     ],
+     "explain": "sollen and wollen keep their vowel: sollte, wollte."
+    },
+    {
+     "type": "fill",
+     "prompt": "Polite request with haben.",
+     "text": "___ Sie vielleicht einen Moment Zeit?",
+     "answers": [
+      "Hätten"
+     ],
+     "explain": "haben → hätte, used for polite questions."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which is the second conditional of werden?",
+     "text": "",
+     "options": [
+      "würde",
+      "wurde",
+      "werde",
+      "worden"
+     ],
+     "answers": [
+      "würde"
+     ],
+     "explain": "werden → würde, with an umlaut."
+    },
+    {
+     "type": "choice",
+     "prompt": "What does möcht- replace for polite requests?",
+     "text": "",
+     "options": [
+      "wollen",
+      "sollen",
+      "dürfen",
+      "müssen"
+     ],
+     "answers": [
+      "wollen"
+     ],
+     "explain": "möcht- is the conditional of mögen but replaces wollen for polite requests and wishes."
+    },
+    {
+     "type": "error",
+     "prompt": "sollen takes no umlaut here. Correct it.",
+     "text": "Du söllst mehr schlafen.",
+     "answers": [
+      "Du solltest mehr schlafen."
+     ],
+     "explain": "The second conditional of sollen is sollte, without an umlaut."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-b1-second-conditional",
+   "titleEn": "Second conditional: all verbs",
+   "summary": "When to use a real Konjunktiv II form and when to fall back on würde + infinitive.",
+   "category": "Verben",
+   "tags": [
+    "Konjunktiv II",
+    "würde",
+    "unregelmäßig"
+   ],
+   "difficulty": 4,
+   "prerequisites": [
+    "g-daf-a2-second-conditional-haben-sein-werden-k-n"
+   ],
+   "explanation": [
+    {
+     "heading": "Why würde exists",
+     "text": "For regular verbs the form of the second conditional is the same as the preterite, so it would be ambiguous. For this reason we use würde + infinitive instead."
+    },
+    {
+     "heading": "Verbs that keep a real form",
+     "text": "The second conditional is used with haben, sein, the modal verbs and certain frequently used irregular and mixed verbs. Otherwise use würde + infinitive."
+    }
+   ],
+   "rules": [
+    "Regular verbs: würde + Infinitiv — er schaute nach → er würde nachschauen.",
+    "haben, können, müssen, dürfen and mixed verbs like wissen: preterite + umlaut — ich hatte → ich hätte, du konntest → du könntest, er wusste → er wüsste.",
+    "Irregular verbs: preterite + ending -e + umlaut — ich kam → ich käme, du warst → du wärest, sie fand → sie fände, er ging → er ginge.",
+    "In practice, use a real form for haben, sein, the modals and common irregular verbs; use würde for everything else."
+   ],
+   "examples": [
+    {
+     "de": "“er schaute nach” --> “er würde nachschauen”",
+     "note": "regular verb → würde + infinitive"
+    },
+    {
+     "de": "“ich hatte” --> “ich hätte”",
+     "note": "preterite + umlaut"
+    },
+    {
+     "de": "“du konntest” --> “du könntest”",
+     "note": "modal verb"
+    },
+    {
+     "de": "“er wusste” --> “er wüsste”",
+     "note": "mixed verb"
+    },
+    {
+     "de": "“ich kam” --> “ich käme”",
+     "note": "irregular: preterite + -e + umlaut"
+    },
+    {
+     "de": "“er ging” -",
+     "note": "irregular: ging → ginge"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "choice",
+     "prompt": "nachschauen is regular. How is its second conditional formed?",
+     "text": "",
+     "options": [
+      "er würde nachschauen",
+      "er schaute nach",
+      "er schäute nach",
+      "er nachschaute"
+     ],
+     "answers": [
+      "er würde nachschauen"
+     ],
+     "explain": "For regular verbs the Konjunktiv II looks like the preterite, so würde + infinitive is used."
+    },
+    {
+     "type": "fill",
+     "prompt": "Second conditional of wissen, er-form.",
+     "text": "Wenn er das nur ___!",
+     "answers": [
+      "wüsste"
+     ],
+     "explain": "Mixed verb: preterite wusste + umlaut → wüsste."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which is the second conditional of kommen?",
+     "text": "",
+     "options": [
+      "käme",
+      "kam",
+      "kommte",
+      "würde kam"
+     ],
+     "answers": [
+      "käme"
+     ],
+     "explain": "Irregular: preterite kam + -e + umlaut → käme."
+    },
+    {
+     "type": "transform",
+     "prompt": "Rewrite with würde + infinitive.",
+     "from": "Er schaute nach.",
+     "answers": [
+      "Er würde nachschauen."
+     ],
+     "explain": "A regular verb takes würde + infinitive in the second conditional."
+    },
+    {
+     "type": "error",
+     "prompt": "haben has its own form — würde is not used here. Correct it.",
+     "text": "Ich würde mehr Zeit haben, wenn ich nicht arbeiten müsste.",
+     "answers": [
+      "Ich hätte mehr Zeit, wenn ich nicht arbeiten müsste."
+     ],
+     "explain": "haben, sein and the modal verbs use their real Konjunktiv II form."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a1-word-order-for-positive-statements-w-que",
+   "titleEn": "Word order: statements, W-questions and yes/no questions",
+   "summary": "The verb is in position 2 in statements and W-questions, and in position 1 in yes/no questions.",
+   "category": "Satzstellung",
+   "tags": [
+    "Wortstellung",
+    "Fragen",
+    "Position 2"
+   ],
+   "difficulty": 1,
+   "prerequisites": [
+    "g-daf-a1-regular-verbs-in-the-present-tense"
+   ],
+   "explanation": [
+    {
+     "heading": "Position 2",
+     "text": "In a statement and in a W-question the conjugated verb always stands in position 2. In a W-question position 1 is taken by the question word."
+    },
+    {
+     "heading": "Position 1",
+     "text": "In a yes/no question there is no question word, so the verb itself moves to position 1."
+    }
+   ],
+   "rules": [
+    "W-question: question word (Pos. 1) + verb (Pos. 2) — Woher kommen Sie?",
+    "Statement: subject or another element (Pos. 1) + verb (Pos. 2) — Ich komme aus Marokko.",
+    "Yes/no question: verb (Pos. 1) + subject — Kommen Sie aus Tunesien?"
+   ],
+   "examples": [
+    {
+     "de": "Woher kommen Sie?",
+     "note": "W-question, verb in position 2"
+    },
+    {
+     "de": "Ich komme aus Marokko.",
+     "note": "statement, verb in position 2"
+    },
+    {
+     "de": "Wo wohnst du?",
+     "note": "W-question"
+    },
+    {
+     "de": "Kommen Sie aus Tunesien?",
+     "note": "yes/no question, verb in position 1"
+    },
+    {
+     "de": "Wohnst du in Stuttgart?",
+     "note": "yes/no question"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "reorder",
+     "prompt": "Make a W-question.",
+     "tokens": [
+      "Woher",
+      "kommen",
+      "Sie?"
+     ],
+     "answers": [
+      "Woher kommen Sie?"
+     ],
+     "explain": "Question word first, verb in position 2."
+    },
+    {
+     "type": "reorder",
+     "prompt": "Make a yes/no question.",
+     "tokens": [
+      "Wohnst",
+      "du",
+      "in",
+      "Stuttgart?"
+     ],
+     "answers": [
+      "Wohnst du in Stuttgart?"
+     ],
+     "explain": "In a yes/no question the verb takes position 1."
+    },
+    {
+     "type": "choice",
+     "prompt": "Where does the verb stand in a W-question?",
+     "text": "",
+     "options": [
+      "position 2",
+      "position 1",
+      "at the end",
+      "after the object"
+     ],
+     "answers": [
+      "position 2"
+     ],
+     "explain": "The question word takes position 1, the verb position 2."
+    },
+    {
+     "type": "error",
+     "prompt": "This should be a yes/no question. Correct the word order.",
+     "text": "Sie kommen aus Tunesien?",
+     "answers": [
+      "Kommen Sie aus Tunesien?"
+     ],
+     "explain": "A yes/no question puts the verb first."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a1-subject-position",
+   "titleEn": "Subject position",
+   "summary": "The subject stands either first or straight after the verb — both are correct, so vary them.",
+   "category": "Satzstellung",
+   "tags": [
+    "Wortstellung",
+    "Subjekt",
+    "Inversion"
+   ],
+   "difficulty": 2,
+   "prerequisites": [
+    "g-daf-a1-word-order-for-positive-statements-w-que"
+   ],
+   "explanation": [
+    {
+     "heading": "Two places",
+     "text": "The subject is in the first position or after the verb. If something else opens the sentence — a time or a comment — the subject moves behind the verb, because the verb keeps position 2."
+    },
+    {
+     "heading": "Style",
+     "text": "The document advises using both forms when writing, to get some variation."
+    }
+   ],
+   "rules": [
+    "Subject first: Das Brunnenstüberl ist am Sonntag geöffnet.",
+    "Something else first, then verb, then subject: Am Sonntag ist das Brunnenstüberl geöffnet.",
+    "The conjugated verb stays in position 2 either way.",
+    "Use both forms when writing and make sure you have some variation."
+   ],
+   "examples": [
+    {
+     "de": "Am Sonntag ist das Brunnenstüberl geöffnet.",
+     "note": "time first, subject after the verb"
+    },
+    {
+     "de": "Das Brunnenstüberl ist am Sonntag geöffnet.",
+     "note": "subject first"
+    },
+    {
+     "de": "Das Wetter ist leider nicht so gut.",
+     "note": "subject first"
+    },
+    {
+     "de": "Leider ist das Wetter nicht so gut.",
+     "note": "adverb first, subject after the verb"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "transform",
+     "prompt": "Start the sentence with the time expression.",
+     "from": "Das Brunnenstüberl ist am Sonntag geöffnet.",
+     "answers": [
+      "Am Sonntag ist das Brunnenstüberl geöffnet."
+     ],
+     "explain": "The verb stays in position 2, so the subject moves behind it."
+    },
+    {
+     "type": "transform",
+     "prompt": "Start the sentence with leider.",
+     "from": "Das Wetter ist leider nicht so gut.",
+     "answers": [
+      "Leider ist das Wetter nicht so gut."
+     ],
+     "explain": "Whatever opens the sentence, the verb keeps position 2."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which word order is correct?",
+     "text": "",
+     "options": [
+      "Am Sonntag ist das Brunnenstüberl geöffnet.",
+      "Am Sonntag das Brunnenstüberl ist geöffnet.",
+      "Ist am Sonntag das Brunnenstüberl geöffnet.",
+      "Am Sonntag das Brunnenstüberl geöffnet ist."
+     ],
+     "answers": [
+      "Am Sonntag ist das Brunnenstüberl geöffnet."
+     ],
+     "explain": "The verb must be in position 2."
+    },
+    {
+     "type": "error",
+     "prompt": "The verb has lost position 2. Correct the sentence.",
+     "text": "Leider das Wetter ist nicht so gut.",
+     "answers": [
+      "Leider ist das Wetter nicht so gut."
+     ],
+     "explain": "After an opening adverb the verb comes next, then the subject."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a1-word-order-for-statements-and-w-question",
+   "titleEn": "Word order with modal verbs",
+   "summary": "The modal verb takes position 2 and the main verb goes to the end as an infinitive.",
+   "category": "Satzstellung",
+   "tags": [
+    "Wortstellung",
+    "Modalverben",
+    "Satzklammer"
+   ],
+   "difficulty": 2,
+   "prerequisites": [
+    "g-daf-a1-word-order-for-positive-statements-w-que"
+   ],
+   "explanation": [
+    {
+     "heading": "The verb bracket",
+     "text": "With a modal verb the sentence has two verb parts: the conjugated modal verb in position 2 and the infinitive of the main verb at the very end. Everything else sits between them."
+    }
+   ],
+   "rules": [
+    "Modal verb in position 2, infinitive at the end of the sentence.",
+    "In a W-question the question word takes position 1 and the modal verb position 2.",
+    "Separable verbs stay whole as the final infinitive: früh aufstehen."
+   ],
+   "examples": [
+    {
+     "de": "Beatriz muss in der Woche früh aufstehen.",
+     "note": "müssen + aufstehen"
+    },
+    {
+     "de": "Am Wochenende kann sie lange schlafen.",
+     "note": "time first, modal verb second"
+    },
+    {
+     "de": "Man darf im Bus nicht laut Musik hören.",
+     "note": "dürfen + hören"
+    },
+    {
+     "de": "Beatriz und Leopold wollen heute ins Kino gehen.",
+     "note": "wollen + gehen"
+    },
+    {
+     "de": "Wann möchtet ihr nach Hause fahren?",
+     "note": "W-question with a modal verb"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "reorder",
+     "prompt": "Order the sentence.",
+     "tokens": [
+      "Beatriz",
+      "muss",
+      "in",
+      "der",
+      "Woche",
+      "früh",
+      "aufstehen."
+     ],
+     "answers": [
+      "Beatriz muss in der Woche früh aufstehen."
+     ],
+     "explain": "Modal verb in position 2, infinitive last."
+    },
+    {
+     "type": "fill",
+     "prompt": "Where does the main verb go?",
+     "text": "Man darf im Bus nicht laut Musik ___.",
+     "answers": [
+      "hören"
+     ],
+     "sentence": "Man darf im Bus nicht laut Musik hören.",
+     "source": true,
+     "explain": "The infinitive stands at the end of the sentence."
+    },
+    {
+     "type": "transform",
+     "prompt": "Start the sentence with Am Wochenende.",
+     "from": "Sie kann am Wochenende lange schlafen.",
+     "answers": [
+      "Am Wochenende kann sie lange schlafen."
+     ],
+     "explain": "The modal verb keeps position 2, so the subject moves behind it."
+    },
+    {
+     "type": "error",
+     "prompt": "The infinitive is in the wrong place. Correct it.",
+     "text": "Beatriz und Leopold wollen gehen heute ins Kino.",
+     "answers": [
+      "Beatriz und Leopold wollen heute ins Kino gehen."
+     ],
+     "explain": "The infinitive belongs at the end of the sentence."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a1-word-order-for-yes-no-questions",
+   "titleEn": "Yes/no questions with modal verbs",
+   "summary": "The modal verb opens the question and the infinitive still closes it.",
+   "category": "Satzstellung",
+   "tags": [
+    "Wortstellung",
+    "Fragen",
+    "Modalverben"
+   ],
+   "difficulty": 1,
+   "prerequisites": [
+    "g-daf-a1-word-order-for-statements-and-w-question"
+   ],
+   "explanation": [
+    {
+     "heading": "Position 1",
+     "text": "In a yes/no question with a modal verb, the modal verb takes position 1 and the infinitive of the main verb still stands at the end of the sentence."
+    }
+   ],
+   "rules": [
+    "Modal verb in position 1, subject next, infinitive at the end.",
+    "The verb bracket is the same as in a statement — only the modal verb has moved forward."
+   ],
+   "examples": [
+    {
+     "de": "Darf man im Bus laut Musik hören?",
+     "note": "modal verb first, infinitive last"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "reorder",
+     "prompt": "Make a yes/no question.",
+     "tokens": [
+      "Darf",
+      "man",
+      "im",
+      "Bus",
+      "laut",
+      "Musik",
+      "hören?"
+     ],
+     "answers": [
+      "Darf man im Bus laut Musik hören?"
+     ],
+     "explain": "Modal verb in position 1, infinitive at the end."
+    },
+    {
+     "type": "transform",
+     "prompt": "Turn the statement into a yes/no question.",
+     "from": "Man darf im Bus laut Musik hören.",
+     "answers": [
+      "Darf man im Bus laut Musik hören?"
+     ],
+     "explain": "The modal verb moves to position 1; everything else stays."
+    },
+    {
+     "type": "choice",
+     "prompt": "Where does the infinitive stand in a yes/no question?",
+     "text": "",
+     "options": [
+      "at the end",
+      "in position 2",
+      "directly after the modal verb",
+      "before the subject"
+     ],
+     "answers": [
+      "at the end"
+     ],
+     "explain": "The verb bracket is unchanged — the infinitive closes the sentence."
+    }
+   ]
+  }
+ ]
+}
