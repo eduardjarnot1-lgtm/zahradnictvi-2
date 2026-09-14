@@ -1,6 +1,7 @@
 # Master Fuka — German Learning (beta)
 
-A learning app built on three imported source documents. It is not a PDF reader:
+A learning app built on three imported source documents plus a word-frequency
+list. It is not a PDF reader:
 the documents are extracted, normalised, validated and turned into vocabulary
 cards, grammar units, exercises, spaced review and progress tracking.
 
@@ -22,6 +23,7 @@ On Netlify the site publishes the repository root, so the app is served at
 | Vocabulary — 2 047 items | OCR GCSE German Vocabulary List (General and Topic Areas 1–5) | imported |
 | Grammar — 87 A1/A2/B1 topics | DaF kompakt neu A1/A2/B1, Grammatikerklärungen, © Ernst Klett Sprachen GmbH, Stuttgart 2018 | imported |
 | Grammar — 32 C1 topics | Sicher! C1 Grammatikübersicht, © Hueber Verlag | imported |
+| Word frequency — 2 586 forms | hermitdave/FrequencyWords, German (OpenSubtitles corpus) | imported |
 | Goethe-Zertifikat B1 Wortliste | **not supplied** — see below | **missing** |
 
 ### The Goethe B1 Wortliste is not in the repository
@@ -62,6 +64,8 @@ learning engine pick the new items up unchanged.
 * **Review** — everything the spaced-repetition schedule says is due.
 * **Progress** — per topic, per grammar unit, streak, XP, weak words, recent
   mistakes, recent sessions.
+* **Core words** — the cards that carry a subtitle-frequency rank, most
+  frequent first, with their learning status.
 * **Search** — German, English and grammar topics in one box.
 * **Learning Coach** — recommendations computed from the database.
 
@@ -79,9 +83,90 @@ unavailable rather than generating questions from data that does not exist.
 They turn themselves on for any word that arrives with `pluralForm` or
 `verbForms` populated — which the Goethe list would supply.
 
+Two further types depend on the browser rather than on the data: **dictation**
+(hear the word, type it) needs speech synthesis, and **pronunciation** (say the
+word, the browser transcribes it) needs speech recognition. Both are offered
+only once a word has been answered correctly at least once — hearing a word you
+have never seen written is a spelling test, not a memory test — and both hide
+themselves entirely where the browser cannot do the job.
+
 Typed answers are checked leniently: case, punctuation, ß/ss and whitespace are
 ignored, several answers can be accepted, and a near miss is reported as
 "almost" rather than wrong.
+
+## Spaced repetition: FSRS
+
+The scheduler is **FSRS-5**, implemented in `src/srs.js` with the published
+default parameters. Each card carries a *stability* (days until recall
+probability falls to 90 %) and a *difficulty* (1–10); retrievability is computed
+from how long ago the card was last seen rather than stored, so a card left for
+a month is treated as shakier than the same card seen yesterday. That is the
+reason for the change: the SM-2 scheduler this replaces multiplied a fixed
+interval and had no notion of how faded a memory was when you came back to it.
+
+It is reimplemented rather than installed. `ts-fsrs` is a TypeScript npm
+package and this app has no build step, so vendoring it was not an option;
+the algorithm is published and short.
+
+The learner is never asked to rate their own recall, so the grade is inferred
+from the answer:
+
+| Answer | Grade |
+|---|---|
+| wrong | 1 — Again |
+| a near miss, one typo by edit distance | 2 — Hard |
+| correct | 3 — Good |
+| correct, German produced by typing or speaking, no hint on screen | 4 — Easy |
+
+The minutes right after a lapse are handled by fixed learning steps rather than
+by the model, the same separation Anki uses. A word is called "learned" when
+the scheduler itself is willing to leave it alone for a week, not when a
+counter reaches two.
+
+Records written by the old SM-2 scheduler are migrated on read, non-destructively:
+the old difficulty is rescaled onto FSRS's 1–10 and the interval the old
+scheduler had arrived at becomes the starting stability.
+
+## Word frequency
+
+`tools/build_frequency.py` turns the raw `<form> <count>` list into
+`data/frequency.json`, and `build_vocabulary.py` stamps a `frequencyRank` onto
+every card whose **printed headword is itself a listed form**. 785 of the 2 047
+cards match.
+
+No lemma matching is attempted. The corpus lists surface forms, so `ist` and
+`sind` are separate entries and neither resolves to `sein`; attaching `sein`'s
+card to their counts would put a number on a card the corpus never measured.
+The remaining 1 815 listed forms are function words and inflections the GCSE
+list does not carry as headwords.
+
+The corpus is also case-folded, so where two cards share a spelling —
+*morgen*/*Morgen*, *wagen*/*Wagen*, *Paar*/*paar* — the count covers both. Those
+cards are flagged `frequencyShared` and say so on screen rather than claiming
+the rank outright. The validator enforces the invariant that a shared rank only
+ever belongs to cards with the same headword.
+
+Ranks are used in three places: to order new words in a lesson (frequent words
+taught first, unranked words last within their tier rather than excluded), to
+label cards, and to build the Core words screen. Every display says the ranking
+comes from film and television subtitles, because "#312" alone would read as a
+claim about German in general.
+
+## Audio
+
+`src/audio.js` wraps two browser APIs. The research brief proposed Piper for
+speech and Whisper for recognition; both want tens of megabytes of model
+weights and a process to run them in, which a static page does not have.
+
+| | Used | Availability |
+|---|---|---|
+| Text to speech | `speechSynthesis`, `de-DE` | Engine almost everywhere; a genuine German voice is common but not guaranteed |
+| Speech to text | `SpeechRecognition` / `webkitSpeechRecognition`, `de-DE` | Chromium browsers, and only with microphone permission |
+
+Speaker buttons render only where the engine exists, so there is never a button
+that does nothing, and `listenOnce()` always resolves — never rejects — with
+either a transcript or a named reason, so a refused microphone reports itself in
+the panel and leaves the question unanswered instead of marking it wrong.
 
 ## Data integrity
 
@@ -93,7 +178,7 @@ caught two mistakes while this was being written — a phrase that was not in th
 document and a sentence with a footnote marker — which is exactly what it is
 for.
 
-`validate_content.py` runs 35 000+ checks over both databases: duplicate ids,
+`validate_content.py` runs 40 000+ checks over both databases: duplicate ids,
 duplicate entries, near-duplicate variants, missing German words, malformed
 articles and plurals, invalid levels, missing source attribution, malformed
 grammar topics, unknown or circular prerequisites.
@@ -155,6 +240,7 @@ Rebuild everything:
 python3 german/tools/extract_c1_grammar.py <Sicher_C1_Grammatikuebersicht.pdf>
 python3 german/tools/extract_daf_grammar.py <DaF_kompakt_neu_A1_A2_B1_Grammar_English.pdf>
 python3 german/tools/build_grammar.py
+python3 german/tools/build_frequency.py <de_top2000_frequency.txt>
 python3 german/tools/build_vocabulary.py
 python3 german/tools/validate_content.py
 python3 german/tools/build_artifact.py          # single-file bundle
@@ -175,13 +261,15 @@ number.
 german/
   index.html            shell: top bar, search, main region
   styles.css            light + dark theme, no framework
-  data/vocabulary.json  2047 items
+  data/vocabulary.json  2047 items, 785 with a frequency rank
+  data/frequency.json   2586 ranked word forms
   data/grammar.json     119 topics, 599 examples, 602 exercises
   src/
     data.js         vocabulary loading + indexing
     grammar.js      grammar loading + indexing (by level, group, category)
     db.js           the learner database: profile, progress, sessions, events
-    srs.js          spaced repetition (SM-2 style) — pure functions
+    srs.js          spaced repetition (FSRS-5) — pure functions
+    audio.js        speech synthesis + speech recognition, both optional
     progress.js     vocabulary status façade over db.js
     exercises.js    exercise generation + lenient answer checking
     lessons.js      the personalised lesson engine
@@ -205,7 +293,7 @@ for a server without touching a call site:
 | Collection | Fields |
 |---|---|
 | `profile` | userId, displayName, targetLevel, createdAt, streakDays, lastActiveDay, xp |
-| `vocabProgress` | userId, vocabularyItemId, status, seen, correctCount, incorrectCount, repetitionCount, lastSeen, nextReview, difficulty |
+| `vocabProgress` | userId, vocabularyItemId, status, seen, correctCount, incorrectCount, repetitionCount, lastSeen, nextReview, difficulty, stability |
 | `grammarProgress` | userId, grammarTopicId, completion, correctCount, incorrectCount, masteryScore, lastPracticed, nextReview |
 | `sessions` | id, userId, startedAt, finishedAt, kind, items, correct, total |
 | `events` | id, userId, at, kind, itemId, itemKind, correct, given, expected |
@@ -228,3 +316,13 @@ databases and Master Fuka's picture into `dist/master-fuka-german.html` — one
 file that runs with no server and no network. Edit the sources, never the
 bundle. The modules are flattened into one scope, so the bundler rejects
 aliased imports (`x as y`) that cannot survive flattening.
+
+## What was proposed but not integrated
+
+Two data resources named in `docs/skills-integration-brief.md` were described as
+downloaded but never supplied to this repository, so neither is in the app and
+neither was faked: the **Tatoeba `deu-eng`** sentence pairs (~330 000 pairs,
+which would have given generated example sentences and cloze exercises) and the
+**FreeDict `deu-eng`** StarDict dictionary (~517 000 headwords, an offline
+lookup backend). Supply either and it can go through the same extract → build →
+validate chain as everything else.

@@ -10,8 +10,10 @@ import { loadGrammar, getTopic, searchTopics } from './grammar.js';
 import { initProgress, setStatus, toggleStatus, getStatus, resetAllProgress, STATUS } from './progress.js';
 import { setTargetLevel, getProfile } from './db.js';
 import { searchWords } from './search.js';
+import { GRADE } from './srs.js';
+import { initAudio, speak, listenOnce, listenProblem } from './audio.js';
 import { buildLesson, reviewLesson, dueForReview, scopedLesson } from './lessons.js';
-import { buildGrammarExercise, grammarExercisesFor } from './exercises.js';
+import { buildGrammarExercise, grammarExercisesFor, checkAnswer } from './exercises.js';
 import {
   createRun, currentItem, submit, advanceRun,
   answerWithText, answerWithOption, renderQuestion, renderFeedback, renderSummary,
@@ -19,7 +21,7 @@ import {
 import { escapeHtml } from './ui.js';
 import {
   vocabIndexView, categoryView, subcategoryView, wordListView, searchResultsView,
-  notFoundView, aboutView,
+  notFoundView, aboutView, coreWordsView,
 } from './views.js';
 import {
   hubView, progressView, grammarIndexView, grammarTopicView, grammarSearchSection,
@@ -86,6 +88,9 @@ function render() {
     }
     case 'practice':
       startPractice(a, b, c);
+      break;
+    case 'core':
+      main.innerHTML = coreWordsView();
       break;
     case 'about':
       main.innerHTML = aboutView();
@@ -238,6 +243,34 @@ function renderReorderLine() {
   line.textContent = reorderPicks.map((index) => item.tokens[index]).join(' ');
 }
 
+/**
+ * Record one spoken answer and score the transcript.
+ *
+ * The button is disabled while the microphone is open so a second click cannot
+ * start an overlapping recognition session, and a failure — no microphone, a
+ * refused permission, silence — reports itself in the panel and leaves the
+ * question unanswered rather than marking it wrong.
+ */
+async function recordSpokenAnswer(button) {
+  const state = main.querySelector('[data-role="speech-state"]');
+  const say = (message) => { if (state) state.textContent = message; };
+  button.disabled = true;
+  say('Listening…');
+
+  const heard = await listenOnce();
+  button.disabled = false;
+
+  if (!heard.ok) {
+    say(listenProblem(heard.reason));
+    return;
+  }
+  say(`Heard: “${heard.transcript}”`);
+  const item = currentItem(run);
+  const spoken = (heard.alternatives || [heard.transcript])
+    .find((alternative) => checkAnswer(alternative, item.answers).correct) || heard.transcript;
+  showFeedback(answerWithText(run, spoken));
+}
+
 main.addEventListener('submit', (event) => {
   const form = event.target.closest('[data-action="answer-form"]');
   if (!form || !run) return;
@@ -251,6 +284,14 @@ main.addEventListener('click', (event) => {
   const button = event.target.closest('button');
   if (!button) return;
   const action = button.dataset.action;
+
+  // Speaker buttons appear on cards, in questions and in feedback; they are
+  // never part of an answer, so they are handled before anything else and do
+  // not fall through to the runner.
+  if (action === 'speak') {
+    speak(button.dataset.speak);
+    return;
+  }
 
   // the shared runner
   if (run && button.dataset.option !== undefined) {
@@ -277,12 +318,20 @@ main.addEventListener('click', (event) => {
     showFeedback(answerWithText(run, reorderPicks.map((i) => item.tokens[i]).join(' ')));
     return;
   }
+  if (run && action === 'record') {
+    recordSpokenAnswer(button);
+    return;
+  }
+  if (run && action === 'skip-speech') {
+    showFeedback(answerWithText(run, ''));
+    return;
+  }
   if (run && action === 'show-answer') {
     showFeedback({ correct: false, close: false, matched: '' }, { selfAssess: true });
     return;
   }
   if (run && (action === 'knew-it' || action === 'practise-it')) {
-    submit(run, action === 'knew-it');
+    submit(run, action === 'knew-it', '', action === 'knew-it' ? GRADE.GOOD : GRADE.AGAIN);
     advanceRun(run);
     mountRun();
     return;
@@ -350,6 +399,9 @@ window.addEventListener('hashchange', render);
 (async function start() {
   try {
     initProgress();
+    // Voice lists load asynchronously; ask for them before the first render so
+    // that speaker buttons are available on the very first screen.
+    initAudio();
     await Promise.all([loadVocabulary(), loadGrammar()]);
     document.body.classList.remove('is-loading');
     render();

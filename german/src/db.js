@@ -13,7 +13,10 @@
  *                                    streakDays, lastActiveDay, xp }
  * vocabProgress        { userId, vocabularyItemId, status, seen, correctCount,
  *                        incorrectCount, repetitionCount, lastSeen, nextReview,
- *                        difficulty }
+ *                        difficulty, stability }
+ *                      difficulty and stability are the FSRS state; records
+ *                      written by the older SM-2 scheduler are brought up to
+ *                      them on read, non-destructively, by srs.js#ensureFsrs.
  * grammarProgress      { userId, grammarTopicId, completion, correctCount,
  *                        incorrectCount, masteryScore, lastPracticed, nextReview }
  * sessions             { id, userId, startedAt, finishedAt, kind, items,
@@ -21,6 +24,8 @@
  * events               { id, userId, at, kind, itemId, itemKind, correct,
  *                        given, expected }   — the recent-mistake log
  */
+
+import { ensureFsrs } from './srs.js';
 
 const PREFIX = 'fuka-german-db-v1';
 const LEGACY_PROGRESS_KEY = 'fuka-german-progress-v1';
@@ -147,7 +152,9 @@ export function recordActivity(xpGained = 0) {
 // --- progress records -------------------------------------------------------
 
 export function vocabProgress(itemId) {
-  return get('vocabProgress', itemId) || {
+  const stored = get('vocabProgress', itemId);
+  if (stored) return ensureFsrs(stored);
+  return {
     userId: ensureProfile().userId,
     vocabularyItemId: itemId,
     status: 'new',
@@ -157,7 +164,8 @@ export function vocabProgress(itemId) {
     repetitionCount: 0,
     lastSeen: 0,
     nextReview: 0,
-    difficulty: 2.5,
+    difficulty: 5,
+    stability: 0,
   };
 }
 

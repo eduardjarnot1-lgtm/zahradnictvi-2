@@ -30,7 +30,7 @@ OUT = APP / "dist" / "master-fuka-german.html"
 
 # Concatenation order matters: a module may only use names declared above it.
 MODULE_ORDER = [
-    "data.js", "grammar.js", "db.js", "srs.js", "progress.js", "search.js",
+    "data.js", "grammar.js", "audio.js", "srs.js", "db.js", "progress.js", "search.js",
     "exercises.js", "lessons.js", "coach.js", "fuka.js", "ui.js", "runner.js",
     "views.js", "learnViews.js", "app.js",
 ]

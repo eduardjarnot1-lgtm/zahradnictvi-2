@@ -95,6 +95,34 @@ def validate_vocabulary(report: Report) -> None:
         report.check(not (w.get("plural") and not w["article"]),
                      f"vocabulary {wid}: marked plural but has no article", warn=True)
 
+        rank, count = w.get("frequencyRank", 0), w.get("frequencyCount", 0)
+        report.check(isinstance(rank, int) and rank >= 0,
+                     f"vocabulary {wid}: malformed frequency rank {rank!r}")
+        report.check(bool(rank) == bool(count),
+                     f"vocabulary {wid}: frequency rank and count disagree ({rank}, {count})")
+
+    # A rank may legitimately be shared: the corpus is case-folded and lists one
+    # form, so homographs (morgen/Morgen, wagen/Wagen, Paar/paar) and two senses
+    # of one word both match it. What must not happen is two *different* words
+    # claiming the same rank.
+    ranks = [w["frequencyRank"] for w in words if w.get("frequencyRank")]
+    by_rank: dict[int, set] = {}
+    for w in words:
+        if w.get("frequencyRank"):
+            by_rank.setdefault(w["frequencyRank"], set()).add(w["word"].lower())
+    for rank, heads in by_rank.items():
+        report.check(len(heads) == 1,
+                     f"vocabulary: rank {rank} claimed by different words {sorted(heads)}")
+    meta_frequency = db["meta"].get("frequency")
+    if meta_frequency:
+        report.check(meta_frequency["rankedWords"] == len(ranks),
+                     f"vocabulary: meta says {meta_frequency['rankedWords']} ranked words, "
+                     f"found {len(ranks)}")
+        report.check(bool(meta_frequency.get("source")),
+                     "vocabulary: frequency data has no source attribution")
+        report.check(max(ranks, default=0) <= meta_frequency["formCount"],
+                     "vocabulary: a rank exceeds the number of forms in the list")
+
     print(f"vocabulary: {len(words)} words checked")
 
 

@@ -10,7 +10,7 @@
 import {
   initDb, vocabProgress, putVocabProgress, onChange, all, clearAll, logEvent, recordActivity,
 } from './db.js';
-import { review, isDue, DAY } from './srs.js';
+import { review, isDue, seedLearned, GRADE, DAY } from './srs.js';
 
 export const STATUS = {
   NEW: 'new',
@@ -58,9 +58,11 @@ export function setStatus(wordId, status) {
   const next = { ...record, status, seen: status !== STATUS.NEW, lastSeen: now };
 
   if (status === STATUS.LEARNED) {
-    next.repetitionCount = Math.max(record.repetitionCount, 2);
-    next.nextReview = now + 3 * DAY;
-  } else if (status === STATUS.LEARNING) {
+    putVocabProgress(seedLearned(record, now));
+    for (const listener of statusListeners) listener(wordId, status);
+    return vocabProgress(wordId);
+  }
+  if (status === STATUS.LEARNING) {
     next.repetitionCount = 0;
     next.nextReview = now + 10 * 60000;
   } else {
@@ -81,10 +83,16 @@ export function toggleStatus(wordId, status) {
   return next;
 }
 
-/** Record the outcome of an answer — the spaced-repetition path. */
-export function recordAnswer(wordId, correct, { given = '', expected = '' } = {}) {
+/**
+ * Record the outcome of an answer — the spaced-repetition path.
+ *
+ * `grade` is the FSRS grade the runner derived from the answer itself. It is
+ * optional so that a caller with nothing but a boolean still works: a plain
+ * right answer is Good and a wrong one is Again.
+ */
+export function recordAnswer(wordId, correct, { given = '', expected = '', grade = 0 } = {}) {
   const record = vocabProgress(wordId);
-  const next = review(record, correct ? 5 : 1);
+  const next = review(record, grade || (correct ? GRADE.GOOD : GRADE.AGAIN));
   putVocabProgress(next);
   logEvent({ kind: 'answer', itemKind: 'vocab', itemId: wordId, correct, given, expected });
   recordActivity(correct ? 10 : 2);

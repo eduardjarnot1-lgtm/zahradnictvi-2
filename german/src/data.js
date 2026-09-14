@@ -96,3 +96,16 @@ export function articleLabel(word) {
   if (!word.article) return '';
   return word.plural ? `${word.article} (pl.)` : word.article;
 }
+
+/**
+ * The words that carry a subtitle-frequency rank, most frequent first.
+ *
+ * Only a subset of the vocabulary has one: the corpus lists surface forms, so
+ * a card is ranked when its printed headword is itself a listed form. That is
+ * why this is a filter rather than a sort of everything.
+ */
+export const rankedWords = () =>
+  getAllWords().filter((word) => word.frequencyRank > 0)
+    .sort((a, b) => a.frequencyRank - b.frequencyRank);
+
+export const frequencyMeta = () => getMeta().frequency || null;

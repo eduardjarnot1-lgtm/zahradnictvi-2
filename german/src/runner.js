@@ -13,13 +13,17 @@
  *   typing   — type the answer; checked leniently by exercises.js
  *   reorder  — click the words into the right order
  *   reveal   — look, then say whether you knew it
+ *   speech   — say it out loud; the browser transcribes and it is scored
+ *
+ * An item may also carry `speak`: German the learner can play back. Items with
+ * a `speak` and no `text` are dictation — the sentence exists only as audio.
  */
 
-import { escapeHtml } from './ui.js';
+import { escapeHtml, speakButton } from './ui.js';
 import { checkAnswer } from './exercises.js';
 import { recordAnswer } from './progress.js';
 import { grammarProgress, putGrammarProgress, logEvent, recordActivity, saveSession } from './db.js';
-import { reviewTopic } from './srs.js';
+import { reviewTopic, GRADE } from './srs.js';
 import { displayForm } from './data.js';
 
 export function createRun(lesson, { title, backHref }) {
@@ -46,8 +50,30 @@ function tallyGrammar(run, topicId, correct) {
   run.grammarTally.set(topicId, entry);
 }
 
+/**
+ * Turn what we know about an answer into an FSRS grade.
+ *
+ * The app never asks the learner to rate their own recall, so the grade is
+ * inferred from the answer itself:
+ *
+ *   Again (1)  wrong
+ *   Hard (2)   a near miss — right word, one typo, by edit distance
+ *   Good (3)   correct
+ *   Easy (4)   correct, produced by typing German, with no hint on screen
+ *
+ * Easy is reserved for production because recognising the right button is
+ * weaker evidence than writing the word out unaided, and the scheduler should
+ * not treat them as the same event.
+ */
+export function gradeFor(item, verdict) {
+  if (!verdict.correct) return verdict.close ? GRADE.HARD : GRADE.AGAIN;
+  const produced = item.mode === 'typing' || item.mode === 'speech';
+  const unaided = !item.hint;
+  return produced && unaided && item.producesGerman ? GRADE.EASY : GRADE.GOOD;
+}
+
 /** Record an answer against the learner's progress and move the score on. */
-export function submit(run, correct, given = '') {
+export function submit(run, correct, given = '', grade = 0) {
   const item = currentItem(run);
   if (!item || item.done) return item;
   item.done = true;
@@ -56,7 +82,7 @@ export function submit(run, correct, given = '') {
   run.answered.push({ itemId: item.itemId, kind: item.itemKind, correct });
 
   if (item.itemKind === 'vocab') {
-    recordAnswer(item.itemId, correct, { given, expected: item.answers[0] || '' });
+    recordAnswer(item.itemId, correct, { given, expected: item.answers[0] || '', grade });
   } else {
     tallyGrammar(run, item.itemId, correct);
     logEvent({
@@ -96,15 +122,16 @@ function finish(run) {
 export function answerWithText(run, text) {
   const item = currentItem(run);
   const verdict = checkAnswer(text, item.answers);
-  submit(run, verdict.correct, text);
+  submit(run, verdict.correct, text, gradeFor(item, verdict));
   return verdict;
 }
 
 export function answerWithOption(run, option) {
   const item = currentItem(run);
   const correct = item.answers.some((answer) => answer === option);
-  submit(run, correct, option);
-  return { correct, close: false, matched: item.answers[0] || '' };
+  const verdict = { correct, close: false, matched: item.answers[0] || '' };
+  submit(run, correct, option, gradeFor(item, verdict));
+  return verdict;
 }
 
 // --- rendering --------------------------------------------------------------
@@ -139,6 +166,14 @@ function controls(item) {
           </div>
         </div>`;
 
+    case 'speech':
+      return `
+        <div class="speech">
+          <button class="cta" type="button" data-action="record">🎙️ Record</button>
+          <p class="speech__state" data-role="speech-state" aria-live="polite"></p>
+          <button class="btn btn--ghost" type="button" data-action="skip-speech">Skip</button>
+        </div>`;
+
     case 'reveal':
     default:
       return `<button class="btn btn--ghost" type="button" data-action="show-answer">Show the answer</button>`;
@@ -163,6 +198,8 @@ export function renderQuestion(run) {
       <div class="quiz__progress"><span style="width:${Math.round((run.position / total) * 100)}%"></span></div>
       <p class="quiz__ask">${escapeHtml(item.prompt)}</p>
       ${item.text ? `<p class="quiz__word">${escapeHtml(item.text)}</p>` : ''}
+      ${item.speak ? `<p class="quiz__audio">${speakButton(item.speak, { label: 'Play the German' })}
+        <span class="quiz__audio-label">Play${item.text ? ' it' : ' — then type what you hear'}</span></p>` : ''}
       <div class="quiz__controls">${controls(item)}</div>
       <div class="quiz__feedback" hidden></div>
     </div>`;
@@ -184,9 +221,11 @@ export function renderFeedback(run, verdict, { selfAssess = false } = {}) {
 
   const detail = word
     ? `<div class="answer-card">
-         <p class="answer-card__term">${escapeHtml(displayForm(word))}</p>
+         <p class="answer-card__term">${escapeHtml(displayForm(word))}
+           ${speakButton(displayForm(word), { label: 'Hear the word', small: true })}</p>
          <p class="answer-card__translation">${escapeHtml(word.translation)}</p>
-         ${word.example ? `<p class="answer-card__example">${escapeHtml(word.example)}</p>
+         ${word.example ? `<p class="answer-card__example">${escapeHtml(word.example)}
+           ${speakButton(word.example, { label: 'Hear the sentence', small: true })}</p>
            <p class="answer-card__example-en">${escapeHtml(word.exampleTranslation)}</p>` : ''}
          ${word.note ? `<p class="answer-card__note">${escapeHtml(word.note)}</p>` : ''}
        </div>`

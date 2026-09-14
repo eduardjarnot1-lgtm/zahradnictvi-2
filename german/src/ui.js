@@ -3,7 +3,9 @@
  * Views compose these; nothing here knows about routing.
  */
 
-import { articleLabel, getWordType } from './data.js';
+import { canSpeak } from './audio.js';
+
+import { articleLabel, getWordType, displayForm } from './data.js';
 import { getStatus, STATUS, STATUS_LABEL } from './progress.js';
 
 export function escapeHtml(value) {
@@ -85,16 +87,19 @@ export function wordCard(word, { revealed = false } = {}) {
         <p class="card__term">
           ${article ? `<span class="card__article card__article--${word.article}">${article}</span>` : ''}
           <span class="card__word">${escapeHtml(word.word)}</span>
+          ${speakButton(displayForm(word), { label: 'Hear the word', small: true })}
         </p>
         <span class="card__type">${type ? `${type.emoji} ${escapeHtml(type.name.replace(/s$/, ''))}` : ''}</span>
       </header>
       ${word.variants ? `<p class="card__variants">as listed: ${escapeHtml(word.variants)}</p>` : ''}
+      ${frequencyBadge(word)}
 
       <button class="card__reveal" type="button" data-action="reveal">Show meaning</button>
 
       <div class="card__body">
         <p class="card__translation">${escapeHtml(word.translation)}</p>
-        <p class="card__example">${escapeHtml(word.example)}</p>
+        <p class="card__example">${escapeHtml(word.example)}
+          ${speakButton(word.example, { label: 'Hear the sentence', small: true })}</p>
         <p class="card__example-en">${escapeHtml(word.exampleTranslation)}</p>
         ${word.note ? `<p class="card__note">${escapeHtml(word.note)}</p>` : ''}
         ${word.needsReview ? '<p class="card__review">⚑ Article flagged for review — see the note above.</p>' : ''}
@@ -107,4 +112,31 @@ export function wordCard(word, { revealed = false } = {}) {
                 type="button" data-action="learning">Practise 🔄</button>
       </footer>
     </article>`;
+}
+
+/**
+ * A button that reads German aloud. Renders nothing at all when the browser
+ * has no speech synthesis, so there is never a button that does nothing.
+ */
+export function speakButton(text, { label = 'Listen', small = false } = {}) {
+  if (!canSpeak() || !text) return '';
+  return `<button class="speak${small ? ' speak--small' : ''}" type="button"
+    data-action="speak" data-speak="${escapeHtml(text)}"
+    title="${escapeHtml(label)}" aria-label="${escapeHtml(`${label}: ${text}`)}">🔊</button>`;
+}
+
+/**
+ * The word's rank in the subtitle frequency list, when it has one.
+ *
+ * Only cards whose printed headword is itself a listed form carry a rank, and
+ * the label says which corpus it comes from, because "#312" on its own would
+ * read as a claim about German in general rather than about film subtitles.
+ */
+export function frequencyBadge(word) {
+  if (!word.frequencyRank) return '';
+  const shared = word.frequencyShared
+    ? ' <span class="card__freq-note">(rank shared with another word spelled the same)</span>'
+    : '';
+  return `<p class="card__freq" title="Rank in a frequency list built from film and TV subtitles">
+    #${word.frequencyRank} most frequent in subtitles${shared}</p>`;
 }

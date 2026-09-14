@@ -12,6 +12,7 @@
  */
 
 import { getAllWords, displayForm, wordsOfType } from './data.js';
+import { canSpeak, canListen } from './audio.js';
 
 export const VOCAB_TYPES = {
   DE_EN: 'de-en',
@@ -23,6 +24,8 @@ export const VOCAB_TYPES = {
   CONTEXT: 'context',
   RECOGNISE: 'recognise',
   VERB_FORM: 'verb-form',
+  DICTATION: 'dictation',
+  PRONOUNCE: 'pronounce',
 };
 
 export const ARTICLES = ['der', 'die', 'das'];
@@ -144,6 +147,11 @@ export function availability(word) {
     // these two stay switched off until a source that carries them is imported.
     [VOCAB_TYPES.PLURAL]: Boolean(word.pluralForm),
     [VOCAB_TYPES.VERB_FORM]: Boolean(word.verbForms && Object.keys(word.verbForms).length),
+    // Audio types exist only where the browser can actually do the job. A
+    // browser that cannot speak must never be asked a listening question, and
+    // one that cannot listen must never be asked to pronounce.
+    [VOCAB_TYPES.DICTATION]: canSpeak(),
+    [VOCAB_TYPES.PRONOUNCE]: canListen(),
   };
 }
 
@@ -195,11 +203,37 @@ export function buildVocabExercise(word, type) {
       return {
         ...base,
         mode: 'typing',
+        producesGerman: true,
         prompt: 'Which word is missing?',
         text: blankOut(word.example, word.word),
         answers: [word.word, displayForm(word)],
         hint: word.translation,
         explain: `${word.example} — ${word.exampleTranslation}`,
+      };
+
+    case VOCAB_TYPES.DICTATION:
+      return {
+        ...base,
+        mode: 'typing',
+        speak: word.word,
+        producesGerman: true,
+        prompt: 'Listen, then write what you hear.',
+        text: '',
+        answers: [word.word, displayForm(word)],
+        hint: '',
+        explain: `${displayForm(word)} — ${word.translation}`,
+      };
+
+    case VOCAB_TYPES.PRONOUNCE:
+      return {
+        ...base,
+        mode: 'speech',
+        speak: word.word,
+        producesGerman: true,
+        prompt: 'Say this in German.',
+        text: displayForm(word),
+        answers: [word.word, displayForm(word)],
+        explain: `${displayForm(word)} — ${word.translation}`,
       };
 
     case VOCAB_TYPES.SENTENCE:
@@ -238,6 +272,12 @@ export function chooseVocabType(word, record) {
     if (can[VOCAB_TYPES.CONTEXT] && record.correctCount > 0) options.push(VOCAB_TYPES.CONTEXT);
   }
   if (can[VOCAB_TYPES.ARTICLE]) options.push(VOCAB_TYPES.ARTICLE, VOCAB_TYPES.ARTICLE);
+  // Audio work is for words already met once: hearing a word you have never
+  // seen written is a spelling test, not a memory test.
+  if (record.seen && record.correctCount > 0) {
+    if (can[VOCAB_TYPES.DICTATION]) options.push(VOCAB_TYPES.DICTATION);
+    if (can[VOCAB_TYPES.PRONOUNCE]) options.push(VOCAB_TYPES.PRONOUNCE);
+  }
   return pick(options.filter((type) => can[type])) || VOCAB_TYPES.DE_EN;
 }
 

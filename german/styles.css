@@ -483,3 +483,23 @@ a { color: var(--primary); }
   .search { flex: 1 0 100%; max-width: none; }
   .topbar__link { font-size: .84rem; padding: .35rem .65rem; }
 }
+
+/* --- audio ----------------------------------------------------------------*/
+
+.speak {
+  border: 1px solid var(--line); background: var(--surface-2); color: inherit;
+  border-radius: 999px; cursor: pointer; line-height: 1;
+  padding: .3rem .5rem; font-size: .95rem; vertical-align: middle;
+}
+.speak--small { padding: .15rem .4rem; font-size: .8rem; }
+.speak:hover { border-color: var(--primary); }
+
+.quiz__audio { display: flex; gap: .5rem; align-items: center; justify-content: center; margin: .6rem 0 1rem; }
+.quiz__audio-label { font-size: .85rem; color: var(--ink-muted); }
+
+.speech { display: grid; gap: .6rem; justify-items: center; }
+.speech__state { margin: 0; min-height: 1.4em; color: var(--ink-muted); font-size: .9rem; }
+
+.card__freq {
+  margin: -.2rem 0 0; font-size: .74rem; color: var(--ink-muted);
+}

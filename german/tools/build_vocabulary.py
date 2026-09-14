@@ -21,7 +21,7 @@ from __future__ import annotations
 import json
 import re
 import sys
-from collections import OrderedDict
+from collections import Counter, OrderedDict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -260,6 +260,25 @@ def load_annotations():
     return out
 
 
+FREQUENCY = Path(__file__).resolve().parent.parent / "data" / "frequency.json"
+
+
+def frequency_index() -> tuple[dict, dict]:
+    """Load data/frequency.json, or return empty if it has not been built.
+
+    The rank is matched against the *printed headword*, lowercased, and nothing
+    else. The corpus lists surface forms, so "ist" and "sind" are their own
+    entries and neither resolves to "sein"; pretending otherwise would attach a
+    number to a card the corpus never measured. Cards that do not match simply
+    carry no rank.
+    """
+    if not FREQUENCY.exists():
+        return {}, {}
+    payload = json.loads(FREQUENCY.read_text(encoding="utf-8"))
+    index = {entry["form"]: entry for entry in payload["forms"]}
+    return index, payload["meta"]
+
+
 def main() -> int:
     groups = load_source()
     annotations = load_annotations()
@@ -348,6 +367,20 @@ def main() -> int:
 
     word_list = [words[k] for k in order]
 
+    frequency, frequency_meta = frequency_index()
+    ranked = 0
+    heads = Counter(w["word"].lower() for w in word_list)
+    for word in word_list:
+        entry = frequency.get(word["word"].lower())
+        word["frequencyRank"] = entry["rank"] if entry else 0
+        word["frequencyCount"] = entry["count"] if entry else 0
+        # The corpus is case-folded and counts one string. Where two cards share
+        # a printed form — morgen/Morgen, wagen/Wagen — the count covers both,
+        # so the card says the rank is shared rather than claiming it outright.
+        word["frequencyShared"] = bool(entry) and heads[word["word"].lower()] > 1
+        if entry:
+            ranked += 1
+
     categories = []
     for cat_id, emoji, name in CATEGORIES:
         subs = []
@@ -366,6 +399,12 @@ def main() -> int:
             "cefrNote": CEFR_NOTE,
             "wordCount": len(word_list),
             "sourceEntryCount": sum(len(v) for v in groups.values()),
+            "frequency": {
+                "source": frequency_meta.get("source", ""),
+                "note": frequency_meta.get("note", ""),
+                "formCount": frequency_meta.get("formCount", 0),
+                "rankedWords": ranked,
+            } if frequency_meta else None,
         },
         "wordTypes": [{"id": i, "name": n, "emoji": e} for i, n, e in WORD_TYPES],
         "categories": categories,
@@ -378,6 +417,13 @@ def main() -> int:
     print(f"source entries : {db['meta']['sourceEntryCount']}")
     print(f"words written  : {len(word_list)}  -> {DATA_OUT}")
     print(f"needs review   : {sum(1 for w in word_list if w['needsReview'])}")
+    if frequency_meta:
+        unmatched = sum(1 for form in frequency
+                        if form not in {w["word"].lower() for w in word_list})
+        print(f"frequency rank : {ranked} of {len(word_list)} words matched a listed form; "
+              f"{unmatched} of {len(frequency)} listed forms are not vocabulary headwords")
+    else:
+        print("frequency rank : skipped — data/frequency.json not built")
     if problems:
         print(f"\n{len(problems)} warning(s):")
         for p in problems[:60]:

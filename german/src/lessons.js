@@ -20,11 +20,22 @@ import { chooseVocabType, buildVocabExercise, grammarExercisesFor } from './exer
 
 export const DEFAULT_MIX = { newVocab: 4, reviewVocab: 3, articles: 2, context: 2, grammar: 1 };
 
+/**
+ * Order candidates for a lesson.
+ *
+ * Priority from the scheduler decides first. Frequency breaks the tie, so that
+ * among words the scheduler cares about equally — most obviously the unseen
+ * ones, which all score the same — the ones a learner will actually meet get
+ * taught first. Unranked words sort last within their tier rather than being
+ * excluded: not being in a subtitle corpus is not a reason never to learn a
+ * word.
+ */
 function scored(words, now) {
   return words
     .map((word) => ({ word, record: vocabProgress(word.id) }))
     .map((entry) => ({ ...entry, score: priority(entry.record, now) }))
-    .sort((a, b) => b.score - a.score);
+    .sort((a, b) => b.score - a.score
+      || (a.word.frequencyRank || Infinity) - (b.word.frequencyRank || Infinity));
 }
 
 /** Split a scored list into the buckets the mix is expressed in. */

@@ -6,8 +6,9 @@
 import {
   getCategories, getCategory, getSubcategory, getWordType, getAllWords, getMeta,
   wordsInCategory, wordsInSubcategory, wordsOfType, typesInSubcategory,
+  rankedWords, frequencyMeta, displayForm,
 } from './data.js';
-import { summarise } from './progress.js';
+import { summarise, getStatus, STATUS_LABEL } from './progress.js';
 import { fukaBubble } from './fuka.js';
 import { circleButton, crumbs, escapeHtml, progressBar, progressRing, wordCard, percent } from './ui.js';
 
@@ -188,8 +189,80 @@ export function aboutView() {
       <ul class="flagged">
         ${flagged.map((w) => `<li><strong>${escapeHtml(w.article)} ${escapeHtml(w.word)}</strong> — ${escapeHtml(w.note)}</li>`).join('')}
       </ul>
+      <h2>Word frequency</h2>
+      ${frequencyMeta() ? `
+        <p><strong>Frequency source:</strong> ${escapeHtml(frequencyMeta().source)}</p>
+        <p>${escapeHtml(frequencyMeta().note)}</p>
+        <ul>
+          <li>${frequencyMeta().formCount} word forms in the list</li>
+          <li>${frequencyMeta().rankedWords} of ${all.length} vocabulary cards carry a rank</li>
+          <li>${frequencyMeta().formCount - frequencyMeta().rankedWords} listed forms are not vocabulary
+              headwords — mostly function words the GCSE list does not teach as entries, and inflected
+              forms such as <em>ist</em> or <em>sind</em>, which the corpus lists separately from
+              <em>sein</em></li>
+        </ul>
+        <p>A rank is attached only where the card's printed headword is itself a listed form. No lemma
+           matching is attempted, because the corpus does not contain lemmas and guessing at them would
+           put a number on a card the corpus never measured.</p>
+        <p><a href="#/core">See the core words in frequency order</a></p>`
+        : '<p>No frequency list has been imported.</p>'}
+
       <h2>Your progress</h2>
       <p>Progress is stored in this browser only. There are no accounts and nothing is uploaded.</p>
       <button class="btn btn--ghost" type="button" data-action="reset-progress">Reset all progress</button>
     </div>`;
+}
+
+/**
+ * The core-vocabulary screen: cards that carry a subtitle-frequency rank,
+ * most frequent first, with their learning status.
+ *
+ * This is the "core 2000 words" idea from the research note, built from what
+ * the data actually supports. It is not a separate word list — every card here
+ * is one of the existing vocabulary cards, shown in a different order.
+ */
+export function coreWordsView(limit = 300) {
+  const meta = frequencyMeta();
+  const ranked = rankedWords();
+  if (!ranked.length) {
+    return `<p class="empty">No frequency data has been imported.
+      <a href="#/vocab">Back to the vocabulary</a>.</p>`;
+  }
+  const shown = ranked.slice(0, limit);
+  const stats = summarise(ranked);
+
+  const rows = shown.map((word) => {
+    const status = getStatus(word.id);
+    return `
+      <tr>
+        <td class="num">${word.frequencyRank}</td>
+        <th scope="row">${escapeHtml(displayForm(word))}</th>
+        <td>${escapeHtml(word.translation)}</td>
+        <td><span class="chip chip--${status}">${escapeHtml(STATUS_LABEL[status])}</span></td>
+      </tr>`;
+  }).join('');
+
+  return `
+    ${crumbs([{ label: 'Vocabulary', href: '#/vocab' }, { label: 'Core words' }])}
+    ${fukaBubble('subcategory', 'These are the words you will run into most often. Start here.')}
+    <header class="page-head">
+      <h1>⭐ Core words</h1>
+      <p class="page-head__meta">${ranked.length} of ${getAllWords().length} vocabulary cards appear in the
+        frequency list · ${stats.learned} learned · ${stats.learning} in progress</p>
+      <p class="page-head__source">${escapeHtml(meta ? meta.source : '')}</p>
+    </header>
+
+    <p class="lead">${escapeHtml(meta ? meta.note : '')}</p>
+
+    <h2 class="section-title">Top ${shown.length} by frequency</h2>
+    <div class="tablewrap">
+      <table class="table">
+        <thead><tr><th class="num">Rank</th><th>German</th><th>Meaning</th><th>Status</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    ${ranked.length > shown.length
+      ? `<p class="page-head__source">${ranked.length - shown.length} further ranked cards are not listed here;
+         all of them appear under their own topic in the vocabulary section.</p>`
+      : ''}`;
 }
