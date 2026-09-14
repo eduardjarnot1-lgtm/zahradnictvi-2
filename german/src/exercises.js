@@ -141,7 +141,9 @@ export function availability(word) {
     [VOCAB_TYPES.CHOICE]: true,
     [VOCAB_TYPES.RECOGNISE]: true,
     [VOCAB_TYPES.ARTICLE]: Boolean(word.article) && !word.plural,
-    [VOCAB_TYPES.SENTENCE]: Boolean(word.example),
+    // The word lists print a German example but no English one, so this type
+    // needs both before it can ask the learner to translate a sentence.
+    [VOCAB_TYPES.SENTENCE]: Boolean(word.example) && Boolean(word.exampleTranslation),
     [VOCAB_TYPES.CONTEXT]: Boolean(gapped),
     // The OCR source list prints neither plural forms nor verb tables, so
     // these two stay switched off until a source that carries them is imported.

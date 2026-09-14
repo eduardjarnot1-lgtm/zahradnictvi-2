@@ -92,16 +92,20 @@ export function wordCard(word, { revealed = false } = {}) {
         <span class="card__type">${type ? `${type.emoji} ${escapeHtml(type.name.replace(/s$/, ''))}` : ''}</span>
       </header>
       ${word.variants ? `<p class="card__variants">as listed: ${escapeHtml(word.variants)}</p>` : ''}
+      ${levelBadge(word)}
       ${frequencyBadge(word)}
 
       <button class="card__reveal" type="button" data-action="reveal">Show meaning</button>
 
       <div class="card__body">
         <p class="card__translation">${escapeHtml(word.translation)}</p>
-        <p class="card__example">${escapeHtml(word.example)}
-          ${speakButton(word.example, { label: 'Hear the sentence', small: true })}</p>
-        <p class="card__example-en">${escapeHtml(word.exampleTranslation)}</p>
+        ${word.example ? `<p class="card__example">${escapeHtml(word.example)}
+          ${speakButton(word.example, { label: 'Hear the sentence', small: true })}</p>` : ''}
+        ${word.exampleTranslation ? `<p class="card__example-en">${escapeHtml(word.exampleTranslation)}</p>` : ''}
         ${word.note ? `<p class="card__note">${escapeHtml(word.note)}</p>` : ''}
+        ${word.translationSource === 'ding'
+          ? '<p class="card__note">Meaning from the Ding German–English dictionary, not from a course word list.</p>'
+          : ''}
         ${word.needsReview ? '<p class="card__review">⚑ Article flagged for review — see the note above.</p>' : ''}
       </div>
 
@@ -139,4 +143,21 @@ export function frequencyBadge(word) {
     : '';
   return `<p class="card__freq" title="Rank in a frequency list built from film and TV subtitles">
     #${word.frequencyRank} most frequent in subtitles${shared}</p>`;
+}
+
+/**
+ * The card's CEFR level.
+ *
+ * Marked "approx." where it came from mapping the GCSE document's
+ * Foundation/Higher tier rather than from a word list that states a level, so
+ * a sourced A2 and a guessed A2 never look the same on screen.
+ */
+export function levelBadge(word) {
+  if (!word.cefr) return '';
+  const approximate = word.cefrSource === 'tier-approximation';
+  return `<p class="card__level">
+    <span class="tag tag--level">${escapeHtml(word.cefr)}${approximate ? ' approx.' : ''}</span>
+    ${approximate
+      ? '<span class="card__level-note">from the Foundation/Higher tier, not from a word list</span>'
+      : `<span class="card__level-note">${escapeHtml(word.cefrSource)}</span>`}</p>`;
 }

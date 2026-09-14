@@ -52,7 +52,12 @@ CATEGORIES = [
     ("leisure", "\U0001F3AC", "Leisure and entertainment"),
     ("travel", "✈️", "Travel and the wider world"),
     ("education", "\U0001F393", "Education and work"),
+    # Every card also sits under its CEFR level, so the whole vocabulary can be
+    # browsed by level and not only by the GCSE document's own topics.
+    ("levels", "\U0001F4C8", "By level"),
 ]
+
+LEVEL_EMOJI = {"A1": "\U0001F331", "A2": "\U0001F33F", "B1": "\U0001F333", "B2": "\U0001F332"}
 
 # document sub-topic -> (category id, sub id, short label, emoji)
 SUBTOPICS = {
@@ -261,6 +266,117 @@ def load_annotations():
 
 
 FREQUENCY = Path(__file__).resolve().parent.parent / "data" / "frequency.json"
+CEFR = Path(__file__).resolve().parent.parent / "data" / "cefr.json"
+
+# A card built from the CEFR word lists rather than from the GCSE document.
+CEFR_SOURCE = "Goethe-Institut word lists (A1/A2/B1) and Lingster Academy A1-B2"
+
+
+def level_placement(level: str) -> dict:
+    """The same shape the GCSE placements use, so nothing downstream changes."""
+    return {"category": "levels", "subcategory": level.lower(), "tier": "", "page": 0}
+
+
+LEVELS_ORDER = ["A1", "A2", "B1", "B2"]
+
+
+def word_type_of(entry: dict) -> str:
+    """Classify a word-list entry the same way the GCSE annotations do.
+
+    The word lists do not print a part of speech, so it is read off the shape of
+    the entry: an article makes it a noun, the German infinitive endings make it
+    a verb, and anything else is left unclassified rather than guessed at — the
+    app already copes with a card whose type is empty.
+    """
+    if entry.get("article"):
+        return "noun"
+    word = entry["word"]
+    # A capitalised entry with no article printed is not called a noun here.
+    # Some are prefixes (Öko-, Haupt-), some are phrases (Bescheid geben), and
+    # for the rest the list simply did not give a gender — and a noun card with
+    # no article would be teaching a blank where the article should be.
+    if word[:1].isupper():
+        return "other"
+    if word.endswith(("en", "ern", "eln")) and len(word) > 3:
+        return "verb"
+    # The word lists print no part of speech, so anything the shape of the entry
+    # does not settle goes to "other" rather than being guessed at.
+    return "other"
+
+
+UMLAUT = {"au": "äu", "a": "ä", "o": "ö", "u": "ü"}
+UMLAUT_LETTERS = {"ä": "a", "ö": "o", "ü": "u"}
+
+
+def umlaut_stem(stem: str) -> str:
+    """Umlaut the last stem vowel: Abflug -> Abflüg, Haus -> Häus, Vater -> Väter."""
+    lowered = stem.lower()
+    best, best_len = -1, 0
+    for plain in ("au", "a", "o", "u"):
+        index = lowered.rfind(plain)
+        if index == -1:
+            continue
+        # Rightmost vowel wins. Where two candidates end at the same place, the
+        # longer one is the real nucleus — the "u" of Haus is part of "au", so
+        # Haus becomes Häuser and never "Haüser".
+        if (index + len(plain), len(plain)) > (best + best_len, best_len):
+            best, best_len = index, len(plain)
+    if best == -1:
+        return ""
+    replacement = UMLAUT[lowered[best:best + best_len]]
+    if stem[best].isupper():
+        replacement = replacement.capitalize()
+    return stem[:best] + replacement + stem[best + best_len:]
+
+
+def expand_plural(marker: str, headword: str) -> str:
+    """Turn the word lists' plural shorthand into a form a learner can read.
+
+    Two notations appear, because the lists do not agree with each other:
+
+        "-e"        Tisch   -> Tische          ending only
+        "-n"        Frage   -> Fragen
+        "-¨er"      Haus    -> Häuser          diaeresis marks an umlaut
+        "-ö, er"    Dorf    -> Dörfer          A1 spells the umlauted vowel out
+        "-¨"        Vater   -> Väter           umlaut with no ending
+
+    The umlaut lands on the *last* stem vowel, not the first: Abflug is Abflüge,
+    never "äbfluge". Anything outside these shapes is dropped rather than
+    mangled — a wrong plural on a card is worse than no plural at all.
+    """
+    value = marker.strip()
+    if not value or value in {"-", "–"} or not re.fullmatch(r"[A-Za-zÄÖÜäöüß]+", headword):
+        return ""
+
+    fields = [field.strip() for field in value.split(",") if field.strip()]
+    if not fields:
+        return ""
+
+    head = fields[0]
+    umlauted = "¨" in head or '"' in head
+    ending = head.lstrip('-¨"')
+
+    # "-ö, er": the first field names the umlauted vowel, the rest is the ending.
+    if len(ending) == 1 and ending in UMLAUT_LETTERS:
+        umlauted, ending = True, "".join(fields[1:])
+    elif len(fields) > 1:
+        return ""                      # an extra field we do not understand
+
+    if not re.fullmatch(r"[a-zäöüß]*", ending):
+        return ""
+
+    stem = umlaut_stem(headword) if umlauted else headword
+    if not stem:
+        return ""
+    return stem + ending
+
+
+def cefr_index() -> tuple[dict, dict]:
+    """Load data/cefr.json, or return empty if it has not been built."""
+    if not CEFR.exists():
+        return {}, {}
+    payload = json.loads(CEFR.read_text(encoding="utf-8"))
+    return {entry["word"].lower(): entry for entry in payload["entries"]}, payload["meta"]
 
 
 def frequency_index() -> tuple[dict, dict]:
@@ -362,10 +478,84 @@ def main() -> int:
             if not example_uses_word(term, head, ann["example"]):
                 problems.append(f"example may not use {head!r}: {ann['example']}")
 
-    for i, key in enumerate(order, 1):
-        words[key]["id"] = f"w{i:04d}"
-
     word_list = [words[k] for k in order]
+
+    # --- CEFR levels ---------------------------------------------------------
+    # The GCSE document grades by Foundation/Higher tier, which is not CEFR. Where
+    # a word appears in one of the CEFR word lists, that level replaces the tier
+    # approximation and the card records which list said so. Where it does not,
+    # the card keeps the approximation and says that is what it is.
+    cefr, cefr_meta = cefr_index()
+    levelled = 0
+    for word in word_list:
+        entry = cefr.get(word["word"].lower())
+        if entry:
+            word["cefr"] = entry["level"]
+            word["cefrSource"] = ", ".join(entry["sources"])
+            levelled += 1
+        else:
+            word["cefr"] = word.get("cefrApprox", "")
+            word["cefrSource"] = "tier-approximation"
+
+    # --- new cards from the word lists ---------------------------------------
+    # Everything above comes from the GCSE document. These are the words the CEFR
+    # lists carry that the GCSE list does not, which is what actually gives the
+    # app an A1-B2 span rather than one exam board's selection.
+    known = {w["word"].lower() for w in word_list}
+    imported = 0
+    skipped_no_english = 0
+    for entry in sorted(cefr.values(), key=lambda e: (LEVELS_ORDER.index(e["level"]), e["word"])):
+        if entry["word"].lower() in known:
+            continue
+        # Prefixes and bare fragments are not words a card can teach.
+        if entry["word"].endswith("-") or entry["word"].startswith("-"):
+            continue
+        if not entry.get("translation"):
+            # A card with no meaning teaches nothing; it is dropped and counted,
+            # never filled in by guesswork.
+            skipped_no_english += 1
+            continue
+        known.add(entry["word"].lower())
+        imported += 1
+        word_list.append({
+            "id": "",
+            "language": "de",
+            "level": entry["level"],
+            "cefr": entry["level"],
+            "cefrApprox": entry["level"],
+            "cefrSource": ", ".join(entry["sources"]),
+            "source": CEFR_SOURCE,
+            "sourcePage": 0,
+            "regionalVariant": "",
+            "pluralForm": expand_plural(entry.get("plural", ""), entry["word"]),
+            "verbForms": {},
+            "word": entry["word"],
+            "term": entry["word"],
+            "variants": "",
+            "translation": entry["translation"],
+            "translationSource": entry.get("translationSource", ""),
+            "type": word_type_of(entry),
+            "article": entry.get("article", ""),
+            "plural": False,
+            "example": entry.get("example", ""),
+            "exampleTranslation": "",
+            "note": entry.get("preposition", "") and
+                    f"Takes the preposition {entry['preposition']}.",
+            "needsReview": False,
+            "categories": [level_placement(entry["level"])],
+        })
+
+    for i, word in enumerate(word_list, 1):
+        word["id"] = f"w{i:04d}"
+
+    # Give every card its level placement, so browsing by level covers the whole
+    # vocabulary rather than only the imported half.
+    for word in word_list:
+        if not word.get("cefr"):
+            continue
+        if any(c["category"] == "levels" for c in word["categories"]):
+            continue
+        word["categories"].append(level_placement(word["cefr"]))
 
     frequency, frequency_meta = frequency_index()
     ranked = 0
@@ -384,10 +574,16 @@ def main() -> int:
     categories = []
     for cat_id, emoji, name in CATEGORIES:
         subs = []
-        for doc_sub, (c, s, label, sub_emoji) in SUBTOPICS.items():
-            if c != cat_id:
-                continue
-            subs.append({"id": s, "name": label, "documentName": doc_sub, "emoji": sub_emoji})
+        if cat_id == "levels":
+            for level in LEVELS_ORDER:
+                if any(w.get("cefr") == level for w in word_list):
+                    subs.append({"id": level.lower(), "name": f"{level} vocabulary",
+                                 "documentName": level, "emoji": LEVEL_EMOJI[level]})
+        else:
+            for doc_sub, (c, s, label, sub_emoji) in SUBTOPICS.items():
+                if c != cat_id:
+                    continue
+                subs.append({"id": s, "name": label, "documentName": doc_sub, "emoji": sub_emoji})
         categories.append({"id": cat_id, "name": name, "emoji": emoji, "subcategories": subs})
 
     db = {
@@ -405,6 +601,16 @@ def main() -> int:
                 "formCount": frequency_meta.get("formCount", 0),
                 "rankedWords": ranked,
             } if frequency_meta else None,
+            "cefr": {
+                "sources": [source["title"] for source in cefr_meta.get("sources", [])],
+                "note": cefr_meta.get("note", ""),
+                "levelCounts": {level: sum(1 for w in word_list if w.get("cefr") == level)
+                                for level in LEVELS_ORDER},
+                "levelledWords": levelled + imported,
+                "approximatedWords": sum(1 for w in word_list
+                                         if w.get("cefrSource") == "tier-approximation"),
+                "importedWords": imported,
+            } if cefr_meta else None,
         },
         "wordTypes": [{"id": i, "name": n, "emoji": e} for i, n, e in WORD_TYPES],
         "categories": categories,
@@ -417,6 +623,14 @@ def main() -> int:
     print(f"source entries : {db['meta']['sourceEntryCount']}")
     print(f"words written  : {len(word_list)}  -> {DATA_OUT}")
     print(f"needs review   : {sum(1 for w in word_list if w['needsReview'])}")
+    if cefr_meta:
+        print(f"cefr levels    : {levelled} of the {len(order)} GCSE cards levelled from a word list, "
+              f"{sum(1 for w in word_list if w.get('cefrSource') == 'tier-approximation')} left on the "
+              f"tier approximation")
+        print(f"cefr imports   : {imported} new cards from the word lists, "
+              f"{skipped_no_english} skipped for having no English")
+        counts = {lv: sum(1 for w in word_list if w.get("cefr") == lv) for lv in LEVELS_ORDER}
+        print("                 " + " · ".join(f"{k} {v}" for k, v in counts.items()))
     if frequency_meta:
         unmatched = sum(1 for form in frequency
                         if form not in {w["word"].lower() for w in word_list})

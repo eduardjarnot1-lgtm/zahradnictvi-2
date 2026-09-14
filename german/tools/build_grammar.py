@@ -55,6 +55,17 @@ SOURCES = {
                                 else {"IV": 4, "V": 5, "VI": 6, "VII": 7}.get(t["sectionNumber"], 99),
         "order": lambda t: t["page"],
     },
+    "web-b1": {
+        "file": "web-grammar-source.json",
+        "title": "B1 grammar not covered by the course documents",
+        "credit": ("Zustandspassiv from deutsch-lernen-goethe-a1-c2 by Abdullah Butt, "
+                   "CC BY-NC 4.0 (creativecommons.org/licenses/by-nc/4.0/); verb + preposition "
+                   "list from „Der deutsche Wortschatz von A1 bis B2“, Lingster Academy."),
+        "level": None,              # each topic prints its own level
+        "group": lambda t: f"{t['sectionNumber']}. {t['section']}",
+        "groupOrder": lambda t: 90 + len(t["sectionNumber"]),
+        "order": lambda t: t["page"],
+    },
 }
 
 LEVEL_ORDER = ["A1", "A2", "B1", "B2", "C1", "C2"]

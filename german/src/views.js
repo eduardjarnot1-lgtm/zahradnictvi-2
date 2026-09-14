@@ -176,8 +176,22 @@ export function aboutView() {
     <div class="prose">
       <p><strong>Vocabulary source:</strong> ${escapeHtml(meta.source)}</p>
       <p>${escapeHtml(meta.sourceNote)}</p>
-      <p><strong>Level:</strong> the document grades entries by Foundation/Higher tier, not by CEFR.
-         ${escapeHtml(meta.cefrNote)}</p>
+      <p><strong>Level:</strong> the GCSE document grades entries by Foundation/Higher tier, not by
+         CEFR. ${escapeHtml(meta.cefrNote)}</p>
+      ${meta.cefr ? `
+        <h2>CEFR levels</h2>
+        <p>${escapeHtml(meta.cefr.note)}</p>
+        <ul>
+          ${meta.cefr.sources.map((title) => `<li>${escapeHtml(title)}</li>`).join('')}
+        </ul>
+        <ul>
+          <li>${Object.entries(meta.cefr.levelCounts).map(([level, count]) =>
+                `${level} ${count}`).join(' · ')}</li>
+          <li>${meta.cefr.importedWords} cards come from those word lists rather than from the GCSE
+              document</li>
+          <li>${meta.cefr.approximatedWords} cards appear in no list and keep the tier
+              approximation, labelled as approximate</li>
+        </ul>` : ''}
       <ul>
         <li>${meta.sourceEntryCount} entries read from the document</li>
         <li>${meta.wordCount} vocabulary cards after merging repeated entries</li>

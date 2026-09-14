@@ -81,13 +81,22 @@ export function hubView() {
 /** What each level actually holds, counted from the databases. */
 function levelContents() {
   const contents = Object.fromEntries(LEVELS.map((level) => [level, []]));
-  const vocabByLevel = new Map();
+  // Count the sourced levels apart from the approximated ones, so the picker
+  // does not present a word list's statement and a tier mapping as the same
+  // kind of fact.
+  const sourced = new Map();
+  const approximated = new Map();
   for (const word of getAllWords()) {
-    if (!word.cefrApprox) continue;
-    vocabByLevel.set(word.cefrApprox, (vocabByLevel.get(word.cefrApprox) || 0) + 1);
+    if (!word.cefr) continue;
+    const bucket = word.cefrSource === 'tier-approximation' ? approximated : sourced;
+    bucket.set(word.cefr, (bucket.get(word.cefr) || 0) + 1);
   }
-  for (const [level, count] of vocabByLevel) {
-    if (contents[level]) contents[level].push(`${count} words (approx.)`);
+  for (const level of LEVELS) {
+    if (!contents[level]) continue;
+    const exact = sourced.get(level) || 0;
+    const approximate = approximated.get(level) || 0;
+    if (exact) contents[level].push(`${exact} words`);
+    if (approximate) contents[level].push(`${approximate} approx.`);
   }
   for (const entry of getGrammarLevels()) {
     if (contents[entry.level]) contents[entry.level].push(`${entry.topicCount} grammar topics`);
@@ -109,12 +118,13 @@ function levelPicker(profile) {
               ? escapeHtml(contents[level].join(' · ')) : 'no content yet'}</span>
           </button>`).join('')}
       </div>
-      <p class="levels__note">Grammar comes from two documents: DaF kompakt neu, which prints an
-        A1/A2/B1 level beside every block, and the Sicher!&nbsp;C1 Grammatikübersicht. Those levels are
-        the documents' own. The vocabulary comes from the OCR GCSE list, which grades its entries by
-        Foundation/Higher tier rather than by CEFR — the A2/B1 split shown here is the usual
-        approximation of those tiers, not a statement from the document. B2 and C2 are part of the
-        structure and hold no content yet; the app does not claim an A1–C2 curriculum.</p>
+      <p class="levels__note">Levels are the sources' own, not guesses. Grammar comes from DaF kompakt
+        neu, which prints an A1/A2/B1 level beside every block, and the Sicher!&nbsp;C1
+        Grammatikübersicht. Vocabulary levels come from the official Goethe-Institut word lists for
+        A1, A2 and B1 and from the Lingster Academy A1–B2 list, which is the only one of them that
+        reaches B2. Cards no list carries keep the GCSE document's Foundation/Higher tier
+        approximation and are labelled as approximate. C2 is part of the structure and holds no
+        content; the app does not claim an A1–C2 curriculum.</p>
     </section>`;
 }
 

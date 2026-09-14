@@ -503,3 +503,7 @@ a { color: var(--primary); }
 .card__freq {
   margin: -.2rem 0 0; font-size: .74rem; color: var(--ink-muted);
 }
+
+.card__level { margin: -.1rem 0 0; display: flex; gap: .4rem; align-items: baseline; flex-wrap: wrap; }
+.card__level-note { font-size: .72rem; color: var(--ink-muted); }
+.card__freq-note { font-weight: 400; }

@@ -1,0 +1,337 @@
+{
+ "topics": [
+  {
+   "id": "g-web-b1-zustandspassiv",
+   "titleEn": "Zustandspassiv — the passive of state",
+   "summary": "sein + Partizip II describes the result; werden + Partizip II describes the action.",
+   "category": "Verben",
+   "tags": [
+    "Passiv",
+    "Zustandspassiv",
+    "sein-Passiv",
+    "Partizip II"
+   ],
+   "difficulty": 4,
+   "prerequisites": [
+    "g-daf-a2-active-passive",
+    "g-daf-b1-past-perfect-passive"
+   ],
+   "explanation": [
+    {
+     "heading": "Two passives, two questions",
+     "text": "The werden-passive answers what is being done: Die Tür wird geöffnet — somebody is opening it right now. The sein-passive answers what state something is in afterwards: Die Tür ist geöffnet — it is open."
+    },
+    {
+     "heading": "How it is built",
+     "text": "sein in the tense you need, plus the Partizip II, with no worden. The moment worden appears you are in the werden-passive again: Das Haus ist gebaut worden is the action, Das Haus ist gebaut is the state."
+    },
+    {
+     "heading": "Why B1 needs it",
+     "text": "It is mostly a recognition skill at this level — you meet it constantly in signs and instructions (Geschlossen, Reserviert) and need to hear that it reports a condition, not an event."
+    },
+    {
+     "heading": "The test that always works",
+     "text": "If you can add gerade (right now) the sentence is a werden-passive; if you can add immer noch (still) it is a Zustandspassiv."
+    }
+   ],
+   "rules": [
+    "Zustandspassiv = sein + Partizip II. Vorgangspassiv = werden + Partizip II.",
+    "The Zustandspassiv names a result or condition; the werden-passive names an action in progress.",
+    "There is no worden in a Zustandspassiv — worden belongs to the werden-passive perfect.",
+    "Past tense: Die Tür war geöffnet (state) against Die Tür wurde geöffnet (action).",
+    "Only verbs that describe a change of state form a useful Zustandspassiv: öffnen, schließen, reparieren, lösen."
+   ],
+   "examples": [
+    {
+     "de": "Die Tür ist geöffnet.",
+     "note": "state — the door is open"
+    },
+    {
+     "de": "Die Tür wird geöffnet.",
+     "note": "process — somebody is opening it"
+    },
+    {
+     "de": "Das Problem ist gelöst.",
+     "note": "state — the problem is solved"
+    },
+    {
+     "de": "Das Auto ist repariert.",
+     "note": "state — the car is repaired"
+    },
+    {
+     "de": "Das Haus ist gebaut worden.",
+     "note": "werden-passive, Perfekt — note the worden"
+    },
+    {
+     "de": "Das Haus wird gebaut.",
+     "note": "werden-passive, Präsens"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "choice",
+     "prompt": "Which sentence describes a state rather than an action?",
+     "text": "",
+     "options": [
+      "Die Tür ist geöffnet.",
+      "Die Tür wird geöffnet.",
+      "Das Haus wird gebaut.",
+      "Das Haus ist gebaut worden."
+     ],
+     "answers": [
+      "Die Tür ist geöffnet."
+     ],
+     "explain": "sein + Partizip II with no worden is the Zustandspassiv.",
+     "source": true,
+     "sentence": "Die Tür ist geöffnet."
+    },
+    {
+     "type": "fill",
+     "prompt": "Complete the Zustandspassiv.",
+     "text": "Das Problem ___ gelöst.",
+     "answers": [
+      "ist"
+     ],
+     "explain": "The state passive takes sein.",
+     "source": true,
+     "sentence": "Das Problem ist gelöst."
+    },
+    {
+     "type": "transform",
+     "prompt": "Rewrite as a Zustandspassiv — the result, not the action.",
+     "from": "Die Tür wird geöffnet.",
+     "answers": [
+      "Die Tür ist geöffnet.",
+      "Die Tür ist geöffnet"
+     ],
+     "explain": "werden becomes sein and the participle stays.",
+     "source": true,
+     "sentence": "Die Tür ist geöffnet."
+    },
+    {
+     "type": "error",
+     "prompt": "One word does not belong in a Zustandspassiv. Fix it.",
+     "text": "Das Auto ist repariert worden, es fährt wieder.",
+     "answers": [
+      "Das Auto ist repariert, es fährt wieder.",
+      "Das Auto ist repariert"
+     ],
+     "hint": "The sentence is about the car's condition now.",
+     "explain": "worden makes it the werden-passive perfect, which reports the repair as an event; without it the sentence reports the state."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which tense is Das Haus war gebaut worden?",
+     "text": "",
+     "options": [
+      "Plusquamperfekt of the werden-passive",
+      "Zustandspassiv in the past",
+      "Präteritum of the werden-passive",
+      "Konjunktiv II"
+     ],
+     "answers": [
+      "Plusquamperfekt of the werden-passive"
+     ],
+     "explain": "war … worden is the past perfect of the action passive, not a state."
+    },
+    {
+     "type": "context",
+     "prompt": "Choose the form that reports a condition.",
+     "text": "Ich kann nicht rein — der Laden ___ schon geschlossen.",
+     "options": [
+      "ist",
+      "wird",
+      "worden",
+      "wurde"
+     ],
+     "answers": [
+      "ist"
+     ],
+     "explain": "The shop is in a closed state, so sein."
+    }
+   ]
+  },
+  {
+   "id": "g-web-b1-verben-mit-praeposition",
+   "titleEn": "Verbs with a fixed preposition",
+   "summary": "Many verbs demand one particular preposition, and that preposition fixes the case.",
+   "category": "Verben",
+   "tags": [
+    "Verben mit Präposition",
+    "Rektion",
+    "Akkusativ",
+    "Dativ"
+   ],
+   "difficulty": 4,
+   "prerequisites": [
+    "g-daf-b1-question-word-wo-r-prepositional-pronoun"
+   ],
+   "explanation": [
+    {
+     "heading": "The preposition is part of the verb",
+     "text": "warten auf, träumen von, sich freuen auf — the preposition is not chosen by meaning, it is learned with the verb. English does the same thing (to wait FOR, to dream OF) and rarely picks the same one, which is why it has to be memorised rather than translated."
+    },
+    {
+     "heading": "The preposition sets the case",
+     "text": "The list writes the case after the preposition: A for accusative, D for dative. warten auf A means auf takes the accusative here — Ich warte auf den Bus — even though auf is a two-way preposition."
+    },
+    {
+     "heading": "Asking about one",
+     "text": "For a thing, the question word is wo(r)- plus the preposition: Worauf wartest du? For a person, the preposition stays separate: Auf wen wartest du? That is the same split covered under wo(r)- and da(r)-."
+    },
+    {
+     "heading": "Two prepositions at once",
+     "text": "A few verbs take two: sich entschuldigen bei D für A — you apologise to somebody for something."
+    },
+    {
+     "heading": "One entry to distrust",
+     "text": "The list prints glauben an D. That is an error in the source: glauben an takes the accusative — Ich glaube an dich, not *an dir. It is shown here as printed, with this warning, rather than quietly corrected."
+    }
+   ],
+   "rules": [
+    "The preposition belongs to the verb and must be learned with it.",
+    "The preposition fixes the case, even for two-way prepositions: warten auf + Akkusativ.",
+    "A marks the accusative and D the dative in the list below.",
+    "Ask about a thing with wo(r)- + preposition, about a person with the preposition + wen/wem.",
+    "Some verbs govern two prepositional objects: sich entschuldigen bei jemandem für etwas."
+   ],
+   "examples": [
+    {
+     "de": "Ich freue mich auf die Ferien.",
+     "note": "sich freuen auf + Akkusativ — looking forward to something"
+    },
+    {
+     "de": "Ein Team besteht aus 5 Spielern.",
+     "note": "bestehen aus + Dativ — to consist of"
+    },
+    {
+     "de": "warten auf A",
+     "note": "Ich warte auf den Bus."
+    },
+    {
+     "de": "träumen von D",
+     "note": "Sie träumt von einer langen Reise."
+    },
+    {
+     "de": "glauben an D",
+     "note": "quoted as the list prints it — but standard German is the accusative: Ich glaube an dich."
+    },
+    {
+     "de": "nachdenken über A",
+     "note": "Ich denke über das Angebot nach."
+    },
+    {
+     "de": "(sich) erinnern an A",
+     "note": "Erinnerst du dich an den Abend?"
+    },
+    {
+     "de": "(sich) entschuldigen bei D für A",
+     "note": "two objects: bei whom, für what"
+    },
+    {
+     "de": "sich gewöhnen an A",
+     "note": "to get used to something"
+    },
+    {
+     "de": "sich interessieren für A",
+     "note": "to be interested in something"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Complete the preposition.",
+     "text": "Ich freue mich ___ die Ferien.",
+     "answers": [
+      "auf"
+     ],
+     "explain": "sich freuen auf + Akkusativ, for something still to come.",
+     "source": true,
+     "sentence": "Ich freue mich auf die Ferien."
+    },
+    {
+     "type": "fill",
+     "prompt": "Complete the preposition.",
+     "text": "Ein Team besteht ___ 5 Spielern.",
+     "answers": [
+      "aus"
+     ],
+     "explain": "bestehen aus + Dativ — to consist of.",
+     "source": true,
+     "sentence": "Ein Team besteht aus 5 Spielern."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which preposition goes with warten?",
+     "text": "Ich warte ___ den Bus.",
+     "options": [
+      "auf",
+      "für",
+      "an",
+      "über"
+     ],
+     "answers": [
+      "auf"
+     ],
+     "explain": "warten auf + Akkusativ, which is why it is den Bus and not dem Bus.",
+     "source": true,
+     "sentence": "warten auf A"
+    },
+    {
+     "type": "choice",
+     "prompt": "Which case does auf take after warten?",
+     "text": "",
+     "options": [
+      "Akkusativ",
+      "Dativ",
+      "Genitiv",
+      "it varies"
+     ],
+     "answers": [
+      "Akkusativ"
+     ],
+     "explain": "The list writes warten auf A, and A marks the accusative."
+    },
+    {
+     "type": "fill",
+     "prompt": "Complete the preposition.",
+     "text": "Sie träumt ___ einer langen Reise.",
+     "answers": [
+      "von"
+     ],
+     "explain": "träumen von + Dativ, which is why it is einer Reise.",
+     "source": true,
+     "sentence": "träumen von D"
+    },
+    {
+     "type": "choice",
+     "prompt": "How do you ask about the thing in Ich warte auf den Bus?",
+     "text": "",
+     "options": [
+      "Worauf wartest du?",
+      "Auf wen wartest du?",
+      "Was wartest du?",
+      "Wofür wartest du?"
+     ],
+     "answers": [
+      "Worauf wartest du?"
+     ],
+     "explain": "A thing takes wo(r)- + the verb's own preposition; auf begins with a vowel, so wor- + auf."
+    },
+    {
+     "type": "error",
+     "prompt": "Fix the preposition.",
+     "text": "Ich denke oft an das Angebot nach.",
+     "answers": [
+      "Ich denke oft über das Angebot nach.",
+      "über das Angebot nach"
+     ],
+     "hint": "nachdenken takes a different preposition from denken.",
+     "explain": "nachdenken über A. Plain denken an A is a different verb with a different preposition.",
+     "source": true,
+     "sentence": "nachdenken über A"
+    }
+   ]
+  }
+ ]
+}

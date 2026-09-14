@@ -20,13 +20,24 @@ On Netlify the site publishes the repository root, so the app is served at
 
 | Content | Source | Status |
 |---|---|---|
-| Vocabulary — 2 047 items | OCR GCSE German Vocabulary List (General and Topic Areas 1–5) | imported |
+| Vocabulary — 4 768 cards | OCR GCSE list (2 047) + the CEFR word lists below (2 721) | imported |
+| CEFR levels A1/A2/B1 | Official Goethe-Institut Wortlisten (A1 Start Deutsch 1, A2, B1) | imported |
+| CEFR level B2 | Der deutsche Wortschatz von A1 bis B2, Lingster Academy | imported |
+| English glosses for unlisted words | Ding German–English dictionary, TU Chemnitz (GPL v2+) | imported |
+| B1 grammar gaps | deutsch-lernen-goethe-a1-c2, Abdullah Butt (CC BY-NC 4.0) | imported |
 | Grammar — 87 A1/A2/B1 topics | DaF kompakt neu A1/A2/B1, Grammatikerklärungen, © Ernst Klett Sprachen GmbH, Stuttgart 2018 | imported |
 | Grammar — 32 C1 topics | Sicher! C1 Grammatikübersicht, © Hueber Verlag | imported |
 | Word frequency — 2 586 forms | hermitdave/FrequencyWords, German (OpenSubtitles corpus) | imported |
 | Goethe-Zertifikat B1 Wortliste | **not supplied** — see below | **missing** |
 
-### The Goethe B1 Wortliste is not in the repository
+### The Goethe B1 Wortliste has since been found
+
+It was located later, on GitHub, alongside the official A1 and A2 lists — the
+`sprach-o-mat` project carries all three as the Goethe-Institut's own PDFs. They
+are now the level authority for A1–B1. The section below records why it was
+missing in the first place.
+
+### Why it was missing originally
 
 That task named two PDFs. Only one arrived: `Sicher_C1_Grammatikuebersicht.pdf`
 (the DaF kompakt grammar PDF came later, with a separate request). In place of
@@ -34,28 +45,83 @@ the Goethe B1 Wortliste there was a text file containing a fliphtml5 link, and
 that host is blocked by this environment's network egress policy, so the list
 could not be fetched.
 
-Roughly 2 400 B1 lexical units are therefore **not** in the app. No substitute
-was invented: the existing OCR GCSE vocabulary is carried under its own real
-name, and the level picker states plainly that B1 holds no Goethe content.
+No substitute was invented at the time. The list is now imported through
+`build_cefr.py`, described below; `extract_goethe_b1.py` remains as the record
+of the record shape that was designed for it.
 
-Everything needed to ingest it is already built. When the PDF is available:
+## CEFR levels
+
+Every card carries a level, and the level is a source's statement rather than a
+guess wherever one exists.
 
 ```bash
-python3 german/tools/extract_goethe_b1.py <Goethe-Zertifikat_B1_Wortliste.pdf>
+python3 german/tools/build_cefr.py \
+  --goethe-dir <dir with the three Goethe Wortliste PDFs> \
+  --tsv-dir    <dir with a1/ a2/ b1/ transcriptions> \
+  --lingster   <Der-deutsche-Wortschatz-von-A1-bis-B2.pdf> \
+  --ding       <de-en.txt.xz>
+# entries 4442 -> data/cefr.json
+#   B1: 4439 of 4460 transcribed entries verified against the official PDF (100%)
+#   A2: 2006 of 2022 verified (99%)
+#   A1: 1694 of 1694 verified (100%)
+#   levels: A1 850 · A2 945 · B1 2072 · B2 575
 ```
 
-That script is a stub that documents the target record shape (article, plural,
-gender, verb forms, regional D/A/CH labels, cross-references, thematic
-category, source page) and exits with a clear message. Fill in its parser, then
-the existing `build_vocabulary.py` → `validate_content.py` chain and the whole
-learning engine pick the new items up unchanged.
+### Why a PDF *and* a transcription of the same list
+
+The official PDFs are the authority on which word sits at which level, but two
+of the three are laid out in columns that do not survive text extraction — the
+B1 list interleaves headwords and example sentences out of order. A third-party
+TSV transcription is clean, but a transcription can quietly drift from the
+original.
+
+So they are used against each other: the TSV supplies the headword, example and
+English, and that headword must then occur in the raw text of the official PDF
+for its level or the row is dropped and counted. The build prints the
+verification rate, so a drop in transcription quality is visible rather than
+silent, and refuses to build below 75 %.
+
+### The levelling rule
+
+A word sits at the **lowest** level any source assigns it. A word taught at A1
+is an A1 word even though it reappears in the B1 list; letting a later list
+overwrite an earlier one would push almost everything to B1.
+
+| | Count |
+|---|---|
+| Cards levelled by a word list | 4 177 |
+| Cards no list carries, keeping the GCSE Foundation/Higher approximation | 591 |
+| New cards imported from the word lists | 2 721 |
+| Word-list entries skipped for having no English at all | 234 |
+
+A1 829 · A2 1 270 · B1 2 157 · B2 512.
+
+B2 rests on the Lingster list alone — it is the only source here that reaches
+B2 — and that is stated in the data rather than smoothed over. Cards whose
+English comes from the Ding dictionary rather than a course word list say so on
+the card, because a dictionary lookup and a curated gloss are not the same kind
+of evidence.
+
+Levels shown as "approx." on a card or in the level picker come from mapping
+the GCSE document's Foundation/Higher tier, never from a list that states a
+level. The two are never presented as the same thing.
+
+### Plural forms
+
+The word lists write plurals as a shorthand, and the three lists do not agree
+with each other: B1 writes `-¨er`, A1 splits the same thing across fields as
+`-ö, er`. Both are expanded into a readable form, with the umlaut landing on the
+*last* stem vowel — `Abflug → Abflüge`, never `äbfluge`, and `Haus → Häuser`,
+never `Haüser`, because the `u` of `Haus` belongs to the diphthong. A marker
+outside those shapes is dropped rather than mangled: a wrong plural on a card is
+worse than no plural.
 
 ## What the app does
 
 * **German Learning hub** — the coach, the four sections, the target level.
 * **Vocabulary** — the document's own topics → sub-topics → word type → cards
   with article, meaning, example sentence and English translation.
-* **Grammar** — 119 topics from A1 to C1, grouped by level and then by the
+* **Grammar** — 121 topics from A1 to C1, grouped by level and then by the
   source's own section (DaF kompakt's Roman-numbered chapters, Sicher!'s
   Lektionen), each with an English summary, the rules, the source's own
   examples, and 4–7 exercises.
@@ -178,15 +244,15 @@ caught two mistakes while this was being written — a phrase that was not in th
 document and a sentence with a footnote marker — which is exactly what it is
 for.
 
-`validate_content.py` runs 40 000+ checks over both databases: duplicate ids,
+`validate_content.py` runs 98 000+ checks over both databases: duplicate ids,
 duplicate entries, near-duplicate variants, missing German words, malformed
 articles and plurals, invalid levels, missing source attribution, malformed
 grammar topics, unknown or circular prerequisites.
 
 ```bash
 python3 german/tools/validate_content.py
-# vocabulary: 2047 words checked
-# grammar: 119 topics, 602 exercises checked
+# vocabulary: 4768 words checked
+# grammar: 121 topics, 615 exercises checked
 # PASSED — 0 errors, 1 warning
 ```
 
@@ -261,9 +327,10 @@ number.
 german/
   index.html            shell: top bar, search, main region
   styles.css            light + dark theme, no framework
-  data/vocabulary.json  2047 items, 785 with a frequency rank
+  data/vocabulary.json  4768 cards, levelled A1–B2
+  data/cefr.json        4442 levelled headwords with their sources
   data/frequency.json   2586 ranked word forms
-  data/grammar.json     119 topics, 599 examples, 602 exercises
+  data/grammar.json     121 topics, 615 examples, 615 exercises
   src/
     data.js         vocabulary loading + indexing
     grammar.js      grammar loading + indexing (by level, group, category)
@@ -317,12 +384,37 @@ file that runs with no server and no network. Edit the sources, never the
 bundle. The modules are flattened into one scope, so the bundler rejects
 aliased imports (`x as y`) that cannot survive flattening.
 
+## The two B1 grammar gaps are closed
+
+When DaF kompakt was imported, two of the five B1 areas asked for were not in
+that document and nothing was written to cover them. Both are now imported from
+published material rather than authored here:
+
+* **Zustandspassiv** — the sein-passive against the werden-passive, from the
+  `deutsch-lernen-goethe-a1-c2` grammar sheets (Abdullah Butt, CC BY-NC 4.0).
+  The licence is non-commercial, which suits this app and is carried in the
+  credit line shown with the topic.
+* **Verbs with a fixed preposition** — from the same project's exercise set plus
+  the 66 entries in the Lingster list that print a verb with the preposition and
+  case it governs (`warten auf A`, `träumen von D`).
+
+`extract_web_grammar.py` writes the raw source text for both, so the same
+grounding rule applies to them as to everything else: an example not present in
+the source does not build.
+
+That rule earned its keep again here. The Lingster list prints **`glauben an D`**,
+which is wrong — `glauben an` takes the accusative (*Ich glaube an dich*). The
+build rejected the corrected version because it was not in the source, so the
+topic now quotes the list exactly as printed and carries an explicit warning
+that the entry is an error. It is neither silently corrected nor silently
+taught.
+
 ## What was proposed but not integrated
 
-Two data resources named in `docs/skills-integration-brief.md` were described as
-downloaded but never supplied to this repository, so neither is in the app and
-neither was faked: the **Tatoeba `deu-eng`** sentence pairs (~330 000 pairs,
-which would have given generated example sentences and cloze exercises) and the
-**FreeDict `deu-eng`** StarDict dictionary (~517 000 headwords, an offline
-lookup backend). Supply either and it can go through the same extract → build →
-validate chain as everything else.
+The **Tatoeba `deu-eng`** sentence pairs (~330 000 pairs, which would give
+generated example sentences and cloze exercises) are still not here — the file
+was never supplied and no reachable copy was found. The FreeDict `deu-eng`
+dictionary is no longer needed: the Ding dictionary now fills that role.
+
+Source documents are not committed — only the extracted structured data. The
+build commands above name the files they expect.

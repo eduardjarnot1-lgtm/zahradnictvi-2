@@ -82,10 +82,34 @@ def validate_vocabulary(report: Report) -> None:
                      f"vocabulary {wid}: article on a non-noun")
         report.check(w["level"] in VALID_LEVELS, f"vocabulary {wid}: invalid level {w['level']!r}")
         report.check(bool(w.get("source")), f"vocabulary {wid}: missing source")
-        report.check(isinstance(w.get("sourcePage"), int) and w["sourcePage"] > 0,
-                     f"vocabulary {wid}: missing or malformed source page")
-        report.check(bool(w["example"].strip()) and bool(w["exampleTranslation"].strip()),
-                     f"vocabulary {wid}: missing example or its translation")
+
+        # Two kinds of card now sit in this file and they carry different
+        # evidence, so they are checked differently rather than one standard
+        # being relaxed for both. A card read out of the paginated GCSE document
+        # must cite its page and carry a translated example. A card imported
+        # from a word list has no page to cite, and the lists print a German
+        # example without an English one — so the example is optional, but if it
+        # is there it must not be half-built.
+        from_document = bool(w.get("sourcePage"))
+        if from_document:
+            report.check(isinstance(w["sourcePage"], int) and w["sourcePage"] > 0,
+                         f"vocabulary {wid}: missing or malformed source page")
+            report.check(bool(w["example"].strip()) and bool(w["exampleTranslation"].strip()),
+                         f"vocabulary {wid}: missing example or its translation")
+        else:
+            report.check(not w["exampleTranslation"].strip() or bool(w["example"].strip()),
+                         f"vocabulary {wid}: example translation with no example")
+
+        # CEFR levelling, whichever kind of card it is.
+        level, level_source = w.get("cefr", ""), w.get("cefrSource", "")
+        report.check(level in VALID_LEVELS or level == "",
+                     f"vocabulary {wid}: invalid CEFR level {level!r}")
+        report.check(bool(level) == bool(level_source),
+                     f"vocabulary {wid}: CEFR level and its source disagree "
+                     f"({level!r}, {level_source!r})")
+        report.check(w.get("translationSource", "") in ("", "wordlist", "ding"),
+                     f"vocabulary {wid}: unknown translation source "
+                     f"{w.get('translationSource')!r}")
         report.check(bool(w["categories"]), f"vocabulary {wid}: no category")
         # A plural form, when present, must look like a German plural rather
         # than a stray article or a sentence.
@@ -113,6 +137,17 @@ def validate_vocabulary(report: Report) -> None:
     for rank, heads in by_rank.items():
         report.check(len(heads) == 1,
                      f"vocabulary: rank {rank} claimed by different words {sorted(heads)}")
+    meta_cefr = db["meta"].get("cefr")
+    if meta_cefr:
+        for level, count in meta_cefr["levelCounts"].items():
+            actual = sum(1 for w in words if w.get("cefr") == level)
+            report.check(actual == count,
+                         f"vocabulary: meta says {count} words at {level}, found {actual}")
+        report.check(bool(meta_cefr.get("sources")),
+                     "vocabulary: CEFR levels carry no source attribution")
+        report.check(meta_cefr["levelCounts"].get("B2", 0) > 0,
+                     "vocabulary: B2 is empty")
+
     meta_frequency = db["meta"].get("frequency")
     if meta_frequency:
         report.check(meta_frequency["rankedWords"] == len(ranks),
