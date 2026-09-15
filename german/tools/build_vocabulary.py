@@ -37,6 +37,14 @@ B2_NOTE = (
     "with every noun and gives every entry an example sentence with an English "
     "translation, so cards built from it carry all four and nothing is inferred."
 )
+# The document names no author, publisher or licence, so its origin is recorded
+# here on the project owner's statement (2026-09-15) rather than left open.
+B2_PROVENANCE = (
+    "Generated for this project by the project owner, using the german-vocab-pdf "
+    "Claude skill, whose stated constraint is that it builds only from "
+    "freely-composed or openly-licensed content. The example sentences are "
+    "composed rather than taken from a published course."
+)
 
 # The document grades its entries by tier, not by CEFR level. The mapping below
 # is the usual approximation and is labelled as such everywhere it is shown —
@@ -788,6 +796,7 @@ def main() -> int:
             "b2": {
                 "source": B2_TITLE,
                 "note": B2_NOTE,
+                "provenance": B2_PROVENANCE,
                 "entryCount": len(b2_entries),
                 "topicCount": len(B2_TOPICS),
                 "importedWords": b2_imported,

@@ -595,6 +595,7 @@ body { margin: 0; }
   "b2": {
    "source": "German Vocabulary — Level B2 (supplied by the project owner)",
    "note": "500 B2 entries in 25 topics. The list states the level, prints the article with every noun and gives every entry an example sentence with an English translation, so cards built from it carry all four and nothing is inferred.",
+   "provenance": "Generated for this project by the project owner, using the german-vocab-pdf Claude skill, whose stated constraint is that it builds only from freely-composed or openly-licensed content. The example sentences are composed rather than taken from a published course.",
    "entryCount": 500,
    "topicCount": 25,
    "importedWords": 211,
@@ -221694,9 +221695,7 @@ function aboutView() {
           <li>${meta.b2.placedWords} cards that already existed are also filed under one of its
               topics, keeping the level their own source gave them</li>
         </ul>
-        <p class="warn">This file was supplied without an author, publisher or licence,
-           so where its entries and sentences come from is not yet established. It is attributed
-           here as supplied rather than credited to anyone.</p>` : ''}
+        <p><strong>Where it came from:</strong> ${escapeHtml(meta.b2.provenance)}</p>` : ''}
       <ul>
         <li>${meta.sourceEntryCount} entries read from the document</li>
         <li>${meta.wordCount} vocabulary cards after merging repeated entries</li>

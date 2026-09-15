@@ -23,7 +23,7 @@ On Netlify the site publishes the repository root, so the app is served at
 | Vocabulary — 4 979 cards | OCR GCSE list (2 047) + the CEFR word lists below (2 721) + the B2 list below (211) | imported |
 | CEFR levels A1/A2/B1 | Official Goethe-Institut Wortlisten (A1 Start Deutsch 1, A2, B1) | imported |
 | CEFR level B2 | Der deutsche Wortschatz von A1 bis B2, Lingster Academy | imported |
-| B2 vocabulary — 500 entries in 25 topics | *German Vocabulary — Level B2*, supplied by the project owner | imported, **provenance unconfirmed** |
+| B2 vocabulary — 500 entries in 25 topics | *German Vocabulary — Level B2*, generated for this project by the project owner | imported |
 | English glosses for unlisted words | Ding German–English dictionary, TU Chemnitz (GPL v2+) | imported |
 | B1 grammar gaps | deutsch-lernen-goethe-a1-c2, Abdullah Butt (CC BY-NC 4.0) | imported |
 | Grammar — 87 A1/A2/B1 topics | DaF kompakt neu A1/A2/B1, Grammatikerklärungen, © Ernst Klett Sprachen GmbH, Stuttgart 2018 | imported |
@@ -152,22 +152,42 @@ beginning with "to " is the list calling the entry a verb. The rest, mostly
 adjectives and adverbs the list does not label, stay unclassified rather than
 being guessed at — the same rule the word-list import follows.
 
-### Provenance is not established
+### Provenance
 
-**This is a release blocker and is recorded here rather than assumed away.**
-The file was generated with ReportLab on the day it was supplied and carries no
-author, publisher, licence or bibliography. Its content is consistent with
-freely composed material, but nothing in the document establishes that, and
-"looks original" is not a licence. Before this app is published, the project
-owner has to confirm where the 500 entries and 500 example sentences came from.
-If they were composed for this project, that should be stated in the file and
-in this table; if they were taken from a published course, the same licensing
-question applies as to every other source here.
+The file carries no author, publisher or licence of its own — it was produced
+with ReportLab on the day it was supplied — so this section records where it
+came from, on the project owner's statement (2026-09-15).
 
-Until then the list is imported and clearly attributed as *supplied by the
-project owner*, so that it can be removed with one build if the answer requires
-it — `b2-vocabulary-source.json` is the only thing that would have to go, and
-the build already treats its absence as a supported state.
+**It was generated for this project**, by the owner, using the `german-vocab-pdf`
+Claude skill. That skill's stated constraint is that it generates a vocabulary
+PDF "built only from freely-composed or openly-licensed content", and its output
+shape — word, English translation, example sentence, for a given CEFR level, by
+topic — is exactly this document. The 500 example sentences are therefore
+composed rather than copied from a course, and the headword selection is a word
+list, not an author's expressive work.
+
+That makes this the **only vocabulary or grammar source in the project with a
+clean origin**. It is not the licensing problem. The two grammar sources are
+— see below.
+
+What is *not* claimed here: nobody has checked the 500 sentences one by one
+against published material, and a generated sentence can coincide with a common
+phrase. That is a much smaller risk than a verbatim extract from a copyrighted
+textbook, and it is written down rather than smoothed over.
+
+The list stays removable in one step regardless: deleting
+`b2-vocabulary-source.json` and rebuilding takes it out, because the build
+treats its absence as a supported state.
+
+### The grammar sources are the actual release blocker
+
+`DaF kompakt neu` (© Ernst Klett Sprachen) and `Sicher! C1` (© Hueber Verlag)
+are extracted **verbatim** — the build deliberately refuses to show an example
+sentence that does not occur word for word in the source document, which is
+excellent for accuracy and is precisely what makes it a redistribution of
+copyrighted textbook content. No licence for either has been obtained. That has
+to be resolved before this app is published anywhere public; the B2 list above
+never was the thing standing in the way.
 
 ## What the app does
 

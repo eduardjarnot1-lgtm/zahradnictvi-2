@@ -35,6 +35,7 @@
   "b2": {
    "source": "German Vocabulary — Level B2 (supplied by the project owner)",
    "note": "500 B2 entries in 25 topics. The list states the level, prints the article with every noun and gives every entry an example sentence with an English translation, so cards built from it carry all four and nothing is inferred.",
+   "provenance": "Generated for this project by the project owner, using the german-vocab-pdf Claude skill, whose stated constraint is that it builds only from freely-composed or openly-licensed content. The example sentences are composed rather than taken from a published course.",
    "entryCount": 500,
    "topicCount": 25,
    "importedWords": 211,

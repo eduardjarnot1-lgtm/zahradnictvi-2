@@ -204,9 +204,7 @@ export function aboutView() {
           <li>${meta.b2.placedWords} cards that already existed are also filed under one of its
               topics, keeping the level their own source gave them</li>
         </ul>
-        <p class="warn">This file was supplied without an author, publisher or licence,
-           so where its entries and sentences come from is not yet established. It is attributed
-           here as supplied rather than credited to anyone.</p>` : ''}
+        <p><strong>Where it came from:</strong> ${escapeHtml(meta.b2.provenance)}</p>` : ''}
       <ul>
         <li>${meta.sourceEntryCount} entries read from the document</li>
         <li>${meta.wordCount} vocabulary cards after merging repeated entries</li>
