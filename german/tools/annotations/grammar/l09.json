@@ -1,0 +1,168 @@
+{
+ "topics": [
+  {
+   "id": "g-l09-1",
+   "titleEn": "Sentence structures: conditional and concessive relations",
+   "summary": "Conditions and counter-arguments through connectors, main clauses and prepositions.",
+   "category": "Satzstrukturen",
+   "tags": ["Konditional", "Konzessiv", "Konnektoren", "Präpositionen"],
+   "difficulty": 4,
+   "prerequisites": ["g-l02-1"],
+   "explanation": [
+    {"heading": "Same meaning, different structure",
+     "text": "Conditions and counter-arguments can be expressed with different structures. The sentences are equal in meaning but differ in structure and register. Expressions with prepositions are typical of written language."}
+   ],
+   "rules": [
+    "Conditional subordinate connectors: im Falle, dass / unter der Bedingung, dass / angenommen, dass / vorausgesetzt, dass / wenn / falls / sofern / je nachdem, ob / je nachdem, wie.",
+    "vorausgesetzt can also be used as a main-clause connector: Wir können noch vieles ändern, vorausgesetzt wir beginnen sofort.",
+    "Conditional main-clause connectors: sonst / andernfalls.",
+    "Conditional prepositions: bei + Dativ, im Falle + Genitiv, ohne + Akkusativ, je nach + Dativ.",
+    "Concessive subordinate connectors: obwohl / obgleich / obschon / wenn auch / auch wenn / selbst wenn / ungeachtet der Tatsache, dass.",
+    "Concessive main-clause connectors: trotzdem / dennoch / allerdings.",
+    "Concessive prepositions: trotz + Genitiv, ungeachtet + Genitiv, selbst bei + Dativ.",
+    "In spoken German trotz is used more and more with the dative."
+   ],
+   "examples": [
+    {"de": "Wenn / Falls / Sofern wir viele Schadstoffe produzieren, werden wir schlechte Luft einatmen.", "note": "konditionaler Nebensatz"},
+    {"de": "Je nachdem, wie es mir gefällt, bleibe ich einen Tag länger.", "note": "je nachdem, wie"},
+    {"de": "Bei / Im Falle hoher Schadstoffproduktion atmen wir schlechte Luft ein.", "note": "konditionale Präposition"},
+    {"de": "Ohne den Einsatz von Glashaus-Techniken funktioniert die vertikale Landwirtschaft nicht.", "note": "ohne + Akkusativ"},
+    {"de": "Auch wenn / Selbst wenn er wohlhabend war, war Wolfgang mit seinem Leben nicht zufrieden.", "note": "konzessiver Nebensatz"},
+    {"de": "Es ist ein Ort mit Tradition. Trotzdem / Dennoch / Allerdings haben sich die Kreßberger an die neuen Bewohner gewöhnt.", "note": "konzessiver Hauptsatzkonnektor"},
+    {"de": "Selbst bei einer alternativen Lebensweise kann man von traditionsbewussten Dorfbewohnern akzeptiert werden.", "note": "selbst bei + Dativ"}
+   ],
+   "exercises": [
+    {"type": "transform", "prompt": "Rewrite the conditional clause with the preposition bei + Dativ.",
+     "from": "Wenn wir viele Schadstoffe produzieren, atmen wir schlechte Luft ein.",
+     "answers": ["Bei hoher Schadstoffproduktion atmen wir schlechte Luft ein.", "Bei einer hohen Schadstoffproduktion atmen wir schlechte Luft ein."],
+     "explain": "The conditional clause becomes a prepositional phrase with bei + Dativ."},
+    {"type": "choice", "prompt": "Which main-clause connector expresses the negative condition ('otherwise')?",
+     "text": "Wir dürfen nicht mehr so viele Schadstoffe produzieren, ___ atmen wir noch schlechtere Luft ein.",
+     "options": ["sonst", "trotzdem", "sofern", "ungeachtet"],
+     "answers": ["sonst"],
+     "explain": "sonst / andernfalls are the conditional main-clause connectors."},
+    {"type": "choice", "prompt": "Which connector is concessive, not conditional?",
+     "text": "", "options": ["obschon", "sofern", "falls", "angenommen, dass"],
+     "answers": ["obschon"],
+     "explain": "obwohl / obgleich / obschon are concessive; sofern, falls and angenommen, dass are conditional."},
+    {"type": "transform", "prompt": "Rewrite the concessive clause with the preposition trotz + Genitiv.",
+     "from": "Obwohl die Lebensweise ganz anders ist, akzeptieren die Kreßberger die neuen Bewohner.",
+     "answers": ["Trotz der ganz anderen Lebensweise akzeptieren die Kreßberger die neuen Bewohner.", "Ungeachtet der ganz anderen Lebensweise akzeptieren die Kreßberger die neuen Bewohner."],
+     "explain": "trotz / ungeachtet + Genitiv is the prepositional concessive."},
+    {"type": "fill", "prompt": "Complete the conditional preposition + Akkusativ ('without').",
+     "text": "___ den Einsatz von Glashaus-Techniken funktioniert die vertikale Landwirtschaft nicht.",
+     "answers": ["Ohne"],
+     "sentence": "Ohne den Einsatz von Glashaus-Techniken funktioniert die vertikale Landwirtschaft nicht.", "source": true,
+     "explain": "ohne + Akkusativ expresses a negative condition."},
+    {"type": "error", "prompt": "A concessive connector has been used where a conditional one is meant. Correct it.",
+     "text": "Obwohl wir die Mittel bekommen, schaffen wir die neue Technik an.",
+     "answers": ["Vorausgesetzt, dass wir die Mittel bekommen, schaffen wir die neue Technik an.", "Wenn wir die Mittel bekommen, schaffen wir die neue Technik an.", "Falls wir die Mittel bekommen, schaffen wir die neue Technik an."],
+     "explain": "The purchase depends on the funding, so the relation is conditional, not concessive."}
+   ]
+  },
+  {
+   "id": "g-l09-2",
+   "titleEn": "Adjectives and participles with prepositions",
+   "summary": "Fixed adjective + preposition pairs, governing the accusative or the dative.",
+   "category": "Präpositionen",
+   "tags": ["Adjektive", "Partizipien", "Präpositionen", "Rektion"],
+   "difficulty": 3,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "Fixed pairs",
+     "text": "Some adjectives and participles are used together with particular prepositions. The preposition and the case it governs belong to the adjective and have to be learned with it."}
+   ],
+   "rules": [
+    "With the accusative: angewiesen auf, bemüht um, dankbar für, entscheidend für, erfreut über, gespannt auf, glücklich über, verwundert über.",
+    "With the dative: aufgeschlossen gegenüber, erfahren in, überzeugt von, zufrieden mit.",
+    "When the complement is a clause, the preposition appears as a da(r)-form: überzeugt davon, dass …"
+   ],
+   "examples": [
+    {"de": "Er ist auf seine Leser angewiesen.", "note": "angewiesen auf + Akkusativ"},
+    {"de": "Den Lesern gefällt, dass er um aktuelle Bezüge bemüht ist.", "note": "bemüht um + Akkusativ"},
+    {"de": "Ich bin schon gespannt auf seinen nächsten Roman.", "note": "gespannt auf + Akkusativ"},
+    {"de": "Die Kreßberger sind verwundert über die alternative Lebensweise der Aussteiger.", "note": "verwundert über + Akkusativ"},
+    {"de": "Sie ist stets aufgeschlossen gegenüber Neuem.", "note": "aufgeschlossen gegenüber + Dativ"},
+    {"de": "Er ist erfahren im Verfassen von Bestsellern.", "note": "erfahren in + Dativ"},
+    {"de": "Ich bin überzeugt davon, dass Kleinstädte einiges zu bieten haben.", "note": "überzeugt von, here as davon + dass-Satz"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Complete the preposition that belongs to 'angewiesen'.",
+     "text": "Er ist ___ seine Leser angewiesen.", "answers": ["auf"],
+     "sentence": "Er ist auf seine Leser angewiesen.", "source": true,
+     "explain": "angewiesen auf + Akkusativ."},
+    {"type": "fill", "prompt": "Complete the preposition that belongs to 'zufrieden'.",
+     "text": "Viele Leser sind zufrieden ___ dem Angebot.", "answers": ["mit"],
+     "sentence": "Viele Leser sind zufrieden mit dem Angebot.", "source": true,
+     "explain": "zufrieden mit + Dativ."},
+    {"type": "choice", "prompt": "Which case does 'gespannt auf' govern?",
+     "text": "", "options": ["Akkusativ", "Dativ", "Genitiv", "Nominativ"],
+     "answers": ["Akkusativ"],
+     "explain": "angewiesen auf, bemüht um, dankbar für, gespannt auf and the others in that group take the accusative."},
+    {"type": "choice", "prompt": "Which adjective goes with the dative?",
+     "text": "", "options": ["aufgeschlossen gegenüber", "dankbar für", "erfreut über", "entscheidend für"],
+     "answers": ["aufgeschlossen gegenüber"],
+     "explain": "aufgeschlossen gegenüber, erfahren in, überzeugt von and zufrieden mit take the dative."},
+    {"type": "error", "prompt": "The case after the preposition is wrong. Correct the sentence.",
+     "text": "Ich bin schon gespannt auf seinem nächsten Roman.",
+     "answers": ["Ich bin schon gespannt auf seinen nächsten Roman."],
+     "explain": "gespannt auf governs the accusative: auf seinen nächsten Roman."},
+    {"type": "context", "prompt": "The complement is a dass-clause. Complete the da(r)-form.",
+     "text": "Ich bin überzeugt ___, dass Kleinstädte einiges zu bieten haben.",
+     "answers": ["davon"],
+     "sentence": "Ich bin überzeugt davon, dass Kleinstädte einiges zu bieten haben.", "source": true,
+     "explain": "überzeugt von + dass-Satz becomes überzeugt davon, dass …"}
+   ]
+  },
+  {
+   "id": "g-l09-3",
+   "titleEn": "Specifying linking adverbs",
+   "summary": "beziehungsweise / respektive, und zwar and vielmehr make a statement more precise.",
+   "category": "Textgrammatik",
+   "tags": ["Verbindungsadverbien", "Präzisierung", "Textgrammatik"],
+   "difficulty": 3,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "Making a statement precise",
+     "text": "These adverbs add precision to what has just been said: an alternative name, a narrowing specification, or a correction."}
+   ],
+   "rules": [
+    "beziehungsweise (bzw.) and respektive give an alternative designation, or say 'or, more exactly'.",
+    "und zwar narrows what has been said down to a specific case.",
+    "vielmehr corrects the previous statement and replaces it with a more accurate one."
+   ],
+   "examples": [
+    {"de": "Städtische Landwirtschaft, Urban beziehungsweise (bzw.) / respektive Guerilla Gardening genannt, liegt im Trend.", "note": "bzw. — an alternative name"},
+    {"de": "Ich war mit ihm bekannt beziehungsweise befreundet.", "note": "bzw. — 'or, more exactly'"},
+    {"de": "Sie fand die Aufgaben schwierig respektive unmöglich.", "note": "respektive"},
+    {"de": "Die Zukunft gehört ökologischen Lebensformen, und zwar speziell Projekten wie dem Prinzessinnengarten.", "note": "und zwar narrows down"},
+    {"de": "Es geht nicht nur um Fassaden, vielmehr geht es um die Stadtlandschaft.", "note": "vielmehr corrects"},
+    {"de": "Er ist nicht dumm, vielmehr weiß er gut Bescheid.", "note": "vielmehr corrects"}
+   ],
+   "exercises": [
+    {"type": "choice", "prompt": "Which adverb narrows the statement down to a specific case?",
+     "text": "Die Zukunft gehört ökologischen Lebensformen, ___ speziell Projekten wie dem Prinzessinnengarten.",
+     "options": ["und zwar", "vielmehr", "beziehungsweise", "respektive"],
+     "answers": ["und zwar"],
+     "explain": "und zwar narrows the preceding statement down."},
+    {"type": "choice", "prompt": "Which adverb corrects the previous statement?",
+     "text": "Er ist nicht dumm, ___ weiß er gut Bescheid.",
+     "options": ["vielmehr", "und zwar", "beziehungsweise", "bzw."],
+     "answers": ["vielmehr"],
+     "explain": "vielmehr replaces the rejected statement with a more accurate one."},
+    {"type": "fill", "prompt": "Give the alternative name (abbreviated form).",
+     "text": "Ich war mit ihm bekannt ___ befreundet.", "answers": ["beziehungsweise", "bzw."],
+     "sentence": "Ich war mit ihm bekannt beziehungsweise befreundet.", "source": true,
+     "explain": "beziehungsweise (bzw.) = 'or, more exactly'."},
+    {"type": "choice", "prompt": "Which word is the formal synonym of 'beziehungsweise'?",
+     "text": "", "options": ["respektive", "vielmehr", "und zwar", "dennoch"],
+     "answers": ["respektive"],
+     "explain": "respektive is the more formal equivalent of beziehungsweise."},
+    {"type": "error", "prompt": "The linking adverb does not fit the meaning. Correct it.",
+     "text": "Es geht nicht nur um Fassaden, und zwar geht es um die Stadtlandschaft.",
+     "answers": ["Es geht nicht nur um Fassaden, vielmehr geht es um die Stadtlandschaft."],
+     "explain": "The second clause corrects the first, so vielmehr, not und zwar."}
+   ]
+  }
+ ]
+}

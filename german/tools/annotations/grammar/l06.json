@@ -1,0 +1,160 @@
+{
+ "topics": [
+  {
+   "id": "g-l06-1",
+   "titleEn": "Prepositions with the dative",
+   "summary": "entsprechend, samt, fern and zuliebe — elevated, written register.",
+   "category": "Präpositionen",
+   "tags": ["Präpositionen", "Dativ", "Schriftsprache"],
+   "difficulty": 3,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "Register",
+     "text": "The following prepositions belong to elevated usage, that is, to the written language."}
+   ],
+   "rules": [
+    "entsprechend = in accordance with: entsprechend der neuen Studienordnung.",
+    "samt = together with: den Namen samt der E-Mail-Adresse.",
+    "fern = far from; it can also be used with the genitive: fern des Alltags.",
+    "zuliebe = for the sake of; it is postpositioned, i.e. it follows the noun.",
+    "All four govern the dative unless noted otherwise."
+   ],
+   "examples": [
+    {"de": "Doppelstudiengänge sind entsprechend der neuen Studienordnung möglich.", "note": "entsprechend + Dativ"},
+    {"de": "Im Vorlesungsverzeichnis findet man den Namen samt der E-Mail-Adresse.", "note": "samt + Dativ"},
+    {"de": "Sie studiert fern (von) ihrer Heimatstadt.", "note": "fern + Dativ; also possible with the genitive"},
+    {"de": "Seinen Eltern zuliebe hat er Jura studiert.", "note": "zuliebe follows the noun"}
+   ],
+   "exercises": [
+    {"type": "choice", "prompt": "Which of these prepositions is postpositioned?",
+     "text": "", "options": ["zuliebe", "entsprechend", "samt", "fern"],
+     "answers": ["zuliebe"],
+     "explain": "zuliebe follows the noun: Seinen Eltern zuliebe hat er Jura studiert."},
+    {"type": "fill", "prompt": "Complete: 'in accordance with the new study regulations'.",
+     "text": "Doppelstudiengänge sind ___ der neuen Studienordnung möglich.",
+     "answers": ["entsprechend"],
+     "sentence": "Doppelstudiengänge sind entsprechend der neuen Studienordnung möglich.", "source": true,
+     "explain": "entsprechend + Dativ = in accordance with."},
+    {"type": "fill", "prompt": "Complete: the name 'together with' the e-mail address.",
+     "text": "Im Vorlesungsverzeichnis findet man den Namen ___ der E-Mail-Adresse.",
+     "answers": ["samt"],
+     "sentence": "Im Vorlesungsverzeichnis findet man den Namen samt der E-Mail-Adresse.", "source": true,
+     "explain": "samt + Dativ = together with."},
+    {"type": "choice", "prompt": "Which case follows these prepositions by default?",
+     "text": "", "options": ["Dativ", "Genitiv", "Akkusativ", "Nominativ"],
+     "answers": ["Dativ"],
+     "explain": "entsprechend, samt, fern and zuliebe take the dative; fern is additionally possible with the genitive."},
+    {"type": "error", "prompt": "zuliebe is in the wrong position. Correct the sentence.",
+     "text": "Zuliebe seinen Eltern hat er Jura studiert.",
+     "answers": ["Seinen Eltern zuliebe hat er Jura studiert."],
+     "explain": "zuliebe is postpositioned and follows the dative noun."}
+   ]
+  },
+  {
+   "id": "g-l06-2",
+   "titleEn": "Word formation: noun suffixes",
+   "summary": "Nouns with the same suffix usually share the same article.",
+   "category": "Wortbildung",
+   "tags": ["Wortbildung", "Nachsilben", "Nomen", "Artikel"],
+   "difficulty": 3,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "Suffix and article",
+     "text": "Nouns with the same suffixes mostly have the same article, which makes the suffix a reliable clue to the gender."},
+    {"heading": "Where the suffixes come from",
+     "text": "With the endings -ar and -är you can build job titles such as Bibliothek → Bibliothekar, Sekretariat → Sekretär, or collectives such as Vokabel → Vokabular. Adjectives ending in -ant and -ent give nouns in -anz and -enz: elegant → Eleganz, intelligent → Intelligenz. Verbs in -ieren give nouns in -enz: existieren → Existenz."}
+   ],
+   "rules": [
+    "der: -asmus / -ismus (Enthusiasmus, Feminismus, Optimismus, Mechanismus, Aktivismus, Sarkasmus).",
+    "der: -ar / -är for male job titles (Bibliothekar, Kommissar, Sekretär, Volontär).",
+    "das: -ment (Dokument, Experiment, Instrument, Management, Medikament).",
+    "die: -anz (Bilanz, Distanz, Eleganz, Resonanz) and -enz (Existenz, Intelligenz, Kompetenz, Konkurrenz, Präferenz).",
+    "Careful: -ar is der only for male job titles; words taken from Latin are neuter, e.g. das Seminar, das Vokabular, das Exemplar."
+   ],
+   "examples": [
+    {"de": "Enthusiasmus", "note": "der — suffix -asmus"},
+    {"de": "Mechanismus", "note": "der — suffix -ismus"},
+    {"de": "Bibliothekar", "note": "der — male job title in -ar"},
+    {"de": "Experiment", "note": "das — suffix -ment"},
+    {"de": "Eleganz", "note": "die — suffix -anz, from elegant"},
+    {"de": "Intelligenz", "note": "die — suffix -enz, from intelligent"},
+    {"de": "das Vokabular", "note": "das — a Latin word in -ar, not a job title"}
+   ],
+   "exercises": [
+    {"type": "choice", "prompt": "Which article goes with 'Kompetenz'?",
+     "text": "___ Kompetenz", "options": ["die", "der", "das"], "answers": ["die"],
+     "explain": "Nouns in -enz are feminine: Existenz, Intelligenz, Kompetenz, Konkurrenz, Präferenz."},
+    {"type": "choice", "prompt": "Which article goes with 'Medikament'?",
+     "text": "___ Medikament", "options": ["das", "der", "die"], "answers": ["das"],
+     "explain": "Nouns in -ment are neuter: Dokument, Experiment, Instrument, Management, Medikament."},
+    {"type": "choice", "prompt": "Careful — which article goes with 'Seminar'?",
+     "text": "___ Seminar", "options": ["das", "der", "die"], "answers": ["das"],
+     "explain": "-ar is der only for male job titles; Latin words such as das Seminar, das Vokabular, das Exemplar are neuter."},
+    {"type": "transform", "prompt": "Form the noun from the adjective 'intelligent'.",
+     "from": "intelligent", "answers": ["Intelligenz", "die Intelligenz"],
+     "explain": "Adjectives in -ent give nouns in -enz."},
+    {"type": "transform", "prompt": "Form the noun from the adjective 'elegant'.",
+     "from": "elegant", "answers": ["Eleganz", "die Eleganz"],
+     "explain": "Adjectives in -ant give nouns in -anz."},
+    {"type": "fill", "prompt": "Complete the article.",
+     "text": "___ Optimismus meiner Kollegin ist ansteckend.", "answers": ["Der"],
+     "explain": "Nouns in -ismus / -asmus are masculine."}
+   ]
+  },
+  {
+   "id": "g-l06-3",
+   "titleEn": "Reference words",
+   "summary": "Adverbs such as das, dem, da, stattdessen, dadurch and infolgedessen that tie sentences into a coherent text.",
+   "category": "Textgrammatik",
+   "tags": ["Verweiswörter", "Kohärenz", "Textgrammatik"],
+   "difficulty": 3,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "What they do",
+     "text": "To join sentences into coherent, logically built and stylistically good texts, German uses reference words. Each one points back to something already said."}
+   ],
+   "rules": [
+    "Das points back to a whole statement: Das kannte ich so nicht.",
+    "Dem picks up a dative complement: Dem stimme ich zu (zustimmen + Dativ).",
+    "Da points back to a place or a situation: Da habe ich immer Ansprechpartner gefunden.",
+    "Stattdessen / Dafür express a replacement or a counterpart.",
+    "Dadurch expresses the means or the cause of what follows.",
+    "Dementsprechend / Infolgedessen / Demzufolge express a consequence."
+   ],
+   "examples": [
+    {"de": "Das kannte ich so nicht.", "note": "das points back to the whole previous statement"},
+    {"de": "Dem stimme ich zu.", "note": "dem — zustimmen takes the dative"},
+    {"de": "Da habe ich immer Ansprechpartner gefunden.", "note": "da points back to a place or situation"},
+    {"de": "Stattdessen / Dafür lernen wir in den Ferien umso mehr.", "note": "replacement / counterpart"},
+    {"de": "Dadurch bleibt leider wenig Energie für anderes.", "note": "means or cause"},
+    {"de": "Dementsprechend / Infolgedessen / Demzufolge ist man fachlich nicht auf dem neuesten Stand.", "note": "consequence"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "zustimmen takes the dative. Complete the reference word.",
+     "text": "In Deutschland kommt es darauf an, dass man einen Überblick bekommt. ___ stimme ich zu.",
+     "answers": ["Dem"],
+     "sentence": "Dem stimme ich zu.", "source": true,
+     "explain": "The reference word takes the case the verb requires — zustimmen + Dativ, so dem."},
+    {"type": "choice", "prompt": "Which reference word expresses a consequence?",
+     "text": "Leider bleibt keine Zeit, Fachzeitschriften zu lesen. ___ ist man fachlich nicht auf dem neuesten Stand.",
+     "options": ["Infolgedessen", "Stattdessen", "Da", "Das"],
+     "answers": ["Infolgedessen"],
+     "explain": "Dementsprechend / Infolgedessen / Demzufolge express a consequence; stattdessen would express a replacement."},
+    {"type": "choice", "prompt": "Which reference word expresses a replacement?",
+     "text": "In Belgrad studieren wir fast nie im Semester. ___ lernen wir in den Ferien umso mehr.",
+     "options": ["Stattdessen", "Dementsprechend", "Dem", "Dadurch"],
+     "answers": ["Stattdessen"],
+     "explain": "Stattdessen / Dafür express that something happens in place of something else."},
+    {"type": "choice", "prompt": "Which reference word expresses the means or cause of what follows?",
+     "text": "Ich finde das Studium ziemlich anstrengend. ___ bleibt leider wenig Energie für anderes.",
+     "options": ["Dadurch", "Stattdessen", "Dem", "Da"],
+     "answers": ["Dadurch"],
+     "explain": "Dadurch names the means or the cause."},
+    {"type": "error", "prompt": "The case of the reference word is wrong. Correct the sentence.",
+     "text": "Das stimme ich zu.",
+     "answers": ["Dem stimme ich zu."],
+     "explain": "zustimmen governs the dative, so the reference word is dem, not das."}
+   ]
+  }
+ ]
+}

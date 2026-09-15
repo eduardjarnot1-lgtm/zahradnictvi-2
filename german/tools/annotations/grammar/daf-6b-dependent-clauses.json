@@ -1,0 +1,276 @@
+{
+ "topics": [
+  {
+   "id": "g-daf-a2-expressing-reasons-dependent-clauses-wit",
+   "titleEn": "weil and dass clauses",
+   "summary": "Two subordinating conjunctions that send the verb to the end.",
+   "category": "Satzverbindungen",
+   "tags": ["Nebensatz", "weil", "dass", "Kausal", "Verbstellung"],
+   "difficulty": 2,
+   "prerequisites": ["g-daf-a1-connector-den-reason"],
+   "explanation": [
+    {"heading": "The verb goes last", "text": "weil and dass introduce a subordinate clause, so the conjugated verb moves to the very end: … weil er dort keine Sprachprobleme hat."},
+    {"heading": "weil answers Warum?", "text": "Dependent clauses with weil explain the reason. They answer why questions: Warum?"},
+    {"heading": "dass after verbs of thinking and saying", "text": "Verbs such as hoffen, glauben, wissen often go before dependent clauses with dass."},
+    {"heading": "Spoken German", "text": "When speaking colloquially it is possible to link two main clauses with weil, with a pause instead of the moved verb — the document prints the example with dots to mark it."}
+   ],
+   "rules": [
+    "weil and dass send the conjugated verb to the end of the clause.",
+    "weil gives the reason and answers Warum?",
+    "dass follows verbs like hoffen, glauben, wissen, finden.",
+    "A comma separates the main clause from the subordinate clause.",
+    "The colloquial weil + main-clause order exists in speech but is not the written standard."
+   ],
+   "examples": [
+    {"de": "Bernhard möchte in Köln studieren, weil er dort keine Sprachprobleme hat.", "note": "hat at the end"},
+    {"de": "Ich möchte im Ausland studieren, weil Auslandserfahrung wichtig ist.", "note": "ist at the end"},
+    {"de": "Wir finden, dass Köln eine schöne Stadt ist.", "note": "dass after finden"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Complete the conjunction.", "text": "Bernhard möchte in Köln studieren, ___ er dort keine Sprachprobleme hat.", "answers": ["weil"], "explain": "The clause gives the reason.", "source": true, "sentence": "Bernhard möchte in Köln studieren, weil er dort keine Sprachprobleme hat."},
+    {"type": "reorder", "prompt": "Put the subordinate clause in order.", "tokens": ["weil", "Auslandserfahrung", "wichtig", "ist"], "answers": ["weil Auslandserfahrung wichtig ist"], "explain": "The conjugated verb ist closes the clause.", "source": true, "sentence": "weil Auslandserfahrung wichtig ist."},
+    {"type": "error", "prompt": "Fix the verb position.", "text": "Wir finden, dass Köln ist eine schöne Stadt.", "answers": ["Wir finden, dass Köln eine schöne Stadt ist.", "dass Köln eine schöne Stadt ist"], "explain": "dass sends the verb to the end."},
+    {"type": "choice", "prompt": "Which question does a weil clause answer?", "text": "", "options": ["Warum?", "Wann?", "Wo?", "Wie?"], "answers": ["Warum?"], "explain": "weil clauses explain the reason."},
+    {"type": "choice", "prompt": "Which verb typically introduces a dass clause?", "text": "", "options": ["hoffen", "gehen", "fahren", "kaufen"], "answers": ["hoffen"], "explain": "The document names hoffen, glauben and wissen."}
+   ]
+  },
+  {
+   "id": "g-daf-a2-expressing-reasons-causal-connectives-da",
+   "titleEn": "darum, deshalb, deswegen, daher",
+   "summary": "The same reason stated the other way round, with the consequence as a main clause.",
+   "category": "Satzverbindungen",
+   "tags": ["Konnektoren", "deshalb", "darum", "Kausal", "Wortstellung"],
+   "difficulty": 3,
+   "prerequisites": ["g-daf-a2-expressing-reasons-dependent-clauses-wit"],
+   "explanation": [
+    {"heading": "Reason first, consequence second", "text": "A weil clause names the reason; darum, deshalb, deswegen and daher turn the sentence round so that the reason comes first as a main clause and the consequence follows."},
+    {"heading": "Position 1", "text": "The connector fills position 1 of the second main clause, so the conjugated verb comes second and the subject third: … darum gehe ich jeden zweiten Tag walken."},
+    {"heading": "Four words, one meaning", "text": "The document lists darum, deshalb and deswegen as interchangeable in both examples, with daher in the heading."}
+   ],
+   "rules": [
+    "darum, deshalb, deswegen, daher introduce the consequence, not the reason.",
+    "They occupy position 1, so the verb comes second and the subject follows it.",
+    "Weil ich Sport machen soll, … becomes Ich soll Sport machen, darum …",
+    "The clause they open is a main clause, so the verb does not move to the end."
+   ],
+   "examples": [
+    {"de": "Weil ich Sport machen soll, gehe ich jeden zweiten Tag walken.", "note": "the weil version — reason in the subordinate clause"},
+    {"de": "Ich soll Sport machen, darum / deshalb / deswegen gehe ich jeden zweiten Tag walken.", "note": "the connector version — verb gehe in position 2"},
+    {"de": "Ich habe Urlaub genommen, weil ich mich ausruhen soll.", "note": "reason after the main clause"},
+    {"de": "Ich soll mich ausruhen, darum / deshalb / deswegen habe ich Urlaub genommen.", "note": "the same content with the connector"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Complete the verb position after the connector.", "text": "Ich soll Sport machen, deshalb ___ ich jeden zweiten Tag walken.", "answers": ["gehe"], "explain": "The connector fills position 1, so the verb comes second."},
+    {"type": "transform", "prompt": "Rewrite the weil sentence with deshalb.", "from": "Ich habe Urlaub genommen, weil ich mich ausruhen soll.", "answers": ["Ich soll mich ausruhen, deshalb habe ich Urlaub genommen.", "Ich soll mich ausruhen, deshalb habe ich Urlaub genommen"], "explain": "The reason becomes the first main clause and the consequence follows the connector."},
+    {"type": "choice", "prompt": "Which word does NOT belong to this group?", "text": "", "options": ["weil", "darum", "deshalb", "deswegen"], "answers": ["weil"], "explain": "weil is a subordinating conjunction; the other three are connectors in position 1."},
+    {"type": "error", "prompt": "Fix the word order.", "text": "Ich soll Sport machen, darum ich gehe jeden zweiten Tag walken.", "answers": ["Ich soll Sport machen, darum gehe ich jeden zweiten Tag walken.", "darum gehe ich jeden zweiten Tag walken"], "explain": "darum is in position 1, so the verb must come second."},
+    {"type": "choice", "prompt": "What do these connectors introduce?", "text": "", "options": ["the consequence", "the reason", "a condition", "a time"], "answers": ["the consequence"], "explain": "The reason is stated first, as a main clause."}
+   ]
+  },
+  {
+   "id": "g-daf-a2-stating-conditions-dependent-conditional",
+   "titleEn": "Conditions with wenn",
+   "summary": "An if-clause that can stand after or before the main clause.",
+   "category": "Satzverbindungen",
+   "tags": ["Nebensatz", "wenn", "Konditional", "Wortstellung"],
+   "difficulty": 2,
+   "prerequisites": ["g-daf-a2-expressing-reasons-dependent-clauses-wit"],
+   "explanation": [
+    {"heading": "Two orders", "text": "The document prints the same content twice: Hauptsatz + Nebensatz (Rui bekommt Zinsen, wenn …) and Nebensatz + Hauptsatz (Wenn Rui Geld anlegen will, kann er …)."},
+    {"heading": "The verb still goes last in the wenn clause", "text": "wenn is a subordinating conjunction, so its clause always ends with the conjugated verb — hat, macht, will, macht."},
+    {"heading": "When the wenn clause comes first", "text": "The whole subordinate clause counts as position 1, so the main clause begins with its verb: …, kann er es auf ein Sparkonto einzahlen; …, kostet die EC-Karte 6,50 € pro Jahr."}
+   ],
+   "rules": [
+    "wenn introduces the condition and sends its verb to the end.",
+    "The wenn clause may follow or precede the main clause.",
+    "A leading wenn clause fills position 1, so the main clause starts with the conjugated verb.",
+    "A comma always separates the two clauses."
+   ],
+   "examples": [
+    {"de": "Rui bekommt Zinsen, wenn er Geld auf einem Sparkonto hat.", "note": "main clause first"},
+    {"de": "Die EC-Karte kostet nichts, wenn Rui nur Online-Banking macht.", "note": "main clause first"},
+    {"de": "Wenn Rui Geld anlegen will, kann er es auf ein Sparkonto einzahlen", "note": "wenn clause first — the main clause begins with kann"},
+    {"de": "Wenn Rui nicht nur Online-Banking macht, kostet die EC-Karte 6,50 €pro Jahr.", "note": "wenn clause first; the document prints 6,50 €pro Jahr without a space"}
+   ],
+   "exercises": [
+    {"type": "reorder", "prompt": "Put the wenn clause in order.", "tokens": ["wenn", "er", "Geld", "auf", "einem", "Sparkonto", "hat"], "answers": ["wenn er Geld auf einem Sparkonto hat"], "explain": "The conjugated verb hat closes the clause.", "source": true, "sentence": "wenn er Geld auf einem Sparkonto hat."},
+    {"type": "fill", "prompt": "Complete the main clause after the leading wenn clause.", "text": "Wenn Rui Geld anlegen will, ___ er es auf ein Sparkonto einzahlen.", "answers": ["kann"], "explain": "The subordinate clause is position 1, so the verb follows immediately."},
+    {"type": "transform", "prompt": "Put the wenn clause first.", "from": "Die EC-Karte kostet nichts, wenn Rui nur Online-Banking macht.", "answers": ["Wenn Rui nur Online-Banking macht, kostet die EC-Karte nichts.", "Wenn Rui nur Online-Banking macht, kostet die EC-Karte nichts"], "explain": "The main clause then begins with its verb."},
+    {"type": "choice", "prompt": "Where does the verb stand in a wenn clause?", "text": "", "options": ["at the end", "in position 2", "in position 1", "before the subject"], "answers": ["at the end"], "explain": "wenn is a subordinating conjunction."},
+    {"type": "error", "prompt": "Fix the main clause.", "text": "Wenn Rui Geld anlegen will, er kann es auf ein Sparkonto einzahlen.", "answers": ["Wenn Rui Geld anlegen will, kann er es auf ein Sparkonto einzahlen.", "kann er es auf ein Sparkonto einzahlen"], "explain": "The leading subordinate clause counts as position 1."}
+   ]
+  },
+  {
+   "id": "g-daf-a2-naming-a-point-of-time-in-the-past-tempo",
+   "titleEn": "als — a single point in the past",
+   "summary": "The temporal conjunction for something that happened once.",
+   "category": "Satzverbindungen",
+   "tags": ["Nebensatz", "als", "Temporal", "Vergangenheit"],
+   "difficulty": 2,
+   "prerequisites": ["g-daf-a2-stating-conditions-dependent-conditional"],
+   "explanation": [
+    {"heading": "What als does", "text": "als names a point of time in the past — one occasion, not a repeated one."},
+    {"heading": "The verb goes last", "text": "als introduces a subordinate clause: … als der Krimiautor eintraf; … als er an der Kasse zahlen wollte."},
+    {"heading": "Either order", "text": "The document shows both arrangements of the same two sentences, with the als clause after and before the main clause. When it comes first, the main clause opens with its verb: Als der Krimiautor eintraf, gab es ein großes Gedränge."}
+   ],
+   "rules": [
+    "als names a single point of time in the past.",
+    "The conjugated verb goes to the end of the als clause.",
+    "The als clause may stand before or after the main clause.",
+    "A leading als clause is position 1, so the main clause begins with the verb."
+   ],
+   "examples": [
+    {"de": "Es gab ein großes Gedränge, als der Krimiautor eintraf.", "note": "main clause first"},
+    {"de": "Ruis Portemonnaie war weg, als er an der Kasse zahlen wollte.", "note": "the modal wollte closes the clause"},
+    {"de": "Als der Krimiautor eintraf, gab es ein großes Gedränge.", "note": "als clause first — gab comes straight after the comma"},
+    {"de": "Als er an der Kasse zahlen wollte, war Ruis Portemonnaie weg.", "note": "the same content the other way round"}
+   ],
+   "exercises": [
+    {"type": "transform", "prompt": "Put the als clause first.", "from": "Es gab ein großes Gedränge, als der Krimiautor eintraf.", "answers": ["Als der Krimiautor eintraf, gab es ein großes Gedränge.", "Als der Krimiautor eintraf, gab es ein großes Gedränge"], "explain": "The main clause then starts with gab.", "source": true, "sentence": "Als der Krimiautor eintraf, gab es ein großes Gedränge."},
+    {"type": "reorder", "prompt": "Put the als clause in order.", "tokens": ["als", "er", "an", "der", "Kasse", "zahlen", "wollte"], "answers": ["als er an der Kasse zahlen wollte"], "explain": "The conjugated verb wollte comes last, after the infinitive zahlen.", "source": true, "sentence": "als er an der Kasse zahlen wollte."},
+    {"type": "choice", "prompt": "What does als express here?", "text": "", "options": ["a single point of time in the past", "a repeated action in the past", "a condition", "a comparison"], "answers": ["a single point of time in the past"], "explain": "That is the heading of this section."},
+    {"type": "fill", "prompt": "Complete the main clause verb.", "text": "Als er an der Kasse zahlen wollte, ___ Ruis Portemonnaie weg.", "answers": ["war"], "explain": "The als clause is position 1, so the verb comes next."},
+    {"type": "error", "prompt": "Fix the verb position.", "text": "Es gab ein großes Gedränge, als eintraf der Krimiautor.", "answers": ["Es gab ein großes Gedränge, als der Krimiautor eintraf.", "als der Krimiautor eintraf"], "explain": "In an als clause the verb is last."}
+   ]
+  },
+  {
+   "id": "g-daf-a2-time-expressions-dependent-clauses-with-",
+   "titleEn": "seit(dem) and bis",
+   "summary": "seit(dem) marks a starting point that still holds; bis marks an end point.",
+   "category": "Satzverbindungen",
+   "tags": ["Nebensatz", "seitdem", "bis", "Temporal"],
+   "difficulty": 3,
+   "prerequisites": ["g-daf-a2-naming-a-point-of-time-in-the-past-tempo"],
+   "explanation": [
+    {"heading": "seit(dem)", "text": "The clause names the moment something started, and the situation has lasted since: Beate hat dauernd Schmerzen, seit(dem) sie an ihrer Masterarbeit arbeitet. The document marks this with the symbol • →."},
+    {"heading": "bis", "text": "The clause names the moment something will stop or stopped: Es dauert noch 2 Wochen, bis Beate zu Dr. Rosmann gehen kann. The document marks it • → •, an interval with both ends."},
+    {"heading": "Both orders", "text": "Each conjunction is shown after and before the main clause. A leading subordinate clause is position 1, so the main clause begins with its verb: Seit(dem) Beate so viel arbeitet, hat sie dauernd Schmerzen."},
+    {"heading": "Tenses", "text": "The examples pair present with present (arbeitet – hat) and past with past (bekam – dauerte)."}
+   ],
+   "rules": [
+    "seit(dem) names the starting point of a situation that still holds.",
+    "bis names the end point of a period.",
+    "Both are subordinating conjunctions: the verb goes to the end.",
+    "Either clause can come first; a leading subordinate clause fills position 1.",
+    "seitdem and seit are both possible in this use."
+   ],
+   "examples": [
+    {"de": "Beate hat dauernd Schmerzen, seit(dem) sie an ihrer Masterarbeit arbeitet.", "note": "seit(dem) — the starting point"},
+    {"de": "Beate war bei keinem Arzt mehr, seit(dem) ihr alter Hausarzt in Rente ist.", "note": "seit(dem) with a present-tense clause"},
+    {"de": "Es dauert noch 2 Wochen, bis Beate zu Dr. Rosmann gehen kann.", "note": "bis — the end point"},
+    {"de": "Es dauerte 2 Wochen, bis Beate einen Arzttermin bekam.", "note": "bis in the past"},
+    {"de": "Seit(dem) Beate so viel arbeitet, hat sie dauernd Schmerzen.", "note": "subordinate clause first"},
+    {"de": "Bis Beate zu Dr. Rosmann gehen kann, dauert es noch 2 Wochen.", "note": "subordinate clause first"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Complete the conjunction.", "text": "Es dauert noch 2 Wochen, ___ Beate zu Dr. Rosmann gehen kann.", "answers": ["bis"], "explain": "The clause names the end of the waiting period.", "source": true, "sentence": "Es dauert noch 2 Wochen, bis Beate zu Dr. Rosmann gehen kann."},
+    {"type": "choice", "prompt": "Which conjunction marks a starting point that still holds?", "text": "", "options": ["seit(dem)", "bis", "als", "wenn"], "answers": ["seit(dem)"], "explain": "The document marks it with • →, an open-ended stretch."},
+    {"type": "transform", "prompt": "Put the subordinate clause first.", "from": "Es dauerte 2 Wochen, bis Beate einen Arzttermin bekam.", "answers": ["Bis Beate einen Arzttermin bekam, dauerte es 2 Wochen.", "Bis Beate einen Arzttermin bekam, dauerte es 2 Wochen"], "explain": "The main clause then begins with dauerte.", "source": true, "sentence": "Bis Beate einen Arzttermin bekam, dauerte es 2 Wochen."},
+    {"type": "reorder", "prompt": "Put the subordinate clause in order.", "tokens": ["seitdem", "sie", "an", "ihrer", "Masterarbeit", "arbeitet"], "answers": ["seitdem sie an ihrer Masterarbeit arbeitet"], "explain": "The verb arbeitet closes the clause."},
+    {"type": "fill", "prompt": "Complete the main clause verb.", "text": "Seit(dem) Beate so viel arbeitet, ___ sie dauernd Schmerzen.", "answers": ["hat"], "explain": "The leading subordinate clause is position 1.", "source": true, "sentence": "Seit(dem) Beate so viel arbeitet, hat sie dauernd Schmerzen."}
+   ]
+  },
+  {
+   "id": "g-daf-a2-indirect-questions",
+   "titleEn": "Indirect questions",
+   "summary": "ob for yes/no questions, the question word otherwise — and the verb at the end.",
+   "category": "Satzverbindungen",
+   "tags": ["Nebensatz", "ob", "indirekte Frage", "Verbstellung", "Höflichkeit"],
+   "difficulty": 3,
+   "prerequisites": ["g-daf-a2-expressing-reasons-dependent-clauses-wit"],
+   "explanation": [
+    {"heading": "Yes/no questions take ob", "text": "If the direct question is a yes/no question, the indirect question begins with ob: Gibt es auch Führungen …? → Ich möchte wissen, ob es auch Führungen … gibt."},
+    {"heading": "W-questions keep their word", "text": "If the direct question begins with a question word, the indirect question will begin with the same question word: wie lange, wo, welches."},
+    {"heading": "The verb moves to the end", "text": "In every example the conjugated verb closes the clause: gibt, dauert, ist, ist."},
+    {"heading": "Why use it", "text": "The introductory phrases — Ich möchte wissen, Können Sie mir sagen, Können Sie mir zeigen — make the question more polite."}
+   ],
+   "rules": [
+    "Yes/no question → ob.",
+    "W-question → the same question word.",
+    "The conjugated verb goes to the end of the indirect question.",
+    "The introduction is a main clause and keeps its own word order.",
+    "A comma separates the introduction from the indirect question."
+   ],
+   "examples": [
+    {"de": "Gibt es auch Führungen zum Thema „Film“?", "note": "the direct yes/no question"},
+    {"de": "Ich möchte wissen, ob es auch Führungen zum Thema „Film“ gibt.", "note": "ob, with gibt at the end"},
+    {"de": "Können Sie mir sagen, wie lange die Führung dauert?", "note": "the question word is kept"},
+    {"de": "Können Sie mir auf dem Plan zeigen, wo der Treffpunkt ist?", "note": "wo, with ist at the end"},
+    {"de": "Ich möchte gern wissen, welches Ticket am besten ist.", "note": "welches, with ist at the end"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Complete the conjunction.", "text": "Ich möchte wissen, ___ es auch Führungen zum Thema „Film“ gibt.", "answers": ["ob"], "explain": "The direct question was a yes/no question.", "source": true, "sentence": "Ich möchte wissen, ob es auch Führungen zum Thema „Film“ gibt."},
+    {"type": "transform", "prompt": "Make this an indirect question beginning Können Sie mir sagen.", "from": "Wie lange dauert die Führung?", "answers": ["Können Sie mir sagen, wie lange die Führung dauert?", "Können Sie mir sagen, wie lange die Führung dauert"], "explain": "The question word stays and the verb moves to the end.", "source": true, "sentence": "Können Sie mir sagen, wie lange die Führung dauert?"},
+    {"type": "error", "prompt": "Fix the verb position.", "text": "Können Sie mir auf dem Plan zeigen, wo ist der Treffpunkt?", "answers": ["Können Sie mir auf dem Plan zeigen, wo der Treffpunkt ist?", "wo der Treffpunkt ist"], "explain": "In an indirect question the verb comes last."},
+    {"type": "choice", "prompt": "Which word introduces an indirect yes/no question?", "text": "", "options": ["ob", "dass", "wenn", "was"], "answers": ["ob"], "explain": "ob is the indirect counterpart of a question with no question word."},
+    {"type": "reorder", "prompt": "Put the indirect question in order.", "tokens": ["welches", "Ticket", "am", "besten", "ist"], "answers": ["welches Ticket am besten ist"], "explain": "The question word opens the clause and the verb closes it.", "source": true, "sentence": "welches Ticket am besten ist."}
+   ]
+  },
+  {
+   "id": "g-daf-a2-relative-clauses-and-relative-pronouns",
+   "titleEn": "Relative clauses and relative pronouns",
+   "summary": "Gender and number come from the noun; the case comes from the relative clause.",
+   "category": "Satzverbindungen",
+   "tags": ["Relativsatz", "Relativpronomen", "Nebensatz", "Kasus"],
+   "difficulty": 4,
+   "prerequisites": ["g-daf-a2-expressing-reasons-dependent-clauses-wit"],
+   "explanation": [
+    {"heading": "The forms", "text": "The table is almost the definite article: Nom. der, das, die, die; Akk. den, das, die, die; Dat. dem, dem, der, denen. Only the dative plural denen differs."},
+    {"heading": "Where gender comes from", "text": "The gender (der, die, das) and whether the pronoun is singular or plural depends on the noun which the relative pronoun is referring to: Ich hatte einen Berater, der sehr kompetent war."},
+    {"heading": "Where case comes from", "text": "The case depends either on the verb in the relative clause (treffen + accusative) or on the preposition (hören von + dative) — not on the main clause."},
+    {"heading": "Position", "text": "Relative clauses are dependent clauses, so the verb goes to the end, and the clause often begins directly after the word it is referring to."}
+   ],
+   "rules": [
+    "Gender and number come from the noun in the main clause.",
+    "Case comes from the verb or the preposition inside the relative clause.",
+    "The forms match the definite article except in the dative plural: denen.",
+    "The conjugated verb stands at the end of the relative clause.",
+    "The relative clause often follows its noun immediately."
+   ],
+   "examples": [
+    {"de": "Ich hatte einen Berater, der sehr kompetent war.", "note": "der Berater is masculine; the pronoun is the subject of the relative clause, so nominative"},
+    {"de": "Nom. der das die die", "note": "the nominative row of the table"},
+    {"de": "Akk. den den die die", "note": "the accusative row as printed in the document"},
+    {"de": "Dat. dem dem der denen", "note": "the dative row — denen is the one form that differs from the article"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Complete the relative pronoun.", "text": "Ich hatte einen Berater, ___ sehr kompetent war.", "answers": ["der"], "explain": "der Berater, and the pronoun is the subject — nominative masculine.", "source": true, "sentence": "Ich hatte einen Berater, der sehr kompetent war."},
+    {"type": "choice", "prompt": "Which relative pronoun form is not the same as the definite article?", "text": "", "options": ["denen", "der", "dem", "die"], "answers": ["denen"], "explain": "The dative plural of the relative pronoun is denen."},
+    {"type": "choice", "prompt": "What decides the case of the relative pronoun?", "text": "", "options": ["the verb or preposition in the relative clause", "the noun in the main clause", "the gender of the noun", "the position in the sentence"], "answers": ["the verb or preposition in the relative clause"], "explain": "Gender and number come from the noun; the case comes from inside the relative clause."},
+    {"type": "fill", "prompt": "Complete the relative pronoun.", "text": "Das ist der Berater, ___ ich gestern getroffen habe.", "answers": ["den"], "hint": "treffen + Akkusativ", "explain": "Masculine, and the object of treffen — accusative den."},
+    {"type": "error", "prompt": "Fix the verb position.", "text": "Ich hatte einen Berater, der war sehr kompetent.", "answers": ["Ich hatte einen Berater, der sehr kompetent war.", "der sehr kompetent war"], "explain": "A relative clause is a dependent clause, so the verb goes last."}
+   ]
+  },
+  {
+   "id": "g-daf-b1-relative-clauses-with-was",
+   "titleEn": "Relative clauses with was",
+   "summary": "was refers to a whole sentence or to a pronoun, never to an ordinary noun.",
+   "category": "Satzverbindungen",
+   "tags": ["Relativsatz", "was", "Nebensatz"],
+   "difficulty": 3,
+   "prerequisites": ["g-daf-a2-relative-clauses-and-relative-pronouns"],
+   "explanation": [
+    {"heading": "Two uses", "text": "The document lists exactly two: was refers to a previous sentence, or to a pronoun."},
+    {"heading": "To a previous sentence", "text": "Wir duzen unsere Professoren, was komplett anders ist — was stands for the whole statement before the comma."},
+    {"heading": "To a pronoun", "text": "Ich mag alles, was mit Sport zu tun hat — was picks up alles. The same applies to das, nichts, etwas, vieles."},
+    {"heading": "Word order", "text": "It is a relative clause like any other: the conjugated verb closes it — ist, hat."}
+   ],
+   "rules": [
+    "was refers to a previous sentence or to a pronoun.",
+    "An ordinary noun takes der, das or die instead.",
+    "The verb goes to the end of the was clause.",
+    "A comma introduces the clause."
+   ],
+   "examples": [
+    {"de": "Wir duzen unsere Professoren, was komplett anders ist.", "note": "was refers to the whole preceding statement"},
+    {"de": "Ich mag alles, was mit Sport zu tun hat.", "note": "was refers to the pronoun alles"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Complete the relative pronoun.", "text": "Ich mag alles, ___ mit Sport zu tun hat.", "answers": ["was"], "explain": "alles is a pronoun, so the relative pronoun is was.", "source": true, "sentence": "Ich mag alles, was mit Sport zu tun hat."},
+    {"type": "choice", "prompt": "When is was the right relative pronoun?", "text": "", "options": ["after a pronoun or a whole sentence", "after any noun", "after a masculine noun", "after a preposition"], "answers": ["after a pronoun or a whole sentence"], "explain": "Those are the document's two cases."},
+    {"type": "error", "prompt": "Fix the relative pronoun.", "text": "Wir duzen unsere Professoren, das komplett anders ist.", "answers": ["Wir duzen unsere Professoren, was komplett anders ist.", "was komplett anders ist"], "explain": "The pronoun refers to the whole preceding sentence, so it is was."},
+    {"type": "reorder", "prompt": "Put the relative clause in order.", "tokens": ["was", "komplett", "anders", "ist"], "answers": ["was komplett anders ist"], "explain": "The verb ist closes the clause.", "source": true, "sentence": "was komplett anders ist."}
+   ]
+  }
+ ]
+}

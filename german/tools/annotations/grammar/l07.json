@@ -1,0 +1,170 @@
+{
+ "topics": [
+  {
+   "id": "g-l07-1",
+   "titleEn": "Verbal style – nominal style",
+   "summary": "Turning verbs into nouns, the standard move of formal written German.",
+   "category": "Stil",
+   "tags": ["Nominalstil", "Verbalstil", "Schriftsprache", "Genitivattribut"],
+   "difficulty": 5,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "Why it matters",
+     "text": "In written German the nominal style — using nouns in place of verbs — is widespread. It lets you build longer and more complex sentences."},
+    {"heading": "Vowel change",
+     "text": "When a verb is turned into a noun, strong verbs frequently change their stem vowel: brechen → der Bruch, denken → der Gedanke, verstehen → das Verständnis, finden → der Fund, sehen → die Sicht, aussteigen → der Ausstieg."}
+   ],
+   "rules": [
+    "Adverb → declined adjective: Die Menschen reagieren unterschiedlich → Die unterschiedliche Reaktion der Menschen …",
+    "Subject → genitive attribute: Die Gesellschaft verändert sich → Die Veränderung der Gesellschaft …",
+    "Object → genitive attribute: Raphael analysierte die Gesellschaft → Seine Analyse der Gesellschaft …",
+    "Noun without an article → von + Dativ: Man gibt ihm Kleidung → Die Gabe von Kleidung …",
+    "Verb + preposition → noun + preposition: Junge Leute suchen nach Ferienjobs → Die Suche junger Leute nach Ferienjobs …",
+    "Personal pronoun → possessive article: Er arbeitet am Wochenende → Seine Arbeit am Wochenende …",
+    "The causing person or thing → durch + Akkusativ: Manche Eltern bessern das Taschengeld auf → Die Aufbesserung des Taschengeldes durch manche Eltern …",
+    "Verb + Dativ → noun + preposition: Die Schuldnerberatung hilft dem Jugendlichen → Die Hilfe der Schuldnerberatung für den Jugendlichen …"
+   ],
+   "examples": [
+    {"de": "Die unterschiedliche Reaktion der Menschen", "note": "Adverb → dekliniertes Adjektiv"},
+    {"de": "Die Veränderung der Gesellschaft", "note": "Subjekt → Genitivattribut"},
+    {"de": "Seine Analyse der Gesellschaft machte ihn unzufrieden.", "note": "Objekt → Genitivattribut"},
+    {"de": "Die freiwillige Gabe von Kleidung freut ihn.", "note": "Nomen ohne Artikel → von + Dativ"},
+    {"de": "Ihr Interesse an Ferienjobs", "note": "Verb + Präposition → Nomen + Präposition"},
+    {"de": "Die Aufbesserung des Taschengeldes durch manche Eltern", "note": "verursachende Person → durch + Akkusativ"},
+    {"de": "Die Hilfe der Schuldnerberatung für den Jugendlichen", "note": "Verb + Dativ → Nomen + Präposition"}
+   ],
+   "exercises": [
+    {"type": "transform", "prompt": "Turn into the nominal style (subject → genitive attribute).",
+     "from": "Die Gesellschaft verändert sich.",
+     "answers": ["Die Veränderung der Gesellschaft", "die Veränderung der Gesellschaft"],
+     "explain": "The subject of the verbal sentence becomes a genitive attribute of the noun."},
+    {"type": "transform", "prompt": "Turn into the nominal style (adverb → declined adjective).",
+     "from": "Die Menschen reagieren unterschiedlich.",
+     "answers": ["Die unterschiedliche Reaktion der Menschen", "die unterschiedliche Reaktion der Menschen"],
+     "explain": "The adverb unterschiedlich becomes the declined adjective unterschiedliche."},
+    {"type": "choice", "prompt": "Which noun belongs to 'brechen'?",
+     "text": "", "options": ["der Bruch", "die Brechung", "das Brechnis", "der Brach"],
+     "answers": ["der Bruch"],
+     "explain": "Strong verbs frequently change their stem vowel: brechen → der Bruch."},
+    {"type": "choice", "prompt": "Which noun belongs to 'verstehen'?",
+     "text": "", "options": ["das Verständnis", "der Verstand", "die Verstehung", "der Verstoß"],
+     "answers": ["das Verständnis"],
+     "explain": "verstehen → das Verständnis, with a vowel change."},
+    {"type": "fill", "prompt": "The causing person is added with which preposition?",
+     "text": "Die Aufbesserung des Taschengeldes ___ manche Eltern …", "answers": ["durch"],
+     "sentence": "Die Aufbesserung des Taschengeldes durch manche Eltern", "source": true,
+     "explain": "The causing person or thing is added with durch + Akkusativ."},
+    {"type": "error", "prompt": "A noun without an article needs von + Dativ, not a genitive. Correct it.",
+     "text": "Die freiwillige Gabe Kleidung freut ihn.",
+     "answers": ["Die freiwillige Gabe von Kleidung freut ihn."],
+     "explain": "A bare noun without an article is attached with von + Dativ."}
+   ]
+  },
+  {
+   "id": "g-l07-2",
+   "titleEn": "Sentence structures: causal relations",
+   "summary": "Reasons expressed by subordinate connectors, main-clause connectors and prepositions.",
+   "category": "Satzstrukturen",
+   "tags": ["Kausal", "Konnektoren", "Präpositionen", "Genitiv"],
+   "difficulty": 4,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "Same meaning, different structure",
+     "text": "Reasons can be expressed with different structures. The sentences are equal in meaning but differ in structure and in register."}
+   ],
+   "rules": [
+    "Subordinate connectors: weil / da / zumal — the verb goes to the end.",
+    "zumal (or besonders weil) adds a reason that reinforces an already given one.",
+    "Main-clause connectors: deshalb / deswegen / daher / aus diesem Grund / denn.",
+    "nämlich and eben are main-clause connectors that stand in position 3, never in position 1.",
+    "Prepositions with the genitive: wegen, mangels, angesichts, aufgrund, dank, kraft.",
+    "aus / vor express an inner cause: aus Angst, vor Wut."
+   ],
+   "examples": [
+    {"de": "Herr Müller hat sich verschuldet , weil / da seine Scheidung teuer war.", "note": "Nebensatz mit weil / da"},
+    {"de": "Ihm ist das nicht so wichtig, zumal / besonders weil er inzwischen eine neue Stelle hat.", "note": "zumal reinforces a reason"},
+    {"de": "Er ist enttäuscht, denn er hat schon zweimal Schiffbruch erlitten.", "note": "Hauptsatzkonnektor denn"},
+    {"de": "Wegen seiner Scheidung hat Herr Müller sich verschuldet.", "note": "wegen + Genitiv"},
+    {"de": "Viele verschulden sich mangels Erfahrung im Umgang mit Geld.", "note": "mangels + Genitiv"},
+    {"de": "Er kocht vor Wut.", "note": "vor — inner cause"},
+    {"de": "Dank neuer technischer Entwicklungen gibt es Hoffnung für die Städte der Zukunft.", "note": "dank + Genitiv, positive cause"}
+   ],
+   "exercises": [
+    {"type": "transform", "prompt": "Rewrite the weil-clause with the preposition wegen + Genitiv.",
+     "from": "Herr Müller hat sich verschuldet, weil seine Scheidung teuer war.",
+     "answers": ["Wegen seiner Scheidung hat Herr Müller sich verschuldet.", "Wegen seiner teuren Scheidung hat Herr Müller sich verschuldet."],
+     "explain": "The subordinate clause becomes a prepositional phrase with wegen + Genitiv."},
+    {"type": "choice", "prompt": "Which connector adds a reinforcing second reason?",
+     "text": "Ihm ist das nicht so wichtig, ___ er inzwischen eine neue Stelle hat.",
+     "options": ["zumal", "deshalb", "nämlich", "dank"],
+     "answers": ["zumal"],
+     "explain": "zumal (= besonders weil) adds a reason that reinforces the one already given."},
+    {"type": "choice", "prompt": "Where does 'nämlich' stand in the sentence?",
+     "text": "", "options": ["auf Position 3", "auf Position 1", "am Satzende", "vor dem Subjekt"],
+     "answers": ["auf Position 3"],
+     "explain": "The main-clause connectors nämlich and eben stand in position 3."},
+    {"type": "fill", "prompt": "A positive cause takes which preposition?",
+     "text": "___ neuer technischer Entwicklungen gibt es Hoffnung für die Städte der Zukunft.",
+     "answers": ["Dank"],
+     "sentence": "Dank neuer technischer Entwicklungen gibt es Hoffnung für die Städte der Zukunft.", "source": true,
+     "explain": "dank + Genitiv names a cause with a positive outcome."},
+    {"type": "fill", "prompt": "An inner cause — he is boiling with rage.",
+     "text": "Er kocht ___ Wut.", "answers": ["vor"],
+     "sentence": "Er kocht vor Wut.", "source": true,
+     "explain": "aus and vor express an inner cause: aus Angst, vor Wut."},
+    {"type": "error", "prompt": "'nämlich' cannot stand in position 1. Correct the sentence.",
+     "text": "Nämlich wissen sie nicht, dass man seine Ausgaben ständig beobachten muss.",
+     "answers": ["Sie wissen nämlich nicht, dass man seine Ausgaben ständig beobachten muss."],
+     "explain": "nämlich and eben always stand in position 3, never at the front."}
+   ]
+  },
+  {
+   "id": "g-l07-3",
+   "titleEn": "Word formation: adjectives from adverbs with -ig",
+   "summary": "The suffix -ig turns adverbs into attributive adjectives, common in written German.",
+   "category": "Wortbildung",
+   "tags": ["Wortbildung", "Adjektive", "Nachsilben", "Schriftsprache"],
+   "difficulty": 2,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "What -ig does",
+     "text": "With the ending -ig, adverbs become attributive adjectives, which occur frequently in written German. They can be temporal, local or modal."}
+   ],
+   "rules": [
+    "Temporal: bald → das baldige Wiedersehen, morgen → der morgige Tag, gestern → die gestrige Sitzung.",
+    "Local: dort → das dortige Bürgerbüro, oben → der obige Absender, hier → die hiesige Situation.",
+    "Modal: sonst → die sonstigen Kosten.",
+    "Likewise: heute → heutig, jetzt → jetzig, sofort → sofortig, vorher → vorherig, damals → damalig, abseits → abseitig, rückwärts → rückwärtig, mehrmals → mehrmalig, ehemals → ehemalig.",
+    "Some forms change their stem: hier → hiesig, oben → obig."
+   ],
+   "examples": [
+    {"de": "das baldige Wiedersehen", "note": "temporal — from bald"},
+    {"de": "der morgige Tag", "note": "temporal — from morgen"},
+    {"de": "die gestrige Sitzung", "note": "temporal — from gestern"},
+    {"de": "das dortige Bürgerbüro", "note": "local — from dort"},
+    {"de": "die hiesige Situation", "note": "local — from hier, with a stem change"},
+    {"de": "die sonstigen Kosten", "note": "modal — from sonst"}
+   ],
+   "exercises": [
+    {"type": "transform", "prompt": "Form the attributive adjective from 'gestern' (+ Sitzung).",
+     "from": "gestern", "answers": ["gestrig", "die gestrige Sitzung", "gestrige"],
+     "explain": "gestern → gestrig: die gestrige Sitzung."},
+    {"type": "transform", "prompt": "Form the attributive adjective from 'hier' (+ Situation).",
+     "from": "hier", "answers": ["hiesig", "die hiesige Situation", "hiesige"],
+     "explain": "hier → hiesig, with a stem change: die hiesige Situation."},
+    {"type": "choice", "prompt": "Which adjective belongs to 'oben'?",
+     "text": "der ___ Absender", "options": ["obige", "obene", "obenige", "oberige"],
+     "answers": ["obige"],
+     "explain": "oben → obig: der obige Absender."},
+    {"type": "fill", "prompt": "Form the adjective from 'morgen'.",
+     "text": "der ___ Tag", "answers": ["morgige"],
+     "sentence": "der morgige Tag", "source": true,
+     "explain": "morgen → morgig, declined here as morgige."},
+    {"type": "choice", "prompt": "Which of these is NOT formed with -ig in the list?",
+     "text": "", "options": ["weil", "damals", "mehrmals", "ehemals"],
+     "answers": ["weil"],
+     "explain": "damals → damalig, mehrmals → mehrmalig, ehemals → ehemalig; weil is a connector, not an adverb of this kind."}
+   ]
+  }
+ ]
+}

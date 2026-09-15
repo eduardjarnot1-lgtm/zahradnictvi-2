@@ -1,0 +1,279 @@
+{
+ "topics": [
+  {
+   "id": "g-daf-a2-temporal-subordinate-clauses-with-wenn-a",
+   "titleEn": "wenn or als?",
+   "summary": "als for one past occasion, wenn for a repeated one — and for everything present or future.",
+   "category": "Satzverbindungen",
+   "tags": ["Nebensatz", "wenn", "als", "Temporal", "Vergangenheit"],
+   "difficulty": 3,
+   "prerequisites": ["g-daf-a2-naming-a-point-of-time-in-the-past-tempo", "g-daf-a2-stating-conditions-dependent-conditional"],
+   "explanation": [
+    {"heading": "als — once, in the past", "text": "als is used for an action that happened once in the past: Als wir dort waren, hat eine Musikgruppe traditionelle Musik gespielt."},
+    {"heading": "wenn — repeatedly, in the past", "text": "wenn is used for a repeated action in the past, often with immer or jedes Mal in front of it: (Immer) wenn das Wetter gut war, haben wir Wanderungen in den Bergen gemacht."},
+    {"heading": "wenn — present and future", "text": "For a single or a repeated action in the present or the future the conjunction is always wenn: Man erholt sich am besten, wenn man faulenzt."},
+    {"heading": "The optional dann", "text": "When the wenn clause comes first, the main clause may add dann before the verb: Wenn das Wetter morgen schön ist, (dann) machen wir einen Ausflug."}
+   ],
+   "rules": [
+    "Past, once: als.",
+    "Past, repeated: wenn — often with (immer) or (jedes Mal).",
+    "Present or future, single or repeated: wenn.",
+    "Both send the conjugated verb to the end of their clause.",
+    "A leading wenn or als clause fills position 1, so the main clause starts with the verb; dann may be inserted."
+   ],
+   "examples": [
+    {"de": "Das Wetter war leider nicht so gut, als wir ankamen", "note": "als — one occasion in the past"},
+    {"de": "Als wir dort waren, hat eine Musikgruppe traditionelle Musik gespielt.", "note": "als clause first"},
+    {"de": "(Immer) wenn das Wetter gut war, haben wir Wanderungen in den Bergen gemacht.", "note": "wenn — a repeated past action"},
+    {"de": "(Jedes Mal) wenn wir sehr müde waren, haben wir einen Pausentag eingeplant.", "note": "wenn with jedes Mal"},
+    {"de": "Man erholt sich am besten, wenn man faulenzt.", "note": "wenn in the present"},
+    {"de": "Wenn das Wetter morgen schön ist, (dann) machen wir einen Ausflug.", "note": "wenn in the future, with the optional dann"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Complete the conjunction.", "text": "___ wir dort waren, hat eine Musikgruppe traditionelle Musik gespielt.", "answers": ["Als"], "explain": "One occasion in the past → als.", "source": true, "sentence": "Als wir dort waren, hat eine Musikgruppe traditionelle Musik gespielt."},
+    {"type": "fill", "prompt": "Complete the conjunction.", "text": "(Immer) ___ das Wetter gut war, haben wir Wanderungen in den Bergen gemacht.", "answers": ["wenn"], "explain": "A repeated past action → wenn.", "source": true, "sentence": "(Immer) wenn das Wetter gut war, haben wir Wanderungen in den Bergen gemacht."},
+    {"type": "choice", "prompt": "Which conjunction fits a single event in the past?", "text": "___ der Krimiautor eintraf, gab es ein großes Gedränge.", "options": ["Als", "Wenn", "Ob", "Bis"], "answers": ["Als"], "explain": "als marks one past occasion."},
+    {"type": "choice", "prompt": "Which conjunction is used for the present and the future?", "text": "", "options": ["wenn", "als", "both equally", "neither"], "answers": ["wenn"], "explain": "als is restricted to the past."},
+    {"type": "error", "prompt": "Choose the right conjunction.", "text": "Wenn wir dort waren, hat eine Musikgruppe traditionelle Musik gespielt.", "answers": ["Als wir dort waren, hat eine Musikgruppe traditionelle Musik gespielt.", "Als wir dort waren"], "hint": "It happened once.", "explain": "A single past event takes als."}
+   ]
+  },
+  {
+   "id": "g-daf-b1-simultaneity",
+   "titleEn": "während, nachdem, bevor",
+   "summary": "One clause at the same time as another, or one after the other.",
+   "category": "Satzverbindungen",
+   "tags": ["Nebensatz", "während", "nachdem", "bevor", "Temporal"],
+   "difficulty": 4,
+   "prerequisites": ["g-daf-a2-temporal-subordinate-clauses-with-wenn-a"],
+   "explanation": [
+    {"heading": "At the same time", "text": "Subordinate clauses with während are used to express two things happening at the same time."},
+    {"heading": "One after the other", "text": "Subordinate clauses with bevor and nachdem are used to express two things which happen one after the other — nachdem for what came first, bevor for what came second."},
+    {"heading": "Tense with nachdem", "text": "The document's example pairs Plusquamperfekt in the nachdem clause with a simple past main clause: Nachdem wir es bis zum Bahnhof Zoo geschafft hatten, fing es an zu regnen."},
+    {"heading": "A note on the heading", "text": "This block's heading runs on from the previous page, where it reads: Temporal subordinate clauses with nachdem, bevor, während – anteriority, posteriority and … simultaneity."}
+   ],
+   "rules": [
+    "während: the two events overlap in time.",
+    "nachdem: the subordinate clause happens first, the main clause afterwards.",
+    "bevor: the subordinate clause happens second.",
+    "All three send the conjugated verb to the end of their clause.",
+    "With nachdem the earlier clause usually stands one tense further back (Plusquamperfekt with a past main clause)."
+   ],
+   "examples": [
+    {"de": "Während wir dort Kaffee getrunken haben, habe ich beobachtet", "note": "während — two things at once"},
+    {"de": "Nachdem wir es bis zum Bahnhof Zoo geschafft hatten, fing es an zu regnen.", "note": "nachdem — the Plusquamperfekt geschafft hatten comes first in time"},
+    {"de": "Bevor ich endlich die Füße hochlegen konnte, musste ich noch mit Marlene zum türkischen Markt.", "note": "bevor — the hochlegen comes later in time"}
+   ],
+   "exercises": [
+    {"type": "choice", "prompt": "Which conjunction marks two things happening at the same time?", "text": "", "options": ["während", "nachdem", "bevor", "seitdem"], "answers": ["während"], "explain": "während expresses simultaneity."},
+    {"type": "fill", "prompt": "Complete the conjunction.", "text": "___ wir es bis zum Bahnhof Zoo geschafft hatten, fing es an zu regnen.", "answers": ["Nachdem"], "explain": "The clause describes what happened first.", "source": true, "sentence": "Nachdem wir es bis zum Bahnhof Zoo geschafft hatten, fing es an zu regnen."},
+    {"type": "choice", "prompt": "Which tense stands in the nachdem clause of the example?", "text": "Nachdem wir es bis zum Bahnhof Zoo geschafft hatten, fing es an zu regnen.", "options": ["Plusquamperfekt", "Präsens", "Futur I", "Konjunktiv II"], "answers": ["Plusquamperfekt"], "explain": "geschafft hatten is the Plusquamperfekt, one step behind the past main clause."},
+    {"type": "reorder", "prompt": "Put the subordinate clause in order.", "tokens": ["Bevor", "ich", "endlich", "die", "Füße", "hochlegen", "konnte"], "answers": ["Bevor ich endlich die Füße hochlegen konnte"], "explain": "The conjugated verb konnte comes last.", "source": true, "sentence": "Bevor ich endlich die Füße hochlegen konnte"},
+    {"type": "choice", "prompt": "Which event comes first in time?", "text": "Bevor ich die Füße hochlegen konnte, musste ich zum Markt.", "options": ["the trip to the market", "the resting", "both at once", "neither"], "answers": ["the trip to the market"], "explain": "bevor marks the subordinate clause as the later event."}
+   ]
+  },
+  {
+   "id": "g-daf-b1-improbable-conditional-sentences",
+   "titleEn": "Improbable conditions (Konjunktiv II)",
+   "summary": "wenn plus Konjunktiv II for a condition that is not fulfilled.",
+   "category": "Satzverbindungen",
+   "tags": ["Konjunktiv II", "Konditional", "wenn", "Nebensatz"],
+   "difficulty": 5,
+   "prerequisites": ["g-daf-a2-stating-conditions-dependent-conditional"],
+   "explanation": [
+    {"heading": "What it says", "text": "Improbable conditional sentences in the second conditional use wenn to express a condition in the dependent clause which has not been fulfilled, so the result will not — or possibly will — be fulfilled in the future."},
+    {"heading": "Reading the example", "text": "Wenn Markus den Paketschein hätte, könnte er nachforschen … means the opposite is true: Markus hat den Paketschein nicht, daher kann er nicht nachforschen."},
+    {"heading": "wenn can be dropped", "text": "The document prints the same sentence three ways: Nebensatz mit wenn (Wenn ich nicht so unordentlich wäre, …), Nebensatz ohne wenn (Wäre ich nicht so unordentlich, …) where the verb takes first place instead, and Hauptsatz first (Ich könnte jetzt nachforschen, wenn …)."},
+    {"heading": "Both halves", "text": "The Konjunktiv II appears in both clauses: hätte … könnte, wäre … könnte."}
+   ],
+   "rules": [
+    "The condition is unfulfilled, so both clauses use Konjunktiv II.",
+    "wenn sends the verb to the end: Wenn ich nicht so unordentlich wäre, …",
+    "Dropping wenn puts the conjugated verb in first position: Wäre ich nicht so unordentlich, …",
+    "The main clause may come first, with the wenn clause after it.",
+    "A leading conditional clause is position 1, so the main clause starts with its verb."
+   ],
+   "examples": [
+    {"de": "Wenn Markus den Paketschein hätte, könnte er nachforschen, wo das Paket von seiner Schwester ist.", "note": "the condition is not fulfilled"},
+    {"de": "Wenn ich nicht so unordentlich wäre, könnte ich jetzt nachforschen.", "note": "Nebensatz mit wenn"},
+    {"de": "Wäre ich nicht so unordentlich, könnte ich jetzt nachforschen.", "note": "Nebensatz ohne wenn — the verb opens the clause"},
+    {"de": "Ich könnte jetzt nachforschen, wenn ich nicht so unordentlich wäre.", "note": "main clause first"}
+   ],
+   "exercises": [
+    {"type": "transform", "prompt": "Rewrite the clause without wenn.", "from": "Wenn ich nicht so unordentlich wäre, könnte ich jetzt nachforschen.", "answers": ["Wäre ich nicht so unordentlich, könnte ich jetzt nachforschen.", "Wäre ich nicht so unordentlich, könnte ich jetzt nachforschen"], "explain": "Dropping wenn moves the conjugated verb to first position.", "source": true, "sentence": "Wäre ich nicht so unordentlich, könnte ich jetzt nachforschen."},
+    {"type": "fill", "prompt": "Complete the Konjunktiv II form of haben.", "text": "Wenn Markus den Paketschein ___, könnte er nachforschen.", "answers": ["hätte"], "explain": "The unfulfilled condition takes Konjunktiv II.", "source": true, "sentence": "Wenn Markus den Paketschein hätte, könnte er nachforschen"},
+    {"type": "choice", "prompt": "What does the example tell us about Markus?", "text": "Wenn Markus den Paketschein hätte, könnte er nachforschen.", "options": ["He does not have the Paketschein.", "He has the Paketschein.", "He will get the Paketschein.", "Nothing at all."], "answers": ["He does not have the Paketschein."], "explain": "The document spells it out: Markus hat den Paketschein nicht."},
+    {"type": "reorder", "prompt": "Put the main clause first.", "tokens": ["Ich", "könnte", "jetzt", "nachforschen,", "wenn", "ich", "nicht", "so", "unordentlich", "wäre"], "answers": ["Ich könnte jetzt nachforschen, wenn ich nicht so unordentlich wäre"], "explain": "The wenn clause can follow the main clause.", "source": true, "sentence": "Ich könnte jetzt nachforschen, wenn ich nicht so unordentlich wäre."},
+    {"type": "choice", "prompt": "Where does the verb stand when wenn is dropped?", "text": "", "options": ["in first position", "at the end", "in second position", "after the subject"], "answers": ["in first position"], "explain": "Wäre ich nicht so unordentlich, …"}
+   ]
+  },
+  {
+   "id": "g-daf-b1-infinitive-phrases",
+   "titleEn": "Infinitive phrases with zu",
+   "summary": "zu + infinitive at the end of the sentence, after expressions like Lust haben or vorhaben.",
+   "category": "Satzverbindungen",
+   "tags": ["Infinitivsatz", "zu", "trennbare Verben", "Passiv"],
+   "difficulty": 4,
+   "prerequisites": ["g-daf-a2-expressing-reasons-dependent-clauses-wit"],
+   "explanation": [
+    {"heading": "The basic shape", "text": "Infinitive phrases are formed with zu + infinitive, and both go at the end of the sentence: Irina hätte Lust, das Hafenfest zu besuchen."},
+    {"heading": "What comes before them", "text": "They often follow expressions such as Lust haben, vorhaben, es gut / schlecht / … finden, es lieben, and Es ist … + adjective."},
+    {"heading": "Separable verbs", "text": "For verbs with a separable prefix, zu goes between the prefix and the stem of the verb: mitfahren → mitzufahren, printed in the document as mit zu fahren."},
+    {"heading": "Passive", "text": "In passive sentences, zu goes between the past participle and werden: angerempelt zu werden."}
+   ],
+   "rules": [
+    "zu + infinitive stands at the end of the phrase.",
+    "Common triggers: Lust haben, vorhaben, es gut finden, es lieben, Es ist + adjective.",
+    "Separable verbs put zu between the prefix and the stem: mitzufahren.",
+    "Passive infinitives are past participle + zu + werden.",
+    "A comma separates the infinitive phrase from the main clause."
+   ],
+   "examples": [
+    {"de": "Irina hätte Lust, das Hafenfest zu besuchen.", "note": "after Lust haben"},
+    {"de": "Eleni findet es gut, ins Theater zu gehen.", "note": "after es gut finden"},
+    {"de": "Irinas Bruder hat vor, ins Musical zu gehen.", "note": "after vorhaben"},
+    {"de": "Antonia liebt es, auf einem Schiff mit zu fahren.", "note": "separable verb — the document prints the split to show where zu goes"},
+    {"de": "Es ist am schlimmsten, angerempelt zu werden.", "note": "passive infinitive"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Complete the infinitive phrase.", "text": "Irina hätte Lust, das Hafenfest ___ besuchen.", "answers": ["zu"], "explain": "zu stands directly before the infinitive.", "source": true, "sentence": "Irina hätte Lust, das Hafenfest zu besuchen"},
+    {"type": "choice", "prompt": "Where does zu go with a separable verb?", "text": "mitfahren → ___", "options": ["mitzufahren", "zu mitfahren", "mitfahrenzu", "zu mit fahren"], "answers": ["mitzufahren"], "explain": "Between the prefix and the stem."},
+    {"type": "fill", "prompt": "Complete the passive infinitive.", "text": "Es ist am schlimmsten, angerempelt zu ___.", "answers": ["werden"], "explain": "Passive infinitive: participle + zu + werden.", "source": true, "sentence": "Es ist am schlimmsten, angerempelt zu werden."},
+    {"type": "reorder", "prompt": "Put the sentence in order.", "tokens": ["Irinas", "Bruder", "hat", "vor,", "ins", "Musical", "zu", "gehen"], "answers": ["Irinas Bruder hat vor, ins Musical zu gehen"], "explain": "The separable prefix vor closes the main clause; the infinitive phrase follows the comma."},
+    {"type": "choice", "prompt": "Which expression does NOT usually introduce an infinitive phrase here?", "text": "", "options": ["weil", "Lust haben", "vorhaben", "es lieben"], "answers": ["weil"], "explain": "weil introduces a subordinate clause with a conjugated verb, not a zu-infinitive."}
+   ]
+  },
+  {
+   "id": "g-daf-b1-giving-a-counter-argument-concessive-cla",
+   "titleEn": "obwohl — the counter-argument in a subordinate clause",
+   "summary": "A reason that exists but does not take effect.",
+   "category": "Satzverbindungen",
+   "tags": ["Nebensatz", "obwohl", "Konzessiv", "Gegenargument"],
+   "difficulty": 4,
+   "prerequisites": ["g-daf-b1-giving-counter-arguments-concessive-conn"],
+   "explanation": [
+    {"heading": "What concessive means here", "text": "Concessive connectors indicate an invalid counter-argument: there is a reason not to do something, or that something will not happen, but it is not effective — the person does it, or it happens anyway."},
+    {"heading": "How the document builds it", "text": "It starts from a plain reason — Lateinkenntnisse sind hilfreich, and that is why the Latinum used to be compulsory — and then turns that same reason into the counter-argument."},
+    {"heading": "obwohl", "text": "The connector obwohl introduces a subordinate clause, so its verb goes to the end: Obwohl Lateinkenntnisse im Studium sehr hilfreich sein können, …"},
+    {"heading": "Either order", "text": "The obwohl clause may come first or second; the counter-argument is in the subordinate clause either way."}
+   ],
+   "rules": [
+    "obwohl introduces the counter-argument as a subordinate clause.",
+    "The conjugated verb goes to the end of the obwohl clause.",
+    "The obwohl clause can precede or follow the main clause.",
+    "A leading obwohl clause fills position 1, so the main clause begins with its verb.",
+    "Unlike trotzdem and dennoch, which are main-clause connectors, obwohl is a conjunction."
+   ],
+   "examples": [
+    {"de": "Lateinkenntnisse können im Studium sehr hilfreich sein. Deshalb war das „Latinum“ früher fast immer Pflicht.", "note": "the plain reason, before it becomes the counter-argument"},
+    {"de": "Obwohl Lateinkenntnisse im Studium sehr hilfreich sein können, ist das „Latinum“ heute nur noch selten Pflicht.", "note": "obwohl clause first — the main clause opens with ist"},
+    {"de": "Das „Latinum“ ist heute nur noch selten Pflicht, obwohl Lateinkenntnisse im Studium sehr hilfreich sein können.", "note": "the same content with the obwohl clause second"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Complete the conjunction.", "text": "___ Lateinkenntnisse im Studium sehr hilfreich sein können, ist das „Latinum“ heute nur noch selten Pflicht.", "answers": ["Obwohl"], "explain": "The counter-argument goes into the obwohl clause.", "source": true, "sentence": "Obwohl Lateinkenntnisse im Studium sehr hilfreich sein können, ist das „Latinum“ heute nur noch selten Pflicht."},
+    {"type": "choice", "prompt": "Where does the verb go after obwohl?", "text": "", "options": ["at the end of the clause", "in position 2", "in position 1", "before the subject"], "answers": ["at the end of the clause"], "explain": "obwohl is a subordinating conjunction."},
+    {"type": "transform", "prompt": "Move the obwohl clause to the end.", "from": "Obwohl Lateinkenntnisse im Studium sehr hilfreich sein können, ist das „Latinum“ heute nur noch selten Pflicht.", "answers": ["Das „Latinum“ ist heute nur noch selten Pflicht, obwohl Lateinkenntnisse im Studium sehr hilfreich sein können.", "Das Latinum ist heute nur noch selten Pflicht, obwohl Lateinkenntnisse im Studium sehr hilfreich sein können."], "explain": "The main clause then takes ordinary order.", "source": true, "sentence": "Das „Latinum“ ist heute nur noch selten Pflicht, obwohl Lateinkenntnisse im Studium sehr hilfreich sein können."},
+    {"type": "choice", "prompt": "Which word is a subordinating conjunction?", "text": "", "options": ["obwohl", "trotzdem", "dennoch", "zwar"], "answers": ["obwohl"], "explain": "The other three are main-clause connectors."},
+    {"type": "error", "prompt": "Fix the main clause after the leading obwohl clause.", "text": "Obwohl Lateinkenntnisse hilfreich sein können, das „Latinum“ ist selten Pflicht.", "answers": ["Obwohl Lateinkenntnisse hilfreich sein können, ist das „Latinum“ selten Pflicht.", "ist das „Latinum“ selten Pflicht"], "explain": "The subordinate clause is position 1, so the verb comes second."}
+   ]
+  },
+  {
+   "id": "g-daf-b1-naming-the-aim-final-dependent-clauses-a",
+   "titleEn": "Purpose: damit, um … zu, zum / zur / für",
+   "summary": "Saying what something is for — wozu?",
+   "category": "Satzverbindungen",
+   "tags": ["Final", "damit", "um zu", "Infinitivsatz", "Präpositionen"],
+   "difficulty": 4,
+   "prerequisites": ["g-daf-b1-infinitive-phrases"],
+   "explanation": [
+    {"heading": "damit for two different subjects", "text": "damit is used when the subject is different in the main and subordinate clause: Man sollte sich … melden, damit diese ihre zukünftigen Helfer vorher kennen lernen."},
+    {"heading": "um … zu for the same subject", "text": "When the subject is the same in both halves, the usual form is um … zu + infinitive: Man arbeitet als WWOOFer, um praktische Erfahrung im Bio-Landbau zu sammeln."},
+    {"heading": "Either half first", "text": "Both structures can open the sentence, in which case the main clause begins with its verb: Damit die Landwirte …, sollte man …; Um praktische Erfahrung … zu sammeln, arbeitet man …"},
+    {"heading": "Without a clause at all", "text": "The purpose can also be a noun phrase with zum, zur or für, usually referring to an action: für die Mithilfe, zum Geldverdienen."}
+   ],
+   "rules": [
+    "Different subjects → damit + subordinate clause, verb at the end.",
+    "Same subject → um … zu + infinitive at the end.",
+    "Either structure may stand before the main clause.",
+    "zum / zur / für + noun states the purpose without a clause.",
+    "The question this answers is wozu?"
+   ],
+   "examples": [
+    {"de": "Man sollte sich zuerst schriftlich bei den Landwirten melden, damit diese ihre zukünftigen Helfer vorher kennen lernen.", "note": "damit — the subjects differ: man / diese"},
+    {"de": "Damit die Landwirte ihre zukünftigen Helfer vorher kennen lernen, sollte man sich zuerst schriftlich bei diesen melden.", "note": "damit clause first"},
+    {"de": "Man arbeitet als WWOOFer, um praktische Erfahrung im Bio-Landbau zu sammeln.", "note": "um … zu — the same subject in both halves"},
+    {"de": "Um praktische Erfahrung im Bio-Landbau zu sammeln, arbeitet man als WWOOFer.", "note": "the infinitive phrase first"},
+    {"de": "Für die Mithilfe auf einem Hof erhalten die WWOOFer Verpflegung, Unterkunft und manchmal ein Taschengeld.", "note": "für + noun"},
+    {"de": "WWOOFen ist aber kein Ferienjob zum Geldverdienen.", "note": "zum + nominalised verb"}
+   ],
+   "exercises": [
+    {"type": "choice", "prompt": "Which structure do you use when both clauses have the same subject?", "text": "", "options": ["um … zu", "damit", "obwohl", "weil"], "answers": ["um … zu"], "explain": "damit is used when the subject is different."},
+    {"type": "fill", "prompt": "Complete the connector.", "text": "Man sollte sich zuerst schriftlich bei den Landwirten melden, ___ diese ihre zukünftigen Helfer vorher kennen lernen.", "answers": ["damit"], "explain": "The subjects differ — man in the main clause, diese in the subordinate clause.", "source": true, "sentence": "Man sollte sich zuerst schriftlich bei den Landwirten melden, damit diese ihre zukünftigen Helfer vorher kennen lernen."},
+    {"type": "transform", "prompt": "Put the purpose clause first.", "from": "Man arbeitet als WWOOFer, um praktische Erfahrung im Bio-Landbau zu sammeln.", "answers": ["Um praktische Erfahrung im Bio-Landbau zu sammeln, arbeitet man als WWOOFer.", "Um praktische Erfahrung im Bio-Landbau zu sammeln, arbeitet man als WWOOFer"], "explain": "The main clause then begins with arbeitet.", "source": true, "sentence": "Um praktische Erfahrung im Bio-Landbau zu sammeln , arbeitet man als WWOOFer."},
+    {"type": "fill", "prompt": "Complete the preposition.", "text": "WWOOFen ist aber kein Ferienjob ___ Geldverdienen.", "answers": ["zum"], "explain": "zum + nominalised verb states the purpose.", "source": true, "sentence": "WWOOFen ist aber kein Ferienjob zum Geldverdienen."},
+    {"type": "choice", "prompt": "Which question do these structures answer?", "text": "", "options": ["wozu?", "warum?", "wann?", "wo?"], "answers": ["wozu?"], "explain": "The section heading names wozu?"}
+   ]
+  },
+  {
+   "id": "g-daf-b1-stating-consequences-consecutive-sentenc",
+   "titleEn": "sodass and so … dass",
+   "summary": "A consequence in a subordinate clause, with the connector optionally split.",
+   "category": "Satzverbindungen",
+   "tags": ["Nebensatz", "sodass", "Konsekutiv", "Folge"],
+   "difficulty": 4,
+   "prerequisites": ["g-daf-b1-expressing-results-consequences"],
+   "explanation": [
+    {"heading": "sodass", "text": "Consequences can be expressed in the subordinate clause with sodass, whose verb goes to the end: …, sodass man manchmal einfach nur müde ist …"},
+    {"heading": "Splitting it", "text": "The subordinate connector sodass can be separated. This puts so in the main clause with an adjective or an adverb, and the subordinate clause begins with dass: Es ist so anstrengend …, dass man …"},
+    {"heading": "The difference from also and folglich", "text": "sodass builds a subordinate clause; also and folglich are main-clause connectors. The document shows the same content in both forms."}
+   ],
+   "rules": [
+    "sodass introduces the consequence as a subordinate clause: verb at the end.",
+    "sodass can be split into so (in the main clause) + dass (opening the subordinate clause).",
+    "When split, so stands directly before the adjective or adverb it intensifies.",
+    "A comma precedes sodass and dass."
+   ],
+   "examples": [
+    {"de": "Es ist anstrengend mehrere Stunden am Tag eine Fremdsprache zu lernen, sodass man manchmal einfach nur müde ist und dann leichter Fehler macht.", "note": "sodass in one piece"},
+    {"de": "Es ist so anstrengend mehrere Stunden am Tag eine Fremdsprache zu lernen, dass man manchmal einfach nur müde ist und dann leichter Fehler macht.", "note": "split: so with the adjective, dass opening the clause"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Complete the connector.", "text": "Es ist anstrengend, eine Fremdsprache zu lernen, ___ man manchmal einfach nur müde ist.", "answers": ["sodass"], "explain": "The clause states the consequence."},
+    {"type": "transform", "prompt": "Split the connector.", "from": "Es ist anstrengend, eine Fremdsprache zu lernen, sodass man müde ist.", "answers": ["Es ist so anstrengend, eine Fremdsprache zu lernen, dass man müde ist.", "Es ist so anstrengend, eine Fremdsprache zu lernen, dass man müde ist"], "explain": "so joins the adjective in the main clause and dass opens the subordinate clause."},
+    {"type": "choice", "prompt": "Where does so go when the connector is split?", "text": "", "options": ["in the main clause, before the adjective or adverb", "at the end of the main clause", "in the subordinate clause", "before the comma only"], "answers": ["in the main clause, before the adjective or adverb"], "explain": "Es ist so anstrengend …, dass …"},
+    {"type": "choice", "prompt": "What kind of clause does sodass introduce?", "text": "", "options": ["a subordinate clause", "a main clause", "an infinitive phrase", "a relative clause"], "answers": ["a subordinate clause"], "explain": "Unlike also and folglich, sodass sends the verb to the end."},
+    {"type": "error", "prompt": "Fix the verb position.", "text": "Es ist anstrengend, sodass ist man manchmal müde.", "answers": ["Es ist anstrengend, sodass man manchmal müde ist.", "sodass man manchmal müde ist"], "explain": "In a sodass clause the conjugated verb comes last."}
+   ]
+  },
+  {
+   "id": "g-daf-a2-time-expressions-usually-go-in-the-middl",
+   "titleEn": "Time before place in the middle field",
+   "summary": "In the Mittelfeld, when comes before where.",
+   "category": "Satzverbindungen",
+   "tags": ["Wortstellung", "Mittelfeld", "Temporal", "Lokal"],
+   "difficulty": 3,
+   "prerequisites": ["g-daf-a1-connectors-aber-oder-und"],
+   "explanation": [
+    {"heading": "The middle field", "text": "The document's columns are Position 1, Position 2, Mittelfeld and Satzende. Everything between the conjugated verb and the closing verb form is the middle field."},
+    {"heading": "The rule", "text": "Time expressions usually go in the middle field before expressions of place: diese Woche schon fünfmal im Kino, nach dem Frühstück sofort ins Museum."},
+    {"heading": "The sentence bracket", "text": "In the first two examples the participle closes the sentence — gewesen, gegangen — which is what creates the middle field. The third example has no second verb, so the middle field simply follows waren."}
+   ],
+   "rules": [
+    "Time comes before place in the middle field.",
+    "The conjugated verb stays in position 2 and any second verb form closes the sentence.",
+    "Everything between them is the middle field."
+   ],
+   "examples": [
+    {"de": "Jörg ist diese Woche schon fünfmal im Kino gewesen.", "note": "diese Woche (time) before im Kino (place); gewesen closes the sentence"},
+    {"de": "Jörg und Michael sind nach dem Frühstück sofort ins Museum gegangen.", "note": "nach dem Frühstück (time) before ins Museum (place)"},
+    {"de": "Sie waren fast zwei Stunden im Museum.", "note": "time before place with no closing verb"}
+   ],
+   "exercises": [
+    {"type": "reorder", "prompt": "Put the sentence in order.", "tokens": ["Jörg", "ist", "diese", "Woche", "schon", "fünfmal", "im", "Kino", "gewesen"], "answers": ["Jörg ist diese Woche schon fünfmal im Kino gewesen"], "explain": "Time before place, participle last.", "source": true, "sentence": "Jörg ist diese Woche schon fünfmal im Kino gewesen."},
+    {"type": "choice", "prompt": "Which order does the document give?", "text": "", "options": ["time before place", "place before time", "either, freely", "place only"], "answers": ["time before place"], "explain": "Time expressions usually go in the middle field before expressions of place."},
+    {"type": "error", "prompt": "Fix the order of the middle field.", "text": "Jörg und Michael sind ins Museum nach dem Frühstück sofort gegangen.", "answers": ["Jörg und Michael sind nach dem Frühstück sofort ins Museum gegangen.", "nach dem Frühstück sofort ins Museum gegangen"], "explain": "The time expression comes first."},
+    {"type": "choice", "prompt": "What closes the first example sentence?", "text": "Jörg ist diese Woche schon fünfmal im Kino gewesen.", "options": ["the participle gewesen", "the subject Jörg", "the verb ist", "im Kino"], "answers": ["the participle gewesen"], "explain": "The second verb form closes the sentence bracket."},
+    {"type": "fill", "prompt": "Put the time expression in the right place.", "text": "Sie waren ___ im Museum.", "answers": ["fast zwei Stunden"], "explain": "Time before place.", "source": true, "sentence": "Sie waren fast zwei Stunden im Museum."}
+   ]
+  }
+ ]
+}

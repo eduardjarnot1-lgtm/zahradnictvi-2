@@ -1,0 +1,172 @@
+{
+ "topics": [
+  {
+   "id": "g-l03-1",
+   "titleEn": "Modal verbs and their alternatives",
+   "summary": "Paraphrases for können, müssen, wollen, dürfen and sollen with adjectives, nouns and set constructions.",
+   "category": "Modalverben",
+   "tags": ["Modalverben", "Alternativen", "Schriftsprache", "Infinitivsatz"],
+   "difficulty": 4,
+   "prerequisites": ["g-l01-1"],
+   "explanation": [
+    {"heading": "Why paraphrase a modal verb",
+     "text": "Each modal verb can be replaced by a construction with an adjective, a noun or a set expression. These alternatives are typical of written and formal German and let you vary your style."},
+    {"heading": "Structure",
+     "text": "Most alternatives take an Infinitivsatz with zu; some take a dass-clause instead, e.g. Es war nötig, dass sie ihr Gehirn anstrengten."}
+   ],
+   "rules": [
+    "können → in der Lage / imstande / fähig sein, vermögen, die Fähigkeit / das Vermögen haben; for opportunity: die Möglichkeit / die Gelegenheit / die Chance haben; for permission: das Recht / die Erlaubnis / die Genehmigung haben.",
+    "müssen → nötig / notwendig / entscheidend / erforderlich / unumgänglich sein, gezwungen sein, etwas zu tun haben, es besteht die Notwendigkeit, verpflichtet sein, die Pflicht / die Aufgabe haben, es bleibt nichts anderes übrig, als.",
+    "With negations or restrictions, brauchen + zu is used instead of müssen, together with nicht / kein / nur.",
+    "wollen → vorhaben, beabsichtigen, bestrebt sein, die Absicht / die Intention haben, den Wunsch haben, Lust haben; negated: sich weigern.",
+    "dürfen → das Recht / die Erlaubnis haben, es ist erlaubt / gestattet; negated: es ist verboten / untersagt / nicht erlaubt.",
+    "sollen → jemand erwartet, dass …, den Auftrag / die Aufgabe haben; sollte → es wäre empfehlenswert / ratsam / besser."
+   ],
+   "examples": [
+    {"de": "Der Mensch kann sich der Außenwelt anpassen.", "note": "können — the starting sentence."},
+    {"de": "Er hat das Recht / die Erlaubnis / die Genehmigung,", "note": "können / dürfen as permission."},
+    {"de": "Sie waren immer schon gezwungen, ihr Gehirn anzustrengen.", "note": "müssen → gezwungen sein."},
+    {"de": "Er hat die Arbeit rechtzeitig zu erledigen.", "note": "müssen → haben + zu + Infinitiv."},
+    {"de": "Ich habe den Wunsch, mehr Zeit für mich zu haben.", "note": "wollen → den Wunsch haben."},
+    {"de": "Er weigerte sich, unsere Entscheidung zu akzeptieren.", "note": "nicht wollen → sich weigern."},
+    {"de": "Man sollte flexibel sein.", "note": "sollte — recommendation."}
+   ],
+   "exercises": [
+    {"type": "choice", "prompt": "Which alternative expresses ability (können)?",
+     "text": "Er ___, sich der Außenwelt anzupassen.",
+     "options": ["ist in der Lage", "hat die Pflicht", "hat die Absicht", "ist gezwungen"],
+     "answers": ["ist in der Lage"],
+     "explain": "in der Lage / imstande / fähig sein expresses ability, i.e. können."},
+    {"type": "choice", "prompt": "Which alternative expresses a prohibition (nicht dürfen)?",
+     "text": "Es ist bei Tests ___, beim Nachbarn abzuschreiben.",
+     "options": ["verboten", "empfehlenswert", "erforderlich", "beabsichtigt"],
+     "answers": ["verboten"],
+     "explain": "nicht dürfen → es ist verboten / untersagt / nicht erlaubt."},
+    {"type": "transform", "prompt": "Replace the modal verb with haben + zu + Infinitiv.",
+     "from": "Er muss die Arbeit rechtzeitig erledigen.",
+     "answers": ["Er hat die Arbeit rechtzeitig zu erledigen."],
+     "explain": "müssen can be expressed with haben + zu + Infinitiv — typical of formal written German."},
+    {"type": "transform", "prompt": "Replace wollen with a noun construction (der Wunsch).",
+     "from": "Ich will mehr Zeit für mich haben.",
+     "answers": ["Ich habe den Wunsch, mehr Zeit für mich zu haben."],
+     "explain": "wollen → den Wunsch haben + Infinitivsatz mit zu."},
+    {"type": "transform", "prompt": "Replace 'wollte nicht' with the verb sich weigern.",
+     "from": "Er wollte unsere Entscheidung nicht akzeptieren.",
+     "answers": ["Er weigerte sich, unsere Entscheidung zu akzeptieren.", "Er hat sich geweigert, unsere Entscheidung zu akzeptieren."],
+     "explain": "nicht wollen → sich weigern + Infinitivsatz mit zu."},
+    {"type": "fill", "prompt": "With a negation, müssen is replaced by this verb (+ zu).",
+     "text": "Die Menschen ___ ihr Gehirn heute nicht weniger oder mehr anzustrengen als früher.",
+     "answers": ["brauchen"],
+     "hint": "nicht / kein / nur", "explain": "With negations or restrictions, brauchen + zu replaces müssen."},
+    {"type": "context", "prompt": "A recommendation, not an obligation. Complete it.",
+     "text": "Es wäre ___, flexibel zu sein.", "answers": ["empfehlenswert", "ratsam", "besser"],
+     "explain": "sollte → es wäre empfehlenswert / ratsam / besser."}
+   ]
+  },
+  {
+   "id": "g-l03-2",
+   "titleEn": "Unreal consequence clauses",
+   "summary": "zu + adjective, als dass + Konjunktiv II, and zu + adjective, um … zu, for a consequence that does not happen.",
+   "category": "Satzstrukturen",
+   "tags": ["Konsekutiv", "Konjunktiv II", "Infinitivsatz", "irreal"],
+   "difficulty": 4,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "What they express",
+     "text": "With the constructions zu + adjective, als dass + Konjunktiv II and zu + adjective, um … zu you formulate an unreal consequence, that is, a consequence that does not happen or has not happened."},
+    {"heading": "When um … zu is possible",
+     "text": "The um … zu construction is possible when the subject of the main clause and of the subordinate clause are the same, or when the subject of the main clause and the accusative object of the subordinate clause are the same. The modal verb können then frequently drops."}
+   ],
+   "rules": [
+    "als dass is always followed by Konjunktiv II: … als dass man sie schnell erklären könnte.",
+    "For the past, als dass takes the Konjunktiv II of the past: … als dass ich hätte aufhören können.",
+    "um … zu needs matching subjects (or main-clause subject = subordinate accusative object).",
+    "In the um … zu variant können usually drops: um sie schnell zu erklären (or: erklären zu können)."
+   ],
+   "examples": [
+    {"de": "Der Büroalltag ist zu stressig, als dass man gute Vorsätze für die Gesundheit umsetzen könnte.", "note": "zu + Adjektiv, als dass + Konjunktiv II."},
+    {"de": "Das Buch war zu interessant, als dass ich mit dem Lesen hätte aufhören können.", "note": "past: hätte … können."},
+    {"de": "Die Vorgänge im Körper sind zu komplex, als dass man sie schnell erklären könnte.", "note": "als dass variant."},
+    {"de": "Die Vorgänge im Körper sind zu komplex, um sie schnell zu erklären.", "note": "the same content with um … zu; können drops."}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "als dass requires which mood? Complete the verb.",
+     "text": "Die Vorgänge im Körper sind zu komplex, als dass man sie schnell erklären ___.",
+     "answers": ["könnte"],
+     "sentence": "Die Vorgänge im Körper sind zu komplex, als dass man sie schnell erklären könnte.", "source": true,
+     "explain": "als dass is always followed by Konjunktiv II."},
+    {"type": "transform", "prompt": "Rewrite the als-dass clause with um … zu.",
+     "from": "Die Vorgänge im Körper sind zu komplex, als dass man sie schnell erklären könnte.",
+     "answers": ["Die Vorgänge im Körper sind zu komplex, um sie schnell zu erklären.", "Die Vorgänge im Körper sind zu komplex, um sie schnell erklären zu können."],
+     "explain": "The accusative object sie matches, so um … zu is possible; können usually drops."},
+    {"type": "choice", "prompt": "Which past form is correct after als dass?",
+     "text": "Das Buch war zu interessant, als dass ich mit dem Lesen ___.",
+     "options": ["hätte aufhören können", "aufhören gekonnt hätte", "aufhören könnte haben", "hatte aufhören können"],
+     "answers": ["hätte aufhören können"],
+     "explain": "The past of als dass + Konjunktiv II with a modal verb is hätte + Infinitiv + Modalverb-Infinitiv."},
+    {"type": "error", "prompt": "The mood after als dass is wrong. Correct it.",
+     "text": "Der Büroalltag ist zu stressig, als dass man gute Vorsätze für die Gesundheit umsetzen kann.",
+     "answers": ["Der Büroalltag ist zu stressig, als dass man gute Vorsätze für die Gesundheit umsetzen könnte."],
+     "explain": "The consequence is unreal, so als dass takes Konjunktiv II: könnte."},
+    {"type": "context", "prompt": "The subjects differ (der Büroalltag / man). Which construction is possible here?",
+     "text": "", "options": ["nur als dass + Konjunktiv II", "nur um … zu", "beide gleichermaßen"],
+     "answers": ["nur als dass + Konjunktiv II"],
+     "explain": "um … zu needs the same subject (or main subject = subordinate accusative object); otherwise only als dass works."}
+   ]
+  },
+  {
+   "id": "g-l03-3",
+   "titleEn": "Adjective endings after article words and after adjectives / indefinite numerals",
+   "summary": "Which declension an adjective takes depends on the word in front of it.",
+   "category": "Deklination",
+   "tags": ["Adjektivendungen", "Deklination", "Artikelwörter"],
+   "difficulty": 5,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "Two patterns",
+     "text": "After some article words the adjective is declined as after the definite article; after others — the indefinite numerals — it is declined as after the zero article in the plural."},
+    {"heading": "The singular exception",
+     "text": "viel and wenig behave differently in the singular: viel neues Wissen, wenig freier Platz."}
+   ],
+   "rules": [
+    "Like after the definite article: alle / sämtliche, keine, solche / welche.",
+    "Like after the zero article in the plural: einige / mehrere / verschiedene / etliche, viele / wenige, folgende / zahlreiche.",
+    "But when the definite article stands in front of them, those numerals themselves take -en and the adjective follows suit: die vielen, wenigen, verschiedenen, zahlreichen, folgenden aktuellen Fragestellungen.",
+    "In the singular viel and wenig take no ending and the adjective declines strongly: viel neues Wissen, wenig freier Platz."
+   ],
+   "examples": [
+    {"de": "alle / sämtliche interessierten Mitarbeiter", "note": "wie nach bestimmtem Artikel"},
+    {"de": "keine größeren Enttäuschungen", "note": "wie nach bestimmtem Artikel"},
+    {"de": "solche / welche standardisierten Tests", "note": "wie nach bestimmtem Artikel"},
+    {"de": "renommierte Unternehmen", "note": "nach einige / mehrere / verschiedene / etliche — wie nach Nullartikel im Plural"},
+    {"de": "anspruchsvolle Aufgaben", "note": "nach viele / wenige — wie nach Nullartikel im Plural"},
+    {"de": "aktuelle Fragestellungen", "note": "nach folgende / zahlreiche — wie nach Nullartikel im Plural"},
+    {"de": "die vielen, wenigen, verschiedenen, zahlreichen, folgenden", "note": "with the definite article in front, everything takes -en"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "After 'alle' the adjective declines like after the definite article.",
+     "text": "alle interessiert___ Mitarbeiter", "answers": ["en"],
+     "sentence": "alle / sämtliche interessierten Mitarbeiter", "source": true,
+     "explain": "alle / sämtliche behave like the definite article, so the adjective takes -en."},
+    {"type": "fill", "prompt": "After 'mehrere' the adjective declines like after the zero article in the plural.",
+     "text": "mehrere renommiert___ Unternehmen", "answers": ["e"],
+     "explain": "einige / mehrere / verschiedene / etliche behave like the zero article in the plural, so the adjective takes -e in the nominative/accusative."},
+    {"type": "choice", "prompt": "Which is correct?",
+     "text": "", "options": ["die vielen aktuellen Fragestellungen", "die viele aktuelle Fragestellungen", "die vielen aktuelle Fragestellungen"],
+     "answers": ["die vielen aktuellen Fragestellungen"],
+     "explain": "With the definite article in front, the numeral and the adjective both take -en."},
+    {"type": "choice", "prompt": "Singular with viel — which is correct?",
+     "text": "", "options": ["viel neues Wissen", "viel neue Wissen", "vieles neues Wissen"],
+     "answers": ["viel neues Wissen"],
+     "explain": "In the singular viel takes no ending and the adjective declines strongly: viel neues Wissen, wenig freier Platz."},
+    {"type": "error", "prompt": "The adjective ending after 'keine' is wrong. Correct the phrase.",
+     "text": "keine größere Enttäuschungen",
+     "answers": ["keine größeren Enttäuschungen"],
+     "explain": "keine belongs to the group that behaves like the definite article, so the adjective takes -en."},
+    {"type": "context", "prompt": "Complete: 'wenig' in the singular.",
+     "text": "In der Wohnung gab es wenig frei___ Platz.", "answers": ["er"],
+     "explain": "In the singular wenig takes no ending, so the adjective declines strongly: wenig freier Platz."}
+   ]
+  }
+ ]
+}

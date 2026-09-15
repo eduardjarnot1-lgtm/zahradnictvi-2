@@ -1,0 +1,173 @@
+{
+ "topics": [
+  {
+   "id": "g-l05-1",
+   "titleEn": "Word formation: the prefixes be- and ver-",
+   "summary": "be- makes a verb transitive; ver- carries three quite different meanings.",
+   "category": "Wortbildung",
+   "tags": ["Wortbildung", "Vorsilben", "Verben", "Akkusativ"],
+   "difficulty": 3,
+   "prerequisites": ["g-l01-2"],
+   "explanation": [
+    {"heading": "Verbs with the inseparable prefix be-",
+     "text": "These verbs always take an accusative object. Frequently there is a corresponding verb without the prefix that takes a preposition instead."},
+    {"heading": "Verbs with the inseparable prefix ver-",
+     "text": "The prefix ver- can carry different meanings: the result of the action is unwanted, the result of the action is a changed state, or the prefix is simply neutral."}
+   ],
+   "rules": [
+    "be- + verb always has an accusative object; the plain verb takes a preposition: arbeiten an → bearbeiten + Akkusativ, urteilen über → beurteilen + Akkusativ.",
+    "ver- meaning 1 — the result of the action is unwanted: sich verwählen, sich verfahren, sich verhören, sich verirren, sich verzählen, sich verrechnen.",
+    "ver- meaning 2 — the result is a changed state: verschönern, vergrößern, verbessern, verlängern, (sich) verändern.",
+    "ver- meaning 3 — neutral meaning: verbringen, verstehen, verschicken, sich vergnügen, sich verhalten.",
+    "Both prefixes are inseparable and unstressed, so the Partizip II has no ge-: bearbeitet, verbracht."
+   ],
+   "examples": [
+    {"de": "Der Bildhauer bearbeitet die Skulptur.", "note": "be- + Akkusativ"},
+    {"de": "Der Bildhauer arbeitet an der Skulptur.", "note": "the plain verb with a preposition"},
+    {"de": "Der Kritiker beurteilt die Kunstwerke.", "note": "be- + Akkusativ"},
+    {"de": "Der Kritiker urteilt über die Kunstwerke.", "note": "the plain verb with a preposition"},
+    {"de": "Dann habe ich mich auch noch am Telefon verwählt.", "note": "ver- — the result is unwanted"},
+    {"de": "Mit ein paar Bildern kann man ein Zimmer verschönern.", "note": "ver- — a changed state"},
+    {"de": "Der Bildhauer verbringt viel Zeit in seinem Atelier.", "note": "ver- — neutral meaning"}
+   ],
+   "exercises": [
+    {"type": "transform", "prompt": "Rewrite with the be- verb and an accusative object.",
+     "from": "Der Kritiker urteilt über die Kunstwerke.",
+     "answers": ["Der Kritiker beurteilt die Kunstwerke."],
+     "explain": "be- verbs always take an accusative object; the preposition drops."},
+    {"type": "transform", "prompt": "Rewrite with the plain verb and its preposition.",
+     "from": "Der Bildhauer bearbeitet die Skulptur.",
+     "answers": ["Der Bildhauer arbeitet an der Skulptur."],
+     "explain": "Without be-, the verb needs a preposition: arbeiten an + Dativ."},
+    {"type": "choice", "prompt": "Which meaning does ver- carry in 'sich verwählen'?",
+     "text": "", "options": ["Das Resultat der Handlung ist unerwünscht.", "Das Resultat ist ein veränderter Zustand.", "neutrale Bedeutung"],
+     "answers": ["Das Resultat der Handlung ist unerwünscht."],
+     "explain": "Like sich verfahren, sich verhören, sich verirren — the action went wrong."},
+    {"type": "choice", "prompt": "Which meaning does ver- carry in 'vergrößern'?",
+     "text": "", "options": ["Das Resultat ist ein veränderter Zustand.", "Das Resultat der Handlung ist unerwünscht.", "neutrale Bedeutung"],
+     "answers": ["Das Resultat ist ein veränderter Zustand."],
+     "explain": "Like verschönern, verbessern, verlängern, (sich) verändern."},
+    {"type": "fill", "prompt": "The result went wrong — he dialled the wrong number.",
+     "text": "Dann habe ich mich auch noch am Telefon ___.", "answers": ["verwählt"],
+     "sentence": "Dann habe ich mich auch noch am Telefon verwählt.", "source": true,
+     "explain": "sich verwählen — the result of the action is unwanted."},
+    {"type": "error", "prompt": "be- verbs take no preposition. Correct the sentence.",
+     "text": "Der Bildhauer bearbeitet an der Skulptur.",
+     "answers": ["Der Bildhauer bearbeitet die Skulptur."],
+     "explain": "Verbs with be- always take a direct accusative object."}
+   ]
+  },
+  {
+   "id": "g-l05-2",
+   "titleEn": "Indirect speech: questions and imperatives",
+   "summary": "Indirect questions with a question word or ob; indirect imperatives with sollen, mögen, müssen.",
+   "category": "Indirekte Rede",
+   "tags": ["Indirekte Rede", "Konjunktiv I", "Fragen", "Imperativ"],
+   "difficulty": 4,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "Questions in indirect speech",
+     "text": "Indirect questions are introduced by a verb such as fragt or will wissen together with a question word (wer, wie, …) or with the connector ob. The conjugated verb stands at the end of the clause and, above all in written language, in Konjunktiv I or II."},
+    {"heading": "Imperatives in indirect speech",
+     "text": "For imperatives in indirect speech, written German uses the modal verbs sollen (neutral request), mögen (polite request), müssen (urgent request) or nicht dürfen / nicht sollen (negative request) in Konjunktiv I or II."}
+   ],
+   "rules": [
+    "A question with a question word keeps that word: „Warum heißt die documenta so?“ → …, warum die documenta eigentlich so heiße.",
+    "A yes/no question is introduced by ob: „Sind dort die weltbesten Künstler vertreten?“ → …, ob dort die weltbesten Künstler vertreten seien.",
+    "The conjugated verb moves to the end of the clause.",
+    "Konjunktiv I or II is used above all in written language; the Indikativ is also possible.",
+    "Imperative → sollen for a neutral request, mögen for a polite one, müssen for an urgent one.",
+    "A negative imperative → nicht sollen or nicht dürfen."
+   ],
+   "examples": [
+    {"de": "Die Leute fragten,", "note": "the introducing verb"},
+    {"de": "warum die documenta eigentlich so heiße.", "note": "question word + Konjunktiv I at the end"},
+    {"de": "ob dort die weltbesten Künstler vertreten seien.", "note": "yes/no question → ob"},
+    {"de": "ich solle eine Bewerbungsmappe schicken.", "note": "imperative → sollen (neutral request)"},
+    {"de": "ich möge die Studienordnung lesen.", "note": "imperative → mögen (polite request)"},
+    {"de": "ich müsse mich bis März anmelden.", "note": "imperative → müssen (urgent request)"},
+    {"de": "ich solle / dürfe mich nicht verunsichern lassen.", "note": "negative request"}
+   ],
+   "exercises": [
+    {"type": "transform", "prompt": "Put the question into indirect speech (Die Leute fragten, …).",
+     "from": "„Sind dort die weltbesten Künstler vertreten?“",
+     "answers": ["Die Leute fragten, ob dort die weltbesten Künstler vertreten seien.", "ob dort die weltbesten Künstler vertreten seien."],
+     "explain": "A yes/no question takes ob; the conjugated verb goes to the end, in Konjunktiv I."},
+    {"type": "fill", "prompt": "Complete the connector for a yes/no question in indirect speech.",
+     "text": "Die Leute fragten, ___ dort die weltbesten Künstler vertreten seien.",
+     "answers": ["ob"],
+     "sentence": "ob dort die weltbesten Künstler vertreten seien.", "source": true,
+     "explain": "Without a question word, indirect questions are introduced by ob."},
+    {"type": "choice", "prompt": "„Lesen Sie bitte die Studienordnung.“ — which modal verb renders this polite request?",
+     "text": "Die Studienberaterin sagte, ich ___ die Studienordnung lesen.",
+     "options": ["möge", "müsse", "dürfe nicht", "wolle"],
+     "answers": ["möge"],
+     "explain": "mögen renders a polite request; sollen would be neutral, müssen urgent."},
+    {"type": "choice", "prompt": "„Melden Sie sich unbedingt bis März an!“ — which modal verb?",
+     "text": "Sie riet mir, ich ___ mich bis März anmelden.",
+     "options": ["müsse", "möge", "solle nicht", "dürfe"],
+     "answers": ["müsse"],
+     "explain": "unbedingt makes it an urgent request, so müssen."},
+    {"type": "transform", "prompt": "Put the negative imperative into indirect speech (Sie riet mir, …).",
+     "from": "„Lassen Sie sich nicht verunsichern!“",
+     "answers": ["Sie riet mir, ich solle mich nicht verunsichern lassen.", "ich solle mich nicht verunsichern lassen.", "Sie riet mir, ich dürfe mich nicht verunsichern lassen.", "ich dürfe mich nicht verunsichern lassen."],
+     "explain": "A negative request takes nicht sollen or nicht dürfen in Konjunktiv I."},
+    {"type": "error", "prompt": "The word order of the indirect question is wrong. Correct it.",
+     "text": "Die Leute fragten, warum heiße die documenta eigentlich so.",
+     "answers": ["Die Leute fragten, warum die documenta eigentlich so heiße."],
+     "explain": "In an indirect question the conjugated verb stands at the end of the clause."}
+   ]
+  },
+  {
+   "id": "g-l05-3",
+   "titleEn": "Reporting speech with nach, laut, zufolge and wie",
+   "summary": "Prepositional ways of attributing a statement, plus the wie-clause.",
+   "category": "Indirekte Rede",
+   "tags": ["Redewiedergabe", "Präpositionen", "Quellenangabe"],
+   "difficulty": 3,
+   "prerequisites": ["g-l05-2"],
+   "explanation": [
+    {"heading": "Prepositions",
+     "text": "A statement can be attributed to its author with the prepositions nach, laut and zufolge, either with the person's name or with a noun such as Meinung or Aussage."},
+    {"heading": "Position",
+     "text": "nach and laut precede the phrase; nach can also follow it; zufolge always follows the name it refers to."}
+   ],
+   "rules": [
+    "Nach (der) Meinung / Aussage von + Dativ, or Max Liebermanns Meinung / Aussage nach — nach may precede or follow.",
+    "Laut (der) Meinung / Aussage von + Dativ, or simply Laut + name.",
+    "zufolge always follows the noun or name: Max Liebermann zufolge …",
+    "A subordinate clause with wie does the same job: Wie Max Liebermann meinte / sagte, …"
+   ],
+   "examples": [
+    {"de": "Nach (der) Meinung /Aussage von Max Liebermann …", "note": "nach + Dativ, preceding"},
+    {"de": "Max Liebermanns Meinung /Aussage nach …", "note": "nach following the phrase"},
+    {"de": "Laut (der) Meinung /Aussage von Max Liebermann …", "note": "laut + Dativ"},
+    {"de": "Laut Max Liebermann …", "note": "laut + name alone"},
+    {"de": "Max Liebermann zufolge …", "note": "zufolge always follows"},
+    {"de": "Wie Max Liebermann meinte / sagte,", "note": "a wie-clause does the same job"}
+   ],
+   "exercises": [
+    {"type": "choice", "prompt": "Which preposition must follow the name rather than precede it?",
+     "text": "", "options": ["zufolge", "laut", "nach", "wie"],
+     "answers": ["zufolge"],
+     "explain": "zufolge always follows the noun or name: Max Liebermann zufolge …"},
+    {"type": "fill", "prompt": "Attribute the statement with a preposition placed before the name.",
+     "text": "___ Max Liebermann hat Kunst mit Können zu tun.", "answers": ["Laut"],
+     "sentence": "Laut Max Liebermann …", "source": true,
+     "explain": "Laut + name attributes the statement; nach would need der Meinung / Aussage von."},
+    {"type": "transform", "prompt": "Rewrite the attribution as a wie-clause.",
+     "from": "Laut Max Liebermann hat Kunst mit Können zu tun.",
+     "answers": ["Wie Max Liebermann meinte, hat Kunst mit Können zu tun.", "Wie Max Liebermann sagte, hat Kunst mit Können zu tun."],
+     "explain": "A subordinate clause with wie is the clausal equivalent of the prepositional attribution."},
+    {"type": "error", "prompt": "zufolge is in the wrong position. Correct the sentence.",
+     "text": "Zufolge Max Liebermann hat Kunst mit Können zu tun.",
+     "answers": ["Max Liebermann zufolge hat Kunst mit Können zu tun."],
+     "explain": "zufolge is postpositioned — it always follows the name it refers to."},
+    {"type": "context", "prompt": "Which variant puts nach after the phrase?",
+     "text": "", "options": ["Max Liebermanns Meinung nach …", "Nach Max Liebermanns Meinung …", "Max Liebermann zufolge …"],
+     "answers": ["Max Liebermanns Meinung nach …"],
+     "explain": "nach can either precede (Nach der Meinung von …) or follow (… Meinung nach)."}
+   ]
+  }
+ ]
+}

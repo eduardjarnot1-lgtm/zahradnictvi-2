@@ -1,0 +1,12942 @@
+{
+ "meta": {
+  "language": "de",
+  "source": "hermitdave/FrequencyWords — German (OpenSubtitles corpus)",
+  "corpus": "OpenSubtitles",
+  "note": "Word forms ranked by frequency in film and television subtitles. This is a list of surface forms, not lemmas, and it skews spoken and colloquial German. It is not a CEFR list and implies nothing about level.",
+  "formCount": 2586,
+  "totalCount": 82708677
+ },
+ "forms": [
+  {
+   "form": "ich",
+   "rank": 1,
+   "count": 3699605
+  },
+  {
+   "form": "sie",
+   "rank": 2,
+   "count": 2409949
+  },
+  {
+   "form": "das",
+   "rank": 3,
+   "count": 1952794
+  },
+  {
+   "form": "ist",
+   "rank": 4,
+   "count": 1920535
+  },
+  {
+   "form": "du",
+   "rank": 5,
+   "count": 1890181
+  },
+  {
+   "form": "nicht",
+   "rank": 6,
+   "count": 1734016
+  },
+  {
+   "form": "die",
+   "rank": 7,
+   "count": 1585020
+  },
+  {
+   "form": "es",
+   "rank": 8,
+   "count": 1460530
+  },
+  {
+   "form": "und",
+   "rank": 9,
+   "count": 1441012
+  },
+  {
+   "form": "der",
+   "rank": 10,
+   "count": 1109693
+  },
+  {
+   "form": "wir",
+   "rank": 11,
+   "count": 1075801
+  },
+  {
+   "form": "was",
+   "rank": 12,
+   "count": 1072372
+  },
+  {
+   "form": "zu",
+   "rank": 13,
+   "count": 918548
+  },
+  {
+   "form": "er",
+   "rank": 14,
+   "count": 851812
+  },
+  {
+   "form": "ein",
+   "rank": 15,
+   "count": 841835
+  },
+  {
+   "form": "in",
+   "rank": 16,
+   "count": 793011
+  },
+  {
+   "form": "mir",
+   "rank": 17,
+   "count": 645137
+  },
+  {
+   "form": "mit",
+   "rank": 18,
+   "count": 641744
+  },
+  {
+   "form": "ja",
+   "rank": 19,
+   "count": 635186
+  },
+  {
+   "form": "den",
+   "rank": 20,
+   "count": 588653
+  },
+  {
+   "form": "wie",
+   "rank": 21,
+   "count": 585413
+  },
+  {
+   "form": "mich",
+   "rank": 22,
+   "count": 570285
+  },
+  {
+   "form": "auf",
+   "rank": 23,
+   "count": 567544
+  },
+  {
+   "form": "dass",
+   "rank": 24,
+   "count": 555016
+  },
+  {
+   "form": "eine",
+   "rank": 25,
+   "count": 535419
+  },
+  {
+   "form": "aber",
+   "rank": 26,
+   "count": 523716
+  },
+  {
+   "form": "so",
+   "rank": 27,
+   "count": 508157
+  },
+  {
+   "form": "hat",
+   "rank": 28,
+   "count": 499226
+  },
+  {
+   "form": "hier",
+   "rank": 29,
+   "count": 483819
+  },
+  {
+   "form": "haben",
+   "rank": 30,
+   "count": 475089
+  },
+  {
+   "form": "sind",
+   "rank": 31,
+   "count": 464876
+  },
+  {
+   "form": "für",
+   "rank": 32,
+   "count": 461926
+  },
+  {
+   "form": "von",
+   "rank": 33,
+   "count": 457616
+  },
+  {
+   "form": "dich",
+   "rank": 34,
+   "count": 443610
+  },
+  {
+   "form": "war",
+   "rank": 35,
+   "count": 441018
+  },
+  {
+   "form": "wenn",
+   "rank": 36,
+   "count": 438665
+  },
+  {
+   "form": "ihr",
+   "rank": 37,
+   "count": 408931
+  },
+  {
+   "form": "habe",
+   "rank": 38,
+   "count": 406611
+  },
+  {
+   "form": "nein",
+   "rank": 39,
+   "count": 404910
+  },
+  {
+   "form": "an",
+   "rank": 40,
+   "count": 399003
+  },
+  {
+   "form": "bin",
+   "rank": 41,
+   "count": 369586
+  },
+  {
+   "form": "noch",
+   "rank": 42,
+   "count": 358787
+  },
+  {
+   "form": "da",
+   "rank": 43,
+   "count": 356437
+  },
+  {
+   "form": "dir",
+   "rank": 44,
+   "count": 354523
+  },
+  {
+   "form": "nur",
+   "rank": 45,
+   "count": 352269
+  },
+  {
+   "form": "einen",
+   "rank": 46,
+   "count": 339025
+  },
+  {
+   "form": "sich",
+   "rank": 47,
+   "count": 336423
+  },
+  {
+   "form": "uns",
+   "rank": 48,
+   "count": 331921
+  },
+  {
+   "form": "hast",
+   "rank": 49,
+   "count": 325643
+  },
+  {
+   "form": "dem",
+   "rank": 50,
+   "count": 296995
+  },
+  {
+   "form": "kann",
+   "rank": 51,
+   "count": 293647
+  },
+  {
+   "form": "sein",
+   "rank": 52,
+   "count": 280534
+  },
+  {
+   "form": "auch",
+   "rank": 53,
+   "count": 277547
+  },
+  {
+   "form": "ihn",
+   "rank": 54,
+   "count": 276857
+  },
+  {
+   "form": "schon",
+   "rank": 55,
+   "count": 276809
+  },
+  {
+   "form": "als",
+   "rank": 56,
+   "count": 275361
+  },
+  {
+   "form": "jetzt",
+   "rank": 57,
+   "count": 274768
+  },
+  {
+   "form": "gut",
+   "rank": 58,
+   "count": 274669
+  },
+  {
+   "form": "mal",
+   "rank": 59,
+   "count": 271291
+  },
+  {
+   "form": "aus",
+   "rank": 60,
+   "count": 269701
+  },
+  {
+   "form": "um",
+   "rank": 61,
+   "count": 268714
+  },
+  {
+   "form": "meine",
+   "rank": 62,
+   "count": 266017
+  },
+  {
+   "form": "dann",
+   "rank": 63,
+   "count": 264865
+  },
+  {
+   "form": "wird",
+   "rank": 64,
+   "count": 252030
+  },
+  {
+   "form": "im",
+   "rank": 65,
+   "count": 251908
+  },
+  {
+   "form": "bist",
+   "rank": 66,
+   "count": 249017
+  },
+  {
+   "form": "mein",
+   "rank": 67,
+   "count": 247735
+  },
+  {
+   "form": "doch",
+   "rank": 68,
+   "count": 233508
+  },
+  {
+   "form": "alles",
+   "rank": 69,
+   "count": 230999
+  },
+  {
+   "form": "keine",
+   "rank": 70,
+   "count": 218993
+  },
+  {
+   "form": "weiß",
+   "rank": 71,
+   "count": 218422
+  },
+  {
+   "form": "oder",
+   "rank": 72,
+   "count": 214775
+  },
+  {
+   "form": "nach",
+   "rank": 73,
+   "count": 207669
+  },
+  {
+   "form": "werden",
+   "rank": 74,
+   "count": 194284
+  },
+  {
+   "form": "nichts",
+   "rank": 75,
+   "count": 193569
+  },
+  {
+   "form": "man",
+   "rank": 76,
+   "count": 188465
+  },
+  {
+   "form": "wo",
+   "rank": 77,
+   "count": 186838
+  },
+  {
+   "form": "ihnen",
+   "rank": 78,
+   "count": 183662
+  },
+  {
+   "form": "etwas",
+   "rank": 79,
+   "count": 181934
+  },
+  {
+   "form": "muss",
+   "rank": 80,
+   "count": 181625
+  },
+  {
+   "form": "will",
+   "rank": 81,
+   "count": 179801
+  },
+  {
+   "form": "geht",
+   "rank": 82,
+   "count": 178799
+  },
+  {
+   "form": "oh",
+   "rank": 83,
+   "count": 178134
+  },
+  {
+   "form": "mehr",
+   "rank": 84,
+   "count": 177486
+  },
+  {
+   "form": "also",
+   "rank": 85,
+   "count": 174799
+  },
+  {
+   "form": "bei",
+   "rank": 86,
+   "count": 170877
+  },
+  {
+   "form": "immer",
+   "rank": 87,
+   "count": 167261
+  },
+  {
+   "form": "bitte",
+   "rank": 88,
+   "count": 166140
+  },
+  {
+   "form": "warum",
+   "rank": 89,
+   "count": 164397
+  },
+  {
+   "form": "hab",
+   "rank": 90,
+   "count": 159993
+  },
+  {
+   "form": "vor",
+   "rank": 91,
+   "count": 155796
+  },
+  {
+   "form": "los",
+   "rank": 92,
+   "count": 154848
+  },
+  {
+   "form": "können",
+   "rank": 93,
+   "count": 152494
+  },
+  {
+   "form": "wieder",
+   "rank": 94,
+   "count": 151814
+  },
+  {
+   "form": "sagen",
+   "rank": 95,
+   "count": 148970
+  },
+  {
+   "form": "machen",
+   "rank": 96,
+   "count": 147231
+  },
+  {
+   "form": "alle",
+   "rank": 97,
+   "count": 142880
+  },
+  {
+   "form": "sehr",
+   "rank": 98,
+   "count": 141979
+  },
+  {
+   "form": "mann",
+   "rank": 99,
+   "count": 141770
+  },
+  {
+   "form": "okay",
+   "rank": 100,
+   "count": 140795
+  },
+  {
+   "form": "gehen",
+   "rank": 101,
+   "count": 140022
+  },
+  {
+   "form": "denn",
+   "rank": 102,
+   "count": 139250
+  },
+  {
+   "form": "zum",
+   "rank": 103,
+   "count": 138734
+  },
+  {
+   "form": "tun",
+   "rank": 104,
+   "count": 137036
+  },
+  {
+   "form": "ihm",
+   "rank": 105,
+   "count": 136458
+  },
+  {
+   "form": "diese",
+   "rank": 106,
+   "count": 136456
+  },
+  {
+   "form": "danke",
+   "rank": 107,
+   "count": 136305
+  },
+  {
+   "form": "sehen",
+   "rank": 108,
+   "count": 135747
+  },
+  {
+   "form": "wer",
+   "rank": 109,
+   "count": 135593
+  },
+  {
+   "form": "einem",
+   "rank": 110,
+   "count": 135460
+  },
+  {
+   "form": "euch",
+   "rank": 111,
+   "count": 133228
+  },
+  {
+   "form": "komm",
+   "rank": 112,
+   "count": 132064
+  },
+  {
+   "form": "vielleicht",
+   "rank": 113,
+   "count": 129986
+  },
+  {
+   "form": "einer",
+   "rank": 114,
+   "count": 129339
+  },
+  {
+   "form": "ihre",
+   "rank": 115,
+   "count": 128225
+  },
+  {
+   "form": "werde",
+   "rank": 116,
+   "count": 127576
+  },
+  {
+   "form": "gibt",
+   "rank": 117,
+   "count": 125366
+  },
+  {
+   "form": "über",
+   "rank": 118,
+   "count": 124513
+  },
+  {
+   "form": "deine",
+   "rank": 119,
+   "count": 122342
+  },
+  {
+   "form": "wissen",
+   "rank": 120,
+   "count": 120690
+  },
+  {
+   "form": "müssen",
+   "rank": 121,
+   "count": 120043
+  },
+  {
+   "form": "wirklich",
+   "rank": 122,
+   "count": 118129
+  },
+  {
+   "form": "soll",
+   "rank": 123,
+   "count": 117929
+  },
+  {
+   "form": "nie",
+   "rank": 124,
+   "count": 116256
+  },
+  {
+   "form": "weg",
+   "rank": 125,
+   "count": 114064
+  },
+  {
+   "form": "hey",
+   "rank": 126,
+   "count": 113841
+  },
+  {
+   "form": "kein",
+   "rank": 127,
+   "count": 112268
+  },
+  {
+   "form": "des",
+   "rank": 128,
+   "count": 111848
+  },
+  {
+   "form": "würde",
+   "rank": 129,
+   "count": 111071
+  },
+  {
+   "form": "einfach",
+   "rank": 130,
+   "count": 109393
+  },
+  {
+   "form": "leben",
+   "rank": 131,
+   "count": 108302
+  },
+  {
+   "form": "am",
+   "rank": 132,
+   "count": 107925
+  },
+  {
+   "form": "viel",
+   "rank": 133,
+   "count": 107734
+  },
+  {
+   "form": "tut",
+   "rank": 134,
+   "count": 106193
+  },
+  {
+   "form": "willst",
+   "rank": 135,
+   "count": 102090
+  },
+  {
+   "form": "kommen",
+   "rank": 136,
+   "count": 101561
+  },
+  {
+   "form": "zeit",
+   "rank": 137,
+   "count": 101264
+  },
+  {
+   "form": "nun",
+   "rank": 138,
+   "count": 101033
+  },
+  {
+   "form": "hatte",
+   "rank": 139,
+   "count": 100841
+  },
+  {
+   "form": "dein",
+   "rank": 140,
+   "count": 99860
+  },
+  {
+   "form": "weil",
+   "rank": 141,
+   "count": 99547
+  },
+  {
+   "form": "kommt",
+   "rank": 142,
+   "count": 98113
+  },
+  {
+   "form": "heute",
+   "rank": 143,
+   "count": 96550
+  },
+  {
+   "form": "wollen",
+   "rank": 144,
+   "count": 95326
+  },
+  {
+   "form": "weißt",
+   "rank": 145,
+   "count": 94405
+  },
+  {
+   "form": "damit",
+   "rank": 146,
+   "count": 93171
+  },
+  {
+   "form": "frau",
+   "rank": 147,
+   "count": 93136
+  },
+  {
+   "form": "gesagt",
+   "rank": 148,
+   "count": 91482
+  },
+  {
+   "form": "wäre",
+   "rank": 149,
+   "count": 91454
+  },
+  {
+   "form": "ganz",
+   "rank": 150,
+   "count": 91142
+  },
+  {
+   "form": "wurde",
+   "rank": 151,
+   "count": 90078
+  },
+  {
+   "form": "bis",
+   "rank": 152,
+   "count": 89123
+  },
+  {
+   "form": "sicher",
+   "rank": 153,
+   "count": 88933
+  },
+  {
+   "form": "kannst",
+   "rank": 154,
+   "count": 88763
+  },
+  {
+   "form": "zurück",
+   "rank": 155,
+   "count": 88227
+  },
+  {
+   "form": "dieser",
+   "rank": 156,
+   "count": 87809
+  },
+  {
+   "form": "wollte",
+   "rank": 157,
+   "count": 87602
+  },
+  {
+   "form": "leid",
+   "rank": 158,
+   "count": 86310
+  },
+  {
+   "form": "lassen",
+   "rank": 159,
+   "count": 85608
+  },
+  {
+   "form": "macht",
+   "rank": 160,
+   "count": 85039
+  },
+  {
+   "form": "na",
+   "rank": 161,
+   "count": 83059
+  },
+  {
+   "form": "gott",
+   "rank": 162,
+   "count": 82959
+  },
+  {
+   "form": "meinen",
+   "rank": 163,
+   "count": 80743
+  },
+  {
+   "form": "hallo",
+   "rank": 164,
+   "count": 80393
+  },
+  {
+   "form": "seine",
+   "rank": 165,
+   "count": 80287
+  },
+  {
+   "form": "zwei",
+   "rank": 166,
+   "count": 79810
+  },
+  {
+   "form": "lass",
+   "rank": 167,
+   "count": 76422
+  },
+  {
+   "form": "hätte",
+   "rank": 168,
+   "count": 75941
+  },
+  {
+   "form": "zur",
+   "rank": 169,
+   "count": 74317
+  },
+  {
+   "form": "waren",
+   "rank": 170,
+   "count": 73648
+  },
+  {
+   "form": "genau",
+   "rank": 171,
+   "count": 73454
+  },
+  {
+   "form": "könnte",
+   "rank": 172,
+   "count": 73436
+  },
+  {
+   "form": "vater",
+   "rank": 173,
+   "count": 71313
+  },
+  {
+   "form": "morgen",
+   "rank": 174,
+   "count": 71059
+  },
+  {
+   "form": "leute",
+   "rank": 175,
+   "count": 69590
+  },
+  {
+   "form": "klar",
+   "rank": 176,
+   "count": 68997
+  },
+  {
+   "form": "ok",
+   "rank": 177,
+   "count": 67244
+  },
+  {
+   "form": "ab",
+   "rank": 178,
+   "count": 67201
+  },
+  {
+   "form": "tag",
+   "rank": 179,
+   "count": 67125
+  },
+  {
+   "form": "gerade",
+   "rank": 180,
+   "count": 66340
+  },
+  {
+   "form": "gesehen",
+   "rank": 181,
+   "count": 65787
+  },
+  {
+   "form": "schön",
+   "rank": 182,
+   "count": 65228
+  },
+  {
+   "form": "glaube",
+   "rank": 183,
+   "count": 65132
+  },
+  {
+   "form": "liebe",
+   "rank": 184,
+   "count": 64284
+  },
+  {
+   "form": "geld",
+   "rank": 185,
+   "count": 63441
+  },
+  {
+   "form": "durch",
+   "rank": 186,
+   "count": 63104
+  },
+  {
+   "form": "reden",
+   "rank": 187,
+   "count": 63011
+  },
+  {
+   "form": "unsere",
+   "rank": 188,
+   "count": 62769
+  },
+  {
+   "form": "jemand",
+   "rank": 189,
+   "count": 62063
+  },
+  {
+   "form": "mach",
+   "rank": 190,
+   "count": 61553
+  },
+  {
+   "form": "raus",
+   "rank": 191,
+   "count": 61515
+  },
+  {
+   "form": "sagte",
+   "rank": 192,
+   "count": 61265
+  },
+  {
+   "form": "keinen",
+   "rank": 193,
+   "count": 61243
+  },
+  {
+   "form": "ob",
+   "rank": 194,
+   "count": 60877
+  },
+  {
+   "form": "sollte",
+   "rank": 195,
+   "count": 60702
+  },
+  {
+   "form": "gemacht",
+   "rank": 196,
+   "count": 60360
+  },
+  {
+   "form": "mutter",
+   "rank": 197,
+   "count": 59618
+  },
+  {
+   "form": "dieses",
+   "rank": 198,
+   "count": 59483
+  },
+  {
+   "form": "paar",
+   "rank": 199,
+   "count": 59449
+  },
+  {
+   "form": "sir",
+   "rank": 200,
+   "count": 59288
+  },
+  {
+   "form": "passiert",
+   "rank": 201,
+   "count": 58623
+  },
+  {
+   "form": "musst",
+   "rank": 202,
+   "count": 58313
+  },
+  {
+   "form": "wohl",
+   "rank": 203,
+   "count": 58205
+  },
+  {
+   "form": "möchte",
+   "rank": 204,
+   "count": 58060
+  },
+  {
+   "form": "besser",
+   "rank": 205,
+   "count": 57694
+  },
+  {
+   "form": "dachte",
+   "rank": 206,
+   "count": 57154
+  },
+  {
+   "form": "selbst",
+   "rank": 207,
+   "count": 57130
+  },
+  {
+   "form": "her",
+   "rank": 208,
+   "count": 56834
+  },
+  {
+   "form": "hör",
+   "rank": 209,
+   "count": 56715
+  },
+  {
+   "form": "gehört",
+   "rank": 210,
+   "count": 56700
+  },
+  {
+   "form": "wirst",
+   "rank": 211,
+   "count": 56419
+  },
+  {
+   "form": "sag",
+   "rank": 212,
+   "count": 56175
+  },
+  {
+   "form": "ohne",
+   "rank": 213,
+   "count": 55901
+  },
+  {
+   "form": "nacht",
+   "rank": 214,
+   "count": 55724
+  },
+  {
+   "form": "diesen",
+   "rank": 215,
+   "count": 55537
+  },
+  {
+   "form": "anderen",
+   "rank": 216,
+   "count": 55252
+  },
+  {
+   "form": "meiner",
+   "rank": 217,
+   "count": 54323
+  },
+  {
+   "form": "wieso",
+   "rank": 218,
+   "count": 53445
+  },
+  {
+   "form": "finden",
+   "rank": 219,
+   "count": 52788
+  },
+  {
+   "form": "dort",
+   "rank": 220,
+   "count": 52783
+  },
+  {
+   "form": "helfen",
+   "rank": 221,
+   "count": 52622
+  },
+  {
+   "form": "meinem",
+   "rank": 222,
+   "count": 52557
+  },
+  {
+   "form": "lange",
+   "rank": 223,
+   "count": 51857
+  },
+  {
+   "form": "gute",
+   "rank": 224,
+   "count": 51542
+  },
+  {
+   "form": "ordnung",
+   "rank": 225,
+   "count": 51411
+  },
+  {
+   "form": "geben",
+   "rank": 226,
+   "count": 51135
+  },
+  {
+   "form": "weiter",
+   "rank": 227,
+   "count": 50964
+  },
+  {
+   "form": "natürlich",
+   "rank": 228,
+   "count": 50933
+  },
+  {
+   "form": "sei",
+   "rank": 229,
+   "count": 50892
+  },
+  {
+   "form": "ins",
+   "rank": 230,
+   "count": 50433
+  },
+  {
+   "form": "gar",
+   "rank": 231,
+   "count": 49767
+  },
+  {
+   "form": "geh",
+   "rank": 232,
+   "count": 49662
+  },
+  {
+   "form": "richtig",
+   "rank": 233,
+   "count": 49369
+  },
+  {
+   "form": "diesem",
+   "rank": 234,
+   "count": 49241
+  },
+  {
+   "form": "vom",
+   "rank": 235,
+   "count": 49150
+  },
+  {
+   "form": "sagt",
+   "rank": 236,
+   "count": 48911
+  },
+  {
+   "form": "denke",
+   "rank": 237,
+   "count": 48524
+  },
+  {
+   "form": "seit",
+   "rank": 238,
+   "count": 48455
+  },
+  {
+   "form": "gleich",
+   "rank": 239,
+   "count": 48447
+  },
+  {
+   "form": "hören",
+   "rank": 240,
+   "count": 48247
+  },
+  {
+   "form": "ach",
+   "rank": 241,
+   "count": 48226
+  },
+  {
+   "form": "mädchen",
+   "rank": 242,
+   "count": 48201
+  },
+  {
+   "form": "davon",
+   "rank": 243,
+   "count": 47864
+  },
+  {
+   "form": "sieht",
+   "rank": 244,
+   "count": 47821
+  },
+  {
+   "form": "ihren",
+   "rank": 245,
+   "count": 47758
+  },
+  {
+   "form": "recht",
+   "rank": 246,
+   "count": 47629
+  },
+  {
+   "form": "dafür",
+   "rank": 247,
+   "count": 46366
+  },
+  {
+   "form": "wegen",
+   "rank": 248,
+   "count": 46246
+  },
+  {
+   "form": "hause",
+   "rank": 249,
+   "count": 46066
+  },
+  {
+   "form": "hin",
+   "rank": 250,
+   "count": 45955
+  },
+  {
+   "form": "warte",
+   "rank": 251,
+   "count": 45435
+  },
+  {
+   "form": "drei",
+   "rank": 252,
+   "count": 45414
+  },
+  {
+   "form": "deinen",
+   "rank": 253,
+   "count": 45399
+  },
+  {
+   "form": "abend",
+   "rank": 254,
+   "count": 44677
+  },
+  {
+   "form": "freund",
+   "rank": 255,
+   "count": 44650
+  },
+  {
+   "form": "guten",
+   "rank": 256,
+   "count": 44617
+  },
+  {
+   "form": "sollen",
+   "rank": 257,
+   "count": 44539
+  },
+  {
+   "form": "sollten",
+   "rank": 258,
+   "count": 44449
+  },
+  {
+   "form": "haus",
+   "rank": 259,
+   "count": 44446
+  },
+  {
+   "form": "menschen",
+   "rank": 260,
+   "count": 44405
+  },
+  {
+   "form": "viele",
+   "rank": 261,
+   "count": 44288
+  },
+  {
+   "form": "bleiben",
+   "rank": 262,
+   "count": 43700
+  },
+  {
+   "form": "machst",
+   "rank": 263,
+   "count": 43656
+  },
+  {
+   "form": "musik",
+   "rank": 264,
+   "count": 43625
+  },
+  {
+   "form": "unser",
+   "rank": 265,
+   "count": 43571
+  },
+  {
+   "form": "angst",
+   "rank": 266,
+   "count": 43498
+  },
+  {
+   "form": "schnell",
+   "rank": 267,
+   "count": 42927
+  },
+  {
+   "form": "tot",
+   "rank": 268,
+   "count": 42768
+  },
+  {
+   "form": "welt",
+   "rank": 269,
+   "count": 42718
+  },
+  {
+   "form": "zusammen",
+   "rank": 270,
+   "count": 42573
+  },
+  {
+   "form": "habt",
+   "rank": 271,
+   "count": 42426
+  },
+  {
+   "form": "unter",
+   "rank": 272,
+   "count": 42225
+  },
+  {
+   "form": "scheiße",
+   "rank": 273,
+   "count": 42002
+  },
+  {
+   "form": "nehmen",
+   "rank": 274,
+   "count": 41790
+  },
+  {
+   "form": "eines",
+   "rank": 275,
+   "count": 41647
+  },
+  {
+   "form": "herr",
+   "rank": 276,
+   "count": 41547
+  },
+  {
+   "form": "andere",
+   "rank": 277,
+   "count": 41514
+  },
+  {
+   "form": "getan",
+   "rank": 278,
+   "count": 41252
+  },
+  {
+   "form": "rein",
+   "rank": 279,
+   "count": 41132
+  },
+  {
+   "form": "bringen",
+   "rank": 280,
+   "count": 41071
+  },
+  {
+   "form": "ganze",
+   "rank": 281,
+   "count": 40821
+  },
+  {
+   "form": "essen",
+   "rank": 282,
+   "count": 40600
+  },
+  {
+   "form": "kinder",
+   "rank": 283,
+   "count": 40333
+  },
+  {
+   "form": "glauben",
+   "rank": 284,
+   "count": 39944
+  },
+  {
+   "form": "genug",
+   "rank": 285,
+   "count": 39653
+  },
+  {
+   "form": "darf",
+   "rank": 286,
+   "count": 39154
+  },
+  {
+   "form": "junge",
+   "rank": 287,
+   "count": 38692
+  },
+  {
+   "form": "stimmt",
+   "rank": 288,
+   "count": 38674
+  },
+  {
+   "form": "brauchen",
+   "rank": 289,
+   "count": 38499
+  },
+  {
+   "form": "gegen",
+   "rank": 290,
+   "count": 38488
+  },
+  {
+   "form": "moment",
+   "rank": 291,
+   "count": 38244
+  },
+  {
+   "form": "erst",
+   "rank": 292,
+   "count": 38239
+  },
+  {
+   "form": "seid",
+   "rank": 293,
+   "count": 38130
+  },
+  {
+   "form": "einmal",
+   "rank": 294,
+   "count": 37707
+  },
+  {
+   "form": "sonst",
+   "rank": 295,
+   "count": 37532
+  },
+  {
+   "form": "niemand",
+   "rank": 296,
+   "count": 37152
+  },
+  {
+   "form": "arbeit",
+   "rank": 297,
+   "count": 36985
+  },
+  {
+   "form": "steht",
+   "rank": 298,
+   "count": 36838
+  },
+  {
+   "form": "warten",
+   "rank": 299,
+   "count": 36827
+  },
+  {
+   "form": "dabei",
+   "rank": 300,
+   "count": 36612
+  },
+  {
+   "form": "fragen",
+   "rank": 301,
+   "count": 36308
+  },
+  {
+   "form": "sofort",
+   "rank": 302,
+   "count": 36240
+  },
+  {
+   "form": "jahre",
+   "rank": 303,
+   "count": 36182
+  },
+  {
+   "form": "halt",
+   "rank": 304,
+   "count": 35953
+  },
+  {
+   "form": "verdammt",
+   "rank": 305,
+   "count": 35851
+  },
+  {
+   "form": "ihrer",
+   "rank": 306,
+   "count": 35539
+  },
+  {
+   "form": "bevor",
+   "rank": 307,
+   "count": 35329
+  },
+  {
+   "form": "sohn",
+   "rank": 308,
+   "count": 34555
+  },
+  {
+   "form": "familie",
+   "rank": 309,
+   "count": 34293
+  },
+  {
+   "form": "heißt",
+   "rank": 310,
+   "count": 34272
+  },
+  {
+   "form": "jeder",
+   "rank": 311,
+   "count": 34257
+  },
+  {
+   "form": "sprechen",
+   "rank": 312,
+   "count": 34019
+  },
+  {
+   "form": "gefunden",
+   "rank": 313,
+   "count": 33922
+  },
+  {
+   "form": "sache",
+   "rank": 314,
+   "count": 33886
+  },
+  {
+   "form": "problem",
+   "rank": 315,
+   "count": 33643
+  },
+  {
+   "form": "fertig",
+   "rank": 316,
+   "count": 33601
+  },
+  {
+   "form": "allein",
+   "rank": 317,
+   "count": 33525
+  },
+  {
+   "form": "wann",
+   "rank": 318,
+   "count": 33476
+  },
+  {
+   "form": "brauche",
+   "rank": 319,
+   "count": 33451
+  },
+  {
+   "form": "bruder",
+   "rank": 320,
+   "count": 33252
+  },
+  {
+   "form": "hilfe",
+   "rank": 321,
+   "count": 33245
+  },
+  {
+   "form": "halten",
+   "rank": 322,
+   "count": 33202
+  },
+  {
+   "form": "hatten",
+   "rank": 323,
+   "count": 33181
+  },
+  {
+   "form": "kind",
+   "rank": 324,
+   "count": 33079
+  },
+  {
+   "form": "siehst",
+   "rank": 325,
+   "count": 33069
+  },
+  {
+   "form": "darüber",
+   "rank": 326,
+   "count": 32828
+  },
+  {
+   "form": "konnte",
+   "rank": 327,
+   "count": 32825
+  },
+  {
+   "form": "wahr",
+   "rank": 328,
+   "count": 32792
+  },
+  {
+   "form": "warst",
+   "rank": 329,
+   "count": 32628
+  },
+  {
+   "form": "beim",
+   "rank": 330,
+   "count": 32569
+  },
+  {
+   "form": "seinen",
+   "rank": 331,
+   "count": 32530
+  },
+  {
+   "form": "beide",
+   "rank": 332,
+   "count": 32462
+  },
+  {
+   "form": "denken",
+   "rank": 333,
+   "count": 32332
+  },
+  {
+   "form": "jahren",
+   "rank": 334,
+   "count": 32283
+  },
+  {
+   "form": "daran",
+   "rank": 335,
+   "count": 31908
+  },
+  {
+   "form": "kam",
+   "rank": 336,
+   "count": 31779
+  },
+  {
+   "form": "dazu",
+   "rank": 337,
+   "count": 31717
+  },
+  {
+   "form": "gib",
+   "rank": 338,
+   "count": 31576
+  },
+  {
+   "form": "würden",
+   "rank": 339,
+   "count": 31483
+  },
+  {
+   "form": "verstehe",
+   "rank": 340,
+   "count": 31221
+  },
+  {
+   "form": "deinem",
+   "rank": 341,
+   "count": 31058
+  },
+  {
+   "form": "ihrem",
+   "rank": 342,
+   "count": 30847
+  },
+  {
+   "form": "deiner",
+   "rank": 343,
+   "count": 30844
+  },
+  {
+   "form": "wusste",
+   "rank": 344,
+   "count": 30820
+  },
+  {
+   "form": "könnten",
+   "rank": 345,
+   "count": 30743
+  },
+  {
+   "form": "fall",
+   "rank": 346,
+   "count": 30735
+  },
+  {
+   "form": "lieber",
+   "rank": 347,
+   "count": 30660
+  },
+  {
+   "form": "eigentlich",
+   "rank": 348,
+   "count": 30446
+  },
+  {
+   "form": "bekommen",
+   "rank": 349,
+   "count": 30412
+  },
+  {
+   "form": "jeden",
+   "rank": 350,
+   "count": 30306
+  },
+  {
+   "form": "sieh",
+   "rank": 351,
+   "count": 30300
+  },
+  {
+   "form": "dank",
+   "rank": 352,
+   "count": 30257
+  },
+  {
+   "form": "vergessen",
+   "rank": 353,
+   "count": 30171
+  },
+  {
+   "form": "kennen",
+   "rank": 354,
+   "count": 30103
+  },
+  {
+   "form": "mag",
+   "rank": 355,
+   "count": 30060
+  },
+  {
+   "form": "sehe",
+   "rank": 356,
+   "count": 29963
+  },
+  {
+   "form": "frage",
+   "rank": 357,
+   "count": 29796
+  },
+  {
+   "form": "gern",
+   "rank": 358,
+   "count": 29788
+  },
+  {
+   "form": "komme",
+   "rank": 359,
+   "count": 29593
+  },
+  {
+   "form": "stadt",
+   "rank": 360,
+   "count": 29590
+  },
+  {
+   "form": "sage",
+   "rank": 361,
+   "count": 29204
+  },
+  {
+   "form": "kopf",
+   "rank": 362,
+   "count": 29159
+  },
+  {
+   "form": "männer",
+   "rank": 363,
+   "count": 29061
+  },
+  {
+   "form": "egal",
+   "rank": 364,
+   "count": 28936
+  },
+  {
+   "form": "letzte",
+   "rank": 365,
+   "count": 28922
+  },
+  {
+   "form": "namen",
+   "rank": 366,
+   "count": 28879
+  },
+  {
+   "form": "gab",
+   "rank": 367,
+   "count": 28744
+  },
+  {
+   "form": "kleine",
+   "rank": 368,
+   "count": 28720
+  },
+  {
+   "form": "mache",
+   "rank": 369,
+   "count": 28654
+  },
+  {
+   "form": "töten",
+   "rank": 370,
+   "count": 28571
+  },
+  {
+   "form": "fahren",
+   "rank": 371,
+   "count": 28565
+  },
+  {
+   "form": "all",
+   "rank": 372,
+   "count": 28366
+  },
+  {
+   "form": "später",
+   "rank": 373,
+   "count": 28272
+  },
+  {
+   "form": "uhr",
+   "rank": 374,
+   "count": 28149
+  },
+  {
+   "form": "ende",
+   "rank": 375,
+   "count": 28065
+  },
+  {
+   "form": "baby",
+   "rank": 376,
+   "count": 27935
+  },
+  {
+   "form": "gehe",
+   "rank": 377,
+   "count": 27758
+  },
+  {
+   "form": "glück",
+   "rank": 378,
+   "count": 27747
+  },
+  {
+   "form": "dinge",
+   "rank": 379,
+   "count": 27590
+  },
+  {
+   "form": "freunde",
+   "rank": 380,
+   "count": 27436
+  },
+  {
+   "form": "bisschen",
+   "rank": 381,
+   "count": 27343
+  },
+  {
+   "form": "sterben",
+   "rank": 382,
+   "count": 27336
+  },
+  {
+   "form": "darauf",
+   "rank": 383,
+   "count": 27177
+  },
+  {
+   "form": "bald",
+   "rank": 384,
+   "count": 27064
+  },
+  {
+   "form": "minuten",
+   "rank": 385,
+   "count": 26971
+  },
+  {
+   "form": "echt",
+   "rank": 386,
+   "count": 26844
+  },
+  {
+   "form": "bereit",
+   "rank": 387,
+   "count": 26763
+  },
+  {
+   "form": "eins",
+   "rank": 388,
+   "count": 26732
+  },
+  {
+   "form": "augen",
+   "rank": 389,
+   "count": 26715
+  },
+  {
+   "form": "runter",
+   "rank": 390,
+   "count": 26479
+  },
+  {
+   "form": "jungs",
+   "rank": 391,
+   "count": 26356
+  },
+  {
+   "form": "seiner",
+   "rank": 392,
+   "count": 26344
+  },
+  {
+   "form": "polizei",
+   "rank": 393,
+   "count": 26127
+  },
+  {
+   "form": "auto",
+   "rank": 394,
+   "count": 26062
+  },
+  {
+   "form": "eure",
+   "rank": 395,
+   "count": 25995
+  },
+  {
+   "form": "vielen",
+   "rank": 396,
+   "count": 25958
+  },
+  {
+   "form": "stehen",
+   "rank": 397,
+   "count": 25905
+  },
+  {
+   "form": "weit",
+   "rank": 398,
+   "count": 25733
+  },
+  {
+   "form": "meinst",
+   "rank": 399,
+   "count": 25717
+  },
+  {
+   "form": "draußen",
+   "rank": 400,
+   "count": 25700
+  },
+  {
+   "form": "tür",
+   "rank": 401,
+   "count": 25683
+  },
+  {
+   "form": "dad",
+   "rank": 402,
+   "count": 25677
+  },
+  {
+   "form": "wurden",
+   "rank": 403,
+   "count": 25385
+  },
+  {
+   "form": "verrückt",
+   "rank": 404,
+   "count": 24992
+  },
+  {
+   "form": "kerl",
+   "rank": 405,
+   "count": 24963
+  },
+  {
+   "form": "hätten",
+   "rank": 406,
+   "count": 24941
+  },
+  {
+   "form": "einzige",
+   "rank": 407,
+   "count": 24839
+  },
+  {
+   "form": "vorbei",
+   "rank": 408,
+   "count": 24833
+  },
+  {
+   "form": "treffen",
+   "rank": 409,
+   "count": 24548
+  },
+  {
+   "form": "ganzen",
+   "rank": 410,
+   "count": 24536
+  },
+  {
+   "form": "hi",
+   "rank": 411,
+   "count": 24421
+  },
+  {
+   "form": "ahnung",
+   "rank": 412,
+   "count": 24386
+  },
+  {
+   "form": "teufel",
+   "rank": 413,
+   "count": 24377
+  },
+  {
+   "form": "kenne",
+   "rank": 414,
+   "count": 24293
+  },
+  {
+   "form": "hinter",
+   "rank": 415,
+   "count": 24261
+  },
+  {
+   "form": "fast",
+   "rank": 416,
+   "count": 24181
+  },
+  {
+   "form": "name",
+   "rank": 417,
+   "count": 24087
+  },
+  {
+   "form": "arbeiten",
+   "rank": 418,
+   "count": 24085
+  },
+  {
+   "form": "gerne",
+   "rank": 419,
+   "count": 24082
+  },
+  {
+   "form": "dran",
+   "rank": 420,
+   "count": 24013
+  },
+  {
+   "form": "neue",
+   "rank": 421,
+   "count": 23809
+  },
+  {
+   "form": "ziemlich",
+   "rank": 422,
+   "count": 23673
+  },
+  {
+   "form": "ruhig",
+   "rank": 423,
+   "count": 23596
+  },
+  {
+   "form": "ging",
+   "rank": 424,
+   "count": 23577
+  },
+  {
+   "form": "sorgen",
+   "rank": 425,
+   "count": 23565
+  },
+  {
+   "form": "verstanden",
+   "rank": 426,
+   "count": 23556
+  },
+  {
+   "form": "tochter",
+   "rank": 427,
+   "count": 23504
+  },
+  {
+   "form": "toll",
+   "rank": 428,
+   "count": 23432
+  },
+  {
+   "form": "jemanden",
+   "rank": 429,
+   "count": 23411
+  },
+  {
+   "form": "sogar",
+   "rank": 430,
+   "count": 23348
+  },
+  {
+   "form": "überhaupt",
+   "rank": 431,
+   "count": 23328
+  },
+  {
+   "form": "he",
+   "rank": 432,
+   "count": 23276
+  },
+  {
+   "form": "spät",
+   "rank": 433,
+   "count": 23219
+  },
+  {
+   "form": "hört",
+   "rank": 434,
+   "count": 23167
+  },
+  {
+   "form": "frauen",
+   "rank": 435,
+   "count": 23141
+  },
+  {
+   "form": "hand",
+   "rank": 436,
+   "count": 23136
+  },
+  {
+   "form": "drin",
+   "rank": 437,
+   "count": 23127
+  },
+  {
+   "form": "schau",
+   "rank": 438,
+   "count": 23112
+  },
+  {
+   "form": "nimm",
+   "rank": 439,
+   "count": 23056
+  },
+  {
+   "form": "seinem",
+   "rank": 440,
+   "count": 23006
+  },
+  {
+   "form": "mama",
+   "rank": 441,
+   "count": 22979
+  },
+  {
+   "form": "lang",
+   "rank": 442,
+   "count": 22946
+  },
+  {
+   "form": "solltest",
+   "rank": 443,
+   "count": 22899
+  },
+  {
+   "form": "verloren",
+   "rank": 444,
+   "count": 22883
+  },
+  {
+   "form": "art",
+   "rank": 445,
+   "count": 22847
+  },
+  {
+   "form": "sah",
+   "rank": 446,
+   "count": 22811
+  },
+  {
+   "form": "verstehen",
+   "rank": 447,
+   "count": 22808
+  },
+  {
+   "form": "große",
+   "rank": 448,
+   "count": 22802
+  },
+  {
+   "form": "darum",
+   "rank": 449,
+   "count": 22792
+  },
+  {
+   "form": "denkst",
+   "rank": 450,
+   "count": 22733
+  },
+  {
+   "form": "job",
+   "rank": 451,
+   "count": 22720
+  },
+  {
+   "form": "ruhe",
+   "rank": 452,
+   "count": 22714
+  },
+  {
+   "form": "braucht",
+   "rank": 453,
+   "count": 22695
+  },
+  {
+   "form": "woher",
+   "rank": 454,
+   "count": 22618
+  },
+  {
+   "form": "spielen",
+   "rank": 455,
+   "count": 22616
+  },
+  {
+   "form": "idee",
+   "rank": 456,
+   "count": 22558
+  },
+  {
+   "form": "suchen",
+   "rank": 457,
+   "count": 22456
+  },
+  {
+   "form": "je",
+   "rank": 458,
+   "count": 22392
+  },
+  {
+   "form": "kommst",
+   "rank": 459,
+   "count": 22374
+  },
+  {
+   "form": "liegt",
+   "rank": 460,
+   "count": 22368
+  },
+  {
+   "form": "grund",
+   "rank": 461,
+   "count": 22293
+  },
+  {
+   "form": "versuchen",
+   "rank": 462,
+   "count": 22259
+  },
+  {
+   "form": "jahr",
+   "rank": 463,
+   "count": 22128
+  },
+  {
+   "form": "gekommen",
+   "rank": 464,
+   "count": 22127
+  },
+  {
+   "form": "wasser",
+   "rank": 465,
+   "count": 22015
+  },
+  {
+   "form": "gewesen",
+   "rank": 466,
+   "count": 21982
+  },
+  {
+   "form": "endlich",
+   "rank": 467,
+   "count": 21948
+  },
+  {
+   "form": "schwester",
+   "rank": 468,
+   "count": 21916
+  },
+  {
+   "form": "keiner",
+   "rank": 469,
+   "count": 21913
+  },
+  {
+   "form": "wenig",
+   "rank": 470,
+   "count": 21865
+  },
+  {
+   "form": "tod",
+   "rank": 471,
+   "count": 21854
+  },
+  {
+   "form": "versucht",
+   "rank": 472,
+   "count": 21844
+  },
+  {
+   "form": "oben",
+   "rank": 473,
+   "count": 21843
+  },
+  {
+   "form": "letzten",
+   "rank": 474,
+   "count": 21748
+  },
+  {
+   "form": "geschichte",
+   "rank": 475,
+   "count": 21694
+  },
+  {
+   "form": "erste",
+   "rank": 476,
+   "count": 21584
+  },
+  {
+   "form": "alter",
+   "rank": 477,
+   "count": 21582
+  },
+  {
+   "form": "kurz",
+   "rank": 478,
+   "count": 21578
+  },
+  {
+   "form": "bedeutet",
+   "rank": 479,
+   "count": 21519
+  },
+  {
+   "form": "niemals",
+   "rank": 480,
+   "count": 21495
+  },
+  {
+   "form": "ah",
+   "rank": 481,
+   "count": 21383
+  },
+  {
+   "form": "fünf",
+   "rank": 482,
+   "count": 21360
+  },
+  {
+   "form": "welche",
+   "rank": 483,
+   "count": 21242
+  },
+  {
+   "form": "hoch",
+   "rank": 484,
+   "count": 21240
+  },
+  {
+   "form": "etwa",
+   "rank": 485,
+   "count": 21171
+  },
+  {
+   "form": "erzählt",
+   "rank": 486,
+   "count": 21145
+  },
+  {
+   "form": "finde",
+   "rank": 487,
+   "count": 21135
+  },
+  {
+   "form": "land",
+   "rank": 488,
+   "count": 20995
+  },
+  {
+   "form": "lasst",
+   "rank": 489,
+   "count": 20971
+  },
+  {
+   "form": "bringt",
+   "rank": 490,
+   "count": 20892
+  },
+  {
+   "form": "getötet",
+   "rank": 491,
+   "count": 20834
+  },
+  {
+   "form": "stunden",
+   "rank": 492,
+   "count": 20816
+  },
+  {
+   "form": "holen",
+   "rank": 493,
+   "count": 20791
+  },
+  {
+   "form": "schwer",
+   "rank": 494,
+   "count": 20741
+  },
+  {
+   "form": "lässt",
+   "rank": 495,
+   "count": 20687
+  },
+  {
+   "form": "verlassen",
+   "rank": 496,
+   "count": 20653
+  },
+  {
+   "form": "anders",
+   "rank": 497,
+   "count": 20560
+  },
+  {
+   "form": "hoffe",
+   "rank": 498,
+   "count": 20510
+  },
+  {
+   "form": "gestern",
+   "rank": 499,
+   "count": 20504
+  },
+  {
+   "form": "musste",
+   "rank": 500,
+   "count": 20477
+  },
+  {
+   "form": "wahrheit",
+   "rank": 501,
+   "count": 20416
+  },
+  {
+   "form": "vier",
+   "rank": 502,
+   "count": 20265
+  },
+  {
+   "form": "sagst",
+   "rank": 503,
+   "count": 20142
+  },
+  {
+   "form": "mom",
+   "rank": 504,
+   "count": 20135
+  },
+  {
+   "form": "ort",
+   "rank": 505,
+   "count": 19952
+  },
+  {
+   "form": "läuft",
+   "rank": 506,
+   "count": 19932
+  },
+  {
+   "form": "zimmer",
+   "rank": 507,
+   "count": 19888
+  },
+  {
+   "form": "während",
+   "rank": 508,
+   "count": 19849
+  },
+  {
+   "form": "captain",
+   "rank": 509,
+   "count": 19846
+  },
+  {
+   "form": "deshalb",
+   "rank": 510,
+   "count": 19841
+  },
+  {
+   "form": "seite",
+   "rank": 511,
+   "count": 19837
+  },
+  {
+   "form": "würdest",
+   "rank": 512,
+   "count": 19810
+  },
+  {
+   "form": "glaubst",
+   "rank": 513,
+   "count": 19796
+  },
+  {
+   "form": "krieg",
+   "rank": 514,
+   "count": 19748
+  },
+  {
+   "form": "zeigen",
+   "rank": 515,
+   "count": 19694
+  },
+  {
+   "form": "gefallen",
+   "rank": 516,
+   "count": 19663
+  },
+  {
+   "form": "spiel",
+   "rank": 517,
+   "count": 19649
+  },
+  {
+   "form": "bleibt",
+   "rank": 518,
+   "count": 19603
+  },
+  {
+   "form": "woche",
+   "rank": 519,
+   "count": 19602
+  },
+  {
+   "form": "unserer",
+   "rank": 520,
+   "count": 19595
+  },
+  {
+   "form": "nett",
+   "rank": 521,
+   "count": 19593
+  },
+  {
+   "form": "denen",
+   "rank": 522,
+   "count": 19513
+  },
+  {
+   "form": "bestimmt",
+   "rank": 523,
+   "count": 19446
+  },
+  {
+   "form": "zwischen",
+   "rank": 524,
+   "count": 19369
+  },
+  {
+   "form": "wagen",
+   "rank": 525,
+   "count": 19361
+  },
+  {
+   "form": "kleinen",
+   "rank": 526,
+   "count": 19313
+  },
+  {
+   "form": "guter",
+   "rank": 527,
+   "count": 19252
+  },
+  {
+   "form": "schatz",
+   "rank": 528,
+   "count": 19218
+  },
+  {
+   "form": "schuld",
+   "rank": 529,
+   "count": 19103
+  },
+  {
+   "form": "erzählen",
+   "rank": 530,
+   "count": 19084
+  },
+  {
+   "form": "ersten",
+   "rank": 531,
+   "count": 19078
+  },
+  {
+   "form": "dies",
+   "rank": 532,
+   "count": 19022
+  },
+  {
+   "form": "spaß",
+   "rank": 533,
+   "count": 19020
+  },
+  {
+   "form": "tage",
+   "rank": 534,
+   "count": 18999
+  },
+  {
+   "form": "nehme",
+   "rank": 535,
+   "count": 18956
+  },
+  {
+   "form": "manchmal",
+   "rank": 536,
+   "count": 18931
+  },
+  {
+   "form": "beste",
+   "rank": 537,
+   "count": 18908
+  },
+  {
+   "form": "gehst",
+   "rank": 538,
+   "count": 18785
+  },
+  {
+   "form": "chance",
+   "rank": 539,
+   "count": 18641
+  },
+  {
+   "form": "entschuldigung",
+   "rank": 540,
+   "count": 18616
+  },
+  {
+   "form": "anderes",
+   "rank": 541,
+   "count": 18492
+  },
+  {
+   "form": "schlecht",
+   "rank": 542,
+   "count": 18478
+  },
+  {
+   "form": "wollten",
+   "rank": 543,
+   "count": 18439
+  },
+  {
+   "form": "äh",
+   "rank": 544,
+   "count": 18414
+  },
+  {
+   "form": "ernst",
+   "rank": 545,
+   "count": 18369
+  },
+  {
+   "form": "sachen",
+   "rank": 546,
+   "count": 18334
+  },
+  {
+   "form": "eben",
+   "rank": 547,
+   "count": 18316
+  },
+  {
+   "form": "schlafen",
+   "rank": 548,
+   "count": 18283
+  },
+  {
+   "form": "gefällt",
+   "rank": 549,
+   "count": 18282
+  },
+  {
+   "form": "entschuldigen",
+   "rank": 550,
+   "count": 18281
+  },
+  {
+   "form": "bett",
+   "rank": 551,
+   "count": 18232
+  },
+  {
+   "form": "wort",
+   "rank": 552,
+   "count": 18163
+  },
+  {
+   "form": "allen",
+   "rank": 553,
+   "count": 18129
+  },
+  {
+   "form": "gesicht",
+   "rank": 554,
+   "count": 18095
+  },
+  {
+   "form": "typ",
+   "rank": 555,
+   "count": 18066
+  },
+  {
+   "form": "unten",
+   "rank": 556,
+   "count": 18005
+  },
+  {
+   "form": "mensch",
+   "rank": 557,
+   "count": 17915
+  },
+  {
+   "form": "freundin",
+   "rank": 558,
+   "count": 17902
+  },
+  {
+   "form": "miss",
+   "rank": 559,
+   "count": 17885
+  },
+  {
+   "form": "kleiner",
+   "rank": 560,
+   "count": 17819
+  },
+  {
+   "form": "hättest",
+   "rank": 561,
+   "count": 17799
+  },
+  {
+   "form": "teil",
+   "rank": 562,
+   "count": 17740
+  },
+  {
+   "form": "tu",
+   "rank": 563,
+   "count": 17679
+  },
+  {
+   "form": "trinken",
+   "rank": 564,
+   "count": 17564
+  },
+  {
+   "form": "einige",
+   "rank": 565,
+   "count": 17522
+  },
+  {
+   "form": "wären",
+   "rank": 566,
+   "count": 17436
+  },
+  {
+   "form": "bleib",
+   "rank": 567,
+   "count": 17387
+  },
+  {
+   "form": "beiden",
+   "rank": 568,
+   "count": 17358
+  },
+  {
+   "form": "herz",
+   "rank": 569,
+   "count": 17286
+  },
+  {
+   "form": "papa",
+   "rank": 570,
+   "count": 17256
+  },
+  {
+   "form": "stellen",
+   "rank": 571,
+   "count": 17230
+  },
+  {
+   "form": "wichtig",
+   "rank": 572,
+   "count": 17156
+  },
+  {
+   "form": "euer",
+   "rank": 573,
+   "count": 17109
+  },
+  {
+   "form": "blut",
+   "rank": 574,
+   "count": 17101
+  },
+  {
+   "form": "schule",
+   "rank": 575,
+   "count": 17000
+  },
+  {
+   "form": "bloß",
+   "rank": 576,
+   "count": 16976
+  },
+  {
+   "form": "neuen",
+   "rank": 577,
+   "count": 16877
+  },
+  {
+   "form": "wiedersehen",
+   "rank": 578,
+   "count": 16819
+  },
+  {
+   "form": "unseren",
+   "rank": 579,
+   "count": 16817
+  },
+  {
+   "form": "glücklich",
+   "rank": 580,
+   "count": 16738
+  },
+  {
+   "form": "frei",
+   "rank": 581,
+   "count": 16630
+  },
+  {
+   "form": "ding",
+   "rank": 582,
+   "count": 16615
+  },
+  {
+   "form": "gedacht",
+   "rank": 583,
+   "count": 16604
+  },
+  {
+   "form": "tust",
+   "rank": 584,
+   "count": 16603
+  },
+  {
+   "form": "scheint",
+   "rank": 585,
+   "count": 16567
+  },
+  {
+   "form": "arsch",
+   "rank": 586,
+   "count": 16510
+  },
+  {
+   "form": "oft",
+   "rank": 587,
+   "count": 16458
+  },
+  {
+   "form": "wohin",
+   "rank": 588,
+   "count": 16447
+  },
+  {
+   "form": "alt",
+   "rank": 589,
+   "count": 16420
+  },
+  {
+   "form": "alte",
+   "rank": 590,
+   "count": 16303
+  },
+  {
+   "form": "waffe",
+   "rank": 591,
+   "count": 16296
+  },
+  {
+   "form": "sorge",
+   "rank": 592,
+   "count": 16271
+  },
+  {
+   "form": "fest",
+   "rank": 593,
+   "count": 16261
+  },
+  {
+   "form": "platz",
+   "rank": 594,
+   "count": 16193
+  },
+  {
+   "form": "eltern",
+   "rank": 595,
+   "count": 16182
+  },
+  {
+   "form": "kriegen",
+   "rank": 596,
+   "count": 16094
+  },
+  {
+   "form": "wen",
+   "rank": 597,
+   "count": 16039
+  },
+  {
+   "form": "möglich",
+   "rank": 598,
+   "count": 15984
+  },
+  {
+   "form": "drauf",
+   "rank": 599,
+   "count": 15969
+  },
+  {
+   "form": "falls",
+   "rank": 600,
+   "count": 15947
+  },
+  {
+   "form": "irgendwie",
+   "rank": 601,
+   "count": 15895
+  },
+  {
+   "form": "jungen",
+   "rank": 602,
+   "count": 15680
+  },
+  {
+   "form": "besten",
+   "rank": 603,
+   "count": 15642
+  },
+  {
+   "form": "alten",
+   "rank": 604,
+   "count": 15591
+  },
+  {
+   "form": "nummer",
+   "rank": 605,
+   "count": 15580
+  },
+  {
+   "form": "wahrscheinlich",
+   "rank": 606,
+   "count": 15579
+  },
+  {
+   "form": "dollar",
+   "rank": 607,
+   "count": 15540
+  },
+  {
+   "form": "brauchst",
+   "rank": 608,
+   "count": 15533
+  },
+  {
+   "form": "ehrlich",
+   "rank": 609,
+   "count": 15525
+  },
+  {
+   "form": "hierher",
+   "rank": 610,
+   "count": 15512
+  },
+  {
+   "form": "irgendwas",
+   "rank": 611,
+   "count": 15497
+  },
+  {
+   "form": "setzen",
+   "rank": 612,
+   "count": 15470
+  },
+  {
+   "form": "zuerst",
+   "rank": 613,
+   "count": 15469
+  },
+  {
+   "form": "falsch",
+   "rank": 614,
+   "count": 15452
+  },
+  {
+   "form": "reicht",
+   "rank": 615,
+   "count": 15417
+  },
+  {
+   "form": "menge",
+   "rank": 616,
+   "count": 15400
+  },
+  {
+   "form": "bereits",
+   "rank": 617,
+   "count": 15375
+  },
+  {
+   "form": "bring",
+   "rank": 618,
+   "count": 15352
+  },
+  {
+   "form": "jede",
+   "rank": 619,
+   "count": 15339
+  },
+  {
+   "form": "hölle",
+   "rank": 620,
+   "count": 15326
+  },
+  {
+   "form": "pass",
+   "rank": 621,
+   "count": 15216
+  },
+  {
+   "form": "außer",
+   "rank": 622,
+   "count": 15213
+  },
+  {
+   "form": "früher",
+   "rank": 623,
+   "count": 15141
+  },
+  {
+   "form": "rede",
+   "rank": 624,
+   "count": 15130
+  },
+  {
+   "form": "großen",
+   "rank": 625,
+   "count": 15105
+  },
+  {
+   "form": "hände",
+   "rank": 626,
+   "count": 14989
+  },
+  {
+   "form": "wollt",
+   "rank": 627,
+   "count": 14904
+  },
+  {
+   "form": "gegeben",
+   "rank": 628,
+   "count": 14892
+  },
+  {
+   "form": "telefon",
+   "rank": 629,
+   "count": 14890
+  },
+  {
+   "form": "kennst",
+   "rank": 630,
+   "count": 14882
+  },
+  {
+   "form": "wartet",
+   "rank": 631,
+   "count": 14832
+  },
+  {
+   "form": "schiff",
+   "rank": 632,
+   "count": 14823
+  },
+  {
+   "form": "früh",
+   "rank": 633,
+   "count": 14800
+  },
+  {
+   "form": "sondern",
+   "rank": 634,
+   "count": 14747
+  },
+  {
+   "form": "scheiß",
+   "rank": 635,
+   "count": 14646
+  },
+  {
+   "form": "tue",
+   "rank": 636,
+   "count": 14643
+  },
+  {
+   "form": "willkommen",
+   "rank": 637,
+   "count": 14607
+  },
+  {
+   "form": "kaum",
+   "rank": 638,
+   "count": 14597
+  },
+  {
+   "form": "lieben",
+   "rank": 639,
+   "count": 14463
+  },
+  {
+   "form": "fehler",
+   "rank": 640,
+   "count": 14412
+  },
+  {
+   "form": "retten",
+   "rank": 641,
+   "count": 14386
+  },
+  {
+   "form": "stunde",
+   "rank": 642,
+   "count": 14369
+  },
+  {
+   "form": "meines",
+   "rank": 643,
+   "count": 14363
+  },
+  {
+   "form": "dürfen",
+   "rank": 644,
+   "count": 14308
+  },
+  {
+   "form": "sechs",
+   "rank": 645,
+   "count": 14308
+  },
+  {
+   "form": "plan",
+   "rank": 646,
+   "count": 14259
+  },
+  {
+   "form": "klingt",
+   "rank": 647,
+   "count": 14196
+  },
+  {
+   "form": "hund",
+   "rank": 648,
+   "count": 14109
+  },
+  {
+   "form": "zehn",
+   "rank": 649,
+   "count": 14088
+  },
+  {
+   "form": "nächste",
+   "rank": 650,
+   "count": 14081
+  },
+  {
+   "form": "nächsten",
+   "rank": 651,
+   "count": 14065
+  },
+  {
+   "form": "langsam",
+   "rank": 652,
+   "count": 14044
+  },
+  {
+   "form": "gebe",
+   "rank": 653,
+   "count": 13996
+  },
+  {
+   "form": "allem",
+   "rank": 654,
+   "count": 13965
+  },
+  {
+   "form": "film",
+   "rank": 655,
+   "count": 13924
+  },
+  {
+   "form": "ruf",
+   "rank": 656,
+   "count": 13806
+  },
+  {
+   "form": "wochen",
+   "rank": 657,
+   "count": 13776
+  },
+  {
+   "form": "geworden",
+   "rank": 658,
+   "count": 13747
+  },
+  {
+   "form": "schaffen",
+   "rank": 659,
+   "count": 13727
+  },
+  {
+   "form": "wär",
+   "rank": 660,
+   "count": 13717
+  },
+  {
+   "form": "überall",
+   "rank": 661,
+   "count": 13690
+  },
+  {
+   "form": "voll",
+   "rank": 662,
+   "count": 13655
+  },
+  {
+   "form": "feuer",
+   "rank": 663,
+   "count": 13645
+  },
+  {
+   "form": "alleine",
+   "rank": 664,
+   "count": 13565
+  },
+  {
+   "form": "büro",
+   "rank": 665,
+   "count": 13548
+  },
+  {
+   "form": "direkt",
+   "rank": 666,
+   "count": 13535
+  },
+  {
+   "form": "kumpel",
+   "rank": 667,
+   "count": 13439
+  },
+  {
+   "form": "trotzdem",
+   "rank": 668,
+   "count": 13429
+  },
+  {
+   "form": "erinnern",
+   "rank": 669,
+   "count": 13299
+  },
+  {
+   "form": "lernen",
+   "rank": 670,
+   "count": 13275
+  },
+  {
+   "form": "laufen",
+   "rank": 671,
+   "count": 13257
+  },
+  {
+   "form": "denkt",
+   "rank": 672,
+   "count": 13211
+  },
+  {
+   "form": "könig",
+   "rank": 673,
+   "count": 13182
+  },
+  {
+   "form": "tat",
+   "rank": 674,
+   "count": 13117
+  },
+  {
+   "form": "nennen",
+   "rank": 675,
+   "count": 13082
+  },
+  {
+   "form": "kleines",
+   "rank": 676,
+   "count": 13065
+  },
+  {
+   "form": "wem",
+   "rank": 677,
+   "count": 13054
+  },
+  {
+   "form": "eigenen",
+   "rank": 678,
+   "count": 12965
+  },
+  {
+   "form": "aufhören",
+   "rank": 679,
+   "count": 12953
+  },
+  {
+   "form": "könnt",
+   "rank": 680,
+   "count": 12945
+  },
+  {
+   "form": "deswegen",
+   "rank": 681,
+   "count": 12837
+  },
+  {
+   "form": "danach",
+   "rank": 682,
+   "count": 12820
+  },
+  {
+   "form": "verlieren",
+   "rank": 683,
+   "count": 12804
+  },
+  {
+   "form": "neues",
+   "rank": 684,
+   "count": 12801
+  },
+  {
+   "form": "völlig",
+   "rank": 685,
+   "count": 12783
+  },
+  {
+   "form": "hattest",
+   "rank": 686,
+   "count": 12773
+  },
+  {
+   "form": "leider",
+   "rank": 687,
+   "count": 12743
+  },
+  {
+   "form": "hol",
+   "rank": 688,
+   "count": 12732
+  },
+  {
+   "form": "seht",
+   "rank": 689,
+   "count": 12722
+  },
+  {
+   "form": "luft",
+   "rank": 690,
+   "count": 12707
+  },
+  {
+   "form": "stelle",
+   "rank": 691,
+   "count": 12643
+  },
+  {
+   "form": "ziehen",
+   "rank": 692,
+   "count": 12612
+  },
+  {
+   "form": "funktioniert",
+   "rank": 693,
+   "count": 12591
+  },
+  {
+   "form": "verstehst",
+   "rank": 694,
+   "count": 12590
+  },
+  {
+   "form": "verschwinden",
+   "rank": 695,
+   "count": 12579
+  },
+  {
+   "form": "heiraten",
+   "rank": 696,
+   "count": 12434
+  },
+  {
+   "form": "wolltest",
+   "rank": 697,
+   "count": 12431
+  },
+  {
+   "form": "unserem",
+   "rank": 698,
+   "count": 12405
+  },
+  {
+   "form": "spricht",
+   "rank": 699,
+   "count": 12389
+  },
+  {
+   "form": "entschuldige",
+   "rank": 700,
+   "count": 12376
+  },
+  {
+   "form": "jedes",
+   "rank": 701,
+   "count": 12359
+  },
+  {
+   "form": "probleme",
+   "rank": 702,
+   "count": 12343
+  },
+  {
+   "form": "lebt",
+   "rank": 703,
+   "count": 12311
+  },
+  {
+   "form": "könntest",
+   "rank": 704,
+   "count": 12298
+  },
+  {
+   "form": "versuche",
+   "rank": 705,
+   "count": 12262
+  },
+  {
+   "form": "groß",
+   "rank": 706,
+   "count": 12250
+  },
+  {
+   "form": "gebracht",
+   "rank": 707,
+   "count": 12239
+  },
+  {
+   "form": "krank",
+   "rank": 708,
+   "count": 12239
+  },
+  {
+   "form": "gegangen",
+   "rank": 709,
+   "count": 12202
+  },
+  {
+   "form": "kaffee",
+   "rank": 710,
+   "count": 12186
+  },
+  {
+   "form": "straße",
+   "rank": 711,
+   "count": 12160
+  },
+  {
+   "form": "froh",
+   "rank": 712,
+   "count": 12146
+  },
+  {
+   "form": "genommen",
+   "rank": 713,
+   "count": 12129
+  },
+  {
+   "form": "fühle",
+   "rank": 714,
+   "count": 12101
+  },
+  {
+   "form": "wert",
+   "rank": 715,
+   "count": 12067
+  },
+  {
+   "form": "rufen",
+   "rank": 716,
+   "count": 12056
+  },
+  {
+   "form": "erde",
+   "rank": 717,
+   "count": 12050
+  },
+  {
+   "form": "richtige",
+   "rank": 718,
+   "count": 12021
+  },
+  {
+   "form": "suche",
+   "rank": 719,
+   "count": 12003
+  },
+  {
+   "form": "buch",
+   "rank": 720,
+   "count": 11909
+  },
+  {
+   "form": "stück",
+   "rank": 721,
+   "count": 11906
+  },
+  {
+   "form": "getroffen",
+   "rank": 722,
+   "count": 11899
+  },
+  {
+   "form": "tagen",
+   "rank": 723,
+   "count": 11828
+  },
+  {
+   "form": "nochmal",
+   "rank": 724,
+   "count": 11809
+  },
+  {
+   "form": "nachdem",
+   "rank": 725,
+   "count": 11797
+  },
+  {
+   "form": "möchten",
+   "rank": 726,
+   "count": 11784
+  },
+  {
+   "form": "arzt",
+   "rank": 727,
+   "count": 11773
+  },
+  {
+   "form": "typen",
+   "rank": 728,
+   "count": 11734
+  },
+  {
+   "form": "fand",
+   "rank": 729,
+   "count": 11723
+  },
+  {
+   "form": "vertrauen",
+   "rank": 730,
+   "count": 11704
+  },
+  {
+   "form": "drüben",
+   "rank": 731,
+   "count": 11691
+  },
+  {
+   "form": "himmel",
+   "rank": 732,
+   "count": 11687
+  },
+  {
+   "form": "erklären",
+   "rank": 733,
+   "count": 11686
+  },
+  {
+   "form": "interessiert",
+   "rank": 734,
+   "count": 11650
+  },
+  {
+   "form": "irgendwo",
+   "rank": 735,
+   "count": 11607
+  },
+  {
+   "form": "nachricht",
+   "rank": 736,
+   "count": 11590
+  },
+  {
+   "form": "glaub",
+   "rank": 737,
+   "count": 11559
+  },
+  {
+   "form": "gutes",
+   "rank": 738,
+   "count": 11502
+  },
+  {
+   "form": "onkel",
+   "rank": 739,
+   "count": 11488
+  },
+  {
+   "form": "spielt",
+   "rank": 740,
+   "count": 11488
+  },
+  {
+   "form": "genauso",
+   "rank": 741,
+   "count": 11440
+  },
+  {
+   "form": "geschafft",
+   "rank": 742,
+   "count": 11434
+  },
+  {
+   "form": "großer",
+   "rank": 743,
+   "count": 11424
+  },
+  {
+   "form": "waffen",
+   "rank": 744,
+   "count": 11413
+  },
+  {
+   "form": "licht",
+   "rank": 745,
+   "count": 11394
+  },
+  {
+   "form": "körper",
+   "rank": 746,
+   "count": 11393
+  },
+  {
+   "form": "kaufen",
+   "rank": 747,
+   "count": 11383
+  },
+  {
+   "form": "weniger",
+   "rank": 748,
+   "count": 11371
+  },
+  {
+   "form": "lasse",
+   "rank": 749,
+   "count": 11351
+  },
+  {
+   "form": "wahl",
+   "rank": 750,
+   "count": 11323
+  },
+  {
+   "form": "damals",
+   "rank": 751,
+   "count": 11298
+  },
+  {
+   "form": "rest",
+   "rank": 752,
+   "count": 11293
+  },
+  {
+   "form": "schätze",
+   "rank": 753,
+   "count": 11271
+  },
+  {
+   "form": "gefühl",
+   "rank": 754,
+   "count": 11258
+  },
+  {
+   "form": "zwar",
+   "rank": 755,
+   "count": 11254
+  },
+  {
+   "form": "halte",
+   "rank": 756,
+   "count": 11242
+  },
+  {
+   "form": "passieren",
+   "rank": 757,
+   "count": 11220
+  },
+  {
+   "form": "schlüssel",
+   "rank": 758,
+   "count": 11219
+  },
+  {
+   "form": "sitzen",
+   "rank": 759,
+   "count": 11198
+  },
+  {
+   "form": "millionen",
+   "rank": 760,
+   "count": 11179
+  },
+  {
+   "form": "leicht",
+   "rank": 761,
+   "count": 11169
+  },
+  {
+   "form": "weh",
+   "rank": 762,
+   "count": 11169
+  },
+  {
+   "form": "kümmern",
+   "rank": 763,
+   "count": 11165
+  },
+  {
+   "form": "hält",
+   "rank": 764,
+   "count": 11092
+  },
+  {
+   "form": "herren",
+   "rank": 765,
+   "count": 11070
+  },
+  {
+   "form": "sagten",
+   "rank": 766,
+   "count": 11067
+  },
+  {
+   "form": "kennt",
+   "rank": 767,
+   "count": 11043
+  },
+  {
+   "form": "gefragt",
+   "rank": 768,
+   "count": 11020
+  },
+  {
+   "form": "zukunft",
+   "rank": 769,
+   "count": 10960
+  },
+  {
+   "form": "schauen",
+   "rank": 770,
+   "count": 10949
+  },
+  {
+   "form": "party",
+   "rank": 771,
+   "count": 10939
+  },
+  {
+   "form": "vergiss",
+   "rank": 772,
+   "count": 10919
+  },
+  {
+   "form": "angerufen",
+   "rank": 773,
+   "count": 10892
+  },
+  {
+   "form": "total",
+   "rank": 774,
+   "count": 10879
+  },
+  {
+   "form": "möchtest",
+   "rank": 775,
+   "count": 10819
+  },
+  {
+   "form": "opfer",
+   "rank": 776,
+   "count": 10816
+  },
+  {
+   "form": "solche",
+   "rank": 777,
+   "count": 10816
+  },
+  {
+   "form": "passt",
+   "rank": 778,
+   "count": 10807
+  },
+  {
+   "form": "worden",
+   "rank": 779,
+   "count": 10807
+  },
+  {
+   "form": "versuch",
+   "rank": 780,
+   "count": 10806
+  },
+  {
+   "form": "gesprochen",
+   "rank": 781,
+   "count": 10793
+  },
+  {
+   "form": "gefängnis",
+   "rank": 782,
+   "count": 10768
+  },
+  {
+   "form": "cool",
+   "rank": 783,
+   "count": 10760
+  },
+  {
+   "form": "schreiben",
+   "rank": 784,
+   "count": 10695
+  },
+  {
+   "form": "vorsichtig",
+   "rank": 785,
+   "count": 10692
+  },
+  {
+   "form": "wovon",
+   "rank": 786,
+   "count": 10669
+  },
+  {
+   "form": "großartig",
+   "rank": 787,
+   "count": 10651
+  },
+  {
+   "form": "laut",
+   "rank": 788,
+   "count": 10643
+  },
+  {
+   "form": "vorstellen",
+   "rank": 789,
+   "count": 10587
+  },
+  {
+   "form": "sinn",
+   "rank": 790,
+   "count": 10573
+  },
+  {
+   "form": "schöne",
+   "rank": 791,
+   "count": 10559
+  },
+  {
+   "form": "sobald",
+   "rank": 792,
+   "count": 10558
+  },
+  {
+   "form": "krankenhaus",
+   "rank": 793,
+   "count": 10532
+  },
+  {
+   "form": "wohnung",
+   "rank": 794,
+   "count": 10528
+  },
+  {
+   "form": "tragen",
+   "rank": 795,
+   "count": 10524
+  },
+  {
+   "form": "person",
+   "rank": 796,
+   "count": 10521
+  },
+  {
+   "form": "böse",
+   "rank": 797,
+   "count": 10497
+  },
+  {
+   "form": "mist",
+   "rank": 798,
+   "count": 10492
+  },
+  {
+   "form": "super",
+   "rank": 799,
+   "count": 10474
+  },
+  {
+   "form": "stark",
+   "rank": 800,
+   "count": 10452
+  },
+  {
+   "form": "still",
+   "rank": 801,
+   "count": 10438
+  },
+  {
+   "form": "mund",
+   "rank": 802,
+   "count": 10433
+  },
+  {
+   "form": "verletzt",
+   "rank": 803,
+   "count": 10408
+  },
+  {
+   "form": "boss",
+   "rank": 804,
+   "count": 10384
+  },
+  {
+   "form": "leuten",
+   "rank": 805,
+   "count": 10381
+  },
+  {
+   "form": "boden",
+   "rank": 806,
+   "count": 10374
+  },
+  {
+   "form": "sex",
+   "rank": 807,
+   "count": 10336
+  },
+  {
+   "form": "kämpfen",
+   "rank": 808,
+   "count": 10333
+  },
+  {
+   "form": "bringe",
+   "rank": 809,
+   "count": 10315
+  },
+  {
+   "form": "fühlen",
+   "rank": 810,
+   "count": 10313
+  },
+  {
+   "form": "außerdem",
+   "rank": 811,
+   "count": 10271
+  },
+  {
+   "form": "lustig",
+   "rank": 812,
+   "count": 10249
+  },
+  {
+   "form": "ändern",
+   "rank": 813,
+   "count": 10237
+  },
+  {
+   "form": "fliegen",
+   "rank": 814,
+   "count": 10217
+  },
+  {
+   "form": "findet",
+   "rank": 815,
+   "count": 10204
+  },
+  {
+   "form": "höre",
+   "rank": 816,
+   "count": 10200
+  },
+  {
+   "form": "klasse",
+   "rank": 817,
+   "count": 10189
+  },
+  {
+   "form": "verdammte",
+   "rank": 818,
+   "count": 10183
+  },
+  {
+   "form": "solange",
+   "rank": 819,
+   "count": 10182
+  },
+  {
+   "form": "setz",
+   "rank": 820,
+   "count": 10137
+  },
+  {
+   "form": "länger",
+   "rank": 821,
+   "count": 10114
+  },
+  {
+   "form": "schicken",
+   "rank": 822,
+   "count": 10114
+  },
+  {
+   "form": "jemals",
+   "rank": 823,
+   "count": 10102
+  },
+  {
+   "form": "hörst",
+   "rank": 824,
+   "count": 10096
+  },
+  {
+   "form": "stolz",
+   "rank": 825,
+   "count": 10090
+  },
+  {
+   "form": "besonders",
+   "rank": 826,
+   "count": 10074
+  },
+  {
+   "form": "idiot",
+   "rank": 827,
+   "count": 10071
+  },
+  {
+   "form": "sicherheit",
+   "rank": 828,
+   "count": 10062
+  },
+  {
+   "form": "redest",
+   "rank": 829,
+   "count": 10057
+  },
+  {
+   "form": "eher",
+   "rank": 830,
+   "count": 10048
+  },
+  {
+   "form": "umbringen",
+   "rank": 831,
+   "count": 10038
+  },
+  {
+   "form": "wenigstens",
+   "rank": 832,
+   "count": 10030
+  },
+  {
+   "form": "anrufen",
+   "rank": 833,
+   "count": 10029
+  },
+  {
+   "form": "zeug",
+   "rank": 834,
+   "count": 10023
+  },
+  {
+   "form": "sollst",
+   "rank": 835,
+   "count": 10015
+  },
+  {
+   "form": "gestorben",
+   "rank": 836,
+   "count": 10000
+  },
+  {
+   "form": "hasse",
+   "rank": 837,
+   "count": 9986
+  },
+  {
+   "form": "ähm",
+   "rank": 838,
+   "count": 9986
+  },
+  {
+   "form": "zeig",
+   "rank": 839,
+   "count": 9975
+  },
+  {
+   "form": "hart",
+   "rank": 840,
+   "count": 9956
+  },
+  {
+   "form": "erwartet",
+   "rank": 841,
+   "count": 9929
+  },
+  {
+   "form": "heißen",
+   "rank": 842,
+   "count": 9927
+  },
+  {
+   "form": "mörder",
+   "rank": 843,
+   "count": 9921
+  },
+  {
+   "form": "lachen",
+   "rank": 844,
+   "count": 9915
+  },
+  {
+   "form": "führen",
+   "rank": 845,
+   "count": 9897
+  },
+  {
+   "form": "heraus",
+   "rank": 846,
+   "count": 9896
+  },
+  {
+   "form": "glaubt",
+   "rank": 847,
+   "count": 9894
+  },
+  {
+   "form": "fällt",
+   "rank": 848,
+   "count": 9893
+  },
+  {
+   "form": "stimme",
+   "rank": 849,
+   "count": 9878
+  },
+  {
+   "form": "geschehen",
+   "rank": 850,
+   "count": 9874
+  },
+  {
+   "form": "wisst",
+   "rank": 851,
+   "count": 9847
+  },
+  {
+   "form": "erfahren",
+   "rank": 852,
+   "count": 9844
+  },
+  {
+   "form": "wärst",
+   "rank": 853,
+   "count": 9792
+  },
+  {
+   "form": "geschäft",
+   "rank": 854,
+   "count": 9776
+  },
+  {
+   "form": "tages",
+   "rank": 855,
+   "count": 9703
+  },
+  {
+   "form": "schneller",
+   "rank": 856,
+   "count": 9694
+  },
+  {
+   "form": "hinten",
+   "rank": 857,
+   "count": 9693
+  },
+  {
+   "form": "stand",
+   "rank": 858,
+   "count": 9681
+  },
+  {
+   "form": "umgebracht",
+   "rank": 859,
+   "count": 9675
+  },
+  {
+   "form": "acht",
+   "rank": 860,
+   "count": 9653
+  },
+  {
+   "form": "liebling",
+   "rank": 861,
+   "count": 9646
+  },
+  {
+   "form": "mögen",
+   "rank": 862,
+   "count": 9605
+  },
+  {
+   "form": "fallen",
+   "rank": 863,
+   "count": 9604
+  },
+  {
+   "form": "denk",
+   "rank": 864,
+   "count": 9564
+  },
+  {
+   "form": "lesen",
+   "rank": 865,
+   "count": 9533
+  },
+  {
+   "form": "meinung",
+   "rank": 866,
+   "count": 9506
+  },
+  {
+   "form": "liebt",
+   "rank": 867,
+   "count": 9504
+  },
+  {
+   "form": "erinnere",
+   "rank": 868,
+   "count": 9480
+  },
+  {
+   "form": "folgen",
+   "rank": 869,
+   "count": 9421
+  },
+  {
+   "form": "schluss",
+   "rank": 870,
+   "count": 9420
+  },
+  {
+   "form": "monate",
+   "rank": 871,
+   "count": 9419
+  },
+  {
+   "form": "unglaublich",
+   "rank": 872,
+   "count": 9365
+  },
+  {
+   "form": "vorher",
+   "rank": 873,
+   "count": 9355
+  },
+  {
+   "form": "verzeihung",
+   "rank": 874,
+   "count": 9339
+  },
+  {
+   "form": "arschloch",
+   "rank": 875,
+   "count": 9327
+  },
+  {
+   "form": "meisten",
+   "rank": 876,
+   "count": 9310
+  },
+  {
+   "form": "schlimm",
+   "rank": 877,
+   "count": 9304
+  },
+  {
+   "form": "aufs",
+   "rank": 878,
+   "count": 9303
+  },
+  {
+   "form": "werdet",
+   "rank": 879,
+   "count": 9237
+  },
+  {
+   "form": "unmöglich",
+   "rank": 880,
+   "count": 9207
+  },
+  {
+   "form": "kampf",
+   "rank": 881,
+   "count": 9188
+  },
+  {
+   "form": "laden",
+   "rank": 882,
+   "count": 9188
+  },
+  {
+   "form": "nähe",
+   "rank": 883,
+   "count": 9154
+  },
+  {
+   "form": "team",
+   "rank": 884,
+   "count": 9147
+  },
+  {
+   "form": "bild",
+   "rank": 885,
+   "count": 9142
+  },
+  {
+   "form": "verdient",
+   "rank": 886,
+   "count": 9128
+  },
+  {
+   "form": "arbeitet",
+   "rank": 887,
+   "count": 9126
+  },
+  {
+   "form": "jedem",
+   "rank": 888,
+   "count": 9119
+  },
+  {
+   "form": "behalten",
+   "rank": 889,
+   "count": 9108
+  },
+  {
+   "form": "bitten",
+   "rank": 890,
+   "count": 9095
+  },
+  {
+   "form": "tatsächlich",
+   "rank": 891,
+   "count": 9095
+  },
+  {
+   "form": "anfangen",
+   "rank": 892,
+   "count": 9043
+  },
+  {
+   "form": "versprochen",
+   "rank": 893,
+   "count": 9024
+  },
+  {
+   "form": "mord",
+   "rank": 894,
+   "count": 9002
+  },
+  {
+   "form": "bekommt",
+   "rank": 895,
+   "count": 8982
+  },
+  {
+   "form": "rufe",
+   "rank": 896,
+   "count": 8970
+  },
+  {
+   "form": "zieh",
+   "rank": 897,
+   "count": 8947
+  },
+  {
+   "form": "fort",
+   "rank": 898,
+   "count": 8940
+  },
+  {
+   "form": "perfekt",
+   "rank": 899,
+   "count": 8920
+  },
+  {
+   "form": "sieben",
+   "rank": 900,
+   "count": 8891
+  },
+  {
+   "form": "plötzlich",
+   "rank": 901,
+   "count": 8886
+  },
+  {
+   "form": "geschickt",
+   "rank": 902,
+   "count": 8880
+  },
+  {
+   "form": "tisch",
+   "rank": 903,
+   "count": 8870
+  },
+  {
+   "form": "liegen",
+   "rank": 904,
+   "count": 8864
+  },
+  {
+   "form": "antwort",
+   "rank": 905,
+   "count": 8849
+  },
+  {
+   "form": "bezahlen",
+   "rank": 906,
+   "count": 8841
+  },
+  {
+   "form": "machte",
+   "rank": 907,
+   "count": 8822
+  },
+  {
+   "form": "arbeite",
+   "rank": 908,
+   "count": 8807
+  },
+  {
+   "form": "gefährlich",
+   "rank": 909,
+   "count": 8779
+  },
+  {
+   "form": "bezahlt",
+   "rank": 910,
+   "count": 8763
+  },
+  {
+   "form": "traum",
+   "rank": 911,
+   "count": 8763
+  },
+  {
+   "form": "auge",
+   "rank": 912,
+   "count": 8759
+  },
+  {
+   "form": "general",
+   "rank": 913,
+   "count": 8750
+  },
+  {
+   "form": "dumm",
+   "rank": 914,
+   "count": 8735
+  },
+  {
+   "form": "konnten",
+   "rank": 915,
+   "count": 8727
+  },
+  {
+   "form": "starb",
+   "rank": 916,
+   "count": 8717
+  },
+  {
+   "form": "hotel",
+   "rank": 917,
+   "count": 8716
+  },
+  {
+   "form": "verkaufen",
+   "rank": 918,
+   "count": 8704
+  },
+  {
+   "form": "ziel",
+   "rank": 919,
+   "count": 8667
+  },
+  {
+   "form": "obwohl",
+   "rank": 920,
+   "count": 8643
+  },
+  {
+   "form": "ärger",
+   "rank": 921,
+   "count": 8627
+  },
+  {
+   "form": "fenster",
+   "rank": 922,
+   "count": 8602
+  },
+  {
+   "form": "seien",
+   "rank": 923,
+   "count": 8595
+  },
+  {
+   "form": "niemanden",
+   "rank": 924,
+   "count": 8587
+  },
+  {
+   "form": "hörte",
+   "rank": 925,
+   "count": 8582
+  },
+  {
+   "form": "handy",
+   "rank": 926,
+   "count": 8581
+  },
+  {
+   "form": "bewegung",
+   "rank": 927,
+   "count": 8561
+  },
+  {
+   "form": "gerettet",
+   "rank": 928,
+   "count": 8550
+  },
+  {
+   "form": "dagegen",
+   "rank": 929,
+   "count": 8523
+  },
+  {
+   "form": "monaten",
+   "rank": 930,
+   "count": 8516
+  },
+  {
+   "form": "nötig",
+   "rank": 931,
+   "count": 8515
+  },
+  {
+   "form": "hilf",
+   "rank": 932,
+   "count": 8508
+  },
+  {
+   "form": "ihres",
+   "rank": 933,
+   "count": 8502
+  },
+  {
+   "form": "werd",
+   "rank": 934,
+   "count": 8491
+  },
+  {
+   "form": "gewinnen",
+   "rank": 935,
+   "count": 8472
+  },
+  {
+   "form": "gedanken",
+   "rank": 936,
+   "count": 8461
+  },
+  {
+   "form": "erinnerst",
+   "rank": 937,
+   "count": 8456
+  },
+  {
+   "form": "voller",
+   "rank": 938,
+   "count": 8450
+  },
+  {
+   "form": "verheiratet",
+   "rank": 939,
+   "count": 8442
+  },
+  {
+   "form": "fahr",
+   "rank": 940,
+   "count": 8436
+  },
+  {
+   "form": "rum",
+   "rank": 941,
+   "count": 8432
+  },
+  {
+   "form": "neu",
+   "rank": 942,
+   "count": 8420
+  },
+  {
+   "form": "nimmt",
+   "rank": 943,
+   "count": 8411
+  },
+  {
+   "form": "welcher",
+   "rank": 944,
+   "count": 8383
+  },
+  {
+   "form": "augenblick",
+   "rank": 945,
+   "count": 8378
+  },
+  {
+   "form": "komisch",
+   "rank": 946,
+   "count": 8350
+  },
+  {
+   "form": "hole",
+   "rank": 947,
+   "count": 8335
+  },
+  {
+   "form": "gefahr",
+   "rank": 948,
+   "count": 8330
+  },
+  {
+   "form": "entscheidung",
+   "rank": 949,
+   "count": 8315
+  },
+  {
+   "form": "meister",
+   "rank": 950,
+   "count": 8312
+  },
+  {
+   "form": "unterwegs",
+   "rank": 951,
+   "count": 8290
+  },
+  {
+   "form": "lacht",
+   "rank": 952,
+   "count": 8285
+  },
+  {
+   "form": "leiche",
+   "rank": 953,
+   "count": 8283
+  },
+  {
+   "form": "zug",
+   "rank": 954,
+   "count": 8259
+  },
+  {
+   "form": "gleiche",
+   "rank": 955,
+   "count": 8241
+  },
+  {
+   "form": "worte",
+   "rank": 956,
+   "count": 8237
+  },
+  {
+   "form": "bier",
+   "rank": 957,
+   "count": 8217
+  },
+  {
+   "form": "arm",
+   "rank": 958,
+   "count": 8212
+  },
+  {
+   "form": "klappe",
+   "rank": 959,
+   "count": 8192
+  },
+  {
+   "form": "fangen",
+   "rank": 960,
+   "count": 8161
+  },
+  {
+   "form": "absolut",
+   "rank": 961,
+   "count": 8154
+  },
+  {
+   "form": "schlimmer",
+   "rank": 962,
+   "count": 8153
+  },
+  {
+   "form": "kamen",
+   "rank": 963,
+   "count": 8142
+  },
+  {
+   "form": "minute",
+   "rank": 964,
+   "count": 8127
+  },
+  {
+   "form": "zahlen",
+   "rank": 965,
+   "count": 8124
+  },
+  {
+   "form": "benutzen",
+   "rank": 966,
+   "count": 8123
+  },
+  {
+   "form": "anfang",
+   "rank": 967,
+   "count": 8105
+  },
+  {
+   "form": "finger",
+   "rank": 968,
+   "count": 8091
+  },
+  {
+   "form": "zuhause",
+   "rank": 969,
+   "count": 8083
+  },
+  {
+   "form": "hilft",
+   "rank": 970,
+   "count": 8060
+  },
+  {
+   "form": "arme",
+   "rank": 971,
+   "count": 8051
+  },
+  {
+   "form": "findest",
+   "rank": 972,
+   "count": 8040
+  },
+  {
+   "form": "legen",
+   "rank": 973,
+   "count": 8040
+  },
+  {
+   "form": "weiss",
+   "rank": 974,
+   "count": 8040
+  },
+  {
+   "form": "regeln",
+   "rank": 975,
+   "count": 8026
+  },
+  {
+   "form": "herum",
+   "rank": 976,
+   "count": 8023
+  },
+  {
+   "form": "geschrieben",
+   "rank": 977,
+   "count": 7953
+  },
+  {
+   "form": "klein",
+   "rank": 978,
+   "count": 7952
+  },
+  {
+   "form": "wach",
+   "rank": 979,
+   "count": 7928
+  },
+  {
+   "form": "irgendetwas",
+   "rank": 980,
+   "count": 7912
+  },
+  {
+   "form": "offen",
+   "rank": 981,
+   "count": 7888
+  },
+  {
+   "form": "schönen",
+   "rank": 982,
+   "count": 7888
+  },
+  {
+   "form": "wünschte",
+   "rank": 983,
+   "count": 7878
+  },
+  {
+   "form": "jemandem",
+   "rank": 984,
+   "count": 7845
+  },
+  {
+   "form": "tanzen",
+   "rank": 985,
+   "count": 7827
+  },
+  {
+   "form": "sitzt",
+   "rank": 986,
+   "count": 7824
+  },
+  {
+   "form": "kalt",
+   "rank": 987,
+   "count": 7810
+  },
+  {
+   "form": "partner",
+   "rank": 988,
+   "count": 7805
+  },
+  {
+   "form": "reise",
+   "rank": 989,
+   "count": 7802
+  },
+  {
+   "form": "dame",
+   "rank": 990,
+   "count": 7772
+  },
+  {
+   "form": "sekunden",
+   "rank": 991,
+   "count": 7768
+  },
+  {
+   "form": "bescheid",
+   "rank": 992,
+   "count": 7752
+  },
+  {
+   "form": "raum",
+   "rank": 993,
+   "count": 7750
+  },
+  {
+   "form": "schießen",
+   "rank": 994,
+   "count": 7720
+  },
+  {
+   "form": "steh",
+   "rank": 995,
+   "count": 7720
+  },
+  {
+   "form": "rolle",
+   "rank": 996,
+   "count": 7705
+  },
+  {
+   "form": "führt",
+   "rank": 997,
+   "count": 7699
+  },
+  {
+   "form": "monat",
+   "rank": 998,
+   "count": 7697
+  },
+  {
+   "form": "müde",
+   "rank": 999,
+   "count": 7660
+  },
+  {
+   "form": "schlagen",
+   "rank": 1000,
+   "count": 7649
+  },
+  {
+   "form": "informationen",
+   "rank": 1001,
+   "count": 7647
+  },
+  {
+   "form": "müsst",
+   "rank": 1002,
+   "count": 7636
+  },
+  {
+   "form": "lage",
+   "rank": 1003,
+   "count": 7630
+  },
+  {
+   "form": "hochzeit",
+   "rank": 1004,
+   "count": 7603
+  },
+  {
+   "form": "ständig",
+   "rank": 1005,
+   "count": 7600
+  },
+  {
+   "form": "gottes",
+   "rank": 1006,
+   "count": 7592
+  },
+  {
+   "form": "müsste",
+   "rank": 1007,
+   "count": 7588
+  },
+  {
+   "form": "weise",
+   "rank": 1008,
+   "count": 7578
+  },
+  {
+   "form": "weitere",
+   "rank": 1009,
+   "count": 7567
+  },
+  {
+   "form": "gewonnen",
+   "rank": 1010,
+   "count": 7564
+  },
+  {
+   "form": "richtung",
+   "rank": 1011,
+   "count": 7554
+  },
+  {
+   "form": "süß",
+   "rank": 1012,
+   "count": 7553
+  },
+  {
+   "form": "heiß",
+   "rank": 1013,
+   "count": 7552
+  },
+  {
+   "form": "wozu",
+   "rank": 1014,
+   "count": 7549
+  },
+  {
+   "form": "darfst",
+   "rank": 1015,
+   "count": 7543
+  },
+  {
+   "form": "lauf",
+   "rank": 1016,
+   "count": 7538
+  },
+  {
+   "form": "anwalt",
+   "rank": 1017,
+   "count": 7514
+  },
+  {
+   "form": "erzähl",
+   "rank": 1018,
+   "count": 7512
+  },
+  {
+   "form": "agent",
+   "rank": 1019,
+   "count": 7508
+  },
+  {
+   "form": "aller",
+   "rank": 1020,
+   "count": 7505
+  },
+  {
+   "form": "fühlt",
+   "rank": 1021,
+   "count": 7479
+  },
+  {
+   "form": "steckt",
+   "rank": 1022,
+   "count": 7455
+  },
+  {
+   "form": "magst",
+   "rank": 1023,
+   "count": 7440
+  },
+  {
+   "form": "ließ",
+   "rank": 1024,
+   "count": 7437
+  },
+  {
+   "form": "gelernt",
+   "rank": 1025,
+   "count": 7433
+  },
+  {
+   "form": "wunderbar",
+   "rank": 1026,
+   "count": 7431
+  },
+  {
+   "form": "beispiel",
+   "rank": 1027,
+   "count": 7424
+  },
+  {
+   "form": "hältst",
+   "rank": 1028,
+   "count": 7409
+  },
+  {
+   "form": "weile",
+   "rank": 1029,
+   "count": 7405
+  },
+  {
+   "form": "vorsicht",
+   "rank": 1030,
+   "count": 7399
+  },
+  {
+   "form": "seele",
+   "rank": 1031,
+   "count": 7398
+  },
+  {
+   "form": "selber",
+   "rank": 1032,
+   "count": 7392
+  },
+  {
+   "form": "erledigt",
+   "rank": 1033,
+   "count": 7388
+  },
+  {
+   "form": "ehre",
+   "rank": 1034,
+   "count": 7385
+  },
+  {
+   "form": "fürs",
+   "rank": 1035,
+   "count": 7384
+  },
+  {
+   "form": "nennt",
+   "rank": 1036,
+   "count": 7378
+  },
+  {
+   "form": "ansehen",
+   "rank": 1037,
+   "count": 7372
+  },
+  {
+   "form": "gehabt",
+   "rank": 1038,
+   "count": 7371
+  },
+  {
+   "form": "nahm",
+   "rank": 1039,
+   "count": 7364
+  },
+  {
+   "form": "kraft",
+   "rank": 1040,
+   "count": 7356
+  },
+  {
+   "form": "links",
+   "rank": 1041,
+   "count": 7348
+  },
+  {
+   "form": "herzen",
+   "rank": 1042,
+   "count": 7317
+  },
+  {
+   "form": "bekannt",
+   "rank": 1043,
+   "count": 7314
+  },
+  {
+   "form": "wofür",
+   "rank": 1044,
+   "count": 7309
+  },
+  {
+   "form": "boot",
+   "rank": 1045,
+   "count": 7287
+  },
+  {
+   "form": "stell",
+   "rank": 1046,
+   "count": 7278
+  },
+  {
+   "form": "verschwinde",
+   "rank": 1047,
+   "count": 7278
+  },
+  {
+   "form": "darin",
+   "rank": 1048,
+   "count": 7259
+  },
+  {
+   "form": "kontrolle",
+   "rank": 1049,
+   "count": 7245
+  },
+  {
+   "form": "dahin",
+   "rank": 1050,
+   "count": 7243
+  },
+  {
+   "form": "rücken",
+   "rank": 1051,
+   "count": 7227
+  },
+  {
+   "form": "befehl",
+   "rank": 1052,
+   "count": 7221
+  },
+  {
+   "form": "leg",
+   "rank": 1053,
+   "count": 7206
+  },
+  {
+   "form": "sucht",
+   "rank": 1054,
+   "count": 7187
+  },
+  {
+   "form": "bar",
+   "rank": 1055,
+   "count": 7185
+  },
+  {
+   "form": "hübsch",
+   "rank": 1056,
+   "count": 7184
+  },
+  {
+   "form": "tief",
+   "rank": 1057,
+   "count": 7181
+  },
+  {
+   "form": "foto",
+   "rank": 1058,
+   "count": 7179
+  },
+  {
+   "form": "brief",
+   "rank": 1059,
+   "count": 7178
+  },
+  {
+   "form": "schreit",
+   "rank": 1060,
+   "count": 7175
+  },
+  {
+   "form": "gestohlen",
+   "rank": 1061,
+   "count": 7136
+  },
+  {
+   "form": "verliebt",
+   "rank": 1062,
+   "count": 7129
+  },
+  {
+   "form": "irgendwann",
+   "rank": 1063,
+   "count": 7125
+  },
+  {
+   "form": "näher",
+   "rank": 1064,
+   "count": 7120
+  },
+  {
+   "form": "welches",
+   "rank": 1065,
+   "count": 7115
+  },
+  {
+   "form": "tasche",
+   "rank": 1066,
+   "count": 7113
+  },
+  {
+   "form": "heiße",
+   "rank": 1067,
+   "count": 7105
+  },
+  {
+   "form": "ehe",
+   "rank": 1068,
+   "count": 7102
+  },
+  {
+   "form": "unfall",
+   "rank": 1069,
+   "count": 7093
+  },
+  {
+   "form": "verbindung",
+   "rank": 1070,
+   "count": 7092
+  },
+  {
+   "form": "geschenk",
+   "rank": 1071,
+   "count": 7090
+  },
+  {
+   "form": "jedenfalls",
+   "rank": 1072,
+   "count": 7088
+  },
+  {
+   "form": "beweise",
+   "rank": 1073,
+   "count": 7078
+  },
+  {
+   "form": "punkt",
+   "rank": 1074,
+   "count": 7076
+  },
+  {
+   "form": "verschwunden",
+   "rank": 1075,
+   "count": 7065
+  },
+  {
+   "form": "hoffentlich",
+   "rank": 1076,
+   "count": 7054
+  },
+  {
+   "form": "schrecklich",
+   "rank": 1077,
+   "count": 7047
+  },
+  {
+   "form": "geist",
+   "rank": 1078,
+   "count": 7039
+  },
+  {
+   "form": "sowieso",
+   "rank": 1079,
+   "count": 7028
+  },
+  {
+   "form": "gold",
+   "rank": 1080,
+   "count": 7003
+  },
+  {
+   "form": "dasselbe",
+   "rank": 1081,
+   "count": 6990
+  },
+  {
+   "form": "zumindest",
+   "rank": 1082,
+   "count": 6989
+  },
+  {
+   "form": "gelesen",
+   "rank": 1083,
+   "count": 6986
+  },
+  {
+   "form": "beweisen",
+   "rank": 1084,
+   "count": 6984
+  },
+  {
+   "form": "gearbeitet",
+   "rank": 1085,
+   "count": 6976
+  },
+  {
+   "form": "erwischt",
+   "rank": 1086,
+   "count": 6969
+  },
+  {
+   "form": "geboren",
+   "rank": 1087,
+   "count": 6966
+  },
+  {
+   "form": "bisher",
+   "rank": 1088,
+   "count": 6965
+  },
+  {
+   "form": "öffnen",
+   "rank": 1089,
+   "count": 6965
+  },
+  {
+   "form": "versteckt",
+   "rank": 1090,
+   "count": 6963
+  },
+  {
+   "form": "unbedingt",
+   "rank": 1091,
+   "count": 6962
+  },
+  {
+   "form": "dauert",
+   "rank": 1092,
+   "count": 6955
+  },
+  {
+   "form": "computer",
+   "rank": 1093,
+   "count": 6937
+  },
+  {
+   "form": "sonne",
+   "rank": 1094,
+   "count": 6925
+  },
+  {
+   "form": "reich",
+   "rank": 1095,
+   "count": 6920
+  },
+  {
+   "form": "damen",
+   "rank": 1096,
+   "count": 6911
+  },
+  {
+   "form": "hunger",
+   "rank": 1097,
+   "count": 6906
+  },
+  {
+   "form": "preis",
+   "rank": 1098,
+   "count": 6898
+  },
+  {
+   "form": "lügen",
+   "rank": 1099,
+   "count": 6897
+  },
+  {
+   "form": "firma",
+   "rank": 1100,
+   "count": 6891
+  },
+  {
+   "form": "normal",
+   "rank": 1101,
+   "count": 6881
+  },
+  {
+   "form": "neben",
+   "rank": 1102,
+   "count": 6875
+  },
+  {
+   "form": "wette",
+   "rank": 1103,
+   "count": 6873
+  },
+  {
+   "form": "gekauft",
+   "rank": 1104,
+   "count": 6870
+  },
+  {
+   "form": "wunder",
+   "rank": 1105,
+   "count": 6859
+  },
+  {
+   "form": "pferd",
+   "rank": 1106,
+   "count": 6857
+  },
+  {
+   "form": "beschützen",
+   "rank": 1107,
+   "count": 6831
+  },
+  {
+   "form": "frieden",
+   "rank": 1108,
+   "count": 6830
+  },
+  {
+   "form": "erreichen",
+   "rank": 1109,
+   "count": 6828
+  },
+  {
+   "form": "schwöre",
+   "rank": 1110,
+   "count": 6828
+  },
+  {
+   "form": "aussehen",
+   "rank": 1111,
+   "count": 6823
+  },
+  {
+   "form": "fehlt",
+   "rank": 1112,
+   "count": 6823
+  },
+  {
+   "form": "erwarten",
+   "rank": 1113,
+   "count": 6806
+  },
+  {
+   "form": "verkauft",
+   "rank": 1114,
+   "count": 6806
+  },
+  {
+   "form": "haut",
+   "rank": 1115,
+   "count": 6796
+  },
+  {
+   "form": "holt",
+   "rank": 1116,
+   "count": 6771
+  },
+  {
+   "form": "herrn",
+   "rank": 1117,
+   "count": 6752
+  },
+  {
+   "form": "wussten",
+   "rank": 1118,
+   "count": 6725
+  },
+  {
+   "form": "traurig",
+   "rank": 1119,
+   "count": 6717
+  },
+  {
+   "form": "seltsam",
+   "rank": 1120,
+   "count": 6706
+  },
+  {
+   "form": "gesucht",
+   "rank": 1121,
+   "count": 6688
+  },
+  {
+   "form": "kriegt",
+   "rank": 1122,
+   "count": 6688
+  },
+  {
+   "form": "zieht",
+   "rank": 1123,
+   "count": 6686
+  },
+  {
+   "form": "süße",
+   "rank": 1124,
+   "count": 6680
+  },
+  {
+   "form": "jung",
+   "rank": 1125,
+   "count": 6661
+  },
+  {
+   "form": "liste",
+   "rank": 1126,
+   "count": 6658
+  },
+  {
+   "form": "tolle",
+   "rank": 1127,
+   "count": 6647
+  },
+  {
+   "form": "nächstes",
+   "rank": 1128,
+   "count": 6646
+  },
+  {
+   "form": "euren",
+   "rank": 1129,
+   "count": 6645
+  },
+  {
+   "form": "sekunde",
+   "rank": 1130,
+   "count": 6645
+  },
+  {
+   "form": "tschüss",
+   "rank": 1131,
+   "count": 6637
+  },
+  {
+   "form": "großes",
+   "rank": 1132,
+   "count": 6632
+  },
+  {
+   "form": "karte",
+   "rank": 1133,
+   "count": 6623
+  },
+  {
+   "form": "stirbt",
+   "rank": 1134,
+   "count": 6615
+  },
+  {
+   "form": "redet",
+   "rank": 1135,
+   "count": 6606
+  },
+  {
+   "form": "ans",
+   "rank": 1136,
+   "count": 6589
+  },
+  {
+   "form": "schade",
+   "rank": 1137,
+   "count": 6573
+  },
+  {
+   "form": "anruf",
+   "rank": 1138,
+   "count": 6569
+  },
+  {
+   "form": "letzter",
+   "rank": 1139,
+   "count": 6568
+  },
+  {
+   "form": "beziehung",
+   "rank": 1140,
+   "count": 6558
+  },
+  {
+   "form": "bewegen",
+   "rank": 1141,
+   "count": 6557
+  },
+  {
+   "form": "rechts",
+   "rank": 1142,
+   "count": 6555
+  },
+  {
+   "form": "willen",
+   "rank": 1143,
+   "count": 6553
+  },
+  {
+   "form": "wütend",
+   "rank": 1144,
+   "count": 6550
+  },
+  {
+   "form": "toten",
+   "rank": 1145,
+   "count": 6543
+  },
+  {
+   "form": "nachrichten",
+   "rank": 1146,
+   "count": 6532
+  },
+  {
+   "form": "persönlich",
+   "rank": 1147,
+   "count": 6532
+  },
+  {
+   "form": "zeiten",
+   "rank": 1148,
+   "count": 6523
+  },
+  {
+   "form": "präsident",
+   "rank": 1149,
+   "count": 6521
+  },
+  {
+   "form": "eigene",
+   "rank": 1150,
+   "count": 6520
+  },
+  {
+   "form": "muß",
+   "rank": 1151,
+   "count": 6512
+  },
+  {
+   "form": "bleibe",
+   "rank": 1152,
+   "count": 6505
+  },
+  {
+   "form": "witz",
+   "rank": 1153,
+   "count": 6503
+  },
+  {
+   "form": "freut",
+   "rank": 1154,
+   "count": 6500
+  },
+  {
+   "form": "lebe",
+   "rank": 1155,
+   "count": 6499
+  },
+  {
+   "form": "fährt",
+   "rank": 1156,
+   "count": 6497
+  },
+  {
+   "form": "geburtstag",
+   "rank": 1157,
+   "count": 6493
+  },
+  {
+   "form": "entfernt",
+   "rank": 1158,
+   "count": 6492
+  },
+  {
+   "form": "verraten",
+   "rank": 1159,
+   "count": 6475
+  },
+  {
+   "form": "möglichkeit",
+   "rank": 1160,
+   "count": 6466
+  },
+  {
+   "form": "wein",
+   "rank": 1161,
+   "count": 6451
+  },
+  {
+   "form": "vermutlich",
+   "rank": 1162,
+   "count": 6444
+  },
+  {
+   "form": "bord",
+   "rank": 1163,
+   "count": 6432
+  },
+  {
+   "form": "ruft",
+   "rank": 1164,
+   "count": 6419
+  },
+  {
+   "form": "fahre",
+   "rank": 1165,
+   "count": 6417
+  },
+  {
+   "form": "nase",
+   "rank": 1166,
+   "count": 6414
+  },
+  {
+   "form": "kindern",
+   "rank": 1167,
+   "count": 6407
+  },
+  {
+   "form": "bank",
+   "rank": 1168,
+   "count": 6406
+  },
+  {
+   "form": "geschlafen",
+   "rank": 1169,
+   "count": 6404
+  },
+  {
+   "form": "fürchte",
+   "rank": 1170,
+   "count": 6396
+  },
+  {
+   "form": "offensichtlich",
+   "rank": 1171,
+   "count": 6396
+  },
+  {
+   "form": "blick",
+   "rank": 1172,
+   "count": 6393
+  },
+  {
+   "form": "verändert",
+   "rank": 1173,
+   "count": 6380
+  },
+  {
+   "form": "hau",
+   "rank": 1174,
+   "count": 6358
+  },
+  {
+   "form": "singen",
+   "rank": 1175,
+   "count": 6357
+  },
+  {
+   "form": "zerstört",
+   "rank": 1176,
+   "count": 6354
+  },
+  {
+   "form": "geheimnis",
+   "rank": 1177,
+   "count": 6352
+  },
+  {
+   "form": "beschäftigt",
+   "rank": 1178,
+   "count": 6350
+  },
+  {
+   "form": "flugzeug",
+   "rank": 1179,
+   "count": 6349
+  },
+  {
+   "form": "diesmal",
+   "rank": 1180,
+   "count": 6342
+  },
+  {
+   "form": "fuß",
+   "rank": 1181,
+   "count": 6342
+  },
+  {
+   "form": "tante",
+   "rank": 1182,
+   "count": 6340
+  },
+  {
+   "form": "vermisst",
+   "rank": 1183,
+   "count": 6340
+  },
+  {
+   "form": "bekam",
+   "rank": 1184,
+   "count": 6338
+  },
+  {
+   "form": "schlaf",
+   "rank": 1185,
+   "count": 6321
+  },
+  {
+   "form": "regierung",
+   "rank": 1186,
+   "count": 6318
+  },
+  {
+   "form": "sauer",
+   "rank": 1187,
+   "count": 6313
+  },
+  {
+   "form": "armee",
+   "rank": 1188,
+   "count": 6294
+  },
+  {
+   "form": "majestät",
+   "rank": 1189,
+   "count": 6293
+  },
+  {
+   "form": "meinte",
+   "rank": 1190,
+   "count": 6288
+  },
+  {
+   "form": "deines",
+   "rank": 1191,
+   "count": 6278
+  },
+  {
+   "form": "kirche",
+   "rank": 1192,
+   "count": 6274
+  },
+  {
+   "form": "drogen",
+   "rank": 1193,
+   "count": 6259
+  },
+  {
+   "form": "schlechte",
+   "rank": 1194,
+   "count": 6233
+  },
+  {
+   "form": "zeigt",
+   "rank": 1195,
+   "count": 6224
+  },
+  {
+   "form": "kontakt",
+   "rank": 1196,
+   "count": 6221
+  },
+  {
+   "form": "letztes",
+   "rank": 1197,
+   "count": 6215
+  },
+  {
+   "form": "gegenüber",
+   "rank": 1198,
+   "count": 6211
+  },
+  {
+   "form": "geredet",
+   "rank": 1199,
+   "count": 6209
+  },
+  {
+   "form": "bleibst",
+   "rank": 1200,
+   "count": 6184
+  },
+  {
+   "form": "richtigen",
+   "rank": 1201,
+   "count": 6181
+  },
+  {
+   "form": "miteinander",
+   "rank": 1202,
+   "count": 6180
+  },
+  {
+   "form": "detective",
+   "rank": 1203,
+   "count": 6179
+  },
+  {
+   "form": "hoffnung",
+   "rank": 1204,
+   "count": 6173
+  },
+  {
+   "form": "wunderschön",
+   "rank": 1205,
+   "count": 6167
+  },
+  {
+   "form": "ermordet",
+   "rank": 1206,
+   "count": 6164
+  },
+  {
+   "form": "liebst",
+   "rank": 1207,
+   "count": 6163
+  },
+  {
+   "form": "schicksal",
+   "rank": 1208,
+   "count": 6148
+  },
+  {
+   "form": "stecken",
+   "rank": 1209,
+   "count": 6140
+  },
+  {
+   "form": "schlag",
+   "rank": 1210,
+   "count": 6130
+  },
+  {
+   "form": "lust",
+   "rank": 1211,
+   "count": 6128
+  },
+  {
+   "form": "geliebt",
+   "rank": 1212,
+   "count": 6108
+  },
+  {
+   "form": "gericht",
+   "rank": 1213,
+   "count": 6102
+  },
+  {
+   "form": "bekomme",
+   "rank": 1214,
+   "count": 6100
+  },
+  {
+   "form": "ran",
+   "rank": 1215,
+   "count": 6092
+  },
+  {
+   "form": "kaputt",
+   "rank": 1216,
+   "count": 6087
+  },
+  {
+   "form": "sauber",
+   "rank": 1217,
+   "count": 6081
+  },
+  {
+   "form": "nämlich",
+   "rank": 1218,
+   "count": 6079
+  },
+  {
+   "form": "gefühle",
+   "rank": 1219,
+   "count": 6070
+  },
+  {
+   "form": "erhalten",
+   "rank": 1220,
+   "count": 6051
+  },
+  {
+   "form": "brachte",
+   "rank": 1221,
+   "count": 6049
+  },
+  {
+   "form": "gesellschaft",
+   "rank": 1222,
+   "count": 6041
+  },
+  {
+   "form": "verspreche",
+   "rank": 1223,
+   "count": 6034
+  },
+  {
+   "form": "lieb",
+   "rank": 1224,
+   "count": 6033
+  },
+  {
+   "form": "zeichen",
+   "rank": 1225,
+   "count": 6019
+  },
+  {
+   "form": "übrigens",
+   "rank": 1226,
+   "count": 6015
+  },
+  {
+   "form": "interessant",
+   "rank": 1227,
+   "count": 6014
+  },
+  {
+   "form": "gehören",
+   "rank": 1228,
+   "count": 6012
+  },
+  {
+   "form": "volk",
+   "rank": 1229,
+   "count": 6005
+  },
+  {
+   "form": "anderer",
+   "rank": 1230,
+   "count": 6004
+  },
+  {
+   "form": "erledigen",
+   "rank": 1231,
+   "count": 6003
+  },
+  {
+   "form": "antworten",
+   "rank": 1232,
+   "count": 6000
+  },
+  {
+   "form": "überraschung",
+   "rank": 1233,
+   "count": 5997
+  },
+  {
+   "form": "tee",
+   "rank": 1234,
+   "count": 5991
+  },
+  {
+   "form": "vaters",
+   "rank": 1235,
+   "count": 5987
+  },
+  {
+   "form": "kriegst",
+   "rank": 1236,
+   "count": 5986
+  },
+  {
+   "form": "soweit",
+   "rank": 1237,
+   "count": 5982
+  },
+  {
+   "form": "schlampe",
+   "rank": 1238,
+   "count": 5981
+  },
+  {
+   "form": "besorgt",
+   "rank": 1239,
+   "count": 5978
+  },
+  {
+   "form": "indem",
+   "rank": 1240,
+   "count": 5978
+  },
+  {
+   "form": "achtung",
+   "rank": 1241,
+   "count": 5968
+  },
+  {
+   "form": "verstecken",
+   "rank": 1242,
+   "count": 5964
+  },
+  {
+   "form": "verdammten",
+   "rank": 1243,
+   "count": 5961
+  },
+  {
+   "form": "manche",
+   "rank": 1244,
+   "count": 5957
+  },
+  {
+   "form": "ewig",
+   "rank": 1245,
+   "count": 5942
+  },
+  {
+   "form": "soldaten",
+   "rank": 1246,
+   "count": 5917
+  },
+  {
+   "form": "herausfinden",
+   "rank": 1247,
+   "count": 5916
+  },
+  {
+   "form": "weihnachten",
+   "rank": 1248,
+   "count": 5913
+  },
+  {
+   "form": "namens",
+   "rank": 1249,
+   "count": 5911
+  },
+  {
+   "form": "überleben",
+   "rank": 1250,
+   "count": 5911
+  },
+  {
+   "form": "gelassen",
+   "rank": 1251,
+   "count": 5902
+  },
+  {
+   "form": "entweder",
+   "rank": 1252,
+   "count": 5900
+  },
+  {
+   "form": "heim",
+   "rank": 1253,
+   "count": 5900
+  },
+  {
+   "form": "sagtest",
+   "rank": 1254,
+   "count": 5893
+  },
+  {
+   "form": "fotos",
+   "rank": 1255,
+   "count": 5888
+  },
+  {
+   "form": "vergangenheit",
+   "rank": 1256,
+   "count": 5888
+  },
+  {
+   "form": "haare",
+   "rank": 1257,
+   "count": 5884
+  },
+  {
+   "form": "situation",
+   "rank": 1258,
+   "count": 5872
+  },
+  {
+   "form": "weder",
+   "rank": 1259,
+   "count": 5858
+  },
+  {
+   "form": "angefangen",
+   "rank": 1260,
+   "count": 5855
+  },
+  {
+   "form": "wald",
+   "rank": 1261,
+   "count": 5854
+  },
+  {
+   "form": "setzt",
+   "rank": 1262,
+   "count": 5838
+  },
+  {
+   "form": "stellt",
+   "rank": 1263,
+   "count": 5832
+  },
+  {
+   "form": "kriege",
+   "rank": 1264,
+   "count": 5831
+  },
+  {
+   "form": "frag",
+   "rank": 1265,
+   "count": 5829
+  },
+  {
+   "form": "besuch",
+   "rank": 1266,
+   "count": 5814
+  },
+  {
+   "form": "zuvor",
+   "rank": 1267,
+   "count": 5814
+  },
+  {
+   "form": "amerika",
+   "rank": 1268,
+   "count": 5811
+  },
+  {
+   "form": "teilen",
+   "rank": 1269,
+   "count": 5802
+  },
+  {
+   "form": "schuldig",
+   "rank": 1270,
+   "count": 5784
+  },
+  {
+   "form": "schwein",
+   "rank": 1271,
+   "count": 5783
+  },
+  {
+   "form": "beginnen",
+   "rank": 1272,
+   "count": 5769
+  },
+  {
+   "form": "gebäude",
+   "rank": 1273,
+   "count": 5766
+  },
+  {
+   "form": "schritt",
+   "rank": 1274,
+   "count": 5766
+  },
+  {
+   "form": "kümmere",
+   "rank": 1275,
+   "count": 5758
+  },
+  {
+   "form": "entscheiden",
+   "rank": 1276,
+   "count": 5755
+  },
+  {
+   "form": "guck",
+   "rank": 1277,
+   "count": 5755
+  },
+  {
+   "form": "hals",
+   "rank": 1278,
+   "count": 5739
+  },
+  {
+   "form": "verstand",
+   "rank": 1279,
+   "count": 5738
+  },
+  {
+   "form": "zweite",
+   "rank": 1280,
+   "count": 5734
+  },
+  {
+   "form": "drinnen",
+   "rank": 1281,
+   "count": 5733
+  },
+  {
+   "form": "ungefähr",
+   "rank": 1282,
+   "count": 5733
+  },
+  {
+   "form": "passen",
+   "rank": 1283,
+   "count": 5728
+  },
+  {
+   "form": "herein",
+   "rank": 1284,
+   "count": 5719
+  },
+  {
+   "form": "vergnügen",
+   "rank": 1285,
+   "count": 5719
+  },
+  {
+   "form": "haltet",
+   "rank": 1286,
+   "count": 5716
+  },
+  {
+   "form": "gefahren",
+   "rank": 1287,
+   "count": 5709
+  },
+  {
+   "form": "schönes",
+   "rank": 1288,
+   "count": 5705
+  },
+  {
+   "form": "güte",
+   "rank": 1289,
+   "count": 5704
+  },
+  {
+   "form": "gebeten",
+   "rank": 1290,
+   "count": 5703
+  },
+  {
+   "form": "meint",
+   "rank": 1291,
+   "count": 5702
+  },
+  {
+   "form": "übrig",
+   "rank": 1292,
+   "count": 5700
+  },
+  {
+   "form": "überrascht",
+   "rank": 1293,
+   "count": 5696
+  },
+  {
+   "form": "aufhalten",
+   "rank": 1294,
+   "count": 5686
+  },
+  {
+   "form": "worauf",
+   "rank": 1295,
+   "count": 5680
+  },
+  {
+   "form": "ehemann",
+   "rank": 1296,
+   "count": 5673
+  },
+  {
+   "form": "besuchen",
+   "rank": 1297,
+   "count": 5666
+  },
+  {
+   "form": "ganzes",
+   "rank": 1298,
+   "count": 5665
+  },
+  {
+   "form": "brauch",
+   "rank": 1299,
+   "count": 5650
+  },
+  {
+   "form": "insel",
+   "rank": 1300,
+   "count": 5648
+  },
+  {
+   "form": "nimmst",
+   "rank": 1301,
+   "count": 5643
+  },
+  {
+   "form": "glas",
+   "rank": 1302,
+   "count": 5640
+  },
+  {
+   "form": "werfen",
+   "rank": 1303,
+   "count": 5639
+  },
+  {
+   "form": "erkennen",
+   "rank": 1304,
+   "count": 5638
+  },
+  {
+   "form": "nervös",
+   "rank": 1305,
+   "count": 5634
+  },
+  {
+   "form": "verantwortlich",
+   "rank": 1306,
+   "count": 5632
+  },
+  {
+   "form": "fühlst",
+   "rank": 1307,
+   "count": 5612
+  },
+  {
+   "form": "schaut",
+   "rank": 1308,
+   "count": 5611
+  },
+  {
+   "form": "königin",
+   "rank": 1309,
+   "count": 5610
+  },
+  {
+   "form": "kamera",
+   "rank": 1310,
+   "count": 5606
+  },
+  {
+   "form": "zerstören",
+   "rank": 1311,
+   "count": 5603
+  },
+  {
+   "form": "witzig",
+   "rank": 1312,
+   "count": 5597
+  },
+  {
+   "form": "wohnen",
+   "rank": 1313,
+   "count": 5590
+  },
+  {
+   "form": "irgendwelche",
+   "rank": 1314,
+   "count": 5586
+  },
+  {
+   "form": "niemandem",
+   "rank": 1315,
+   "count": 5573
+  },
+  {
+   "form": "schützen",
+   "rank": 1316,
+   "count": 5563
+  },
+  {
+   "form": "deutsche",
+   "rank": 1317,
+   "count": 5545
+  },
+  {
+   "form": "mussten",
+   "rank": 1318,
+   "count": 5545
+  },
+  {
+   "form": "lag",
+   "rank": 1319,
+   "count": 5543
+  },
+  {
+   "form": "prinzessin",
+   "rank": 1320,
+   "count": 5525
+  },
+  {
+   "form": "gibst",
+   "rank": 1321,
+   "count": 5522
+  },
+  {
+   "form": "gesetz",
+   "rank": 1322,
+   "count": 5513
+  },
+  {
+   "form": "schöner",
+   "rank": 1323,
+   "count": 5511
+  },
+  {
+   "form": "erschossen",
+   "rank": 1324,
+   "count": 5490
+  },
+  {
+   "form": "vorne",
+   "rank": 1325,
+   "count": 5482
+  },
+  {
+   "form": "freude",
+   "rank": 1326,
+   "count": 5474
+  },
+  {
+   "form": "messer",
+   "rank": 1327,
+   "count": 5466
+  },
+  {
+   "form": "sowas",
+   "rank": 1328,
+   "count": 5463
+  },
+  {
+   "form": "nehmt",
+   "rank": 1329,
+   "count": 5462
+  },
+  {
+   "form": "gleichen",
+   "rank": 1330,
+   "count": 5460
+  },
+  {
+   "form": "glückwunsch",
+   "rank": 1331,
+   "count": 5459
+  },
+  {
+   "form": "nahe",
+   "rank": 1332,
+   "count": 5458
+  },
+  {
+   "form": "aufgabe",
+   "rank": 1333,
+   "count": 5433
+  },
+  {
+   "form": "falsche",
+   "rank": 1334,
+   "count": 5433
+  },
+  {
+   "form": "neun",
+   "rank": 1335,
+   "count": 5429
+  },
+  {
+   "form": "gegend",
+   "rank": 1336,
+   "count": 5424
+  },
+  {
+   "form": "feiern",
+   "rank": 1337,
+   "count": 5418
+  },
+  {
+   "form": "falschen",
+   "rank": 1338,
+   "count": 5417
+  },
+  {
+   "form": "entschieden",
+   "rank": 1339,
+   "count": 5414
+  },
+  {
+   "form": "mission",
+   "rank": 1340,
+   "count": 5408
+  },
+  {
+   "form": "küche",
+   "rank": 1341,
+   "count": 5406
+  },
+  {
+   "form": "erster",
+   "rank": 1342,
+   "count": 5405
+  },
+  {
+   "form": "gegessen",
+   "rank": 1343,
+   "count": 5396
+  },
+  {
+   "form": "planeten",
+   "rank": 1344,
+   "count": 5390
+  },
+  {
+   "form": "ball",
+   "rank": 1345,
+   "count": 5383
+  },
+  {
+   "form": "übernehmen",
+   "rank": 1346,
+   "count": 5381
+  },
+  {
+   "form": "mitnehmen",
+   "rank": 1347,
+   "count": 5375
+  },
+  {
+   "form": "unsinn",
+   "rank": 1348,
+   "count": 5367
+  },
+  {
+   "form": "stopp",
+   "rank": 1349,
+   "count": 5363
+  },
+  {
+   "form": "pro",
+   "rank": 1350,
+   "count": 5356
+  },
+  {
+   "form": "gemeinsam",
+   "rank": 1351,
+   "count": 5349
+  },
+  {
+   "form": "lied",
+   "rank": 1352,
+   "count": 5334
+  },
+  {
+   "form": "gespielt",
+   "rank": 1353,
+   "count": 5333
+  },
+  {
+   "form": "melden",
+   "rank": 1354,
+   "count": 5333
+  },
+  {
+   "form": "seines",
+   "rank": 1355,
+   "count": 5323
+  },
+  {
+   "form": "spur",
+   "rank": 1356,
+   "count": 5322
+  },
+  {
+   "form": "rat",
+   "rank": 1357,
+   "count": 5321
+  },
+  {
+   "form": "adresse",
+   "rank": 1358,
+   "count": 5316
+  },
+  {
+   "form": "dorf",
+   "rank": 1359,
+   "count": 5312
+  },
+  {
+   "form": "hälfte",
+   "rank": 1360,
+   "count": 5309
+  },
+  {
+   "form": "allerdings",
+   "rank": 1361,
+   "count": 5306
+  },
+  {
+   "form": "position",
+   "rank": 1362,
+   "count": 5299
+  },
+  {
+   "form": "bedeuten",
+   "rank": 1363,
+   "count": 5293
+  },
+  {
+   "form": "bewegt",
+   "rank": 1364,
+   "count": 5286
+  },
+  {
+   "form": "wüsste",
+   "rank": 1365,
+   "count": 5286
+  },
+  {
+   "form": "gruppe",
+   "rank": 1366,
+   "count": 5282
+  },
+  {
+   "form": "monster",
+   "rank": 1367,
+   "count": 5282
+  },
+  {
+   "form": "beine",
+   "rank": 1368,
+   "count": 5281
+  },
+  {
+   "form": "aussieht",
+   "rank": 1369,
+   "count": 5276
+  },
+  {
+   "form": "wohnt",
+   "rank": 1370,
+   "count": 5269
+  },
+  {
+   "form": "hängt",
+   "rank": 1371,
+   "count": 5268
+  },
+  {
+   "form": "schwierigkeiten",
+   "rank": 1372,
+   "count": 5268
+  },
+  {
+   "form": "respekt",
+   "rank": 1373,
+   "count": 5262
+  },
+  {
+   "form": "seh",
+   "rank": 1374,
+   "count": 5255
+  },
+  {
+   "form": "händen",
+   "rank": 1375,
+   "count": 5250
+  },
+  {
+   "form": "erinnert",
+   "rank": 1376,
+   "count": 5248
+  },
+  {
+   "form": "schuhe",
+   "rank": 1377,
+   "count": 5242
+  },
+  {
+   "form": "verhaftet",
+   "rank": 1378,
+   "count": 5240
+  },
+  {
+   "form": "feind",
+   "rank": 1379,
+   "count": 5239
+  },
+  {
+   "form": "verzeihen",
+   "rank": 1380,
+   "count": 5235
+  },
+  {
+   "form": "band",
+   "rank": 1381,
+   "count": 5233
+  },
+  {
+   "form": "geholfen",
+   "rank": 1382,
+   "count": 5231
+  },
+  {
+   "form": "dachten",
+   "rank": 1383,
+   "count": 5228
+  },
+  {
+   "form": "abendessen",
+   "rank": 1384,
+   "count": 5227
+  },
+  {
+   "form": "statt",
+   "rank": 1385,
+   "count": 5223
+  },
+  {
+   "form": "besorgen",
+   "rank": 1386,
+   "count": 5211
+  },
+  {
+   "form": "drehen",
+   "rank": 1387,
+   "count": 5207
+  },
+  {
+   "form": "worüber",
+   "rank": 1388,
+   "count": 5201
+  },
+  {
+   "form": "davor",
+   "rank": 1389,
+   "count": 5198
+  },
+  {
+   "form": "freiheit",
+   "rank": 1390,
+   "count": 5194
+  },
+  {
+   "form": "nah",
+   "rank": 1391,
+   "count": 5186
+  },
+  {
+   "form": "schließen",
+   "rank": 1392,
+   "count": 5186
+  },
+  {
+   "form": "nachts",
+   "rank": 1393,
+   "count": 5183
+  },
+  {
+   "form": "kannte",
+   "rank": 1394,
+   "count": 5176
+  },
+  {
+   "form": "zufrieden",
+   "rank": 1395,
+   "count": 5172
+  },
+  {
+   "form": "gewartet",
+   "rank": 1396,
+   "count": 5149
+  },
+  {
+   "form": "gefangen",
+   "rank": 1397,
+   "count": 5141
+  },
+  {
+   "form": "brücke",
+   "rank": 1398,
+   "count": 5138
+  },
+  {
+   "form": "leisten",
+   "rank": 1399,
+   "count": 5136
+  },
+  {
+   "form": "gewusst",
+   "rank": 1400,
+   "count": 5135
+  },
+  {
+   "form": "verbrechen",
+   "rank": 1401,
+   "count": 5126
+  },
+  {
+   "form": "armen",
+   "rank": 1402,
+   "count": 5120
+  },
+  {
+   "form": "lief",
+   "rank": 1403,
+   "count": 5119
+  },
+  {
+   "form": "drink",
+   "rank": 1404,
+   "count": 5112
+  },
+  {
+   "form": "meer",
+   "rank": 1405,
+   "count": 5105
+  },
+  {
+   "form": "wünsche",
+   "rank": 1406,
+   "count": 5096
+  },
+  {
+   "form": "eier",
+   "rank": 1407,
+   "count": 5095
+  },
+  {
+   "form": "eis",
+   "rank": 1408,
+   "count": 5088
+  },
+  {
+   "form": "kleid",
+   "rank": 1409,
+   "count": 5086
+  },
+  {
+   "form": "schmerz",
+   "rank": 1410,
+   "count": 5056
+  },
+  {
+   "form": "stimmen",
+   "rank": 1411,
+   "count": 5050
+  },
+  {
+   "form": "gesund",
+   "rank": 1412,
+   "count": 5040
+  },
+  {
+   "form": "eurer",
+   "rank": 1413,
+   "count": 5038
+  },
+  {
+   "form": "witze",
+   "rank": 1414,
+   "count": 5034
+  },
+  {
+   "form": "richter",
+   "rank": 1415,
+   "count": 5030
+  },
+  {
+   "form": "bullen",
+   "rank": 1416,
+   "count": 5028
+  },
+  {
+   "form": "deren",
+   "rank": 1417,
+   "count": 5027
+  },
+  {
+   "form": "leise",
+   "rank": 1418,
+   "count": 5026
+  },
+  {
+   "form": "welchen",
+   "rank": 1419,
+   "count": 5026
+  },
+  {
+   "form": "wind",
+   "rank": 1420,
+   "count": 5023
+  },
+  {
+   "form": "danken",
+   "rank": 1421,
+   "count": 5014
+  },
+  {
+   "form": "bericht",
+   "rank": 1422,
+   "count": 5013
+  },
+  {
+   "form": "kümmert",
+   "rank": 1423,
+   "count": 5013
+  },
+  {
+   "form": "ring",
+   "rank": 1424,
+   "count": 5005
+  },
+  {
+   "form": "sorry",
+   "rank": 1425,
+   "count": 5001
+  },
+  {
+   "form": "entlang",
+   "rank": 1426,
+   "count": 5000
+  },
+  {
+   "form": "furchtbar",
+   "rank": 1427,
+   "count": 5000
+  },
+  {
+   "form": "einverstanden",
+   "rank": 1428,
+   "count": 4994
+  },
+  {
+   "form": "geschlagen",
+   "rank": 1429,
+   "count": 4989
+  },
+  {
+   "form": "übel",
+   "rank": 1430,
+   "count": 4988
+  },
+  {
+   "form": "betrunken",
+   "rank": 1431,
+   "count": 4986
+  },
+  {
+   "form": "taxi",
+   "rank": 1432,
+   "count": 4985
+  },
+  {
+   "form": "versteht",
+   "rank": 1433,
+   "count": 4983
+  },
+  {
+   "form": "fernsehen",
+   "rank": 1434,
+   "count": 4966
+  },
+  {
+   "form": "mitten",
+   "rank": 1435,
+   "count": 4964
+  },
+  {
+   "form": "erfolg",
+   "rank": 1436,
+   "count": 4961
+  },
+  {
+   "form": "schwanger",
+   "rank": 1437,
+   "count": 4958
+  },
+  {
+   "form": "falle",
+   "rank": 1438,
+   "count": 4947
+  },
+  {
+   "form": "unternehmen",
+   "rank": 1439,
+   "count": 4943
+  },
+  {
+   "form": "beenden",
+   "rank": 1440,
+   "count": 4936
+  },
+  {
+   "form": "deal",
+   "rank": 1441,
+   "count": 4929
+  },
+  {
+   "form": "träume",
+   "rank": 1442,
+   "count": 4924
+  },
+  {
+   "form": "schwierig",
+   "rank": 1443,
+   "count": 4921
+  },
+  {
+   "form": "maul",
+   "rank": 1444,
+   "count": 4919
+  },
+  {
+   "form": "schläft",
+   "rank": 1445,
+   "count": 4916
+  },
+  {
+   "form": "dauern",
+   "rank": 1446,
+   "count": 4915
+  },
+  {
+   "form": "genannt",
+   "rank": 1447,
+   "count": 4895
+  },
+  {
+   "form": "maschine",
+   "rank": 1448,
+   "count": 4894
+  },
+  {
+   "form": "fantastisch",
+   "rank": 1449,
+   "count": 4891
+  },
+  {
+   "form": "beginnt",
+   "rank": 1450,
+   "count": 4889
+  },
+  {
+   "form": "helfe",
+   "rank": 1451,
+   "count": 4882
+  },
+  {
+   "form": "energie",
+   "rank": 1452,
+   "count": 4880
+  },
+  {
+   "form": "versprechen",
+   "rank": 1453,
+   "count": 4873
+  },
+  {
+   "form": "fleisch",
+   "rank": 1454,
+   "count": 4867
+  },
+  {
+   "form": "singt",
+   "rank": 1455,
+   "count": 4862
+  },
+  {
+   "form": "aha",
+   "rank": 1456,
+   "count": 4857
+  },
+  {
+   "form": "schließlich",
+   "rank": 1457,
+   "count": 4854
+  },
+  {
+   "form": "unseres",
+   "rank": 1458,
+   "count": 4852
+  },
+  {
+   "form": "stehe",
+   "rank": 1459,
+   "count": 4849
+  },
+  {
+   "form": "ehren",
+   "rank": 1460,
+   "count": 4847
+  },
+  {
+   "form": "männern",
+   "rank": 1461,
+   "count": 4845
+  },
+  {
+   "form": "angriff",
+   "rank": 1462,
+   "count": 4839
+  },
+  {
+   "form": "sergeant",
+   "rank": 1463,
+   "count": 4838
+  },
+  {
+   "form": "beeil",
+   "rank": 1464,
+   "count": 4836
+  },
+  {
+   "form": "größte",
+   "rank": 1465,
+   "count": 4835
+  },
+  {
+   "form": "verdienen",
+   "rank": 1466,
+   "count": 4835
+  },
+  {
+   "form": "wochenende",
+   "rank": 1467,
+   "count": 4835
+  },
+  {
+   "form": "freue",
+   "rank": 1468,
+   "count": 4830
+  },
+  {
+   "form": "hängen",
+   "rank": 1469,
+   "count": 4822
+  },
+  {
+   "form": "spiele",
+   "rank": 1470,
+   "count": 4819
+  },
+  {
+   "form": "kostet",
+   "rank": 1471,
+   "count": 4816
+  },
+  {
+   "form": "bekommst",
+   "rank": 1472,
+   "count": 4804
+  },
+  {
+   "form": "schloss",
+   "rank": 1473,
+   "count": 4803
+  },
+  {
+   "form": "halb",
+   "rank": 1474,
+   "count": 4800
+  },
+  {
+   "form": "rennen",
+   "rank": 1475,
+   "count": 4797
+  },
+  {
+   "form": "unterschied",
+   "rank": 1476,
+   "count": 4796
+  },
+  {
+   "form": "echte",
+   "rank": 1477,
+   "count": 4794
+  },
+  {
+   "form": "trägt",
+   "rank": 1478,
+   "count": 4785
+  },
+  {
+   "form": "tötet",
+   "rank": 1479,
+   "count": 4785
+  },
+  {
+   "form": "quatsch",
+   "rank": 1480,
+   "count": 4784
+  },
+  {
+   "form": "geändert",
+   "rank": 1481,
+   "count": 4782
+  },
+  {
+   "form": "angebot",
+   "rank": 1482,
+   "count": 4771
+  },
+  {
+   "form": "bilder",
+   "rank": 1483,
+   "count": 4768
+  },
+  {
+   "form": "neuer",
+   "rank": 1484,
+   "count": 4761
+  },
+  {
+   "form": "major",
+   "rank": 1485,
+   "count": 4752
+  },
+  {
+   "form": "bein",
+   "rank": 1486,
+   "count": 4750
+  },
+  {
+   "form": "schuss",
+   "rank": 1487,
+   "count": 4741
+  },
+  {
+   "form": "freunden",
+   "rank": 1488,
+   "count": 4739
+  },
+  {
+   "form": "polizist",
+   "rank": 1489,
+   "count": 4738
+  },
+  {
+   "form": "schätzchen",
+   "rank": 1490,
+   "count": 4735
+  },
+  {
+   "form": "treten",
+   "rank": 1491,
+   "count": 4725
+  },
+  {
+   "form": "weinen",
+   "rank": 1492,
+   "count": 4722
+  },
+  {
+   "form": "patienten",
+   "rank": 1493,
+   "count": 4710
+  },
+  {
+   "form": "schaden",
+   "rank": 1494,
+   "count": 4700
+  },
+  {
+   "form": "fang",
+   "rank": 1495,
+   "count": 4698
+  },
+  {
+   "form": "wusstest",
+   "rank": 1496,
+   "count": 4697
+  },
+  {
+   "form": "fräulein",
+   "rank": 1497,
+   "count": 4690
+  },
+  {
+   "form": "hielt",
+   "rank": 1498,
+   "count": 4688
+  },
+  {
+   "form": "schätzen",
+   "rank": 1499,
+   "count": 4688
+  },
+  {
+   "form": "brechen",
+   "rank": 1500,
+   "count": 4687
+  },
+  {
+   "form": "fanden",
+   "rank": 1501,
+   "count": 4680
+  },
+  {
+   "form": "besteht",
+   "rank": 1502,
+   "count": 4669
+  },
+  {
+   "form": "leiden",
+   "rank": 1503,
+   "count": 4668
+  },
+  {
+   "form": "haufen",
+   "rank": 1504,
+   "count": 4667
+  },
+  {
+   "form": "brüder",
+   "rank": 1505,
+   "count": 4664
+  },
+  {
+   "form": "sprach",
+   "rank": 1506,
+   "count": 4657
+  },
+  {
+   "form": "ernsthaft",
+   "rank": 1507,
+   "count": 4656
+  },
+  {
+   "form": "daher",
+   "rank": 1508,
+   "count": 4650
+  },
+  {
+   "form": "reichen",
+   "rank": 1509,
+   "count": 4644
+  },
+  {
+   "form": "lächerlich",
+   "rank": 1510,
+   "count": 4635
+  },
+  {
+   "form": "dessen",
+   "rank": 1511,
+   "count": 4634
+  },
+  {
+   "form": "aufpassen",
+   "rank": 1512,
+   "count": 4633
+  },
+  {
+   "form": "nee",
+   "rank": 1513,
+   "count": 4632
+  },
+  {
+   "form": "verpasst",
+   "rank": 1514,
+   "count": 4630
+  },
+  {
+   "form": "befehle",
+   "rank": 1515,
+   "count": 4629
+  },
+  {
+   "form": "zufällig",
+   "rank": 1516,
+   "count": 4626
+  },
+  {
+   "form": "blumen",
+   "rank": 1517,
+   "count": 4623
+  },
+  {
+   "form": "meter",
+   "rank": 1518,
+   "count": 4623
+  },
+  {
+   "form": "bauen",
+   "rank": 1519,
+   "count": 4622
+  },
+  {
+   "form": "vorwärts",
+   "rank": 1520,
+   "count": 4622
+  },
+  {
+   "form": "park",
+   "rank": 1521,
+   "count": 4612
+  },
+  {
+   "form": "hut",
+   "rank": 1522,
+   "count": 4609
+  },
+  {
+   "form": "töte",
+   "rank": 1523,
+   "count": 4606
+  },
+  {
+   "form": "bringst",
+   "rank": 1524,
+   "count": 4603
+  },
+  {
+   "form": "loch",
+   "rank": 1525,
+   "count": 4602
+  },
+  {
+   "form": "operation",
+   "rank": 1526,
+   "count": 4596
+  },
+  {
+   "form": "spreche",
+   "rank": 1527,
+   "count": 4593
+  },
+  {
+   "form": "hinaus",
+   "rank": 1528,
+   "count": 4592
+  },
+  {
+   "form": "tiere",
+   "rank": 1529,
+   "count": 4585
+  },
+  {
+   "form": "gehirn",
+   "rank": 1530,
+   "count": 4579
+  },
+  {
+   "form": "zeitung",
+   "rank": 1531,
+   "count": 4579
+  },
+  {
+   "form": "wand",
+   "rank": 1532,
+   "count": 4577
+  },
+  {
+   "form": "verbringen",
+   "rank": 1533,
+   "count": 4575
+  },
+  {
+   "form": "wünschen",
+   "rank": 1534,
+   "count": 4573
+  },
+  {
+   "form": "mitgebracht",
+   "rank": 1535,
+   "count": 4555
+  },
+  {
+   "form": "spannende",
+   "rank": 1536,
+   "count": 4550
+  },
+  {
+   "form": "bücher",
+   "rank": 1537,
+   "count": 4541
+  },
+  {
+   "form": "worum",
+   "rank": 1538,
+   "count": 4541
+  },
+  {
+   "form": "gelegenheit",
+   "rank": 1539,
+   "count": 4539
+  },
+  {
+   "form": "ohren",
+   "rank": 1540,
+   "count": 4529
+  },
+  {
+   "form": "entkommen",
+   "rank": 1541,
+   "count": 4520
+  },
+  {
+   "form": "schreien",
+   "rank": 1542,
+   "count": 4519
+  },
+  {
+   "form": "bombe",
+   "rank": 1543,
+   "count": 4506
+  },
+  {
+   "form": "nachgedacht",
+   "rank": 1544,
+   "count": 4506
+  },
+  {
+   "form": "angetan",
+   "rank": 1545,
+   "count": 4505
+  },
+  {
+   "form": "gebrochen",
+   "rank": 1546,
+   "count": 4503
+  },
+  {
+   "form": "mut",
+   "rank": 1547,
+   "count": 4497
+  },
+  {
+   "form": "bus",
+   "rank": 1548,
+   "count": 4496
+  },
+  {
+   "form": "steig",
+   "rank": 1549,
+   "count": 4491
+  },
+  {
+   "form": "lüge",
+   "rank": 1550,
+   "count": 4482
+  },
+  {
+   "form": "weißen",
+   "rank": 1551,
+   "count": 4480
+  },
+  {
+   "form": "heilige",
+   "rank": 1552,
+   "count": 4473
+  },
+  {
+   "form": "unterhalten",
+   "rank": 1553,
+   "count": 4472
+  },
+  {
+   "form": "ecke",
+   "rank": 1554,
+   "count": 4471
+  },
+  {
+   "form": "flasche",
+   "rank": 1555,
+   "count": 4469
+  },
+  {
+   "form": "eingeladen",
+   "rank": 1556,
+   "count": 4468
+  },
+  {
+   "form": "sahen",
+   "rank": 1557,
+   "count": 4467
+  },
+  {
+   "form": "stöhnt",
+   "rank": 1558,
+   "count": 4458
+  },
+  {
+   "form": "gestellt",
+   "rank": 1559,
+   "count": 4452
+  },
+  {
+   "form": "zeitpunkt",
+   "rank": 1560,
+   "count": 4448
+  },
+  {
+   "form": "verhalten",
+   "rank": 1561,
+   "count": 4427
+  },
+  {
+   "form": "grad",
+   "rank": 1562,
+   "count": 4425
+  },
+  {
+   "form": "lächeln",
+   "rank": 1563,
+   "count": 4424
+  },
+  {
+   "form": "schafft",
+   "rank": 1564,
+   "count": 4423
+  },
+  {
+   "form": "besonderes",
+   "rank": 1565,
+   "count": 4413
+  },
+  {
+   "form": "konntest",
+   "rank": 1566,
+   "count": 4413
+  },
+  {
+   "form": "haar",
+   "rank": 1567,
+   "count": 4406
+  },
+  {
+   "form": "nutzen",
+   "rank": 1568,
+   "count": 4403
+  },
+  {
+   "form": "schwanz",
+   "rank": 1569,
+   "count": 4400
+  },
+  {
+   "form": "neuigkeiten",
+   "rank": 1570,
+   "count": 4393
+  },
+  {
+   "form": "engel",
+   "rank": 1571,
+   "count": 4392
+  },
+  {
+   "form": "gespräch",
+   "rank": 1572,
+   "count": 4391
+  },
+  {
+   "form": "leer",
+   "rank": 1573,
+   "count": 4388
+  },
+  {
+   "form": "klingelt",
+   "rank": 1574,
+   "count": 4382
+  },
+  {
+   "form": "lehrer",
+   "rank": 1575,
+   "count": 4381
+  },
+  {
+   "form": "blöd",
+   "rank": 1576,
+   "count": 4380
+  },
+  {
+   "form": "fassen",
+   "rank": 1577,
+   "count": 4366
+  },
+  {
+   "form": "trifft",
+   "rank": 1578,
+   "count": 4366
+  },
+  {
+   "form": "fahrt",
+   "rank": 1579,
+   "count": 4359
+  },
+  {
+   "form": "interesse",
+   "rank": 1580,
+   "count": 4357
+  },
+  {
+   "form": "verantwortung",
+   "rank": 1581,
+   "count": 4351
+  },
+  {
+   "form": "versteh",
+   "rank": 1582,
+   "count": 4351
+  },
+  {
+   "form": "gebt",
+   "rank": 1583,
+   "count": 4347
+  },
+  {
+   "form": "mannes",
+   "rank": 1584,
+   "count": 4339
+  },
+  {
+   "form": "folge",
+   "rank": 1585,
+   "count": 4336
+  },
+  {
+   "form": "tor",
+   "rank": 1586,
+   "count": 4334
+  },
+  {
+   "form": "fragt",
+   "rank": 1587,
+   "count": 4326
+  },
+  {
+   "form": "wart",
+   "rank": 1588,
+   "count": 4320
+  },
+  {
+   "form": "kosten",
+   "rank": 1589,
+   "count": 4312
+  },
+  {
+   "form": "schmerzen",
+   "rank": 1590,
+   "count": 4311
+  },
+  {
+   "form": "geschlossen",
+   "rank": 1591,
+   "count": 4309
+  },
+  {
+   "form": "system",
+   "rank": 1592,
+   "count": 4307
+  },
+  {
+   "form": "funktionieren",
+   "rank": 1593,
+   "count": 4306
+  },
+  {
+   "form": "eigenes",
+   "rank": 1594,
+   "count": 4304
+  },
+  {
+   "form": "sommer",
+   "rank": 1595,
+   "count": 4302
+  },
+  {
+   "form": "zweiten",
+   "rank": 1596,
+   "count": 4299
+  },
+  {
+   "form": "club",
+   "rank": 1597,
+   "count": 4290
+  },
+  {
+   "form": "keller",
+   "rank": 1598,
+   "count": 4288
+  },
+  {
+   "form": "schwarze",
+   "rank": 1599,
+   "count": 4286
+  },
+  {
+   "form": "dorthin",
+   "rank": 1600,
+   "count": 4278
+  },
+  {
+   "form": "keinem",
+   "rank": 1601,
+   "count": 4273
+  },
+  {
+   "form": "überprüfen",
+   "rank": 1602,
+   "count": 4272
+  },
+  {
+   "form": "frühstück",
+   "rank": 1603,
+   "count": 4271
+  },
+  {
+   "form": "mami",
+   "rank": 1604,
+   "count": 4268
+  },
+  {
+   "form": "druck",
+   "rank": 1605,
+   "count": 4267
+  },
+  {
+   "form": "schwert",
+   "rank": 1606,
+   "count": 4261
+  },
+  {
+   "form": "traf",
+   "rank": 1607,
+   "count": 4249
+  },
+  {
+   "form": "dach",
+   "rank": 1608,
+   "count": 4246
+  },
+  {
+   "form": "sprichst",
+   "rank": 1609,
+   "count": 4236
+  },
+  {
+   "form": "gehalten",
+   "rank": 1610,
+   "count": 4232
+  },
+  {
+   "form": "wahnsinn",
+   "rank": 1611,
+   "count": 4230
+  },
+  {
+   "form": "baum",
+   "rank": 1612,
+   "count": 4227
+  },
+  {
+   "form": "verdammter",
+   "rank": 1613,
+   "count": 4226
+  },
+  {
+   "form": "auftrag",
+   "rank": 1614,
+   "count": 4219
+  },
+  {
+   "form": "hintern",
+   "rank": 1615,
+   "count": 4218
+  },
+  {
+   "form": "fragte",
+   "rank": 1616,
+   "count": 4216
+  },
+  {
+   "form": "gelaufen",
+   "rank": 1617,
+   "count": 4216
+  },
+  {
+   "form": "mitkommen",
+   "rank": 1618,
+   "count": 4214
+  },
+  {
+   "form": "hose",
+   "rank": 1619,
+   "count": 4213
+  },
+  {
+   "form": "fisch",
+   "rank": 1620,
+   "count": 4206
+  },
+  {
+   "form": "rief",
+   "rank": 1621,
+   "count": 4206
+  },
+  {
+   "form": "zeige",
+   "rank": 1622,
+   "count": 4203
+  },
+  {
+   "form": "held",
+   "rank": 1623,
+   "count": 4196
+  },
+  {
+   "form": "rauf",
+   "rank": 1624,
+   "count": 4190
+  },
+  {
+   "form": "kugel",
+   "rank": 1625,
+   "count": 4188
+  },
+  {
+   "form": "gewalt",
+   "rank": 1626,
+   "count": 4187
+  },
+  {
+   "form": "kurs",
+   "rank": 1627,
+   "count": 4183
+  },
+  {
+   "form": "lösung",
+   "rank": 1628,
+   "count": 4181
+  },
+  {
+   "form": "flug",
+   "rank": 1629,
+   "count": 4180
+  },
+  {
+   "form": "gebaut",
+   "rank": 1630,
+   "count": 4176
+  },
+  {
+   "form": "sprich",
+   "rank": 1631,
+   "count": 4176
+  },
+  {
+   "form": "nachdenken",
+   "rank": 1632,
+   "count": 4168
+  },
+  {
+   "form": "beweis",
+   "rank": 1633,
+   "count": 4160
+  },
+  {
+   "form": "vorhin",
+   "rank": 1634,
+   "count": 4157
+  },
+  {
+   "form": "freuen",
+   "rank": 1635,
+   "count": 4142
+  },
+  {
+   "form": "hasst",
+   "rank": 1636,
+   "count": 4138
+  },
+  {
+   "form": "stein",
+   "rank": 1637,
+   "count": 4138
+  },
+  {
+   "form": "knast",
+   "rank": 1638,
+   "count": 4133
+  },
+  {
+   "form": "katze",
+   "rank": 1639,
+   "count": 4125
+  },
+  {
+   "form": "daraus",
+   "rank": 1640,
+   "count": 4121
+  },
+  {
+   "form": "tote",
+   "rank": 1641,
+   "count": 4120
+  },
+  {
+   "form": "hunde",
+   "rank": 1642,
+   "count": 4119
+  },
+  {
+   "form": "urlaub",
+   "rank": 1643,
+   "count": 4119
+  },
+  {
+   "form": "pause",
+   "rank": 1644,
+   "count": 4112
+  },
+  {
+   "form": "verschwindet",
+   "rank": 1645,
+   "count": 4107
+  },
+  {
+   "form": "irre",
+   "rank": 1646,
+   "count": 4097
+  },
+  {
+   "form": "nachmittag",
+   "rank": 1647,
+   "count": 4094
+  },
+  {
+   "form": "tier",
+   "rank": 1648,
+   "count": 4094
+  },
+  {
+   "form": "erreicht",
+   "rank": 1649,
+   "count": 4090
+  },
+  {
+   "form": "übersetzung",
+   "rank": 1650,
+   "count": 4084
+  },
+  {
+   "form": "koffer",
+   "rank": 1651,
+   "count": 4083
+  },
+  {
+   "form": "welchem",
+   "rank": 1652,
+   "count": 4082
+  },
+  {
+   "form": "hinterlassen",
+   "rank": 1653,
+   "count": 4077
+  },
+  {
+   "form": "erklärt",
+   "rank": 1654,
+   "count": 4076
+  },
+  {
+   "form": "fick",
+   "rank": 1655,
+   "count": 4076
+  },
+  {
+   "form": "einzigen",
+   "rank": 1656,
+   "count": 4074
+  },
+  {
+   "form": "vogel",
+   "rank": 1657,
+   "count": 4073
+  },
+  {
+   "form": "getrunken",
+   "rank": 1658,
+   "count": 4063
+  },
+  {
+   "form": "erstes",
+   "rank": 1659,
+   "count": 4051
+  },
+  {
+   "form": "geschieht",
+   "rank": 1660,
+   "count": 4047
+  },
+  {
+   "form": "gemeint",
+   "rank": 1661,
+   "count": 4046
+  },
+  {
+   "form": "taten",
+   "rank": 1662,
+   "count": 4045
+  },
+  {
+   "form": "jagen",
+   "rank": 1663,
+   "count": 4044
+  },
+  {
+   "form": "wichser",
+   "rank": 1664,
+   "count": 4043
+  },
+  {
+   "form": "erlaubt",
+   "rank": 1665,
+   "count": 4041
+  },
+  {
+   "form": "küssen",
+   "rank": 1666,
+   "count": 4038
+  },
+  {
+   "form": "weiteren",
+   "rank": 1667,
+   "count": 4035
+  },
+  {
+   "form": "bessere",
+   "rank": 1668,
+   "count": 4026
+  },
+  {
+   "form": "irgendjemand",
+   "rank": 1669,
+   "count": 4026
+  },
+  {
+   "form": "schwarzen",
+   "rank": 1670,
+   "count": 4025
+  },
+  {
+   "form": "stören",
+   "rank": 1671,
+   "count": 4017
+  },
+  {
+   "form": "größer",
+   "rank": 1672,
+   "count": 4011
+  },
+  {
+   "form": "dankbar",
+   "rank": 1673,
+   "count": 4007
+  },
+  {
+   "form": "hoffen",
+   "rank": 1674,
+   "count": 4007
+  },
+  {
+   "form": "besseres",
+   "rank": 1675,
+   "count": 4005
+  },
+  {
+   "form": "seitdem",
+   "rank": 1676,
+   "count": 4005
+  },
+  {
+   "form": "versuchte",
+   "rank": 1677,
+   "count": 4005
+  },
+  {
+   "form": "kunden",
+   "rank": 1678,
+   "count": 4004
+  },
+  {
+   "form": "normalerweise",
+   "rank": 1679,
+   "count": 4003
+  },
+  {
+   "form": "übersetzt",
+   "rank": 1680,
+   "count": 3999
+  },
+  {
+   "form": "gingen",
+   "rank": 1681,
+   "count": 3992
+  },
+  {
+   "form": "halbe",
+   "rank": 1682,
+   "count": 3985
+  },
+  {
+   "form": "natur",
+   "rank": 1683,
+   "count": 3983
+  },
+  {
+   "form": "atmen",
+   "rank": 1684,
+   "count": 3981
+  },
+  {
+   "form": "risiko",
+   "rank": 1685,
+   "count": 3975
+  },
+  {
+   "form": "mindestens",
+   "rank": 1686,
+   "count": 3974
+  },
+  {
+   "form": "fiel",
+   "rank": 1687,
+   "count": 3969
+  },
+  {
+   "form": "beruhigen",
+   "rank": 1688,
+   "count": 3962
+  },
+  {
+   "form": "schlechter",
+   "rank": 1689,
+   "count": 3961
+  },
+  {
+   "form": "fängt",
+   "rank": 1690,
+   "count": 3960
+  },
+  {
+   "form": "prima",
+   "rank": 1691,
+   "count": 3960
+  },
+  {
+   "form": "karten",
+   "rank": 1692,
+   "count": 3959
+  },
+  {
+   "form": "vollkommen",
+   "rank": 1693,
+   "count": 3958
+  },
+  {
+   "form": "mädels",
+   "rank": 1694,
+   "count": 3957
+  },
+  {
+   "form": "brauchte",
+   "rank": 1695,
+   "count": 3953
+  },
+  {
+   "form": "wahre",
+   "rank": 1696,
+   "count": 3951
+  },
+  {
+   "form": "zeugen",
+   "rank": 1697,
+   "count": 3950
+  },
+  {
+   "form": "entdeckt",
+   "rank": 1698,
+   "count": 3948
+  },
+  {
+   "form": "erfahrung",
+   "rank": 1699,
+   "count": 3945
+  },
+  {
+   "form": "gezeigt",
+   "rank": 1700,
+   "count": 3944
+  },
+  {
+   "form": "liebes",
+   "rank": 1701,
+   "count": 3944
+  },
+  {
+   "form": "steigen",
+   "rank": 1702,
+   "count": 3941
+  },
+  {
+   "form": "idioten",
+   "rank": 1703,
+   "count": 3940
+  },
+  {
+   "form": "polizisten",
+   "rank": 1704,
+   "count": 3937
+  },
+  {
+   "form": "runde",
+   "rank": 1705,
+   "count": 3936
+  },
+  {
+   "form": "geschossen",
+   "rank": 1706,
+   "count": 3934
+  },
+  {
+   "form": "gibts",
+   "rank": 1707,
+   "count": 3934
+  },
+  {
+   "form": "schmeckt",
+   "rank": 1708,
+   "count": 3930
+  },
+  {
+   "form": "schickt",
+   "rank": 1709,
+   "count": 3928
+  },
+  {
+   "form": "mistkerl",
+   "rank": 1710,
+   "count": 3924
+  },
+  {
+   "form": "thema",
+   "rank": 1711,
+   "count": 3924
+  },
+  {
+   "form": "offenbar",
+   "rank": 1712,
+   "count": 3915
+  },
+  {
+   "form": "isst",
+   "rank": 1713,
+   "count": 3907
+  },
+  {
+   "form": "weiße",
+   "rank": 1714,
+   "count": 3904
+  },
+  {
+   "form": "gewissen",
+   "rank": 1715,
+   "count": 3903
+  },
+  {
+   "form": "drüber",
+   "rank": 1716,
+   "count": 3901
+  },
+  {
+   "form": "gilt",
+   "rank": 1717,
+   "count": 3901
+  },
+  {
+   "form": "reihe",
+   "rank": 1718,
+   "count": 3895
+  },
+  {
+   "form": "verfolgt",
+   "rank": 1719,
+   "count": 3892
+  },
+  {
+   "form": "großvater",
+   "rank": 1720,
+   "count": 3889
+  },
+  {
+   "form": "behandelt",
+   "rank": 1721,
+   "count": 3886
+  },
+  {
+   "form": "wunsch",
+   "rank": 1722,
+   "count": 3875
+  },
+  {
+   "form": "erschießen",
+   "rank": 1723,
+   "count": 3874
+  },
+  {
+   "form": "pläne",
+   "rank": 1724,
+   "count": 3871
+  },
+  {
+   "form": "morgens",
+   "rank": 1725,
+   "count": 3867
+  },
+  {
+   "form": "solchen",
+   "rank": 1726,
+   "count": 3864
+  },
+  {
+   "form": "geblieben",
+   "rank": 1727,
+   "count": 3860
+  },
+  {
+   "form": "entschuldigt",
+   "rank": 1728,
+   "count": 3854
+  },
+  {
+   "form": "schaffst",
+   "rank": 1729,
+   "count": 3854
+  },
+  {
+   "form": "dienst",
+   "rank": 1730,
+   "count": 3847
+  },
+  {
+   "form": "zufall",
+   "rank": 1731,
+   "count": 3845
+  },
+  {
+   "form": "eurem",
+   "rank": 1732,
+   "count": 3843
+  },
+  {
+   "form": "längst",
+   "rank": 1733,
+   "count": 3843
+  },
+  {
+   "form": "bravo",
+   "rank": 1734,
+   "count": 3842
+  },
+  {
+   "form": "zustand",
+   "rank": 1735,
+   "count": 3836
+  },
+  {
+   "form": "bemerkt",
+   "rank": 1736,
+   "count": 3835
+  },
+  {
+   "form": "fluss",
+   "rank": 1737,
+   "count": 3833
+  },
+  {
+   "form": "wesen",
+   "rank": 1738,
+   "count": 3833
+  },
+  {
+   "form": "amerikaner",
+   "rank": 1739,
+   "count": 3827
+  },
+  {
+   "form": "wahnsinnig",
+   "rank": 1740,
+   "count": 3817
+  },
+  {
+   "form": "nem",
+   "rank": 1741,
+   "count": 3815
+  },
+  {
+   "form": "lautet",
+   "rank": 1742,
+   "count": 3811
+  },
+  {
+   "form": "junger",
+   "rank": 1743,
+   "count": 3807
+  },
+  {
+   "form": "szene",
+   "rank": 1744,
+   "count": 3807
+  },
+  {
+   "form": "schlägt",
+   "rank": 1745,
+   "count": 3805
+  },
+  {
+   "form": "schwarz",
+   "rank": 1746,
+   "count": 3803
+  },
+  {
+   "form": "durcheinander",
+   "rank": 1747,
+   "count": 3793
+  },
+  {
+   "form": "weisst",
+   "rank": 1748,
+   "count": 3790
+  },
+  {
+   "form": "beruhige",
+   "rank": 1749,
+   "count": 3788
+  },
+  {
+   "form": "geplant",
+   "rank": 1750,
+   "count": 3786
+  },
+  {
+   "form": "dringend",
+   "rank": 1751,
+   "count": 3783
+  },
+  {
+   "form": "einigen",
+   "rank": 1752,
+   "count": 3777
+  },
+  {
+   "form": "farbe",
+   "rank": 1753,
+   "count": 3777
+  },
+  {
+   "form": "fern",
+   "rank": 1754,
+   "count": 3774
+  },
+  {
+   "form": "geschäfte",
+   "rank": 1755,
+   "count": 3773
+  },
+  {
+   "form": "rot",
+   "rank": 1756,
+   "count": 3767
+  },
+  {
+   "form": "vertraut",
+   "rank": 1757,
+   "count": 3765
+  },
+  {
+   "form": "labor",
+   "rank": 1758,
+   "count": 3763
+  },
+  {
+   "form": "strand",
+   "rank": 1759,
+   "count": 3763
+  },
+  {
+   "form": "mond",
+   "rank": 1760,
+   "count": 3762
+  },
+  {
+   "form": "hinein",
+   "rank": 1761,
+   "count": 3757
+  },
+  {
+   "form": "soldat",
+   "rank": 1762,
+   "count": 3754
+  },
+  {
+   "form": "außerhalb",
+   "rank": 1763,
+   "count": 3749
+  },
+  {
+   "form": "gäste",
+   "rank": 1764,
+   "count": 3749
+  },
+  {
+   "form": "rache",
+   "rank": 1765,
+   "count": 3746
+  },
+  {
+   "form": "frankreich",
+   "rank": 1766,
+   "count": 3745
+  },
+  {
+   "form": "pferde",
+   "rank": 1767,
+   "count": 3745
+  },
+  {
+   "form": "restaurant",
+   "rank": 1768,
+   "count": 3743
+  },
+  {
+   "form": "england",
+   "rank": 1769,
+   "count": 3742
+  },
+  {
+   "form": "geschichten",
+   "rank": 1770,
+   "count": 3741
+  },
+  {
+   "form": "angegriffen",
+   "rank": 1771,
+   "count": 3739
+  },
+  {
+   "form": "füße",
+   "rank": 1772,
+   "count": 3737
+  },
+  {
+   "form": "überlegen",
+   "rank": 1773,
+   "count": 3727
+  },
+  {
+   "form": "gelogen",
+   "rank": 1774,
+   "count": 3725
+  },
+  {
+   "form": "rechte",
+   "rank": 1775,
+   "count": 3722
+  },
+  {
+   "form": "garten",
+   "rank": 1776,
+   "count": 3716
+  },
+  {
+   "form": "ähnlich",
+   "rank": 1777,
+   "count": 3713
+  },
+  {
+   "form": "anscheinend",
+   "rank": 1778,
+   "count": 3712
+  },
+  {
+   "form": "deutschen",
+   "rank": 1779,
+   "count": 3711
+  },
+  {
+   "form": "radio",
+   "rank": 1780,
+   "count": 3707
+  },
+  {
+   "form": "langer",
+   "rank": 1781,
+   "count": 3704
+  },
+  {
+   "form": "meilen",
+   "rank": 1782,
+   "count": 3697
+  },
+  {
+   "form": "verfolgen",
+   "rank": 1783,
+   "count": 3692
+  },
+  {
+   "form": "zweimal",
+   "rank": 1784,
+   "count": 3691
+  },
+  {
+   "form": "autos",
+   "rank": 1785,
+   "count": 3685
+  },
+  {
+   "form": "erinnerung",
+   "rank": 1786,
+   "count": 3683
+  },
+  {
+   "form": "reisen",
+   "rank": 1787,
+   "count": 3681
+  },
+  {
+   "form": "direktor",
+   "rank": 1788,
+   "count": 3680
+  },
+  {
+   "form": "verlangt",
+   "rank": 1789,
+   "count": 3677
+  },
+  {
+   "form": "gang",
+   "rank": 1790,
+   "count": 3676
+  },
+  {
+   "form": "legt",
+   "rank": 1791,
+   "count": 3676
+  },
+  {
+   "form": "stört",
+   "rank": 1792,
+   "count": 3676
+  },
+  {
+   "form": "kapiert",
+   "rank": 1793,
+   "count": 3667
+  },
+  {
+   "form": "streit",
+   "rank": 1794,
+   "count": 3664
+  },
+  {
+   "form": "trink",
+   "rank": 1795,
+   "count": 3661
+  },
+  {
+   "form": "netter",
+   "rank": 1796,
+   "count": 3653
+  },
+  {
+   "form": "riecht",
+   "rank": 1797,
+   "count": 3651
+  },
+  {
+   "form": "fuck",
+   "rank": 1798,
+   "count": 3641
+  },
+  {
+   "form": "überzeugt",
+   "rank": 1799,
+   "count": 3635
+  },
+  {
+   "form": "stehst",
+   "rank": 1800,
+   "count": 3634
+  },
+  {
+   "form": "aufgeben",
+   "rank": 1801,
+   "count": 3632
+  },
+  {
+   "form": "stehlen",
+   "rank": 1802,
+   "count": 3631
+  },
+  {
+   "form": "weshalb",
+   "rank": 1803,
+   "count": 3626
+  },
+  {
+   "form": "fair",
+   "rank": 1804,
+   "count": 3625
+  },
+  {
+   "form": "fass",
+   "rank": 1805,
+   "count": 3622
+  },
+  {
+   "form": "dürfte",
+   "rank": 1806,
+   "count": 3621
+  },
+  {
+   "form": "nerven",
+   "rank": 1807,
+   "count": 3619
+  },
+  {
+   "form": "verlangen",
+   "rank": 1808,
+   "count": 3616
+  },
+  {
+   "form": "sprache",
+   "rank": 1809,
+   "count": 3606
+  },
+  {
+   "form": "scherz",
+   "rank": 1810,
+   "count": 3602
+  },
+  {
+   "form": "arbeitest",
+   "rank": 1811,
+   "count": 3596
+  },
+  {
+   "form": "derjenige",
+   "rank": 1812,
+   "count": 3592
+  },
+  {
+   "form": "vertrag",
+   "rank": 1813,
+   "count": 3591
+  },
+  {
+   "form": "abgesehen",
+   "rank": 1814,
+   "count": 3590
+  },
+  {
+   "form": "grenze",
+   "rank": 1815,
+   "count": 3589
+  },
+  {
+   "form": "such",
+   "rank": 1816,
+   "count": 3589
+  },
+  {
+   "form": "vorbereitet",
+   "rank": 1817,
+   "count": 3588
+  },
+  {
+   "form": "braut",
+   "rank": 1818,
+   "count": 3584
+  },
+  {
+   "form": "einiges",
+   "rank": 1819,
+   "count": 3577
+  },
+  {
+   "form": "lauter",
+   "rank": 1820,
+   "count": 3576
+  },
+  {
+   "form": "kuchen",
+   "rank": 1821,
+   "count": 3575
+  },
+  {
+   "form": "bürgermeister",
+   "rank": 1822,
+   "count": 3572
+  },
+  {
+   "form": "hieß",
+   "rank": 1823,
+   "count": 3564
+  },
+  {
+   "form": "erzählte",
+   "rank": 1824,
+   "count": 3562
+  },
+  {
+   "form": "langweilig",
+   "rank": 1825,
+   "count": 3561
+  },
+  {
+   "form": "college",
+   "rank": 1826,
+   "count": 3559
+  },
+  {
+   "form": "aufstehen",
+   "rank": 1827,
+   "count": 3557
+  },
+  {
+   "form": "scheinen",
+   "rank": 1828,
+   "count": 3556
+  },
+  {
+   "form": "womit",
+   "rank": 1829,
+   "count": 3554
+  },
+  {
+   "form": "schande",
+   "rank": 1830,
+   "count": 3547
+  },
+  {
+   "form": "milch",
+   "rank": 1831,
+   "count": 3544
+  },
+  {
+   "form": "wache",
+   "rank": 1832,
+   "count": 3543
+  },
+  {
+   "form": "zweifel",
+   "rank": 1833,
+   "count": 3542
+  },
+  {
+   "form": "nirgendwo",
+   "rank": 1834,
+   "count": 3540
+  },
+  {
+   "form": "gebrauchen",
+   "rank": 1835,
+   "count": 3538
+  },
+  {
+   "form": "knie",
+   "rank": 1836,
+   "count": 3537
+  },
+  {
+   "form": "rauchen",
+   "rank": 1837,
+   "count": 3535
+  },
+  {
+   "form": "nette",
+   "rank": 1838,
+   "count": 3531
+  },
+  {
+   "form": "erzähle",
+   "rank": 1839,
+   "count": 3525
+  },
+  {
+   "form": "entführt",
+   "rank": 1840,
+   "count": 3523
+  },
+  {
+   "form": "wurdest",
+   "rank": 1841,
+   "count": 3521
+  },
+  {
+   "form": "woran",
+   "rank": 1842,
+   "count": 3520
+  },
+  {
+   "form": "folgt",
+   "rank": 1843,
+   "count": 3513
+  },
+  {
+   "form": "lager",
+   "rank": 1844,
+   "count": 3510
+  },
+  {
+   "form": "geglaubt",
+   "rank": 1845,
+   "count": 3508
+  },
+  {
+   "form": "dadurch",
+   "rank": 1846,
+   "count": 3507
+  },
+  {
+   "form": "lösen",
+   "rank": 1847,
+   "count": 3506
+  },
+  {
+   "form": "geheiratet",
+   "rank": 1848,
+   "count": 3504
+  },
+  {
+   "form": "nachher",
+   "rank": 1849,
+   "count": 3500
+  },
+  {
+   "form": "fragst",
+   "rank": 1850,
+   "count": 3484
+  },
+  {
+   "form": "abholen",
+   "rank": 1851,
+   "count": 3483
+  },
+  {
+   "form": "pflicht",
+   "rank": 1852,
+   "count": 3483
+  },
+  {
+   "form": "verflucht",
+   "rank": 1853,
+   "count": 3482
+  },
+  {
+   "form": "ziehe",
+   "rank": 1854,
+   "count": 3481
+  },
+  {
+   "form": "umsonst",
+   "rank": 1855,
+   "count": 3479
+  },
+  {
+   "form": "entlassen",
+   "rank": 1856,
+   "count": 3478
+  },
+  {
+   "form": "dreck",
+   "rank": 1857,
+   "count": 3476
+  },
+  {
+   "form": "zählt",
+   "rank": 1858,
+   "count": 3474
+  },
+  {
+   "form": "anzug",
+   "rank": 1859,
+   "count": 3473
+  },
+  {
+   "form": "erwähnt",
+   "rank": 1860,
+   "count": 3467
+  },
+  {
+   "form": "beeilen",
+   "rank": 1861,
+   "count": 3465
+  },
+  {
+   "form": "tatsache",
+   "rank": 1862,
+   "count": 3464
+  },
+  {
+   "form": "sieg",
+   "rank": 1863,
+   "count": 3459
+  },
+  {
+   "form": "suchst",
+   "rank": 1864,
+   "count": 3452
+  },
+  {
+   "form": "unschuldig",
+   "rank": 1865,
+   "count": 3452
+  },
+  {
+   "form": "test",
+   "rank": 1866,
+   "count": 3443
+  },
+  {
+   "form": "dreh",
+   "rank": 1867,
+   "count": 3440
+  },
+  {
+   "form": "schutz",
+   "rank": 1868,
+   "count": 3440
+  },
+  {
+   "form": "ner",
+   "rank": 1869,
+   "count": 3437
+  },
+  {
+   "form": "leichen",
+   "rank": 1870,
+   "count": 3435
+  },
+  {
+   "form": "bösen",
+   "rank": 1871,
+   "count": 3434
+  },
+  {
+   "form": "erinnerungen",
+   "rank": 1872,
+   "count": 3431
+  },
+  {
+   "form": "programm",
+   "rank": 1873,
+   "count": 3431
+  },
+  {
+   "form": "schulden",
+   "rank": 1874,
+   "count": 3428
+  },
+  {
+   "form": "fährst",
+   "rank": 1875,
+   "count": 3427
+  },
+  {
+   "form": "pistole",
+   "rank": 1876,
+   "count": 3427
+  },
+  {
+   "form": "hassen",
+   "rank": 1877,
+   "count": 3424
+  },
+  {
+   "form": "mister",
+   "rank": 1878,
+   "count": 3422
+  },
+  {
+   "form": "schwach",
+   "rank": 1879,
+   "count": 3421
+  },
+  {
+   "form": "verboten",
+   "rank": 1880,
+   "count": 3417
+  },
+  {
+   "form": "schatten",
+   "rank": 1881,
+   "count": 3416
+  },
+  {
+   "form": "enden",
+   "rank": 1882,
+   "count": 3414
+  },
+  {
+   "form": "helft",
+   "rank": 1883,
+   "count": 3413
+  },
+  {
+   "form": "form",
+   "rank": 1884,
+   "count": 3407
+  },
+  {
+   "form": "stock",
+   "rank": 1885,
+   "count": 3407
+  },
+  {
+   "form": "klug",
+   "rank": 1886,
+   "count": 3401
+  },
+  {
+   "form": "erklärung",
+   "rank": 1887,
+   "count": 3398
+  },
+  {
+   "form": "einfacher",
+   "rank": 1888,
+   "count": 3395
+  },
+  {
+   "form": "kollegen",
+   "rank": 1889,
+   "count": 3393
+  },
+  {
+   "form": "knochen",
+   "rank": 1890,
+   "count": 3392
+  },
+  {
+   "form": "kuss",
+   "rank": 1891,
+   "count": 3391
+  },
+  {
+   "form": "begann",
+   "rank": 1892,
+   "count": 3390
+  },
+  {
+   "form": "daten",
+   "rank": 1893,
+   "count": 3390
+  },
+  {
+   "form": "selbstverständlich",
+   "rank": 1894,
+   "count": 3387
+  },
+  {
+   "form": "irgendeine",
+   "rank": 1895,
+   "count": 3385
+  },
+  {
+   "form": "akte",
+   "rank": 1896,
+   "count": 3379
+  },
+  {
+   "form": "handeln",
+   "rank": 1897,
+   "count": 3378
+  },
+  {
+   "form": "vergeben",
+   "rank": 1898,
+   "count": 3375
+  },
+  {
+   "form": "blödsinn",
+   "rank": 1899,
+   "count": 3374
+  },
+  {
+   "form": "dunkel",
+   "rank": 1900,
+   "count": 3374
+  },
+  {
+   "form": "wichtiger",
+   "rank": 1901,
+   "count": 3374
+  },
+  {
+   "form": "karriere",
+   "rank": 1902,
+   "count": 3372
+  },
+  {
+   "form": "krankheit",
+   "rank": 1903,
+   "count": 3360
+  },
+  {
+   "form": "englisch",
+   "rank": 1904,
+   "count": 3359
+  },
+  {
+   "form": "hexe",
+   "rank": 1905,
+   "count": 3358
+  },
+  {
+   "form": "aufmerksamkeit",
+   "rank": 1906,
+   "count": 3355
+  },
+  {
+   "form": "gefeuert",
+   "rank": 1907,
+   "count": 3355
+  },
+  {
+   "form": "großmutter",
+   "rank": 1908,
+   "count": 3354
+  },
+  {
+   "form": "gehts",
+   "rank": 1909,
+   "count": 3353
+  },
+  {
+   "form": "hingehen",
+   "rank": 1910,
+   "count": 3346
+  },
+  {
+   "form": "erlauben",
+   "rank": 1911,
+   "count": 3344
+  },
+  {
+   "form": "gezogen",
+   "rank": 1912,
+   "count": 3344
+  },
+  {
+   "form": "blöde",
+   "rank": 1913,
+   "count": 3343
+  },
+  {
+   "form": "pfund",
+   "rank": 1914,
+   "count": 3340
+  },
+  {
+   "form": "bester",
+   "rank": 1915,
+   "count": 3339
+  },
+  {
+   "form": "kunst",
+   "rank": 1916,
+   "count": 3338
+  },
+  {
+   "form": "innerhalb",
+   "rank": 1917,
+   "count": 3336
+  },
+  {
+   "form": "beendet",
+   "rank": 1918,
+   "count": 3334
+  },
+  {
+   "form": "million",
+   "rank": 1919,
+   "count": 3334
+  },
+  {
+   "form": "satt",
+   "rank": 1920,
+   "count": 3333
+  },
+  {
+   "form": "ebenso",
+   "rank": 1921,
+   "count": 3332
+  },
+  {
+   "form": "regen",
+   "rank": 1922,
+   "count": 3332
+  },
+  {
+   "form": "wachen",
+   "rank": 1923,
+   "count": 3332
+  },
+  {
+   "form": "geb",
+   "rank": 1924,
+   "count": 3331
+  },
+  {
+   "form": "trottel",
+   "rank": 1925,
+   "count": 3327
+  },
+  {
+   "form": "überlebt",
+   "rank": 1926,
+   "count": 3325
+  },
+  {
+   "form": "termin",
+   "rank": 1927,
+   "count": 3324
+  },
+  {
+   "form": "komplett",
+   "rank": 1928,
+   "count": 3323
+  },
+  {
+   "form": "woanders",
+   "rank": 1929,
+   "count": 3317
+  },
+  {
+   "form": "fühlte",
+   "rank": 1930,
+   "count": 3316
+  },
+  {
+   "form": "hure",
+   "rank": 1931,
+   "count": 3316
+  },
+  {
+   "form": "herzlichen",
+   "rank": 1932,
+   "count": 3315
+  },
+  {
+   "form": "fliegt",
+   "rank": 1933,
+   "count": 3314
+  },
+  {
+   "form": "dennoch",
+   "rank": 1934,
+   "count": 3309
+  },
+  {
+   "form": "gebraucht",
+   "rank": 1935,
+   "count": 3309
+  },
+  {
+   "form": "seiten",
+   "rank": 1936,
+   "count": 3295
+  },
+  {
+   "form": "feinde",
+   "rank": 1937,
+   "count": 3294
+  },
+  {
+   "form": "tritt",
+   "rank": 1938,
+   "count": 3294
+  },
+  {
+   "form": "behandeln",
+   "rank": 1939,
+   "count": 3293
+  },
+  {
+   "form": "geheimnisse",
+   "rank": 1940,
+   "count": 3287
+  },
+  {
+   "form": "signal",
+   "rank": 1941,
+   "count": 3286
+  },
+  {
+   "form": "besprechen",
+   "rank": 1942,
+   "count": 3285
+  },
+  {
+   "form": "schreibt",
+   "rank": 1943,
+   "count": 3279
+  },
+  {
+   "form": "warm",
+   "rank": 1944,
+   "count": 3279
+  },
+  {
+   "form": "verhindern",
+   "rank": 1945,
+   "count": 3272
+  },
+  {
+   "form": "selben",
+   "rank": 1946,
+   "count": 3271
+  },
+  {
+   "form": "verlässt",
+   "rank": 1947,
+   "count": 3268
+  },
+  {
+   "form": "kochen",
+   "rank": 1948,
+   "count": 3259
+  },
+  {
+   "form": "kontrollieren",
+   "rank": 1949,
+   "count": 3259
+  },
+  {
+   "form": "theater",
+   "rank": 1950,
+   "count": 3254
+  },
+  {
+   "form": "peinlich",
+   "rank": 1951,
+   "count": 3249
+  },
+  {
+   "form": "merken",
+   "rank": 1952,
+   "count": 3244
+  },
+  {
+   "form": "zurückkommen",
+   "rank": 1953,
+   "count": 3242
+  },
+  {
+   "form": "grab",
+   "rank": 1954,
+   "count": 3241
+  },
+  {
+   "form": "voraus",
+   "rank": 1955,
+   "count": 3241
+  },
+  {
+   "form": "schweigen",
+   "rank": 1956,
+   "count": 3240
+  },
+  {
+   "form": "roten",
+   "rank": 1957,
+   "count": 3239
+  },
+  {
+   "form": "spuren",
+   "rank": 1958,
+   "count": 3236
+  },
+  {
+   "form": "washington",
+   "rank": 1959,
+   "count": 3236
+  },
+  {
+   "form": "irgendein",
+   "rank": 1960,
+   "count": 3233
+  },
+  {
+   "form": "weiterhin",
+   "rank": 1961,
+   "count": 3233
+  },
+  {
+   "form": "schwimmen",
+   "rank": 1962,
+   "count": 3230
+  },
+  {
+   "form": "müssten",
+   "rank": 1963,
+   "count": 3229
+  },
+  {
+   "form": "griff",
+   "rank": 1964,
+   "count": 3226
+  },
+  {
+   "form": "wirkt",
+   "rank": 1965,
+   "count": 3223
+  },
+  {
+   "form": "bewusst",
+   "rank": 1966,
+   "count": 3222
+  },
+  {
+   "form": "liebte",
+   "rank": 1967,
+   "count": 3221
+  },
+  {
+   "form": "sterbe",
+   "rank": 1968,
+   "count": 3219
+  },
+  {
+   "form": "bastard",
+   "rank": 1969,
+   "count": 3217
+  },
+  {
+   "form": "schnappen",
+   "rank": 1970,
+   "count": 3214
+  },
+  {
+   "form": "schaffe",
+   "rank": 1971,
+   "count": 3213
+  },
+  {
+   "form": "schick",
+   "rank": 1972,
+   "count": 3213
+  },
+  {
+   "form": "gäbe",
+   "rank": 1973,
+   "count": 3212
+  },
+  {
+   "form": "stuhl",
+   "rank": 1974,
+   "count": 3210
+  },
+  {
+   "form": "präsidenten",
+   "rank": 1975,
+   "count": 3208
+  },
+  {
+   "form": "geschah",
+   "rank": 1976,
+   "count": 3195
+  },
+  {
+   "form": "dick",
+   "rank": 1977,
+   "count": 3191
+  },
+  {
+   "form": "trotz",
+   "rank": 1978,
+   "count": 3190
+  },
+  {
+   "form": "video",
+   "rank": 1979,
+   "count": 3189
+  },
+  {
+   "form": "alkohol",
+   "rank": 1980,
+   "count": 3188
+  },
+  {
+   "form": "kerle",
+   "rank": 1981,
+   "count": 3188
+  },
+  {
+   "form": "freundlich",
+   "rank": 1982,
+   "count": 3187
+  },
+  {
+   "form": "beobachtet",
+   "rank": 1983,
+   "count": 3185
+  },
+  {
+   "form": "dumme",
+   "rank": 1984,
+   "count": 3179
+  },
+  {
+   "form": "selbstmord",
+   "rank": 1985,
+   "count": 3177
+  },
+  {
+   "form": "zähne",
+   "rank": 1986,
+   "count": 3170
+  },
+  {
+   "form": "passierte",
+   "rank": 1987,
+   "count": 3168
+  },
+  {
+   "form": "genießen",
+   "rank": 1988,
+   "count": 3163
+  },
+  {
+   "form": "teuer",
+   "rank": 1989,
+   "count": 3161
+  },
+  {
+   "form": "kräfte",
+   "rank": 1990,
+   "count": 3160
+  },
+  {
+   "form": "desto",
+   "rank": 1991,
+   "count": 3159
+  },
+  {
+   "form": "trage",
+   "rank": 1992,
+   "count": 3157
+  },
+  {
+   "form": "verrückte",
+   "rank": 1993,
+   "count": 3156
+  },
+  {
+   "form": "eifersüchtig",
+   "rank": 1994,
+   "count": 3150
+  },
+  {
+   "form": "einsatz",
+   "rank": 1995,
+   "count": 3150
+  },
+  {
+   "form": "heiligen",
+   "rank": 1996,
+   "count": 3150
+  },
+  {
+   "form": "gast",
+   "rank": 1997,
+   "count": 3148
+  },
+  {
+   "form": "gentlemen",
+   "rank": 1998,
+   "count": 3148
+  },
+  {
+   "form": "zulassen",
+   "rank": 1999,
+   "count": 3148
+  },
+  {
+   "form": "toilette",
+   "rank": 2000,
+   "count": 3146
+  },
+  {
+   "form": "flughafen",
+   "rank": 2001,
+   "count": 3145
+  },
+  {
+   "form": "mitgenommen",
+   "rank": 2002,
+   "count": 3144
+  },
+  {
+   "form": "panik",
+   "rank": 2003,
+   "count": 3144
+  },
+  {
+   "form": "raten",
+   "rank": 2004,
+   "count": 3142
+  },
+  {
+   "form": "handelt",
+   "rank": 2005,
+   "count": 3134
+  },
+  {
+   "form": "dreht",
+   "rank": 2006,
+   "count": 3131
+  },
+  {
+   "form": "absicht",
+   "rank": 2007,
+   "count": 3129
+  },
+  {
+   "form": "ideen",
+   "rank": 2008,
+   "count": 3128
+  },
+  {
+   "form": "lebendig",
+   "rank": 2009,
+   "count": 3124
+  },
+  {
+   "form": "kennenzulernen",
+   "rank": 2010,
+   "count": 3122
+  },
+  {
+   "form": "begleiten",
+   "rank": 2011,
+   "count": 3119
+  },
+  {
+   "form": "stärker",
+   "rank": 2012,
+   "count": 3118
+  },
+  {
+   "form": "mühe",
+   "rank": 2013,
+   "count": 3115
+  },
+  {
+   "form": "schlage",
+   "rank": 2014,
+   "count": 3113
+  },
+  {
+   "form": "blind",
+   "rank": 2015,
+   "count": 3111
+  },
+  {
+   "form": "getrennt",
+   "rank": 2016,
+   "count": 3110
+  },
+  {
+   "form": "rote",
+   "rank": 2017,
+   "count": 3110
+  },
+  {
+   "form": "crew",
+   "rank": 2018,
+   "count": 3109
+  },
+  {
+   "form": "angenommen",
+   "rank": 2019,
+   "count": 3106
+  },
+  {
+   "form": "annehmen",
+   "rank": 2020,
+   "count": 3104
+  },
+  {
+   "form": "mochte",
+   "rank": 2021,
+   "count": 3103
+  },
+  {
+   "form": "code",
+   "rank": 2022,
+   "count": 3101
+  },
+  {
+   "form": "nachbarn",
+   "rank": 2023,
+   "count": 3099
+  },
+  {
+   "form": "enttäuscht",
+   "rank": 2024,
+   "count": 3098
+  },
+  {
+   "form": "tode",
+   "rank": 2025,
+   "count": 3098
+  },
+  {
+   "form": "herauszufinden",
+   "rank": 2026,
+   "count": 3096
+  },
+  {
+   "form": "zählen",
+   "rank": 2027,
+   "count": 3090
+  },
+  {
+   "form": "freitag",
+   "rank": 2028,
+   "count": 3088
+  },
+  {
+   "form": "fuhr",
+   "rank": 2029,
+   "count": 3082
+  },
+  {
+   "form": "neulich",
+   "rank": 2030,
+   "count": 3082
+  },
+  {
+   "form": "schicke",
+   "rank": 2031,
+   "count": 3082
+  },
+  {
+   "form": "definitiv",
+   "rank": 2032,
+   "count": 3081
+  },
+  {
+   "form": "wählen",
+   "rank": 2033,
+   "count": 3081
+  },
+  {
+   "form": "stoppen",
+   "rank": 2034,
+   "count": 3080
+  },
+  {
+   "form": "weitermachen",
+   "rank": 2035,
+   "count": 3077
+  },
+  {
+   "form": "kohle",
+   "rank": 2036,
+   "count": 3076
+  },
+  {
+   "form": "bieten",
+   "rank": 2037,
+   "count": 3075
+  },
+  {
+   "form": "möglicherweise",
+   "rank": 2038,
+   "count": 3073
+  },
+  {
+   "form": "verletzen",
+   "rank": 2039,
+   "count": 3072
+  },
+  {
+   "form": "street",
+   "rank": 2040,
+   "count": 3070
+  },
+  {
+   "form": "betrifft",
+   "rank": 2041,
+   "count": 3069
+  },
+  {
+   "form": "beinahe",
+   "rank": 2042,
+   "count": 3066
+  },
+  {
+   "form": "familien",
+   "rank": 2043,
+   "count": 3066
+  },
+  {
+   "form": "saß",
+   "rank": 2044,
+   "count": 3065
+  },
+  {
+   "form": "sonntag",
+   "rank": 2045,
+   "count": 3065
+  },
+  {
+   "form": "fahrer",
+   "rank": 2046,
+   "count": 3064
+  },
+  {
+   "form": "bestes",
+   "rank": 2047,
+   "count": 3061
+  },
+  {
+   "form": "vorstellung",
+   "rank": 2048,
+   "count": 3058
+  },
+  {
+   "form": "schlau",
+   "rank": 2049,
+   "count": 3056
+  },
+  {
+   "form": "merkwürdig",
+   "rank": 2050,
+   "count": 3055
+  },
+  {
+   "form": "schien",
+   "rank": 2051,
+   "count": 3052
+  },
+  {
+   "form": "erwarte",
+   "rank": 2052,
+   "count": 3048
+  },
+  {
+   "form": "begraben",
+   "rank": 2053,
+   "count": 3042
+  },
+  {
+   "form": "ergibt",
+   "rank": 2054,
+   "count": 3041
+  },
+  {
+   "form": "größe",
+   "rank": 2055,
+   "count": 3038
+  },
+  {
+   "form": "schlimmste",
+   "rank": 2056,
+   "count": 3038
+  },
+  {
+   "form": "ohr",
+   "rank": 2057,
+   "count": 3037
+  },
+  {
+   "form": "größten",
+   "rank": 2058,
+   "count": 3034
+  },
+  {
+   "form": "klappt",
+   "rank": 2059,
+   "count": 3032
+  },
+  {
+   "form": "killer",
+   "rank": 2060,
+   "count": 3031
+  },
+  {
+   "form": "medizin",
+   "rank": 2061,
+   "count": 3025
+  },
+  {
+   "form": "ebenfalls",
+   "rank": 2062,
+   "count": 3023
+  },
+  {
+   "form": "schüler",
+   "rank": 2063,
+   "count": 3020
+  },
+  {
+   "form": "mehrere",
+   "rank": 2064,
+   "count": 3017
+  },
+  {
+   "form": "einander",
+   "rank": 2065,
+   "count": 3016
+  },
+  {
+   "form": "anhalten",
+   "rank": 2066,
+   "count": 3015
+  },
+  {
+   "form": "riesen",
+   "rank": 2067,
+   "count": 3015
+  },
+  {
+   "form": "tanz",
+   "rank": 2068,
+   "count": 3014
+  },
+  {
+   "form": "gehofft",
+   "rank": 2069,
+   "count": 3013
+  },
+  {
+   "form": "rechnung",
+   "rank": 2070,
+   "count": 3013
+  },
+  {
+   "form": "überzeugen",
+   "rank": 2071,
+   "count": 3012
+  },
+  {
+   "form": "gegenteil",
+   "rank": 2072,
+   "count": 3011
+  },
+  {
+   "form": "treffe",
+   "rank": 2073,
+   "count": 3007
+  },
+  {
+   "form": "aussage",
+   "rank": 2074,
+   "count": 3005
+  },
+  {
+   "form": "schnauze",
+   "rank": 2075,
+   "count": 3004
+  },
+  {
+   "form": "ändert",
+   "rank": 2076,
+   "count": 3004
+  },
+  {
+   "form": "ausgehen",
+   "rank": 2077,
+   "count": 3003
+  },
+  {
+   "form": "erwachsen",
+   "rank": 2078,
+   "count": 3002
+  },
+  {
+   "form": "überprüft",
+   "rank": 2079,
+   "count": 2998
+  },
+  {
+   "form": "kennengelernt",
+   "rank": 2080,
+   "count": 2996
+  },
+  {
+   "form": "konzentrieren",
+   "rank": 2081,
+   "count": 2996
+  },
+  {
+   "form": "lügner",
+   "rank": 2082,
+   "count": 2996
+  },
+  {
+   "form": "whoa",
+   "rank": 2083,
+   "count": 2996
+  },
+  {
+   "form": "filme",
+   "rank": 2084,
+   "count": 2991
+  },
+  {
+   "form": "gesetzt",
+   "rank": 2085,
+   "count": 2991
+  },
+  {
+   "form": "erlebt",
+   "rank": 2086,
+   "count": 2990
+  },
+  {
+   "form": "prozent",
+   "rank": 2087,
+   "count": 2989
+  },
+  {
+   "form": "aufmachen",
+   "rank": 2088,
+   "count": 2987
+  },
+  {
+   "form": "aufgeregt",
+   "rank": 2089,
+   "count": 2986
+  },
+  {
+   "form": "einsam",
+   "rank": 2090,
+   "count": 2984
+  },
+  {
+   "form": "trick",
+   "rank": 2091,
+   "count": 2981
+  },
+  {
+   "form": "schönheit",
+   "rank": 2092,
+   "count": 2979
+  },
+  {
+   "form": "solltet",
+   "rank": 2093,
+   "count": 2978
+  },
+  {
+   "form": "unterstützung",
+   "rank": 2094,
+   "count": 2978
+  },
+  {
+   "form": "echter",
+   "rank": 2095,
+   "count": 2977
+  },
+  {
+   "form": "flucht",
+   "rank": 2096,
+   "count": 2974
+  },
+  {
+   "form": "dieselbe",
+   "rank": 2097,
+   "count": 2972
+  },
+  {
+   "form": "norden",
+   "rank": 2098,
+   "count": 2970
+  },
+  {
+   "form": "zwölf",
+   "rank": 2099,
+   "count": 2969
+  },
+  {
+   "form": "station",
+   "rank": 2100,
+   "count": 2967
+  },
+  {
+   "form": "untersuchen",
+   "rank": 2101,
+   "count": 2967
+  },
+  {
+   "form": "hoheit",
+   "rank": 2102,
+   "count": 2966
+  },
+  {
+   "form": "verliert",
+   "rank": 2103,
+   "count": 2965
+  },
+  {
+   "form": "tschüs",
+   "rank": 2104,
+   "count": 2964
+  },
+  {
+   "form": "toller",
+   "rank": 2105,
+   "count": 2962
+  },
+  {
+   "form": "erlaubnis",
+   "rank": 2106,
+   "count": 2959
+  },
+  {
+   "form": "klopfen",
+   "rank": 2107,
+   "count": 2959
+  },
+  {
+   "form": "probieren",
+   "rank": 2108,
+   "count": 2959
+  },
+  {
+   "form": "scharf",
+   "rank": 2109,
+   "count": 2959
+  },
+  {
+   "form": "vermisse",
+   "rank": 2110,
+   "count": 2956
+  },
+  {
+   "form": "lebst",
+   "rank": 2111,
+   "count": 2950
+  },
+  {
+   "form": "halben",
+   "rank": 2112,
+   "count": 2949
+  },
+  {
+   "form": "spielst",
+   "rank": 2113,
+   "count": 2947
+  },
+  {
+   "form": "beobachten",
+   "rank": 2114,
+   "count": 2946
+  },
+  {
+   "form": "fremden",
+   "rank": 2115,
+   "count": 2946
+  },
+  {
+   "form": "reinkommen",
+   "rank": 2116,
+   "count": 2941
+  },
+  {
+   "form": "hof",
+   "rank": 2117,
+   "count": 2934
+  },
+  {
+   "form": "endet",
+   "rank": 2118,
+   "count": 2932
+  },
+  {
+   "form": "berg",
+   "rank": 2119,
+   "count": 2931
+  },
+  {
+   "form": "fehlen",
+   "rank": 2120,
+   "count": 2930
+  },
+  {
+   "form": "abends",
+   "rank": 2121,
+   "count": 2927
+  },
+  {
+   "form": "streiten",
+   "rank": 2122,
+   "count": 2927
+  },
+  {
+   "form": "brennt",
+   "rank": 2123,
+   "count": 2924
+  },
+  {
+   "form": "abhauen",
+   "rank": 2124,
+   "count": 2921
+  },
+  {
+   "form": "springen",
+   "rank": 2125,
+   "count": 2921
+  },
+  {
+   "form": "spüren",
+   "rank": 2126,
+   "count": 2913
+  },
+  {
+   "form": "botschaft",
+   "rank": 2127,
+   "count": 2911
+  },
+  {
+   "form": "blieb",
+   "rank": 2128,
+   "count": 2906
+  },
+  {
+   "form": "fing",
+   "rank": 2129,
+   "count": 2906
+  },
+  {
+   "form": "stich",
+   "rank": 2130,
+   "count": 2905
+  },
+  {
+   "form": "entspann",
+   "rank": 2131,
+   "count": 2904
+  },
+  {
+   "form": "verändern",
+   "rank": 2132,
+   "count": 2903
+  },
+  {
+   "form": "zuletzt",
+   "rank": 2133,
+   "count": 2902
+  },
+  {
+   "form": "aufgenommen",
+   "rank": 2134,
+   "count": 2900
+  },
+  {
+   "form": "unterschreiben",
+   "rank": 2135,
+   "count": 2900
+  },
+  {
+   "form": "locker",
+   "rank": 2136,
+   "count": 2898
+  },
+  {
+   "form": "post",
+   "rank": 2137,
+   "count": 2895
+  },
+  {
+   "form": "brust",
+   "rank": 2138,
+   "count": 2894
+  },
+  {
+   "form": "geklaut",
+   "rank": 2139,
+   "count": 2894
+  },
+  {
+   "form": "trauen",
+   "rank": 2140,
+   "count": 2894
+  },
+  {
+   "form": "antun",
+   "rank": 2141,
+   "count": 2890
+  },
+  {
+   "form": "frisch",
+   "rank": 2142,
+   "count": 2890
+  },
+  {
+   "form": "packen",
+   "rank": 2143,
+   "count": 2888
+  },
+  {
+   "form": "prost",
+   "rank": 2144,
+   "count": 2888
+  },
+  {
+   "form": "dritte",
+   "rank": 2145,
+   "count": 2887
+  },
+  {
+   "form": "existiert",
+   "rank": 2146,
+   "count": 2887
+  },
+  {
+   "form": "liest",
+   "rank": 2147,
+   "count": 2887
+  },
+  {
+   "form": "jederzeit",
+   "rank": 2148,
+   "count": 2886
+  },
+  {
+   "form": "geöffnet",
+   "rank": 2149,
+   "count": 2884
+  },
+  {
+   "form": "schiffe",
+   "rank": 2150,
+   "count": 2884
+  },
+  {
+   "form": "älter",
+   "rank": 2151,
+   "count": 2883
+  },
+  {
+   "form": "gewinnt",
+   "rank": 2152,
+   "count": 2880
+  },
+  {
+   "form": "gebiet",
+   "rank": 2153,
+   "count": 2879
+  },
+  {
+   "form": "götter",
+   "rank": 2154,
+   "count": 2879
+  },
+  {
+   "form": "kino",
+   "rank": 2155,
+   "count": 2878
+  },
+  {
+   "form": "ums",
+   "rank": 2156,
+   "count": 2878
+  },
+  {
+   "form": "verhaften",
+   "rank": 2157,
+   "count": 2875
+  },
+  {
+   "form": "umgehen",
+   "rank": 2158,
+   "count": 2872
+  },
+  {
+   "form": "beruf",
+   "rank": 2159,
+   "count": 2871
+  },
+  {
+   "form": "abgeschlossen",
+   "rank": 2160,
+   "count": 2870
+  },
+  {
+   "form": "einheit",
+   "rank": 2161,
+   "count": 2870
+  },
+  {
+   "form": "knapp",
+   "rank": 2162,
+   "count": 2870
+  },
+  {
+   "form": "vorn",
+   "rank": 2163,
+   "count": 2868
+  },
+  {
+   "form": "gerechtigkeit",
+   "rank": 2164,
+   "count": 2864
+  },
+  {
+   "form": "schrieb",
+   "rank": 2165,
+   "count": 2862
+  },
+  {
+   "form": "gesamte",
+   "rank": 2166,
+   "count": 2861
+  },
+  {
+   "form": "verräter",
+   "rank": 2167,
+   "count": 2861
+  },
+  {
+   "form": "deckung",
+   "rank": 2168,
+   "count": 2859
+  },
+  {
+   "form": "alarm",
+   "rank": 2169,
+   "count": 2858
+  },
+  {
+   "form": "drücken",
+   "rank": 2170,
+   "count": 2858
+  },
+  {
+   "form": "gewehr",
+   "rank": 2171,
+   "count": 2858
+  },
+  {
+   "form": "dingen",
+   "rank": 2172,
+   "count": 2857
+  },
+  {
+   "form": "akzeptieren",
+   "rank": 2173,
+   "count": 2856
+  },
+  {
+   "form": "machten",
+   "rank": 2174,
+   "count": 2856
+  },
+  {
+   "form": "geduld",
+   "rank": 2175,
+   "count": 2855
+  },
+  {
+   "form": "straßen",
+   "rank": 2176,
+   "count": 2853
+  },
+  {
+   "form": "story",
+   "rank": 2177,
+   "count": 2849
+  },
+  {
+   "form": "herausgefunden",
+   "rank": 2178,
+   "count": 2843
+  },
+  {
+   "form": "aufgehört",
+   "rank": 2179,
+   "count": 2841
+  },
+  {
+   "form": "wichtige",
+   "rank": 2180,
+   "count": 2840
+  },
+  {
+   "form": "zugang",
+   "rank": 2181,
+   "count": 2839
+  },
+  {
+   "form": "anrufe",
+   "rank": 2182,
+   "count": 2835
+  },
+  {
+   "form": "bauch",
+   "rank": 2183,
+   "count": 2835
+  },
+  {
+   "form": "landen",
+   "rank": 2184,
+   "count": 2831
+  },
+  {
+   "form": "ertragen",
+   "rank": 2185,
+   "count": 2829
+  },
+  {
+   "form": "kenn",
+   "rank": 2186,
+   "count": 2826
+  },
+  {
+   "form": "herrgott",
+   "rank": 2187,
+   "count": 2822
+  },
+  {
+   "form": "mitte",
+   "rank": 2188,
+   "count": 2822
+  },
+  {
+   "form": "untersuchung",
+   "rank": 2189,
+   "count": 2821
+  },
+  {
+   "form": "armer",
+   "rank": 2190,
+   "count": 2820
+  },
+  {
+   "form": "selten",
+   "rank": 2191,
+   "count": 2817
+  },
+  {
+   "form": "sitze",
+   "rank": 2192,
+   "count": 2817
+  },
+  {
+   "form": "extra",
+   "rank": 2193,
+   "count": 2815
+  },
+  {
+   "form": "reparieren",
+   "rank": 2194,
+   "count": 2815
+  },
+  {
+   "form": "verbunden",
+   "rank": 2195,
+   "count": 2814
+  },
+  {
+   "form": "fliehen",
+   "rank": 2196,
+   "count": 2813
+  },
+  {
+   "form": "möge",
+   "rank": 2197,
+   "count": 2813
+  },
+  {
+   "form": "erzählst",
+   "rank": 2198,
+   "count": 2811
+  },
+  {
+   "form": "vertraue",
+   "rank": 2199,
+   "count": 2810
+  },
+  {
+   "form": "ärzte",
+   "rank": 2200,
+   "count": 2806
+  },
+  {
+   "form": "angeht",
+   "rank": 2201,
+   "count": 2805
+  },
+  {
+   "form": "wege",
+   "rank": 2202,
+   "count": 2805
+  },
+  {
+   "form": "kleider",
+   "rank": 2203,
+   "count": 2803
+  },
+  {
+   "form": "schießt",
+   "rank": 2204,
+   "count": 2803
+  },
+  {
+   "form": "gerufen",
+   "rank": 2205,
+   "count": 2801
+  },
+  {
+   "form": "iss",
+   "rank": 2206,
+   "count": 2798
+  },
+  {
+   "form": "angekommen",
+   "rank": 2207,
+   "count": 2796
+  },
+  {
+   "form": "gezwungen",
+   "rank": 2208,
+   "count": 2796
+  },
+  {
+   "form": "schreibe",
+   "rank": 2209,
+   "count": 2795
+  },
+  {
+   "form": "presse",
+   "rank": 2210,
+   "count": 2789
+  },
+  {
+   "form": "langen",
+   "rank": 2211,
+   "count": 2786
+  },
+  {
+   "form": "steigt",
+   "rank": 2212,
+   "count": 2784
+  },
+  {
+   "form": "brot",
+   "rank": 2213,
+   "count": 2782
+  },
+  {
+   "form": "magie",
+   "rank": 2214,
+   "count": 2778
+  },
+  {
+   "form": "priester",
+   "rank": 2215,
+   "count": 2778
+  },
+  {
+   "form": "befreien",
+   "rank": 2216,
+   "count": 2777
+  },
+  {
+   "form": "westen",
+   "rank": 2217,
+   "count": 2777
+  },
+  {
+   "form": "schlechten",
+   "rank": 2218,
+   "count": 2776
+  },
+  {
+   "form": "anziehen",
+   "rank": 2219,
+   "count": 2774
+  },
+  {
+   "form": "jedoch",
+   "rank": 2220,
+   "count": 2773
+  },
+  {
+   "form": "kompliziert",
+   "rank": 2221,
+   "count": 2773
+  },
+  {
+   "form": "laß",
+   "rank": 2222,
+   "count": 2772
+  },
+  {
+   "form": "wetter",
+   "rank": 2223,
+   "count": 2769
+  },
+  {
+   "form": "sexy",
+   "rank": 2224,
+   "count": 2768
+  },
+  {
+   "form": "erkannt",
+   "rank": 2225,
+   "count": 2767
+  },
+  {
+   "form": "berlin",
+   "rank": 2226,
+   "count": 2765
+  },
+  {
+   "form": "deutschland",
+   "rank": 2227,
+   "count": 2765
+  },
+  {
+   "form": "inzwischen",
+   "rank": 2228,
+   "count": 2764
+  },
+  {
+   "form": "staaten",
+   "rank": 2229,
+   "count": 2762
+  },
+  {
+   "form": "ton",
+   "rank": 2230,
+   "count": 2761
+  },
+  {
+   "form": "riskieren",
+   "rank": 2231,
+   "count": 2759
+  },
+  {
+   "form": "chaos",
+   "rank": 2232,
+   "count": 2758
+  },
+  {
+   "form": "wundervoll",
+   "rank": 2233,
+   "count": 2757
+  },
+  {
+   "form": "papiere",
+   "rank": 2234,
+   "count": 2756
+  },
+  {
+   "form": "prozess",
+   "rank": 2235,
+   "count": 2756
+  },
+  {
+   "form": "rechten",
+   "rank": 2236,
+   "count": 2755
+  },
+  {
+   "form": "freundschaft",
+   "rank": 2237,
+   "count": 2754
+  },
+  {
+   "form": "cop",
+   "rank": 2238,
+   "count": 2751
+  },
+  {
+   "form": "rock",
+   "rank": 2239,
+   "count": 2749
+  },
+  {
+   "form": "beten",
+   "rank": 2240,
+   "count": 2747
+  },
+  {
+   "form": "schauspieler",
+   "rank": 2241,
+   "count": 2747
+  },
+  {
+   "form": "überlegt",
+   "rank": 2242,
+   "count": 2747
+  },
+  {
+   "form": "interessieren",
+   "rank": 2243,
+   "count": 2746
+  },
+  {
+   "form": "versuchst",
+   "rank": 2244,
+   "count": 2745
+  },
+  {
+   "form": "zunge",
+   "rank": 2245,
+   "count": 2745
+  },
+  {
+   "form": "rate",
+   "rank": 2246,
+   "count": 2739
+  },
+  {
+   "form": "strafe",
+   "rank": 2247,
+   "count": 2739
+  },
+  {
+   "form": "weint",
+   "rank": 2248,
+   "count": 2739
+  },
+  {
+   "form": "amen",
+   "rank": 2249,
+   "count": 2737
+  },
+  {
+   "form": "song",
+   "rank": 2250,
+   "count": 2736
+  },
+  {
+   "form": "träumen",
+   "rank": 2251,
+   "count": 2734
+  },
+  {
+   "form": "hauen",
+   "rank": 2252,
+   "count": 2732
+  },
+  {
+   "form": "winter",
+   "rank": 2253,
+   "count": 2731
+  },
+  {
+   "form": "usa",
+   "rank": 2254,
+   "count": 2730
+  },
+  {
+   "form": "dieb",
+   "rank": 2255,
+   "count": 2729
+  },
+  {
+   "form": "türen",
+   "rank": 2256,
+   "count": 2729
+  },
+  {
+   "form": "hübsche",
+   "rank": 2257,
+   "count": 2725
+  },
+  {
+   "form": "hmm",
+   "rank": 2258,
+   "count": 2720
+  },
+  {
+   "form": "wartest",
+   "rank": 2259,
+   "count": 2713
+  },
+  {
+   "form": "helden",
+   "rank": 2260,
+   "count": 2711
+  },
+  {
+   "form": "trinkt",
+   "rank": 2261,
+   "count": 2711
+  },
+  {
+   "form": "trennen",
+   "rank": 2262,
+   "count": 2710
+  },
+  {
+   "form": "stellte",
+   "rank": 2263,
+   "count": 2709
+  },
+  {
+   "form": "gras",
+   "rank": 2264,
+   "count": 2707
+  },
+  {
+   "form": "immerhin",
+   "rank": 2265,
+   "count": 2707
+  },
+  {
+   "form": "personen",
+   "rank": 2266,
+   "count": 2707
+  },
+  {
+   "form": "befindet",
+   "rank": 2267,
+   "count": 2706
+  },
+  {
+   "form": "kiste",
+   "rank": 2268,
+   "count": 2704
+  },
+  {
+   "form": "beantworten",
+   "rank": 2269,
+   "count": 2702
+  },
+  {
+   "form": "nehm",
+   "rank": 2270,
+   "count": 2701
+  },
+  {
+   "form": "schritte",
+   "rank": 2271,
+   "count": 2701
+  },
+  {
+   "form": "schüsse",
+   "rank": 2272,
+   "count": 2701
+  },
+  {
+   "form": "zog",
+   "rank": 2273,
+   "count": 2701
+  },
+  {
+   "form": "zuhören",
+   "rank": 2274,
+   "count": 2694
+  },
+  {
+   "form": "artikel",
+   "rank": 2275,
+   "count": 2688
+  },
+  {
+   "form": "deutlich",
+   "rank": 2276,
+   "count": 2688
+  },
+  {
+   "form": "jacke",
+   "rank": 2277,
+   "count": 2687
+  },
+  {
+   "form": "starten",
+   "rank": 2278,
+   "count": 2684
+  },
+  {
+   "form": "regel",
+   "rank": 2279,
+   "count": 2683
+  },
+  {
+   "form": "gegenseitig",
+   "rank": 2280,
+   "count": 2678
+  },
+  {
+   "form": "anstatt",
+   "rank": 2281,
+   "count": 2677
+  },
+  {
+   "form": "schwul",
+   "rank": 2282,
+   "count": 2673
+  },
+  {
+   "form": "blau",
+   "rank": 2283,
+   "count": 2671
+  },
+  {
+   "form": "hinterher",
+   "rank": 2284,
+   "count": 2671
+  },
+  {
+   "form": "inspektor",
+   "rank": 2285,
+   "count": 2671
+  },
+  {
+   "form": "leck",
+   "rank": 2286,
+   "count": 2671
+  },
+  {
+   "form": "spiegel",
+   "rank": 2287,
+   "count": 2671
+  },
+  {
+   "form": "gift",
+   "rank": 2288,
+   "count": 2668
+  },
+  {
+   "form": "schief",
+   "rank": 2289,
+   "count": 2667
+  },
+  {
+   "form": "verwirrt",
+   "rank": 2290,
+   "count": 2667
+  },
+  {
+   "form": "zahl",
+   "rank": 2291,
+   "count": 2667
+  },
+  {
+   "form": "trinke",
+   "rank": 2292,
+   "count": 2666
+  },
+  {
+   "form": "ficken",
+   "rank": 2293,
+   "count": 2664
+  },
+  {
+   "form": "feuern",
+   "rank": 2294,
+   "count": 2663
+  },
+  {
+   "form": "erfreut",
+   "rank": 2295,
+   "count": 2661
+  },
+  {
+   "form": "vermissen",
+   "rank": 2296,
+   "count": 2661
+  },
+  {
+   "form": "samstag",
+   "rank": 2297,
+   "count": 2657
+  },
+  {
+   "form": "wolf",
+   "rank": 2298,
+   "count": 2657
+  },
+  {
+   "form": "fälle",
+   "rank": 2299,
+   "count": 2656
+  },
+  {
+   "form": "leichter",
+   "rank": 2300,
+   "count": 2654
+  },
+  {
+   "form": "schlafzimmer",
+   "rank": 2301,
+   "count": 2653
+  },
+  {
+   "form": "erleben",
+   "rank": 2302,
+   "count": 2650
+  },
+  {
+   "form": "cousin",
+   "rank": 2303,
+   "count": 2649
+  },
+  {
+   "form": "schwestern",
+   "rank": 2304,
+   "count": 2648
+  },
+  {
+   "form": "meins",
+   "rank": 2305,
+   "count": 2647
+  },
+  {
+   "form": "wichtigste",
+   "rank": 2306,
+   "count": 2646
+  },
+  {
+   "form": "tausend",
+   "rank": 2307,
+   "count": 2644
+  },
+  {
+   "form": "hemd",
+   "rank": 2308,
+   "count": 2643
+  },
+  {
+   "form": "mittagessen",
+   "rank": 2309,
+   "count": 2642
+  },
+  {
+   "form": "perfekte",
+   "rank": 2310,
+   "count": 2642
+  },
+  {
+   "form": "herkommen",
+   "rank": 2311,
+   "count": 2641
+  },
+  {
+   "form": "eindruck",
+   "rank": 2312,
+   "count": 2640
+  },
+  {
+   "form": "gucken",
+   "rank": 2313,
+   "count": 2640
+  },
+  {
+   "form": "bedeutung",
+   "rank": 2314,
+   "count": 2634
+  },
+  {
+   "form": "hungrig",
+   "rank": 2315,
+   "count": 2634
+  },
+  {
+   "form": "projekt",
+   "rank": 2316,
+   "count": 2629
+  },
+  {
+   "form": "trug",
+   "rank": 2317,
+   "count": 2629
+  },
+  {
+   "form": "bühne",
+   "rank": 2318,
+   "count": 2626
+  },
+  {
+   "form": "lügt",
+   "rank": 2319,
+   "count": 2623
+  },
+  {
+   "form": "kleidung",
+   "rank": 2320,
+   "count": 2622
+  },
+  {
+   "form": "vernichten",
+   "rank": 2321,
+   "count": 2622
+  },
+  {
+   "form": "champagner",
+   "rank": 2322,
+   "count": 2619
+  },
+  {
+   "form": "verpassen",
+   "rank": 2323,
+   "count": 2619
+  },
+  {
+   "form": "echten",
+   "rank": 2324,
+   "count": 2618
+  },
+  {
+   "form": "soviel",
+   "rank": 2325,
+   "count": 2616
+  },
+  {
+   "form": "gekriegt",
+   "rank": 2326,
+   "count": 2615
+  },
+  {
+   "form": "nenne",
+   "rank": 2327,
+   "count": 2614
+  },
+  {
+   "form": "schwere",
+   "rank": 2328,
+   "count": 2614
+  },
+  {
+   "form": "theorie",
+   "rank": 2329,
+   "count": 2613
+  },
+  {
+   "form": "verteidigen",
+   "rank": 2330,
+   "count": 2611
+  },
+  {
+   "form": "menschheit",
+   "rank": 2331,
+   "count": 2610
+  },
+  {
+   "form": "tatort",
+   "rank": 2332,
+   "count": 2606
+  },
+  {
+   "form": "wild",
+   "rank": 2333,
+   "count": 2606
+  },
+  {
+   "form": "angesehen",
+   "rank": 2334,
+   "count": 2605
+  },
+  {
+   "form": "bestellt",
+   "rank": 2335,
+   "count": 2605
+  },
+  {
+   "form": "altes",
+   "rank": 2336,
+   "count": 2603
+  },
+  {
+   "form": "gemeldet",
+   "rank": 2337,
+   "count": 2603
+  },
+  {
+   "form": "gerät",
+   "rank": 2338,
+   "count": 2603
+  },
+  {
+   "form": "arbeitete",
+   "rank": 2339,
+   "count": 2602
+  },
+  {
+   "form": "müll",
+   "rank": 2340,
+   "count": 2602
+  },
+  {
+   "form": "wessen",
+   "rank": 2341,
+   "count": 2600
+  },
+  {
+   "form": "dritten",
+   "rank": 2342,
+   "count": 2599
+  },
+  {
+   "form": "virus",
+   "rank": 2343,
+   "count": 2599
+  },
+  {
+   "form": "harte",
+   "rank": 2344,
+   "count": 2597
+  },
+  {
+   "form": "decke",
+   "rank": 2345,
+   "count": 2595
+  },
+  {
+   "form": "motor",
+   "rank": 2346,
+   "count": 2594
+  },
+  {
+   "form": "möglichkeiten",
+   "rank": 2347,
+   "count": 2593
+  },
+  {
+   "form": "ausgezeichnet",
+   "rank": 2348,
+   "count": 2590
+  },
+  {
+   "form": "geholt",
+   "rank": 2349,
+   "count": 2589
+  },
+  {
+   "form": "bestätigt",
+   "rank": 2350,
+   "count": 2587
+  },
+  {
+   "form": "dienen",
+   "rank": 2351,
+   "count": 2583
+  },
+  {
+   "form": "geraten",
+   "rank": 2352,
+   "count": 2583
+  },
+  {
+   "form": "süßer",
+   "rank": 2353,
+   "count": 2583
+  },
+  {
+   "form": "geschmack",
+   "rank": 2354,
+   "count": 2582
+  },
+  {
+   "form": "ruiniert",
+   "rank": 2355,
+   "count": 2582
+  },
+  {
+   "form": "vertrau",
+   "rank": 2356,
+   "count": 2576
+  },
+  {
+   "form": "europa",
+   "rank": 2357,
+   "count": 2575
+  },
+  {
+   "form": "zelle",
+   "rank": 2358,
+   "count": 2575
+  },
+  {
+   "form": "treiben",
+   "rank": 2359,
+   "count": 2573
+  },
+  {
+   "form": "beweg",
+   "rank": 2360,
+   "count": 2569
+  },
+  {
+   "form": "gründe",
+   "rank": 2361,
+   "count": 2569
+  },
+  {
+   "form": "auseinander",
+   "rank": 2362,
+   "count": 2568
+  },
+  {
+   "form": "aye",
+   "rank": 2363,
+   "count": 2567
+  },
+  {
+   "form": "gelebt",
+   "rank": 2364,
+   "count": 2566
+  },
+  {
+   "form": "sprachen",
+   "rank": 2365,
+   "count": 2564
+  },
+  {
+   "form": "anführer",
+   "rank": 2366,
+   "count": 2562
+  },
+  {
+   "form": "beeilung",
+   "rank": 2367,
+   "count": 2561
+  },
+  {
+   "form": "wonach",
+   "rank": 2368,
+   "count": 2561
+  },
+  {
+   "form": "abteilung",
+   "rank": 2369,
+   "count": 2559
+  },
+  {
+   "form": "sturm",
+   "rank": 2370,
+   "count": 2555
+  },
+  {
+   "form": "vorschlag",
+   "rank": 2371,
+   "count": 2555
+  },
+  {
+   "form": "kaiser",
+   "rank": 2372,
+   "count": 2551
+  },
+  {
+   "form": "gaben",
+   "rank": 2373,
+   "count": 2550
+  },
+  {
+   "form": "bricht",
+   "rank": 2374,
+   "count": 2549
+  },
+  {
+   "form": "gas",
+   "rank": 2375,
+   "count": 2547
+  },
+  {
+   "form": "gewählt",
+   "rank": 2376,
+   "count": 2546
+  },
+  {
+   "form": "beerdigung",
+   "rank": 2377,
+   "count": 2545
+  },
+  {
+   "form": "geworfen",
+   "rank": 2378,
+   "count": 2545
+  },
+  {
+   "form": "menschliche",
+   "rank": 2379,
+   "count": 2543
+  },
+  {
+   "form": "spitze",
+   "rank": 2380,
+   "count": 2542
+  },
+  {
+   "form": "find",
+   "rank": 2381,
+   "count": 2541
+  },
+  {
+   "form": "unrecht",
+   "rank": 2382,
+   "count": 2541
+  },
+  {
+   "form": "verbracht",
+   "rank": 2383,
+   "count": 2541
+  },
+  {
+   "form": "welch",
+   "rank": 2384,
+   "count": 2540
+  },
+  {
+   "form": "festhalten",
+   "rank": 2385,
+   "count": 2539
+  },
+  {
+   "form": "gnade",
+   "rank": 2386,
+   "count": 2533
+  },
+  {
+   "form": "schlafe",
+   "rank": 2387,
+   "count": 2533
+  },
+  {
+   "form": "papier",
+   "rank": 2388,
+   "count": 2531
+  },
+  {
+   "form": "betrogen",
+   "rank": 2389,
+   "count": 2530
+  },
+  {
+   "form": "praktisch",
+   "rank": 2390,
+   "count": 2530
+  },
+  {
+   "form": "vögel",
+   "rank": 2391,
+   "count": 2530
+  },
+  {
+   "form": "agenten",
+   "rank": 2392,
+   "count": 2526
+  },
+  {
+   "form": "wahren",
+   "rank": 2393,
+   "count": 2525
+  },
+  {
+   "form": "geburt",
+   "rank": 2394,
+   "count": 2522
+  },
+  {
+   "form": "spinnst",
+   "rank": 2395,
+   "count": 2521
+  },
+  {
+   "form": "beruhigt",
+   "rank": 2396,
+   "count": 2520
+  },
+  {
+   "form": "dunkelheit",
+   "rank": 2397,
+   "count": 2520
+  },
+  {
+   "form": "tolles",
+   "rank": 2398,
+   "count": 2519
+  },
+  {
+   "form": "richtiger",
+   "rank": 2399,
+   "count": 2518
+  },
+  {
+   "form": "notfall",
+   "rank": 2400,
+   "count": 2514
+  },
+  {
+   "form": "dahinter",
+   "rank": 2401,
+   "count": 2513
+  },
+  {
+   "form": "fremde",
+   "rank": 2402,
+   "count": 2513
+  },
+  {
+   "form": "anfassen",
+   "rank": 2403,
+   "count": 2512
+  },
+  {
+   "form": "begegnet",
+   "rank": 2404,
+   "count": 2511
+  },
+  {
+   "form": "besseren",
+   "rank": 2405,
+   "count": 2509
+  },
+  {
+   "form": "wechseln",
+   "rank": 2406,
+   "count": 2508
+  },
+  {
+   "form": "sack",
+   "rank": 2407,
+   "count": 2507
+  },
+  {
+   "form": "süden",
+   "rank": 2408,
+   "count": 2503
+  },
+  {
+   "form": "genie",
+   "rank": 2409,
+   "count": 2501
+  },
+  {
+   "form": "fähigkeiten",
+   "rank": 2410,
+   "count": 2499
+  },
+  {
+   "form": "kommando",
+   "rank": 2411,
+   "count": 2495
+  },
+  {
+   "form": "treppe",
+   "rank": 2412,
+   "count": 2495
+  },
+  {
+   "form": "überlassen",
+   "rank": 2413,
+   "count": 2495
+  },
+  {
+   "form": "übergeben",
+   "rank": 2414,
+   "count": 2494
+  },
+  {
+   "form": "gelegt",
+   "rank": 2415,
+   "count": 2492
+  },
+  {
+   "form": "mantel",
+   "rank": 2416,
+   "count": 2492
+  },
+  {
+   "form": "verschiedene",
+   "rank": 2417,
+   "count": 2491
+  },
+  {
+   "form": "nenn",
+   "rank": 2418,
+   "count": 2489
+  },
+  {
+   "form": "offizier",
+   "rank": 2419,
+   "count": 2488
+  },
+  {
+   "form": "entwickelt",
+   "rank": 2420,
+   "count": 2486
+  },
+  {
+   "form": "täter",
+   "rank": 2421,
+   "count": 2485
+  },
+  {
+   "form": "details",
+   "rank": 2422,
+   "count": 2483
+  },
+  {
+   "form": "krebs",
+   "rank": 2423,
+   "count": 2483
+  },
+  {
+   "form": "fressen",
+   "rank": 2424,
+   "count": 2482
+  },
+  {
+   "form": "gefolgt",
+   "rank": 2425,
+   "count": 2480
+  },
+  {
+   "form": "gemein",
+   "rank": 2426,
+   "count": 2479
+  },
+  {
+   "form": "fliege",
+   "rank": 2427,
+   "count": 2477
+  },
+  {
+   "form": "fein",
+   "rank": 2428,
+   "count": 2476
+  },
+  {
+   "form": "huh",
+   "rank": 2429,
+   "count": 2474
+  },
+  {
+   "form": "heimat",
+   "rank": 2430,
+   "count": 2472
+  },
+  {
+   "form": "öffne",
+   "rank": 2431,
+   "count": 2472
+  },
+  {
+   "form": "gleichzeitig",
+   "rank": 2432,
+   "count": 2471
+  },
+  {
+   "form": "kilometer",
+   "rank": 2433,
+   "count": 2470
+  },
+  {
+   "form": "zurückkehren",
+   "rank": 2434,
+   "count": 2469
+  },
+  {
+   "form": "bye",
+   "rank": 2435,
+   "count": 2468
+  },
+  {
+   "form": "reiten",
+   "rank": 2436,
+   "count": 2468
+  },
+  {
+   "form": "strom",
+   "rank": 2437,
+   "count": 2467
+  },
+  {
+   "form": "briefe",
+   "rank": 2438,
+   "count": 2466
+  },
+  {
+   "form": "kuh",
+   "rank": 2439,
+   "count": 2466
+  },
+  {
+   "form": "cops",
+   "rank": 2440,
+   "count": 2462
+  },
+  {
+   "form": "geil",
+   "rank": 2441,
+   "count": 2461
+  },
+  {
+   "form": "tötete",
+   "rank": 2442,
+   "count": 2461
+  },
+  {
+   "form": "schlange",
+   "rank": 2443,
+   "count": 2460
+  },
+  {
+   "form": "explosion",
+   "rank": 2444,
+   "count": 2459
+  },
+  {
+   "form": "talent",
+   "rank": 2445,
+   "count": 2458
+  },
+  {
+   "form": "trägst",
+   "rank": 2446,
+   "count": 2458
+  },
+  {
+   "form": "frische",
+   "rank": 2447,
+   "count": 2456
+  },
+  {
+   "form": "feld",
+   "rank": 2448,
+   "count": 2455
+  },
+  {
+   "form": "versteck",
+   "rank": 2449,
+   "count": 2455
+  },
+  {
+   "form": "cia",
+   "rank": 2450,
+   "count": 2453
+  },
+  {
+   "form": "fernseher",
+   "rank": 2451,
+   "count": 2453
+  },
+  {
+   "form": "geführt",
+   "rank": 2452,
+   "count": 2452
+  },
+  {
+   "form": "aufnehmen",
+   "rank": 2453,
+   "count": 2450
+  },
+  {
+   "form": "pech",
+   "rank": 2454,
+   "count": 2448
+  },
+  {
+   "form": "greifen",
+   "rank": 2455,
+   "count": 2447
+  },
+  {
+   "form": "nieder",
+   "rank": 2456,
+   "count": 2446
+  },
+  {
+   "form": "wetten",
+   "rank": 2457,
+   "count": 2446
+  },
+  {
+   "form": "china",
+   "rank": 2458,
+   "count": 2445
+  },
+  {
+   "form": "null",
+   "rank": 2459,
+   "count": 2445
+  },
+  {
+   "form": "verdächtigen",
+   "rank": 2460,
+   "count": 2445
+  },
+  {
+   "form": "schließt",
+   "rank": 2461,
+   "count": 2444
+  },
+  {
+   "form": "publikum",
+   "rank": 2462,
+   "count": 2437
+  },
+  {
+   "form": "krieger",
+   "rank": 2463,
+   "count": 2435
+  },
+  {
+   "form": "wieviel",
+   "rank": 2464,
+   "count": 2434
+  },
+  {
+   "form": "mittag",
+   "rank": 2465,
+   "count": 2433
+  },
+  {
+   "form": "unterhaltung",
+   "rank": 2466,
+   "count": 2431
+  },
+  {
+   "form": "öfter",
+   "rank": 2467,
+   "count": 2429
+  },
+  {
+   "form": "setze",
+   "rank": 2468,
+   "count": 2428
+  },
+  {
+   "form": "spazieren",
+   "rank": 2469,
+   "count": 2425
+  },
+  {
+   "form": "entspannen",
+   "rank": 2470,
+   "count": 2424
+  },
+  {
+   "form": "lebte",
+   "rank": 2471,
+   "count": 2424
+  },
+  {
+   "form": "wehtun",
+   "rank": 2472,
+   "count": 2424
+  },
+  {
+   "form": "hiermit",
+   "rank": 2473,
+   "count": 2423
+  },
+  {
+   "form": "hilfst",
+   "rank": 2474,
+   "count": 2421
+  },
+  {
+   "form": "öffnet",
+   "rank": 2475,
+   "count": 2418
+  },
+  {
+   "form": "quelle",
+   "rank": 2476,
+   "count": 2414
+  },
+  {
+   "form": "entscheidungen",
+   "rank": 2477,
+   "count": 2413
+  },
+  {
+   "form": "ei",
+   "rank": 2478,
+   "count": 2412
+  },
+  {
+   "form": "sterne",
+   "rank": 2479,
+   "count": 2412
+  },
+  {
+   "form": "zwingen",
+   "rank": 2480,
+   "count": 2412
+  },
+  {
+   "form": "unterstützen",
+   "rank": 2481,
+   "count": 2409
+  },
+  {
+   "form": "eilig",
+   "rank": 2482,
+   "count": 2408
+  },
+  {
+   "form": "solch",
+   "rank": 2483,
+   "count": 2408
+  },
+  {
+   "form": "verlor",
+   "rank": 2484,
+   "count": 2407
+  },
+  {
+   "form": "erfüllt",
+   "rank": 2485,
+   "count": 2406
+  },
+  {
+   "form": "schlechtes",
+   "rank": 2486,
+   "count": 2406
+  },
+  {
+   "form": "bauer",
+   "rank": 2487,
+   "count": 2405
+  },
+  {
+   "form": "geträumt",
+   "rank": 2488,
+   "count": 2402
+  },
+  {
+   "form": "leitung",
+   "rank": 2489,
+   "count": 2402
+  },
+  {
+   "form": "neugierig",
+   "rank": 2490,
+   "count": 2401
+  },
+  {
+   "form": "gewarnt",
+   "rank": 2491,
+   "count": 2400
+  },
+  {
+   "form": "schreie",
+   "rank": 2492,
+   "count": 2400
+  },
+  {
+   "form": "akten",
+   "rank": 2493,
+   "count": 2399
+  },
+  {
+   "form": "babys",
+   "rank": 2494,
+   "count": 2397
+  },
+  {
+   "form": "offiziell",
+   "rank": 2495,
+   "count": 2394
+  },
+  {
+   "form": "anderem",
+   "rank": 2496,
+   "count": 2392
+  },
+  {
+   "form": "besucht",
+   "rank": 2497,
+   "count": 2392
+  },
+  {
+   "form": "las",
+   "rank": 2498,
+   "count": 2392
+  },
+  {
+   "form": "befinden",
+   "rank": 2499,
+   "count": 2388
+  },
+  {
+   "form": "schrei",
+   "rank": 2500,
+   "count": 2388
+  },
+  {
+   "form": "bart",
+   "rank": 2501,
+   "count": 2385
+  },
+  {
+   "form": "seufzt",
+   "rank": 2502,
+   "count": 2385
+  },
+  {
+   "form": "tränen",
+   "rank": 2503,
+   "count": 2383
+  },
+  {
+   "form": "behauptet",
+   "rank": 2504,
+   "count": 2382
+  },
+  {
+   "form": "umzubringen",
+   "rank": 2505,
+   "count": 2374
+  },
+  {
+   "form": "volle",
+   "rank": 2506,
+   "count": 2372
+  },
+  {
+   "form": "esse",
+   "rank": 2507,
+   "count": 2371
+  },
+  {
+   "form": "einziger",
+   "rank": 2508,
+   "count": 2369
+  },
+  {
+   "form": "verarschen",
+   "rank": 2509,
+   "count": 2369
+  },
+  {
+   "form": "geister",
+   "rank": 2510,
+   "count": 2368
+  },
+  {
+   "form": "streng",
+   "rank": 2511,
+   "count": 2368
+  },
+  {
+   "form": "bestens",
+   "rank": 2512,
+   "count": 2365
+  },
+  {
+   "form": "mitternacht",
+   "rank": 2513,
+   "count": 2365
+  },
+  {
+   "form": "behaupten",
+   "rank": 2514,
+   "count": 2364
+  },
+  {
+   "form": "schläfst",
+   "rank": 2515,
+   "count": 2364
+  },
+  {
+   "form": "fühl",
+   "rank": 2516,
+   "count": 2362
+  },
+  {
+   "form": "höher",
+   "rank": 2517,
+   "count": 2362
+  },
+  {
+   "form": "begonnen",
+   "rank": 2518,
+   "count": 2359
+  },
+  {
+   "form": "erschaffen",
+   "rank": 2519,
+   "count": 2357
+  },
+  {
+   "form": "loswerden",
+   "rank": 2520,
+   "count": 2355
+  },
+  {
+   "form": "staat",
+   "rank": 2521,
+   "count": 2355
+  },
+  {
+   "form": "hütte",
+   "rank": 2522,
+   "count": 2354
+  },
+  {
+   "form": "geschenkt",
+   "rank": 2523,
+   "count": 2351
+  },
+  {
+   "form": "stoff",
+   "rank": 2524,
+   "count": 2351
+  },
+  {
+   "form": "rechtzeitig",
+   "rank": 2525,
+   "count": 2350
+  },
+  {
+   "form": "schweine",
+   "rank": 2526,
+   "count": 2350
+  },
+  {
+   "form": "vorgestellt",
+   "rank": 2527,
+   "count": 2350
+  },
+  {
+   "form": "melde",
+   "rank": 2528,
+   "count": 2349
+  },
+  {
+   "form": "mitglied",
+   "rank": 2529,
+   "count": 2348
+  },
+  {
+   "form": "korrektur",
+   "rank": 2530,
+   "count": 2343
+  },
+  {
+   "form": "hergekommen",
+   "rank": 2531,
+   "count": 2340
+  },
+  {
+   "form": "würdet",
+   "rank": 2532,
+   "count": 2339
+  },
+  {
+   "form": "dicht",
+   "rank": 2533,
+   "count": 2337
+  },
+  {
+   "form": "verursacht",
+   "rank": 2534,
+   "count": 2336
+  },
+  {
+   "form": "wohne",
+   "rank": 2535,
+   "count": 2333
+  },
+  {
+   "form": "heutzutage",
+   "rank": 2536,
+   "count": 2331
+  },
+  {
+   "form": "hosen",
+   "rank": 2537,
+   "count": 2331
+  },
+  {
+   "form": "verdammtes",
+   "rank": 2538,
+   "count": 2329
+  },
+  {
+   "form": "wut",
+   "rank": 2539,
+   "count": 2328
+  },
+  {
+   "form": "kämpfe",
+   "rank": 2540,
+   "count": 2324
+  },
+  {
+   "form": "medikamente",
+   "rank": 2541,
+   "count": 2324
+  },
+  {
+   "form": "schreckliche",
+   "rank": 2542,
+   "count": 2322
+  },
+  {
+   "form": "glaubte",
+   "rank": 2543,
+   "count": 2321
+  },
+  {
+   "form": "bürger",
+   "rank": 2544,
+   "count": 2320
+  },
+  {
+   "form": "klären",
+   "rank": 2545,
+   "count": 2319
+  },
+  {
+   "form": "gründen",
+   "rank": 2546,
+   "count": 2318
+  },
+  {
+   "form": "entfernen",
+   "rank": 2547,
+   "count": 2312
+  },
+  {
+   "form": "information",
+   "rank": 2548,
+   "count": 2307
+  },
+  {
+   "form": "treibt",
+   "rank": 2549,
+   "count": 2307
+  },
+  {
+   "form": "beides",
+   "rank": 2550,
+   "count": 2306
+  },
+  {
+   "form": "lebend",
+   "rank": 2551,
+   "count": 2304
+  },
+  {
+   "form": "waschen",
+   "rank": 2552,
+   "count": 2303
+  },
+  {
+   "form": "tausende",
+   "rank": 2553,
+   "count": 2302
+  },
+  {
+   "form": "vieles",
+   "rank": 2554,
+   "count": 2301
+  },
+  {
+   "form": "schnee",
+   "rank": 2555,
+   "count": 2300
+  },
+  {
+   "form": "ergeben",
+   "rank": 2556,
+   "count": 2299
+  },
+  {
+   "form": "vermute",
+   "rank": 2557,
+   "count": 2296
+  },
+  {
+   "form": "feigling",
+   "rank": 2558,
+   "count": 2294
+  },
+  {
+   "form": "atmet",
+   "rank": 2559,
+   "count": 2292
+  },
+  {
+   "form": "abgehauen",
+   "rank": 2560,
+   "count": 2291
+  },
+  {
+   "form": "juden",
+   "rank": 2561,
+   "count": 2291
+  },
+  {
+   "form": "nannte",
+   "rank": 2562,
+   "count": 2291
+  },
+  {
+   "form": "sicherlich",
+   "rank": 2563,
+   "count": 2291
+  },
+  {
+   "form": "besitz",
+   "rank": 2564,
+   "count": 2289
+  },
+  {
+   "form": "vernünftig",
+   "rank": 2565,
+   "count": 2289
+  },
+  {
+   "form": "geräusch",
+   "rank": 2566,
+   "count": 2282
+  },
+  {
+   "form": "häuser",
+   "rank": 2567,
+   "count": 2282
+  },
+  {
+   "form": "stärke",
+   "rank": 2568,
+   "count": 2281
+  },
+  {
+   "form": "empfangen",
+   "rank": 2569,
+   "count": 2280
+  },
+  {
+   "form": "dauernd",
+   "rank": 2570,
+   "count": 2279
+  },
+  {
+   "form": "geheim",
+   "rank": 2571,
+   "count": 2278
+  },
+  {
+   "form": "beeilt",
+   "rank": 2572,
+   "count": 2277
+  },
+  {
+   "form": "schlacht",
+   "rank": 2573,
+   "count": 2277
+  },
+  {
+   "form": "wirf",
+   "rank": 2574,
+   "count": 2277
+  },
+  {
+   "form": "eindeutig",
+   "rank": 2575,
+   "count": 2276
+  },
+  {
+   "form": "chancen",
+   "rank": 2576,
+   "count": 2273
+  },
+  {
+   "form": "politik",
+   "rank": 2577,
+   "count": 2273
+  },
+  {
+   "form": "mittel",
+   "rank": 2578,
+   "count": 2272
+  },
+  {
+   "form": "riechen",
+   "rank": 2579,
+   "count": 2272
+  },
+  {
+   "form": "universum",
+   "rank": 2580,
+   "count": 2272
+  },
+  {
+   "form": "eingesperrt",
+   "rank": 2581,
+   "count": 2271
+  },
+  {
+   "form": "schlug",
+   "rank": 2582,
+   "count": 2271
+  },
+  {
+   "form": "werk",
+   "rank": 2583,
+   "count": 2271
+  },
+  {
+   "form": "schrank",
+   "rank": 2584,
+   "count": 2269
+  },
+  {
+   "form": "wichtiges",
+   "rank": 2585,
+   "count": 2263
+  },
+  {
+   "form": "grenzen",
+   "rank": 2586,
+   "count": 2249
+  }
+ ]
+}

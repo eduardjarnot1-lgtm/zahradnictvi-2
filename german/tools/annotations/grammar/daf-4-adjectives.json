@@ -1,0 +1,1082 @@
+{
+ "topics": [
+  {
+   "id": "g-daf-a2-adjectives-after-the-definite-article",
+   "titleEn": "Adjective endings after the definite article",
+   "summary": "Only -e and -en; five boxes take -e, the rest take -en.",
+   "category": "Adjektive",
+   "tags": [
+    "Adjektivdeklination",
+    "bestimmter Artikel",
+    "Endungen"
+   ],
+   "difficulty": 2,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "Two endings only",
+     "text": "After der, das, die, den, dem the adjective ends in -e or -en — nothing else. The article has already shown the case and gender, so the adjective carries little work."
+    },
+    {
+     "heading": "Where -e appears",
+     "text": "In the nominative of all three genders, and in the accusative of the neuter and the feminine: der lebendige Dialekt, das neue Leben, die lange Tradition."
+    },
+    {
+     "heading": "Where -en appears",
+     "text": "In the accusative masculine, in the whole dative, and in the entire plural: den lebendigen Dialekt, dem neuen Leben, die alten Lieder."
+    },
+    {
+     "heading": "The dative plural noun too",
+     "text": "The table's dative plural is den alten Liedern — the noun itself adds -n."
+    }
+   ],
+   "rules": [
+    "Nominative M/N/F: -e. Accusative N/F: -e.",
+    "Accusative M: -en.",
+    "Dative in every gender and number: -en.",
+    "Plural in every case: -en.",
+    "In the dative plural the noun adds -n as well: den alten Liedern."
+   ],
+   "examples": [
+    {
+     "de": "der lebendige Dialekt",
+     "note": "Nominativ M"
+    },
+    {
+     "de": "das neue Leben",
+     "note": "Nominativ and Akkusativ N"
+    },
+    {
+     "de": "die lange Tradition",
+     "note": "Nominativ and Akkusativ F"
+    },
+    {
+     "de": "den lebendigen Dialekt",
+     "note": "Akkusativ M — the only accusative with -en"
+    },
+    {
+     "de": "dem neuen Leben",
+     "note": "Dativ N"
+    },
+    {
+     "de": "der langen Tradition",
+     "note": "Dativ F"
+    },
+    {
+     "de": "den alten Liedern",
+     "note": "Dativ Plural — noun ends in -n as well"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Complete the ending.",
+     "text": "der lebendig___ Dialekt",
+     "answers": [
+      "e"
+     ],
+     "explain": "Nominative masculine after der takes -e."
+    },
+    {
+     "type": "fill",
+     "prompt": "Complete the ending.",
+     "text": "den lebendig___ Dialekt",
+     "answers": [
+      "en"
+     ],
+     "explain": "Accusative masculine takes -en."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which form is the dative plural?",
+     "text": "",
+     "options": [
+      "den alten Liedern",
+      "die alten Lieder",
+      "der alten Lieder",
+      "dem alten Lied"
+     ],
+     "answers": [
+      "den alten Liedern"
+     ],
+     "explain": "Dative plural: den, -en on the adjective, -n on the noun."
+    },
+    {
+     "type": "fill",
+     "prompt": "Complete the ending.",
+     "text": "die lang___ Tradition",
+     "answers": [
+      "e"
+     ],
+     "explain": "Feminine nominative and accusative take -e."
+    },
+    {
+     "type": "transform",
+     "prompt": "Put the phrase into the dative.",
+     "from": "die lange Tradition",
+     "answers": [
+      "der langen Tradition"
+     ],
+     "explain": "Feminine dative: der + -en."
+    },
+    {
+     "type": "choice",
+     "prompt": "How many different endings does this table use?",
+     "text": "",
+     "options": [
+      "two: -e and -en",
+      "three: -e, -er and -en",
+      "four",
+      "five"
+     ],
+     "answers": [
+      "two: -e and -en"
+     ],
+     "explain": "After the definite article only -e and -en occur."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a2-adjectives-before-nouns-without-an-artic",
+   "titleEn": "Adjective endings with no article (Nullartikel)",
+   "summary": "With no article the adjective takes over the article's own ending.",
+   "category": "Adjektive",
+   "tags": [
+    "Adjektivdeklination",
+    "Nullartikel",
+    "Endungen"
+   ],
+   "difficulty": 3,
+   "prerequisites": [
+    "g-daf-a2-adjectives-after-the-definite-article"
+   ],
+   "explanation": [
+    {
+     "heading": "The adjective stands in for the article",
+     "text": "The table is written as a set of arrows — der → lebendiger Dialekt, das → neues Leben — because the ending the missing article would have had moves onto the adjective."
+    },
+    {
+     "heading": "How to work it out",
+     "text": "Think of the definite article the phrase would take, strip the d-, and put what is left on the adjective: dem → -em, der → -er, den → -en."
+    },
+    {
+     "heading": "Where you meet it",
+     "text": "Mass nouns and plurals without an article: neues Leben, lange Tradition, alte Lieder."
+    }
+   ],
+   "rules": [
+    "Nominative: -er (M), -es (N), -e (F), -e (plural).",
+    "Accusative: -en (M); the neuter, feminine and plural endings are unchanged.",
+    "Dative: -em (M and N), -er (F), -en (plural).",
+    "In the dative plural the noun still adds -n: alten Liedern."
+   ],
+   "examples": [
+    {
+     "de": "der → lebendiger Dialekt",
+     "note": "the article's -er moves onto the adjective"
+    },
+    {
+     "de": "das → neues Leben",
+     "note": "Nominativ and Akkusativ N"
+    },
+    {
+     "de": "die → lange Tradition",
+     "note": "Nominativ and Akkusativ F"
+    },
+    {
+     "de": "den → lebendigen Dialekt",
+     "note": "Akkusativ M"
+    },
+    {
+     "de": "dem → lebendigem Dialekt",
+     "note": "Dativ M"
+    },
+    {
+     "de": "der → langer Tradition",
+     "note": "Dativ F"
+    },
+    {
+     "de": "den → alten Liedern",
+     "note": "Dativ Plural"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Complete the ending (no article).",
+     "text": "lebendig___ Dialekt (Nominativ)",
+     "answers": [
+      "er"
+     ],
+     "explain": "der → -er on the adjective."
+    },
+    {
+     "type": "fill",
+     "prompt": "Complete the ending (no article).",
+     "text": "neu___ Leben (Nominativ)",
+     "answers": [
+      "es"
+     ],
+     "explain": "das → -es on the adjective."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which is the dative masculine without an article?",
+     "text": "",
+     "options": [
+      "lebendigem Dialekt",
+      "lebendigen Dialekt",
+      "lebendiger Dialekt",
+      "lebendige Dialekt"
+     ],
+     "answers": [
+      "lebendigem Dialekt"
+     ],
+     "explain": "dem → -em."
+    },
+    {
+     "type": "transform",
+     "prompt": "Drop the article and adjust the ending.",
+     "from": "die langen Traditionen",
+     "answers": [
+      "lange Traditionen"
+     ],
+     "explain": "Plural nominative and accusative without an article take -e."
+    },
+    {
+     "type": "choice",
+     "prompt": "Why does the adjective carry a strong ending here?",
+     "text": "",
+     "options": [
+      "there is no article to show case and gender",
+      "the noun is plural",
+      "the adjective is long",
+      "it is a fixed expression"
+     ],
+     "answers": [
+      "there is no article to show case and gender"
+     ],
+     "explain": "The ending the article would have carried moves onto the adjective."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a2-adjectives-after-ein-kein-mein",
+   "titleEn": "Adjective endings after ein-, kein-, mein-",
+   "summary": "Where ein has no ending, the adjective supplies it.",
+   "category": "Adjektive",
+   "tags": [
+    "Adjektivdeklination",
+    "unbestimmter Artikel",
+    "Possessivartikel",
+    "Endungen"
+   ],
+   "difficulty": 3,
+   "prerequisites": [
+    "g-daf-a2-adjectives-after-the-definite-article",
+    "g-daf-a2-adjectives-before-nouns-without-an-artic"
+   ],
+   "explanation": [
+    {
+     "heading": "The mixed pattern",
+     "text": "ein, kein and mein behave like the definite article except in three boxes, where they have no ending of their own: nominative masculine, nominative neuter and accusative neuter."
+    },
+    {
+     "heading": "What the adjective does there",
+     "text": "In exactly those three boxes the adjective takes the strong ending instead: ein neuer Trend, ein festliches Kleid, ein schwarzes Barett."
+    },
+    {
+     "heading": "Everywhere else -en",
+     "text": "Accusative masculine, the whole dative and the whole plural take -en: meinen teuren Anzug, meinem schwarzen Talar, meinen stolzen Eltern."
+    },
+    {
+     "heading": "The plural column",
+     "text": "The table pairs the plural with an article-less form: schwarze Talare beside meine / keine männlichen Kollegen — ein- itself has no plural."
+    }
+   ],
+   "rules": [
+    "Nominative M: -er (ein neuer Trend), because ein has no ending.",
+    "Nominative and accusative N: -es (ein festliches Kleid, ein schwarzes Barett).",
+    "Nominative and accusative F: -e (eine neue Phase, eine große Party).",
+    "Accusative M, the whole dative and the whole plural: -en.",
+    "kein- and the possessive articles follow ein- exactly."
+   ],
+   "examples": [
+    {
+     "de": "ein neuer Trend",
+     "note": "Nominativ M — the adjective carries the -er"
+    },
+    {
+     "de": "mein festliches Kleid",
+     "note": "Nominativ N"
+    },
+    {
+     "de": "eine neue Phase",
+     "note": "Nominativ F"
+    },
+    {
+     "de": "meinen teuren Anzug",
+     "note": "Akkusativ M"
+    },
+    {
+     "de": "mein schwarzes Barett",
+     "note": "Akkusativ N"
+    },
+    {
+     "de": "eine große Party",
+     "note": "Akkusativ F"
+    },
+    {
+     "de": "meinem schwarzen Talar",
+     "note": "Dativ M"
+    },
+    {
+     "de": "einer schicken Frisur",
+     "note": "Dativ F"
+    },
+    {
+     "de": "meinen / keinen stolzen Eltern",
+     "note": "Dativ Plural"
+    },
+    {
+     "de": "langen Abendkleidern",
+     "note": "Dativ Plural without an article"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Complete the ending.",
+     "text": "ein neu___ Trend",
+     "answers": [
+      "er"
+     ],
+     "explain": "ein has no ending in the nominative masculine, so the adjective takes -er."
+    },
+    {
+     "type": "fill",
+     "prompt": "Complete the ending.",
+     "text": "ein festlich___ Kleid",
+     "answers": [
+      "es"
+     ],
+     "explain": "Neuter nominative and accusative: -es."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which is the accusative masculine?",
+     "text": "Ich kaufe ___.",
+     "options": [
+      "meinen teuren Anzug",
+      "mein teurer Anzug",
+      "meinem teuren Anzug",
+      "meine teure Anzug"
+     ],
+     "answers": [
+      "meinen teuren Anzug"
+     ],
+     "explain": "Accusative masculine: meinen + -en."
+    },
+    {
+     "type": "fill",
+     "prompt": "Complete the ending.",
+     "text": "mit meinem schwarz___ Talar",
+     "answers": [
+      "en"
+     ],
+     "explain": "The whole dative takes -en."
+    },
+    {
+     "type": "transform",
+     "prompt": "Put the phrase into the dative.",
+     "from": "eine schicke Frisur",
+     "answers": [
+      "einer schicken Frisur"
+     ],
+     "explain": "Feminine dative: einer + -en."
+    },
+    {
+     "type": "choice",
+     "prompt": "In which three boxes does the adjective take a strong ending after ein-?",
+     "text": "",
+     "options": [
+      "Nom. M, Nom. N, Akk. N",
+      "Nom. M, Akk. M, Dat. M",
+      "all three genders in the dative",
+      "the whole plural"
+     ],
+     "answers": [
+      "Nom. M, Nom. N, Akk. N"
+     ],
+     "explain": "Exactly where ein- itself has no ending."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a2-adjectives-in-the-genitive",
+   "titleEn": "Adjectives in the genitive",
+   "summary": "-en after any article; -er only when there is no article.",
+   "category": "Adjektive",
+   "tags": [
+    "Adjektivdeklination",
+    "Genitiv",
+    "Endungen"
+   ],
+   "difficulty": 3,
+   "prerequisites": [
+    "g-daf-a2-adjectives-after-the-definite-article"
+   ],
+   "explanation": [
+    {
+     "heading": "The simplest case of all",
+     "text": "The table sets four columns side by side — definite article, indefinite article, possessive article, no article — and in the first three the adjective always ends in -en."
+    },
+    {
+     "heading": "The exception",
+     "text": "Without an article the adjective takes -er in the feminine and in the plural: kurzer Karriere, gestresster Manager. The masculine and neuter keep -en, because the noun itself already shows the genitive with -s."
+    },
+    {
+     "heading": "The gap in the table",
+     "text": "The plural row prints a dash under the indefinite article: ein- has no plural, so there is nothing to show."
+    }
+   ],
+   "rules": [
+    "After der/die/das, ein-, kein- and the possessive articles: -en in every gender and number.",
+    "With no article, M and N: -en (großen Erfolgs, großen Lebens) — the noun's -s carries the case.",
+    "With no article, F and plural: -er (kurzer Karriere, gestresster Manager).",
+    "ein- has no genitive plural."
+   ],
+   "examples": [
+    {
+     "de": "des großen Erfolgs",
+     "note": "definite article, M"
+    },
+    {
+     "de": "eines großen Erfolgs",
+     "note": "indefinite article, M"
+    },
+    {
+     "de": "meines großen Erfolgs",
+     "note": "possessive article, M"
+    },
+    {
+     "de": "großen Erfolgs",
+     "note": "no article, M — still -en"
+    },
+    {
+     "de": "der kurzen Karriere",
+     "note": "definite article, F"
+    },
+    {
+     "de": "kurzer Karriere",
+     "note": "no article, F — the one place -er appears"
+    },
+    {
+     "de": "unserer gestressten Manager",
+     "note": "possessive article, plural"
+    },
+    {
+     "de": "gestresster Manager",
+     "note": "no article, plural"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Complete the ending.",
+     "text": "des groß___ Erfolgs",
+     "answers": [
+      "en"
+     ],
+     "explain": "After any article the genitive adjective takes -en."
+    },
+    {
+     "type": "fill",
+     "prompt": "Complete the ending (no article).",
+     "text": "kurz___ Karriere",
+     "answers": [
+      "er"
+     ],
+     "explain": "Feminine genitive with no article takes -er."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which form has no article?",
+     "text": "",
+     "options": [
+      "gestresster Manager",
+      "der gestressten Manager",
+      "unserer gestressten Manager",
+      "des gestressten Managers"
+     ],
+     "answers": [
+      "gestresster Manager"
+     ],
+     "explain": "Only the article-less plural takes -er."
+    },
+    {
+     "type": "choice",
+     "prompt": "Why is it großen Erfolgs and not großer Erfolgs without an article?",
+     "text": "",
+     "options": [
+      "the noun's -s already marks the genitive",
+      "großer is not a word",
+      "the adjective is masculine",
+      "the phrase is plural"
+     ],
+     "answers": [
+      "the noun's -s already marks the genitive"
+     ],
+     "explain": "M and N genitive nouns add -s, so the adjective stays weak."
+    },
+    {
+     "type": "transform",
+     "prompt": "Add the possessive article for ich.",
+     "from": "großen Erfolgs",
+     "answers": [
+      "meines großen Erfolgs"
+     ],
+     "explain": "The ending does not change — only the article is added."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-b1-adjectives-before-nouns-without-an-artic-2",
+   "titleEn": "Article-less genitive phrases in use",
+   "summary": "Four phrases showing the genitive without an article in real noun groups.",
+   "category": "Adjektive",
+   "tags": [
+    "Adjektivdeklination",
+    "Genitiv",
+    "Nullartikel"
+   ],
+   "difficulty": 4,
+   "prerequisites": [
+    "g-daf-a2-adjectives-in-the-genitive"
+   ],
+   "explanation": [
+    {
+     "heading": "A genitive hanging off another noun",
+     "text": "Each phrase has a head noun with its own article — der Genuss, ein Beispiel, Fisch, ein Fotomotiv — followed by an article-less genitive that says what of."
+    },
+    {
+     "heading": "M and N take -en",
+     "text": "der Genuss frischen Fisches, ein Beispiel erfolgreichen Engagements — the genitive -es on the noun does the identifying work."
+    },
+    {
+     "heading": "F and plural take -er",
+     "text": "Fisch bester Qualität (feminine), ein Fotomotiv begeisterter Besucher (plural)."
+    },
+    {
+     "heading": "Register",
+     "text": "This is written, fairly formal German — advertising, journalism, reports."
+    }
+   ],
+   "rules": [
+    "Masculine and neuter: adjective in -en, noun in -es / -s.",
+    "Feminine and plural: adjective in -er, noun unchanged.",
+    "The genitive phrase follows the noun it belongs to."
+   ],
+   "examples": [
+    {
+     "de": "der Genuss frischen Fisches",
+     "note": "M — -en on the adjective, -es on the noun"
+    },
+    {
+     "de": "ein Beispiel erfolgreichen Engagements",
+     "note": "N — the same pattern"
+    },
+    {
+     "de": "Fisch bester Qualität",
+     "note": "F — -er"
+    },
+    {
+     "de": "ein Fotomotiv begeisterter Besucher",
+     "note": "Plural — -er"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Complete the ending.",
+     "text": "der Genuss frisch___ Fisches",
+     "answers": [
+      "en"
+     ],
+     "explain": "Masculine genitive with no article: -en."
+    },
+    {
+     "type": "fill",
+     "prompt": "Complete the ending.",
+     "text": "Fisch best___ Qualität",
+     "answers": [
+      "er"
+     ],
+     "explain": "Feminine genitive with no article: -er."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which phrase is a plural genitive?",
+     "text": "",
+     "options": [
+      "ein Fotomotiv begeisterter Besucher",
+      "der Genuss frischen Fisches",
+      "ein Beispiel erfolgreichen Engagements",
+      "Fisch bester Qualität"
+     ],
+     "answers": [
+      "ein Fotomotiv begeisterter Besucher"
+     ],
+     "explain": "Besucher is plural and takes -er on the adjective."
+    },
+    {
+     "type": "reorder",
+     "prompt": "Rebuild the phrase.",
+     "tokens": [
+      "ein",
+      "Beispiel",
+      "erfolgreichen",
+      "Engagements"
+     ],
+     "answers": [
+      "ein Beispiel erfolgreichen Engagements"
+     ],
+     "explain": "The genitive phrase follows the head noun.",
+     "source": true,
+     "sentence": "ein Beispiel erfolgreich en Engagements"
+    },
+    {
+     "type": "choice",
+     "prompt": "Where does the genitive phrase stand?",
+     "text": "",
+     "options": [
+      "after the noun it belongs to",
+      "before the noun it belongs to",
+      "at the end of the sentence",
+      "in the first position"
+     ],
+     "answers": [
+      "after the noun it belongs to"
+     ],
+     "explain": "All four examples follow that order."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a2-comparison-comparative-and-superlative-p",
+   "titleEn": "Comparative and superlative — predicative forms",
+   "summary": "-er and am …sten, plus the umlauts and the five irregulars.",
+   "category": "Adjektive",
+   "tags": [
+    "Komparativ",
+    "Superlativ",
+    "Steigerung",
+    "unregelmäßig"
+   ],
+   "difficulty": 2,
+   "prerequisites": [],
+   "explanation": [
+    {
+     "heading": "The regular pattern",
+     "text": "Add -er for the comparative and am …sten for the superlative: attraktiv, attraktiver, am attraktivsten."
+    },
+    {
+     "heading": "When -esten appears",
+     "text": "Adjectives ending in -t, -d, -s, -ß or -z insert an e in the superlative: bekannt → am bekanntesten, alt → am ältesten."
+    },
+    {
+     "heading": "Umlaut",
+     "text": "Several short adjectives take an umlaut in both forms: groß → größer → am größten, alt → älter → am ältesten, hoch → höher → am höchsten."
+    },
+    {
+     "heading": "The irregulars",
+     "text": "gut → besser → am besten; gern → lieber → am liebsten; viel → mehr → am meisten; hoch → höher → am höchsten; teuer loses its second e: teurer."
+    }
+   ],
+   "rules": [
+    "Comparative: adjective + -er. Superlative: am + adjective + -sten.",
+    "After -t, -d, -s, -ß, -z the superlative is -esten: am bekanntesten, am ältesten.",
+    "groß, alt, hoch take an umlaut: größer, älter, höher.",
+    "gut → besser → am besten; gern → lieber → am liebsten; viel → mehr → am meisten.",
+    "teuer drops the e of the stem in the comparative: teurer.",
+    "hoch loses its c before -er: höher, but am höchsten keeps it."
+   ],
+   "examples": [
+    {
+     "de": "attraktiv attraktiver am attraktivsten",
+     "note": "the regular pattern"
+    },
+    {
+     "de": "bekannt bekannter am bekanntesten",
+     "note": "-t forces the extra e in the superlative"
+    },
+    {
+     "de": "groß größer am größten",
+     "note": "umlaut"
+    },
+    {
+     "de": "alt älter am ältesten",
+     "note": "umlaut plus the extra e"
+    },
+    {
+     "de": "teuer teurer am teuersten",
+     "note": "the stem loses its e in the comparative"
+    },
+    {
+     "de": "hoch höher am höchsten",
+     "note": "irregular"
+    },
+    {
+     "de": "gut besser am besten",
+     "note": "irregular"
+    },
+    {
+     "de": "gern lieber am liebsten",
+     "note": "irregular"
+    },
+    {
+     "de": "viel mehr am meisten",
+     "note": "irregular"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Give the comparative.",
+     "text": "schön → ___",
+     "answers": [
+      "schöner"
+     ],
+     "explain": "Regular -er."
+    },
+    {
+     "type": "fill",
+     "prompt": "Give the superlative.",
+     "text": "alt → ___",
+     "answers": [
+      "am ältesten"
+     ],
+     "explain": "Umlaut plus -esten after -t."
+    },
+    {
+     "type": "choice",
+     "prompt": "What is the comparative of gut?",
+     "text": "",
+     "options": [
+      "besser",
+      "guter",
+      "güter",
+      "mehr"
+     ],
+     "answers": [
+      "besser"
+     ],
+     "explain": "gut → besser → am besten."
+    },
+    {
+     "type": "choice",
+     "prompt": "What is the comparative of viel?",
+     "text": "",
+     "options": [
+      "mehr",
+      "vieler",
+      "meisten",
+      "mehrer"
+     ],
+     "answers": [
+      "mehr"
+     ],
+     "explain": "viel → mehr → am meisten."
+    },
+    {
+     "type": "fill",
+     "prompt": "Give the comparative.",
+     "text": "teuer → ___",
+     "answers": [
+      "teurer"
+     ],
+     "explain": "The e of the stem drops out: teurer, not teuerer."
+    },
+    {
+     "type": "transform",
+     "prompt": "Give the superlative of gern.",
+     "from": "gern",
+     "answers": [
+      "am liebsten"
+     ],
+     "explain": "gern → lieber → am liebsten."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-a2-comparative-sentences",
+   "titleEn": "Comparative sentences: (genau)so … wie and …er als",
+   "summary": "wie for equality, als for a difference.",
+   "category": "Adjektive",
+   "tags": [
+    "Vergleich",
+    "Komparativ",
+    "wie",
+    "als"
+   ],
+   "difficulty": 2,
+   "prerequisites": [
+    "g-daf-a2-comparison-comparative-and-superlative-p"
+   ],
+   "explanation": [
+    {
+     "heading": "Equal, or not equal",
+     "text": "For etwas / jemand ist gleich / nicht gleich use the basic form with so … wie: genauso gern … wie, nicht so attraktiv wie."
+    },
+    {
+     "heading": "More",
+     "text": "For etwas / jemand ist mehr use the comparative with als: billiger als, gesünder als, mehr Sportmöglichkeiten als."
+    },
+    {
+     "heading": "lieber … als",
+     "text": "The irregular comparative of gern behaves the same way: lieber mit Freunden als allein."
+    },
+    {
+     "heading": "The commonest mistake",
+     "text": "wie never follows a comparative and als never follows so — keep the two frames apart."
+    }
+   ],
+   "rules": [
+    "Equality: (genau)so + basic form + wie.",
+    "Inequality stated as less: nicht so + basic form + wie.",
+    "Difference: comparative + als.",
+    "mehr + noun + als works the same way as an adjective comparative.",
+    "lieber … als is the comparative of gern."
+   ],
+   "examples": [
+    {
+     "de": "Immer mehr Deutsche verbringen ihren Urlaub genauso gern in Deutschland wie im Ausland.",
+     "note": "genauso … wie — equality"
+    },
+    {
+     "de": "Für den Urlaub findet Niclas die Ostsee nicht so attraktiv wie die Alpen.",
+     "note": "nicht so … wie"
+    },
+    {
+     "de": "Linus meint, Urlaub in Deutschland ist billiger als im Ausland.",
+     "note": "comparative + als"
+    },
+    {
+     "de": "Viele denken, die Luft auf dem Land ist gesünder als die Luft in der Stadt.",
+     "note": "comparative + als"
+    },
+    {
+     "de": "Niclas möchte lieber mit Freunden als allein in Urlaub fahren.",
+     "note": "lieber … als"
+    },
+    {
+     "de": "Niclas findet, die Alpen bieten mehr Sportmöglichkeiten als die Ostsee.",
+     "note": "mehr + noun + als"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Complete the comparison.",
+     "text": "Linus meint, Urlaub in Deutschland ist billiger ___ im Ausland.",
+     "answers": [
+      "als"
+     ],
+     "explain": "A comparative is always followed by als.",
+     "source": true,
+     "sentence": "Linus meint, Urlaub in Deutschland ist billiger als im Ausland."
+    },
+    {
+     "type": "fill",
+     "prompt": "Complete the comparison.",
+     "text": "Für den Urlaub findet Niclas die Ostsee nicht so attraktiv ___ die Alpen.",
+     "answers": [
+      "wie"
+     ],
+     "explain": "so + basic form takes wie.",
+     "source": true,
+     "sentence": "Für den Urlaub findet Niclas die Ostsee nicht so attraktiv wie die Alpen."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which sentence states that two things are equal?",
+     "text": "",
+     "options": [
+      "Immer mehr Deutsche verbringen ihren Urlaub genauso gern in Deutschland wie im Ausland.",
+      "Linus meint, Urlaub in Deutschland ist billiger als im Ausland.",
+      "Viele denken, die Luft auf dem Land ist gesünder als die Luft in der Stadt.",
+      "Niclas findet, die Alpen bieten mehr Sportmöglichkeiten als die Ostsee."
+     ],
+     "answers": [
+      "Immer mehr Deutsche verbringen ihren Urlaub genauso gern in Deutschland wie im Ausland."
+     ],
+     "explain": "genauso … wie marks equality; the others use a comparative with als."
+    },
+    {
+     "type": "error",
+     "prompt": "Fix the comparison word.",
+     "text": "Die Luft auf dem Land ist gesünder wie die Luft in der Stadt.",
+     "answers": [
+      "Die Luft auf dem Land ist gesünder als die Luft in der Stadt.",
+      "gesünder als die Luft in der Stadt"
+     ],
+     "explain": "gesünder is a comparative, so it takes als."
+    },
+    {
+     "type": "fill",
+     "prompt": "Complete with the comparative of gern.",
+     "text": "Niclas möchte ___ mit Freunden als allein in Urlaub fahren.",
+     "answers": [
+      "lieber"
+     ],
+     "explain": "gern → lieber, and the comparison word is als.",
+     "source": true,
+     "sentence": "Niclas möchte lieber mit Freunden als allein in Urlaub fahren."
+    }
+   ]
+  },
+  {
+   "id": "g-daf-b1-comparisons-comparative-and-superlative-",
+   "titleEn": "Comparative and superlative before a noun",
+   "summary": "The comparative and superlative keep the ordinary adjective endings.",
+   "category": "Adjektive",
+   "tags": [
+    "Komparativ",
+    "Superlativ",
+    "Adjektivdeklination",
+    "attributiv"
+   ],
+   "difficulty": 4,
+   "prerequisites": [
+    "g-daf-a2-comparison-comparative-and-superlative-p",
+    "g-daf-a2-adjectives-after-ein-kein-mein"
+   ],
+   "explanation": [
+    {
+     "heading": "Two endings stacked",
+     "text": "Before a noun the adjective carries the comparison marker first and the declension ending second: höher + e → höhere, höchst + e → höchste."
+    },
+    {
+     "heading": "Nothing new to learn",
+     "text": "The document states it as a rule: adjectives have the same basic endings when they are in the comparative or superlative form."
+    },
+    {
+     "heading": "No am here",
+     "text": "The predicative superlative am höchsten becomes der höchste Berg before a noun — the article replaces am."
+    },
+    {
+     "heading": "The one restriction",
+     "text": "It is not possible to have a superlative before a noun with the indefinite article, which is why the table's ein- row jumps straight from ein höherer Berg to kein / sein höchster Berg."
+    }
+   ],
+   "rules": [
+    "The comparison ending comes first, the declension ending second: der höher-e Berg, der höchst-e Berg.",
+    "The endings are exactly those of the basic form.",
+    "The predicative am …sten is replaced by an article plus the declined superlative.",
+    "A superlative cannot stand after ein-; kein- and the possessive articles are fine."
+   ],
+   "examples": [
+    {
+     "de": "der hohe Berg der höhere Berg der höchste Berg",
+     "note": "M with the definite article: basic, comparative, superlative"
+    },
+    {
+     "de": "die kurze Grenze die kürzere Grenze die kürzeste Grenze",
+     "note": "F — the superlative adds -est after -z"
+    },
+    {
+     "de": "das kleine Land das kleinere Land das kleinste Land",
+     "note": "N"
+    },
+    {
+     "de": "die hohen Berge die höheren Berge die höchsten Berge",
+     "note": "Plural, all -en"
+    },
+    {
+     "de": "ein / kein / sein höherer Berg",
+     "note": "comparative after ein- takes the strong -er"
+    },
+    {
+     "de": "kein / sein höchster Berg",
+     "note": "no ein- in this row — a superlative cannot follow ein-"
+    },
+    {
+     "de": "hohe Berge höhere Berge höchste Berge",
+     "note": "plural with no article"
+    }
+   ],
+   "exercises": [
+    {
+     "type": "fill",
+     "prompt": "Complete the ending.",
+     "text": "der höher___ Berg",
+     "answers": [
+      "e"
+     ],
+     "explain": "After der the adjective takes -e, comparative or not."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which phrase is impossible?",
+     "text": "",
+     "options": [
+      "ein höchster Berg",
+      "kein höchster Berg",
+      "sein höchster Berg",
+      "der höchste Berg"
+     ],
+     "answers": [
+      "ein höchster Berg"
+     ],
+     "explain": "The document states that a superlative cannot follow the indefinite article ein-."
+    },
+    {
+     "type": "transform",
+     "prompt": "Put the phrase into the superlative.",
+     "from": "das kleine Land",
+     "answers": [
+      "das kleinste Land"
+     ],
+     "explain": "klein + -st + -e, with the article unchanged.",
+     "source": true,
+     "sentence": "das klein e Land das kleiner e Land das kleinst e Land"
+    },
+    {
+     "type": "fill",
+     "prompt": "Complete the ending.",
+     "text": "ein höher___ Berg",
+     "answers": [
+      "er"
+     ],
+     "explain": "ein has no ending in the nominative masculine, so the adjective takes -er."
+    },
+    {
+     "type": "choice",
+     "prompt": "What happens to the endings in the comparative and superlative?",
+     "text": "",
+     "options": [
+      "they stay the same as in the basic form",
+      "they all become -en",
+      "they disappear",
+      "they become -er"
+     ],
+     "answers": [
+      "they stay the same as in the basic form"
+     ],
+     "explain": "The document's own rule under the table."
+    },
+    {
+     "type": "transform",
+     "prompt": "Put the phrase into the comparative.",
+     "from": "die kurze Grenze",
+     "answers": [
+      "die kürzere Grenze"
+     ],
+     "explain": "kurz takes an umlaut, then -er, then the declension ending -e.",
+     "source": true,
+     "sentence": "die kurz e Grenze die kürzer e Grenze die kürzest e Grenze"
+    }
+   ]
+  }
+ ]
+}

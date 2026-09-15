@@ -1,0 +1,170 @@
+{
+ "topics": [
+  {
+   "id": "g-l10-1",
+   "titleEn": "Variations of word order",
+   "summary": "Moving parts of the sentence into the Vorfeld or out into the Nachfeld.",
+   "category": "Satzstellung",
+   "tags": ["Satzstellung", "Vorfeld", "Nachfeld", "Verbklammer"],
+   "difficulty": 4,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "Infinitive and Partizip II in the Vorfeld",
+     "text": "For emphasis, single parts of the sentence can be placed in the Vorfeld, the position before the finite verb. You can, for instance, put the second part of the Verbklammer there — the infinitive belonging to a modal verb, or the Partizip II in the perfect or the passive."},
+    {"heading": "Moving out into the Nachfeld",
+     "text": "Single parts of the sentence can be placed after the second part of the Verbklammer. This usually makes the sentence clearer, and in speech it lets you add something you had forgotten."}
+   ],
+   "rules": [
+    "Vorfeld: the infinitive belonging to a modal verb — Vorkommen kann es immer wieder.",
+    "Vorfeld: the Partizip II in the perfect or passive — Verstanden habe ich den Roman sofort.",
+    "Nachfeld: comparisons with wie and als — Lesen mag anstrengender sein als Fernsehen.",
+    "Nachfeld: clauses with sondern and oder, and infinitives with zu — Der Autor hat gerade angefangen zu schreiben.",
+    "Nachfeld: afterthoughts and explanations — Man ist nicht immer einverstanden mit der Meinung des Autors."
+   ],
+   "examples": [
+    {"de": "Vorkommen kann es immer wieder.", "note": "infinitive to the modal verb in the Vorfeld"},
+    {"de": "Verstanden habe ich den Roman sofort.", "note": "Partizip II in the Vorfeld (perfect)"},
+    {"de": "Übersetzt wurde er in mehrere Sprachen.", "note": "Partizip II in the Vorfeld (passive)"},
+    {"de": "Lesen mag anstrengender sein als Fernsehen.", "note": "comparison moved into the Nachfeld"},
+    {"de": "Der Autor hat gerade angefangen zu schreiben.", "note": "infinitive with zu in the Nachfeld"},
+    {"de": "Man ist nicht immer einverstanden mit der Meinung des Autors.", "note": "afterthought in the Nachfeld"}
+   ],
+   "exercises": [
+    {"type": "transform", "prompt": "Emphasise the Partizip II by putting it in the Vorfeld.",
+     "from": "Ich habe den Roman sofort verstanden.",
+     "answers": ["Verstanden habe ich den Roman sofort."],
+     "explain": "The Partizip II moves to position 1; the finite verb stays in position 2."},
+    {"type": "transform", "prompt": "Emphasise the infinitive by putting it in the Vorfeld.",
+     "from": "Es kann immer wieder vorkommen.",
+     "answers": ["Vorkommen kann es immer wieder."],
+     "explain": "The infinitive belonging to the modal verb moves into the Vorfeld."},
+    {"type": "transform", "prompt": "Move the comparison out into the Nachfeld.",
+     "from": "Lesen mag anstrengender als Fernsehen sein.",
+     "answers": ["Lesen mag anstrengender sein als Fernsehen."],
+     "explain": "Comparisons with wie and als are readily moved behind the second part of the Verbklammer."},
+    {"type": "transform", "prompt": "Move the infinitive clause out into the Nachfeld.",
+     "from": "Der Autor hat gerade zu schreiben angefangen.",
+     "answers": ["Der Autor hat gerade angefangen zu schreiben."],
+     "explain": "Infinitives with zu are commonly placed in the Nachfeld; the sentence becomes clearer."},
+    {"type": "choice", "prompt": "What is the effect of moving something into the Nachfeld?",
+     "text": "", "options": ["Der Satz wird meist übersichtlicher.", "Der Satz wird zur Frage.", "Der Satz wird passiv.", "Das Verb verliert seine Endung."],
+     "answers": ["Der Satz wird meist übersichtlicher."],
+     "explain": "It usually makes the sentence clearer, and in speech lets you add a forgotten element."},
+    {"type": "reorder", "prompt": "Put the Partizip II into the Vorfeld and order the sentence.",
+     "tokens": ["Übersetzt", "wurde", "er", "in", "mehrere", "Sprachen."],
+     "answers": ["Übersetzt wurde er in mehrere Sprachen."],
+     "explain": "Partizip II in position 1, finite verb in position 2, subject third."}
+   ]
+  },
+  {
+   "id": "g-l10-2",
+   "titleEn": "Word formation: noun suffixes (die and das)",
+   "summary": "-(a)tion, -ie, -ität, -ur are feminine; -tum and -ium are neuter.",
+   "category": "Wortbildung",
+   "tags": ["Wortbildung", "Nachsilben", "Nomen", "Artikel"],
+   "difficulty": 2,
+   "prerequisites": ["g-l06-2"],
+   "explanation": [
+    {"heading": "Suffix and article",
+     "text": "As with the suffixes in Lektion 6, the ending of the noun tells you its article — with one well-known exception."}
+   ],
+   "rules": [
+    "die: -(a)tion (Manipulation, Intention, Kreation).",
+    "die: -ie (Fantasie, Harmonie, Ökonomie).",
+    "die: -ität (Aktivität, Kreativität, Stabilität).",
+    "die: -ur (Figur, Statur, Fraktur).",
+    "das: -tum (Wachstum, Eigentum, Brauchtum) — but der Reichtum.",
+    "das: -ium (Medium, Stadium, Studium)."
+   ],
+   "examples": [
+    {"de": "Manipulation, Intention, Kreation", "note": "die — suffix -(a)tion"},
+    {"de": "Fantasie, Harmonie, Ökonomie", "note": "die — suffix -ie"},
+    {"de": "Aktivität, Kreativität, Stabilität", "note": "die — suffix -ität"},
+    {"de": "Figur, Statur, Fraktur", "note": "die — suffix -ur"},
+    {"de": "Wachstum, Eigentum", "note": "das — suffix -tum"},
+    {"de": "Medium, Stadium, Studium", "note": "das — suffix -ium"},
+    {"de": "aber: der Reichtum", "note": "the exception to -tum"}
+   ],
+   "exercises": [
+    {"type": "choice", "prompt": "Which article goes with 'Stabilität'?",
+     "text": "___ Stabilität", "options": ["die", "der", "das"], "answers": ["die"],
+     "explain": "Nouns in -ität are feminine."},
+    {"type": "choice", "prompt": "Which article goes with 'Studium'?",
+     "text": "___ Studium", "options": ["das", "die", "der"], "answers": ["das"],
+     "explain": "Nouns in -ium are neuter: Medium, Stadium, Studium."},
+    {"type": "choice", "prompt": "Which noun in -tum is the exception?",
+     "text": "", "options": ["Reichtum", "Wachstum", "Eigentum", "Brauchtum"],
+     "answers": ["Reichtum"],
+     "explain": "-tum is otherwise neuter, but it is der Reichtum."},
+    {"type": "fill", "prompt": "Complete the article.",
+     "text": "___ Ökonomie eines Landes hängt von vielen Faktoren ab.", "answers": ["Die"],
+     "explain": "Nouns in -ie are feminine: Fantasie, Harmonie, Ökonomie."},
+    {"type": "fill", "prompt": "Complete the article.",
+     "text": "___ Wachstum der Stadt war nicht geplant.", "answers": ["Das"],
+     "explain": "Nouns in -tum are neuter — apart from der Reichtum."}
+   ]
+  },
+  {
+   "id": "g-l10-3",
+   "titleEn": "Sentence structures: temporal and final relations",
+   "summary": "Time relations and purposes through connectors, main clauses and prepositions.",
+   "category": "Satzstrukturen",
+   "tags": ["Temporal", "Final", "Konnektoren", "Präpositionen"],
+   "difficulty": 4,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "Expressing time relations",
+     "text": "Temporal clauses are introduced by wenn, als, bevor, ehe, sobald, nachdem, während or woraufhin; the corresponding main-clause connectors are daraufhin and währenddessen."},
+    {"heading": "Time relations as prepositional phrases",
+     "text": "The same content can be expressed with a preposition plus a nominalised infinitive or a noun: im / beim + nominalisierter Infinitiv, am + nominalisierter Infinitiv + sein, vor + Dativ, während + Genitiv, (gleich) nach + Dativ."},
+    {"heading": "Expressing purposes",
+     "text": "Final clauses are introduced by um zu, damit, wozu or wofür; the main-clause connectors are dazu and dafür; the prepositions are für + Akkusativ, zu + Dativ, zwecks + Genitiv and zum Zweck(e) + Genitiv."}
+   ],
+   "rules": [
+    "wenn = repeated or general; als = one single event in the past.",
+    "bevor / ehe precede, sobald / nachdem follow, während is simultaneous.",
+    "woraufhin is a subordinate connector; daraufhin the corresponding main-clause one.",
+    "For a state use im + nominalised infinitive; for an action rather beim.",
+    "am + nominalised infinitive + sein is frequent in colloquial speech.",
+    "um zu needs the same subject in both clauses; damit does not."
+   ],
+   "examples": [
+    {"de": "Wenn der Wecker klingelt, steht Dr. Kauter auf.", "note": "wenn — repeated event"},
+    {"de": "Als der Wecker gestern Morgen klingelte, wollte Fredi nicht aufstehen.", "note": "als — one single past event"},
+    {"de": "Bevor / Ehe Dr. Kauter ins Bad geht, nimmt er Ballaststoffe ein.", "note": "bevor / ehe"},
+    {"de": "Im Stehen trank er eine Tasse Kaffee.", "note": "im + nominalised infinitive — a state"},
+    {"de": "Beim Telefonieren macht er sich Notizen.", "note": "beim + nominalised infinitive — an action"},
+    {"de": "Um sich von seiner Frau zu verabschieden, geht er ins Schlafzimmer.", "note": "final clause with um zu"},
+    {"de": "Dr. Kauter verlässt das Schlafzimmer leise, damit seine Frau nicht aufwacht.", "note": "damit — different subjects"}
+   ],
+   "exercises": [
+    {"type": "choice", "prompt": "One single event in the past — which connector?",
+     "text": "___ der Wecker gestern Morgen klingelte, wollte Fredi nicht aufstehen.",
+     "options": ["Als", "Wenn", "Sobald", "Während"],
+     "answers": ["Als"],
+     "explain": "als is used for one single event in the past; wenn for repeated or general ones."},
+    {"type": "transform", "prompt": "Rewrite with a preposition + nominalised infinitive (an action).",
+     "from": "Während er telefoniert, macht er sich Notizen.",
+     "answers": ["Beim Telefonieren macht er sich Notizen."],
+     "explain": "For an action you use beim + nominalised infinitive; im would suggest a state."},
+    {"type": "choice", "prompt": "Both clauses have the same subject. Which final connector?",
+     "text": "___ sich von seiner Frau zu verabschieden, geht er ins Schlafzimmer.",
+     "options": ["Um", "Damit", "Wozu", "Dafür"],
+     "answers": ["Um"],
+     "explain": "um zu requires the same subject in both clauses; damit does not."},
+    {"type": "error", "prompt": "The subjects differ, so um zu is impossible. Correct the sentence.",
+     "text": "Dr. Kauter verlässt das Schlafzimmer leise, um seine Frau nicht aufzuwecken zu lassen.",
+     "answers": ["Dr. Kauter verlässt das Schlafzimmer leise, damit seine Frau nicht aufwacht."],
+     "explain": "With different subjects you need damit."},
+    {"type": "fill", "prompt": "Complete the subordinate connector meaning 'whereupon'.",
+     "text": "Der Wecker fiept, ___ sich Fred tot stellt.", "answers": ["woraufhin"],
+     "sentence": "Der Wecker fiept, woraufhin sich Fred tot stellt.", "source": true,
+     "explain": "woraufhin is the subordinate connector; daraufhin the main-clause one."},
+    {"type": "transform", "prompt": "Rewrite the final clause with the preposition zu + Dativ.",
+     "from": "Viele Schriftsteller brauchen Ruhe und Abgeschiedenheit, um zu schreiben.",
+     "answers": ["Zum Schreiben brauchen viele Schriftsteller Ruhe und Abgeschiedenheit."],
+     "explain": "zu + nominalised infinitive is the prepositional equivalent of the final clause."}
+   ]
+  }
+ ]
+}

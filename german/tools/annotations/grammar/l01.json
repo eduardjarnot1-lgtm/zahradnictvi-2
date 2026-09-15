@@ -1,0 +1,125 @@
+{
+ "topics": [
+  {
+   "id": "g-l01-1",
+   "titleEn": "Subjective meaning of the modal verbs",
+   "summary": "müssen, dürfen and können express how certain the speaker is; sollen and wollen report a claim.",
+   "category": "Modalverben",
+   "tags": ["Modalverben", "Vermutung", "Redewiedergabe"],
+   "difficulty": 3,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "Objective and subjective meaning",
+     "text": "Modal verbs have a subjective meaning alongside their objective one. In the present tense only the context tells you which of the two is meant; in the past the two are told apart by their different forms."},
+    {"heading": "Degrees of certainty",
+     "text": "müssen, dürfen and können say how sure the speaker is about the statement: muss = absolutely sure (100 %), müsste = almost sure (90 %), dürfte = probable (75 %), könnte = possible (50 %)."},
+    {"heading": "Reporting a claim",
+     "text": "sollen and wollen express claims. sollen reports someone else's claim; wollen reports a claim the speaker has made about themselves."}
+   ],
+   "rules": [
+    "muss = the speaker is sure it is so, but has no proof and has not checked it.",
+    "müsste = the speaker supposes it.",
+    "dürfte = the speaker thinks it probable.",
+    "könnte = the speaker thinks it possible; the uncertainty is relatively high.",
+    "sollen = it is reported by others, e.g. in the media.",
+    "wollen = the person claims it about themselves.",
+    "For the past, the modal verb is followed by the Infinitiv Perfekt: muss ... gehandelt haben, soll ... geschwommen sein."
+   ],
+   "examples": [
+    {"de": "Es muss sich um eine Sucht handeln.", "note": "100 % — the speaker is sure, but has no proof."},
+    {"de": "Auch beim letzten Fall muss es sich um die neue Sucht gehandelt haben.", "note": "Past: muss + Infinitiv Perfekt."},
+    {"de": "Er müsste den Zug eigentlich noch bekommen, da er glücklicherweise Verspätung hat.", "note": "90 % — the speaker supposes it."},
+    {"de": "Die Sucht dürfte besonders junge Leute betreffen.", "note": "75 % — probable."},
+    {"de": "Die Nervosität könnte von der Handysucht kommen.", "note": "50 % — possible."},
+    {"de": "Der Täter soll sich zurzeit im Ausland aufhalten.", "note": "sollen — reported by others."},
+    {"de": "Eine 56-Jährige will durch den Ärmelkanal geschwommen sein.", "note": "wollen — she claims it about herself."}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "The speaker is completely certain. Which modal verb?",
+     "text": "Es ___ sich um eine Sucht handeln.", "answers": ["muss"],
+     "sentence": "Es muss sich um eine Sucht handeln.", "source": true,
+     "hint": "100 %", "explain": "muss = the speaker is sure, but has no proof."},
+    {"type": "fill", "prompt": "The speaker thinks this is probable (75 %).",
+     "text": "Die Sucht ___ besonders junge Leute betreffen.", "answers": ["dürfte"],
+     "sentence": "Die Sucht dürfte besonders junge Leute betreffen.", "source": true,
+     "hint": "75 %", "explain": "dürfte expresses probability."},
+    {"type": "choice", "prompt": "Which sentence reports what the media say, not what the person claims?",
+     "text": "", "options": ["Der Täter soll sich zurzeit im Ausland aufhalten.", "Der Täter will sich zurzeit im Ausland aufhalten.", "Der Täter dürfte sich zurzeit im Ausland aufhalten."],
+     "answers": ["Der Täter soll sich zurzeit im Ausland aufhalten."],
+     "explain": "sollen reports someone else's claim; wollen would be the man's own claim."},
+    {"type": "choice", "prompt": "Order the four by certainty: which is the least certain?",
+     "text": "", "options": ["könnte", "dürfte", "müsste", "muss"], "answers": ["könnte"],
+     "explain": "muss 100 % > müsste 90 % > dürfte 75 % > könnte 50 %."},
+    {"type": "transform", "prompt": "Put the claim into the past. (wollen + Infinitiv Perfekt)",
+     "from": "Eine 56-Jährige will durch den Ärmelkanal schwimmen.",
+     "answers": ["Eine 56-Jährige will durch den Ärmelkanal geschwommen sein."],
+     "explain": "For the past, wollen takes the Infinitiv Perfekt: geschwommen sein."},
+    {"type": "error", "prompt": "The modal verb contradicts the meaning. Correct the sentence.",
+     "text": "Sie will dafür über 28 Stunden gebraucht haben — so berichten es alle Zeitungen.",
+     "answers": ["Sie soll dafür über 28 Stunden gebraucht haben — so berichten es alle Zeitungen.", "Sie soll dafür über 28 Stunden gebraucht haben."],
+     "explain": "If the newspapers report it, it is someone else's claim, so sollen, not wollen."},
+    {"type": "context", "prompt": "Complete with the modal verb that fits the certainty stated in brackets.",
+     "text": "Die Nervosität ___ von der Handysucht kommen. (nur möglich, 50 %)",
+     "answers": ["könnte"],
+     "sentence": "Die Nervosität könnte von der Handysucht kommen.", "source": true,
+     "explain": "könnte = the speaker holds it possible; the uncertainty is relatively high."}
+   ]
+  },
+  {
+   "id": "g-l01-2",
+   "titleEn": "Word formation: the prefixes miss-, zer-, ent- and de-",
+   "summary": "Four inseparable prefixes that give the base verb a different, often negative meaning.",
+   "category": "Wortbildung",
+   "tags": ["Wortbildung", "Vorsilben", "Verben"],
+   "difficulty": 2,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "What they do",
+     "text": "The inseparable prefixes miss-, zer-, ent- and de- give the base verb a different, frequently negative meaning."},
+    {"heading": "Verbs already carrying ge-",
+     "text": "If the base verb has the prefix ge-, that prefix drops and is replaced by miss-, e.g. gelingen – misslingen."}
+   ],
+   "rules": [
+    "miss- reverses or negates the base verb: gefallen → missfallen, trauen → misstrauen.",
+    "zer- expresses destruction or something going to pieces: reden → zerreden, laufen → zerlaufen.",
+    "ent- expresses removal or taking away: kleiden → entkleiden, sorgen → entsorgen.",
+    "de- reverses a technical or formal process, mostly with Latinate verbs: installieren → deinstallieren, stabilisieren → destabilisieren.",
+    "All four prefixes are inseparable and unstressed; the Partizip II has no ge-: missfallen, zerredet, entsorgt, deinstalliert."
+   ],
+   "examples": [
+    {"de": "Max misstraut den Berichten über solche Rekordversuche.", "note": "miss- — trauen becomes its opposite."},
+    {"de": "Man sollte die Glücksmomente aber nicht zerreden.", "note": "zer- — talking something to pieces."},
+    {"de": "Dem Modell ist das Make-up total zerlaufen.", "note": "zer- — running and coming apart."},
+    {"de": "Bei manchen beginnt die Entspannung bereits, wenn sie sich entkleiden.", "note": "ent- — taking clothes off."},
+    {"de": "Plastikabfall wurde in speziellen Containern entsorgt.", "note": "ent- — getting rid of."},
+    {"de": "Ein Kollege hilft mir, das alte Programm auf dem Computer zu deinstallieren.", "note": "de- — undoing the installation."},
+    {"de": "Durch das viele Laufen wurden die Wirbel wieder leicht destabilisiert.", "note": "de- — undoing the stabilisation."}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Which prefix turns trauen into its opposite?",
+     "text": "Max ___traut den Berichten über solche Rekordversuche.", "answers": ["miss"],
+     "sentence": "Max misstraut den Berichten über solche Rekordversuche.", "source": true,
+     "explain": "miss- negates the base verb: trauen → misstrauen."},
+    {"type": "fill", "prompt": "Complete the verb of disposal.",
+     "text": "Plastikabfall wurde in speziellen Containern ___sorgt.", "answers": ["ent"],
+     "sentence": "Plastikabfall wurde in speziellen Containern entsorgt.", "source": true,
+     "explain": "ent- expresses removal: sorgen → entsorgen."},
+    {"type": "choice", "prompt": "gelingen has the prefix ge-. What is its negative form?",
+     "text": "", "options": ["misslingen", "missgelingen", "gemisslingen", "zergelingen"],
+     "answers": ["misslingen"],
+     "explain": "With base verbs carrying ge-, that prefix drops and is replaced by miss-: gelingen – misslingen."},
+    {"type": "choice", "prompt": "Which prefix undoes a technical process such as installieren?",
+     "text": "", "options": ["de-", "zer-", "ent-", "miss-"], "answers": ["de-"],
+     "explain": "de- reverses a technical or formal process: installieren → deinstallieren."},
+    {"type": "transform", "prompt": "Rewrite with a zer- verb: the make-up ran and came apart completely.",
+     "from": "Dem Modell ist das Make-up total verlaufen.",
+     "answers": ["Dem Modell ist das Make-up total zerlaufen."],
+     "explain": "zer- expresses that something goes to pieces."},
+    {"type": "error", "prompt": "The Partizip II is wrong — these prefixes are inseparable. Correct it.",
+     "text": "Ein Kollege hat das alte Programm gedeinstalliert.",
+     "answers": ["Ein Kollege hat das alte Programm deinstalliert."],
+     "explain": "miss-, zer-, ent- and de- are inseparable and unstressed, so the Partizip II takes no ge-."}
+   ]
+  }
+ ]
+}

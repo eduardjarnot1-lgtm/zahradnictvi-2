@@ -1,0 +1,314 @@
+{
+ "topics": [
+  {
+   "id": "g-daf-a1-location",
+   "titleEn": "Saying where something is (Wo?)",
+   "summary": "A Wo? question is answered in the dative, usually with stehen, sitzen, liegen or hängen.",
+   "category": "Adverbien und Präpositionen",
+   "tags": ["Lokal", "Dativ", "Wo", "Wechselpräpositionen"],
+   "difficulty": 1,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "The rule", "text": "When asking a Wo? question, the answer will be in the dative case."},
+    {"heading": "The four verbs", "text": "The answer often contains stehen, sitzen, liegen or hängen — verbs of position rather than of movement."},
+    {"heading": "Reading the arrows", "text": "The document writes the dative form and then the nominative it came from in brackets: dem Tisch (← der Tisch), der Kommode (← die Kommode), den Regalen (← die Regale, Pl.)."}
+   ],
+   "rules": [
+    "Wo? is answered with the dative.",
+    "der → dem, das → dem, die → der, plural die → den (+ -n on the noun).",
+    "Typical verbs: stehen, sitzen, liegen, hängen.",
+    "The prepositions used here are auf, unter, an, neben, in, vor, hinter, über, zwischen."
+   ],
+   "examples": [
+    {"de": "Wo ist / liegt das Buch?", "note": "the question"},
+    {"de": "Das Buch ist auf / unter / an dem Tisch (← der Tisch)", "note": "der Tisch → dem Tisch"},
+    {"de": "liegt neben / in dem Sofa (← das Sofa)", "note": "das Sofa → dem Sofa"},
+    {"de": "vor / hinter der Kommode (← die Kommode)", "note": "die Kommode → der Kommode"},
+    {"de": "über / zwischen den Regalen (← die Regale, Pl.)", "note": "plural dative: den + -n on the noun"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Complete the article.", "text": "Das Buch liegt auf ___ Tisch.", "answers": ["dem"], "hint": "der Tisch, and Wo? takes the dative.", "explain": "der → dem in the dative."},
+    {"type": "fill", "prompt": "Complete the article.", "text": "Das Buch liegt vor ___ Kommode.", "answers": ["der"], "explain": "die Kommode → der Kommode in the dative."},
+    {"type": "choice", "prompt": "Which case answers a Wo? question?", "text": "", "options": ["Dativ", "Akkusativ", "Nominativ", "Genitiv"], "answers": ["Dativ"], "explain": "The document states it as the rule for this section."},
+    {"type": "choice", "prompt": "Which verb does NOT belong to the Wo? group named here?", "text": "", "options": ["gehen", "stehen", "sitzen", "hängen"], "answers": ["gehen"], "explain": "The document names stehen, sitzen, liegen and hängen — verbs of position."},
+    {"type": "fill", "prompt": "Complete the plural dative.", "text": "Das Buch liegt zwischen ___ Regalen.", "answers": ["den"], "explain": "die Regale → den Regalen."}
+   ]
+  },
+  {
+   "id": "g-daf-a1-prepositions-of-place",
+   "titleEn": "Prepositions of place and their contractions",
+   "summary": "durch and um take the accusative; von, zu and bei the dative; in takes either.",
+   "category": "Adverbien und Präpositionen",
+   "tags": ["Präpositionen", "Lokal", "Akkusativ", "Dativ", "Kontraktion"],
+   "difficulty": 2,
+   "prerequisites": ["g-daf-a1-location"],
+   "explanation": [
+    {"heading": "Always accusative", "text": "durch and um … (herum) take the accusative: durch den Park, um die Ecke herum."},
+    {"heading": "Always dative", "text": "von, zu and bei take the dative, and they contract with the article: von dem → vom, zu dem → zum, zu der → zur, bei dem → beim."},
+    {"heading": "From … to", "text": "A route is von … (bis) zu: vom Münster (bis) zum Bahnhof, von der Postgasse (bis) zur Kramgasse."},
+    {"heading": "in takes both", "text": "in answers wohin? with the accusative (in den Park, ins Haus) and wo? with the dative (im Bärenpark, in der Schweiz). in das → ins and in dem → im."}
+   ],
+   "rules": [
+    "durch, um … (herum): accusative.",
+    "von, zu, bei: dative.",
+    "Contractions: vom, zum, zur, beim, ins, im.",
+    "in + accusative answers wohin?; in + dative answers wo?",
+    "The feminine keeps its own forms: von der, zur, bei der, in die, in der."
+   ],
+   "examples": [
+    {"de": "durch den Park / durch das Einkaufszentrum / durch die Stadt", "note": "durch + accusative in all three genders"},
+    {"de": "um den Haupteingang / um das Haus / um die Ecke herum", "note": "um … herum + accusative"},
+    {"de": "vom Bahnhof", "note": "von dem → vom"},
+    {"de": "von der Zytglogge", "note": "feminine: no contraction"},
+    {"de": "zum Park", "note": "zu dem → zum"},
+    {"de": "zur Zytglogge", "note": "zu der → zur"},
+    {"de": "vom Münster (bis) zum Bahnhof", "note": "a route"},
+    {"de": "beim Bahnhof", "note": "bei dem → beim"},
+    {"de": "in den Park", "note": "wohin? — accusative"},
+    {"de": "ins Haus", "note": "in das → ins, wohin?"},
+    {"de": "im Bärenpark", "note": "in dem → im, wo?"},
+    {"de": "in der Schweiz", "note": "wo? — feminine dative"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Complete the contraction.", "text": "Ich gehe ___ Park. (zu dem)", "answers": ["zum"], "explain": "zu + dem = zum."},
+    {"type": "fill", "prompt": "Complete the contraction.", "text": "Ich komme ___ Bahnhof. (von dem)", "answers": ["vom"], "explain": "von + dem = vom."},
+    {"type": "choice", "prompt": "Which case does durch take?", "text": "durch ___ Park", "options": ["den", "dem", "des", "der"], "answers": ["den"], "explain": "durch always takes the accusative."},
+    {"type": "choice", "prompt": "Which phrase answers wo?", "text": "", "options": ["im Bärenpark", "in den Park", "ins Haus", "in die Kramgasse"], "answers": ["im Bärenpark"], "explain": "in + dative answers wo?; the other three are accusative and answer wohin?"},
+    {"type": "fill", "prompt": "Complete the contraction.", "text": "Wir gehen ___ Haus. (in das)", "answers": ["ins"], "explain": "in + das = ins."},
+    {"type": "transform", "prompt": "Rewrite with the feminine noun die Zytglogge.", "from": "zum Park", "answers": ["zur Zytglogge"], "explain": "zu + der = zur."}
+   ]
+  },
+  {
+   "id": "g-daf-a2-prepositions-of-place-2",
+   "titleEn": "entlang, rein / raus, hin- and her-",
+   "summary": "More prepositions of place, plus the direction prefixes hin- (away) and her- (towards).",
+   "category": "Adverbien und Präpositionen",
+   "tags": ["Präpositionen", "Lokal", "entlang", "hin", "her", "Umgangssprache"],
+   "difficulty": 3,
+   "prerequisites": ["g-daf-a1-prepositions-of-place"],
+   "explanation": [
+    {"heading": "Dative group", "text": "bei, (bis) zu and links / rechts / gegenüber von take the dative, and zu, bei and von contract with the article."},
+    {"heading": "entlang comes after", "text": "entlang takes the accusative and, unusually, is placed after the noun: Jörg soll die Kärntner Straße entlang gehen."},
+    {"heading": "The short forms", "text": "rein and raus are the short forms of hinein / herein and hinaus / heraus, especially common in spoken German. rein goes with in + accusative, raus with aus + dative."},
+    {"heading": "hin- or her-", "text": "her- means movement from a place towards the speaker (Komm heraus!); hin- means movement to a place away from the speaker (Jörg geht aus dem Museum hinaus)."}
+   ],
+   "rules": [
+    "bei, (bis) zu, links / rechts / gegenüber von: dative.",
+    "Contractions: zu + dem = zum, zu + der = zur, bei + dem = beim, von + dem = vom.",
+    "entlang + accusative, placed after the noun.",
+    "rein = hinein / herein; raus = hinaus / heraus; both are colloquial short forms.",
+    "rein goes with in + accusative; raus goes with aus + dative.",
+    "her- = towards the speaker; hin- = away from the speaker."
+   ],
+   "examples": [
+    {"de": "zu + dem = zum, zu + der = zur, bei + dem = beim, von + dem = vom", "note": "the four contractions the document lists"},
+    {"de": "Jörg soll bis zum Ring gehen. / bis zur Dumbastraße gehen.", "note": "bis zu + dative"},
+    {"de": "Jörg soll die Kärntner Straße entlang gehen.", "note": "entlang follows the noun"},
+    {"de": "Jörg geht in das Wien Museum rein.", "note": "rein with in + accusative"},
+    {"de": "Jörg geht aus dem Wien Museum raus.", "note": "raus with aus + dative"},
+    {"de": "Komm heraus!", "note": "her- — towards the speaker"},
+    {"de": "Jörg geht aus dem Museum hinaus.", "note": "hin- — away from the speaker"}
+   ],
+   "exercises": [
+    {"type": "reorder", "prompt": "Put the sentence in order.", "tokens": ["Jörg", "soll", "die", "Kärntner", "Straße", "entlang", "gehen"], "answers": ["Jörg soll die Kärntner Straße entlang gehen"], "explain": "entlang comes after the noun it belongs to.", "source": true, "sentence": "Jörg soll die Kärntner Straße entlang gehen."},
+    {"type": "choice", "prompt": "Which prefix means movement towards the speaker?", "text": "", "options": ["her-", "hin-", "ent-", "aus-"], "answers": ["her-"], "explain": "her- = from a place towards the speaker; hin- = to a place away from the speaker."},
+    {"type": "fill", "prompt": "Complete the short form.", "text": "Jörg geht aus dem Wien Museum ___.", "answers": ["raus"], "explain": "raus is the short form of hinaus / heraus and goes with aus + dative.", "source": true, "sentence": "Jörg geht aus dem Wien Museum raus."},
+    {"type": "fill", "prompt": "Complete the contraction.", "text": "Jörg soll bis ___ Ring gehen.", "answers": ["zum"], "explain": "zu + dem = zum.", "source": true, "sentence": "Jörg soll bis zum Ring gehen."},
+    {"type": "choice", "prompt": "Which case does entlang take?", "text": "die Kärntner Straße entlang", "options": ["Akkusativ", "Dativ", "Genitiv", "Nominativ"], "answers": ["Akkusativ"], "explain": "entlang + accusative, after the noun."},
+    {"type": "context", "prompt": "Choose the form that matches the preposition.", "text": "Jörg geht ___ das Wien Museum rein.", "options": ["in", "aus", "bei", "von"], "answers": ["in"], "explain": "rein pairs with in + accusative; raus pairs with aus + dative."}
+   ]
+  },
+  {
+   "id": "g-daf-a2-dual-case-prepositions-an-auf-in-ber-unt",
+   "titleEn": "Dual-case prepositions: wohin? or wo?",
+   "summary": "Nine prepositions that take the accusative for movement and the dative for position.",
+   "category": "Adverbien und Präpositionen",
+   "tags": ["Wechselpräpositionen", "Akkusativ", "Dativ", "Kontraktion"],
+   "difficulty": 3,
+   "prerequisites": ["g-daf-a1-location", "g-daf-a1-prepositions-of-place"],
+   "explanation": [
+    {"heading": "The nine", "text": "an, auf, in, über, unter, hinter, vor, neben, zwischen can take either case; the case is chosen by the question, not by the preposition."},
+    {"heading": "Wohin? → accusative", "text": "Movement towards a goal: Stell den Kaffee ins Regal! The contractions are an das → ans, auf das → aufs, in das → ins, and colloquially hinters, übers, unters, vors."},
+    {"heading": "Wo? → dative", "text": "Position: Der Kaffee steht im Regal. The contractions are an dem → am, in dem → im, and colloquially auf'm, hinterm, überm, unterm, vorm."},
+    {"heading": "A quick test", "text": "If the verb is stellen, legen, setzen, hängen (put) the case is accusative; with stehen, liegen, sitzen, hängen (be) it is dative."}
+   ],
+   "rules": [
+    "Wohin? → accusative. Wo? → dative.",
+    "Standard accusative contractions: ans, aufs, ins.",
+    "Standard dative contractions: am, im.",
+    "The document marks hinters, übers, unters, vors and auf'm, hinterm, überm, unterm, vorm as colloquial.",
+    "The same preposition can appear in both frames: ins Regal (wohin?) and im Regal (wo?)."
+   ],
+   "examples": [
+    {"de": "Stell den Kaffee ins Regal!", "note": "wohin? — accusative"},
+    {"de": "Der Kaffee steht im Regal.", "note": "wo? — dative"},
+    {"de": "an das → ans, auf das → aufs, in das → ins", "note": "the accusative contractions"},
+    {"de": "an dem → am, in dem → im", "note": "the dative contractions"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Complete the contraction.", "text": "Stell den Kaffee ___ Regal!", "answers": ["ins"], "explain": "Movement, so accusative: in das → ins.", "source": true, "sentence": "Stell den Kaffee ins Regal!"},
+    {"type": "fill", "prompt": "Complete the contraction.", "text": "Der Kaffee steht ___ Regal.", "answers": ["im"], "explain": "Position, so dative: in dem → im.", "source": true, "sentence": "Der Kaffee steht im Regal."},
+    {"type": "choice", "prompt": "Which question goes with the accusative?", "text": "", "options": ["Wohin?", "Wo?", "Wann?", "Wie?"], "answers": ["Wohin?"], "explain": "Wohin? asks about movement to a goal and takes the accusative."},
+    {"type": "choice", "prompt": "Which contraction does the document mark as colloquial?", "text": "", "options": ["überm", "im", "ins", "am"], "answers": ["überm"], "explain": "auf'm, hinterm, überm, unterm, vorm are listed as colloquial."},
+    {"type": "transform", "prompt": "Turn the movement sentence into a position sentence.", "from": "Stell den Kaffee ins Regal!", "answers": ["Der Kaffee steht im Regal.", "Der Kaffee steht im Regal"], "explain": "The goal becomes a location, so the accusative ins becomes the dative im."}
+   ]
+  },
+  {
+   "id": "g-daf-b1-giving-reasons-causal-connectives",
+   "titleEn": "Giving reasons: wegen and nämlich",
+   "summary": "A preposition with the genitive, and an adverb that never starts the sentence.",
+   "category": "Adverbien und Präpositionen",
+   "tags": ["Kausal", "wegen", "nämlich", "Genitiv", "Konnektoren"],
+   "difficulty": 4,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "wegen + genitive", "text": "wegen names the reason as a noun phrase in the genitive: Wegen der Kombination aus Theorie und Praxis …"},
+    {"heading": "nämlich is not a conjunction", "text": "nämlich is a connecting adverb. It stands inside the second sentence, after the conjugated verb — never in first position and never before it."},
+    {"heading": "What it does", "text": "The sentence with nämlich supplies the reason for the sentence before it: Ich muss ein Auslandssemester machen. Ich habe nämlich vor, …"}
+   ],
+   "rules": [
+    "wegen takes the genitive and can open the sentence.",
+    "nämlich is a connecting adverb, placed after the conjugated verb in the middle field.",
+    "nämlich cannot stand in first position.",
+    "The nämlich sentence gives the reason for the statement before it."
+   ],
+   "examples": [
+    {"de": "Wegen der Kombination aus Theorie und Praxis wäre ein Studium an einer FH sicher interessant.", "note": "wegen + genitive in first position"},
+    {"de": "Ich muss ein Auslandssemester machen. Ich habe nämlich vor, später für eine internationale Organisation zu arbeiten.", "note": "nämlich after the conjugated verb habe"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Complete the connecting adverb.", "text": "Ich muss ein Auslandssemester machen. Ich habe ___ vor, später für eine internationale Organisation zu arbeiten.", "answers": ["nämlich"], "explain": "The adverb goes after the conjugated verb habe.", "source": true, "sentence": "Ich habe nämlich vor, später für eine internationale Organisation zu arbeiten."},
+    {"type": "choice", "prompt": "Which case follows wegen?", "text": "wegen ___ Kombination aus Theorie und Praxis", "options": ["der", "die", "dem", "den"], "answers": ["der"], "explain": "wegen takes the genitive; die Kombination → der Kombination."},
+    {"type": "error", "prompt": "nämlich is in the wrong place. Fix the sentence.", "text": "Nämlich ich habe vor, im Ausland zu arbeiten.", "answers": ["Ich habe nämlich vor, im Ausland zu arbeiten.", "Ich habe nämlich vor, im Ausland zu arbeiten"], "explain": "nämlich cannot open a sentence; it follows the conjugated verb."},
+    {"type": "choice", "prompt": "What kind of word is nämlich?", "text": "", "options": ["a connecting adverb", "a subordinating conjunction", "a preposition", "a modal particle only"], "answers": ["a connecting adverb"], "explain": "The document calls it a connecting adverb, which is why it takes a middle-field position."},
+    {"type": "reorder", "prompt": "Put the sentence in order.", "tokens": ["Wegen", "der", "Kombination", "aus", "Theorie", "und", "Praxis", "wäre", "ein", "Studium", "an", "einer", "FH", "sicher", "interessant"], "answers": ["Wegen der Kombination aus Theorie und Praxis wäre ein Studium an einer FH sicher interessant"], "explain": "The wegen phrase fills position 1, so the verb wäre comes second.", "source": true, "sentence": "Wegen der Kombination aus Theorie und Praxis wäre ein Studium an einer FH sicher interessant."}
+   ]
+  },
+  {
+   "id": "g-daf-b1-giving-counter-arguments-concessive-conn",
+   "titleEn": "Counter-arguments: trotzdem, dennoch, zwar … aber, trotz",
+   "summary": "Four ways to concede a point and then argue against it.",
+   "category": "Adverbien und Präpositionen",
+   "tags": ["Konzessiv", "trotzdem", "dennoch", "zwar", "trotz", "Konnektoren"],
+   "difficulty": 4,
+   "prerequisites": ["g-daf-b1-giving-reasons-causal-connectives"],
+   "explanation": [
+    {"heading": "trotzdem and dennoch", "text": "Both are connectors standing at the front of the second sentence, so the verb follows immediately: Trotzdem ist das „Latinum“ heute nur noch selten Pflicht. dennoch is the more formal of the two."},
+    {"heading": "Where the conceded point sits", "text": "With trotzdem and dennoch the counter-argument is in the preceding main sentence; with zwar it is in the main clause itself, answered by aber."},
+    {"heading": "trotz + genitive", "text": "The preposition trotz packs the conceded point into a noun phrase: Trotz der Nützlichkeit von Lateinkenntnissen …"},
+    {"heading": "A note on the zwar example", "text": "The document prints Zwar Lateinkenntnisse können …; in ordinary usage zwar follows the subject or the verb (Lateinkenntnisse können zwar …). The example is quoted here as printed."}
+   ],
+   "rules": [
+    "trotzdem and dennoch open the second sentence and are followed directly by the verb.",
+    "dennoch is more formal than trotzdem.",
+    "zwar … aber puts the conceded point and the objection in one sentence pair.",
+    "trotz takes the genitive."
+   ],
+   "examples": [
+    {"de": "Lateinkenntnisse können im Studium sehr hilfreich sein. Trotzdem ist das „Latinum“ heute nur noch selten Pflicht.", "note": "trotzdem in position 1, verb second"},
+    {"de": "Dennoch ist das „Latinum“ heute nur noch selten Pflicht.", "note": "dennoch — the more formal variant"},
+    {"de": "Zwar Lateinkenntnisse können im Studium sehr hilfreich sein, aber das „Latinum“ ist heute nur noch selten Pflicht.", "note": "zwar … aber, quoted exactly as the document prints it"},
+    {"de": "Trotz der Nützlichkeit von Lateinkenntnissen ist das „Latinum“ heute nur noch selten Pflicht.", "note": "trotz + genitive"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Complete the connector.", "text": "Lateinkenntnisse können im Studium sehr hilfreich sein. ___ ist das „Latinum“ heute nur noch selten Pflicht.", "answers": ["Trotzdem", "Dennoch"], "explain": "Both connectors fit; dennoch is the more formal one.", "source": true, "sentence": "Trotzdem ist das „Latinum“ heute nur noch selten Pflicht."},
+    {"type": "choice", "prompt": "Which case follows trotz?", "text": "trotz ___ Nützlichkeit von Lateinkenntnissen", "options": ["der", "die", "dem", "den"], "answers": ["der"], "explain": "trotz takes the genitive: der Nützlichkeit."},
+    {"type": "choice", "prompt": "Which connector is the more formal one?", "text": "", "options": ["dennoch", "trotzdem", "zwar", "aber"], "answers": ["dennoch"], "explain": "The document offers dennoch as the formal alternative to trotzdem."},
+    {"type": "fill", "prompt": "Complete the pair.", "text": "___ können Lateinkenntnisse hilfreich sein, aber das „Latinum“ ist selten Pflicht.", "answers": ["Zwar"], "explain": "zwar concedes the point and aber states the objection."},
+    {"type": "error", "prompt": "The word order after the connector is wrong. Fix it.", "text": "Trotzdem das „Latinum“ ist heute nur noch selten Pflicht.", "answers": ["Trotzdem ist das „Latinum“ heute nur noch selten Pflicht.", "Trotzdem ist das Latinum heute nur noch selten Pflicht."], "explain": "trotzdem fills position 1, so the conjugated verb must come second."}
+   ]
+  },
+  {
+   "id": "g-daf-b1-expressing-results-consequences",
+   "titleEn": "Results: also and folglich",
+   "summary": "Two main-clause connectors for a consequence, one everyday, one formal.",
+   "category": "Adverbien und Präpositionen",
+   "tags": ["Konsekutiv", "also", "folglich", "Konnektoren", "Wortstellung"],
+   "difficulty": 3,
+   "prerequisites": ["g-daf-b1-giving-reasons-causal-connectives"],
+   "explanation": [
+    {"heading": "What they do", "text": "In main clauses folglich or also express a result — the consequence of what was just said."},
+    {"heading": "Two positions", "text": "Both can stand at the beginning of the sentence or in the middle. At the beginning the verb follows immediately: Folglich ist man manchmal … In the middle the ordinary order is kept: Man ist folglich manchmal …"},
+    {"heading": "Register", "text": "Sentences with folglich are more formal than sentences with also."}
+   ],
+   "rules": [
+    "also and folglich are main-clause connectors, not subordinating conjunctions.",
+    "In first position they are followed directly by the conjugated verb.",
+    "In the middle field they stand after the conjugated verb.",
+    "folglich is more formal than also."
+   ],
+   "examples": [
+    {"de": "Mehrere Stunden am Tag eine Fremdsprache zu lernen ist anstrengend. Folglich ist man manchmal einfach nur müde und macht dann leichter Fehler.", "note": "folglich in position 1, verb second"},
+    {"de": "Man ist folglich manchmal einfach nur müde und macht dann leichter Fehler.", "note": "the same sentence with folglich in the middle"},
+    {"de": "Ich kenne das Wort „Gerät“ nicht, also muss ich im Wörterbuch nachschlagen.", "note": "also in position 1 of the second clause"},
+    {"de": "Ich kenne das Wort „Gerät“ nicht, ich muss also im Wörterbuch nachschlagen.", "note": "the same with also in the middle"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Complete the verb position after the connector.", "text": "Folglich ___ man manchmal einfach nur müde.", "answers": ["ist"], "explain": "The connector fills position 1, so the conjugated verb comes second.", "source": true, "sentence": "Folglich ist man manchmal einfach nur müde und macht dann leichter Fehler."},
+    {"type": "choice", "prompt": "Which version is the more formal one?", "text": "", "options": ["Folglich ist man manchmal müde.", "Also ist man manchmal müde.", "Both are equally formal.", "Neither is used in writing."], "answers": ["Folglich ist man manchmal müde."], "explain": "The document says sentences with folglich are more formal than sentences with also."},
+    {"type": "transform", "prompt": "Move the connector into the middle of the clause.", "from": "Ich kenne das Wort „Gerät“ nicht, also muss ich im Wörterbuch nachschlagen.", "answers": ["Ich kenne das Wort „Gerät“ nicht, ich muss also im Wörterbuch nachschlagen.", "ich muss also im Wörterbuch nachschlagen"], "explain": "With also in the middle field the subject takes position 1.", "source": true, "sentence": "Ich kenne das Wort „Gerät“ nicht, ich muss also im Wörterbuch nachschlagen."},
+    {"type": "choice", "prompt": "Where can also and folglich stand?", "text": "", "options": ["at the beginning or in the middle of the sentence", "only at the beginning", "only at the end", "only after a comma"], "answers": ["at the beginning or in the middle of the sentence"], "explain": "The document gives both placements for each connector."},
+    {"type": "error", "prompt": "Fix the word order.", "text": "Folglich man ist manchmal einfach nur müde.", "answers": ["Folglich ist man manchmal einfach nur müde.", "Folglich ist man manchmal einfach nur müde"], "explain": "The verb must come second when the connector opens the sentence."}
+   ]
+  },
+  {
+   "id": "g-daf-b1-preposition-statt-genitive-standard-use-",
+   "titleEn": "statt + genitive (or dative)",
+   "summary": "Expressing an alternative — instead of.",
+   "category": "Adverbien und Präpositionen",
+   "tags": ["Präpositionen", "statt", "Genitiv", "Dativ", "Alternative"],
+   "difficulty": 4,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "Two cases, two registers", "text": "Alternatives can be expressed using statt + genitive in standard usage, or statt + dative colloquially: Statt der Grünen / Statt den Grünen."},
+    {"heading": "statt before a preposition", "text": "statt is also used with prepositions. Then it simply stands in front of the whole prepositional phrase and does not govern a case of its own: Statt im Mai, Statt für die SPD."},
+    {"heading": "Position", "text": "In both examples the statt phrase opens the sentence, so the conjugated verb follows in second position: … wählt Lisa …, … war die Wahl …"}
+   ],
+   "rules": [
+    "statt + genitive is the standard form; statt + dative is colloquial.",
+    "statt can also stand in front of a prepositional phrase, which keeps its own case.",
+    "A statt phrase in first position is followed by the conjugated verb."
+   ],
+   "examples": [
+    {"de": "Statt der Grünen / Statt den Grünen wählt Lisa das nächste Mal eine andere Partei.", "note": "genitive (standard) beside dative (colloquial)"},
+    {"de": "Statt im Mai, war die Wahl im Juni.", "note": "statt in front of a prepositional phrase"},
+    {"de": "Statt für die SPD hat sie für die Grünen gestimmt.", "note": "the preposition für keeps its own case"}
+   ],
+   "exercises": [
+    {"type": "choice", "prompt": "Which form is the standard one?", "text": "___ Grünen wählt Lisa das nächste Mal eine andere Partei.", "options": ["Statt der", "Statt den", "Statt die", "Statt dem"], "answers": ["Statt der"], "explain": "statt + genitive is standard; statt den Grünen is the colloquial dative."},
+    {"type": "fill", "prompt": "Complete the sentence.", "text": "Statt für die SPD hat sie ___ die Grünen gestimmt.", "answers": ["für"], "explain": "statt stands in front of the prepositional phrase; für keeps its own case.", "source": true, "sentence": "Statt für die SPD hat sie für die Grünen gestimmt."},
+    {"type": "choice", "prompt": "What does statt express?", "text": "", "options": ["an alternative", "a reason", "a consequence", "a time"], "answers": ["an alternative"], "explain": "The document introduces it under alternatives."},
+    {"type": "reorder", "prompt": "Put the sentence in order.", "tokens": ["Statt", "im", "Mai,", "war", "die", "Wahl", "im", "Juni"], "answers": ["Statt im Mai, war die Wahl im Juni"], "explain": "The statt phrase fills position 1, so war comes second.", "source": true, "sentence": "Statt im Mai, war die Wahl im Juni."},
+    {"type": "error", "prompt": "Use the standard case after statt.", "text": "Statt dem Kaffee trinkt sie heute Tee.", "answers": ["Statt des Kaffees trinkt sie heute Tee.", "Statt des Kaffees trinkt sie heute Tee"], "hint": "The standard form is the genitive.", "explain": "statt + genitive: des Kaffees. The dative is colloquial."}
+   ]
+  },
+  {
+   "id": "g-daf-b1-preposition-w-hrend-genitive-standard-us",
+   "titleEn": "während + genitive (or dative)",
+   "summary": "A preposition naming the time during which something happens.",
+   "category": "Adverbien und Präpositionen",
+   "tags": ["Präpositionen", "während", "Genitiv", "Dativ", "Temporal"],
+   "difficulty": 3,
+   "prerequisites": ["g-daf-b1-preposition-statt-genitive-standard-use-"],
+   "explanation": [
+    {"heading": "What it says", "text": "The preposition während expresses a time in which something happens — during, in the course of."},
+    {"heading": "Two cases", "text": "The standard case is the genitive: während seines Besuchs. Colloquially the dative is heard: während seinem Besuch."},
+    {"heading": "Not the same as the conjunction", "text": "This während is a preposition and takes a noun phrase. The conjunction während, which introduces a whole clause with a verb at the end, is a different word."}
+   ],
+   "rules": [
+    "während + genitive is standard; während + dative is colloquial.",
+    "It names the period during which something happens.",
+    "It is followed by a noun phrase, not a clause."
+   ],
+   "examples": [
+    {"de": "Während seines Besuchs / seinem Besuch sieht Karl viel von Berlin.", "note": "the genitive and the colloquial dative side by side"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Complete the standard (genitive) form.", "text": "Während sein___ Besuchs sieht Karl viel von Berlin.", "answers": ["es"], "explain": "Masculine genitive: seines Besuchs."},
+    {"type": "choice", "prompt": "Which case does während take in standard usage?", "text": "", "options": ["Genitiv", "Dativ", "Akkusativ", "Nominativ"], "answers": ["Genitiv"], "explain": "The genitive is standard; the dative is marked colloquial."},
+    {"type": "choice", "prompt": "What does während express here?", "text": "", "options": ["a time in which something happens", "a reason", "an alternative", "a counter-argument"], "answers": ["a time in which something happens"], "explain": "The document's own definition."},
+    {"type": "transform", "prompt": "Give the colloquial version.", "from": "während seines Besuchs", "answers": ["während seinem Besuch"], "explain": "The colloquial variant uses the dative."}
+   ]
+  }
+ ]
+}

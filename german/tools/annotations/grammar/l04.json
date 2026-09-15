@@ -1,0 +1,119 @@
+{
+ "topics": [
+  {
+   "id": "g-l04-1",
+   "titleEn": "Functions of the pronoun es",
+   "summary": "es as an optional placeholder, as a real pronoun, and as an impersonal subject or object.",
+   "category": "Pronomen",
+   "tags": ["es", "Pronomen", "Satzbau", "Korrelat"],
+   "difficulty": 4,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "Two kinds of es",
+     "text": "The pronoun es fulfils several functions in German. In some sentences es is an obligatory element of the sentence; in others it is not obligatory and can drop."},
+    {"heading": "es as a placeholder",
+     "text": "As a non-obligatory element es stands for a following subordinate clause or infinitive clause: a dass-clause, an infinitive clause or an indirect question. If that clause is placed first, es drops or is replaced by das."},
+    {"heading": "es as an obligatory element",
+     "text": "As an obligatory element es either replaces something (a noun in the nominative or accusative, an adjective or participle, a part of a sentence or a whole sentence) or serves as an impersonal subject or object."}
+   ],
+   "rules": [
+    "Placeholder es represents a dass-clause, an infinitive clause or an indirect question.",
+    "If the subordinate or infinitive clause is placed first, es drops or is replaced by das.",
+    "As a pronoun es can replace a noun in the nominative or accusative, an adjective or participle, or a whole part of a sentence.",
+    "When es replaces an adjective, a participle or a whole clause, it cannot stand in position 1.",
+    "Impersonal es is used for weather, time, personal well-being, sense impressions, noises, topic, and as a nominative complement with sein.",
+    "Impersonal es also appears as an object in set expressions: es eilig haben, es darauf ankommen lassen, es ernst meinen."
+   ],
+   "examples": [
+    {"de": "Es ist wunderbar, dass sich so viele Möglichkeiten bieten.", "note": "es represents a dass-clause."},
+    {"de": "Für diese Menschen ist es sinnvoller, eine vielseitige Tätigkeit anzustreben.", "note": "es represents an infinitive clause."},
+    {"de": "Es ist fraglich, ob das stimmt.", "note": "es represents an indirect question."},
+    {"de": "Sie besorgt nicht nur das Geschenk, sie verpackt es auch.", "note": "es replaces a noun in the accusative."},
+    {"de": "Meine Kolleginnen sind topfit, ich bin es leider nicht.", "note": "es replaces an adjective; it cannot stand in position 1."},
+    {"de": "Es regnet. Es schneit. Es donnert.", "note": "impersonal es — weather."},
+    {"de": "Er hat es eilig.", "note": "impersonal es as an object in a set expression."}
+   ],
+   "exercises": [
+    {"type": "choice", "prompt": "The dass-clause is placed first. What happens to es?",
+     "text": "___ sich so viele Möglichkeiten bieten, ist wunderbar.",
+     "options": ["Dass", "Es dass", "Es, dass", "Dass es"],
+     "answers": ["Dass"],
+     "explain": "When the subordinate clause comes first, es drops (or is replaced by das): Dass sich so viele Möglichkeiten bieten, (das) ist wunderbar."},
+    {"type": "fill", "prompt": "Complete the placeholder for the following infinitive clause.",
+     "text": "Für diese Menschen ist ___ sinnvoller, eine vielseitige Tätigkeit anzustreben.",
+     "answers": ["es"],
+     "sentence": "Für diese Menschen ist es sinnvoller, eine vielseitige Tätigkeit anzustreben.", "source": true,
+     "explain": "es represents the following infinitive clause."},
+    {"type": "choice", "prompt": "What does es replace here?",
+     "text": "Meine Kolleginnen sind topfit, ich bin es leider nicht.",
+     "options": ["ein Adjektiv", "ein Nomen im Nominativ", "ein Nomen im Akkusativ", "das Wetter"],
+     "answers": ["ein Adjektiv"],
+     "explain": "es stands for the adjective topfit — and in this use it cannot stand in position 1."},
+    {"type": "error", "prompt": "This es cannot stand in position 1. Correct the sentence.",
+     "text": "Es bin ich leider nicht.",
+     "answers": ["Ich bin es leider nicht."],
+     "explain": "When es replaces an adjective, a participle or a whole clause, it cannot occupy position 1."},
+    {"type": "context", "prompt": "Which use of es is this?",
+     "text": "Es klopft. Es klingelt. Es läutet.",
+     "options": ["Geräusche", "Wetter", "Zeit", "Persönliches Befinden"],
+     "answers": ["Geräusche"],
+     "explain": "Impersonal es is used for noises: Es klopft. Es klingelt. Es läutet. Es pfeift. Es raschelt."},
+    {"type": "fill", "prompt": "Set expression: he is in a hurry.",
+     "text": "Er hat ___ eilig.", "answers": ["es"],
+     "sentence": "Er hat es eilig.", "source": true,
+     "explain": "Impersonal es appears as an object in fixed expressions such as es eilig haben."}
+   ]
+  },
+  {
+   "id": "g-l04-2",
+   "titleEn": "Word formation: grading of adjectives",
+   "summary": "Intensifying prefixes such as brand-, tod-, top- and voll- in advertising, youth and colloquial language.",
+   "category": "Wortbildung",
+   "tags": ["Wortbildung", "Adjektive", "Graduierung", "Umgangssprache"],
+   "difficulty": 2,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "Where they occur",
+     "text": "In the language of advertising, in youth language and in colloquial German, adjectives are frequently graded with an intensifying first element."},
+    {"heading": "Not freely combinable",
+     "text": "Gradings and adjectives cannot be combined at will: affenstark (youth language) exists, but not affenbreit; bildschön exists, but not bildnett; nagelneu exists, but not nagelaktuell."}
+   ],
+   "rules": [
+    "brand + neu / aktuell / gefährlich; extra + stark / breit; hyper + aktiv / modern / nervös.",
+    "riesen + groß; super + aktuell / nett / schnell / schön; tief + blau / traurig.",
+    "tod + schick / traurig; top + aktuell / fit / modisch; voll + automatisch / funktionsfähig.",
+    "Which grading goes with which adjective is fixed by usage and has to be learned."
+   ],
+   "examples": [
+    {"de": "brand neu / aktuell / gefährlich", "note": "brand- as an intensifier"},
+    {"de": "hyper aktiv / modern / nervös", "note": "hyper- as an intensifier"},
+    {"de": "tod schick / traurig", "note": "tod- as an intensifier"},
+    {"de": "top aktuell / fit / modisch", "note": "top- as an intensifier"},
+    {"de": "voll automatisch / funktionsfähig", "note": "voll- as an intensifier"},
+    {"de": "bildschön, aber nicht bildnett", "note": "the combinations are fixed"}
+   ],
+   "exercises": [
+    {"type": "choice", "prompt": "Which combination is actually used?",
+     "text": "", "options": ["nagelneu", "nagelaktuell", "bildnett", "affenbreit"],
+     "answers": ["nagelneu"],
+     "explain": "Gradings and adjectives cannot be combined freely: nagelneu and bildschön exist, nagelaktuell, bildnett and affenbreit do not."},
+    {"type": "fill", "prompt": "Very fashionable, in the language of advertising (___ + modisch).",
+     "text": "___ modisch", "answers": ["top"],
+     "sentence": "top aktuell / fit / modisch", "source": true,
+     "explain": "top- grades aktuell, fit and modisch."},
+    {"type": "fill", "prompt": "Completely automatic (___ + automatisch).",
+     "text": "___ automatisch", "answers": ["voll"],
+     "sentence": "voll automatisch / funktionsfähig", "source": true,
+     "explain": "voll- grades automatisch and funktionsfähig."},
+    {"type": "choice", "prompt": "Which grading goes with 'nervös'?",
+     "text": "___ nervös", "options": ["hyper", "riesen", "brand", "voll"],
+     "answers": ["hyper"],
+     "explain": "hyper- grades aktiv, modern and nervös."},
+    {"type": "error", "prompt": "This grading is not used with this adjective. Replace it.",
+     "text": "Das Kleid ist bildnett.",
+     "answers": ["Das Kleid ist bildschön."],
+     "explain": "bild- goes with schön, not with nett."}
+   ]
+  }
+ ]
+}

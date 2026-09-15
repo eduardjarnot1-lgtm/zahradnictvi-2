@@ -1,0 +1,171 @@
+{
+ "topics": [
+  {
+   "id": "g-l12-1",
+   "titleEn": "Prepositions with the genitive",
+   "summary": "Eight genitive prepositions of technical and legal register, each with a plain paraphrase.",
+   "category": "Präpositionen",
+   "tags": ["Präpositionen", "Genitiv", "Fachsprache"],
+   "difficulty": 3,
+   "prerequisites": ["g-l06-1"],
+   "explanation": [
+    {"heading": "Register",
+     "text": "These prepositions occur above all in technical or legal specialist language. Each of them can be paraphrased by a plainer clause or phrase."}
+   ],
+   "rules": [
+    "angesichts = wenn man … betrachtet.",
+    "anlässlich = weil … stattfindet.",
+    "hinsichtlich = in Bezug auf.",
+    "mithilfe = indem man … verwendet.",
+    "mittels = unter Verwendung von.",
+    "oberhalb = über.",
+    "ungeachtet = wobei man … nicht berücksichtigt.",
+    "unweit = in der Nähe von."
+   ],
+   "examples": [
+    {"de": "angesichts des hohen Preisgeldes", "note": "= wenn man das hohe Preisgeld betrachtet"},
+    {"de": "anlässlich eines spannenden Wettbewerbs", "note": "= weil ein spannender Wettbewerb stattfindet"},
+    {"de": "hinsichtlich der gesammelten Kriterien", "note": "= in Bezug auf die gesammelten Kriterien"},
+    {"de": "mithilfe spezieller 3D-Drucker", "note": "= indem man 3D-Drucker verwendet"},
+    {"de": "mittels einer Matratze", "note": "= unter Verwendung einer Matratze"},
+    {"de": "oberhalb der Einkommensgrenze", "note": "= über der Einkommensgrenze"},
+    {"de": "unweit seines Trägers", "note": "= in der Nähe seines Trägers"}
+   ],
+   "exercises": [
+    {"type": "choice", "prompt": "Which preposition means 'in der Nähe von'?",
+     "text": "", "options": ["unweit", "oberhalb", "ungeachtet", "anlässlich"],
+     "answers": ["unweit"],
+     "explain": "unweit + Genitiv = in der Nähe von."},
+    {"type": "choice", "prompt": "Which preposition means 'in Bezug auf'?",
+     "text": "", "options": ["hinsichtlich", "mittels", "angesichts", "unweit"],
+     "answers": ["hinsichtlich"],
+     "explain": "hinsichtlich + Genitiv = in Bezug auf."},
+    {"type": "transform", "prompt": "Rewrite with a genitive preposition: 'indem man spezielle 3D-Drucker verwendet'.",
+     "from": "indem man spezielle 3D-Drucker verwendet",
+     "answers": ["mithilfe spezieller 3D-Drucker", "mittels spezieller 3D-Drucker"],
+     "explain": "mithilfe / mittels + Genitiv name the means."},
+    {"type": "fill", "prompt": "Complete the preposition: 'weil ein spannender Wettbewerb stattfindet'.",
+     "text": "___ eines spannenden Wettbewerbs", "answers": ["anlässlich"],
+     "sentence": "anlässlich eines spannenden Wettbewerbs", "source": true,
+     "explain": "anlässlich + Genitiv = weil … stattfindet."},
+    {"type": "error", "prompt": "These prepositions take the genitive. Correct the case.",
+     "text": "oberhalb der Einkommensgrenze liegt das Einkommen von wenigen — mittels einer Matratze wurde geschlafen, angesichts dem hohen Preisgeld.",
+     "answers": ["oberhalb der Einkommensgrenze liegt das Einkommen von wenigen — mittels einer Matratze wurde geschlafen, angesichts des hohen Preisgeldes."],
+     "explain": "angesichts governs the genitive: angesichts des hohen Preisgeldes."}
+   ]
+  },
+  {
+   "id": "g-l12-2",
+   "titleEn": "Participial clauses",
+   "summary": "Shortened relative and adverbial clauses with Partizip I or II, without a subject of their own.",
+   "category": "Satzstrukturen",
+   "tags": ["Partizipialsätze", "Partizip I", "Partizip II", "Schriftsprache"],
+   "difficulty": 5,
+   "prerequisites": ["g-l08-1"],
+   "explanation": [
+    {"heading": "What they are",
+     "text": "These clauses produce brevity and concision in written language, because they are shortened relative or adverbial clauses without a subject of their own. They can be formed with Partizip I or Partizip II."},
+    {"heading": "Position",
+     "text": "The participle carries no ending and usually stands at the end of the participial clause."}
+   ],
+   "rules": [
+    "Partizip II has a passive or completed meaning and resolves to weil / obwohl / während + passive: Vom sinnvollen Einsatz überzeugt … = Weil sie vom sinnvollen Einsatz überzeugt sind, …",
+    "Partizip I has an active, simultaneous meaning and resolves to während / wenn / indem: Mit Mund und Augen lächelnd … = Indem er mit Mund und Augen lächelt, …",
+    "The participial clause has no subject of its own — it takes the subject of the main clause.",
+    "The participial clause can stand before the main clause or be inserted into it."
+   ],
+   "examples": [
+    {"de": "Vom sinnvollen Einsatz überzeugt entwickelten die Wissenschaftler einen Roboter, der Gefühle zeigen kann.", "note": "Partizip II, resolves with weil"},
+    {"de": "Der erste Versuch, obwohl gut durchdacht, war ein Misserfolg, denn der Roboter konnte nicht lächeln.", "note": "Partizip II inserted into the main clause"},
+    {"de": "Den munteren Kaspar auf dem Arm tragend entscheiden die Kinder selbst, wann und wie sie mit der Puppe kommunizieren wollen.", "note": "Partizip I, resolves with während / wenn"},
+    {"de": "Mit Mund und Augen lächelnd wendet sich der Roboter seinen Kommunikationspartnern zu.", "note": "Partizip I, resolves with indem"},
+    {"de": "Indem er mit Mund und Augen lächelt, wendet sich der Roboter seinen Kommunikationspartnern zu.", "note": "the resolved variant"}
+   ],
+   "exercises": [
+    {"type": "transform", "prompt": "Resolve the participial clause into a full clause with indem.",
+     "from": "Mit Mund und Augen lächelnd wendet sich der Roboter seinen Kommunikationspartnern zu.",
+     "answers": ["Indem er mit Mund und Augen lächelt, wendet sich der Roboter seinen Kommunikationspartnern zu."],
+     "explain": "Partizip I is active and simultaneous, so it resolves with indem / während / wenn."},
+    {"type": "transform", "prompt": "Resolve the participial clause into a full clause with weil.",
+     "from": "Vom sinnvollen Einsatz überzeugt entwickelten die Wissenschaftler einen Roboter, der Gefühle zeigen kann.",
+     "answers": ["Weil sie vom sinnvollen Einsatz überzeugt sind, entwickelten die Wissenschaftler einen Roboter, der Gefühle zeigen kann."],
+     "explain": "Partizip II here carries a causal, passive sense and resolves with weil."},
+    {"type": "choice", "prompt": "Which participle has an active, simultaneous meaning?",
+     "text": "", "options": ["Partizip I", "Partizip II", "beide gleich", "keines von beiden"],
+     "answers": ["Partizip I"],
+     "explain": "Partizip I is active and simultaneous; Partizip II is passive or completed."},
+    {"type": "choice", "prompt": "What does a participial clause lack?",
+     "text": "", "options": ["ein eigenes Subjekt", "ein Verb", "ein Objekt", "eine Präposition"],
+     "answers": ["ein eigenes Subjekt"],
+     "explain": "Participial clauses are shortened clauses without a subject of their own; they take the subject of the main clause."},
+    {"type": "error", "prompt": "The participle should carry no ending here. Correct it.",
+     "text": "Mit Mund und Augen lächelnde wendet sich der Roboter seinen Kommunikationspartnern zu.",
+     "answers": ["Mit Mund und Augen lächelnd wendet sich der Roboter seinen Kommunikationspartnern zu."],
+     "explain": "The participle in a participial clause is endingless and usually stands at the end of that clause."},
+    {"type": "reorder", "prompt": "Order the participial clause (Partizip II, inserted).",
+     "tokens": ["Der", "erste", "Versuch,", "obwohl", "gut", "durchdacht,", "war", "ein", "Misserfolg"],
+     "answers": ["Der erste Versuch, obwohl gut durchdacht, war ein Misserfolg"],
+     "explain": "The participial clause is inserted between subject and finite verb, framed by commas."}
+   ]
+  },
+  {
+   "id": "g-l12-3",
+   "titleEn": "Word formation: the prefixes durch-, über-, um- and unter-",
+   "summary": "The same prefix separable and stressed, or inseparable and unstressed — with different meanings.",
+   "category": "Wortbildung",
+   "tags": ["Wortbildung", "Vorsilben", "trennbar", "untrennbar", "Betonung"],
+   "difficulty": 4,
+   "prerequisites": ["g-l01-2"],
+   "explanation": [
+    {"heading": "One prefix, two verbs",
+     "text": "These prefixes can form both separable and inseparable verbs. Depending on whether the verb is separable or not, it has a different meaning and a different stress."},
+    {"heading": "Which meaning goes with which",
+     "text": "Verbs with the separable, stressed prefix are mostly used with the original meaning of the prefix; the inseparable, unstressed prefixes mostly have a more abstract, figurative meaning."}
+   ],
+   "rules": [
+    "Separable and stressed → the literal, original meaning of the prefix.",
+    "Inseparable and unstressed → an abstract, figurative meaning.",
+    "durch-: Man schaut durch ein Mikroskop durch (literal) / Man durchschaut einen Kartentrick (figurative).",
+    "über-: einen Pulli überziehen (literal) / sein Konto überziehen (figurative).",
+    "um-: ein Straßenschild umfahren — knock it down (literal) / das Stadtzentrum umfahren — drive around it (figurative).",
+    "unter-: sich bei Regen unterstellen (literal) / jemandem böse Absichten unterstellen (figurative).",
+    "Separable verbs form the Partizip II with ge- in the middle (umgefahren); inseparable ones take no ge- (umfahren)."
+   ],
+   "examples": [
+    {"de": "Man schaut durch ein Mikroskop durch.", "note": "trennbar, betont — wörtlich"},
+    {"de": "Man durchschaut einen Kartentrick.", "note": "untrennbar, unbetont — übertragen"},
+    {"de": "Ich rate dir, einen Pulli überzuziehen.", "note": "trennbar — wörtlich"},
+    {"de": "Es kostet etwas, sein Konto zu überziehen.", "note": "untrennbar — übertragen"},
+    {"de": "Wir haben ein Straßenschild umgefahren.", "note": "trennbar — das Schild fiel um"},
+    {"de": "Wir haben das Stadtzentrum umfahren.", "note": "untrennbar — wir fuhren darum herum"},
+    {"de": "Ich unterstelle dir keine bösen Absichten.", "note": "untrennbar — übertragen"}
+   ],
+   "exercises": [
+    {"type": "choice", "prompt": "'Wir haben das Stadtzentrum umfahren.' — what happened?",
+     "text": "", "options": ["Wir sind darum herumgefahren.", "Wir haben es beschädigt.", "Wir sind hindurchgefahren.", "Wir haben dort geparkt."],
+     "answers": ["Wir sind darum herumgefahren."],
+     "explain": "Inseparable umfahren (unstressed) means to drive around; the separable umfahren means to knock down."},
+    {"type": "choice", "prompt": "'Wir haben ein Straßenschild umgefahren.' — separable or inseparable?",
+     "text": "", "options": ["trennbar", "untrennbar", "beides möglich", "weder noch"],
+     "answers": ["trennbar"],
+     "explain": "The ge- inside the participle (um-ge-fahren) shows it is separable — and it means the sign was knocked over."},
+    {"type": "transform", "prompt": "Use the inseparable verb: to see through a card trick.",
+     "from": "Man schaut einen Kartentrick durch.",
+     "answers": ["Man durchschaut einen Kartentrick."],
+     "explain": "The figurative meaning takes the inseparable, unstressed prefix: durchschauen."},
+    {"type": "choice", "prompt": "Which meaning goes with the inseparable, unstressed prefix?",
+     "text": "", "options": ["eine abstraktere, übertragene Bedeutung", "die ursprüngliche Bedeutung", "immer eine negative Bedeutung", "eine zeitliche Bedeutung"],
+     "answers": ["eine abstraktere, übertragene Bedeutung"],
+     "explain": "Separable and stressed keeps the original meaning; inseparable and unstressed is abstract and figurative."},
+    {"type": "error", "prompt": "The Partizip II is wrong for the intended meaning (to overdraw an account). Correct it.",
+     "text": "Er hat sein Konto umgezogen.",
+     "answers": ["Er hat sein Konto überzogen."],
+     "explain": "sein Konto überziehen is inseparable, so the Partizip II is überzogen, with no ge-."},
+    {"type": "fill", "prompt": "Literal meaning — take shelter from the rain.",
+     "text": "Wir stellen uns bei Regen ___.", "answers": ["unter"],
+     "sentence": "Wir stellen uns bei Regen unter.", "source": true,
+     "explain": "The separable, stressed prefix keeps the original meaning: sich unterstellen."}
+   ]
+  }
+ ]
+}

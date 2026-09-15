@@ -1,0 +1,185 @@
+{
+ "topics": [
+  {
+   "id": "g-daf-a2-diminutive-form",
+   "titleEn": "The diminutive: -chen and -lein",
+   "summary": "Both endings make the noun das and usually add an umlaut.",
+   "category": "Nomen",
+   "tags": ["Diminutiv", "Artikel", "Wortbildung", "Umlaut"],
+   "difficulty": 2,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "Always das", "text": "Nouns ending in -chen or -lein take the das article, whatever the gender of the original noun: der Rock → das Röckchen."},
+    {"heading": "Meaning", "text": "The ending -chen / -lein means something is small; -chen also means something is nice or attractive."}
+   ],
+   "rules": [
+    "-chen and -lein always make the noun neuter: das Röckchen, das Jäckchen.",
+    "There is usually a vowel change: a → ä, o → ö, u → ü.",
+    "The ending marks smallness; -chen can also add a friendly, attractive tone."
+   ],
+   "examples": [
+    {"de": "der Rock → das Röck chen .", "note": "der becomes das, o → ö"},
+    {"de": "Jacke → Jäckchen", "note": "a → ä"}
+   ],
+   "exercises": [
+    {"type": "choice", "prompt": "Which article does a noun in -chen take?", "text": "___ Röckchen", "options": ["das", "der", "die", "den"], "answers": ["das"], "explain": "-chen and -lein always make the noun neuter."},
+    {"type": "transform", "prompt": "Form the diminutive of die Jacke.", "from": "die Jacke", "answers": ["das Jäckchen", "Jäckchen"], "explain": "a → ä plus -chen, and the article becomes das."},
+    {"type": "fill", "prompt": "Complete the vowel change.", "text": "der Rock → das R___ckchen", "answers": ["ö"], "explain": "o → ö is the usual change before -chen."},
+    {"type": "choice", "prompt": "What does the ending -chen express?", "text": "", "options": ["something is small", "something is large", "something is plural", "something is masculine"], "answers": ["something is small"], "explain": "It marks smallness, and with -chen often a nice or attractive tone."}
+   ]
+  },
+  {
+   "id": "g-daf-a1-definite-articles-in-the-nominative-and-",
+   "titleEn": "Definite articles: nominative and accusative",
+   "summary": "Only the masculine changes: der → den. Everything else stays the same.",
+   "category": "Nomen",
+   "tags": ["Artikel", "Nominativ", "Akkusativ", "Deklination"],
+   "difficulty": 1,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "One change only", "text": "Between the nominative and the accusative, only the masculine article changes: der becomes den. Neuter, feminine and plural keep the same form."}
+   ],
+   "rules": [
+    "Nominative: der Computer, das Telefon, die Kamera, die Kassetten.",
+    "Accusative: den Computer, das Telefon, die Kamera, die Kassetten.",
+    "So the only difference is masculine der → den."
+   ],
+   "examples": [
+    {"de": "der Computer", "note": "masculine nominative"},
+    {"de": "den Computer", "note": "masculine accusative"},
+    {"de": "das Telefon", "note": "neuter — unchanged"},
+    {"de": "die Kamera", "note": "feminine — unchanged"},
+    {"de": "die Kassetten", "note": "plural — unchanged"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Accusative of der Computer.", "text": "Ich kaufe ___ Computer.", "answers": ["den"], "explain": "Masculine der becomes den in the accusative."},
+    {"type": "choice", "prompt": "Which article changes between nominative and accusative?", "text": "", "options": ["masculine", "neuter", "feminine", "plural"], "answers": ["masculine"], "explain": "Only der → den; the others stay the same."},
+    {"type": "fill", "prompt": "Accusative of die Kamera.", "text": "Ich sehe ___ Kamera.", "answers": ["die"], "explain": "The feminine article is die in both cases."},
+    {"type": "error", "prompt": "The article is wrong in the accusative. Correct it.", "text": "Ich brauche der Computer.", "answers": ["Ich brauche den Computer."], "explain": "brauchen takes the accusative, so der becomes den."}
+   ]
+  },
+  {
+   "id": "g-daf-a1-indefinite-articles-and-negative-article",
+   "titleEn": "Indefinite and negative articles: nominative and accusative",
+   "summary": "ein/kein behave alike; only the masculine accusative adds -en.",
+   "category": "Nomen",
+   "tags": ["Artikel", "unbestimmt", "kein", "Akkusativ"],
+   "difficulty": 1,
+   "prerequisites": ["g-daf-a1-definite-articles-in-the-nominative-and-"],
+   "explanation": [
+    {"heading": "Same endings", "text": "The negative article kein takes exactly the same endings as the indefinite article ein. The only change between nominative and accusative is again in the masculine."},
+    {"heading": "No plural of ein", "text": "ein has no plural form, so the plural shows only kein: keine Kassetten."}
+   ],
+   "rules": [
+    "Nominative masculine: ein / kein Computer. Accusative masculine: einen / keinen Computer.",
+    "Neuter: ein / kein Telefon in both cases.",
+    "Feminine: eine / keine Kamera in both cases.",
+    "Plural: no ein, only keine Kassetten."
+   ],
+   "examples": [
+    {"de": "ein / kein Computer", "note": "masculine nominative"},
+    {"de": "ein en / kein en Computer", "note": "masculine accusative"},
+    {"de": "eine / keine Kamera", "note": "feminine, both cases"},
+    {"de": "- / keine Kassetten", "note": "plural: ein has no plural"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Masculine accusative of ein.", "text": "Ich habe ___ Computer.", "answers": ["einen"], "explain": "Masculine accusative adds -en: einen."},
+    {"type": "choice", "prompt": "Which is the plural of ein?", "text": "", "options": ["there is none", "eine", "einen", "eins"], "answers": ["there is none"], "explain": "ein has no plural; only kein appears in the plural."},
+    {"type": "fill", "prompt": "Negative article, feminine accusative.", "text": "Ich sehe ___ Kamera.", "answers": ["keine"], "explain": "Feminine keine is the same in nominative and accusative."},
+    {"type": "error", "prompt": "The masculine accusative needs an ending. Correct it.", "text": "Ich brauche kein Computer.", "answers": ["Ich brauche keinen Computer."], "explain": "Masculine accusative: keinen."}
+   ]
+  },
+  {
+   "id": "g-daf-a2-inflections-with-the-definite-article",
+   "titleEn": "Definite article: nominative, accusative and dative",
+   "summary": "Adds the dative — dem, dem, der, den — and the -n on the dative plural.",
+   "category": "Nomen",
+   "tags": ["Artikel", "Dativ", "Deklination", "Plural"],
+   "difficulty": 2,
+   "prerequisites": ["g-daf-a1-definite-articles-in-the-nominative-and-"],
+   "explanation": [
+    {"heading": "The dative row", "text": "In the dative the articles are dem (masculine), dem (neuter), der (feminine) and den (plural)."},
+    {"heading": "The dative plural -n", "text": "In the dative plural the noun itself takes an extra -n: den Söhnen, den Kindern, den Töchtern. Nouns whose plural already ends in -s do not: den T-Shirts, den Festivals, den Autos."}
+   ],
+   "rules": [
+    "Nom.: der Sohn, das Kind, die Tochter, die Söhne.",
+    "Akk.: den Sohn, das Kind, die Tochter, die Söhne.",
+    "Dat.: dem Sohn, dem Kind, der Tochter, den Söhnen.",
+    "The dative plural noun adds -n, except for plurals in -s."
+   ],
+   "examples": [
+    {"de": "dem Sohn", "note": "masculine dative"},
+    {"de": "de r Tochter", "note": "feminine dative — der, not die"},
+    {"de": "den Söhne n / Kinder n / Töchter n", "note": "dative plural with the extra -n"},
+    {"de": "(aber: den T-Shirts / Festivals / Autos)", "note": "plurals in -s take no extra -n"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Feminine dative article.", "text": "Ich helfe ___ Tochter.", "answers": ["der"], "explain": "The feminine dative is der — the same form as the masculine nominative."},
+    {"type": "fill", "prompt": "Dative plural — mind the noun ending.", "text": "Ich helfe den ___.", "answers": ["Söhnen", "Kindern", "Töchtern"], "explain": "The dative plural noun takes an extra -n."},
+    {"type": "choice", "prompt": "Which dative plural takes NO extra -n?", "text": "", "options": ["den Autos", "den Söhnen", "den Kindern", "den Töchtern"], "answers": ["den Autos"], "explain": "Plurals ending in -s do not add another -n."},
+    {"type": "error", "prompt": "The dative plural is missing its -n. Correct it.", "text": "Ich gebe den Kinder ein Buch.", "answers": ["Ich gebe den Kindern ein Buch."], "explain": "The dative plural noun adds -n: den Kindern."}
+   ]
+  },
+  {
+   "id": "g-daf-a2-inflections-with-the-indefinite-article-",
+   "titleEn": "Indefinite, negative and possessive articles: all three cases",
+   "summary": "ein, kein and mein share one set of endings across nominative, accusative and dative.",
+   "category": "Nomen",
+   "tags": ["Artikel", "Possessivartikel", "Dativ", "Deklination"],
+   "difficulty": 3,
+   "prerequisites": ["g-daf-a2-inflections-with-the-definite-article"],
+   "explanation": [
+    {"heading": "One pattern, three words", "text": "ein, kein and mein all decline the same way, so learning one gives you all of them — and the same endings carry over to dein, sein, ihr, unser and euer."},
+    {"heading": "The dative", "text": "The dative endings are -em (masculine and neuter), -er (feminine) and -en (plural), with the extra -n on the plural noun."}
+   ],
+   "rules": [
+    "Nom.: ein / kein / mein Sohn, ein Kind, eine Tochter, keine / meine Söhne.",
+    "Akk.: einen / keinen / meinen Sohn; neuter and feminine unchanged.",
+    "Dat.: einem / keinem / meinem Sohn, einem Kind, einer / keiner / meiner Tochter.",
+    "Dative plural: keinen / meinen Söhnen — article in -en and noun in -n."
+   ],
+   "examples": [
+    {"de": "ein en / kein en / mein en", "note": "masculine accusative"},
+    {"de": "ein em / kein em / mein em", "note": "masculine dative"},
+    {"de": "eine r / keine r / meine r", "note": "feminine dative"},
+    {"de": "- / kein en / mein en Söhne n /", "note": "dative plural: article -en, noun -n"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Masculine dative of mein.", "text": "Ich gebe ___ Sohn das Buch.", "answers": ["meinem"], "explain": "Masculine dative takes -em: meinem."},
+    {"type": "fill", "prompt": "Feminine dative of kein.", "text": "Ich helfe ___ Tochter.", "answers": ["keiner"], "explain": "Feminine dative takes -er: keiner."},
+    {"type": "choice", "prompt": "Which words share this same set of endings?", "text": "", "options": ["ein, kein and the possessives", "only ein and kein", "only the definite articles", "only the possessives"], "answers": ["ein, kein and the possessives"], "explain": "The endings on possessive articles are the same as the indefinite and the negative article."},
+    {"type": "error", "prompt": "Both the article and the noun need a dative-plural ending. Correct it.", "text": "Ich schreibe meine Söhne eine E-Mail.", "answers": ["Ich schreibe meinen Söhnen eine E-Mail."], "explain": "Dative plural: meinen Söhnen."}
+   ]
+  },
+  {
+   "id": "g-daf-a2-n-declension-masculine-nouns-with-e-n-pl",
+   "titleEn": "n-Declension",
+   "summary": "Some masculine nouns add -(e)n in every case except the nominative singular.",
+   "category": "Nomen",
+   "tags": ["n-Deklination", "Maskulinum", "Akkusativ", "Dativ"],
+   "difficulty": 3,
+   "prerequisites": ["g-daf-a2-inflections-with-the-definite-article"],
+   "explanation": [
+    {"heading": "The one exception", "text": "A group of masculine nouns whose plural ends in -(e)n take that same -(e)n in the accusative and dative singular too. Only the nominative singular is without it."}
+   ],
+   "rules": [
+    "Nominative singular: der Herr, der Nachbar, der Kollege — no ending.",
+    "Accusative and dative singular: den/dem Herrn, Nachbarn, Kollegen.",
+    "All plural forms: die Herren, Nachbarn, Kollegen.",
+    "So the bare form appears only once, in the nominative singular."
+   ],
+   "examples": [
+    {"de": "der /ein Herr / Nachbar / Kollege", "note": "nominative singular — no ending"},
+    {"de": "den / einen Herr n / Nachbar n / Kollege n", "note": "accusative singular takes -(e)n"},
+    {"de": "mit dem / einem Herr n / Nachbar n / Kollege n", "note": "dative singular takes -(e)n"},
+    {"de": "die / - Herr en / Nachbar n / Kollege n", "note": "plural"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Accusative singular of der Nachbar.", "text": "Ich sehe den ___.", "answers": ["Nachbarn"], "explain": "n-declension nouns add -n outside the nominative singular."},
+    {"type": "fill", "prompt": "Dative singular of der Kollege.", "text": "Ich spreche mit dem ___.", "answers": ["Kollegen"], "explain": "The dative singular also takes the -n."},
+    {"type": "choice", "prompt": "In which case does the n-declension noun have NO ending?", "text": "", "options": ["nominative singular", "accusative singular", "dative singular", "nominative plural"], "answers": ["nominative singular"], "explain": "Only the nominative singular is the bare form."},
+    {"type": "error", "prompt": "This noun follows the n-declension. Correct it.", "text": "Ich habe den Herr gestern getroffen.", "answers": ["Ich habe den Herrn gestern getroffen."], "explain": "Accusative singular: den Herrn."}
+   ]
+  }
+ ]
+}

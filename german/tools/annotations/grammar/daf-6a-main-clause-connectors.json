@@ -1,0 +1,201 @@
+{
+ "topics": [
+  {
+   "id": "g-daf-a1-connectors-aber-oder-und",
+   "titleEn": "aber, oder, und — joining two main clauses",
+   "summary": "Connectors that sit in position 0 and leave the word order untouched.",
+   "category": "Satzverbindungen",
+   "tags": ["Konnektoren", "Hauptsatz", "Position 0", "und", "aber", "oder"],
+   "difficulty": 1,
+   "prerequisites": [],
+   "explanation": [
+    {"heading": "Position 0", "text": "The table's columns are Pos. 1, Pos. 2, Pos. 0, Pos. 1, Pos. 2. The connector stands outside the counting, in position 0, so the second clause starts its own count at position 1 with the subject and keeps the verb in position 2."},
+    {"heading": "What each one does", "text": "und adds, aber contrasts, oder offers an alternative."},
+    {"heading": "Comma", "text": "aber takes a comma before it; und and oder joining two full main clauses may be written without one, as the examples show."}
+   ],
+   "rules": [
+    "aber, oder and und occupy position 0 and do not count as a sentence position.",
+    "The second clause keeps ordinary main-clause order: subject in position 1, verb in position 2.",
+    "und = addition, aber = contrast, oder = alternative.",
+    "A comma goes before aber."
+   ],
+   "examples": [
+    {"de": "Das ist die normale Kleinfamilie, aber sie ist heute nicht mehr die Regel.", "note": "aber — contrast; sie in position 1, ist in position 2"},
+    {"de": "Man bekommt Kinder, aber man heiratet nicht immer.", "note": "aber"},
+    {"de": "Meine Mutter ist nicht verheiratet und sie erzieht meinen Bruder und mich allein.", "note": "und — addition"},
+    {"de": "Sie heiraten noch einmal oder sie leben ohne Trauschein.", "note": "oder — alternative"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Complete the connector.", "text": "Das ist die normale Kleinfamilie, ___ sie ist heute nicht mehr die Regel.", "answers": ["aber"], "explain": "The second clause contradicts the first.", "source": true, "sentence": "Das ist die normale Kleinfamilie, aber sie ist heute nicht mehr die Regel."},
+    {"type": "choice", "prompt": "Which connector offers an alternative?", "text": "Sie heiraten noch einmal ___ sie leben ohne Trauschein.", "options": ["oder", "und", "aber", "denn"], "answers": ["oder"], "explain": "oder marks a choice between two possibilities.", "source": true, "sentence": "Sie heiraten noch einmal oder sie leben ohne Trauschein."},
+    {"type": "choice", "prompt": "Which position do these connectors occupy?", "text": "", "options": ["Position 0", "Position 1", "Position 2", "the end of the sentence"], "answers": ["Position 0"], "explain": "They stand outside the positions, so the second clause counts from 1 again."},
+    {"type": "reorder", "prompt": "Put the second clause in order.", "tokens": ["aber", "sie", "ist", "heute", "nicht", "mehr", "die", "Regel"], "answers": ["aber sie ist heute nicht mehr die Regel"], "explain": "The connector is in position 0, the subject in 1, the verb in 2."},
+    {"type": "error", "prompt": "Fix the word order after und.", "text": "Meine Mutter ist nicht verheiratet und erzieht sie meinen Bruder allein.", "answers": ["Meine Mutter ist nicht verheiratet und sie erzieht meinen Bruder allein.", "und sie erzieht meinen Bruder allein"], "explain": "und does not count as a position, so the subject still comes before the verb."}
+   ]
+  },
+  {
+   "id": "g-daf-a1-connector-den-reason",
+   "titleEn": "denn — giving a reason",
+   "summary": "A position-0 connector that gives the reason, always with a comma.",
+   "category": "Satzverbindungen",
+   "tags": ["Konnektoren", "Hauptsatz", "denn", "Kausal", "Position 0"],
+   "difficulty": 2,
+   "prerequisites": ["g-daf-a1-connectors-aber-oder-und"],
+   "explanation": [
+    {"heading": "Two main clauses", "text": "denn joins two main clauses: 1. Hauptsatz, Konnektor, 2. Hauptsatz. Like aber, oder and und it stands in position 0."},
+    {"heading": "Word order is unchanged", "text": "The clause after denn begins with its subject in position 1 and the conjugated verb in position 2 — it is not a subordinate clause, so the verb does not move to the end."},
+    {"heading": "The comma", "text": "The document is emphatic: always put a comma before denn."}
+   ],
+   "rules": [
+    "denn gives the reason for the statement in the first main clause.",
+    "denn occupies position 0 and does not change the word order.",
+    "Always put a comma before denn.",
+    "The verb stays in position 2, unlike in a weil clause."
+   ],
+   "examples": [
+    {"de": "Beatriz geht gern ins Theater, denn sie liebt Literatur", "note": "denn in position 0, sie in 1, liebt in 2"},
+    {"de": "Beatriz und Leopold kaufen Brot und Wurst, denn sie wollen ein Picknick machen.", "note": "the modal verb wollen stays in position 2 and machen closes the clause"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Complete the connector.", "text": "Beatriz geht gern ins Theater, ___ sie liebt Literatur.", "answers": ["denn"], "explain": "denn introduces the reason."},
+    {"type": "choice", "prompt": "Where does the verb stand after denn?", "text": "", "options": ["in position 2, as in any main clause", "at the end of the clause", "in position 1", "before the subject"], "answers": ["in position 2, as in any main clause"], "explain": "denn is a position-0 connector, not a subordinating conjunction."},
+    {"type": "reorder", "prompt": "Put the clause in order.", "tokens": ["denn", "sie", "wollen", "ein", "Picknick", "machen"], "answers": ["denn sie wollen ein Picknick machen"], "explain": "The modal wollen takes position 2; the infinitive machen goes last.", "source": true, "sentence": "denn sie wollen ein Picknick machen."},
+    {"type": "error", "prompt": "Fix the word order.", "text": "Beatriz geht gern ins Theater, denn sie Literatur liebt.", "answers": ["Beatriz geht gern ins Theater, denn sie liebt Literatur.", "denn sie liebt Literatur"], "explain": "After denn the clause keeps main-clause order: verb in position 2."},
+    {"type": "choice", "prompt": "What does the document insist on?", "text": "", "options": ["a comma before denn", "no comma before denn", "denn at the end of the sentence", "denn with the verb at the end"], "answers": ["a comma before denn"], "explain": "Always put a comma before denn."}
+   ]
+  },
+  {
+   "id": "g-daf-a2-aber-denn-und-sondern-oder-aduso-connect",
+   "titleEn": "The aduso connectors",
+   "summary": "aber, denn, und, sondern, oder — five connectors in position 0.",
+   "category": "Satzverbindungen",
+   "tags": ["Konnektoren", "aduso", "sondern", "Position 0", "Hauptsatz"],
+   "difficulty": 2,
+   "prerequisites": ["g-daf-a1-connector-den-reason"],
+   "explanation": [
+    {"heading": "A memory word", "text": "aber, denn, und, sondern, oder make the word aduso. All five stand in position 0 and leave the following clause in ordinary main-clause order."},
+    {"heading": "sondern", "text": "sondern corrects a negative statement: the first half says what is not the case, the second what is. It therefore needs a nicht or kein in front of it."},
+    {"heading": "Half clauses", "text": "The document brackets the repeated parts — sondern (es liegt) östlich, oder (sie möchten) in Lindenhof — to show that the second half need not be a complete clause when it repeats the subject and verb."}
+   ],
+   "rules": [
+    "aber, denn, und, sondern, oder = the aduso connectors, all in position 0.",
+    "The second clause keeps subject–verb order.",
+    "sondern always follows a negation (nicht, kein).",
+    "Repeated subjects and verbs may be left out of the second half."
+   ],
+   "examples": [
+    {"de": "Witikon liegt etwas außerhalb, aber es hat gute Verkehrsverbindungen.", "note": "aber"},
+    {"de": "Lindenhof ist schön, denn es liegt in der Altstadt.", "note": "denn"},
+    {"de": "In Witikon sind die Mieten nicht so hoch und die Verkehrsverbindungen sind gut.", "note": "und"},
+    {"de": "Frankfurt liegt nicht westlich (von Mainz), sondern (es liegt) östlich von Mainz.", "note": "sondern after nicht; the repeated subject and verb are in brackets"},
+    {"de": "Lara und Andrea möchten in Enge oder (sie möchten) in Lindenhof wohnen.", "note": "oder with the repeated part left out"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Complete the connector.", "text": "Frankfurt liegt nicht westlich von Mainz, ___ östlich von Mainz.", "answers": ["sondern"], "explain": "sondern corrects the negated statement."},
+    {"type": "choice", "prompt": "Which connector needs a negation in front of it?", "text": "", "options": ["sondern", "aber", "und", "oder"], "answers": ["sondern"], "explain": "sondern only works after nicht or kein."},
+    {"type": "choice", "prompt": "What do the five aduso connectors have in common?", "text": "", "options": ["they all stand in position 0", "they all send the verb to the end", "they all need a comma", "they all give reasons"], "answers": ["they all stand in position 0"], "explain": "None of them counts as a sentence position."},
+    {"type": "fill", "prompt": "Complete the connector.", "text": "Lindenhof ist schön, ___ es liegt in der Altstadt.", "answers": ["denn"], "explain": "The second clause gives the reason.", "source": true, "sentence": "Lindenhof ist schön, denn es liegt in der Altstadt."},
+    {"type": "error", "prompt": "Choose the right connector.", "text": "Frankfurt liegt nicht westlich von Mainz, aber östlich von Mainz.", "answers": ["Frankfurt liegt nicht westlich von Mainz, sondern östlich von Mainz.", "sondern östlich von Mainz"], "explain": "After a negation the correcting connector is sondern, not aber."}
+   ]
+  },
+  {
+   "id": "g-daf-b1-alternatives-entweder-oder",
+   "titleEn": "entweder … oder",
+   "summary": "A two-part connector for one alternative or the other.",
+   "category": "Satzverbindungen",
+   "tags": ["Konnektoren", "entweder", "oder", "Alternative", "Wortstellung"],
+   "difficulty": 3,
+   "prerequisites": ["g-daf-a2-aber-denn-und-sondern-oder-aduso-connect"],
+   "explanation": [
+    {"heading": "Two placements for entweder", "text": "entweder can stand outside the positions, leaving the subject in position 1 — Entweder wir gehen in „Criminal Dinner“ … — or it can take position 1 itself, which pushes the subject behind the verb: Entweder gehen wir ins Theater im Hafen …"},
+    {"heading": "oder stays in position 0", "text": "The second half always begins with oder in position 0, followed by ordinary main-clause order."},
+    {"heading": "Not only whole clauses", "text": "The pair can also join two parts inside one clause: Wir können entweder in „Criminal Dinner“ oder das Musical gehen."}
+   ],
+   "rules": [
+    "entweder … oder presents two alternatives, of which one applies.",
+    "entweder may stand before position 1 or fill position 1 itself.",
+    "If entweder fills position 1, the verb comes second and the subject third.",
+    "oder introduces the second half in position 0.",
+    "The pair can also link two elements within a single clause."
+   ],
+   "examples": [
+    {"de": "Entweder wir gehen in „Criminal Dinner“ oder wir sehen die „Dreigroschenoper“.", "note": "entweder outside the count — subject wir in position 1"},
+    {"de": "Entweder gehen wir ins Theater im Hafen oder wir besuchen das Stadtfest.", "note": "entweder in position 1 — verb gehen second, subject wir third"},
+    {"de": "Wir können entweder in „Criminal Dinner“ oder das Musical gehen.", "note": "the pair inside one clause, as printed in the document"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Complete the second part of the connector.", "text": "Entweder wir gehen in „Criminal Dinner“ ___ wir sehen die „Dreigroschenoper“.", "answers": ["oder"], "explain": "entweder is always answered by oder.", "source": true, "sentence": "Entweder wir gehen in „Criminal Dinner“ oder wir sehen die „Dreigroschenoper“."},
+    {"type": "choice", "prompt": "Which sentence has entweder in position 1?", "text": "", "options": ["Entweder gehen wir ins Theater im Hafen oder wir besuchen das Stadtfest.", "Entweder wir gehen in „Criminal Dinner“ oder wir sehen die „Dreigroschenoper“.", "Wir können entweder in „Criminal Dinner“ oder das Musical gehen.", "None of them."], "answers": ["Entweder gehen wir ins Theater im Hafen oder wir besuchen das Stadtfest."], "explain": "There the verb gehen follows immediately, so entweder is counted as position 1."},
+    {"type": "reorder", "prompt": "Put the clause in order with entweder in position 1.", "tokens": ["Entweder", "gehen", "wir", "ins", "Theater", "im", "Hafen"], "answers": ["Entweder gehen wir ins Theater im Hafen"], "explain": "Position 1 entweder, position 2 the verb, then the subject.", "source": true, "sentence": "Entweder gehen wir ins Theater im Hafen"},
+    {"type": "choice", "prompt": "What does entweder … oder express?", "text": "", "options": ["two alternatives, one of which applies", "two things that both apply", "two things that neither applies to", "a reason and a result"], "answers": ["two alternatives, one of which applies"], "explain": "It is the document's connector for Alternativen."},
+    {"type": "fill", "prompt": "Complete the first part of the connector.", "text": "___ gehen wir ins Theater im Hafen oder wir besuchen das Stadtfest.", "answers": ["Entweder"], "explain": "The verb comes directly after, so entweder is in position 1."}
+   ]
+  },
+  {
+   "id": "g-daf-b1-two-part-connectors-nicht-nur-sondern-au",
+   "titleEn": "nicht nur … sondern auch, sowohl … als auch, weder … noch",
+   "summary": "Two-part connectors that replace und, emphasise, or negate both halves.",
+   "category": "Satzverbindungen",
+   "tags": ["Konnektoren", "zweiteilig", "sowohl", "weder noch", "nicht nur"],
+   "difficulty": 4,
+   "prerequisites": ["g-daf-b1-alternatives-entweder-oder"],
+   "explanation": [
+    {"heading": "Replacing und", "text": "nicht nur … sondern auch and sowohl … als auch both replace the conjunction und."},
+    {"heading": "Equal weight", "text": "sowohl … als auch expresses that the listed elements are equally important: Innsbruck bietet sowohl Kultur als auch Natur."},
+    {"heading": "Unequal weight", "text": "With nicht nur … sondern auch the second element is emphasised more strongly: nicht nur die Architektur, sondern auch die Aussicht."},
+    {"heading": "Neither", "text": "weder … noch means that neither element is applicable. It is negative in itself, so no nicht is added — and after noch the verb may come first, as in the document's example: … noch ist die Speisekarte aufregend."}
+   ],
+   "rules": [
+    "nicht nur … sondern auch and sowohl … als auch replace und.",
+    "sowohl … als auch: the elements are equally important.",
+    "nicht nur … sondern auch: the second element carries the emphasis.",
+    "weder … noch: neither element applies; no further negation is used.",
+    "A comma goes before sondern auch."
+   ],
+   "examples": [
+    {"de": "Innsbruck bietet sowohl Kultur als auch Natur.", "note": "sowohl … als auch — equal weight"},
+    {"de": "Besucher können dort nicht nur die Architektur, sondern auch die Aussicht bewundern.", "note": "the second element is emphasised"},
+    {"de": "Das Restaurant ist weder besonders schick noch ist die Speisekarte aufregend.", "note": "weder … noch — neither applies"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Complete the connector.", "text": "Innsbruck bietet sowohl Kultur ___ Natur.", "answers": ["als auch"], "explain": "sowohl is always answered by als auch.", "source": true, "sentence": "Innsbruck bietet sowohl Kultur als auch Natur."},
+    {"type": "choice", "prompt": "Which pair means that neither element applies?", "text": "", "options": ["weder … noch", "sowohl … als auch", "nicht nur … sondern auch", "entweder … oder"], "answers": ["weder … noch"], "explain": "weder … noch is negative in itself."},
+    {"type": "fill", "prompt": "Complete the connector.", "text": "Besucher können dort nicht nur die Architektur, ___ auch die Aussicht bewundern.", "answers": ["sondern"], "explain": "nicht nur is answered by sondern auch.", "source": true, "sentence": "Besucher können dort nicht nur die Architektur, sondern auch die Aussicht bewundern."},
+    {"type": "choice", "prompt": "Which pair puts the two elements on an equal footing?", "text": "", "options": ["sowohl … als auch", "nicht nur … sondern auch", "weder … noch", "entweder … oder"], "answers": ["sowohl … als auch"], "explain": "The document says the listed elements are equally important."},
+    {"type": "error", "prompt": "Remove the double negation.", "text": "Das Restaurant ist weder nicht besonders schick noch ist die Speisekarte aufregend.", "answers": ["Das Restaurant ist weder besonders schick noch ist die Speisekarte aufregend.", "weder besonders schick noch ist die Speisekarte aufregend"], "explain": "weder … noch already carries the negation."}
+   ]
+  },
+  {
+   "id": "g-daf-b1-expressing-how-one-thing-relates-to-anot",
+   "titleEn": "je … desto / umso",
+   "summary": "The more of one thing, the more of the other — a subordinate clause first, a main clause second.",
+   "category": "Satzverbindungen",
+   "tags": ["je desto", "Komparativ", "Nebensatz", "Wortstellung"],
+   "difficulty": 4,
+   "prerequisites": ["g-daf-a2-comparison-comparative-and-superlative-p"],
+   "explanation": [
+    {"heading": "Two clauses, two shapes", "text": "The je clause is a subordinate clause: its verb goes to the end. The desto / umso clause is a main clause whose first position is filled by desto or umso plus the comparative, so the verb comes second."},
+    {"heading": "Comparatives on both sides", "text": "Both halves need a comparative — je weiter … desto besser, je mehr … umso mehr."},
+    {"heading": "desto or umso", "text": "The two are interchangeable; the document simply shows one example of each."}
+   ],
+   "rules": [
+    "The je clause is a subordinate clause: verb at the end.",
+    "The desto / umso clause is a main clause: verb in position 2.",
+    "Both halves contain a comparative.",
+    "desto and umso mean the same thing.",
+    "The je clause normally comes first."
+   ],
+   "examples": [
+    {"de": "Je weiter oben eine Person steht, desto besser sind ihre Chancen.", "note": "steht at the end of the je clause; sind second in the main clause"},
+    {"de": "Je mehr Stimmen ein Partei erhält, umso mehr Sitze bekommt sie.", "note": "quoted as printed — the document has ein Partei, where standard German would be eine Partei"}
+   ],
+   "exercises": [
+    {"type": "fill", "prompt": "Complete the connector.", "text": "Je weiter oben eine Person steht, ___ besser sind ihre Chancen.", "answers": ["desto", "umso"], "explain": "desto and umso are interchangeable.", "source": true, "sentence": "Je weiter oben eine Person steht, desto besser sind ihre Chancen."},
+    {"type": "choice", "prompt": "Where does the verb go in the je clause?", "text": "", "options": ["at the end", "in position 2", "in position 1", "directly after je"], "answers": ["at the end"], "explain": "The je clause is a subordinate clause."},
+    {"type": "reorder", "prompt": "Put the main clause in order.", "tokens": ["desto", "besser", "sind", "ihre", "Chancen"], "answers": ["desto besser sind ihre Chancen"], "explain": "desto besser fills position 1, so sind comes second."},
+    {"type": "choice", "prompt": "What must both halves contain?", "text": "", "options": ["a comparative", "a superlative", "a modal verb", "a negation"], "answers": ["a comparative"], "explain": "je weiter … desto besser, je mehr … umso mehr."},
+    {"type": "error", "prompt": "Fix the verb position.", "text": "Je weiter oben eine Person steht, desto ihre Chancen sind besser.", "answers": ["Je weiter oben eine Person steht, desto besser sind ihre Chancen.", "desto besser sind ihre Chancen"], "explain": "desto plus the comparative fills position 1, so the verb must come second."}
+   ]
+  }
+ ]
+}
