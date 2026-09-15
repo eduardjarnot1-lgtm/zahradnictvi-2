@@ -28,7 +28,7 @@ On Netlify the site publishes the repository root, so the app is served at
 | B1 grammar gaps | deutsch-lernen-goethe-a1-c2, Abdullah Butt (CC BY-NC 4.0) | imported |
 | Grammar — 87 A1/A2/B1 topics | DaF kompakt neu A1/A2/B1, Grammatikerklärungen, © Ernst Klett Sprachen GmbH, Stuttgart 2018 | imported |
 | Grammar — 32 C1 topics | Sicher! C1 Grammatikübersicht, © Hueber Verlag | imported |
-| Grammar — 6 B2 topics | *Deutsche Grammatik – Niveau B2*, generated for this project by the project owner | imported |
+| Grammar — 15 B2 topics | *Deutsche Grammatik – Niveau B2*, parts 1–2, generated for this project by the project owner | imported |
 | Word frequency — 2 586 forms | hermitdave/FrequencyWords, German (OpenSubtitles corpus) | imported |
 | Goethe-Zertifikat B1 Wortliste | **not supplied** — see below | **missing** |
 
@@ -121,19 +121,36 @@ worse than no plural.
 
 ## The B2 grammar set
 
-`German_Grammar_B2_1.pdf` is the fifth source document and the one that closes
-the app's biggest structural gap: **B2 grammar was empty**. Six topics, each
-with the rule in German *and* English, four worked examples with translations,
-and an "Achtung" box naming the mistake learners actually make.
+The fifth source document, and the one that closes the app's biggest structural
+gap: **B2 grammar was empty**. Fifteen topics across two parts, each with the
+rule in German *and* English, four worked examples with translations, and an
+"Achtung" box naming the mistake learners actually make. It has **its own
+section in the app** at `#/grammar/b2`, reachable from the top bar and from a
+banner on the grammar index — B2 is the level the vocabulary already reaches,
+and this is the only grammar here that was written for the app rather than
+extracted from a course, so it does not sit as one band among five.
 
-| # | Topic | English |
-|---|---|---|
-| 1 | Konjunktiv II – irreale Wünsche und Bedingungen | Unreal wishes and conditions |
-| 2 | Passiv mit Modalverben | Passive voice with modal verbs |
-| 3 | Relativsätze mit Präposition und im Genitiv | Relative clauses with a preposition or in the genitive |
-| 4 | Nominalisierung – vom Verb zum Nomen | Turning verbs into nouns |
-| 5 | Konzessive und kausale Konnektoren | Concessive and causal connectors |
-| 6 | Infinitivkonstruktionen: um…zu, ohne…zu, statt…zu | Infinitive constructions |
+| # | Topic | English | Part |
+|---|---|---|---|
+| 1 | Konjunktiv II – irreale Wünsche und Bedingungen | Unreal wishes and conditions | 1 |
+| 2 | Passiv mit Modalverben | Passive voice with modal verbs | 1 |
+| 3 | Relativsätze mit Präposition und im Genitiv | Relative clauses with a preposition or in the genitive | 1 |
+| 4 | Nominalisierung – vom Verb zum Nomen | Turning verbs into nouns | 1 |
+| 5 | Konzessive und kausale Konnektoren | Concessive and causal connectors | 1 |
+| 6 | Infinitivkonstruktionen: um…zu, ohne…zu, statt…zu | Infinitive constructions | 1 |
+| 7 | Futur II – vollendete Zukunft und Vermutung | The completed future, and guesses about the past | 2 |
+| 8 | Indirekte Rede mit Konjunktiv I | Reported speech with Konjunktiv I | 2 |
+| 9 | Partizip I und Partizip II als Attribut | Participles used as attributes | 2 |
+| 10 | Erweiterte Partizipialattribute | Extended participial attributes | 2 |
+| 11 | Verben mit festen Präpositionen und Präpositionaladverbien | Fixed prepositions, da(r)- / wo(r)- | 2 |
+| 12 | Zweiteilige Konnektoren | Two-part connectors | 2 |
+| 13 | Temporale Nebensätze | Temporal subordinate clauses | 2 |
+| 14 | Subjektiver Gebrauch der Modalverben | Modal verbs used subjectively | 2 |
+| 15 | Passiversatzformen | Alternatives to the passive | 2 |
+
+The set is published in parts, and the extractor takes them in order: topics are
+numbered sequentially across the whole set, so adding a later part never
+renumbers an earlier one and the annotation ids stay stable.
 
 `extract_b2_grammar.py` reads the structure off the fonts, as the B2 vocabulary
 extractor does, because this is a styled layout rather than a tagged one: bold
@@ -147,14 +164,14 @@ Each topic's prerequisites point at the B1 topics it actually builds on, so the
 lesson engine can route a learner into B2 grammar from the DaF kompakt B1
 material rather than dropping them into it cold.
 
-All 30 exercises and all 24 examples go through the same grounding rule as every
+All 75 exercises and all 60 examples go through the same grounding rule as every
 other grammar source: **an example sentence is rejected unless it occurs
-verbatim in the source text of its own topic.** The five exercises per topic that
-are built on a document sentence carry it in a `sentence` field and are marked
-`fromSource: true`; the ones written for practice — a deliberately wrong sentence
-to correct, a register choice, a different-subjects case — are marked
-`fromSource: false` and the app labels them as practice rather than passing them
-off as document content.
+verbatim in the source text of its own topic.** Exercises built on a document sentence carry it in a
+`sentence` field and are marked `fromSource: true`; the ones written for
+practice — a deliberately wrong sentence to correct, a register choice, a
+different-subjects case that rules out `um…zu` — are marked `fromSource: false`
+and the app labels them as practice rather than passing them off as document
+content.
 
 Provenance is the same as the B2 vocabulary list: generated for this project by
 the project owner with the Claude skill that composes its own explanations and
@@ -232,8 +249,8 @@ to be resolved before this app is published anywhere public; the B2 list above
 never was the thing standing in the way.
 
 The same applies in reverse to the **B2 grammar set**: it was generated for this
-project the same way the B2 vocabulary was, so its six topics are the only
-grammar in the app whose origin is known and clean. 119 of the 127 grammar
+project the same way the B2 vocabulary was, so its fifteen topics are the only
+grammar in the app whose origin is known and clean. 119 of the 136 grammar
 topics are still Klett and Hueber.
 
 ## What the app does
@@ -372,7 +389,7 @@ grammar topics, unknown or circular prerequisites.
 ```bash
 python3 german/tools/validate_content.py
 # vocabulary: 4979 words checked
-# grammar: 127 topics, 645 exercises checked
+# grammar: 136 topics, 690 exercises checked
 # PASSED — 0 errors, 1 warning
 ```
 
@@ -431,7 +448,8 @@ Rebuild everything:
 ```bash
 python3 german/tools/extract_c1_grammar.py <Sicher_C1_Grammatikuebersicht.pdf>
 python3 german/tools/extract_daf_grammar.py <DaF_kompakt_neu_A1_A2_B1_Grammar_English.pdf>
-python3 german/tools/extract_b2_grammar.py --pdf <German_Grammar_B2_1.pdf> --expect 6
+python3 german/tools/extract_b2_grammar.py \
+  --pdf <German_Grammar_B2_1.pdf> --pdf <German_Grammar_B2_2.pdf> --expect 15
 python3 german/tools/build_grammar.py
 python3 german/tools/extract_b2_vocabulary.py --pdf <German_Vocabulary_B2.pdf> --expect 500
 python3 german/tools/build_frequency.py <de_top2000_frequency.txt>
@@ -458,7 +476,7 @@ german/
   data/vocabulary.json  4979 cards, levelled A1–B2
   data/cefr.json        4442 levelled headwords with their sources
   data/frequency.json   2586 ranked word forms
-  data/grammar.json     127 topics, 639 examples, 645 exercises
+  data/grammar.json     136 topics, 675 examples, 690 exercises
   src/
     data.js         vocabulary loading + indexing
     grammar.js      grammar loading + indexing (by level, group, category)

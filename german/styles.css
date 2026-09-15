@@ -353,6 +353,23 @@ a { color: var(--primary); }
   border-radius: 12px; padding: .6rem .85rem; font-size: .88rem;
 }
 
+/* --- the B2 grammar section ------------------------------------------------*/
+
+.b2-banner {
+  display: flex; gap: .9rem; align-items: center; margin: 1rem 0 1.4rem;
+  background: var(--surface); border: 1px solid var(--line);
+  border-left: 4px solid var(--primary); border-radius: var(--radius);
+  padding: .85rem 1rem; text-decoration: none; color: inherit;
+}
+.b2-banner:hover { border-color: var(--primary); }
+.b2-banner__mark {
+  flex: 0 0 auto; font-weight: 700; font-size: 1.05rem; letter-spacing: .04em;
+  background: var(--primary); color: var(--on-primary); border-radius: 10px; padding: .45rem .6rem;
+}
+.b2-banner__text { display: flex; flex-direction: column; gap: .15rem; }
+.b2-banner__text span { font-size: .85rem; color: var(--ink-muted); }
+.b2-summary { margin-bottom: 1.4rem; display: flex; flex-direction: column; gap: .6rem; }
+
 /* --- progress -------------------------------------------------------------*/
 
 .stat-row { display: grid; gap: .8rem; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }

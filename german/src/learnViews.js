@@ -228,6 +228,27 @@ export function progressView() {
 
 // --- grammar ----------------------------------------------------------------
 
+/** One grammar topic as a card. Shared by the index and the B2 section. */
+function topicCard(topic) {
+  const record = grammarProgress(topic.id);
+  const attempts = record.correctCount + record.incorrectCount;
+  const mastery = Math.round(record.masteryScore * 100);
+  return `
+    <a class="topic" href="#/grammar/${topic.id}">
+      <span class="topic__head">
+        <span class="topic__title">${escapeHtml(topic.title)}</span>
+        <span class="topic__diff" title="Difficulty ${topic.difficulty} of 5">${'●'.repeat(topic.difficulty)}${'○'.repeat(5 - topic.difficulty)}</span>
+      </span>
+      <span class="topic__en">${escapeHtml(topic.titleEn)}</span>
+      <span class="topic__meta">
+        <span class="tag">${escapeHtml(topic.category)}</span>
+        ${attempts ? `<span class="topic__mastery${mastery >= 70 ? ' is-good' : mastery < 50 ? ' is-weak' : ''}">${mastery}% mastery</span>`
+          : `<span class="topic__mastery is-new">not started</span>`}
+        <span class="topic__count">${topic.exercises.length} exercises</span>
+      </span>
+    </a>`;
+}
+
 export function grammarIndexView() {
   const meta = getGrammarMeta();
   const profile = getProfile();
@@ -238,26 +259,6 @@ export function grammarIndexView() {
     .filter((entry) => entry.attempts >= 2 && entry.record.masteryScore < 0.5)
     .sort((a, b) => a.record.masteryScore - b.record.masteryScore)
     .slice(0, 3);
-
-  const topicCard = (topic) => {
-    const record = grammarProgress(topic.id);
-    const attempts = record.correctCount + record.incorrectCount;
-    const mastery = Math.round(record.masteryScore * 100);
-    return `
-      <a class="topic" href="#/grammar/${topic.id}">
-        <span class="topic__head">
-          <span class="topic__title">${escapeHtml(topic.title)}</span>
-          <span class="topic__diff" title="Difficulty ${topic.difficulty} of 5">${'●'.repeat(topic.difficulty)}${'○'.repeat(5 - topic.difficulty)}</span>
-        </span>
-        <span class="topic__en">${escapeHtml(topic.titleEn)}</span>
-        <span class="topic__meta">
-          <span class="tag">${escapeHtml(topic.category)}</span>
-          ${attempts ? `<span class="topic__mastery${mastery >= 70 ? ' is-good' : mastery < 50 ? ' is-weak' : ''}">${mastery}% mastery</span>`
-            : `<span class="topic__mastery is-new">not started</span>`}
-          <span class="topic__count">${topic.exercises.length} exercises</span>
-        </span>
-      </a>`;
-  };
 
   const levels = getGrammarLevels();
   const rail = levels.map((entry) => `
@@ -298,6 +299,16 @@ export function grammarIndexView() {
 
     <nav class="level-rail" aria-label="Grammar levels">${rail}</nav>
 
+    ${topicsAtLevel('B2').length ? `<a class="b2-banner" href="#/grammar/b2">
+      <span class="b2-banner__mark">B2</span>
+      <span class="b2-banner__text">
+        <strong>B2 Grammar — its own section</strong>
+        <span>${topicsAtLevel('B2').length} topics written for this app, with rules in German and
+          English, worked examples and ${topicsAtLevel('B2').reduce((n, t) => n + t.exercises.length, 0)}
+          exercises. Open the section →</span>
+      </span>
+    </a>` : ''}
+
     ${weak.length ? `<section class="weakspots">
       <h2 class="section-title">Your weak areas</h2>
       <div class="topics">
@@ -308,6 +319,68 @@ export function grammarIndexView() {
         </a>`).join('')}
       </div>
     </section>` : ''}
+
+    ${blocks}`;
+}
+
+/**
+ * The B2 grammar section.
+ *
+ * B2 held no grammar at all until this set was written for the app, so it gets
+ * a section of its own rather than being one band among five on the index: it
+ * is the only grammar here that was composed for this project instead of
+ * extracted from a published course, and it is the level the vocabulary
+ * already reaches.
+ *
+ * Topics are grouped by the document they came from, so a second B2 source
+ * would slot in beside this one rather than silently mixing into it.
+ */
+export function b2GrammarView() {
+  const topics = topicsAtLevel('B2');
+  if (!topics.length) {
+    return `<p class="empty">B2 grammar is not built yet. <a href="#/grammar">Back to grammar</a>.</p>`;
+  }
+
+  const meta = getGrammarMeta();
+  const exercises = topics.reduce((n, topic) => n + topic.exercises.length, 0);
+  const records = topics.map((topic) => grammarProgress(topic.id));
+  const started = records.filter((r) => r.correctCount + r.incorrectCount > 0).length;
+  const mastered = records.filter((r) => r.masteryScore >= 0.7).length;
+
+  const bySource = new Map();
+  topics.forEach((topic) => {
+    if (!bySource.has(topic.sourceKey)) bySource.set(topic.sourceKey, []);
+    bySource.get(topic.sourceKey).push(topic);
+  });
+
+  const blocks = [...bySource.entries()].map(([key, group]) => {
+    const source = (meta.sources || []).find((entry) => entry.key === key);
+    return `
+      <section class="lektion">
+        <h3 class="lektion__title">${escapeHtml(source ? source.title : key)}</h3>
+        ${source ? `<p class="level-block__source">${escapeHtml(source.credit)}</p>` : ''}
+        <div class="topics">${group.map(topicCard).join('')}</div>
+      </section>`;
+  }).join('');
+
+  return `
+    ${crumbs([{ label: 'German Learning', href: '#/' },
+              { label: 'Grammar', href: '#/grammar' },
+              { label: 'B2 Grammar' }])}
+    ${fukaBubble('subcategory', 'B2 is where German starts sounding like German. Take one topic at a time.')}
+    <header class="page-head">
+      <h1>🇩🇪 B2 Grammar</h1>
+      <p class="page-head__meta">${topics.length} topics · ${exercises} exercises ·
+        ${started} started · ${mastered} at 70%+ mastery</p>
+    </header>
+
+    <div class="b2-summary">
+      ${progressBar({ learned: mastered, learning: Math.max(0, started - mastered),
+                     total: topics.length })}
+      <p class="levels__note">Every topic gives you the rule in German and in English, four worked
+        examples taken from the source document, and exercises. Exercises built on a document
+        sentence are marked as such; the rest are labelled as practice.</p>
+    </div>
 
     ${blocks}`;
 }

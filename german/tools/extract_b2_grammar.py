@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """Extract the B2 grammar topics supplied by the project owner.
 
-Usage:  python3 extract_b2_grammar.py --pdf <German_Grammar_B2_1.pdf> [--expect 6]
+Usage:  python3 extract_b2_grammar.py --pdf <part1.pdf> [--pdf <part2.pdf> ...] [--expect 15]
+
+The set is published in parts. Pass them in order: the topics are numbered
+sequentially across the whole set, so adding a later part never renumbers an
+earlier one and the annotation ids stay stable.
 
 Writes b2-grammar-source.json next to this script: one record per numbered
 topic, with the German heading, the document's own English heading, the rule in
@@ -96,12 +100,13 @@ def slug(title: str) -> str:
     return re.sub(r"-+", "-", re.sub(r"[^a-z0-9]+", "-", folded.lower())).strip("-")
 
 
-def split_topics(runs):
+def split_topics(runs, part: int, source_file: str):
     """Cut the run stream into one list per topic heading."""
     topics, current = [], None
     for style, piece, page in runs:
         if style == TITLE and HEADING.match(piece):
-            current = {"heading": piece, "page": page, "pages": [page], "runs": []}
+            current = {"heading": piece, "page": page, "pages": [page], "runs": [],
+                       "part": part, "sourceFile": source_file}
             topics.append(current)
             continue
         if current is None:
@@ -112,9 +117,10 @@ def split_topics(runs):
     return topics
 
 
-def parse_topic(topic: dict) -> dict:
-    match = HEADING.match(topic["heading"])
-    number, title = int(match.group(1)), match.group(2).strip()
+def parse_topic(topic: dict, number: int) -> dict:
+    """Parse one topic. The number is the position in the whole set, not in its
+    own part, so the ids do not shift when a later part is added."""
+    title = HEADING.match(topic["heading"]).group(2).strip()
 
     title_en = ""
     rule_de: list[str] = []
@@ -190,6 +196,10 @@ def parse_topic(topic: dict) -> dict:
         "level": "B2",
         "section": "Deutsche Grammatik B2",
         "sectionNumber": str(number),
+        # The page is the page of the part the topic was printed in, which is
+        # what a reader checking the source would look for.
+        "part": topic["part"],
+        "sourceFile": topic["sourceFile"],
         "page": topic["page"],
         "pages": topic["pages"],
         "ruleDe": join(rule_de),
@@ -203,15 +213,20 @@ def parse_topic(topic: dict) -> dict:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--pdf", required=True, type=Path)
+    parser.add_argument("--pdf", required=True, type=Path, action="append",
+                        help="a part of the set; repeat in order for several parts")
     parser.add_argument("--expect", type=int, default=0,
                         help="fail unless exactly this many topics are found")
     args = parser.parse_args()
 
-    if not args.pdf.exists():
-        raise SystemExit(f"no such file: {args.pdf}")
+    for pdf in args.pdf:
+        if not pdf.exists():
+            raise SystemExit(f"no such file: {pdf}")
 
-    topics = [parse_topic(topic) for topic in split_topics(read_runs(args.pdf))]
+    topics = []
+    for part, pdf in enumerate(args.pdf, start=1):
+        for raw in split_topics(read_runs(pdf), part, pdf.name):
+            topics.append(parse_topic(raw, len(topics) + 1))
 
     if args.expect and len(topics) != args.expect:
         raise SystemExit(f"expected {args.expect} topics, found {len(topics)}")
@@ -221,11 +236,10 @@ def main() -> int:
 
     OUT.write_text(json.dumps(topics, ensure_ascii=False, indent=1), encoding="utf-8")
 
-    print(f"topics : {len(topics)} -> {OUT}")
+    print(f"topics : {len(topics)} from {len(args.pdf)} part(s) -> {OUT}")
     for topic in topics:
-        print(f"  {topic['number']}. {topic['title']}  "
-              f"({len(topic['examples'])} examples, p{topic['page']})")
-        print(f"      {topic['id']}")
+        print(f"  {topic['number']:2}. {topic['title']}  "
+              f"(part {topic['part']}, p{topic['page']}, {len(topic['examples'])} examples)")
     return 0
 
 

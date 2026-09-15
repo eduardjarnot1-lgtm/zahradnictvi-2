@@ -24,7 +24,7 @@ import {
   notFoundView, aboutView, coreWordsView,
 } from './views.js';
 import {
-  hubView, progressView, grammarIndexView, grammarTopicView, grammarSearchSection,
+  hubView, progressView, grammarIndexView, b2GrammarView, grammarTopicView, grammarSearchSection,
   activityView, emptyActivityView,
 } from './learnViews.js';
 
@@ -68,6 +68,8 @@ function render() {
       break;
     case 'grammar':
       if (a && b === 'practice') startGrammarPractice(a);
+      // 'b2' is the dedicated B2 section, not a topic — topic ids all start "g-".
+      else if (a === 'b2') main.innerHTML = b2GrammarView();
       else if (a) main.innerHTML = grammarTopicView(a);
       else main.innerHTML = grammarIndexView();
       break;
