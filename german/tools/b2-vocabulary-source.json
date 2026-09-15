@@ -1,0 +1,4033 @@
+{
+ "source": "German Vocabulary — Level B2 (supplied by the project owner)",
+ "level": "B2",
+ "topics": [
+  "Arbeit & Beruf",
+  "Bildung",
+  "Gesundheit",
+  "Umwelt",
+  "Gesellschaft",
+  "Politik",
+  "Wirtschaft",
+  "Technologie",
+  "Medien",
+  "Reisen & Kultur",
+  "Beziehungen & Gefühle",
+  "Meinung & Diskussion",
+  "Wissenschaft",
+  "Recht",
+  "Natur & Tiere",
+  "Wohnen & Alltag",
+  "Kunst & Literatur",
+  "Sport & Freizeit",
+  "Charaktereigenschaften",
+  "Abstrakte Substantive",
+  "Komplexe Verben",
+  "Erweiterte Adjektive",
+  "Zeit & Veränderung",
+  "Kommunikation",
+  "Probleme & Lösungen"
+ ],
+ "entries": [
+  {
+   "word": "Bewerbung",
+   "article": "die",
+   "translation": "application",
+   "example": "Ich habe meine Bewerbung gestern abgeschickt.",
+   "exampleTranslation": "I sent my application yesterday.",
+   "topic": "Arbeit & Beruf"
+  },
+  {
+   "word": "Lebenslauf",
+   "article": "der",
+   "translation": "CV / resume",
+   "example": "Er hat seinen Lebenslauf aktualisiert.",
+   "exampleTranslation": "He updated his CV.",
+   "topic": "Arbeit & Beruf"
+  },
+  {
+   "word": "Erfahrung",
+   "article": "die",
+   "translation": "experience",
+   "example": "Sie hat viel Erfahrung in diesem Bereich.",
+   "exampleTranslation": "She has a lot of experience in this field.",
+   "topic": "Arbeit & Beruf"
+  },
+  {
+   "word": "Fähigkeit",
+   "article": "die",
+   "translation": "skill / ability",
+   "example": "Kommunikation ist eine wichtige Fähigkeit.",
+   "exampleTranslation": "Communication is an important skill.",
+   "topic": "Arbeit & Beruf"
+  },
+  {
+   "word": "Verantwortung",
+   "article": "die",
+   "translation": "responsibility",
+   "example": "Er übernimmt gerne Verantwortung.",
+   "exampleTranslation": "He likes to take on responsibility.",
+   "topic": "Arbeit & Beruf"
+  },
+  {
+   "word": "Kündigung",
+   "article": "die",
+   "translation": "termination / resignation",
+   "example": "Sie hat ihre Kündigung eingereicht.",
+   "exampleTranslation": "She submitted her resignation.",
+   "topic": "Arbeit & Beruf"
+  },
+  {
+   "word": "Vertrag",
+   "article": "der",
+   "translation": "contract",
+   "example": "Wir haben den Vertrag unterschrieben.",
+   "exampleTranslation": "We signed the contract.",
+   "topic": "Arbeit & Beruf"
+  },
+  {
+   "word": "Gehaltserhöhung",
+   "article": "die",
+   "translation": "pay raise",
+   "example": "Er hat um eine Gehaltserhöhung gebeten.",
+   "exampleTranslation": "He asked for a pay raise.",
+   "topic": "Arbeit & Beruf"
+  },
+  {
+   "word": "Teamarbeit",
+   "article": "die",
+   "translation": "teamwork",
+   "example": "Teamarbeit ist in diesem Projekt entscheidend.",
+   "exampleTranslation": "Teamwork is crucial in this project.",
+   "topic": "Arbeit & Beruf"
+  },
+  {
+   "word": "Führungskraft",
+   "article": "die",
+   "translation": "manager / executive",
+   "example": "Sie ist eine erfahrene Führungskraft.",
+   "exampleTranslation": "She is an experienced manager.",
+   "topic": "Arbeit & Beruf"
+  },
+  {
+   "word": "Kollege / die Kollegin",
+   "article": "der",
+   "translation": "colleague",
+   "example": "Mein Kollege hilft mir oft.",
+   "exampleTranslation": "My colleague often helps me.",
+   "topic": "Arbeit & Beruf"
+  },
+  {
+   "word": "Karriere",
+   "article": "die",
+   "translation": "career",
+   "example": "Er plant seine Karriere sorgfältig.",
+   "exampleTranslation": "He plans his career carefully.",
+   "topic": "Arbeit & Beruf"
+  },
+  {
+   "word": "Weiterbildung",
+   "article": "die",
+   "translation": "further training",
+   "example": "Die Firma bietet Weiterbildung an.",
+   "exampleTranslation": "The company offers further training.",
+   "topic": "Arbeit & Beruf"
+  },
+  {
+   "word": "Vorstellungsgespräch",
+   "article": "das",
+   "translation": "job interview",
+   "example": "Das Vorstellungsgespräch verlief gut.",
+   "exampleTranslation": "The job interview went well.",
+   "topic": "Arbeit & Beruf"
+  },
+  {
+   "word": "Teilzeit",
+   "article": "die",
+   "translation": "part-time",
+   "example": "Sie arbeitet jetzt in Teilzeit.",
+   "exampleTranslation": "She now works part-time.",
+   "topic": "Arbeit & Beruf"
+  },
+  {
+   "word": "Überstunde",
+   "article": "die",
+   "translation": "overtime",
+   "example": "Er macht selten Überstunden.",
+   "exampleTranslation": "He rarely works overtime.",
+   "topic": "Arbeit & Beruf"
+  },
+  {
+   "word": "Arbeitsmarkt",
+   "article": "der",
+   "translation": "job market",
+   "example": "Der Arbeitsmarkt hat sich verändert.",
+   "exampleTranslation": "The job market has changed.",
+   "topic": "Arbeit & Beruf"
+  },
+  {
+   "word": "Kündigungsfrist",
+   "article": "die",
+   "translation": "notice period",
+   "example": "Die Kündigungsfrist beträgt drei Monate.",
+   "exampleTranslation": "The notice period is three months.",
+   "topic": "Arbeit & Beruf"
+  },
+  {
+   "word": "Feierabend",
+   "article": "der",
+   "translation": "end of the workday",
+   "example": "Endlich Feierabend!",
+   "exampleTranslation": "Finally, the end of the workday!",
+   "topic": "Arbeit & Beruf"
+  },
+  {
+   "word": "sich bewerben (um)",
+   "article": "",
+   "translation": "to apply (for)",
+   "example": "Ich bewerbe mich um die Stelle.",
+   "exampleTranslation": "I am applying for the position.",
+   "topic": "Arbeit & Beruf"
+  },
+  {
+   "word": "Ausbildung",
+   "article": "die",
+   "translation": "vocational training",
+   "example": "Er macht eine Ausbildung zum Elektriker.",
+   "exampleTranslation": "He is doing vocational training to become an electrician.",
+   "topic": "Bildung"
+  },
+  {
+   "word": "Studium",
+   "article": "das",
+   "translation": "university studies",
+   "example": "Ihr Studium dauert vier Jahre.",
+   "exampleTranslation": "Her studies take four years.",
+   "topic": "Bildung"
+  },
+  {
+   "word": "Prüfung",
+   "article": "die",
+   "translation": "exam",
+   "example": "Die Prüfung war schwieriger als erwartet.",
+   "exampleTranslation": "The exam was harder than expected.",
+   "topic": "Bildung"
+  },
+  {
+   "word": "Abschluss",
+   "article": "der",
+   "translation": "degree / graduation",
+   "example": "Er hat seinen Abschluss letztes Jahr gemacht.",
+   "exampleTranslation": "He graduated last year.",
+   "topic": "Bildung"
+  },
+  {
+   "word": "Note",
+   "article": "die",
+   "translation": "grade",
+   "example": "Sie hat eine gute Note bekommen.",
+   "exampleTranslation": "She got a good grade.",
+   "topic": "Bildung"
+  },
+  {
+   "word": "Stipendium",
+   "article": "das",
+   "translation": "scholarship",
+   "example": "Er hat ein Stipendium erhalten.",
+   "exampleTranslation": "He received a scholarship.",
+   "topic": "Bildung"
+  },
+  {
+   "word": "Vorlesung",
+   "article": "die",
+   "translation": "lecture",
+   "example": "Die Vorlesung beginnt um neun Uhr.",
+   "exampleTranslation": "The lecture starts at nine.",
+   "topic": "Bildung"
+  },
+  {
+   "word": "Hausaufgabe",
+   "article": "die",
+   "translation": "homework",
+   "example": "Hast du deine Hausaufgaben gemacht?",
+   "exampleTranslation": "Have you done your homework?",
+   "topic": "Bildung"
+  },
+  {
+   "word": "Lehrplan",
+   "article": "der",
+   "translation": "curriculum",
+   "example": "Der Lehrplan wurde geändert.",
+   "exampleTranslation": "The curriculum was changed.",
+   "topic": "Bildung"
+  },
+  {
+   "word": "Lernfähigkeit",
+   "article": "die",
+   "translation": "ability to learn",
+   "example": "Kinder haben eine erstaunliche Lernfähigkeit.",
+   "exampleTranslation": "Children have an amazing ability to learn.",
+   "topic": "Bildung"
+  },
+  {
+   "word": "Fach",
+   "article": "das",
+   "translation": "subject",
+   "example": "Mathematik ist mein Lieblingsfach.",
+   "exampleTranslation": "Math is my favorite subject.",
+   "topic": "Bildung"
+  },
+  {
+   "word": "Unterricht",
+   "article": "der",
+   "translation": "class / lesson",
+   "example": "Der Unterricht fällt heute aus.",
+   "exampleTranslation": "Class is cancelled today.",
+   "topic": "Bildung"
+  },
+  {
+   "word": "Bibliothek",
+   "article": "die",
+   "translation": "library",
+   "example": "Ich lerne oft in der Bibliothek.",
+   "exampleTranslation": "I often study in the library.",
+   "topic": "Bildung"
+  },
+  {
+   "word": "Studiengang",
+   "article": "der",
+   "translation": "degree program",
+   "example": "Der Studiengang dauert sechs Semester.",
+   "exampleTranslation": "The degree program lasts six semesters.",
+   "topic": "Bildung"
+  },
+  {
+   "word": "Forschung",
+   "article": "die",
+   "translation": "research",
+   "example": "Die Forschung braucht mehr Geld.",
+   "exampleTranslation": "The research needs more funding.",
+   "topic": "Bildung"
+  },
+  {
+   "word": "lebenslange Lernen",
+   "article": "das",
+   "translation": "lifelong learning",
+   "example": "Lebenslanges Lernen wird immer wichtiger.",
+   "exampleTranslation": "Lifelong learning is becoming increasingly important.",
+   "topic": "Bildung"
+  },
+  {
+   "word": "Grundschule",
+   "article": "die",
+   "translation": "primary school",
+   "example": "Er geht noch in die Grundschule.",
+   "exampleTranslation": "He still goes to primary school.",
+   "topic": "Bildung"
+  },
+  {
+   "word": "Hochschule",
+   "article": "die",
+   "translation": "university / college",
+   "example": "Sie studiert an einer Hochschule.",
+   "exampleTranslation": "She studies at a university.",
+   "topic": "Bildung"
+  },
+  {
+   "word": "Wissen",
+   "article": "das",
+   "translation": "knowledge",
+   "example": "Wissen ist Macht.",
+   "exampleTranslation": "Knowledge is power.",
+   "topic": "Bildung"
+  },
+  {
+   "word": "auswendig lernen",
+   "article": "",
+   "translation": "to memorize",
+   "example": "Wir müssen das Gedicht auswendig lernen.",
+   "exampleTranslation": "We have to memorize the poem.",
+   "topic": "Bildung"
+  },
+  {
+   "word": "Gesundheit",
+   "article": "die",
+   "translation": "health",
+   "example": "Gesundheit ist das Wichtigste im Leben.",
+   "exampleTranslation": "Health is the most important thing in life.",
+   "topic": "Gesundheit"
+  },
+  {
+   "word": "Ernährung",
+   "article": "die",
+   "translation": "nutrition / diet",
+   "example": "Eine ausgewogene Ernährung ist wichtig.",
+   "exampleTranslation": "A balanced diet is important.",
+   "topic": "Gesundheit"
+  },
+  {
+   "word": "Bewegung",
+   "article": "die",
+   "translation": "exercise / movement",
+   "example": "Regelmäßige Bewegung hält fit.",
+   "exampleTranslation": "Regular exercise keeps you fit.",
+   "topic": "Gesundheit"
+  },
+  {
+   "word": "Termin",
+   "article": "der",
+   "translation": "appointment",
+   "example": "Ich habe morgen einen Termin beim Arzt.",
+   "exampleTranslation": "I have a doctor's appointment tomorrow.",
+   "topic": "Gesundheit"
+  },
+  {
+   "word": "sich erholen",
+   "article": "",
+   "translation": "to recover",
+   "example": "Er erholt sich langsam von der Grippe.",
+   "exampleTranslation": "He is slowly recovering from the flu.",
+   "topic": "Gesundheit"
+  },
+  {
+   "word": "Behandlung",
+   "article": "die",
+   "translation": "treatment",
+   "example": "Die Behandlung dauert mehrere Wochen.",
+   "exampleTranslation": "The treatment takes several weeks.",
+   "topic": "Gesundheit"
+  },
+  {
+   "word": "Versicherung",
+   "article": "die",
+   "translation": "insurance",
+   "example": "Die Versicherung übernimmt die Kosten.",
+   "exampleTranslation": "The insurance covers the costs.",
+   "topic": "Gesundheit"
+  },
+  {
+   "word": "Stress",
+   "article": "der",
+   "translation": "stress",
+   "example": "Zu viel Stress schadet der Gesundheit.",
+   "exampleTranslation": "Too much stress harms your health.",
+   "topic": "Gesundheit"
+  },
+  {
+   "word": "Entspannung",
+   "article": "die",
+   "translation": "relaxation",
+   "example": "Yoga hilft mir bei der Entspannung.",
+   "exampleTranslation": "Yoga helps me relax.",
+   "topic": "Gesundheit"
+  },
+  {
+   "word": "vorbeugen",
+   "article": "",
+   "translation": "to prevent",
+   "example": "Sport kann vielen Krankheiten vorbeugen.",
+   "exampleTranslation": "Exercise can prevent many illnesses.",
+   "topic": "Gesundheit"
+  },
+  {
+   "word": "Schlafmangel",
+   "article": "der",
+   "translation": "lack of sleep",
+   "example": "Schlafmangel wirkt sich negativ auf die Konzentration aus.",
+   "exampleTranslation": "Lack of sleep negatively affects concentration.",
+   "topic": "Gesundheit"
+  },
+  {
+   "word": "Apotheke",
+   "article": "die",
+   "translation": "pharmacy",
+   "example": "Ich hole das Medikament aus der Apotheke.",
+   "exampleTranslation": "I'm picking up the medicine from the pharmacy.",
+   "topic": "Gesundheit"
+  },
+  {
+   "word": "Rezept",
+   "article": "das",
+   "translation": "prescription",
+   "example": "Der Arzt hat mir ein Rezept ausgestellt.",
+   "exampleTranslation": "The doctor wrote me a prescription.",
+   "topic": "Gesundheit"
+  },
+  {
+   "word": "sich fühlen",
+   "article": "",
+   "translation": "to feel",
+   "example": "Wie fühlst du dich heute?",
+   "exampleTranslation": "How do you feel today?",
+   "topic": "Gesundheit"
+  },
+  {
+   "word": "Symptom",
+   "article": "das",
+   "translation": "symptom",
+   "example": "Die Symptome sind seit gestern schlimmer geworden.",
+   "exampleTranslation": "The symptoms have gotten worse since yesterday.",
+   "topic": "Gesundheit"
+  },
+  {
+   "word": "Untersuchung",
+   "article": "die",
+   "translation": "examination / checkup",
+   "example": "Die Untersuchung hat nichts Auffälliges ergeben.",
+   "exampleTranslation": "The examination didn't show anything unusual.",
+   "topic": "Gesundheit"
+  },
+  {
+   "word": "Gewohnheit",
+   "article": "die",
+   "translation": "habit",
+   "example": "Rauchen ist eine schwer zu ändernde Gewohnheit.",
+   "exampleTranslation": "Smoking is a hard habit to change.",
+   "topic": "Gesundheit"
+  },
+  {
+   "word": "Wohlbefinden",
+   "article": "das",
+   "translation": "wellbeing",
+   "example": "Musik steigert mein Wohlbefinden.",
+   "exampleTranslation": "Music improves my wellbeing.",
+   "topic": "Gesundheit"
+  },
+  {
+   "word": "Impfung",
+   "article": "die",
+   "translation": "vaccination",
+   "example": "Die Impfung schützt vor der Krankheit.",
+   "exampleTranslation": "The vaccination protects against the disease.",
+   "topic": "Gesundheit"
+  },
+  {
+   "word": "gesund bleiben",
+   "article": "",
+   "translation": "to stay healthy",
+   "example": "Ich versuche, durch Sport gesund zu bleiben.",
+   "exampleTranslation": "I try to stay healthy through exercise.",
+   "topic": "Gesundheit"
+  },
+  {
+   "word": "Umwelt",
+   "article": "die",
+   "translation": "environment",
+   "example": "Wir müssen die Umwelt schützen.",
+   "exampleTranslation": "We need to protect the environment.",
+   "topic": "Umwelt"
+  },
+  {
+   "word": "Klimawandel",
+   "article": "der",
+   "translation": "climate change",
+   "example": "Der Klimawandel betrifft die ganze Welt.",
+   "exampleTranslation": "Climate change affects the whole world.",
+   "topic": "Umwelt"
+  },
+  {
+   "word": "Nachhaltigkeit",
+   "article": "die",
+   "translation": "sustainability",
+   "example": "Nachhaltigkeit spielt in der Wirtschaft eine größere Rolle.",
+   "exampleTranslation": "Sustainability is playing a bigger role in the economy.",
+   "topic": "Umwelt"
+  },
+  {
+   "word": "Müll",
+   "article": "der",
+   "translation": "trash / waste",
+   "example": "Wir sollten weniger Müll produzieren.",
+   "exampleTranslation": "We should produce less waste.",
+   "topic": "Umwelt"
+  },
+  {
+   "word": "Recycling",
+   "article": "das",
+   "translation": "recycling",
+   "example": "Recycling schont die natürlichen Ressourcen.",
+   "exampleTranslation": "Recycling conserves natural resources.",
+   "topic": "Umwelt"
+  },
+  {
+   "word": "Ressource",
+   "article": "die",
+   "translation": "resource",
+   "example": "Wasser ist eine begrenzte Ressource.",
+   "exampleTranslation": "Water is a limited resource.",
+   "topic": "Umwelt"
+  },
+  {
+   "word": "erneuerbare Energie",
+   "article": "die",
+   "translation": "renewable energy",
+   "example": "Erneuerbare Energie wird immer wichtiger.",
+   "exampleTranslation": "Renewable energy is becoming increasingly important.",
+   "topic": "Umwelt"
+  },
+  {
+   "word": "Verschmutzung",
+   "article": "die",
+   "translation": "pollution",
+   "example": "Die Luftverschmutzung nimmt in Städten zu.",
+   "exampleTranslation": "Air pollution is increasing in cities.",
+   "topic": "Umwelt"
+  },
+  {
+   "word": "Treibhauseffekt",
+   "article": "der",
+   "translation": "greenhouse effect",
+   "example": "Der Treibhauseffekt erwärmt die Erde.",
+   "exampleTranslation": "The greenhouse effect is warming the earth.",
+   "topic": "Umwelt"
+  },
+  {
+   "word": "Artenvielfalt",
+   "article": "die",
+   "translation": "biodiversity",
+   "example": "Die Artenvielfalt geht weltweit zurück.",
+   "exampleTranslation": "Biodiversity is declining worldwide.",
+   "topic": "Umwelt"
+  },
+  {
+   "word": "nachhaltig",
+   "article": "",
+   "translation": "sustainable",
+   "example": "Wir kaufen möglichst nachhaltige Produkte.",
+   "exampleTranslation": "We buy the most sustainable products possible.",
+   "topic": "Umwelt"
+  },
+  {
+   "word": "Umweltschutz",
+   "article": "der",
+   "translation": "environmental protection",
+   "example": "Umweltschutz beginnt im Alltag.",
+   "exampleTranslation": "Environmental protection starts in everyday life.",
+   "topic": "Umwelt"
+  },
+  {
+   "word": "CO2-Ausstoß",
+   "article": "der",
+   "translation": "CO2 emissions",
+   "example": "Der CO2-Ausstoß muss gesenkt werden.",
+   "exampleTranslation": "CO2 emissions need to be reduced.",
+   "topic": "Umwelt"
+  },
+  {
+   "word": "Ökosystem",
+   "article": "das",
+   "translation": "ecosystem",
+   "example": "Das Ökosystem des Waldes ist empfindlich.",
+   "exampleTranslation": "The forest ecosystem is sensitive.",
+   "topic": "Umwelt"
+  },
+  {
+   "word": "Dürre",
+   "article": "die",
+   "translation": "drought",
+   "example": "Die Dürre hat die Ernte zerstört.",
+   "exampleTranslation": "The drought destroyed the harvest.",
+   "topic": "Umwelt"
+  },
+  {
+   "word": "Meeresspiegel",
+   "article": "der",
+   "translation": "sea level",
+   "example": "Der Meeresspiegel steigt langsam an.",
+   "exampleTranslation": "The sea level is slowly rising.",
+   "topic": "Umwelt"
+  },
+  {
+   "word": "Abholzung",
+   "article": "die",
+   "translation": "deforestation",
+   "example": "Die Abholzung bedroht viele Tierarten.",
+   "exampleTranslation": "Deforestation threatens many animal species.",
+   "topic": "Umwelt"
+  },
+  {
+   "word": "verschwenden",
+   "article": "",
+   "translation": "to waste",
+   "example": "Wir sollten keine Lebensmittel verschwenden.",
+   "exampleTranslation": "We shouldn't waste food.",
+   "topic": "Umwelt"
+  },
+  {
+   "word": "Katastrophe",
+   "article": "die",
+   "translation": "disaster",
+   "example": "Die Naturkatastrophe traf die Region hart.",
+   "exampleTranslation": "The natural disaster hit the region hard.",
+   "topic": "Umwelt"
+  },
+  {
+   "word": "schützen",
+   "article": "",
+   "translation": "to protect",
+   "example": "Wir müssen die Wälder schützen.",
+   "exampleTranslation": "We must protect the forests.",
+   "topic": "Umwelt"
+  },
+  {
+   "word": "Gesellschaft",
+   "article": "die",
+   "translation": "society",
+   "example": "Die Gesellschaft verändert sich ständig.",
+   "exampleTranslation": "Society is constantly changing.",
+   "topic": "Gesellschaft"
+  },
+  {
+   "word": "Integration",
+   "article": "die",
+   "translation": "integration",
+   "example": "Sprachkurse fördern die Integration.",
+   "exampleTranslation": "Language courses promote integration.",
+   "topic": "Gesellschaft"
+  },
+  {
+   "word": "Vielfalt",
+   "article": "die",
+   "translation": "diversity",
+   "example": "Vielfalt bereichert die Gesellschaft.",
+   "exampleTranslation": "Diversity enriches society.",
+   "topic": "Gesellschaft"
+  },
+  {
+   "word": "Gleichberechtigung",
+   "article": "die",
+   "translation": "equality",
+   "example": "Gleichberechtigung ist ein wichtiges Thema.",
+   "exampleTranslation": "Equality is an important topic.",
+   "topic": "Gesellschaft"
+  },
+  {
+   "word": "Generation",
+   "article": "die",
+   "translation": "generation",
+   "example": "Jede Generation hat ihre eigenen Werte.",
+   "exampleTranslation": "Every generation has its own values.",
+   "topic": "Gesellschaft"
+  },
+  {
+   "word": "Wandel",
+   "article": "der",
+   "translation": "change / transformation",
+   "example": "Der gesellschaftliche Wandel geht schnell voran.",
+   "exampleTranslation": "Social change is progressing quickly.",
+   "topic": "Gesellschaft"
+  },
+  {
+   "word": "Solidarität",
+   "article": "die",
+   "translation": "solidarity",
+   "example": "In der Krise zeigten die Menschen Solidarität.",
+   "exampleTranslation": "People showed solidarity during the crisis.",
+   "topic": "Gesellschaft"
+  },
+  {
+   "word": "Armut",
+   "article": "die",
+   "translation": "poverty",
+   "example": "Armut betrifft viele Familien.",
+   "exampleTranslation": "Poverty affects many families.",
+   "topic": "Gesellschaft"
+  },
+  {
+   "word": "Wohlstand",
+   "article": "der",
+   "translation": "prosperity",
+   "example": "Der Wohlstand ist ungleich verteilt.",
+   "exampleTranslation": "Prosperity is unevenly distributed.",
+   "topic": "Gesellschaft"
+  },
+  {
+   "word": "Tradition",
+   "article": "die",
+   "translation": "tradition",
+   "example": "Diese Tradition wird seit Generationen gepflegt.",
+   "exampleTranslation": "This tradition has been kept up for generations.",
+   "topic": "Gesellschaft"
+  },
+  {
+   "word": "Errungenschaft",
+   "article": "die",
+   "translation": "achievement",
+   "example": "Technische Errungenschaften verändern unser Leben.",
+   "exampleTranslation": "Technical achievements are changing our lives.",
+   "topic": "Gesellschaft"
+  },
+  {
+   "word": "Bevölkerung",
+   "article": "die",
+   "translation": "population",
+   "example": "Die Bevölkerung wächst stetig.",
+   "exampleTranslation": "The population is steadily growing.",
+   "topic": "Gesellschaft"
+  },
+  {
+   "word": "Gemeinschaft",
+   "article": "die",
+   "translation": "community",
+   "example": "Die Nachbarn bilden eine enge Gemeinschaft.",
+   "exampleTranslation": "The neighbors form a close community.",
+   "topic": "Gesellschaft"
+  },
+  {
+   "word": "Herausforderung",
+   "article": "die",
+   "translation": "challenge",
+   "example": "Der Klimawandel ist eine globale Herausforderung.",
+   "exampleTranslation": "Climate change is a global challenge.",
+   "topic": "Gesellschaft"
+  },
+  {
+   "word": "Kluft",
+   "article": "die",
+   "translation": "gap / divide",
+   "example": "Die Kluft zwischen Arm und Reich wächst.",
+   "exampleTranslation": "The gap between rich and poor is growing.",
+   "topic": "Gesellschaft"
+  },
+  {
+   "word": "Vorurteil",
+   "article": "das",
+   "translation": "prejudice",
+   "example": "Vorurteile lassen sich schwer abbauen.",
+   "exampleTranslation": "Prejudices are hard to break down.",
+   "topic": "Gesellschaft"
+  },
+  {
+   "word": "Toleranz",
+   "article": "die",
+   "translation": "tolerance",
+   "example": "Toleranz ist die Grundlage eines friedlichen Zusammenlebens.",
+   "exampleTranslation": "Tolerance is the basis for peaceful coexistence.",
+   "topic": "Gesellschaft"
+  },
+  {
+   "word": "Zusammenhalt",
+   "article": "der",
+   "translation": "cohesion / solidarity",
+   "example": "Der Zusammenhalt in der Familie ist stark.",
+   "exampleTranslation": "The cohesion within the family is strong.",
+   "topic": "Gesellschaft"
+  },
+  {
+   "word": "Ungleichheit",
+   "article": "die",
+   "translation": "inequality",
+   "example": "Soziale Ungleichheit nimmt zu.",
+   "exampleTranslation": "Social inequality is increasing.",
+   "topic": "Gesellschaft"
+  },
+  {
+   "word": "sich engagieren",
+   "article": "",
+   "translation": "to get involved",
+   "example": "Sie engagiert sich für den Naturschutz.",
+   "exampleTranslation": "She is involved in nature conservation.",
+   "topic": "Gesellschaft"
+  },
+  {
+   "word": "Politik",
+   "article": "die",
+   "translation": "politics",
+   "example": "Er interessiert sich sehr für Politik.",
+   "exampleTranslation": "He is very interested in politics.",
+   "topic": "Politik"
+  },
+  {
+   "word": "Wahl",
+   "article": "die",
+   "translation": "election",
+   "example": "Die Wahl findet im Herbst statt.",
+   "exampleTranslation": "The election takes place in autumn.",
+   "topic": "Politik"
+  },
+  {
+   "word": "Regierung",
+   "article": "die",
+   "translation": "government",
+   "example": "Die Regierung hat ein neues Gesetz beschlossen.",
+   "exampleTranslation": "The government passed a new law.",
+   "topic": "Politik"
+  },
+  {
+   "word": "Gesetz",
+   "article": "das",
+   "translation": "law",
+   "example": "Das Gesetz tritt nächstes Jahr in Kraft.",
+   "exampleTranslation": "The law comes into effect next year.",
+   "topic": "Politik"
+  },
+  {
+   "word": "Partei",
+   "article": "die",
+   "translation": "political party",
+   "example": "Er ist Mitglied einer Partei.",
+   "exampleTranslation": "He is a member of a party.",
+   "topic": "Politik"
+  },
+  {
+   "word": "Demokratie",
+   "article": "die",
+   "translation": "democracy",
+   "example": "Demokratie beruht auf freien Wahlen.",
+   "exampleTranslation": "Democracy is based on free elections.",
+   "topic": "Politik"
+  },
+  {
+   "word": "Abstimmung",
+   "article": "die",
+   "translation": "vote / ballot",
+   "example": "Die Abstimmung endete knapp.",
+   "exampleTranslation": "The vote ended narrowly.",
+   "topic": "Politik"
+  },
+  {
+   "word": "Bürger / die Bürgerin",
+   "article": "der",
+   "translation": "citizen",
+   "example": "Jeder Bürger hat das Recht zu wählen.",
+   "exampleTranslation": "Every citizen has the right to vote.",
+   "topic": "Politik"
+  },
+  {
+   "word": "Verfassung",
+   "article": "die",
+   "translation": "constitution",
+   "example": "Die Verfassung schützt die Grundrechte.",
+   "exampleTranslation": "The constitution protects fundamental rights.",
+   "topic": "Politik"
+  },
+  {
+   "word": "Debatte",
+   "article": "die",
+   "translation": "debate",
+   "example": "Die Debatte im Parlament dauerte Stunden.",
+   "exampleTranslation": "The debate in parliament lasted for hours.",
+   "topic": "Politik"
+  },
+  {
+   "word": "Reform",
+   "article": "die",
+   "translation": "reform",
+   "example": "Die Reform des Bildungssystems wird diskutiert.",
+   "exampleTranslation": "The reform of the education system is being discussed.",
+   "topic": "Politik"
+  },
+  {
+   "word": "Verwaltung",
+   "article": "die",
+   "translation": "administration",
+   "example": "Die Verwaltung bearbeitet den Antrag.",
+   "exampleTranslation": "The administration is processing the application.",
+   "topic": "Politik"
+  },
+  {
+   "word": "Zuständigkeit",
+   "article": "die",
+   "translation": "jurisdiction / area of responsibility",
+   "example": "Diese Angelegenheit fällt nicht in seine Zuständigkeit.",
+   "exampleTranslation": "This matter is not within his jurisdiction.",
+   "topic": "Politik"
+  },
+  {
+   "word": "Öffentlichkeit",
+   "article": "die",
+   "translation": "the public",
+   "example": "Die Öffentlichkeit wurde über die Pläne informiert.",
+   "exampleTranslation": "The public was informed about the plans.",
+   "topic": "Politik"
+  },
+  {
+   "word": "Kompromiss",
+   "article": "der",
+   "translation": "compromise",
+   "example": "Beide Seiten fanden einen Kompromiss.",
+   "exampleTranslation": "Both sides found a compromise.",
+   "topic": "Politik"
+  },
+  {
+   "word": "Meinungsfreiheit",
+   "article": "die",
+   "translation": "freedom of speech",
+   "example": "Meinungsfreiheit ist ein Grundrecht.",
+   "exampleTranslation": "Freedom of speech is a fundamental right.",
+   "topic": "Politik"
+  },
+  {
+   "word": "Grundrecht",
+   "article": "das",
+   "translation": "fundamental right",
+   "example": "Grundrechte gelten für alle Bürger.",
+   "exampleTranslation": "Fundamental rights apply to all citizens.",
+   "topic": "Politik"
+  },
+  {
+   "word": "Opposition",
+   "article": "die",
+   "translation": "opposition",
+   "example": "Die Opposition kritisierte den Plan scharf.",
+   "exampleTranslation": "The opposition sharply criticized the plan.",
+   "topic": "Politik"
+  },
+  {
+   "word": "Beschluss",
+   "article": "der",
+   "translation": "resolution / decision",
+   "example": "Der Beschluss wurde einstimmig gefasst.",
+   "exampleTranslation": "The resolution was passed unanimously.",
+   "topic": "Politik"
+  },
+  {
+   "word": "sich beteiligen",
+   "article": "",
+   "translation": "to participate",
+   "example": "Viele Bürger beteiligen sich an der Diskussion.",
+   "exampleTranslation": "Many citizens participate in the discussion.",
+   "topic": "Politik"
+  },
+  {
+   "word": "Wirtschaft",
+   "article": "die",
+   "translation": "economy",
+   "example": "Die Wirtschaft wächst langsam.",
+   "exampleTranslation": "The economy is growing slowly.",
+   "topic": "Wirtschaft"
+  },
+  {
+   "word": "Unternehmen",
+   "article": "das",
+   "translation": "company",
+   "example": "Das Unternehmen stellt neue Mitarbeiter ein.",
+   "exampleTranslation": "The company is hiring new employees.",
+   "topic": "Wirtschaft"
+  },
+  {
+   "word": "Markt",
+   "article": "der",
+   "translation": "market",
+   "example": "Der Markt reagiert auf die neuen Zahlen.",
+   "exampleTranslation": "The market is reacting to the new figures.",
+   "topic": "Wirtschaft"
+  },
+  {
+   "word": "Nachfrage",
+   "article": "die",
+   "translation": "demand",
+   "example": "Die Nachfrage nach dem Produkt steigt.",
+   "exampleTranslation": "Demand for the product is rising.",
+   "topic": "Wirtschaft"
+  },
+  {
+   "word": "Angebot",
+   "article": "das",
+   "translation": "supply / offer",
+   "example": "Angebot und Nachfrage bestimmen den Preis.",
+   "exampleTranslation": "Supply and demand determine the price.",
+   "topic": "Wirtschaft"
+  },
+  {
+   "word": "Gewinn",
+   "article": "der",
+   "translation": "profit",
+   "example": "Die Firma hat letztes Jahr Gewinn gemacht.",
+   "exampleTranslation": "The company made a profit last year.",
+   "topic": "Wirtschaft"
+  },
+  {
+   "word": "Verlust",
+   "article": "der",
+   "translation": "loss",
+   "example": "Der Verlust überraschte die Aktionäre.",
+   "exampleTranslation": "The loss surprised the shareholders.",
+   "topic": "Wirtschaft"
+  },
+  {
+   "word": "Investition",
+   "article": "die",
+   "translation": "investment",
+   "example": "Sie planen eine große Investition.",
+   "exampleTranslation": "They are planning a large investment.",
+   "topic": "Wirtschaft"
+  },
+  {
+   "word": "Konkurrenz",
+   "article": "die",
+   "translation": "competition",
+   "example": "Die Konkurrenz auf dem Markt ist groß.",
+   "exampleTranslation": "Competition in the market is fierce.",
+   "topic": "Wirtschaft"
+  },
+  {
+   "word": "Steuer",
+   "article": "die",
+   "translation": "tax",
+   "example": "Die Steuern werden nächstes Jahr erhöht.",
+   "exampleTranslation": "Taxes will be raised next year.",
+   "topic": "Wirtschaft"
+  },
+  {
+   "word": "Inflation",
+   "article": "die",
+   "translation": "inflation",
+   "example": "Die Inflation treibt die Preise nach oben.",
+   "exampleTranslation": "Inflation is driving prices up.",
+   "topic": "Wirtschaft"
+  },
+  {
+   "word": "Budget",
+   "article": "das",
+   "translation": "budget",
+   "example": "Das Budget wurde gekürzt.",
+   "exampleTranslation": "The budget was cut.",
+   "topic": "Wirtschaft"
+  },
+  {
+   "word": "Branche",
+   "article": "die",
+   "translation": "industry / sector",
+   "example": "Er arbeitet in der Automobilbranche.",
+   "exampleTranslation": "He works in the automotive industry.",
+   "topic": "Wirtschaft"
+  },
+  {
+   "word": "Kunde / die Kundin",
+   "article": "der",
+   "translation": "customer",
+   "example": "Der Kunde hat immer Recht, sagt man.",
+   "exampleTranslation": "The customer is always right, as they say.",
+   "topic": "Wirtschaft"
+  },
+  {
+   "word": "Produktion",
+   "article": "die",
+   "translation": "production",
+   "example": "Die Produktion wurde ins Ausland verlagert.",
+   "exampleTranslation": "Production was moved abroad.",
+   "topic": "Wirtschaft"
+  },
+  {
+   "word": "Handelsbeziehung",
+   "article": "die",
+   "translation": "trade relationship",
+   "example": "Die Handelsbeziehungen zwischen den Ländern verbessern sich.",
+   "exampleTranslation": "Trade relations between the countries are improving.",
+   "topic": "Wirtschaft"
+  },
+  {
+   "word": "Aufschwung",
+   "article": "der",
+   "translation": "upturn / boom",
+   "example": "Nach der Krise folgte ein Aufschwung.",
+   "exampleTranslation": "An upturn followed the crisis.",
+   "topic": "Wirtschaft"
+  },
+  {
+   "word": "Rückgang",
+   "article": "der",
+   "translation": "decline",
+   "example": "Der Rückgang der Verkaufszahlen besorgt die Firma.",
+   "exampleTranslation": "The decline in sales figures worries the company.",
+   "topic": "Wirtschaft"
+  },
+  {
+   "word": "Konjunktur",
+   "article": "die",
+   "translation": "economic climate / cycle",
+   "example": "Die Konjunktur hat sich abgeschwächt.",
+   "exampleTranslation": "The economic climate has weakened.",
+   "topic": "Wirtschaft"
+  },
+  {
+   "word": "sich entwickeln",
+   "article": "",
+   "translation": "to develop",
+   "example": "Der Markt entwickelt sich schnell.",
+   "exampleTranslation": "The market is developing quickly.",
+   "topic": "Wirtschaft"
+  },
+  {
+   "word": "Technologie",
+   "article": "die",
+   "translation": "technology",
+   "example": "Neue Technologien verändern unseren Alltag.",
+   "exampleTranslation": "New technologies are changing our everyday lives.",
+   "topic": "Technologie"
+  },
+  {
+   "word": "Entwicklung",
+   "article": "die",
+   "translation": "development",
+   "example": "Die Entwicklung der App dauerte ein Jahr.",
+   "exampleTranslation": "The development of the app took a year.",
+   "topic": "Technologie"
+  },
+  {
+   "word": "Software",
+   "article": "die",
+   "translation": "software",
+   "example": "Die Software muss aktualisiert werden.",
+   "exampleTranslation": "The software needs to be updated.",
+   "topic": "Technologie"
+  },
+  {
+   "word": "Gerät",
+   "article": "das",
+   "translation": "device",
+   "example": "Das Gerät funktioniert nicht mehr richtig.",
+   "exampleTranslation": "The device isn't working properly anymore.",
+   "topic": "Technologie"
+  },
+  {
+   "word": "künstliche Intelligenz",
+   "article": "die",
+   "translation": "artificial intelligence",
+   "example": "Künstliche Intelligenz wird immer leistungsfähiger.",
+   "exampleTranslation": "Artificial intelligence is becoming increasingly powerful.",
+   "topic": "Technologie"
+  },
+  {
+   "word": "Datenschutz",
+   "article": "der",
+   "translation": "data protection",
+   "example": "Datenschutz ist im Internet sehr wichtig.",
+   "exampleTranslation": "Data protection is very important on the internet.",
+   "topic": "Technologie"
+  },
+  {
+   "word": "Netzwerk",
+   "article": "das",
+   "translation": "network",
+   "example": "Das Netzwerk ist momentan überlastet.",
+   "exampleTranslation": "The network is currently overloaded.",
+   "topic": "Technologie"
+  },
+  {
+   "word": "Anwendung",
+   "article": "die",
+   "translation": "application",
+   "example": "Diese Anwendung hat viele nützliche Funktionen.",
+   "exampleTranslation": "This application has many useful features.",
+   "topic": "Technologie"
+  },
+  {
+   "word": "digitalisieren",
+   "article": "",
+   "translation": "to digitize",
+   "example": "Viele Firmen digitalisieren ihre Prozesse.",
+   "exampleTranslation": "Many companies are digitizing their processes.",
+   "topic": "Technologie"
+  },
+  {
+   "word": "Sicherheit",
+   "article": "die",
+   "translation": "security",
+   "example": "Die Sicherheit der Daten hat hohe Priorität.",
+   "exampleTranslation": "Data security is a high priority.",
+   "topic": "Technologie"
+  },
+  {
+   "word": "Neuerung",
+   "article": "die",
+   "translation": "innovation / new development",
+   "example": "Die Neuerung erleichtert vielen Nutzern die Arbeit.",
+   "exampleTranslation": "The innovation makes work easier for many users.",
+   "topic": "Technologie"
+  },
+  {
+   "word": "speichern",
+   "article": "",
+   "translation": "to save / store",
+   "example": "Speichere die Datei, bevor du den Computer ausschaltest.",
+   "exampleTranslation": "Save the file before you turn off the computer.",
+   "topic": "Technologie"
+  },
+  {
+   "word": "herunterladen",
+   "article": "",
+   "translation": "to download",
+   "example": "Ich habe die Datei bereits heruntergeladen.",
+   "exampleTranslation": "I've already downloaded the file.",
+   "topic": "Technologie"
+  },
+  {
+   "word": "hochladen",
+   "article": "",
+   "translation": "to upload",
+   "example": "Er lädt das Video gerade hoch.",
+   "exampleTranslation": "He's uploading the video right now.",
+   "topic": "Technologie"
+  },
+  {
+   "word": "Algorithmus",
+   "article": "der",
+   "translation": "algorithm",
+   "example": "Der Algorithmus wählt die passenden Ergebnisse aus.",
+   "exampleTranslation": "The algorithm selects the matching results.",
+   "topic": "Technologie"
+  },
+  {
+   "word": "Vernetzung",
+   "article": "die",
+   "translation": "connectivity / networking",
+   "example": "Die Vernetzung der Geräte nimmt zu.",
+   "exampleTranslation": "The connectivity of devices is increasing.",
+   "topic": "Technologie"
+  },
+  {
+   "word": "Innovation",
+   "article": "die",
+   "translation": "innovation",
+   "example": "Innovation treibt das Unternehmen voran.",
+   "exampleTranslation": "Innovation is driving the company forward.",
+   "topic": "Technologie"
+  },
+  {
+   "word": "Nutzer / die Nutzerin",
+   "article": "der",
+   "translation": "user",
+   "example": "Die App hat Millionen von Nutzern.",
+   "exampleTranslation": "The app has millions of users.",
+   "topic": "Technologie"
+  },
+  {
+   "word": "Störung",
+   "article": "die",
+   "translation": "malfunction / disruption",
+   "example": "Es gab eine technische Störung im System.",
+   "exampleTranslation": "There was a technical malfunction in the system.",
+   "topic": "Technologie"
+  },
+  {
+   "word": "programmieren",
+   "article": "",
+   "translation": "to program",
+   "example": "Sie lernt, in Python zu programmieren.",
+   "exampleTranslation": "She is learning to program in Python.",
+   "topic": "Technologie"
+  },
+  {
+   "word": "Medien",
+   "article": "die",
+   "translation": "media",
+   "example": "Die Medien berichten täglich darüber.",
+   "exampleTranslation": "The media report on it daily.",
+   "topic": "Medien"
+  },
+  {
+   "word": "Nachricht",
+   "article": "die",
+   "translation": "news / message",
+   "example": "Hast du die Nachrichten heute gesehen?",
+   "exampleTranslation": "Did you see the news today?",
+   "topic": "Medien"
+  },
+  {
+   "word": "Zeitung",
+   "article": "die",
+   "translation": "newspaper",
+   "example": "Er liest jeden Morgen die Zeitung.",
+   "exampleTranslation": "He reads the newspaper every morning.",
+   "topic": "Medien"
+  },
+  {
+   "word": "Bericht",
+   "article": "der",
+   "translation": "report",
+   "example": "Der Bericht wurde gestern veröffentlicht.",
+   "exampleTranslation": "The report was published yesterday.",
+   "topic": "Medien"
+  },
+  {
+   "word": "Werbung",
+   "article": "die",
+   "translation": "advertising",
+   "example": "Werbung beeinflusst unser Kaufverhalten.",
+   "exampleTranslation": "Advertising influences our buying behavior.",
+   "topic": "Medien"
+  },
+  {
+   "word": "Zielgruppe",
+   "article": "die",
+   "translation": "target audience",
+   "example": "Die Werbung richtet sich an eine junge Zielgruppe.",
+   "exampleTranslation": "The advertising targets a young audience.",
+   "topic": "Medien"
+  },
+  {
+   "word": "veröffentlichen",
+   "article": "",
+   "translation": "to publish",
+   "example": "Der Artikel wird morgen veröffentlicht.",
+   "exampleTranslation": "The article will be published tomorrow.",
+   "topic": "Medien"
+  },
+  {
+   "word": "Quelle",
+   "article": "die",
+   "translation": "source",
+   "example": "Die Quelle der Information ist unklar.",
+   "exampleTranslation": "The source of the information is unclear.",
+   "topic": "Medien"
+  },
+  {
+   "word": "Meinungsbildung",
+   "article": "die",
+   "translation": "opinion formation",
+   "example": "Medien spielen eine große Rolle bei der Meinungsbildung.",
+   "exampleTranslation": "Media play a big role in opinion formation.",
+   "topic": "Medien"
+  },
+  {
+   "word": "Berichterstattung",
+   "article": "die",
+   "translation": "news coverage",
+   "example": "Die Berichterstattung war sehr ausführlich.",
+   "exampleTranslation": "The news coverage was very detailed.",
+   "topic": "Medien"
+  },
+  {
+   "word": "Interview",
+   "article": "das",
+   "translation": "interview",
+   "example": "Sie gab der Zeitung ein Interview.",
+   "exampleTranslation": "She gave the newspaper an interview.",
+   "topic": "Medien"
+  },
+  {
+   "word": "Zensur",
+   "article": "die",
+   "translation": "censorship",
+   "example": "Zensur schränkt die Meinungsfreiheit ein.",
+   "exampleTranslation": "Censorship restricts freedom of speech.",
+   "topic": "Medien"
+  },
+  {
+   "word": "Reichweite",
+   "article": "die",
+   "translation": "reach",
+   "example": "Das Video hat eine große Reichweite erzielt.",
+   "exampleTranslation": "The video achieved a large reach.",
+   "topic": "Medien"
+  },
+  {
+   "word": "glaubwürdig",
+   "article": "",
+   "translation": "credible",
+   "example": "Nicht jede Quelle im Internet ist glaubwürdig.",
+   "exampleTranslation": "Not every source on the internet is credible.",
+   "topic": "Medien"
+  },
+  {
+   "word": "Skandal",
+   "article": "der",
+   "translation": "scandal",
+   "example": "Der Skandal sorgte für viel Aufsehen.",
+   "exampleTranslation": "The scandal caused a lot of stir.",
+   "topic": "Medien"
+  },
+  {
+   "word": "sozialen Medien",
+   "article": "die",
+   "translation": "social media",
+   "example": "Viele Jugendliche verbringen viel Zeit in sozialen Medien.",
+   "exampleTranslation": "Many young people spend a lot of time on social media.",
+   "topic": "Medien"
+  },
+  {
+   "word": "beeinflussen",
+   "article": "",
+   "translation": "to influence",
+   "example": "Medien beeinflussen die öffentliche Meinung.",
+   "exampleTranslation": "Media influence public opinion.",
+   "topic": "Medien"
+  },
+  {
+   "word": "Schlagzeile",
+   "article": "die",
+   "translation": "headline",
+   "example": "Die Schlagzeile war reißerisch formuliert.",
+   "exampleTranslation": "The headline was written in a sensational way.",
+   "topic": "Medien"
+  },
+  {
+   "word": "Medienkompetenz",
+   "article": "die",
+   "translation": "media literacy",
+   "example": "Medienkompetenz wird in Schulen immer wichtiger.",
+   "exampleTranslation": "Media literacy is becoming increasingly important in schools.",
+   "topic": "Medien"
+  },
+  {
+   "word": "recherchieren",
+   "article": "",
+   "translation": "to research (journalistically)",
+   "example": "Der Journalist recherchierte monatelang für den Artikel.",
+   "exampleTranslation": "The journalist researched the article for months.",
+   "topic": "Medien"
+  },
+  {
+   "word": "Reise",
+   "article": "die",
+   "translation": "trip / journey",
+   "example": "Die Reise nach Japan war unvergesslich.",
+   "exampleTranslation": "The trip to Japan was unforgettable.",
+   "topic": "Reisen & Kultur"
+  },
+  {
+   "word": "Kultur",
+   "article": "die",
+   "translation": "culture",
+   "example": "Jedes Land hat seine eigene Kultur.",
+   "exampleTranslation": "Every country has its own culture.",
+   "topic": "Reisen & Kultur"
+  },
+  {
+   "word": "Sitte",
+   "article": "die",
+   "translation": "custom",
+   "example": "Diese Sitte ist in vielen Ländern verbreitet.",
+   "exampleTranslation": "This custom is widespread in many countries.",
+   "topic": "Reisen & Kultur"
+  },
+  {
+   "word": "Reiseziel",
+   "article": "das",
+   "translation": "travel destination",
+   "example": "Italien ist ein beliebtes Reiseziel.",
+   "exampleTranslation": "Italy is a popular travel destination.",
+   "topic": "Reisen & Kultur"
+  },
+  {
+   "word": "Unterkunft",
+   "article": "die",
+   "translation": "accommodation",
+   "example": "Wir haben eine günstige Unterkunft gefunden.",
+   "exampleTranslation": "We found affordable accommodation.",
+   "topic": "Reisen & Kultur"
+  },
+  {
+   "word": "Sehenswürdigkeit",
+   "article": "die",
+   "translation": "sight / attraction",
+   "example": "Der Eiffelturm ist eine berühmte Sehenswürdigkeit.",
+   "exampleTranslation": "The Eiffel Tower is a famous attraction.",
+   "topic": "Reisen & Kultur"
+  },
+  {
+   "word": "Fremdsprache",
+   "article": "die",
+   "translation": "foreign language",
+   "example": "Eine Fremdsprache zu lernen öffnet viele Türen.",
+   "exampleTranslation": "Learning a foreign language opens many doors.",
+   "topic": "Reisen & Kultur"
+  },
+  {
+   "word": "Aufenthalt",
+   "article": "der",
+   "translation": "stay",
+   "example": "Ihr Aufenthalt dauerte zwei Wochen.",
+   "exampleTranslation": "Her stay lasted two weeks.",
+   "topic": "Reisen & Kultur"
+  },
+  {
+   "word": "Grenze",
+   "article": "die",
+   "translation": "border",
+   "example": "Wir haben die Grenze ohne Probleme überquert.",
+   "exampleTranslation": "We crossed the border without any problems.",
+   "topic": "Reisen & Kultur"
+  },
+  {
+   "word": "Landschaft",
+   "article": "die",
+   "translation": "landscape",
+   "example": "Die Landschaft dort ist wunderschön.",
+   "exampleTranslation": "The landscape there is beautiful.",
+   "topic": "Reisen & Kultur"
+  },
+  {
+   "word": "Brauch",
+   "article": "der",
+   "translation": "custom / tradition",
+   "example": "Dieser Brauch wird seit Jahrhunderten gepflegt.",
+   "exampleTranslation": "This custom has been kept for centuries.",
+   "topic": "Reisen & Kultur"
+  },
+  {
+   "word": "Erlebnis",
+   "article": "das",
+   "translation": "experience",
+   "example": "Der Ausflug war ein tolles Erlebnis.",
+   "exampleTranslation": "The trip was a great experience.",
+   "topic": "Reisen & Kultur"
+  },
+  {
+   "word": "Verständigung",
+   "article": "die",
+   "translation": "communication / understanding",
+   "example": "Trotz der Sprachbarriere klappte die Verständigung gut.",
+   "exampleTranslation": "Despite the language barrier, communication worked well.",
+   "topic": "Reisen & Kultur"
+  },
+  {
+   "word": "Bandbreite",
+   "article": "die",
+   "translation": "range / breadth",
+   "example": "Die kulturelle Bandbreite der Stadt beeindruckt Besucher.",
+   "exampleTranslation": "The city's cultural range impresses visitors.",
+   "topic": "Reisen & Kultur"
+  },
+  {
+   "word": "erkunden",
+   "article": "",
+   "translation": "to explore",
+   "example": "Wir haben die Altstadt zu Fuß erkundet.",
+   "exampleTranslation": "We explored the old town on foot.",
+   "topic": "Reisen & Kultur"
+  },
+  {
+   "word": "Herkunft",
+   "article": "die",
+   "translation": "origin / background",
+   "example": "Er ist stolz auf seine Herkunft.",
+   "exampleTranslation": "He is proud of his origin.",
+   "topic": "Reisen & Kultur"
+  },
+  {
+   "word": "fremd",
+   "article": "",
+   "translation": "foreign / strange",
+   "example": "Am Anfang fühlte sich alles fremd an.",
+   "exampleTranslation": "At first everything felt foreign.",
+   "topic": "Reisen & Kultur"
+  },
+  {
+   "word": "sich anpassen",
+   "article": "",
+   "translation": "to adapt",
+   "example": "Es dauert Zeit, sich an eine neue Kultur anzupassen.",
+   "exampleTranslation": "It takes time to adapt to a new culture.",
+   "topic": "Reisen & Kultur"
+  },
+  {
+   "word": "Weltanschauung",
+   "article": "die",
+   "translation": "worldview",
+   "example": "Reisen verändert oft die eigene Weltanschauung.",
+   "exampleTranslation": "Traveling often changes one's own worldview.",
+   "topic": "Reisen & Kultur"
+  },
+  {
+   "word": "weltoffen",
+   "article": "",
+   "translation": "open-minded / cosmopolitan",
+   "example": "Sie ist sehr weltoffen und neugierig.",
+   "exampleTranslation": "She is very open-minded and curious.",
+   "topic": "Reisen & Kultur"
+  },
+  {
+   "word": "Beziehung",
+   "article": "die",
+   "translation": "relationship",
+   "example": "Ihre Beziehung dauert schon fünf Jahre.",
+   "exampleTranslation": "Their relationship has lasted five years already.",
+   "topic": "Beziehungen & Gefühle"
+  },
+  {
+   "word": "Vertrauen",
+   "article": "das",
+   "translation": "trust",
+   "example": "Vertrauen ist die Basis jeder Beziehung.",
+   "exampleTranslation": "Trust is the basis of every relationship.",
+   "topic": "Beziehungen & Gefühle"
+  },
+  {
+   "word": "Enttäuschung",
+   "article": "die",
+   "translation": "disappointment",
+   "example": "Die Absage war eine große Enttäuschung.",
+   "exampleTranslation": "The rejection was a big disappointment.",
+   "topic": "Beziehungen & Gefühle"
+  },
+  {
+   "word": "sich verlieben",
+   "article": "",
+   "translation": "to fall in love",
+   "example": "Sie hat sich in ihren Kollegen verliebt.",
+   "exampleTranslation": "She fell in love with her colleague.",
+   "topic": "Beziehungen & Gefühle"
+  },
+  {
+   "word": "Eifersucht",
+   "article": "die",
+   "translation": "jealousy",
+   "example": "Eifersucht kann eine Beziehung zerstören.",
+   "exampleTranslation": "Jealousy can destroy a relationship.",
+   "topic": "Beziehungen & Gefühle"
+  },
+  {
+   "word": "Streit",
+   "article": "der",
+   "translation": "argument / quarrel",
+   "example": "Nach dem Streit haben sie sich versöhnt.",
+   "exampleTranslation": "After the argument they made up.",
+   "topic": "Beziehungen & Gefühle"
+  },
+  {
+   "word": "sich versöhnen",
+   "article": "",
+   "translation": "to reconcile",
+   "example": "Die Geschwister haben sich endlich versöhnt.",
+   "exampleTranslation": "The siblings finally reconciled.",
+   "topic": "Beziehungen & Gefühle"
+  },
+  {
+   "word": "Freundschaft",
+   "article": "die",
+   "translation": "friendship",
+   "example": "Ihre Freundschaft hält schon seit der Schulzeit.",
+   "exampleTranslation": "Their friendship has lasted since school.",
+   "topic": "Beziehungen & Gefühle"
+  },
+  {
+   "word": "Einsamkeit",
+   "article": "die",
+   "translation": "loneliness",
+   "example": "Einsamkeit betrifft viele ältere Menschen.",
+   "exampleTranslation": "Loneliness affects many elderly people.",
+   "topic": "Beziehungen & Gefühle"
+  },
+  {
+   "word": "dankbar",
+   "article": "",
+   "translation": "grateful",
+   "example": "Ich bin dir sehr dankbar für deine Hilfe.",
+   "exampleTranslation": "I am very grateful to you for your help.",
+   "topic": "Beziehungen & Gefühle"
+  },
+  {
+   "word": "Rücksicht",
+   "article": "die",
+   "translation": "consideration",
+   "example": "Er nimmt immer Rücksicht auf andere.",
+   "exampleTranslation": "He always shows consideration for others.",
+   "topic": "Beziehungen & Gefühle"
+  },
+  {
+   "word": "verständnisvoll",
+   "article": "",
+   "translation": "understanding (adj.)",
+   "example": "Meine Eltern waren sehr verständnisvoll.",
+   "exampleTranslation": "My parents were very understanding.",
+   "topic": "Beziehungen & Gefühle"
+  },
+  {
+   "word": "Konflikt",
+   "article": "der",
+   "translation": "conflict",
+   "example": "Der Konflikt zwischen den beiden dauert schon Wochen.",
+   "exampleTranslation": "The conflict between the two has lasted for weeks.",
+   "topic": "Beziehungen & Gefühle"
+  },
+  {
+   "word": "sich kümmern (um)",
+   "article": "",
+   "translation": "to take care of",
+   "example": "Sie kümmert sich liebevoll um ihre Großmutter.",
+   "exampleTranslation": "She lovingly takes care of her grandmother.",
+   "topic": "Beziehungen & Gefühle"
+  },
+  {
+   "word": "enttäuscht",
+   "article": "",
+   "translation": "disappointed",
+   "example": "Er war enttäuscht von dem Ergebnis.",
+   "exampleTranslation": "He was disappointed with the result.",
+   "topic": "Beziehungen & Gefühle"
+  },
+  {
+   "word": "Zuneigung",
+   "article": "die",
+   "translation": "affection",
+   "example": "Er zeigt seine Zuneigung selten offen.",
+   "exampleTranslation": "He rarely shows his affection openly.",
+   "topic": "Beziehungen & Gefühle"
+  },
+  {
+   "word": "vertrauenswürdig",
+   "article": "",
+   "translation": "trustworthy",
+   "example": "Sie ist eine sehr vertrauenswürdige Person.",
+   "exampleTranslation": "She is a very trustworthy person.",
+   "topic": "Beziehungen & Gefühle"
+  },
+  {
+   "word": "sich streiten",
+   "article": "",
+   "translation": "to argue",
+   "example": "Die beiden streiten sich oft über Kleinigkeiten.",
+   "exampleTranslation": "The two often argue about small things.",
+   "topic": "Beziehungen & Gefühle"
+  },
+  {
+   "word": "Verbundenheit",
+   "article": "die",
+   "translation": "connection / bond",
+   "example": "Die Verbundenheit zur Heimat bleibt stark.",
+   "exampleTranslation": "The connection to one's home country remains strong.",
+   "topic": "Beziehungen & Gefühle"
+  },
+  {
+   "word": "unterstützen",
+   "article": "",
+   "translation": "to support",
+   "example": "Seine Familie unterstützt ihn in jeder Situation.",
+   "exampleTranslation": "His family supports him in every situation.",
+   "topic": "Beziehungen & Gefühle"
+  },
+  {
+   "word": "Meinung",
+   "article": "die",
+   "translation": "opinion",
+   "example": "Jeder hat eine andere Meinung dazu.",
+   "exampleTranslation": "Everyone has a different opinion on this.",
+   "topic": "Meinung & Diskussion"
+  },
+  {
+   "word": "Standpunkt",
+   "article": "der",
+   "translation": "point of view",
+   "example": "Er erklärte seinen Standpunkt sehr klar.",
+   "exampleTranslation": "He explained his point of view very clearly.",
+   "topic": "Meinung & Diskussion"
+  },
+  {
+   "word": "Argument",
+   "article": "das",
+   "translation": "argument",
+   "example": "Ihr Argument war überzeugend.",
+   "exampleTranslation": "Her argument was convincing.",
+   "topic": "Meinung & Diskussion"
+  },
+  {
+   "word": "einerseits … andererseits",
+   "article": "",
+   "translation": "on the one hand … on the other hand",
+   "example": "Einerseits ist es praktisch, andererseits teuer.",
+   "exampleTranslation": "On the one hand it's practical, on the other hand expensive.",
+   "topic": "Meinung & Diskussion"
+  },
+  {
+   "word": "Vorteil",
+   "article": "der",
+   "translation": "advantage",
+   "example": "Der größte Vorteil ist die Zeitersparnis.",
+   "exampleTranslation": "The biggest advantage is the time saved.",
+   "topic": "Meinung & Diskussion"
+  },
+  {
+   "word": "Nachteil",
+   "article": "der",
+   "translation": "disadvantage",
+   "example": "Ein Nachteil dieser Methode sind die Kosten.",
+   "exampleTranslation": "A disadvantage of this method is the cost.",
+   "topic": "Meinung & Diskussion"
+  },
+  {
+   "word": "zustimmen",
+   "article": "",
+   "translation": "to agree",
+   "example": "Ich stimme dir in diesem Punkt zu.",
+   "exampleTranslation": "I agree with you on this point.",
+   "topic": "Meinung & Diskussion"
+  },
+  {
+   "word": "widersprechen",
+   "article": "",
+   "translation": "to contradict / disagree",
+   "example": "Er widersprach ihrer Meinung sofort.",
+   "exampleTranslation": "He immediately disagreed with her opinion.",
+   "topic": "Meinung & Diskussion"
+  },
+  {
+   "word": "begründen",
+   "article": "",
+   "translation": "to justify / give reasons",
+   "example": "Bitte begründe deine Entscheidung.",
+   "exampleTranslation": "Please justify your decision.",
+   "topic": "Meinung & Diskussion"
+  },
+  {
+   "word": "Gegensatz",
+   "article": "der",
+   "translation": "contrast / opposite",
+   "example": "Im Gegensatz zu ihm bin ich optimistisch.",
+   "exampleTranslation": "In contrast to him, I am optimistic.",
+   "topic": "Meinung & Diskussion"
+  },
+  {
+   "word": "überzeugen",
+   "article": "",
+   "translation": "to convince",
+   "example": "Sie konnte ihn mit guten Argumenten überzeugen.",
+   "exampleTranslation": "She was able to convince him with good arguments.",
+   "topic": "Meinung & Diskussion"
+  },
+  {
+   "word": "Perspektive",
+   "article": "die",
+   "translation": "perspective",
+   "example": "Es lohnt sich, verschiedene Perspektiven zu betrachten.",
+   "exampleTranslation": "It's worth considering different perspectives.",
+   "topic": "Meinung & Diskussion"
+  },
+  {
+   "word": "berücksichtigen",
+   "article": "",
+   "translation": "to take into account",
+   "example": "Wir müssen alle Faktoren berücksichtigen.",
+   "exampleTranslation": "We have to take all factors into account.",
+   "topic": "Meinung & Diskussion"
+  },
+  {
+   "word": "Zusammenhang",
+   "article": "der",
+   "translation": "context / connection",
+   "example": "Man sollte das im Zusammenhang betrachten.",
+   "exampleTranslation": "One should look at this in context.",
+   "topic": "Meinung & Diskussion"
+  },
+  {
+   "word": "hervorheben",
+   "article": "",
+   "translation": "to emphasize / highlight",
+   "example": "Er hob besonders die Vorteile hervor.",
+   "exampleTranslation": "He particularly emphasized the advantages.",
+   "topic": "Meinung & Diskussion"
+  },
+  {
+   "word": "abwägen",
+   "article": "",
+   "translation": "to weigh (pros and cons)",
+   "example": "Man sollte Vor- und Nachteile sorgfältig abwägen.",
+   "exampleTranslation": "One should carefully weigh the pros and cons.",
+   "topic": "Meinung & Diskussion"
+  },
+  {
+   "word": "Schlussfolgerung",
+   "article": "die",
+   "translation": "conclusion",
+   "example": "Zu welcher Schlussfolgerung bist du gekommen?",
+   "exampleTranslation": "What conclusion did you come to?",
+   "topic": "Meinung & Diskussion"
+  },
+  {
+   "word": "bezweifeln",
+   "article": "",
+   "translation": "to doubt",
+   "example": "Ich bezweifle, dass das funktioniert.",
+   "exampleTranslation": "I doubt that this will work.",
+   "topic": "Meinung & Diskussion"
+  },
+  {
+   "word": "Tatsache",
+   "article": "die",
+   "translation": "fact",
+   "example": "Das ist eine unbestreitbare Tatsache.",
+   "exampleTranslation": "That is an undeniable fact.",
+   "topic": "Meinung & Diskussion"
+  },
+  {
+   "word": "folglich",
+   "article": "",
+   "translation": "consequently",
+   "example": "Die Preise sind gestiegen, folglich kaufen weniger Leute ein.",
+   "exampleTranslation": "Prices have risen, consequently fewer people are shopping.",
+   "topic": "Meinung & Diskussion"
+  },
+  {
+   "word": "Wissenschaft",
+   "article": "die",
+   "translation": "science",
+   "example": "Die Wissenschaft macht große Fortschritte.",
+   "exampleTranslation": "Science is making great progress.",
+   "topic": "Wissenschaft"
+  },
+  {
+   "word": "Studie",
+   "article": "die",
+   "translation": "study",
+   "example": "Eine neue Studie bestätigt diese Vermutung.",
+   "exampleTranslation": "A new study confirms this assumption.",
+   "topic": "Wissenschaft"
+  },
+  {
+   "word": "Experiment",
+   "article": "das",
+   "translation": "experiment",
+   "example": "Das Experiment lieferte überraschende Ergebnisse.",
+   "exampleTranslation": "The experiment produced surprising results.",
+   "topic": "Wissenschaft"
+  },
+  {
+   "word": "Hypothese",
+   "article": "die",
+   "translation": "hypothesis",
+   "example": "Die Hypothese wurde durch die Daten bestätigt.",
+   "exampleTranslation": "The hypothesis was confirmed by the data.",
+   "topic": "Wissenschaft"
+  },
+  {
+   "word": "beweisen",
+   "article": "",
+   "translation": "to prove",
+   "example": "Er konnte seine Theorie nicht beweisen.",
+   "exampleTranslation": "He couldn't prove his theory.",
+   "topic": "Wissenschaft"
+  },
+  {
+   "word": "Erkenntnis",
+   "article": "die",
+   "translation": "finding / insight",
+   "example": "Diese Erkenntnis verändert unser Verständnis des Problems.",
+   "exampleTranslation": "This finding changes our understanding of the problem.",
+   "topic": "Wissenschaft"
+  },
+  {
+   "word": "Ergebnis",
+   "article": "das",
+   "translation": "result",
+   "example": "Das Ergebnis wurde in einer Fachzeitschrift veröffentlicht.",
+   "exampleTranslation": "The result was published in a scientific journal.",
+   "topic": "Wissenschaft"
+  },
+  {
+   "word": "Versuch",
+   "article": "der",
+   "translation": "trial / attempt / experiment",
+   "example": "Der zweite Versuch war erfolgreicher.",
+   "exampleTranslation": "The second attempt was more successful.",
+   "topic": "Wissenschaft"
+  },
+  {
+   "word": "untersuchen",
+   "article": "",
+   "translation": "to investigate / examine",
+   "example": "Forscher untersuchen die Ursachen der Krankheit.",
+   "exampleTranslation": "Researchers are investigating the causes of the disease.",
+   "topic": "Wissenschaft"
+  },
+  {
+   "word": "Theorie",
+   "article": "die",
+   "translation": "theory",
+   "example": "Diese Theorie ist in der Wissenschaft umstritten.",
+   "exampleTranslation": "This theory is controversial in science.",
+   "topic": "Wissenschaft"
+  },
+  {
+   "word": "Labor",
+   "article": "das",
+   "translation": "laboratory",
+   "example": "Sie arbeitet im Labor an einem neuen Impfstoff.",
+   "exampleTranslation": "She is working in the lab on a new vaccine.",
+   "topic": "Wissenschaft"
+  },
+  {
+   "word": "Methode",
+   "article": "die",
+   "translation": "method",
+   "example": "Die Methode wurde weiterentwickelt.",
+   "exampleTranslation": "The method was further developed.",
+   "topic": "Wissenschaft"
+  },
+  {
+   "word": "nachweisen",
+   "article": "",
+   "translation": "to demonstrate / verify",
+   "example": "Die Studie konnte den Zusammenhang nachweisen.",
+   "exampleTranslation": "The study was able to demonstrate the connection.",
+   "topic": "Wissenschaft"
+  },
+  {
+   "word": "Entdeckung",
+   "article": "die",
+   "translation": "discovery",
+   "example": "Die Entdeckung veränderte die gesamte Forschung.",
+   "exampleTranslation": "The discovery changed the entire field of research.",
+   "topic": "Wissenschaft"
+  },
+  {
+   "word": "Fortschritt",
+   "article": "der",
+   "translation": "progress",
+   "example": "Der wissenschaftliche Fortschritt bringt neue Fragen mit sich.",
+   "exampleTranslation": "Scientific progress brings new questions with it.",
+   "topic": "Wissenschaft"
+  },
+  {
+   "word": "Fachgebiet",
+   "article": "das",
+   "translation": "field of expertise",
+   "example": "Sein Fachgebiet ist die Astrophysik.",
+   "exampleTranslation": "His field of expertise is astrophysics.",
+   "topic": "Wissenschaft"
+  },
+  {
+   "word": "objektiv",
+   "article": "",
+   "translation": "objective",
+   "example": "Wissenschaftliche Ergebnisse sollten objektiv sein.",
+   "exampleTranslation": "Scientific results should be objective.",
+   "topic": "Wissenschaft"
+  },
+  {
+   "word": "Annahme",
+   "article": "die",
+   "translation": "assumption",
+   "example": "Diese Annahme muss noch überprüft werden.",
+   "exampleTranslation": "This assumption still needs to be checked.",
+   "topic": "Wissenschaft"
+  },
+  {
+   "word": "auswerten",
+   "article": "",
+   "translation": "to evaluate / analyze",
+   "example": "Die Daten müssen noch ausgewertet werden.",
+   "exampleTranslation": "The data still needs to be analyzed.",
+   "topic": "Wissenschaft"
+  },
+  {
+   "word": "zitieren",
+   "article": "",
+   "translation": "to cite",
+   "example": "Er zitierte den Wissenschaftler korrekt.",
+   "exampleTranslation": "He cited the scientist correctly.",
+   "topic": "Wissenschaft"
+  },
+  {
+   "word": "Recht",
+   "article": "das",
+   "translation": "law / right",
+   "example": "Jeder hat das Recht auf freie Meinungsäußerung.",
+   "exampleTranslation": "Everyone has the right to free expression.",
+   "topic": "Recht"
+  },
+  {
+   "word": "Gericht",
+   "article": "das",
+   "translation": "court",
+   "example": "Der Fall kommt vor Gericht.",
+   "exampleTranslation": "The case is going to court.",
+   "topic": "Recht"
+  },
+  {
+   "word": "Anwalt / die Anwältin",
+   "article": "der",
+   "translation": "lawyer",
+   "example": "Sie hat sich einen guten Anwalt genommen.",
+   "exampleTranslation": "She hired a good lawyer.",
+   "topic": "Recht"
+  },
+  {
+   "word": "Urteil",
+   "article": "das",
+   "translation": "verdict / judgment",
+   "example": "Das Urteil wurde heute verkündet.",
+   "exampleTranslation": "The verdict was announced today.",
+   "topic": "Recht"
+  },
+  {
+   "word": "Klage",
+   "article": "die",
+   "translation": "lawsuit / complaint",
+   "example": "Er reichte eine Klage gegen die Firma ein.",
+   "exampleTranslation": "He filed a lawsuit against the company.",
+   "topic": "Recht"
+  },
+  {
+   "word": "Vereinbarung",
+   "article": "die",
+   "translation": "agreement",
+   "example": "Die Vereinbarung wurde von beiden Seiten unterschrieben.",
+   "exampleTranslation": "The agreement was signed by both parties.",
+   "topic": "Recht"
+  },
+  {
+   "word": "Haftung",
+   "article": "die",
+   "translation": "liability",
+   "example": "Die Haftung liegt beim Hersteller des Produkts.",
+   "exampleTranslation": "Liability lies with the manufacturer of the product.",
+   "topic": "Recht"
+  },
+  {
+   "word": "Verbrechen",
+   "article": "das",
+   "translation": "crime",
+   "example": "Das Verbrechen wurde schnell aufgeklärt.",
+   "exampleTranslation": "The crime was quickly solved.",
+   "topic": "Recht"
+  },
+  {
+   "word": "Strafe",
+   "article": "die",
+   "translation": "punishment / penalty",
+   "example": "Die Strafe fiel milder aus als erwartet.",
+   "exampleTranslation": "The punishment turned out to be lighter than expected.",
+   "topic": "Recht"
+  },
+  {
+   "word": "unschuldig",
+   "article": "",
+   "translation": "innocent",
+   "example": "Er beteuerte, unschuldig zu sein.",
+   "exampleTranslation": "He insisted he was innocent.",
+   "topic": "Recht"
+  },
+  {
+   "word": "schuldig",
+   "article": "",
+   "translation": "guilty",
+   "example": "Das Gericht erklärte ihn für schuldig.",
+   "exampleTranslation": "The court found him guilty.",
+   "topic": "Recht"
+  },
+  {
+   "word": "Beweise",
+   "article": "die",
+   "translation": "evidence",
+   "example": "Es gab keine eindeutigen Beweise.",
+   "exampleTranslation": "There was no clear evidence.",
+   "topic": "Recht"
+  },
+  {
+   "word": "Zeuge / die Zeugin",
+   "article": "der",
+   "translation": "witness",
+   "example": "Der Zeuge beschrieb den Vorfall genau.",
+   "exampleTranslation": "The witness described the incident in detail.",
+   "topic": "Recht"
+  },
+  {
+   "word": "Grundgesetz",
+   "article": "das",
+   "translation": "constitution (German Basic Law)",
+   "example": "Das Grundgesetz garantiert die Menschenrechte.",
+   "exampleTranslation": "The constitution guarantees human rights.",
+   "topic": "Recht"
+  },
+  {
+   "word": "legal",
+   "article": "",
+   "translation": "legal",
+   "example": "Diese Praxis ist in vielen Ländern legal.",
+   "exampleTranslation": "This practice is legal in many countries.",
+   "topic": "Recht"
+  },
+  {
+   "word": "illegal",
+   "article": "",
+   "translation": "illegal",
+   "example": "Der Handel mit diesen Waren ist illegal.",
+   "exampleTranslation": "Trading these goods is illegal.",
+   "topic": "Recht"
+  },
+  {
+   "word": "Verhandlung",
+   "article": "die",
+   "translation": "negotiation / trial hearing",
+   "example": "Die Verhandlung wurde auf nächste Woche verschoben.",
+   "exampleTranslation": "The hearing was postponed to next week.",
+   "topic": "Recht"
+  },
+  {
+   "word": "verurteilen",
+   "article": "",
+   "translation": "to convict / condemn",
+   "example": "Er wurde zu zwei Jahren Haft verurteilt.",
+   "exampleTranslation": "He was sentenced to two years in prison.",
+   "topic": "Recht"
+  },
+  {
+   "word": "Pflicht",
+   "article": "die",
+   "translation": "duty / obligation",
+   "example": "Steuern zu zahlen ist eine Pflicht.",
+   "exampleTranslation": "Paying taxes is a duty.",
+   "topic": "Recht"
+  },
+  {
+   "word": "Anspruch",
+   "article": "der",
+   "translation": "claim / entitlement",
+   "example": "Sie hat Anspruch auf Entschädigung.",
+   "exampleTranslation": "She is entitled to compensation.",
+   "topic": "Recht"
+  },
+  {
+   "word": "Natur",
+   "article": "die",
+   "translation": "nature",
+   "example": "Er verbringt viel Zeit in der Natur.",
+   "exampleTranslation": "He spends a lot of time in nature.",
+   "topic": "Natur & Tiere"
+  },
+  {
+   "word": "Tier",
+   "article": "das",
+   "translation": "animal",
+   "example": "Dieses Tier ist vom Aussterben bedroht.",
+   "exampleTranslation": "This animal is threatened with extinction.",
+   "topic": "Natur & Tiere"
+  },
+  {
+   "word": "Pflanze",
+   "article": "die",
+   "translation": "plant",
+   "example": "Diese Pflanze braucht viel Sonnenlicht.",
+   "exampleTranslation": "This plant needs a lot of sunlight.",
+   "topic": "Natur & Tiere"
+  },
+  {
+   "word": "Lebensraum",
+   "article": "der",
+   "translation": "habitat",
+   "example": "Der Lebensraum vieler Tiere schrumpft.",
+   "exampleTranslation": "The habitat of many animals is shrinking.",
+   "topic": "Natur & Tiere"
+  },
+  {
+   "word": "Aussterben",
+   "article": "das",
+   "translation": "extinction",
+   "example": "Das Aussterben vieler Arten ist besorgniserregend.",
+   "exampleTranslation": "The extinction of many species is worrying.",
+   "topic": "Natur & Tiere"
+  },
+  {
+   "word": "Wildnis",
+   "article": "die",
+   "translation": "wilderness",
+   "example": "In der Wildnis gibt es kaum Menschen.",
+   "exampleTranslation": "There are hardly any people in the wilderness.",
+   "topic": "Natur & Tiere"
+  },
+  {
+   "word": "Wald",
+   "article": "der",
+   "translation": "forest",
+   "example": "Der Wald wird immer kleiner.",
+   "exampleTranslation": "The forest is getting smaller.",
+   "topic": "Natur & Tiere"
+  },
+  {
+   "word": "Küste",
+   "article": "die",
+   "translation": "coast",
+   "example": "Sie wohnen direkt an der Küste.",
+   "exampleTranslation": "They live right on the coast.",
+   "topic": "Natur & Tiere"
+  },
+  {
+   "word": "Gewässer",
+   "article": "das",
+   "translation": "body of water",
+   "example": "Das Gewässer ist stark verschmutzt.",
+   "exampleTranslation": "The body of water is heavily polluted.",
+   "topic": "Natur & Tiere"
+  },
+  {
+   "word": "bedroht",
+   "article": "",
+   "translation": "threatened / endangered",
+   "example": "Viele Tierarten sind heute bedroht.",
+   "exampleTranslation": "Many animal species are endangered today.",
+   "topic": "Natur & Tiere"
+  },
+  {
+   "word": "erhalten",
+   "article": "",
+   "translation": "to preserve / maintain",
+   "example": "Naturschutzgebiete helfen, seltene Arten zu erhalten.",
+   "exampleTranslation": "Nature reserves help preserve rare species.",
+   "topic": "Natur & Tiere"
+  },
+  {
+   "word": "wachsen",
+   "article": "",
+   "translation": "to grow",
+   "example": "Die Pflanze wächst sehr schnell.",
+   "exampleTranslation": "The plant grows very quickly.",
+   "topic": "Natur & Tiere"
+  },
+  {
+   "word": "Wurzel",
+   "article": "die",
+   "translation": "root",
+   "example": "Die Wurzel des Baumes ist sehr tief.",
+   "exampleTranslation": "The tree's root is very deep.",
+   "topic": "Natur & Tiere"
+  },
+  {
+   "word": "Lebenszyklus",
+   "article": "der",
+   "translation": "life cycle",
+   "example": "Der Lebenszyklus des Schmetterlings ist faszinierend.",
+   "exampleTranslation": "The life cycle of the butterfly is fascinating.",
+   "topic": "Natur & Tiere"
+  },
+  {
+   "word": "Umgebung",
+   "article": "die",
+   "translation": "surroundings / environment",
+   "example": "Die Tiere passen sich an ihre Umgebung an.",
+   "exampleTranslation": "Animals adapt to their surroundings.",
+   "topic": "Natur & Tiere"
+  },
+  {
+   "word": "artgerecht",
+   "article": "",
+   "translation": "species-appropriate",
+   "example": "Die Tiere werden hier artgerecht gehalten.",
+   "exampleTranslation": "The animals are kept here in a species-appropriate way.",
+   "topic": "Natur & Tiere"
+  },
+  {
+   "word": "Erde",
+   "article": "die",
+   "translation": "earth",
+   "example": "Wir haben nur eine Erde.",
+   "exampleTranslation": "We only have one earth.",
+   "topic": "Natur & Tiere"
+  },
+  {
+   "word": "Ressourcenknappheit",
+   "article": "die",
+   "translation": "resource scarcity",
+   "example": "Ressourcenknappheit wird zu einem globalen Problem.",
+   "exampleTranslation": "Resource scarcity is becoming a global problem.",
+   "topic": "Natur & Tiere"
+  },
+  {
+   "word": "bewahren",
+   "article": "",
+   "translation": "to preserve",
+   "example": "Wir müssen die Natur für kommende Generationen bewahren.",
+   "exampleTranslation": "We must preserve nature for future generations.",
+   "topic": "Natur & Tiere"
+  },
+  {
+   "word": "Gleichgewicht",
+   "article": "das",
+   "translation": "balance",
+   "example": "Das ökologische Gleichgewicht ist gestört.",
+   "exampleTranslation": "The ecological balance is disturbed.",
+   "topic": "Natur & Tiere"
+  },
+  {
+   "word": "Miete",
+   "article": "die",
+   "translation": "rent",
+   "example": "Die Miete ist in dieser Stadt sehr hoch.",
+   "exampleTranslation": "Rent is very high in this city.",
+   "topic": "Wohnen & Alltag"
+  },
+  {
+   "word": "Haushalt",
+   "article": "der",
+   "translation": "household",
+   "example": "Sie führt den Haushalt allein.",
+   "exampleTranslation": "She runs the household alone.",
+   "topic": "Wohnen & Alltag"
+  },
+  {
+   "word": "Alltag",
+   "article": "der",
+   "translation": "everyday life",
+   "example": "Der Alltag ist oft stressig.",
+   "exampleTranslation": "Everyday life is often stressful.",
+   "topic": "Wohnen & Alltag"
+  },
+  {
+   "word": "Nachbarschaft",
+   "article": "die",
+   "translation": "neighborhood",
+   "example": "Die Nachbarschaft ist sehr ruhig.",
+   "exampleTranslation": "The neighborhood is very quiet.",
+   "topic": "Wohnen & Alltag"
+  },
+  {
+   "word": "umziehen",
+   "article": "",
+   "translation": "to move (house)",
+   "example": "Wir ziehen nächsten Monat um.",
+   "exampleTranslation": "We're moving next month.",
+   "topic": "Wohnen & Alltag"
+  },
+  {
+   "word": "renovieren",
+   "article": "",
+   "translation": "to renovate",
+   "example": "Sie renovieren gerade die Küche.",
+   "exampleTranslation": "They are currently renovating the kitchen.",
+   "topic": "Wohnen & Alltag"
+  },
+  {
+   "word": "Einrichtung",
+   "article": "die",
+   "translation": "furnishing / furniture",
+   "example": "Die Einrichtung der Wohnung ist modern.",
+   "exampleTranslation": "The furnishing of the apartment is modern.",
+   "topic": "Wohnen & Alltag"
+  },
+  {
+   "word": "erledigen",
+   "article": "",
+   "translation": "to take care of / complete",
+   "example": "Ich muss noch ein paar Dinge erledigen.",
+   "exampleTranslation": "I still have to take care of a few things.",
+   "topic": "Wohnen & Alltag"
+  },
+  {
+   "word": "Verabredung",
+   "article": "die",
+   "translation": "appointment / arrangement to meet",
+   "example": "Ich habe heute mehrere Verabredungen.",
+   "exampleTranslation": "I have several appointments today.",
+   "topic": "Wohnen & Alltag"
+  },
+  {
+   "word": "sich gewöhnen (an)",
+   "article": "",
+   "translation": "to get used to",
+   "example": "Er hat sich schnell an das neue Leben gewöhnt.",
+   "exampleTranslation": "He quickly got used to the new life.",
+   "topic": "Wohnen & Alltag"
+  },
+  {
+   "word": "Verpflichtung",
+   "article": "die",
+   "translation": "obligation / commitment",
+   "example": "Berufliche Verpflichtungen nehmen viel Zeit in Anspruch.",
+   "exampleTranslation": "Professional obligations take up a lot of time.",
+   "topic": "Wohnen & Alltag"
+  },
+  {
+   "word": "Nachbar / die Nachbarin",
+   "article": "der",
+   "translation": "neighbor",
+   "example": "Unsere Nachbarn sind sehr freundlich.",
+   "exampleTranslation": "Our neighbors are very friendly.",
+   "topic": "Wohnen & Alltag"
+  },
+  {
+   "word": "Routine",
+   "article": "die",
+   "translation": "routine",
+   "example": "Meine Routine am Morgen ist immer gleich.",
+   "exampleTranslation": "My morning routine is always the same.",
+   "topic": "Wohnen & Alltag"
+  },
+  {
+   "word": "bequem",
+   "article": "",
+   "translation": "comfortable",
+   "example": "Das Sofa ist sehr bequem.",
+   "exampleTranslation": "The sofa is very comfortable.",
+   "topic": "Wohnen & Alltag"
+  },
+  {
+   "word": "praktisch",
+   "article": "",
+   "translation": "practical",
+   "example": "Diese Lösung ist sehr praktisch.",
+   "exampleTranslation": "This solution is very practical.",
+   "topic": "Wohnen & Alltag"
+  },
+  {
+   "word": "Ordnung",
+   "article": "die",
+   "translation": "order / tidiness",
+   "example": "Er hält immer Ordnung in seiner Wohnung.",
+   "exampleTranslation": "He always keeps his apartment tidy.",
+   "topic": "Wohnen & Alltag"
+  },
+  {
+   "word": "Aufwand",
+   "article": "der",
+   "translation": "effort / expenditure",
+   "example": "Der Aufwand hat sich am Ende gelohnt.",
+   "exampleTranslation": "The effort was worth it in the end.",
+   "topic": "Wohnen & Alltag"
+  },
+  {
+   "word": "regeln",
+   "article": "",
+   "translation": "to arrange / sort out",
+   "example": "Sie regelt alle Formalitäten selbst.",
+   "exampleTranslation": "She handles all the formalities herself.",
+   "topic": "Wohnen & Alltag"
+  },
+  {
+   "word": "selbstständig",
+   "article": "",
+   "translation": "independent",
+   "example": "Er lebt seit einem Jahr selbstständig.",
+   "exampleTranslation": "He has been living independently for a year.",
+   "topic": "Wohnen & Alltag"
+  },
+  {
+   "word": "Alltagsgegenstand",
+   "article": "der",
+   "translation": "everyday object",
+   "example": "Ein Regenschirm ist ein nützlicher Alltagsgegenstand.",
+   "exampleTranslation": "An umbrella is a useful everyday object.",
+   "topic": "Wohnen & Alltag"
+  },
+  {
+   "word": "Kunst",
+   "article": "die",
+   "translation": "art",
+   "example": "Moderne Kunst gefällt nicht jedem.",
+   "exampleTranslation": "Not everyone likes modern art.",
+   "topic": "Kunst & Literatur"
+  },
+  {
+   "word": "Literatur",
+   "article": "die",
+   "translation": "literature",
+   "example": "Sie studiert deutsche Literatur.",
+   "exampleTranslation": "She studies German literature.",
+   "topic": "Kunst & Literatur"
+  },
+  {
+   "word": "Roman",
+   "article": "der",
+   "translation": "novel",
+   "example": "Dieser Roman wurde ein internationaler Bestseller.",
+   "exampleTranslation": "This novel became an international bestseller.",
+   "topic": "Kunst & Literatur"
+  },
+  {
+   "word": "Autor / die Autorin",
+   "article": "der",
+   "translation": "author",
+   "example": "Der Autor signierte sein neues Buch.",
+   "exampleTranslation": "The author signed his new book.",
+   "topic": "Kunst & Literatur"
+  },
+  {
+   "word": "Gedicht",
+   "article": "das",
+   "translation": "poem",
+   "example": "Das Gedicht handelt von der Liebe.",
+   "exampleTranslation": "The poem is about love.",
+   "topic": "Kunst & Literatur"
+  },
+  {
+   "word": "Ausstellung",
+   "article": "die",
+   "translation": "exhibition",
+   "example": "Die Ausstellung ist bis Ende des Monats zu sehen.",
+   "exampleTranslation": "The exhibition can be seen until the end of the month.",
+   "topic": "Kunst & Literatur"
+  },
+  {
+   "word": "Gemälde",
+   "article": "das",
+   "translation": "painting",
+   "example": "Das Gemälde hängt im Museum.",
+   "exampleTranslation": "The painting hangs in the museum.",
+   "topic": "Kunst & Literatur"
+  },
+  {
+   "word": "interpretieren",
+   "article": "",
+   "translation": "to interpret",
+   "example": "Jeder interpretiert das Kunstwerk anders.",
+   "exampleTranslation": "Everyone interprets the artwork differently.",
+   "topic": "Kunst & Literatur"
+  },
+  {
+   "word": "Ausdruck",
+   "article": "der",
+   "translation": "expression",
+   "example": "Musik ist für sie ein Ausdruck von Gefühlen.",
+   "exampleTranslation": "Music is an expression of feelings for her.",
+   "topic": "Kunst & Literatur"
+  },
+  {
+   "word": "kreativ",
+   "article": "",
+   "translation": "creative",
+   "example": "Sie ist eine sehr kreative Künstlerin.",
+   "exampleTranslation": "She is a very creative artist.",
+   "topic": "Kunst & Literatur"
+  },
+  {
+   "word": "Werk",
+   "article": "das",
+   "translation": "work (of art)",
+   "example": "Das Werk stammt aus dem neunzehnten Jahrhundert.",
+   "exampleTranslation": "The work dates from the nineteenth century.",
+   "topic": "Kunst & Literatur"
+  },
+  {
+   "word": "Handlung",
+   "article": "die",
+   "translation": "plot",
+   "example": "Die Handlung des Films ist sehr komplex.",
+   "exampleTranslation": "The plot of the movie is very complex.",
+   "topic": "Kunst & Literatur"
+  },
+  {
+   "word": "Charakter",
+   "article": "der",
+   "translation": "character",
+   "example": "Der Hauptcharakter entwickelt sich im Verlauf der Geschichte.",
+   "exampleTranslation": "The main character develops over the course of the story.",
+   "topic": "Kunst & Literatur"
+  },
+  {
+   "word": "veranschaulichen",
+   "article": "",
+   "translation": "to illustrate",
+   "example": "Das Beispiel veranschaulicht den Gedanken gut.",
+   "exampleTranslation": "The example illustrates the idea well.",
+   "topic": "Kunst & Literatur"
+  },
+  {
+   "word": "Publikum",
+   "article": "das",
+   "translation": "audience",
+   "example": "Das Publikum applaudierte lange.",
+   "exampleTranslation": "The audience applauded for a long time.",
+   "topic": "Kunst & Literatur"
+  },
+  {
+   "word": "Inspiration",
+   "article": "die",
+   "translation": "inspiration",
+   "example": "Die Landschaft war seine größte Inspiration.",
+   "exampleTranslation": "The landscape was his greatest inspiration.",
+   "topic": "Kunst & Literatur"
+  },
+  {
+   "word": "Theater",
+   "article": "das",
+   "translation": "theater",
+   "example": "Wir gehen heute Abend ins Theater.",
+   "exampleTranslation": "We're going to the theater tonight.",
+   "topic": "Kunst & Literatur"
+  },
+  {
+   "word": "Aufführung",
+   "article": "die",
+   "translation": "performance",
+   "example": "Die Aufführung dauerte über zwei Stunden.",
+   "exampleTranslation": "The performance lasted over two hours.",
+   "topic": "Kunst & Literatur"
+  },
+  {
+   "word": "Meisterwerk",
+   "article": "das",
+   "translation": "masterpiece",
+   "example": "Dieses Gemälde gilt als sein Meisterwerk.",
+   "exampleTranslation": "This painting is considered his masterpiece.",
+   "topic": "Kunst & Literatur"
+  },
+  {
+   "word": "widerspiegeln",
+   "article": "",
+   "translation": "to reflect",
+   "example": "Das Buch spiegelt die Gesellschaft seiner Zeit wider.",
+   "exampleTranslation": "The book reflects the society of its time.",
+   "topic": "Kunst & Literatur"
+  },
+  {
+   "word": "Wettkampf",
+   "article": "der",
+   "translation": "competition",
+   "example": "Der Wettkampf findet am Wochenende statt.",
+   "exampleTranslation": "The competition takes place this weekend.",
+   "topic": "Sport & Freizeit"
+  },
+  {
+   "word": "Mannschaft",
+   "article": "die",
+   "translation": "team",
+   "example": "Unsere Mannschaft hat das Spiel gewonnen.",
+   "exampleTranslation": "Our team won the game.",
+   "topic": "Sport & Freizeit"
+  },
+  {
+   "word": "Training",
+   "article": "das",
+   "translation": "training",
+   "example": "Das Training beginnt um sechs Uhr.",
+   "exampleTranslation": "Training starts at six o'clock.",
+   "topic": "Sport & Freizeit"
+  },
+  {
+   "word": "sich fit halten",
+   "article": "",
+   "translation": "to stay fit",
+   "example": "Er hält sich durch Joggen fit.",
+   "exampleTranslation": "He stays fit by jogging.",
+   "topic": "Sport & Freizeit"
+  },
+  {
+   "word": "Leistung",
+   "article": "die",
+   "translation": "performance",
+   "example": "Ihre Leistung im Wettkampf war beeindruckend.",
+   "exampleTranslation": "Her performance in the competition was impressive.",
+   "topic": "Sport & Freizeit"
+  },
+  {
+   "word": "Verein",
+   "article": "der",
+   "translation": "club",
+   "example": "Er ist Mitglied in einem Sportverein.",
+   "exampleTranslation": "He is a member of a sports club.",
+   "topic": "Sport & Freizeit"
+  },
+  {
+   "word": "Freizeit",
+   "article": "die",
+   "translation": "leisure time",
+   "example": "In seiner Freizeit spielt er gern Gitarre.",
+   "exampleTranslation": "In his free time, he likes to play guitar.",
+   "topic": "Sport & Freizeit"
+  },
+  {
+   "word": "Hobby",
+   "article": "das",
+   "translation": "hobby",
+   "example": "Fotografieren ist ihr liebstes Hobby.",
+   "exampleTranslation": "Photography is her favorite hobby.",
+   "topic": "Sport & Freizeit"
+  },
+  {
+   "word": "Ausflug",
+   "article": "der",
+   "translation": "excursion / outing",
+   "example": "Wir machen am Sonntag einen Ausflug.",
+   "exampleTranslation": "We're going on an excursion on Sunday.",
+   "topic": "Sport & Freizeit"
+  },
+  {
+   "word": "entspannen",
+   "article": "",
+   "translation": "to relax",
+   "example": "Am Wochenende entspanne ich gern zu Hause.",
+   "exampleTranslation": "On weekends I like to relax at home.",
+   "topic": "Sport & Freizeit"
+  },
+  {
+   "word": "Belastung",
+   "article": "die",
+   "translation": "strain / burden",
+   "example": "Der Marathon war eine große körperliche Belastung.",
+   "exampleTranslation": "The marathon was a great physical strain.",
+   "topic": "Sport & Freizeit"
+  },
+  {
+   "word": "sich anstrengen",
+   "article": "",
+   "translation": "to make an effort / exert oneself",
+   "example": "Sie musste sich sehr anstrengen, um zu gewinnen.",
+   "exampleTranslation": "She had to make a great effort to win.",
+   "topic": "Sport & Freizeit"
+  },
+  {
+   "word": "Ausdauer",
+   "article": "die",
+   "translation": "endurance / stamina",
+   "example": "Ausdauer ist beim Marathonlauf entscheidend.",
+   "exampleTranslation": "Endurance is crucial in marathon running.",
+   "topic": "Sport & Freizeit"
+  },
+  {
+   "word": "Zuschauer / die Zuschauerin",
+   "article": "der",
+   "translation": "spectator",
+   "example": "Tausende Zuschauer verfolgten das Spiel.",
+   "exampleTranslation": "Thousands of spectators watched the game.",
+   "topic": "Sport & Freizeit"
+  },
+  {
+   "word": "Erfolg",
+   "article": "der",
+   "translation": "success",
+   "example": "Der Erfolg der Mannschaft überraschte alle.",
+   "exampleTranslation": "The team's success surprised everyone.",
+   "topic": "Sport & Freizeit"
+  },
+  {
+   "word": "Niederlage",
+   "article": "die",
+   "translation": "defeat",
+   "example": "Die Niederlage war bitter für die Fans.",
+   "exampleTranslation": "The defeat was bitter for the fans.",
+   "topic": "Sport & Freizeit"
+  },
+  {
+   "word": "gewinnen",
+   "article": "",
+   "translation": "to win",
+   "example": "Wer wird das Finale gewinnen?",
+   "exampleTranslation": "Who will win the final?",
+   "topic": "Sport & Freizeit"
+  },
+  {
+   "word": "verlieren",
+   "article": "",
+   "translation": "to lose",
+   "example": "Niemand verliert gern.",
+   "exampleTranslation": "Nobody likes to lose.",
+   "topic": "Sport & Freizeit"
+  },
+  {
+   "word": "mitwirken",
+   "article": "",
+   "translation": "to participate / contribute",
+   "example": "Er wirkt ehrenamtlich im Verein mit.",
+   "exampleTranslation": "He participates in the club as a volunteer.",
+   "topic": "Sport & Freizeit"
+  },
+  {
+   "word": "Erholung",
+   "article": "die",
+   "translation": "recovery / relaxation",
+   "example": "Nach dem Wettkampf braucht der Körper Erholung.",
+   "exampleTranslation": "After the competition, the body needs recovery.",
+   "topic": "Sport & Freizeit"
+  },
+  {
+   "word": "zuverlässig",
+   "article": "",
+   "translation": "reliable",
+   "example": "Er ist ein sehr zuverlässiger Kollege.",
+   "exampleTranslation": "He is a very reliable colleague.",
+   "topic": "Charaktereigenschaften"
+  },
+  {
+   "word": "ehrgeizig",
+   "article": "",
+   "translation": "ambitious",
+   "example": "Sie ist ehrgeizig und zielstrebig.",
+   "exampleTranslation": "She is ambitious and determined.",
+   "topic": "Charaktereigenschaften"
+  },
+  {
+   "word": "geduldig",
+   "article": "",
+   "translation": "patient",
+   "example": "Ein guter Lehrer muss geduldig sein.",
+   "exampleTranslation": "A good teacher must be patient.",
+   "topic": "Charaktereigenschaften"
+  },
+  {
+   "word": "großzügig",
+   "article": "",
+   "translation": "generous",
+   "example": "Er ist immer sehr großzügig zu anderen.",
+   "exampleTranslation": "He is always very generous to others.",
+   "topic": "Charaktereigenschaften"
+  },
+  {
+   "word": "bescheiden",
+   "article": "",
+   "translation": "modest",
+   "example": "Trotz ihres Erfolgs bleibt sie bescheiden.",
+   "exampleTranslation": "Despite her success, she remains modest.",
+   "topic": "Charaktereigenschaften"
+  },
+  {
+   "word": "neugierig",
+   "article": "",
+   "translation": "curious",
+   "example": "Kinder sind von Natur aus neugierig.",
+   "exampleTranslation": "Children are curious by nature.",
+   "topic": "Charaktereigenschaften"
+  },
+  {
+   "word": "stur",
+   "article": "",
+   "translation": "stubborn",
+   "example": "Er ist manchmal ziemlich stur.",
+   "exampleTranslation": "He is sometimes quite stubborn.",
+   "topic": "Charaktereigenschaften"
+  },
+  {
+   "word": "selbstbewusst",
+   "article": "",
+   "translation": "self-confident",
+   "example": "Sie tritt sehr selbstbewusst auf.",
+   "exampleTranslation": "She comes across as very self-confident.",
+   "topic": "Charaktereigenschaften"
+  },
+  {
+   "word": "rücksichtslos",
+   "article": "",
+   "translation": "inconsiderate / reckless",
+   "example": "Sein rücksichtsloses Verhalten hat alle verärgert.",
+   "exampleTranslation": "His inconsiderate behavior angered everyone.",
+   "topic": "Charaktereigenschaften"
+  },
+  {
+   "word": "zuvorkommend",
+   "article": "",
+   "translation": "courteous / obliging",
+   "example": "Das Personal war sehr zuvorkommend.",
+   "exampleTranslation": "The staff were very courteous.",
+   "topic": "Charaktereigenschaften"
+  },
+  {
+   "word": "gelassen",
+   "article": "",
+   "translation": "calm / composed",
+   "example": "Sie blieb auch in der Krise gelassen.",
+   "exampleTranslation": "She remained calm even during the crisis.",
+   "topic": "Charaktereigenschaften"
+  },
+  {
+   "word": "eigensinnig",
+   "article": "",
+   "translation": "headstrong / willful",
+   "example": "Das Kind ist manchmal ziemlich eigensinnig.",
+   "exampleTranslation": "The child is sometimes quite headstrong.",
+   "topic": "Charaktereigenschaften"
+  },
+  {
+   "word": "zielstrebig",
+   "article": "",
+   "translation": "determined / goal-oriented",
+   "example": "Er verfolgt seine Ziele sehr zielstrebig.",
+   "exampleTranslation": "He pursues his goals very determinedly.",
+   "topic": "Charaktereigenschaften"
+  },
+  {
+   "word": "einfühlsam",
+   "article": "",
+   "translation": "empathetic / sensitive",
+   "example": "Ihr einfühlsamer Umgang mit Patienten wird geschätzt.",
+   "exampleTranslation": "Her empathetic way with patients is appreciated.",
+   "topic": "Charaktereigenschaften"
+  },
+  {
+   "word": "leichtsinnig",
+   "article": "",
+   "translation": "careless / reckless",
+   "example": "Sein leichtsinniges Verhalten führte zu einem Unfall.",
+   "exampleTranslation": "His careless behavior led to an accident.",
+   "topic": "Charaktereigenschaften"
+  },
+  {
+   "word": "verlässlich",
+   "article": "",
+   "translation": "dependable",
+   "example": "Auf ihn ist immer Verlass, er ist sehr verlässlich.",
+   "exampleTranslation": "He can always be counted on, he is very dependable.",
+   "topic": "Charaktereigenschaften"
+  },
+  {
+   "word": "eigenständig",
+   "article": "",
+   "translation": "independent / self-reliant",
+   "example": "Sie arbeitet gern eigenständig.",
+   "exampleTranslation": "She likes to work independently.",
+   "topic": "Charaktereigenschaften"
+  },
+  {
+   "word": "misstrauisch",
+   "article": "",
+   "translation": "suspicious / distrustful",
+   "example": "Er ist von Natur aus etwas misstrauisch.",
+   "exampleTranslation": "He is somewhat suspicious by nature.",
+   "topic": "Charaktereigenschaften"
+  },
+  {
+   "word": "hilfsbereit",
+   "article": "",
+   "translation": "helpful",
+   "example": "Meine Nachbarn sind immer hilfsbereit.",
+   "exampleTranslation": "My neighbors are always helpful.",
+   "topic": "Charaktereigenschaften"
+  },
+  {
+   "word": "entschlossen",
+   "article": "",
+   "translation": "determined / resolute",
+   "example": "Sie war fest entschlossen, das Projekt zu beenden.",
+   "exampleTranslation": "She was firmly determined to finish the project.",
+   "topic": "Charaktereigenschaften"
+  },
+  {
+   "word": "Freiheit",
+   "article": "die",
+   "translation": "freedom",
+   "example": "Freiheit ist ein hohes Gut.",
+   "exampleTranslation": "Freedom is a great asset.",
+   "topic": "Abstrakte Substantive"
+  },
+  {
+   "word": "Gerechtigkeit",
+   "article": "die",
+   "translation": "justice",
+   "example": "Er kämpft sein Leben lang für Gerechtigkeit.",
+   "exampleTranslation": "He has fought for justice his whole life.",
+   "topic": "Abstrakte Substantive"
+  },
+  {
+   "word": "Wahrheit",
+   "article": "die",
+   "translation": "truth",
+   "example": "Die Wahrheit kommt immer ans Licht.",
+   "exampleTranslation": "The truth always comes to light.",
+   "topic": "Abstrakte Substantive"
+  },
+  {
+   "word": "Hoffnung",
+   "article": "die",
+   "translation": "hope",
+   "example": "Sie gibt die Hoffnung nicht auf.",
+   "exampleTranslation": "She doesn't give up hope.",
+   "topic": "Abstrakte Substantive"
+  },
+  {
+   "word": "Angst",
+   "article": "die",
+   "translation": "fear",
+   "example": "Angst vor dem Scheitern hält viele zurück.",
+   "exampleTranslation": "Fear of failure holds many people back.",
+   "topic": "Abstrakte Substantive"
+  },
+  {
+   "word": "Geborgenheit",
+   "article": "die",
+   "translation": "sense of security / safety",
+   "example": "Kinder brauchen Geborgenheit und Liebe.",
+   "exampleTranslation": "Children need a sense of security and love.",
+   "topic": "Abstrakte Substantive"
+  },
+  {
+   "word": "Zufriedenheit",
+   "article": "die",
+   "translation": "satisfaction / contentment",
+   "example": "Zufriedenheit lässt sich nicht kaufen.",
+   "exampleTranslation": "Contentment can't be bought.",
+   "topic": "Abstrakte Substantive"
+  },
+  {
+   "word": "Verantwortlichkeit",
+   "article": "die",
+   "translation": "accountability",
+   "example": "Verantwortlichkeit wird in dieser Firma großgeschrieben.",
+   "exampleTranslation": "Accountability is highly valued at this company.",
+   "topic": "Abstrakte Substantive"
+  },
+  {
+   "word": "Vernunft",
+   "article": "die",
+   "translation": "reason / common sense",
+   "example": "In dieser Situation siegte die Vernunft.",
+   "exampleTranslation": "Reason prevailed in this situation.",
+   "topic": "Abstrakte Substantive"
+  },
+  {
+   "word": "Gewissheit",
+   "article": "die",
+   "translation": "certainty",
+   "example": "Niemand hat die absolute Gewissheit über die Zukunft.",
+   "exampleTranslation": "No one has absolute certainty about the future.",
+   "topic": "Abstrakte Substantive"
+  },
+  {
+   "word": "Zweifel",
+   "article": "der",
+   "translation": "doubt",
+   "example": "Ihm kamen plötzlich Zweifel.",
+   "exampleTranslation": "He suddenly had doubts.",
+   "topic": "Abstrakte Substantive"
+  },
+  {
+   "word": "Existenz",
+   "article": "die",
+   "translation": "existence",
+   "example": "Die Existenz der Firma ist bedroht.",
+   "exampleTranslation": "The company's existence is threatened.",
+   "topic": "Abstrakte Substantive"
+  },
+  {
+   "word": "Bedeutung",
+   "article": "die",
+   "translation": "meaning / significance",
+   "example": "Dieses Ereignis hat große Bedeutung für die Region.",
+   "exampleTranslation": "This event has great significance for the region.",
+   "topic": "Abstrakte Substantive"
+  },
+  {
+   "word": "Notwendigkeit",
+   "article": "die",
+   "translation": "necessity",
+   "example": "Die Notwendigkeit einer Reform ist offensichtlich.",
+   "exampleTranslation": "The necessity of a reform is obvious.",
+   "topic": "Abstrakte Substantive"
+  },
+  {
+   "word": "Möglichkeit",
+   "article": "die",
+   "translation": "possibility",
+   "example": "Es gibt mehrere Möglichkeiten, das Problem zu lösen.",
+   "exampleTranslation": "There are several possibilities for solving the problem.",
+   "topic": "Abstrakte Substantive"
+  },
+  {
+   "word": "Wert",
+   "article": "der",
+   "translation": "value",
+   "example": "Ehrlichkeit ist für mich ein wichtiger Wert.",
+   "exampleTranslation": "Honesty is an important value to me.",
+   "topic": "Abstrakte Substantive"
+  },
+  {
+   "word": "Würde",
+   "article": "die",
+   "translation": "dignity",
+   "example": "Jeder Mensch hat ein Recht auf Würde.",
+   "exampleTranslation": "Every human being has a right to dignity.",
+   "topic": "Abstrakte Substantive"
+  },
+  {
+   "word": "Absicht",
+   "article": "die",
+   "translation": "intention",
+   "example": "Seine Absicht war eigentlich gut gemeint.",
+   "exampleTranslation": "His intention was actually well-meant.",
+   "topic": "Abstrakte Substantive"
+  },
+  {
+   "word": "Erwartung",
+   "article": "die",
+   "translation": "expectation",
+   "example": "Das Ergebnis übertraf ihre Erwartungen.",
+   "exampleTranslation": "The result exceeded her expectations.",
+   "topic": "Abstrakte Substantive"
+  },
+  {
+   "word": "Einsicht",
+   "article": "die",
+   "translation": "insight / realization",
+   "example": "Diese Einsicht kam ihm zu spät.",
+   "exampleTranslation": "This realization came to him too late.",
+   "topic": "Abstrakte Substantive"
+  },
+  {
+   "word": "sich auseinandersetzen (mit)",
+   "article": "",
+   "translation": "to deal with / engage with",
+   "example": "Wir müssen uns mit diesem Thema auseinandersetzen.",
+   "exampleTranslation": "We need to engage with this topic.",
+   "topic": "Komplexe Verben"
+  },
+  {
+   "word": "verzichten (auf)",
+   "article": "",
+   "translation": "to forgo / do without",
+   "example": "Sie verzichtet aus gesundheitlichen Gründen auf Zucker.",
+   "exampleTranslation": "She avoids sugar for health reasons.",
+   "topic": "Komplexe Verben"
+  },
+  {
+   "word": "sich beschweren",
+   "article": "",
+   "translation": "to complain",
+   "example": "Der Kunde hat sich über den Service beschwert.",
+   "exampleTranslation": "The customer complained about the service.",
+   "topic": "Komplexe Verben"
+  },
+  {
+   "word": "gelingen",
+   "article": "",
+   "translation": "to succeed",
+   "example": "Es gelang ihr, den Vertrag zu unterschreiben.",
+   "exampleTranslation": "She succeeded in signing the contract.",
+   "topic": "Komplexe Verben"
+  },
+  {
+   "word": "scheitern",
+   "article": "",
+   "translation": "to fail",
+   "example": "Das Projekt ist leider gescheitert.",
+   "exampleTranslation": "The project unfortunately failed.",
+   "topic": "Komplexe Verben"
+  },
+  {
+   "word": "bestehen (auf / aus)",
+   "article": "",
+   "translation": "to insist (on) / to consist (of)",
+   "example": "Er besteht darauf, die Rechnung selbst zu zahlen.",
+   "exampleTranslation": "He insists on paying the bill himself.",
+   "topic": "Komplexe Verben"
+  },
+  {
+   "word": "sich beziehen (auf)",
+   "article": "",
+   "translation": "to refer to",
+   "example": "Diese Regel bezieht sich nur auf neue Mitarbeiter.",
+   "exampleTranslation": "This rule only applies to new employees.",
+   "topic": "Komplexe Verben"
+  },
+  {
+   "word": "ermöglichen",
+   "article": "",
+   "translation": "to enable / make possible",
+   "example": "Das Stipendium ermöglichte ihr das Studium.",
+   "exampleTranslation": "The scholarship made her studies possible.",
+   "topic": "Komplexe Verben"
+  },
+  {
+   "word": "verhindern",
+   "article": "",
+   "translation": "to prevent",
+   "example": "Wir konnten den Schaden gerade noch verhindern.",
+   "exampleTranslation": "We were just able to prevent the damage.",
+   "topic": "Komplexe Verben"
+  },
+  {
+   "word": "sich erkundigen (nach)",
+   "article": "",
+   "translation": "to inquire about",
+   "example": "Ich erkundige mich nach den Öffnungszeiten.",
+   "exampleTranslation": "I'll inquire about the opening hours.",
+   "topic": "Komplexe Verben"
+  },
+  {
+   "word": "sich weigern",
+   "article": "",
+   "translation": "to refuse",
+   "example": "Er weigerte sich, den Vertrag zu unterschreiben.",
+   "exampleTranslation": "He refused to sign the contract.",
+   "topic": "Komplexe Verben"
+  },
+  {
+   "word": "beitragen (zu)",
+   "article": "",
+   "translation": "to contribute (to)",
+   "example": "Jeder kann zu einer besseren Zukunft beitragen.",
+   "exampleTranslation": "Everyone can contribute to a better future.",
+   "topic": "Komplexe Verben"
+  },
+  {
+   "word": "erwägen",
+   "article": "",
+   "translation": "to consider",
+   "example": "Wir erwägen, umzuziehen.",
+   "exampleTranslation": "We are considering moving.",
+   "topic": "Komplexe Verben"
+  },
+  {
+   "word": "sich lohnen",
+   "article": "",
+   "translation": "to be worth it",
+   "example": "Die Investition hat sich am Ende gelohnt.",
+   "exampleTranslation": "The investment was worth it in the end.",
+   "topic": "Komplexe Verben"
+  },
+  {
+   "word": "auffallen",
+   "article": "",
+   "translation": "to stand out / be noticeable",
+   "example": "Ihr Talent ist schon früh aufgefallen.",
+   "exampleTranslation": "Her talent stood out early on.",
+   "topic": "Komplexe Verben"
+  },
+  {
+   "word": "sich durchsetzen",
+   "article": "",
+   "translation": "to prevail / assert oneself",
+   "example": "Die neue Idee konnte sich schnell durchsetzen.",
+   "exampleTranslation": "The new idea was able to prevail quickly.",
+   "topic": "Komplexe Verben"
+  },
+  {
+   "word": "voraussetzen",
+   "article": "",
+   "translation": "to require / presuppose",
+   "example": "Der Job setzt gute Englischkenntnisse voraus.",
+   "exampleTranslation": "The job requires good English skills.",
+   "topic": "Komplexe Verben"
+  },
+  {
+   "word": "sich einigen (auf)",
+   "article": "",
+   "translation": "to agree (on)",
+   "example": "Sie haben sich auf einen Preis geeinigt.",
+   "exampleTranslation": "They agreed on a price.",
+   "topic": "Komplexe Verben"
+  },
+  {
+   "word": "abhängen (von)",
+   "article": "",
+   "translation": "to depend (on)",
+   "example": "Der Erfolg hängt von vielen Faktoren ab.",
+   "exampleTranslation": "Success depends on many factors.",
+   "topic": "Komplexe Verben"
+  },
+  {
+   "word": "bewältigen",
+   "article": "",
+   "translation": "to manage / cope with",
+   "example": "Sie musste viele Schwierigkeiten bewältigen.",
+   "exampleTranslation": "She had to cope with many difficulties.",
+   "topic": "Komplexe Verben"
+  },
+  {
+   "word": "bedeutend",
+   "article": "",
+   "translation": "significant",
+   "example": "Das war ein bedeutender Schritt für das Unternehmen.",
+   "exampleTranslation": "That was a significant step for the company.",
+   "topic": "Erweiterte Adjektive"
+  },
+  {
+   "word": "unabhängig",
+   "article": "",
+   "translation": "independent",
+   "example": "Sie möchte finanziell unabhängig sein.",
+   "exampleTranslation": "She wants to be financially independent.",
+   "topic": "Erweiterte Adjektive"
+  },
+  {
+   "word": "angemessen",
+   "article": "",
+   "translation": "appropriate / adequate",
+   "example": "Die Reaktion war völlig angemessen.",
+   "exampleTranslation": "The reaction was completely appropriate.",
+   "topic": "Erweiterte Adjektive"
+  },
+  {
+   "word": "widersprüchlich",
+   "article": "",
+   "translation": "contradictory",
+   "example": "Die Aussagen der Zeugen waren widersprüchlich.",
+   "exampleTranslation": "The witnesses' statements were contradictory.",
+   "topic": "Erweiterte Adjektive"
+  },
+  {
+   "word": "vielfältig",
+   "article": "",
+   "translation": "diverse / varied",
+   "example": "Die Möglichkeiten sind sehr vielfältig.",
+   "exampleTranslation": "The possibilities are very diverse.",
+   "topic": "Erweiterte Adjektive"
+  },
+  {
+   "word": "unvermeidlich",
+   "article": "",
+   "translation": "inevitable",
+   "example": "Ein Wandel scheint unvermeidlich.",
+   "exampleTranslation": "Change seems inevitable.",
+   "topic": "Erweiterte Adjektive"
+  },
+  {
+   "word": "anspruchsvoll",
+   "article": "",
+   "translation": "demanding / sophisticated",
+   "example": "Das ist eine anspruchsvolle Aufgabe.",
+   "exampleTranslation": "That is a demanding task.",
+   "topic": "Erweiterte Adjektive"
+  },
+  {
+   "word": "überzeugend",
+   "article": "",
+   "translation": "convincing",
+   "example": "Ihre Präsentation war sehr überzeugend.",
+   "exampleTranslation": "Her presentation was very convincing.",
+   "topic": "Erweiterte Adjektive"
+  },
+  {
+   "word": "gleichgültig",
+   "article": "",
+   "translation": "indifferent",
+   "example": "Ihm scheint das Ergebnis gleichgültig zu sein.",
+   "exampleTranslation": "The result seems to be indifferent to him.",
+   "topic": "Erweiterte Adjektive"
+  },
+  {
+   "word": "konsequent",
+   "article": "",
+   "translation": "consistent",
+   "example": "Er verfolgt sein Ziel sehr konsequent.",
+   "exampleTranslation": "He pursues his goal very consistently.",
+   "topic": "Erweiterte Adjektive"
+  },
+  {
+   "word": "umstritten",
+   "article": "",
+   "translation": "controversial",
+   "example": "Das Thema bleibt in der Gesellschaft umstritten.",
+   "exampleTranslation": "The topic remains controversial in society.",
+   "topic": "Erweiterte Adjektive"
+  },
+  {
+   "word": "wesentlich",
+   "article": "",
+   "translation": "essential / substantial",
+   "example": "Das ist ein wesentlicher Unterschied.",
+   "exampleTranslation": "That is an essential difference.",
+   "topic": "Erweiterte Adjektive"
+  },
+  {
+   "word": "zwingend",
+   "article": "",
+   "translation": "compelling / mandatory",
+   "example": "Ein Ausweis ist zwingend erforderlich.",
+   "exampleTranslation": "An ID is mandatory.",
+   "topic": "Erweiterte Adjektive"
+  },
+  {
+   "word": "begrenzt",
+   "article": "",
+   "translation": "limited",
+   "example": "Die Anzahl der Plätze ist begrenzt.",
+   "exampleTranslation": "The number of seats is limited.",
+   "topic": "Erweiterte Adjektive"
+  },
+  {
+   "word": "vertraut",
+   "article": "",
+   "translation": "familiar",
+   "example": "Die Umgebung kam ihr vertraut vor.",
+   "exampleTranslation": "The surroundings seemed familiar to her.",
+   "topic": "Erweiterte Adjektive"
+  },
+  {
+   "word": "widerstandsfähig",
+   "article": "",
+   "translation": "resilient / resistant",
+   "example": "Diese Pflanze ist sehr widerstandsfähig.",
+   "exampleTranslation": "This plant is very resilient.",
+   "topic": "Erweiterte Adjektive"
+  },
+  {
+   "word": "nachvollziehbar",
+   "article": "",
+   "translation": "understandable / comprehensible",
+   "example": "Seine Entscheidung ist gut nachvollziehbar.",
+   "exampleTranslation": "His decision is easy to understand.",
+   "topic": "Erweiterte Adjektive"
+  },
+  {
+   "word": "langfristig",
+   "article": "",
+   "translation": "long-term",
+   "example": "Wir denken langfristig.",
+   "exampleTranslation": "We think long-term.",
+   "topic": "Erweiterte Adjektive"
+  },
+  {
+   "word": "kurzfristig",
+   "article": "",
+   "translation": "short-term",
+   "example": "Das ist nur eine kurzfristige Lösung.",
+   "exampleTranslation": "That is only a short-term solution.",
+   "topic": "Erweiterte Adjektive"
+  },
+  {
+   "word": "entscheidend",
+   "article": "",
+   "translation": "decisive / crucial",
+   "example": "Das war der entscheidende Moment des Spiels.",
+   "exampleTranslation": "That was the decisive moment of the game.",
+   "topic": "Erweiterte Adjektive"
+  },
+  {
+   "word": "Veränderung",
+   "article": "die",
+   "translation": "change",
+   "example": "Die Veränderung kam plötzlich.",
+   "exampleTranslation": "The change came suddenly.",
+   "topic": "Zeit & Veränderung"
+  },
+  {
+   "word": "allmählich",
+   "article": "",
+   "translation": "gradually",
+   "example": "Die Situation verbesserte sich allmählich.",
+   "exampleTranslation": "The situation gradually improved.",
+   "topic": "Zeit & Veränderung"
+  },
+  {
+   "word": "vorübergehend",
+   "article": "",
+   "translation": "temporary",
+   "example": "Das ist nur eine vorübergehende Lösung.",
+   "exampleTranslation": "That's only a temporary solution.",
+   "topic": "Zeit & Veränderung"
+  },
+  {
+   "word": "dauerhaft",
+   "article": "",
+   "translation": "permanent / lasting",
+   "example": "Wir suchen eine dauerhafte Lösung.",
+   "exampleTranslation": "We're looking for a permanent solution.",
+   "topic": "Zeit & Veränderung"
+  },
+  {
+   "word": "sich verändern",
+   "article": "",
+   "translation": "to change",
+   "example": "Die Stadt hat sich stark verändert.",
+   "exampleTranslation": "The city has changed a lot.",
+   "topic": "Zeit & Veränderung"
+  },
+  {
+   "word": "Zeitpunkt",
+   "article": "der",
+   "translation": "point in time",
+   "example": "Das war der falsche Zeitpunkt.",
+   "exampleTranslation": "That was the wrong point in time.",
+   "topic": "Zeit & Veränderung"
+  },
+  {
+   "word": "inzwischen",
+   "article": "",
+   "translation": "meanwhile / by now",
+   "example": "Inzwischen hat sich vieles geändert.",
+   "exampleTranslation": "Meanwhile, a lot has changed.",
+   "topic": "Zeit & Veränderung"
+  },
+  {
+   "word": "rückblickend",
+   "article": "",
+   "translation": "in retrospect",
+   "example": "Rückblickend war das eine gute Entscheidung.",
+   "exampleTranslation": "In retrospect, that was a good decision.",
+   "topic": "Zeit & Veränderung"
+  },
+  {
+   "word": "gleichzeitig",
+   "article": "",
+   "translation": "simultaneously",
+   "example": "Sie macht oft mehrere Dinge gleichzeitig.",
+   "exampleTranslation": "She often does several things simultaneously.",
+   "topic": "Zeit & Veränderung"
+  },
+  {
+   "word": "sich wandeln",
+   "article": "",
+   "translation": "to transform / change",
+   "example": "Die Beziehung wandelte sich langsam.",
+   "exampleTranslation": "The relationship slowly transformed.",
+   "topic": "Zeit & Veränderung"
+  },
+  {
+   "word": "vorläufig",
+   "article": "",
+   "translation": "provisional / for now",
+   "example": "Das ist vorläufig die beste Lösung.",
+   "exampleTranslation": "That's the best solution for now.",
+   "topic": "Zeit & Veränderung"
+  },
+  {
+   "word": "Verlauf",
+   "article": "der",
+   "translation": "course / progression",
+   "example": "Der Verlauf der Ereignisse war überraschend.",
+   "exampleTranslation": "The course of events was surprising.",
+   "topic": "Zeit & Veränderung"
+  },
+  {
+   "word": "zunehmend",
+   "article": "",
+   "translation": "increasingly",
+   "example": "Das Thema wird zunehmend wichtiger.",
+   "exampleTranslation": "The topic is becoming increasingly important.",
+   "topic": "Zeit & Veränderung"
+  },
+  {
+   "word": "Wendepunkt",
+   "article": "der",
+   "translation": "turning point",
+   "example": "Das war der Wendepunkt in seiner Karriere.",
+   "exampleTranslation": "That was the turning point in his career.",
+   "topic": "Zeit & Veränderung"
+  },
+  {
+   "word": "rechtzeitig",
+   "article": "",
+   "translation": "on time / in time",
+   "example": "Wir kamen gerade noch rechtzeitig an.",
+   "exampleTranslation": "We arrived just in time.",
+   "topic": "Zeit & Veränderung"
+  },
+  {
+   "word": "Frist",
+   "article": "die",
+   "translation": "deadline",
+   "example": "Die Frist läuft nächste Woche ab.",
+   "exampleTranslation": "The deadline expires next week.",
+   "topic": "Zeit & Veränderung"
+  },
+  {
+   "word": "verlaufen",
+   "article": "",
+   "translation": "to proceed / go (of events)",
+   "example": "Die Verhandlungen verliefen reibungslos.",
+   "exampleTranslation": "The negotiations went smoothly.",
+   "topic": "Zeit & Veränderung"
+  },
+  {
+   "word": "bevorstehend",
+   "article": "",
+   "translation": "upcoming / imminent",
+   "example": "Die bevorstehende Wahl beschäftigt alle.",
+   "exampleTranslation": "The upcoming election is on everyone's mind.",
+   "topic": "Zeit & Veränderung"
+  },
+  {
+   "word": "andauern",
+   "article": "",
+   "translation": "to continue / persist",
+   "example": "Der Streit dauert schon Wochen an.",
+   "exampleTranslation": "The dispute has been going on for weeks.",
+   "topic": "Zeit & Veränderung"
+  },
+  {
+   "word": "rückgängig machen",
+   "article": "",
+   "translation": "to undo / reverse",
+   "example": "Die Entscheidung lässt sich nicht rückgängig machen.",
+   "exampleTranslation": "The decision cannot be undone.",
+   "topic": "Zeit & Veränderung"
+  },
+  {
+   "word": "Kommunikation",
+   "article": "die",
+   "translation": "communication",
+   "example": "Gute Kommunikation ist im Team entscheidend.",
+   "exampleTranslation": "Good communication is crucial in a team.",
+   "topic": "Kommunikation"
+  },
+  {
+   "word": "vermitteln",
+   "article": "",
+   "translation": "to convey / mediate",
+   "example": "Der Lehrer vermittelt den Stoff verständlich.",
+   "exampleTranslation": "The teacher conveys the material clearly.",
+   "topic": "Kommunikation"
+  },
+  {
+   "word": "missverstehen",
+   "article": "",
+   "translation": "to misunderstand",
+   "example": "Ich glaube, du hast mich missverstanden.",
+   "exampleTranslation": "I think you misunderstood me.",
+   "topic": "Kommunikation"
+  },
+  {
+   "word": "Missverständnis",
+   "article": "das",
+   "translation": "misunderstanding",
+   "example": "Das war nur ein kleines Missverständnis.",
+   "exampleTranslation": "That was just a small misunderstanding.",
+   "topic": "Kommunikation"
+  },
+  {
+   "word": "ausdrücken",
+   "article": "",
+   "translation": "to express",
+   "example": "Er kann seine Gefühle nur schwer ausdrücken.",
+   "exampleTranslation": "He finds it hard to express his feelings.",
+   "topic": "Kommunikation"
+  },
+  {
+   "word": "andeuten",
+   "article": "",
+   "translation": "to hint at / indicate",
+   "example": "Sie deutete an, dass sie kündigen wolle.",
+   "exampleTranslation": "She hinted that she wanted to resign.",
+   "topic": "Kommunikation"
+  },
+  {
+   "word": "betonen",
+   "article": "",
+   "translation": "to emphasize",
+   "example": "Er betonte, wie wichtig das Projekt sei.",
+   "exampleTranslation": "He emphasized how important the project was.",
+   "topic": "Kommunikation"
+  },
+  {
+   "word": "erwähnen",
+   "article": "",
+   "translation": "to mention",
+   "example": "Das hat sie gestern gar nicht erwähnt.",
+   "exampleTranslation": "She didn't mention that at all yesterday.",
+   "topic": "Kommunikation"
+  },
+  {
+   "word": "sich verständigen",
+   "article": "",
+   "translation": "to communicate / come to an understanding",
+   "example": "Wir haben uns auf Englisch verständigt.",
+   "exampleTranslation": "We communicated in English.",
+   "topic": "Kommunikation"
+  },
+  {
+   "word": "Formulierung",
+   "article": "die",
+   "translation": "phrasing / wording",
+   "example": "Die Formulierung war etwas unglücklich gewählt.",
+   "exampleTranslation": "The phrasing was somewhat unfortunately chosen.",
+   "topic": "Kommunikation"
+  },
+  {
+   "word": "zwischen den Zeilen",
+   "article": "",
+   "translation": "between the lines",
+   "example": "Man muss oft zwischen den Zeilen lesen.",
+   "exampleTranslation": "You often have to read between the lines.",
+   "topic": "Kommunikation"
+  },
+  {
+   "word": "Körpersprache",
+   "article": "die",
+   "translation": "body language",
+   "example": "Ihre Körpersprache verriet ihre Nervosität.",
+   "exampleTranslation": "Her body language revealed her nervousness.",
+   "topic": "Kommunikation"
+  },
+  {
+   "word": "sich äußern",
+   "article": "",
+   "translation": "to comment / express oneself",
+   "example": "Der Minister äußerte sich nicht zu dem Vorfall.",
+   "exampleTranslation": "The minister did not comment on the incident.",
+   "topic": "Kommunikation"
+  },
+  {
+   "word": "wörtlich",
+   "article": "",
+   "translation": "literal(ly)",
+   "example": "Nimm das nicht so wörtlich.",
+   "exampleTranslation": "Don't take that so literally.",
+   "topic": "Kommunikation"
+  },
+  {
+   "word": "sinngemäß",
+   "article": "",
+   "translation": "in essence / paraphrased",
+   "example": "Er hat den Text nur sinngemäß wiedergegeben.",
+   "exampleTranslation": "He only paraphrased the text.",
+   "topic": "Kommunikation"
+  },
+  {
+   "word": "Small Talk",
+   "article": "der",
+   "translation": "small talk",
+   "example": "Beim Small Talk redet man meist über das Wetter.",
+   "exampleTranslation": "In small talk people mostly talk about the weather.",
+   "topic": "Kommunikation"
+  },
+  {
+   "word": "klarstellen",
+   "article": "",
+   "translation": "to clarify / make clear",
+   "example": "Ich möchte einen Punkt klarstellen.",
+   "exampleTranslation": "I would like to clarify one point.",
+   "topic": "Kommunikation"
+  },
+  {
+   "word": "Gespräch",
+   "article": "das",
+   "translation": "conversation",
+   "example": "Das Gespräch dauerte über eine Stunde.",
+   "exampleTranslation": "The conversation lasted over an hour.",
+   "topic": "Kommunikation"
+  },
+  {
+   "word": "überreden",
+   "article": "",
+   "translation": "to persuade / talk into",
+   "example": "Sie überredete ihn, doch mitzukommen.",
+   "exampleTranslation": "She persuaded him to come along after all.",
+   "topic": "Kommunikation"
+  },
+  {
+   "word": "sich schriftlich ausdrücken",
+   "article": "",
+   "translation": "to express oneself in writing",
+   "example": "Sie drückt sich schriftlich sehr klar aus.",
+   "exampleTranslation": "She expresses herself very clearly in writing.",
+   "topic": "Kommunikation"
+  },
+  {
+   "word": "Problem",
+   "article": "das",
+   "translation": "problem",
+   "example": "Wir müssen das Problem gemeinsam lösen.",
+   "exampleTranslation": "We need to solve the problem together.",
+   "topic": "Probleme & Lösungen"
+  },
+  {
+   "word": "Lösung",
+   "article": "die",
+   "translation": "solution",
+   "example": "Es gibt keine einfache Lösung für diese Situation.",
+   "exampleTranslation": "There is no simple solution to this situation.",
+   "topic": "Probleme & Lösungen"
+  },
+  {
+   "word": "Ursache",
+   "article": "die",
+   "translation": "cause",
+   "example": "Die Ursache des Fehlers ist noch unklar.",
+   "exampleTranslation": "The cause of the error is still unclear.",
+   "topic": "Probleme & Lösungen"
+  },
+  {
+   "word": "Folge",
+   "article": "die",
+   "translation": "consequence",
+   "example": "Diese Entscheidung hatte ernste Folgen.",
+   "exampleTranslation": "This decision had serious consequences.",
+   "topic": "Probleme & Lösungen"
+  },
+  {
+   "word": "meistern",
+   "article": "",
+   "translation": "to master / cope with",
+   "example": "Sie hat die Krise gut gemeistert.",
+   "exampleTranslation": "She mastered the crisis well.",
+   "topic": "Probleme & Lösungen"
+  },
+  {
+   "word": "Hindernis",
+   "article": "das",
+   "translation": "obstacle",
+   "example": "Bürokratie ist oft ein großes Hindernis.",
+   "exampleTranslation": "Bureaucracy is often a big obstacle.",
+   "topic": "Probleme & Lösungen"
+  },
+  {
+   "word": "überwinden",
+   "article": "",
+   "translation": "to overcome",
+   "example": "Er hat seine Angst überwunden.",
+   "exampleTranslation": "He overcame his fear.",
+   "topic": "Probleme & Lösungen"
+  },
+  {
+   "word": "Ausweg",
+   "article": "der",
+   "translation": "way out",
+   "example": "Es schien keinen Ausweg zu geben.",
+   "exampleTranslation": "There seemed to be no way out.",
+   "topic": "Probleme & Lösungen"
+  },
+  {
+   "word": "beheben",
+   "article": "",
+   "translation": "to fix / remedy",
+   "example": "Der Techniker hat das Problem schnell behoben.",
+   "exampleTranslation": "The technician quickly fixed the problem.",
+   "topic": "Probleme & Lösungen"
+  },
+  {
+   "word": "Schwierigkeit",
+   "article": "die",
+   "translation": "difficulty",
+   "example": "Sie hatte Schwierigkeiten, die Aufgabe zu verstehen.",
+   "exampleTranslation": "She had difficulty understanding the task.",
+   "topic": "Probleme & Lösungen"
+  },
+  {
+   "word": "Ansatz",
+   "article": "der",
+   "translation": "approach",
+   "example": "Sein Ansatz zur Problemlösung ist ungewöhnlich.",
+   "exampleTranslation": "His approach to problem-solving is unusual.",
+   "topic": "Probleme & Lösungen"
+  },
+  {
+   "word": "sich abzeichnen",
+   "article": "",
+   "translation": "to become apparent / loom",
+   "example": "Ein Konflikt zeichnete sich schon lange ab.",
+   "exampleTranslation": "A conflict had been looming for a long time.",
+   "topic": "Probleme & Lösungen"
+  },
+  {
+   "word": "Abhilfe",
+   "article": "die",
+   "translation": "remedy",
+   "example": "Es muss schnell Abhilfe geschaffen werden.",
+   "exampleTranslation": "A remedy needs to be found quickly.",
+   "topic": "Probleme & Lösungen"
+  },
+  {
+   "word": "Risiko",
+   "article": "das",
+   "translation": "risk",
+   "example": "Das Risiko eines Scheiterns ist hoch.",
+   "exampleTranslation": "The risk of failure is high.",
+   "topic": "Probleme & Lösungen"
+  },
+  {
+   "word": "abwenden",
+   "article": "",
+   "translation": "to avert / ward off",
+   "example": "Durch regelmäßige Wartung lassen sich größere Schäden abwenden.",
+   "exampleTranslation": "Regular maintenance can avert bigger damage.",
+   "topic": "Probleme & Lösungen"
+  },
+  {
+   "word": "Auswirkung",
+   "article": "die",
+   "translation": "impact / effect",
+   "example": "Die Auswirkungen sind noch nicht absehbar.",
+   "exampleTranslation": "The impacts are not yet foreseeable.",
+   "topic": "Probleme & Lösungen"
+  },
+  {
+   "word": "lösen",
+   "article": "",
+   "translation": "to solve",
+   "example": "Das Rätsel war schwer zu lösen.",
+   "exampleTranslation": "The puzzle was hard to solve.",
+   "topic": "Probleme & Lösungen"
+  },
+  {
+   "word": "Engpass",
+   "article": "der",
+   "translation": "bottleneck",
+   "example": "Der Lieferengpass verzögert die Produktion.",
+   "exampleTranslation": "The supply bottleneck is delaying production.",
+   "topic": "Probleme & Lösungen"
+  },
+  {
+   "word": "Maßnahme",
+   "article": "die",
+   "translation": "measure / action",
+   "example": "Die Regierung ergreift neue Maßnahmen.",
+   "exampleTranslation": "The government is taking new measures.",
+   "topic": "Probleme & Lösungen"
+  },
+  {
+   "word": "sich zuspitzen",
+   "article": "",
+   "translation": "to escalate / intensify",
+   "example": "Die Lage hat sich in den letzten Tagen zugespitzt.",
+   "exampleTranslation": "The situation has escalated in recent days.",
+   "topic": "Probleme & Lösungen"
+  }
+ ]
+}

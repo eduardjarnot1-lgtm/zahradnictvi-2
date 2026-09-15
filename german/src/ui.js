@@ -106,6 +106,9 @@ export function wordCard(word, { revealed = false } = {}) {
         ${word.translationSource === 'ding'
           ? '<p class="card__note">Meaning from the Ding German–English dictionary, not from a course word list.</p>'
           : ''}
+        ${word.exampleSource
+          ? `<p class="card__note">Example sentence from: ${escapeHtml(word.exampleSource)}</p>`
+          : ''}
         ${word.needsReview ? '<p class="card__review">⚑ Article flagged for review — see the note above.</p>' : ''}
       </div>
 

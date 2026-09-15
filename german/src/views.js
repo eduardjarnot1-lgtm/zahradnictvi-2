@@ -192,6 +192,21 @@ export function aboutView() {
           <li>${meta.cefr.approximatedWords} cards appear in no list and keep the tier
               approximation, labelled as approximate</li>
         </ul>` : ''}
+      ${meta.b2 ? `
+        <h2>The supplied B2 list</h2>
+        <p><strong>Source:</strong> ${escapeHtml(meta.b2.source)}</p>
+        <p>${escapeHtml(meta.b2.note)}</p>
+        <ul>
+          <li>${meta.b2.entryCount} entries in ${meta.b2.topicCount} topics</li>
+          <li>${meta.b2.importedWords} words nothing else here carries became new B2 cards</li>
+          <li>${meta.b2.examplesAdded} cards from other sources gained an example sentence from
+              this list; each of those cards names it</li>
+          <li>${meta.b2.placedWords} cards that already existed are also filed under one of its
+              topics, keeping the level their own source gave them</li>
+        </ul>
+        <p class="warn">This file was supplied without an author, publisher or licence,
+           so where its entries and sentences come from is not yet established. It is attributed
+           here as supplied rather than credited to anyone.</p>` : ''}
       <ul>
         <li>${meta.sourceEntryCount} entries read from the document</li>
         <li>${meta.wordCount} vocabulary cards after merging repeated entries</li>

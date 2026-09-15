@@ -1,6 +1,6 @@
 # Master Fuka — German Learning (beta)
 
-A learning app built on three imported source documents plus a word-frequency
+A learning app built on four imported source documents plus a word-frequency
 list. It is not a PDF reader:
 the documents are extracted, normalised, validated and turned into vocabulary
 cards, grammar units, exercises, spaced review and progress tracking.
@@ -20,9 +20,10 @@ On Netlify the site publishes the repository root, so the app is served at
 
 | Content | Source | Status |
 |---|---|---|
-| Vocabulary — 4 768 cards | OCR GCSE list (2 047) + the CEFR word lists below (2 721) | imported |
+| Vocabulary — 4 979 cards | OCR GCSE list (2 047) + the CEFR word lists below (2 721) + the B2 list below (211) | imported |
 | CEFR levels A1/A2/B1 | Official Goethe-Institut Wortlisten (A1 Start Deutsch 1, A2, B1) | imported |
 | CEFR level B2 | Der deutsche Wortschatz von A1 bis B2, Lingster Academy | imported |
+| B2 vocabulary — 500 entries in 25 topics | *German Vocabulary — Level B2*, supplied by the project owner | imported, **provenance unconfirmed** |
 | English glosses for unlisted words | Ding German–English dictionary, TU Chemnitz (GPL v2+) | imported |
 | B1 grammar gaps | deutsch-lernen-goethe-a1-c2, Abdullah Butt (CC BY-NC 4.0) | imported |
 | Grammar — 87 A1/A2/B1 topics | DaF kompakt neu A1/A2/B1, Grammatikerklärungen, © Ernst Klett Sprachen GmbH, Stuttgart 2018 | imported |
@@ -93,14 +94,15 @@ overwrite an earlier one would push almost everything to B1.
 | Cards no list carries, keeping the GCSE Foundation/Higher approximation | 591 |
 | New cards imported from the word lists | 2 721 |
 | Word-list entries skipped for having no English at all | 234 |
+| New cards imported from the B2 list | 211 |
 
-A1 829 · A2 1 270 · B1 2 157 · B2 512.
+A1 829 · A2 1 270 · B1 2 157 · B2 723.
 
-B2 rests on the Lingster list alone — it is the only source here that reaches
-B2 — and that is stated in the data rather than smoothed over. Cards whose
-English comes from the Ding dictionary rather than a course word list say so on
-the card, because a dictionary lookup and a curated gloss are not the same kind
-of evidence.
+B2 now rests on two sources that disagree about nothing and overlap heavily:
+the Lingster list and the supplied B2 list below. Cards whose English comes
+from the Ding dictionary rather than a course word list say so on the card,
+because a dictionary lookup and a curated gloss are not the same kind of
+evidence.
 
 Levels shown as "approx." on a card or in the level picker come from mapping
 the GCSE document's Foundation/Higher tier, never from a list that states a
@@ -115,6 +117,57 @@ with each other: B1 writes `-¨er`, A1 splits the same thing across fields as
 never `Haüser`, because the `u` of `Haus` belongs to the diphthong. A marker
 outside those shapes is dropped rather than mangled: a wrong plural on a card is
 worse than no plural.
+
+## The supplied B2 list
+
+`German_Vocabulary_B2.pdf` is the fourth source document: 500 entries in 25
+topics, each with the article, an English gloss, a German example sentence and
+that sentence's English translation. It is the richest per-entry source in the
+project — the only one that supplies all four for every entry — and the only
+one that states B2 as the level of its own entries.
+
+It is also the source that overlaps the others most, so the build makes two
+passes and never the other way round:
+
+1. **Enrichment.** Where a card already exists for the headword, the B2 list
+   fills in what that card lacks: an example sentence *only if the card has
+   none*, plus the B2 topic the list files the word under. The card's level is
+   not touched. Another source already stated it from its own evidence, and
+   "this list also prints the word" is not a reason to move an A1 word to B2.
+   52 cards gained an example this way and 290 were filed under a B2 topic.
+   A borrowed example is attributed on the card (`exampleSource`), because the
+   card's own source did not print that sentence.
+2. **Import.** Only then are the 211 headwords nothing else carries turned into
+   new cards, at B2, with everything the list prints.
+
+The 25 topics — Arbeit & Beruf, Bildung, Gesundheit, Umwelt … Probleme &
+Lösungen — are browsable as their own category. The English topic labels are
+this app's translation of the German headings; the document prints only the
+German.
+
+Word class is read off what the document prints, not guessed: an article makes
+a noun, three headings name a word class outright (*Abstrakte Substantive*,
+*Komplexe Verben*, *Erweiterte Adjektive* — 60 entries), and an English gloss
+beginning with "to " is the list calling the entry a verb. The rest, mostly
+adjectives and adverbs the list does not label, stay unclassified rather than
+being guessed at — the same rule the word-list import follows.
+
+### Provenance is not established
+
+**This is a release blocker and is recorded here rather than assumed away.**
+The file was generated with ReportLab on the day it was supplied and carries no
+author, publisher, licence or bibliography. Its content is consistent with
+freely composed material, but nothing in the document establishes that, and
+"looks original" is not a licence. Before this app is published, the project
+owner has to confirm where the 500 entries and 500 example sentences came from.
+If they were composed for this project, that should be stated in the file and
+in this table; if they were taken from a published course, the same licensing
+question applies as to every other source here.
+
+Until then the list is imported and clearly attributed as *supplied by the
+project owner*, so that it can be removed with one build if the answer requires
+it — `b2-vocabulary-source.json` is the only thing that would have to go, and
+the build already treats its absence as a supported state.
 
 ## What the app does
 
@@ -244,14 +297,14 @@ caught two mistakes while this was being written — a phrase that was not in th
 document and a sentence with a footnote marker — which is exactly what it is
 for.
 
-`validate_content.py` runs 98 000+ checks over both databases: duplicate ids,
+`validate_content.py` runs 120 000+ checks over both databases: duplicate ids,
 duplicate entries, near-duplicate variants, missing German words, malformed
 articles and plurals, invalid levels, missing source attribution, malformed
 grammar topics, unknown or circular prerequisites.
 
 ```bash
 python3 german/tools/validate_content.py
-# vocabulary: 4768 words checked
+# vocabulary: 4979 words checked
 # grammar: 121 topics, 615 exercises checked
 # PASSED — 0 errors, 1 warning
 ```
@@ -286,7 +339,13 @@ tools/c1-source.json  tools/daf-source.json        2060 entries
   + raw source text     + raw source text           │   type, article, example,
   │                     │                           │   translation, note
   │ tools/annotations/grammar/*.json                │
-  │   summary, rules, examples, exercises           │
+  │   summary, rules, examples, exercises           │   German_Vocabulary_B2.pdf
+  │                                                 │     │ extract_b2_
+  │                                                 │     │   vocabulary.py
+  │                                                 │     ▼
+  │                                                 │   tools/b2-vocabulary-
+  │                                                 │     source.json
+  │                                                 │     500 entries, 25 topics
   ▼ tools/build_grammar.py                          ▼ tools/build_vocabulary.py
 data/grammar.json                                 data/vocabulary.json
         └──────────────────────┬─────────────────────────┘
@@ -306,6 +365,7 @@ Rebuild everything:
 python3 german/tools/extract_c1_grammar.py <Sicher_C1_Grammatikuebersicht.pdf>
 python3 german/tools/extract_daf_grammar.py <DaF_kompakt_neu_A1_A2_B1_Grammar_English.pdf>
 python3 german/tools/build_grammar.py
+python3 german/tools/extract_b2_vocabulary.py --pdf <German_Vocabulary_B2.pdf> --expect 500
 python3 german/tools/build_frequency.py <de_top2000_frequency.txt>
 python3 german/tools/build_vocabulary.py
 python3 german/tools/validate_content.py
@@ -327,7 +387,7 @@ number.
 german/
   index.html            shell: top bar, search, main region
   styles.css            light + dark theme, no framework
-  data/vocabulary.json  4768 cards, levelled A1–B2
+  data/vocabulary.json  4979 cards, levelled A1–B2
   data/cefr.json        4442 levelled headwords with their sources
   data/frequency.json   2586 ranked word forms
   data/grammar.json     121 topics, 615 examples, 615 exercises
