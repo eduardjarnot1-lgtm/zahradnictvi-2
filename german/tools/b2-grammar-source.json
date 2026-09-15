@@ -1,0 +1,222 @@
+[
+ {
+  "id": "g-b2-1-konjunktiv-ii-irreale-wuensche-und-bedingungen",
+  "number": 1,
+  "title": "Konjunktiv II – irreale Wünsche und Bedingungen",
+  "titleEn": "Konjunktiv II – unreal wishes and conditions",
+  "level": "B2",
+  "section": "Deutsche Grammatik B2",
+  "sectionNumber": "1",
+  "page": 1,
+  "pages": [
+   1
+  ],
+  "ruleDe": "Der Konjunktiv II drückt aus, dass etwas nicht real ist: einen Wunsch, eine unwirkliche Bedingung oder eine höfliche Bitte. Für die meisten Verben bildet man ihn heute mit würde + Infinitiv (ich würde gehen). Bei den wichtigsten Verben (haben, sein, werden, können, müssen, dürfen, wissen, mögen) benutzt man dagegen die eigene Konjunktiv-II-Form (ich hätte, ich wäre, ich könnte). Die Vergangenheit bildet man immer mit hätte/wäre + Partizip II, nie mit würde.",
+  "ruleEn": "Konjunktiv II marks something as unreal: a wish, a hypothetical condition, or a polite request. For most verbs, modern German uses würde + infinitive (ich würde gehen – I would go). For a small set of very common verbs (haben, sein, werden, können, müssen, dürfen, wissen, mögen), the dedicated Konjunktiv II form is preferred instead (ich hätte, ich wäre, ich könnte). The past form always uses hätte/wäre + past participle — never würde.",
+  "noteDe": "Achtung: 'würde' klingt bei haben/sein/den Modalverben umgangssprachlich falsch — hier immer die eigene Form benutzen (hätte, wäre, könnte), nicht 'würde haben' oder 'würde sein'.",
+  "noteEn": "Watch out: using würde with haben, sein, or the modal verbs (würde haben, würde sein, würde können) sounds wrong to native ears — always use the dedicated form instead (hätte, wäre, könnte).",
+  "examples": [
+   {
+    "de": "Wenn ich mehr Zeit hätte, würde ich öfter kochen.",
+    "en": "If I had more time, I would cook more often."
+   },
+   {
+    "de": "An deiner Stelle würde ich den Vertrag noch einmal lesen.",
+    "en": "If I were you, I'd read the contract one more time."
+   },
+   {
+    "de": "Könnten Sie mir bitte kurz helfen?",
+    "en": "Could you please help me for a moment?"
+   },
+   {
+    "de": "Wenn er früher losgefahren wäre, hätte er den Zug nicht verpasst.",
+    "en": "If he had left earlier, he wouldn't have missed the train."
+   }
+  ],
+  "text": "1. Konjunktiv II – irreale Wünsche und Bedingungen\nKonjunktiv II – unreal wishes and conditions\nDer Konjunktiv II drückt aus, dass etwas nicht real ist: einen Wunsch, eine unwirkliche Bedingung oder eine höfliche Bitte. Für die meisten Verben bildet man ihn heute mit würde + Infinitiv (ich würde gehen). Bei den wichtigsten Verben (haben, sein, werden, können, müssen, dürfen, wissen, mögen) benutzt man dagegen die eigene Konjunktiv-II-Form (ich hätte, ich wäre, ich könnte). Die Vergangenheit bildet man immer mit hätte/wäre + Partizip II, nie mit würde.\nKonjunktiv II marks something as unreal: a wish, a hypothetical condition, or a polite request. For most verbs, modern German uses würde + infinitive (ich würde gehen – I would go). For a small set of very common verbs (haben, sein, werden, können, müssen, dürfen, wissen, mögen), the dedicated Konjunktiv II form is preferred instead (ich hätte, ich wäre, ich könnte). The past form always uses hätte/wäre + past participle — never würde.\nWenn ich mehr Zeit hätte, würde ich öfter kochen. — If I had more time, I would cook more often.\nAn deiner Stelle würde ich den Vertrag noch einmal lesen. — If I were you, I'd read the contract one more time.\nKönnten Sie mir bitte kurz helfen? — Could you please help me for a moment?\nWenn er früher losgefahren wäre, hätte er den Zug nicht verpasst. — If he had left earlier, he wouldn't have missed the train.\nAchtung: 'würde' klingt bei haben/sein/den Modalverben umgangssprachlich falsch — hier immer die eigene Form benutzen (hätte, wäre, könnte), nicht 'würde haben' oder 'würde sein'.\nWatch out: using würde with haben, sein, or the modal verbs (würde haben, würde sein, würde können) sounds wrong to native ears — always use the dedicated form instead (hätte, wäre, könnte)."
+ },
+ {
+  "id": "g-b2-2-passiv-mit-modalverben",
+  "number": 2,
+  "title": "Passiv mit Modalverben",
+  "titleEn": "Passive voice with modal verbs",
+  "level": "B2",
+  "section": "Deutsche Grammatik B2",
+  "sectionNumber": "2",
+  "page": 1,
+  "pages": [
+   1,
+   2
+  ],
+  "ruleDe": "Im Passiv mit Modalverb steht das konjugierte Modalverb an Position 2, danach folgt das Partizip II des Hauptverbs, und ganz am Satzende steht werden im Infinitiv. Muster: Subjekt + Modalverb + ... + Partizip II + werden. Im Präteritum wird nur das Modalverb in die Vergangenheitsform gesetzt, der Rest bleibt gleich.",
+  "ruleEn": "In the passive with a modal verb, the conjugated modal verb takes position 2, the past participle of the main verb comes next, and werden in the infinitive goes to the very end of the clause: subject + modal + ... + past participle + werden. In the simple past, only the modal verb changes to its past-tense form; the rest of the structure stays the same.",
+  "noteDe": "Achtung: 'werden' bleibt am Satzende immer im Infinitiv — nicht 'wird' oder 'wurde' konjugieren. Nur das Modalverb trägt die Zeitform.",
+  "noteEn": "Watch out: werden always stays in the infinitive at the end — never conjugate it (no wird/wurde here). Only the modal verb carries the tense.",
+  "examples": [
+   {
+    "de": "Die Unterlagen müssen bis Freitag eingereicht werden.",
+    "en": "The documents must be submitted by Friday."
+   },
+   {
+    "de": "Das Problem konnte schnell gelöst werden.",
+    "en": "The problem could be solved quickly."
+   },
+   {
+    "de": "Diese Regeln sollen ab nächstem Jahr geändert werden.",
+    "en": "These rules are supposed to be changed starting next year."
+   },
+   {
+    "de": "Der Termin musste leider verschoben werden.",
+    "en": "The appointment unfortunately had to be postponed."
+   }
+  ],
+  "text": "2. Passiv mit Modalverben\nPassive voice with modal verbs\nIm Passiv mit Modalverb steht das konjugierte Modalverb an Position 2, danach folgt das Partizip II des Hauptverbs, und ganz am Satzende steht werden im Infinitiv. Muster: Subjekt + Modalverb + ... + Partizip II + werden. Im Präteritum wird nur das Modalverb in die Vergangenheitsform gesetzt, der Rest bleibt gleich.\nIn the passive with a modal verb, the conjugated modal verb takes position 2, the past participle of the main verb comes next, and werden in the infinitive goes to the very end of the clause: subject + modal + ... + past participle + werden. In the simple past, only the modal verb changes to its past-tense form; the rest of the structure stays the same.\nDie Unterlagen müssen bis Freitag eingereicht werden. — The documents must be submitted by Friday.\nDas Problem konnte schnell gelöst werden. — The problem could be solved quickly.\nDiese Regeln sollen ab nächstem Jahr geändert werden. — These rules are supposed to be changed starting next year.\nDer Termin musste leider verschoben werden. — The appointment unfortunately had to be postponed.\nAchtung: 'werden' bleibt am Satzende immer im Infinitiv — nicht 'wird' oder 'wurde' konjugieren. Nur das Modalverb trägt die Zeitform.\nWatch out: werden always stays in the infinitive at the end — never conjugate it (no wird/wurde here). Only the modal verb carries the tense."
+ },
+ {
+  "id": "g-b2-3-relativsaetze-mit-praeposition-und-im-genitiv",
+  "number": 3,
+  "title": "Relativsätze mit Präposition und im Genitiv",
+  "titleEn": "Relative clauses with a preposition or in the genitive",
+  "level": "B2",
+  "section": "Deutsche Grammatik B2",
+  "sectionNumber": "3",
+  "page": 2,
+  "pages": [
+   2,
+   3
+  ],
+  "ruleDe": "Braucht das Verb im Relativsatz eine Präposition, steht diese direkt vor dem Relativpronomen: Präposition + Relativpronomen (mit dem, für die, an den). Bezieht sich der Relativsatz auf etwas, das dem Bezugswort 'gehört', benutzt man das Genitiv-Relativpronomen (dessen für maskulin/neutral, deren für feminin/Plural) — es steht wie ein Artikel direkt vor dem Nomen und richtet sich nach dessen Geschlecht/Zahl, nicht nach dem Bezugswort.",
+  "ruleEn": "When the verb inside the relative clause needs a preposition, the preposition goes directly before the relative pronoun: preposition + relative pronoun (mit dem, für die, an den). When the clause expresses that something 'belongs to' the noun being described, use the genitive relative pronoun (dessen for masculine/neuter, deren for feminine/plural) — it functions like an article right before the following noun, and its form matches that noun's gender/number, not the antecedent's.",
+  "noteDe": "Achtung: Bei 'dessen/deren' richtet sich die Form nach dem Nomen, das direkt danach kommt (das 'besessene' Ding), nicht nach der Person, von der die Rede ist.",
+  "noteEn": "Watch out: with dessen/deren, the form agrees with the noun that immediately follows it (the thing being 'possessed'), not with the person being talked about.",
+  "examples": [
+   {
+    "de": "Das ist der Kollege, mit dem ich gestern telefoniert habe.",
+    "en": "That's the colleague I spoke to on the phone yesterday."
+   },
+   {
+    "de": "Die Firma, für die sie arbeitet, wurde letztes Jahr gegründet.",
+    "en": "The company she works for was founded last year."
+   },
+   {
+    "de": "Das ist der Mann, dessen Auto letzte Woche gestohlen wurde.",
+    "en": "That's the man whose car was stolen last week."
+   },
+   {
+    "de": "Die Autorin, deren Bücher ich sehr mag, kommt aus Hamburg.",
+    "en": "The author whose books I really like is from Hamburg."
+   }
+  ],
+  "text": "3. Relativsätze mit Präposition und im Genitiv\nRelative clauses with a preposition or in the genitive\nBraucht das Verb im Relativsatz eine Präposition, steht diese direkt vor dem Relativpronomen: Präposition + Relativpronomen (mit dem, für die, an den). Bezieht sich der Relativsatz auf etwas, das dem Bezugswort 'gehört', benutzt man das Genitiv-Relativpronomen (dessen für maskulin/neutral, deren für feminin/Plural) — es steht wie ein Artikel direkt vor dem Nomen und richtet sich nach dessen Geschlecht/Zahl, nicht nach dem Bezugswort.\nWhen the verb inside the relative clause needs a preposition, the preposition goes directly before the relative pronoun: preposition + relative pronoun (mit dem, für die, an den). When the clause expresses that something 'belongs to' the noun being described, use the genitive relative pronoun (dessen for masculine/neuter, deren for feminine/plural) — it functions like an article right before the following noun, and its form matches that noun's gender/number, not the antecedent's.\nDas ist der Kollege, mit dem ich gestern telefoniert habe. — That's the colleague I spoke to on the phone yesterday.\nDie Firma, für die sie arbeitet, wurde letztes Jahr gegründet. — The company she works for was founded last year.\nDas ist der Mann, dessen Auto letzte Woche gestohlen wurde. — That's the man whose car was stolen last week.\nDie Autorin, deren Bücher ich sehr mag, kommt aus Hamburg. — The author whose books I really like is from Hamburg.\nAchtung: Bei 'dessen/deren' richtet sich die Form nach dem Nomen, das direkt danach kommt (das 'besessene' Ding), nicht nach der Person, von der die Rede ist.\nWatch out: with dessen/deren, the form agrees with the noun that immediately follows it (the thing being 'possessed'), not with the person being talked about."
+ },
+ {
+  "id": "g-b2-4-nominalisierung-vom-verb-zum-nomen",
+  "number": 4,
+  "title": "Nominalisierung – vom Verb zum Nomen",
+  "titleEn": "Nominalization – turning verbs into nouns",
+  "level": "B2",
+  "section": "Deutsche Grammatik B2",
+  "sectionNumber": "4",
+  "page": 3,
+  "pages": [
+   3,
+   4
+  ],
+  "ruleDe": "Im formellen und geschriebenen Deutsch (Berichte, Zeitungstexte, offizielle E-Mails) wird oft ein Nomen statt eines Nebensatzes verwendet — das macht den Satz kompakter. Typische Muster: Verb + -ung (untersuchen → die Untersuchung), Infinitiv als Neutrum-Nomen (das Lesen, das Ankommen), oder Adjektiv + -heit/-keit (möglich → die Möglichkeit). Ein Nebensatz mit 'weil/wenn/dass' lässt sich so oft zu einer Präpositionalgruppe verkürzen (durch, bei, nach + Nominalisierung).",
+  "ruleEn": "In formal or written German (reports, news articles, official emails), a noun is often used instead of a subordinate clause, making the sentence more compact. Common patterns: verb + -ung (untersuchen → die Untersuchung, 'to investigate' → 'the investigation'), an infinitive used as a neuter noun (das Lesen, das Ankommen), or adjective + -heit/-keit (möglich → die Möglichkeit). A clause with weil/wenn/dass can often be shortened into a prepositional phrase built on a nominalization (durch, bei, nach + nominalization).",
+  "noteDe": "Achtung: Nominalisierte Sätze klingen im Alltagsgespräch steif — in lockerer, mündlicher Sprache bleibt der Nebensatz mit weil/wenn meist die natürlichere Wahl.",
+  "noteEn": "Watch out: nominalized sentences sound stiff in everyday spoken German — in casual conversation, a normal weil/wenn clause usually still sounds more natural.",
+  "examples": [
+   {
+    "de": "Nach der Ankunft des Zuges verließen alle Passagiere den Bahnsteig.",
+    "en": "After the train's arrival, all passengers left the platform."
+   },
+   {
+    "de": "Durch die Verspätung des Fluges verpasste sie ihren Anschluss.",
+    "en": "Because of the flight's delay, she missed her connection."
+   },
+   {
+    "de": "Die Überprüfung der Unterlagen dauert etwa zwei Wochen.",
+    "en": "The review of the documents takes about two weeks."
+   },
+   {
+    "de": "Bei der Planung der Reise haben wir das Wetter nicht bedacht.",
+    "en": "When planning the trip, we didn't take the weather into account."
+   }
+  ],
+  "text": "4. Nominalisierung – vom Verb zum Nomen\nNominalization – turning verbs into nouns\nIm formellen und geschriebenen Deutsch (Berichte, Zeitungstexte, offizielle E-Mails) wird oft ein Nomen statt eines Nebensatzes verwendet — das macht den Satz kompakter. Typische Muster: Verb + -ung (untersuchen → die Untersuchung), Infinitiv als Neutrum-Nomen (das Lesen, das Ankommen), oder Adjektiv + -heit/-keit (möglich → die Möglichkeit). Ein Nebensatz mit 'weil/wenn/dass' lässt sich so oft zu einer Präpositionalgruppe verkürzen (durch, bei, nach + Nominalisierung).\nIn formal or written German (reports, news articles, official emails), a noun is often used instead of a subordinate clause, making the sentence more compact. Common patterns: verb + -ung (untersuchen → die Untersuchung, 'to investigate' → 'the investigation'), an infinitive used as a neuter noun (das Lesen, das Ankommen), or adjective + -heit/-keit (möglich → die Möglichkeit). A clause with weil/wenn/dass can often be shortened into a prepositional phrase built on a nominalization (durch, bei, nach + nominalization).\nNach der Ankunft des Zuges verließen alle Passagiere den Bahnsteig. — After the train's arrival, all passengers left the platform.\nDurch die Verspätung des Fluges verpasste sie ihren Anschluss. — Because of the flight's delay, she missed her connection.\nDie Überprüfung der Unterlagen dauert etwa zwei Wochen. — The review of the documents takes about two weeks.\nBei der Planung der Reise haben wir das Wetter nicht bedacht. — When planning the trip, we didn't take the weather into account.\nAchtung: Nominalisierte Sätze klingen im Alltagsgespräch steif — in lockerer, mündlicher Sprache bleibt der Nebensatz mit weil/wenn meist die natürlichere Wahl.\nWatch out: nominalized sentences sound stiff in everyday spoken German — in casual conversation, a normal weil/wenn clause usually still sounds more natural."
+ },
+ {
+  "id": "g-b2-5-konzessive-und-kausale-konnektoren",
+  "number": 5,
+  "title": "Konzessive und kausale Konnektoren",
+  "titleEn": "Concessive and causal connectors",
+  "level": "B2",
+  "section": "Deutsche Grammatik B2",
+  "sectionNumber": "5",
+  "page": 4,
+  "pages": [
+   4
+  ],
+  "ruleDe": "'Obwohl' ist eine subordinierende Konjunktion und schickt das konjugierte Verb ans Satzende (Nebensatz). 'Trotzdem' und 'dennoch' sind dagegen Adverbien: Sie stehen auf Position 1 oder nach dem Verb, und das Verb bleibt an Position 2 (Hauptsatz + Hauptsatz). Kausal funktioniert es ähnlich: 'weil' schickt das Verb ans Ende, 'deshalb/weshalb/daher' sind Adverbien mit Verb an Position 2. 'Indem' beschreibt zusätzlich das Mittel, mit dem etwas erreicht wird.",
+  "ruleEn": "'Obwohl' is a subordinating conjunction and pushes the conjugated verb to the end of its clause. 'Trotzdem' and 'dennoch', however, are adverbs: they sit in position 1 or after the verb, with the verb staying in position 2 of its own main clause (main clause + main clause). Cause works the same way: 'weil' sends the verb to the end, while 'deshalb/weshalb/daher' are adverbs with the verb in position 2. 'Indem' additionally describes the means by which something is achieved.",
+  "noteDe": "Achtung: 'trotzdem' und 'deshalb' zählen nicht als Position 1 UND Subjekt gleichzeitig — kommt eines von beiden zuerst, folgt direkt das Verb, dann erst das Subjekt.",
+  "noteEn": "Watch out: trotzdem and deshalb occupy position 1 by themselves — if one starts the clause, the verb comes right after it, and the subject follows the verb (not 'trotzdem wir sind...').",
+  "examples": [
+   {
+    "de": "Obwohl es stark regnete, sind wir spazieren gegangen.",
+    "en": "Although it was raining heavily, we went for a walk."
+   },
+   {
+    "de": "Es regnete stark, trotzdem sind wir spazieren gegangen.",
+    "en": "It was raining heavily; nevertheless, we went for a walk."
+   },
+   {
+    "de": "Sie war krank, deshalb konnte sie nicht zur Prüfung kommen.",
+    "en": "She was sick, which is why she couldn't come to the exam."
+   },
+   {
+    "de": "Er hat sein Deutsch verbessert, indem er jeden Tag Zeitung gelesen hat.",
+    "en": "He improved his German by reading the newspaper every day."
+   }
+  ],
+  "text": "5. Konzessive und kausale Konnektoren\nConcessive and causal connectors\n'Obwohl' ist eine subordinierende Konjunktion und schickt das konjugierte Verb ans Satzende (Nebensatz). 'Trotzdem' und 'dennoch' sind dagegen Adverbien: Sie stehen auf Position 1 oder nach dem Verb, und das Verb bleibt an Position 2 (Hauptsatz + Hauptsatz). Kausal funktioniert es ähnlich: 'weil' schickt das Verb ans Ende, 'deshalb/weshalb/daher' sind Adverbien mit Verb an Position 2. 'Indem' beschreibt zusätzlich das Mittel, mit dem etwas erreicht wird.\n'Obwohl' is a subordinating conjunction and pushes the conjugated verb to the end of its clause. 'Trotzdem' and 'dennoch', however, are adverbs: they sit in position 1 or after the verb, with the verb staying in position 2 of its own main clause (main clause + main clause). Cause works the same way: 'weil' sends the verb to the end, while 'deshalb/weshalb/daher' are adverbs with the verb in position 2. 'Indem' additionally describes the means by which something is achieved.\nObwohl es stark regnete, sind wir spazieren gegangen. — Although it was raining heavily, we went for a walk.\nEs regnete stark, trotzdem sind wir spazieren gegangen. — It was raining heavily; nevertheless, we went for a walk.\nSie war krank, deshalb konnte sie nicht zur Prüfung kommen. — She was sick, which is why she couldn't come to the exam.\nEr hat sein Deutsch verbessert, indem er jeden Tag Zeitung gelesen hat. — He improved his German by reading the newspaper every day.\nAchtung: 'trotzdem' und 'deshalb' zählen nicht als Position 1 UND Subjekt gleichzeitig — kommt eines von beiden zuerst, folgt direkt das Verb, dann erst das Subjekt.\nWatch out: trotzdem and deshalb occupy position 1 by themselves — if one starts the clause, the verb comes right after it, and the subject follows the verb (not 'trotzdem wir sind...')."
+ },
+ {
+  "id": "g-b2-6-infinitivkonstruktionen-um-zu-ohne-zu-statt-zu",
+  "number": 6,
+  "title": "Infinitivkonstruktionen: um...zu, ohne...zu, statt...zu",
+  "titleEn": "Infinitive constructions: um...zu, ohne...zu, statt...zu",
+  "level": "B2",
+  "section": "Deutsche Grammatik B2",
+  "sectionNumber": "6",
+  "page": 4,
+  "pages": [
+   4,
+   5
+  ],
+  "ruleDe": "Diese drei Konstruktionen ersetzen einen Nebensatz, wenn das Subjekt in beiden Satzteilen gleich ist. um...zu nennt den Zweck/das Ziel einer Handlung, ohne...zu sagt, dass etwas Erwartetes NICHT passiert, und statt...zu beschreibt eine Alternative, die anstelle von etwas anderem gewählt wird. In allen drei Fällen steht der Infinitiv mit 'zu' am Ende der Konstruktion.",
+  "ruleEn": "These three constructions replace a subordinate clause when the subject is the same in both parts of the sentence. um...zu states the purpose or goal of an action, ohne...zu says that an expected thing does NOT happen, and statt...zu describes an alternative chosen instead of something else. In all three, the zu-infinitive sits at the end of the construction.",
+  "noteDe": "Achtung: Ist das Subjekt in beiden Satzteilen unterschiedlich, funktioniert die um-zu-Konstruktion nicht — dann braucht man den vollen Nebensatz mit 'damit' statt 'um...zu'.",
+  "noteEn": "Watch out: if the two parts of the sentence have different subjects, um...zu doesn't work — use the full clause with 'damit' instead.",
+  "examples": [
+   {
+    "de": "Sie lernt jeden Tag Deutsch, um die Prüfung zu bestehen.",
+    "en": "She studies German every day (in order) to pass the exam."
+   },
+   {
+    "de": "Er verließ das Meeting, ohne sich zu verabschieden.",
+    "en": "He left the meeting without saying goodbye."
+   },
+   {
+    "de": "Statt eine Antwort zu schreiben, hat er einfach angerufen.",
+    "en": "Instead of writing a reply, he simply called."
+   },
+   {
+    "de": "Wir sind losgefahren, ohne die Karte zu prüfen.",
+    "en": "We set off without checking the map."
+   }
+  ],
+  "text": "6. Infinitivkonstruktionen: um...zu, ohne...zu, statt...zu\nInfinitive constructions: um...zu, ohne...zu, statt...zu\nDiese drei Konstruktionen ersetzen einen Nebensatz, wenn das Subjekt in beiden Satzteilen gleich ist. um...zu nennt den Zweck/das Ziel einer Handlung, ohne...zu sagt, dass etwas Erwartetes NICHT passiert, und statt...zu beschreibt eine Alternative, die anstelle von etwas anderem gewählt wird. In allen drei Fällen steht der Infinitiv mit 'zu' am Ende der Konstruktion.\nThese three constructions replace a subordinate clause when the subject is the same in both parts of the sentence. um...zu states the purpose or goal of an action, ohne...zu says that an expected thing does NOT happen, and statt...zu describes an alternative chosen instead of something else. In all three, the zu-infinitive sits at the end of the construction.\nSie lernt jeden Tag Deutsch, um die Prüfung zu bestehen. — She studies German every day (in order) to pass the exam.\nEr verließ das Meeting, ohne sich zu verabschieden. — He left the meeting without saying goodbye.\nStatt eine Antwort zu schreiben, hat er einfach angerufen. — Instead of writing a reply, he simply called.\nWir sind losgefahren, ohne die Karte zu prüfen. — We set off without checking the map.\nAchtung: Ist das Subjekt in beiden Satzteilen unterschiedlich, funktioniert die um-zu-Konstruktion nicht — dann braucht man den vollen Nebensatz mit 'damit' statt 'um...zu'.\nWatch out: if the two parts of the sentence have different subjects, um...zu doesn't work — use the full clause with 'damit' instead."
+ }
+]

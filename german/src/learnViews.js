@@ -119,12 +119,12 @@ function levelPicker(profile) {
           </button>`).join('')}
       </div>
       <p class="levels__note">Levels are the sources' own, not guesses. Grammar comes from DaF kompakt
-        neu, which prints an A1/A2/B1 level beside every block, and the Sicher!&nbsp;C1
-        Grammatikübersicht. Vocabulary levels come from the official Goethe-Institut word lists for
-        A1, A2 and B1 and from the Lingster Academy A1–B2 list, which is the only one of them that
-        reaches B2. Cards no list carries keep the GCSE document's Foundation/Higher tier
-        approximation and are labelled as approximate. C2 is part of the structure and holds no
-        content; the app does not claim an A1–C2 curriculum.</p>
+        neu, which prints an A1/A2/B1 level beside every block, the Sicher!&nbsp;C1
+        Grammatikübersicht, and a B2 set written for this project. Vocabulary levels come from the
+        official Goethe-Institut word lists for A1, A2 and B1, the Lingster Academy A1–B2 list and a
+        B2 list written for this project. Cards no list carries keep the GCSE document's
+        Foundation/Higher tier approximation and are labelled as approximate. C2 is part of the
+        structure and holds no content; the app does not claim an A1–C2 curriculum.</p>
     </section>`;
 }
 

@@ -1,6 +1,6 @@
 # Master Fuka — German Learning (beta)
 
-A learning app built on four imported source documents plus a word-frequency
+A learning app built on five imported source documents plus a word-frequency
 list. It is not a PDF reader:
 the documents are extracted, normalised, validated and turned into vocabulary
 cards, grammar units, exercises, spaced review and progress tracking.
@@ -28,6 +28,7 @@ On Netlify the site publishes the repository root, so the app is served at
 | B1 grammar gaps | deutsch-lernen-goethe-a1-c2, Abdullah Butt (CC BY-NC 4.0) | imported |
 | Grammar — 87 A1/A2/B1 topics | DaF kompakt neu A1/A2/B1, Grammatikerklärungen, © Ernst Klett Sprachen GmbH, Stuttgart 2018 | imported |
 | Grammar — 32 C1 topics | Sicher! C1 Grammatikübersicht, © Hueber Verlag | imported |
+| Grammar — 6 B2 topics | *Deutsche Grammatik – Niveau B2*, generated for this project by the project owner | imported |
 | Word frequency — 2 586 forms | hermitdave/FrequencyWords, German (OpenSubtitles corpus) | imported |
 | Goethe-Zertifikat B1 Wortliste | **not supplied** — see below | **missing** |
 
@@ -118,6 +119,47 @@ never `Haüser`, because the `u` of `Haus` belongs to the diphthong. A marker
 outside those shapes is dropped rather than mangled: a wrong plural on a card is
 worse than no plural.
 
+## The B2 grammar set
+
+`German_Grammar_B2_1.pdf` is the fifth source document and the one that closes
+the app's biggest structural gap: **B2 grammar was empty**. Six topics, each
+with the rule in German *and* English, four worked examples with translations,
+and an "Achtung" box naming the mistake learners actually make.
+
+| # | Topic | English |
+|---|---|---|
+| 1 | Konjunktiv II – irreale Wünsche und Bedingungen | Unreal wishes and conditions |
+| 2 | Passiv mit Modalverben | Passive voice with modal verbs |
+| 3 | Relativsätze mit Präposition und im Genitiv | Relative clauses with a preposition or in the genitive |
+| 4 | Nominalisierung – vom Verb zum Nomen | Turning verbs into nouns |
+| 5 | Konzessive und kausale Konnektoren | Concessive and causal connectors |
+| 6 | Infinitivkonstruktionen: um…zu, ohne…zu, statt…zu | Infinitive constructions |
+
+`extract_b2_grammar.py` reads the structure off the fonts, as the B2 vocabulary
+extractor does, because this is a styled layout rather than a tagged one: bold
+15 is a topic heading, oblique 10 the document's own English heading, bold 9.5 a
+section marker, size 10.3 rule prose (bold and oblique at that size are inline
+emphasis inside the same paragraph, so size alone groups it), bold 10 a German
+example and oblique 9 its translation. It refuses to write anything unless every
+topic yields both rules, exactly four translated examples and its note.
+
+Each topic's prerequisites point at the B1 topics it actually builds on, so the
+lesson engine can route a learner into B2 grammar from the DaF kompakt B1
+material rather than dropping them into it cold.
+
+All 30 exercises and all 24 examples go through the same grounding rule as every
+other grammar source: **an example sentence is rejected unless it occurs
+verbatim in the source text of its own topic.** The five exercises per topic that
+are built on a document sentence carry it in a `sentence` field and are marked
+`fromSource: true`; the ones written for practice — a deliberately wrong sentence
+to correct, a register choice, a different-subjects case — are marked
+`fromSource: false` and the app labels them as practice rather than passing them
+off as document content.
+
+Provenance is the same as the B2 vocabulary list: generated for this project by
+the project owner with the Claude skill that composes its own explanations and
+examples. It is not part of the licensing problem described below.
+
 ## The supplied B2 list
 
 `German_Vocabulary_B2.pdf` is the fourth source document: 500 entries in 25
@@ -188,6 +230,11 @@ excellent for accuracy and is precisely what makes it a redistribution of
 copyrighted textbook content. No licence for either has been obtained. That has
 to be resolved before this app is published anywhere public; the B2 list above
 never was the thing standing in the way.
+
+The same applies in reverse to the **B2 grammar set**: it was generated for this
+project the same way the B2 vocabulary was, so its six topics are the only
+grammar in the app whose origin is known and clean. 119 of the 127 grammar
+topics are still Klett and Hueber.
 
 ## What the app does
 
@@ -325,7 +372,7 @@ grammar topics, unknown or circular prerequisites.
 ```bash
 python3 german/tools/validate_content.py
 # vocabulary: 4979 words checked
-# grammar: 121 topics, 615 exercises checked
+# grammar: 127 topics, 645 exercises checked
 # PASSED — 0 errors, 1 warning
 ```
 
@@ -338,10 +385,10 @@ Higher tier, so both are kept and flagged for a human.
 The app has A1–C2 as structure. It does **not** claim to hold an A1–C2
 curriculum.
 
-A1, A2, B1 and C1 hold grammar, and those labels are the documents' own: DaF
-kompakt prints `(A1)`, `(A2)` or `(B1)` beside every block, and the extractor
-reads the level off the heading rather than guessing it. B2 and C2 are empty
-and say so.
+A1, A2, B1, B2 and C1 hold grammar, and those labels are the documents' own:
+DaF kompakt prints `(A1)`, `(A2)` or `(B1)` beside every block and the extractor
+reads the level off the heading rather than guessing it; Sicher! is C1
+throughout; the B2 set states B2 in its own title. C2 is empty and says so.
 
 The vocabulary is labelled `GCSE`, because that is what the document is, with
 an *approximate* CEFR mapping of its Foundation/Higher tiers (`cefrApprox`)
@@ -384,6 +431,7 @@ Rebuild everything:
 ```bash
 python3 german/tools/extract_c1_grammar.py <Sicher_C1_Grammatikuebersicht.pdf>
 python3 german/tools/extract_daf_grammar.py <DaF_kompakt_neu_A1_A2_B1_Grammar_English.pdf>
+python3 german/tools/extract_b2_grammar.py --pdf <German_Grammar_B2_1.pdf> --expect 6
 python3 german/tools/build_grammar.py
 python3 german/tools/extract_b2_vocabulary.py --pdf <German_Vocabulary_B2.pdf> --expect 500
 python3 german/tools/build_frequency.py <de_top2000_frequency.txt>
@@ -410,7 +458,7 @@ german/
   data/vocabulary.json  4979 cards, levelled A1–B2
   data/cefr.json        4442 levelled headwords with their sources
   data/frequency.json   2586 ranked word forms
-  data/grammar.json     121 topics, 615 examples, 615 exercises
+  data/grammar.json     127 topics, 639 examples, 645 exercises
   src/
     data.js         vocabulary loading + indexing
     grammar.js      grammar loading + indexing (by level, group, category)

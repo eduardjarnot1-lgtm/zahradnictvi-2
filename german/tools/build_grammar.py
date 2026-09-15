@@ -55,6 +55,18 @@ SOURCES = {
                                 else {"IV": 4, "V": 5, "VI": 6, "VII": 7}.get(t["sectionNumber"], 99),
         "order": lambda t: t["page"],
     },
+    "b2-grammar": {
+        "file": "b2-grammar-source.json",
+        "title": "Deutsche Grammatik – Niveau B2",
+        "credit": ("Generated for this project by the project owner with the "
+                   "german-vocab/german-grammar Claude skill, which composes its own "
+                   "explanations and example sentences rather than reproducing a "
+                   "published course. Rules and examples in German and English."),
+        "level": "B2",              # one level for the whole document
+        "group": lambda t: t["section"],
+        "groupOrder": lambda t: 50,
+        "order": lambda t: t["number"],
+    },
     "web-b1": {
         "file": "web-grammar-source.json",
         "title": "B1 grammar not covered by the course documents",
